@@ -1,0 +1,10 @@
+# Memory index
+
+- [Printer hardware](user-printer-hardware.md) - Bambu X2D, AMS 2 Pro, 0.2/0.4/0.6/0.6-high-flow hardened steel nozzles; name the right nozzle when advising on best results
+- [Agentic OS conventions](feedback-agentic-os-conventions.md) - subagent-first workflow, Obsidian-indexed memory, vault conventions
+- [Logo recreation fidelity](feedback-logo-recreation-fidelity.md) - trace real artwork 1:1, never rebuild logo elements from primitives
+- [Surfboards via Shape3d](project-surfboard-shape3d.md) - parsing proven, Kustom Beak rebuilt in FreeCAD, s3dx writer built; Brian to acceptance-test a written file in Shape3d
+- [X2D LAN status](reference-x2d-printer-lan.md) - read-only MQTT printer check via scripts/x2d-status.py; access code lives in Studio Beta conf
+- [Drawer-bench status](project-drawer-bench.md) - CAD built 2026-08-24, provisional dims, seven CAD resolutions pending Brian's review and measurements
+- [Minimal test coupons](feedback-minimal-test-coupons.md) - coupons hold only the feature under test plus a thin substrate; quote time from a real slice
+- [Keep tools in the vault](project-keep-tools-in-vault.md) - scratchpad is wiped on restarts; pipeline tools and monitors belong in projects/<Name>/pipeline or scripts/

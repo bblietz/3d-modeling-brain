@@ -1,0 +1,60 @@
+--- projects/Drawer-bench/.superpowers/sdd/snaps/task-2-base.py	2026-08-24 17:51:28.518534335 -0700
++++ projects/Drawer-bench/drawer_bench.py	2026-08-24 17:55:33.210562479 -0700
+@@ -147,22 +147,56 @@
+ _rear_vol = _post_box - 2 * T18 * GROOVE_D * (POST_H - GROOVE_STOP)
+ assert abs(post_fl.volume - _front_vol) < 1e-3, post_fl.volume
+ assert abs(post_rl.volume - _rear_vol) < 1e-3, post_rl.volume
+ assert CHAMFER < SETBACK and CHAMFER < FRAME_SETBACK
+ for _p in (post_fl, post_fr, post_rl, post_rr):
+     _bb = _p.bounding_box()
+     assert abs(_bb.size.Z - POST_H) < 1e-6 and abs(_bb.size.X - POST) < 1e-6
+ assert abs(post_fr.bounding_box().max.X - XR) < 1e-6
+ assert abs(post_rl.bounding_box().max.Y - YB) < 1e-6
+ 
++# --- Parts: side panels (qty 2), back panel, rear top rail -----------------
++# Sides: outer face SETBACK behind the post face, housed GROOVE_D in each
++# post, bottom edge on the groove stop, top edge flush with the post tops.
++# Back: same, but stops under the rear top rail, which is tenoned into the
++# same groove line and takes the figure-8 fasteners for the top.
++SIDE_Y0 = Y0 + POST - GROOVE_D
++SIDE_L = FOOT_D - 2 * POST + 2 * GROOVE_D            # 412.75
++side_l = _box(X0 + SETBACK, SIDE_Y0, GROOVE_STOP, T18, SIDE_L, PANEL_H)
++BACK_X0 = X0 + POST - GROOVE_D
++BACK_Y0 = YB - SETBACK - T18
++back = _box(BACK_X0, BACK_Y0, GROOVE_STOP, RAIL_L, T18, BACK_H)
++rail_rear = _box(BACK_X0, BACK_Y0, POST_H - RAIL_REAR_H, RAIL_L, RAIL_T, RAIL_REAR_H)
++
++side_r = mirror_x(side_l)
++PARTS.append({"name": "side", "solid": side_l, "qty": 2, "material": "ply 18mm",
++              "notes": "face grain vertical on the show face; housed 3/8 in each post"})
++PARTS.append({"name": "back", "solid": back, "qty": 1, "material": "ply 18mm",
++              "notes": "housed 3/8 in each post; top edge under the rear rail"})
++PARTS.append({"name": "rail_rear", "solid": rail_rear, "qty": 1, "material": "soft maple",
++              "notes": "stub tenons 3/8 each end are the full section; figure-8 fasteners on top"})
++INST += [("side_l", side_l), ("side_r", side_r), ("back", back), ("rail_rear", rail_rear)]
++
++# Housed edges probed from the solids
++assert_housed(side_l, post_fl, _box(X0 + SETBACK, SIDE_Y0, GROOVE_STOP, T18, GROOVE_D, PANEL_H))
++assert_housed(side_l, post_rl, _box(X0 + SETBACK, YB - POST, GROOVE_STOP, T18, GROOVE_D, PANEL_H))
++assert_housed(back, post_rl, _box(BACK_X0, BACK_Y0, GROOVE_STOP, GROOVE_D, T18, BACK_H))
++assert_housed(rail_rear, post_rl, _box(BACK_X0, BACK_Y0, POST_H - RAIL_REAR_H, GROOVE_D, RAIL_T, RAIL_REAR_H))
++assert abs(side_l.bounding_box().min.X - X0 - SETBACK) < 1e-6
++assert abs(YB - back.bounding_box().max.Y - SETBACK) < 1e-6
++assert abs(side_l.bounding_box().max.Z - POST_H) < 1e-6
++assert abs(back.bounding_box().max.Z - rail_rear.bounding_box().min.Z) < 1e-6
++assert abs(rail_rear.bounding_box().max.Z - POST_H) < 1e-6
++
+ # --- assembly ---------------------------------------------------------------
+-assembly = post_fl + post_fr + post_rl + post_rr
++assembly = (post_fl + post_fr + post_rl + post_rr
++            + side_l + side_r + back + rail_rear)
+ 
+ # --- global checks ----------------------------------------------------------
+ for p in PARTS:
+     assert len(p["solid"].solids()) == 1, p["name"]
+ for i, (na, a) in enumerate(INST):
+     for nb, b in INST[i + 1:]:
+         assert vol(a & b) < 1e-3, f"overlap {na} x {nb}"
+ 
+ # --- exports ----------------------------------------------------------------
+ TMP = os.environ.get("TMP_STL")

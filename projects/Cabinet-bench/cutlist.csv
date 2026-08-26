@@ -1,0 +1,12 @@
+qty,part,thickness_mm,width_mm,length_mm,material,notes
+2,drawer_bottom_bot/drawer_bottom_top,12,521.4,848.4,ply 12mm,
+2,drawer_end_bot,12,240,848.4,ply 12mm,"the BACK needs Blum rear-hook prep (35 x 13 corner notches, 6 x 10 bores 7 in from the side and 24 up, bottom groove stopped 35 from each side), not modeled here; see Drawer-bench drawer_back ; not a plain rectangular blank (98% of bounding box); needs a drawing or template"
+2,drawer_end_top,12,150,848.4,ply 12mm,"the BACK needs Blum rear-hook prep (35 x 13 corner notches, 6 x 10 bores 7 in from the side and 24 up, bottom groove stopped 35 from each side), not modeled here; see Drawer-bench drawer_back ; not a plain rectangular blank (96% of bounding box); needs a drawing or template"
+2,drawer_side_bot,12,240,533.4,ply 12mm,not a plain rectangular blank (95% of bounding box); needs a drawing or template
+2,drawer_side_top,12,150,533.4,ply 12mm,not a plain rectangular blank (94% of bounding box); needs a drawing or template
+2,slab_lower/slab_upper,18,609.6,914.4,ply 18mm,
+1,bottom,18,575.1,914.4,ply 18mm,
+1,face_bot,18,257,910.4,ply 18mm,
+1,face_top,18,190,910.4,ply 18mm,
+2,side,18,460,590.1,ply 18mm,
+1,back,3,466,890.4,ply 3mm,

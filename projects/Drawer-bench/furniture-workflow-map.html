@@ -1,0 +1,442 @@
+<title>Furniture Workflow Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #F4F5F2;
+    --panel: #EAECE7;
+    --ink: #1B1F1C;
+    --muted: #4A524C;
+    --line: #C6CCC5;
+    --accent: #1F4E8C;
+    --accent-soft: #D9E3F2;
+    --wood: #C99A5B;
+    --wood-soft: #F0E2CC;
+    --open: #B7791F;
+    --open-soft: #F3E6CB;
+    --ok: #3C7A4A;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151817;
+      --panel: #1F2422;
+      --ink: #E8E7E0;
+      --muted: #A9B0A9;
+      --line: #3A413D;
+      --accent: #86B1E8;
+      --accent-soft: #22354F;
+      --wood: #D9B27A;
+      --wood-soft: #3A2F20;
+      --open: #E0A94A;
+      --open-soft: #3D3018;
+      --ok: #7CC58A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151817;
+    --panel: #1F2422;
+    --ink: #E8E7E0;
+    --muted: #A9B0A9;
+    --line: #3A413D;
+    --accent: #86B1E8;
+    --accent-soft: #22354F;
+    --wood: #D9B27A;
+    --wood-soft: #3A2F20;
+    --open: #E0A94A;
+    --open-soft: #3D3018;
+    --ok: #7CC58A;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .page { max-width: 1120px; margin: 0 auto; padding: 40px 24px 80px; }
+  .col { max-width: 68ch; }
+  h1, h2, h3 {
+    font-family: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1.05; }
+  h2 { font-size: 26px; margin-top: 56px; padding-top: 18px; border-top: 2px solid var(--ink); }
+  h3 { font-size: 18px; font-weight: 500; margin-top: 28px; }
+  p { margin: 12px 0; }
+  .dek { font-size: 18px; color: var(--muted); max-width: 60ch; margin-top: 14px; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent);
+  }
+  code, .mono {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.9em;
+  }
+  code { background: var(--panel); padding: 1px 5px; border-radius: 3px; }
+  a { color: var(--accent); }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px;
+    margin-top: 32px; padding: 18px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .stat .n {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 30px; line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .l { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  ol.seq { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+  ol.seq li {
+    display: grid; grid-template-columns: 44px 1fr auto; gap: 14px; align-items: start;
+    padding: 16px 4px; border-bottom: 1px solid var(--line);
+  }
+  ol.seq li.parent .k { color: var(--muted); }
+  ol.seq .k {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 22px; line-height: 1;
+    color: var(--accent); padding-top: 2px; font-variant-numeric: tabular-nums;
+  }
+  ol.seq .name { font-weight: 600; }
+  ol.seq .role { color: var(--muted); font-size: 14px; margin-top: 2px; }
+  ol.seq .ev { font-size: 13px; margin-top: 6px; }
+  .chip {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 999px; white-space: nowrap; margin-top: 2px;
+  }
+  .chip.rec { background: var(--accent-soft); color: var(--accent); }
+  .chip.imp { background: var(--wood-soft); color: var(--wood); }
+  .chip.no { background: var(--panel); color: var(--muted); border: 1px solid var(--line); }
+  .chip.open { background: var(--open-soft); color: var(--open); }
+
+  figure { margin: 24px 0 0; }
+  .figwrap { overflow-x: auto; padding-bottom: 6px; }
+  figure svg { width: 100%; min-width: 900px; height: auto; display: block; color: var(--ink); }
+  figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; max-width: 70ch; }
+  .fig .box { fill: var(--panel); stroke: currentColor; stroke-width: 1.2; }
+  .fig .cad { fill: var(--wood-soft); stroke: var(--wood); stroke-width: 1.4; }
+  .fig .acc { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; }
+  .fig .frame { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 4 4; }
+  .fig .edge { fill: none; stroke: currentColor; stroke-width: 1.3; }
+  .fig .edge.acc { stroke: var(--accent); fill: none; }
+  .fig .edge.dash { stroke-dasharray: 5 4; }
+  .fig text { font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; fill: currentColor; }
+  .fig text.t { font-weight: 600; }
+  .fig text.m { font-family: "IBM Plex Mono", monospace; font-size: 11px; }
+  .fig text.s { font-size: 11px; fill: var(--muted); }
+  .fig text.lbl { font-size: 11px; fill: var(--accent); }
+  .fig text.hd { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; }
+
+  table { border-collapse: collapse; width: 100%; margin-top: 18px; font-size: 14px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 10px 10px 0; border-bottom: 1px solid var(--line); }
+  th { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  .tablewrap { overflow-x: auto; }
+  td:first-child { white-space: nowrap; font-weight: 600; }
+
+  ul.res { padding-left: 0; list-style: none; margin: 16px 0 0; display: grid; gap: 8px; }
+  ul.res li { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .foot { margin-top: 56px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+  @media (prefers-reduced-motion: no-preference) { a:focus-visible, li:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="page">
+  <div class="col">
+    <div class="eyebrow">3d-modeling-brain · /furniture · worked example: Drawer-bench</div>
+    <h1 style="margin-top:10px">Furniture Workflow Map</h1>
+    <p class="dek">How a bench goes from a conversation to a cut list in this vault: the skills that ran, the files the data moves through, and the machinery underneath. Every number below is read from the Drawer-bench files as of 2026-08-25.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="n">20</div><div class="l">registry parts, one solid each</div></div>
+    <div class="stat"><div class="n">25</div><div class="l">placed instances</div></div>
+    <div class="stat"><div class="n">65</div><div class="l">asserts, 13 housed-edge probes</div></div>
+    <div class="stat"><div class="n">300</div><div class="l">pairwise no-overlap checks</div></div>
+    <div class="stat"><div class="n">19</div><div class="l">cut-list rows (qty 25)</div></div>
+    <div class="stat"><div class="n">4 s</div><div class="l">full self-checking run</div></div>
+  </div>
+
+  <div class="col">
+    <h2>1. Skills used</h2>
+    <p>In the order they ran. "Recorded" means the project files name the skill; "implied" means its artifacts are on disk (a plan in the writing-plans shape, review diffs, a handoff file) but the name was never written down.</p>
+  </div>
+  <ol class="seq">
+    <li><span class="k">01</span><div><div class="name">superpowers:brainstorming, with the visual companion</div><div class="role">Leg style, post thickness, drawer reveal and layout, top proportions were chosen click by click in a local browser companion (three sessions, 2026-08-23 and 24). The companion is a tool the brainstorming skill opens, not a skill or an artifact; its pages and click log live in <code>projects/Drawer-bench/.superpowers/brainstorm/</code>.</div><div class="ev mono">design.md:10 "brainstorm with the visual companion, then terminal"; brief.md:46 "user picked option A in visual companion"</div></div><span class="chip rec">recorded</span></li>
+    <li><span class="k">02</span><div><div class="name">/furniture</div><div class="role">The workflow itself: brief, plan (grain, show faces, joinery first), one-part-at-a-time build loop with a PARTS registry and asserts, buildability check, cut list + STEP export.</div><div class="ev mono">plan.md:671 and brief.md:105 "Buildability (furniture skill Phase 4)"; handoff lists the SKILL.md under files that matter</div></div><span class="chip rec">recorded</span></li>
+    <li><span class="k">03</span><div><div class="name">superpowers:writing-plans</div><div class="role">Produced <code>plan.md</code>: goal, architecture, global constraints, file structure, nine tasks with checkbox steps, self-review.</div><div class="ev mono">plan.md has the canonical shape (self-review at line 809); name not written</div></div><span class="chip imp">implied</span></li>
+    <li><span class="k">04</span><div><div class="name">superpowers:subagent-driven-development</div><div class="role">Each plan task went to a fresh subagent; a ledger and per-task reports track the build (<code>.superpowers/sdd/progress.md</code>, <code>task-N-report.md</code>, fix-wave reports).</div><div class="ev mono">plan.md:10 "REQUIRED SUB-SKILL"; brief.md:93; memory/project-drawer-bench.md</div></div><span class="chip rec">recorded</span></li>
+    <li><span class="k">05</span><div><div class="name">Code review between tasks</div><div class="role">Reviewers diffed every task and mutation-tested the asserts ("5/5 mutations caught"); the final review blocked export until a fix wave landed.</div><div class="ev mono">.superpowers/sdd/review-task-{1..7}.diff, review-final.diff; progress.md:13-15</div></div><span class="chip imp">implied</span></li>
+    <li><span class="k">06</span><div><div class="name">Test-driven and verification discipline</div><div class="role">The file's asserts are the test suite ("every task ends by running the file"); reports paste the verbatim run output before claiming done.</div><div class="ev mono">plan.md:14; task-8-report.md "Output:" and "No assertion fired"</div></div><span class="chip imp">implied</span></li>
+    <li><span class="k">07</span><div><div class="name">/context-check and /continue-from-clear</div><div class="role">A handoff with "Decisions already locked" is written at milestones so a cold session resumes without relitigating.</div><div class="ev mono">projects/Drawer-bench/.claude/context-check/last-handoff.md; CLAUDE.md:19</div></div><span class="chip imp">implied</span></li>
+    <li class="parent"><span class="k">&mdash;</span><div><div class="name">3d-model</div><div class="role">Not invoked. It is the parent the furniture skill forks from; Phases 1 to 3 are shared verbatim, Phases 4 and 5 are replaced by buildability and the cut list.</div><div class="ev mono">skills/furniture/SKILL.md:10-13</div></div><span class="chip no">parent only</span></li>
+  </ol>
+
+  <div class="col">
+    <h2>2. Flow of data</h2>
+    <p>The geometry file is the hub: decisions enter as named constants, every part is modeled once, and all deliverables are emitted from the same PARTS registry so the cut list cannot drift from the model. Exports are gated by environment variables on the same run.</p>
+  </div>
+  <figure class="fig">
+    <div class="figwrap">
+    <svg viewBox="0 0 1180 620" role="img" aria-label="Data flow from Brian's decisions through brief, design and plan into drawer_bench.py, whose registry emits the cut list, STEP, renders and the viewer, with viewer sign-off feeding back into the constants, and outcomes flowing to learnings, memory and the handoff.">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+        <marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker>
+      </defs>
+
+      <!-- row A -->
+      <rect class="box" x="20" y="30" width="160" height="56" rx="3"/>
+      <text class="t" x="100" y="53" text-anchor="middle">Brian</text>
+      <text class="s" x="100" y="71" text-anchor="middle">companion clicks, measurements</text>
+
+      <rect class="box" x="220" y="30" width="150" height="56" rx="3"/>
+      <text class="t m" x="295" y="53" text-anchor="middle">brief.md</text>
+      <text class="s" x="295" y="71" text-anchor="middle">specs, decisions locked</text>
+
+      <rect class="box" x="410" y="30" width="150" height="56" rx="3"/>
+      <text class="t m" x="485" y="53" text-anchor="middle">design.md</text>
+      <text class="s" x="485" y="71" text-anchor="middle">approved sections</text>
+
+      <rect class="box" x="600" y="30" width="150" height="56" rx="3"/>
+      <text class="t m" x="675" y="53" text-anchor="middle">plan.md</text>
+      <text class="s" x="675" y="71" text-anchor="middle">9 tasks, constraints</text>
+
+      <line class="edge" x1="180" y1="58" x2="218" y2="58" marker-end="url(#ar)"/>
+      <text class="lbl" x="199" y="22" text-anchor="middle">answers</text>
+      <line class="edge" x1="370" y1="58" x2="408" y2="58" marker-end="url(#ar)"/>
+      <text class="lbl" x="389" y="22" text-anchor="middle">approve</text>
+      <line class="edge" x1="560" y1="58" x2="598" y2="58" marker-end="url(#ar)"/>
+      <text class="lbl" x="579" y="22" text-anchor="middle">plan</text>
+      <line class="edge" x1="750" y1="58" x2="788" y2="58" marker-end="url(#ar)"/>
+      <text class="lbl" x="769" y="22" text-anchor="middle">one task at a time</text>
+
+      <!-- the geometry file -->
+      <rect class="cad" x="790" y="14" width="370" height="232" rx="4"/>
+      <text class="hd m" x="975" y="38" text-anchor="middle">drawer_bench.py  (build123d)</text>
+      <rect class="box" x="810" y="50" width="330" height="30" rx="2"/>
+      <text x="975" y="70" text-anchor="middle">named constants: provisional inputs, locked values, Blum, derived</text>
+      <rect class="box" x="810" y="96" width="330" height="30" rx="2"/>
+      <text x="975" y="116" text-anchor="middle">part solids, each modeled once in its final position</text>
+      <rect class="box" x="810" y="142" width="330" height="30" rx="2"/>
+      <text x="975" y="162" text-anchor="middle">PARTS registry (20) + INST placements (25)</text>
+      <rect class="box" x="810" y="188" width="330" height="30" rx="2"/>
+      <text x="975" y="208" text-anchor="middle">asserts: 65 checks, 13 probes, 300 no-overlap tests</text>
+      <line class="edge" x1="975" y1="80" x2="975" y2="94" marker-end="url(#ar)"/>
+      <line class="edge" x1="975" y1="126" x2="975" y2="140" marker-end="url(#ar)"/>
+      <line class="edge" x1="975" y1="172" x2="975" y2="186" marker-end="url(#ar)"/>
+
+      <!-- export bus -->
+      <line class="edge" x1="975" y1="246" x2="975" y2="300"/>
+      <line class="edge" x1="150" y1="300" x2="975" y2="300"/>
+      <text class="lbl" x="560" y="290" text-anchor="middle">exports gated by env vars on the same run</text>
+      <line class="edge" x1="150" y1="300" x2="150" y2="338" marker-end="url(#ar)"/>
+      <line class="edge" x1="390" y1="300" x2="390" y2="338" marker-end="url(#ar)"/>
+      <line class="edge" x1="630" y1="300" x2="630" y2="338" marker-end="url(#ar)"/>
+      <line class="edge" x1="870" y1="300" x2="870" y2="338" marker-end="url(#ar)"/>
+
+      <rect class="box" x="50" y="340" width="200" height="60" rx="3"/>
+      <text class="t m" x="150" y="361" text-anchor="middle">cutlist.md + cutlist.csv</text>
+      <text class="s m" x="150" y="379" text-anchor="middle">EXPORT=1 &#8594; scripts/cutlist.py</text>
+      <text class="s" x="150" y="393" text-anchor="middle">mm + inches to 1/16, merged blanks</text>
+
+      <rect class="box" x="290" y="340" width="200" height="60" rx="3"/>
+      <text class="t m" x="390" y="361" text-anchor="middle">drawer_bench.step</text>
+      <text class="s m" x="390" y="379" text-anchor="middle">EXPORT=1 &#8594; export_step</text>
+      <text class="s" x="390" y="393" text-anchor="middle">one fused solid, 72.6 dm&#179;</text>
+
+      <rect class="box" x="530" y="340" width="200" height="60" rx="3"/>
+      <text class="t m" x="630" y="361" text-anchor="middle">images/*.png</text>
+      <text class="s m" x="630" y="379" text-anchor="middle">TMP_STL &#8594; scripts/render_stl.py</text>
+      <text class="s" x="630" y="393" text-anchor="middle">iso / front / top / right</text>
+
+      <rect class="acc" x="770" y="340" width="200" height="60" rx="3"/>
+      <text class="t m" x="870" y="361" text-anchor="middle">OCP viewer :3939 &#8594; Chrome</text>
+      <text class="s m" x="870" y="379" text-anchor="middle">SHOW=reset | SHOW=1 &#8594; ocp_vscode</text>
+      <text class="s" x="870" y="393" text-anchor="middle">Brian's sign-off, still pending</text>
+
+      <!-- sign-off loop back to the constants -->
+      <path class="edge acc dash" d="M970,370 H1100 V130 H1162" marker-end="url(#arb)"/>
+      <text class="lbl" x="1092" y="246" text-anchor="end">viewer sign-off,</text>
+      <text class="lbl" x="1092" y="261" text-anchor="end">corrections to constants</text>
+
+      <!-- row C -->
+      <line class="edge" x1="150" y1="400" x2="150" y2="478" marker-end="url(#ar)"/>
+      <text class="lbl" x="160" y="432">build outcomes,</text>
+      <text class="lbl" x="160" y="447">measured fits</text>
+
+      <rect class="box" x="50" y="480" width="230" height="56" rx="3"/>
+      <text class="t m" x="165" y="502" text-anchor="middle">knowledge/learnings/drawer-bench.md</text>
+      <text class="s" x="165" y="520" text-anchor="middle">retrospective, resolutions, verdicts</text>
+
+      <line class="edge" x1="280" y1="508" x2="328" y2="508" marker-end="url(#ar)"/>
+      <text class="lbl" x="304" y="498" text-anchor="middle">distill</text>
+
+      <rect class="box" x="330" y="480" width="230" height="56" rx="3"/>
+      <text class="t m" x="445" y="502" text-anchor="middle">memory/project-drawer-bench.md</text>
+      <text class="s" x="445" y="520" text-anchor="middle">one fact, indexed in MEMORY.md</text>
+
+      <line class="edge" x1="560" y1="508" x2="608" y2="508" marker-end="url(#ar)"/>
+      <text class="lbl" x="584" y="498" text-anchor="middle">milestone</text>
+
+      <rect class="box" x="610" y="480" width="300" height="56" rx="3"/>
+      <text class="t m" x="760" y="502" text-anchor="middle">.claude/context-check/last-handoff.md</text>
+      <text class="s" x="760" y="520" text-anchor="middle">decisions locked, next action</text>
+      <text class="s m" x="760" y="560" text-anchor="middle">&#8594; /continue-from-clear resumes the next session from here</text>
+
+      <!-- stock knowledge -->
+      <rect class="box" x="940" y="480" width="220" height="56" rx="3"/>
+      <text class="t m" x="1050" y="502" text-anchor="middle">knowledge/woodworking-stock.md</text>
+      <text class="s" x="1050" y="520" text-anchor="middle">measured ply, kerf: after a real build</text>
+      <path class="edge dash" d="M910,508 H938" marker-end="url(#ar)"/>
+    </svg>
+    </div>
+    <figcaption>Decisions flow left to right into the geometry file; four deliverables come off the same registry on one run; the viewer closes the loop back into the constants; outcomes are distilled into learnings, memory and the handoff. Dashed edges only happen after a physical build or a session break.</figcaption>
+  </figure>
+
+  <div class="col">
+    <h2>3. Architecture</h2>
+    <p>Three things talk to each other: the Claude Code session (main thread plus subagents), the vault, and the runtime that turns Python into geometry you can see. The vault is the source of truth; the two symlinks make its skills and memory the ones the session loads.</p>
+  </div>
+  <figure class="fig">
+    <div class="figwrap">
+    <svg viewBox="0 0 1180 600" role="img" aria-label="Architecture: the Claude Code session on the left reads skills and memory through symlinks into the vault in the middle, runs the geometry file in the vault's virtual environment, which pushes to the OCP viewer server and a WebGL Chrome on the right; FreeCAD over RPC is the escalation path and Obsidian indexes the vault.">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+      </defs>
+
+      <!-- session column -->
+      <rect class="frame" x="20" y="20" width="330" height="560" rx="4"/>
+      <text class="hd" x="36" y="44">CLAUDE CODE SESSION</text>
+      <rect class="box" x="40" y="60" width="290" height="44" rx="3"/>
+      <text class="t" x="185" y="79" text-anchor="middle">main thread</text>
+      <text class="s" x="185" y="95" text-anchor="middle">conclusions only, per CLAUDE.md agent policy</text>
+      <rect class="box" x="40" y="120" width="290" height="44" rx="3"/>
+      <text class="t" x="185" y="139" text-anchor="middle">subagents, batched in parallel</text>
+      <text class="s" x="185" y="155" text-anchor="middle">explore, build one task, review, render, mine transcripts</text>
+      <rect class="acc" x="40" y="180" width="290" height="44" rx="3"/>
+      <text class="t m" x="185" y="199" text-anchor="middle">~/.claude/skills/furniture</text>
+      <text class="s" x="185" y="215" text-anchor="middle">what the /furniture command loads</text>
+      <rect class="acc" x="40" y="240" width="290" height="44" rx="3"/>
+      <text class="t m" x="185" y="259" text-anchor="middle">~/.claude/projects/&#8230;/memory</text>
+      <text class="s" x="185" y="275" text-anchor="middle">auto-memory, MEMORY.md index loaded each session</text>
+      <rect class="box" x="40" y="300" width="290" height="44" rx="3"/>
+      <text class="t m" x="185" y="319" text-anchor="middle">.venv/bin/python projects/&#8230;/drawer_bench.py</text>
+      <text class="s" x="185" y="335" text-anchor="middle">EXPORT=1 · TMP_STL=&#8230; · SHOW=reset|1</text>
+      <line class="edge" x1="185" y1="104" x2="185" y2="118" marker-end="url(#ar2)"/>
+      <line class="edge" x1="185" y1="164" x2="185" y2="178"/>
+      <line class="edge" x1="185" y1="284" x2="185" y2="298" marker-end="url(#ar2)"/>
+
+      <!-- vault column -->
+      <rect class="frame" x="400" y="20" width="390" height="560" rx="4"/>
+      <text class="hd" x="416" y="44">VAULT  ~/ClaudeProjects/3d-modeling-brain  (Obsidian)</text>
+      <rect class="box" x="420" y="60" width="350" height="36" rx="3"/>
+      <text class="t m" x="595" y="83" text-anchor="middle">CLAUDE.md: layout, workflow rules, agent policy</text>
+      <rect class="cad" x="420" y="110" width="350" height="92" rx="3"/>
+      <text class="t m" x="595" y="130" text-anchor="middle">projects/Drawer-bench/</text>
+      <text class="s" x="595" y="148" text-anchor="middle">brief.md · design.md · plan.md · drawer_bench.py</text>
+      <text class="s" x="595" y="164" text-anchor="middle">cutlist.md · cutlist.csv · drawer_bench.step · images/</text>
+      <text class="s" x="595" y="180" text-anchor="middle">.superpowers/ (brainstorm, sdd ledger, reviews)</text>
+      <text class="s" x="595" y="196" text-anchor="middle">.claude/context-check/last-handoff.md</text>
+      <rect class="box" x="420" y="216" width="350" height="52" rx="3"/>
+      <text class="t m" x="595" y="236" text-anchor="middle">scripts/</text>
+      <text class="s" x="595" y="254" text-anchor="middle">cutlist.py · render_stl.py · cad-viewer.sh · start-freecad-mcp.sh</text>
+      <rect class="box" x="420" y="282" width="350" height="52" rx="3"/>
+      <text class="t m" x="595" y="302" text-anchor="middle">knowledge/</text>
+      <text class="s" x="595" y="320" text-anchor="middle">woodworking-stock.md · learnings/drawer-bench.md · printer, materials</text>
+      <rect class="acc" x="420" y="348" width="350" height="40" rx="3"/>
+      <text class="t m" x="595" y="368" text-anchor="middle">memory/  (canonical, symlink target)</text>
+      <rect class="acc" x="420" y="402" width="350" height="40" rx="3"/>
+      <text class="t m" x="595" y="422" text-anchor="middle">skills/furniture, skills/3d-model  (symlink source)</text>
+      <rect class="box" x="420" y="456" width="350" height="52" rx="3"/>
+      <text class="t m" x="595" y="476" text-anchor="middle">.venv/  Python 3.12</text>
+      <text class="s" x="595" y="494" text-anchor="middle">build123d 0.11 · OCP 7.9 · ocp_vscode 4.0 · trimesh · matplotlib</text>
+
+      <!-- symlinks and edges session -> vault -->
+      <path class="edge dash" d="M330,202 H380 V422 H418" marker-end="url(#ar2)"/>
+      <text class="lbl" x="386" y="318" text-anchor="middle" transform="rotate(-90 386 318)">symlink</text>
+      <path class="edge dash" d="M330,262 H364 V368 H418" marker-end="url(#ar2)"/>
+      <line class="edge" x1="330" y1="82" x2="418" y2="82" marker-end="url(#ar2)"/>
+      <text class="lbl" x="374" y="74" text-anchor="middle">reads</text>
+      <path class="edge" d="M330,142 H396 V156 H418" marker-end="url(#ar2)"/>
+      <text class="lbl" x="362" y="134" text-anchor="middle">edits .py, notes</text>
+      <path class="edge" d="M330,322 H396 V482 H418" marker-end="url(#ar2)"/>
+      <text class="lbl" x="405" y="460" text-anchor="end" transform="rotate(-90 405 460)">runs in</text>
+
+      <!-- runtime column -->
+      <rect class="frame" x="840" y="20" width="320" height="560" rx="4"/>
+      <text class="hd" x="856" y="44">RUNTIME</text>
+      <rect class="acc" x="860" y="60" width="280" height="44" rx="3"/>
+      <text class="t m" x="1000" y="79" text-anchor="middle">ocp_vscode viewer server :3939</text>
+      <text class="s" x="1000" y="95" text-anchor="middle">started by scripts/cad-viewer.sh if silent</text>
+      <rect class="acc" x="860" y="120" width="280" height="56" rx="3"/>
+      <text class="t" x="1000" y="140" text-anchor="middle">Chrome, separate profile</text>
+      <text class="s" x="1000" y="156" text-anchor="middle">WebGL via ANGLE on Vulkan, --gtk-version=4</text>
+      <text class="s" x="1000" y="170" text-anchor="middle">what Brian sees on the CRD desktop</text>
+      <rect class="box" x="860" y="192" width="280" height="44" rx="3"/>
+      <text class="t" x="1000" y="211" text-anchor="middle">matplotlib Agg + trimesh</text>
+      <text class="s" x="1000" y="227" text-anchor="middle">headless PNG renders the agent inspects</text>
+      <rect class="box" x="860" y="252" width="280" height="56" rx="3"/>
+      <text class="t" x="1000" y="272" text-anchor="middle">FreeCAD + MCP addon, RPC :9875</text>
+      <text class="s" x="1000" y="288" text-anchor="middle">escalation only: .FCStd edits, TechDraw,</text>
+      <text class="s" x="1000" y="302" text-anchor="middle">or two failed kernel ops on one feature</text>
+      <rect class="box" x="860" y="324" width="280" height="44" rx="3"/>
+      <text class="t" x="1000" y="343" text-anchor="middle">Obsidian app</text>
+      <text class="s" x="1000" y="359" text-anchor="middle">indexes every note and memory file</text>
+
+      <!-- vault -> runtime edges -->
+      <path class="edge" d="M770,482 H812 V82 H858" marker-end="url(#ar2)"/>
+      <text class="lbl" x="820" y="282" text-anchor="middle" transform="rotate(-90 820 282)">show() over websocket</text>
+      <line class="edge" x1="1000" y1="104" x2="1000" y2="118" marker-end="url(#ar2)"/>
+      <path class="edge" d="M770,470 H800 V214 H858" marker-end="url(#ar2)"/>
+      <path class="edge dash" d="M770,242 H830 V280 H858" marker-end="url(#ar2)"/>
+      <path class="edge dash" d="M858,346 H832 V72 H820" />
+      <text class="lbl" x="838" y="560" text-anchor="middle">solid: every run · dashed: on demand</text>
+
+      <!-- viewer back to Brian -->
+      <text class="s" x="1000" y="400" text-anchor="middle">Brian reviews in Chrome, answers in the terminal;</text>
+      <text class="s" x="1000" y="416" text-anchor="middle">the answer becomes a constant, the file re-runs, the viewer re-pushes.</text>
+    </svg>
+    </div>
+    <figcaption>The session never holds geometry itself: it edits the Python file and notes in the vault, the vault's own environment runs the file, and the viewer and renders come back as pictures. Skills and memory live in the vault and reach the session through symlinks, so Obsidian indexes them too.</figcaption>
+  </figure>
+
+  <div class="col">
+    <h2>4. The /furniture phases</h2>
+    <p>What each phase takes in, what it must produce before the next may start, and the tooling behind it. The ordering is load-bearing: joinery is decided in Phase 2 because it changes part lengths, and the cut list cannot be right before that.</p>
+  </div>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Phase</th><th>In</th><th>Out</th><th>Tools</th></tr></thead>
+    <tbody>
+      <tr><td>Backend choice</td><td>The shape of the task</td><td>One line: build123d (default) or FreeCAD MCP, and why</td><td>FreeCAD only for .FCStd edits, TechDraw drawings, or two failed kernel ops</td></tr>
+      <tr><td>1 Brief</td><td>Batched load-bearing questions: size and space, load and use, material, stock, tools, joinery capability, show faces</td><td><code>projects/&lt;Name&gt;/brief.md</code>; assumptions stated, provenance recorded</td><td>Conversation; the visual companion when choices are visual</td></tr>
+      <tr><td>1b Images</td><td>Photos or sketches plus at least one known dimension</td><td>Interpretation table confirmed before any CAD; references copied to <code>images/</code></td><td>Subagent image inspection</td></tr>
+      <tr><td>2 Plan</td><td>The brief</td><td>Ordered part list, grain direction and show faces, joinery per connection</td><td><code>plan.md</code> (writing-plans shape)</td></tr>
+      <tr><td>3 Build loop</td><td>The plan, one task at a time</td><td>One growing <code>&lt;name&gt;.py</code>: constants, PARTS registry, asserts and probes, env-gated exports</td><td><code>.venv</code> build123d, <code>render_stl.py</code>, OCP viewer via <code>cad-viewer.sh</code>, subagent-driven development, review between tasks</td></tr>
+      <tr><td>4 Buildability</td><td>Finished geometry plus <code>knowledge/woodworking-stock.md</code></td><td>Seven verdicts: stock thickness, rectangularity (under 98% of bounding box flagged), grain, joinery fit, stock yield, wood movement, transport and assembly walk</td><td>Checks baked into the file as asserts where possible</td></tr>
+      <tr><td>5 Export</td><td>The PARTS registry</td><td><code>cutlist.md</code> + <code>.csv</code>, <code>&lt;name&gt;.step</code>, four-view renders, brief log, retrospective, measured stock promoted after the build</td><td><code>scripts/cutlist.py</code> <code>write_cut_list</code>, <code>export_step</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="col">
+    <h2>5. The Drawer-bench in numbers</h2>
+    <p>Size convention option (a): 36 x 24 in is the top; the posts sit inside a 1-1/4 in overhang, so the footprint is 33-1/2 x 21-1/2 in and the drawer opening between the posts is 27-1/2 in; height 20 in. Soft maple posts and rails, plywood panels and drawer boxes, a laminated top, 18 in Blum-class undermount slides. About 49 kg, clears a 750 mm doorway with 140 mm to spare.</p>
+    <h3>Registry parts (20, placed 25 times)</h3>
+    <p class="mono" style="font-size:13px; line-height:1.8">post_front &#215;2 · post_rear &#215;2 · side &#215;2 · back · rail_rear · rail_top · rail_mid · rail_bot · bottom · front_bot · front_top · drawer_side_bot &#215;2 · drawer_front_bot · drawer_back_bot · drawer_bottom_bot · drawer_side_top &#215;2 · drawer_front_top · drawer_back_top · drawer_bottom_top · top</p>
+    <h3>Where the CAD forced a value the prose had not closed</h3>
+    <p>Each is a single constant in the file, and each is waiting on Brian's review; the asserts flag any knock-on clash when one moves.</p>
+    <ul class="res">
+      <li><span>Top drawer opening 4-1/2 in; boxes 3-11/16 and 8-11/16 in at Blum's maximum, 14 mm above their rails (top box interior about 69 mm)</span><span class="chip open">open</span></li>
+      <li><span>Three stopped mortises per front post instead of a continuous front-frame groove, so the slide tabs land on solid post</span><span class="chip open">open</span></li>
+      <li><span>Rear top rail (1-1/2 in) tenoned into the back groove line; back panel 15-1/4 in tall beneath it</span><span class="chip open">open</span></li>
+      <li><span>Rails milled to the measured ply thickness (T18) so their stub tenons fill the 3/8 in grooves; the cut list prints 11/16 in as a consequence</span><span class="chip open">open</span></li>
+      <li><span>Bottom panel's front edge in a 1/4 x 1/2 rabbet run through the bottom rail's tenons; panel notched around all four posts</span><span class="chip open">open</span></li>
+      <li><span>7 mm ply lip under the bottom groove in sides and back; lowering the groove stop to 1 in would give 20 mm (owner's call)</span><span class="chip open">open</span></li>
+      <li><span>Assembly order with the bottom pre-joined to the back off the bench; every part enters by a straight sideways move</span><span class="chip open">open</span></li>
+    </ul>
+    <p style="margin-top:20px">Run it: <code>EXPORT=1 TMP_STL=$SCRATCH/db.stl .venv/bin/python projects/Drawer-bench/drawer_bench.py</code> from the vault root; add <code>SHOW=reset</code> for the first viewer push and <code>SHOW=1</code> after each edit. Nothing is cut until the space, the Boos island and both plywood thicknesses are measured and the file re-run.</p>
+    <div class="foot">Sources: skills/furniture/SKILL.md, projects/Drawer-bench (brief.md, design.md, plan.md, drawer_bench.py, .superpowers/), knowledge/learnings/drawer-bench.md, scripts/cutlist.py, scripts/render_stl.py, scripts/cad-viewer.sh, CLAUDE.md. Counts read from the files on 2026-08-25.</div>
+  </div>
+</div>

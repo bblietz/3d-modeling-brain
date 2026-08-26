@@ -1,0 +1,908 @@
+{
+ "plates": [
+  {
+   "plate_name": "Plate A Sami Joe Nathaniel Zachary Jack Kai",
+   "need_arrange": false,
+   "plate_params": {
+    "curr_bed_type": "Textured PEI Plate"
+   },
+   "objects": [
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/sami-5-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      1
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/sami-5-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      1
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/sami-5-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      1
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/joe-8-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      2
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/joe-8-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      2
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/joe-8-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      2
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/nathaniel-9-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      3
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/nathaniel-9-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      3
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/nathaniel-9-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      3
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/zachary-10-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      4
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/zachary-10-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      4
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/zachary-10-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      4
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/jack-12-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      5
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/jack-12-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      5
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/jack-12-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      5
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/kai-14-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      6
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/kai-14-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      6
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/kai-14-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      6
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    }
+   ],
+   "assembled_params": [
+    {
+     "assemble_index": 1,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 2,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 3,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 4,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 5,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 6,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    }
+   ]
+  },
+  {
+   "plate_name": "Plate B David Callan Max Benji Julian Leonidas Luke Krystof",
+   "need_arrange": false,
+   "plate_params": {
+    "curr_bed_type": "Textured PEI Plate"
+   },
+   "objects": [
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/david-15-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      1
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/david-15-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      1
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/david-15-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      1
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/callan-17-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      2
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/callan-17-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      2
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/callan-17-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      2
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/max-18-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      3
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/max-18-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      3
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/max-18-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      3
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      46
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/benji-19-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      4
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/benji-19-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      4
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/benji-19-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      4
+     ],
+     "pos_x": [
+      46
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/julian-20-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      5
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/julian-20-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      5
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/julian-20-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      5
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/leonidas-25-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      6
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/leonidas-25-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      6
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/leonidas-25-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      6
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      128
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/luke-30-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      7
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      210
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/luke-30-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      7
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      210
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/luke-30-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      7
+     ],
+     "pos_x": [
+      128
+     ],
+     "pos_y": [
+      210
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/krystof-33-white.stl",
+     "count": 1,
+     "filaments": [
+      1
+     ],
+     "assemble_index": [
+      8
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      210
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/krystof-33-navy.stl",
+     "count": 1,
+     "filaments": [
+      2
+     ],
+     "assemble_index": [
+      8
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      210
+     ],
+     "pos_z": [
+      0
+     ]
+    },
+    {
+     "path": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Sharks-nametag/pipeline/plates-stl/krystof-33-cyan.stl",
+     "count": 1,
+     "filaments": [
+      3
+     ],
+     "assemble_index": [
+      8
+     ],
+     "pos_x": [
+      210
+     ],
+     "pos_y": [
+      210
+     ],
+     "pos_z": [
+      0
+     ]
+    }
+   ],
+   "assembled_params": [
+    {
+     "assemble_index": 1,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 2,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 3,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 4,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 5,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 6,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 7,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    },
+    {
+     "assemble_index": 8,
+     "print_params": {
+      "detect_narrow_internal_solid_infill": "0"
+     }
+    }
+   ]
+  }
+ ]
+}

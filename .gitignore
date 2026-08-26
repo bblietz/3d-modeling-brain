@@ -1,0 +1,20 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Claude Code session artifacts
+.claude/context-check/
+
+# Obsidian volatile state (keep app.json and other shared config)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+
+# Tool caches and browser-session logs
+.impeccable/
+.playwright-mcp/
+
+# Slicer CLI leftovers
+result.json

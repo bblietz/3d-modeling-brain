@@ -1,0 +1,8 @@
+qty,part,thickness_mm,width_mm,length_mm,material,notes
+2,long apron,22,100,1560,4/4 red oak,"square butt ends; 6mm button groove, top 12 below edge"
+2,short apron,22,100,660,4/4 red oak,"square butt ends; 6mm button groove, top 12 below edge"
+4,corner brace,22,60,190,4/4 red oak,ends cut 45; bolt hole mid-height; 2 screws per end into aprons
+1,top panel,26,900,1720,5/4 red oak,"edge-glue to 900 wide; 12mm tongue both ends, stopped 30 from edges"
+2,breadboard,26,70,900,5/4 red oak,"groove matches tongue; glue CENTER 100mm only, elongate outer peg holes ; not a plain rectangular blank (82% of bounding box); needs a drawing or template"
+4,leg,80,80,714,"8/4 red oak, milled to 80 sq",taper two inner faces 80->48 below z594; hanger bolt in corner ; not a plain rectangular blank (71% of bounding box); needs a drawing or template
+8,button,20,36,40,hardwood scrap,"lip 6x6 rides apron groove; one screw each into top, slot-free movement ; not a plain rectangular blank (88% of bounding box); needs a drawing or template"

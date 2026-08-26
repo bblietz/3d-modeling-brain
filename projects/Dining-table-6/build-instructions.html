@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shaker Dining Table for 6 · Build Instructions</title>
+<style>
+:root {
+  --paper: #F5F4EF;
+  --ink: #26231D;
+  --muted: #6B655B;
+  --line: #D8D4CA;
+  --blue: #4A6B8A;
+  --wood: #B08544;
+  --wood-fill: rgba(176, 133, 68, 0.18);
+  --card: #EFEDE5;
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #201E1A; --ink: #E9E4D9; --muted: #A29A88; --line: #3A362E;
+    --blue: #8FAECB; --wood: #C99A5B; --wood-fill: rgba(201, 154, 91, 0.15);
+    --card: #292620;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #201E1A; --ink: #E9E4D9; --muted: #A29A88; --line: #3A362E;
+  --blue: #8FAECB; --wood: #C99A5B; --wood-fill: rgba(201, 154, 91, 0.15);
+  --card: #292620;
+}
+:root[data-theme="light"] {
+  --paper: #F5F4EF; --ink: #26231D; --muted: #6B655B; --line: #D8D4CA;
+  --blue: #4A6B8A; --wood: #B08544; --wood-fill: rgba(176, 133, 68, 0.18);
+  --card: #EFEDE5;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 17px/1.6 var(--serif);
+}
+main { max-width: 76ch; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+h1, h2, h3 { line-height: 1.2; text-wrap: balance; font-weight: 600; }
+h1 { font-size: 2.1rem; margin: 0 0 0.5rem; }
+h2 {
+  font-size: 1.4rem; margin: 3rem 0 1rem;
+  padding-top: 1.2rem; border-top: 1px solid var(--line);
+}
+h3 { font-size: 1.05rem; margin: 1.6rem 0 0.5rem; }
+p { margin: 0.7rem 0; }
+.eyebrow {
+  font: 600 0.72rem/1 var(--mono); letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--blue); margin: 0 0 0.8rem;
+}
+.lede { font-size: 1.1rem; color: var(--muted); margin: 0.4rem 0 1.6rem; }
+
+.specs {
+  display: flex; flex-wrap: wrap; gap: 0.6rem 2.2rem;
+  padding: 0.9rem 1.1rem; background: var(--card);
+  border: 1px solid var(--line);
+}
+.specs div { display: flex; flex-direction: column; gap: 0.1rem; }
+.specs dt { font: 600 0.68rem/1.2 var(--mono); letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); }
+.specs dd { margin: 0; font: 500 0.95rem/1.3 var(--mono);
+  font-variant-numeric: tabular-nums; }
+
+.dim { font-family: var(--mono); font-variant-numeric: tabular-nums;
+  font-size: 0.92em; }
+
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { text-align: left; padding: 0.45rem 0.8rem 0.45rem 0;
+  border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 0.7rem/1.3 var(--mono); letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); }
+td { font-size: 0.92rem; }
+td.n { font-family: var(--mono); font-variant-numeric: tabular-nums;
+  white-space: nowrap; }
+
+ol.steps { counter-reset: step; list-style: none; margin: 1.5rem 0; padding: 0; }
+ol.steps > li {
+  counter-increment: step; position: relative;
+  padding: 0 0 1.8rem 3.4rem; margin: 0;
+}
+ol.steps > li::before {
+  content: counter(step);
+  position: absolute; left: 0; top: 0.1rem;
+  width: 2.1rem; height: 2.1rem; border: 1.5px solid var(--blue);
+  border-radius: 50%; color: var(--blue);
+  font: 600 1rem/2.05rem var(--mono); text-align: center;
+}
+ol.steps h3 { margin-top: 0; }
+ul { margin: 0.5rem 0; padding-left: 1.2rem; }
+li { margin: 0.3rem 0; }
+
+figure { margin: 1.6rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;
+  padding-left: 0.8rem; border-left: 2px solid var(--line); }
+figure img { max-width: 100%; height: auto; border: 1px solid var(--line); }
+
+svg .part { fill: var(--wood-fill); stroke: currentColor; stroke-width: 1.4; }
+svg .void { fill: none; stroke: var(--blue); stroke-width: 1.2;
+  stroke-dasharray: 5 3; }
+svg .dline { stroke: var(--blue); stroke-width: 1; }
+svg .dtext { fill: var(--blue); font: 11.5px var(--mono); }
+svg .note { fill: var(--muted); font: 11.5px var(--mono); }
+svg .hidden-edge { stroke: currentColor; stroke-width: 1;
+  stroke-dasharray: 4 3; fill: none; }
+
+.callout {
+  background: var(--card); border: 1px solid var(--line);
+  padding: 0.9rem 1.1rem; margin: 1.4rem 0; font-size: 0.95rem;
+}
+.callout strong { color: var(--wood); }
+
+@media print {
+  :root, :root[data-theme="dark"] {
+    --paper: #fff; --ink: #111; --muted: #444; --line: #bbb;
+    --blue: #34506d; --wood: #7a5a2a; --wood-fill: rgba(150, 110, 50, 0.15);
+    --card: #f2f0ea;
+  }
+  body { font-size: 10.5pt; }
+  main { max-width: none; padding: 0; }
+  ol.steps > li, figure, .callout, .specs { break-inside: avoid; }
+  h2 { break-after: avoid; }
+}
+</style>
+</head>
+<body>
+<main>
+
+<p class="eyebrow">Shop Manual · Dining-table-6 · rev 2026-08-04</p>
+<h1>Shaker Dining Table for Six</h1>
+<p class="lede">Red oak, tapered legs, bolted corner-brace base, breadboard-ended
+top held by wooden buttons. Medium skill; the base knocks down flat.</p>
+
+<dl class="specs">
+  <div><dt>Finished size</dt><dd>1800 × 900 × 740 mm</dd></div>
+  <div><dt>Seats</dt><dd>6 (2+2 sides, 1+1 ends)</dd></div>
+  <div><dt>Knee clearance</dt><dd>614 mm</dd></div>
+  <div><dt>Parts</dt><dd>23 (7 blank sizes)</dd></div>
+  <div><dt>Shop time</dt><dd>≈ 2–3 weekends</dd></div>
+</dl>
+
+<h2>Overview</h2>
+<p>The base is four tapered legs and four square-ended aprons pulled together
+by corner braces: a 45° hardwood block behind each corner, screwed to both
+aprons, with a hanger bolt from the leg passing through it. Tightening the
+nut draws the leg hard against the apron ends, and backing the nuts off
+drops the base flat for moving. The top is an edge-glued panel capped by
+breadboard ends riding a stopped tongue, and it attaches to the base with
+eight shop-made buttons that slide in grooves inside the aprons. Nothing
+restrains the top across its width, which is the point: 900&nbsp;mm of solid
+oak moves roughly 9&nbsp;mm through the year, and every detail below that
+looks fussy exists to let that happen without cracking.</p>
+<figure>
+  <img src="images/dining-table-views.png"
+       alt="Four rendered views of the finished table: isometric, front, top, and end">
+  <figcaption>The model. The parametric source
+  (<span class="dim">dining-table.py</span>) is the dimension authority; if a
+  number here ever disagrees with it, the model wins.</figcaption>
+</figure>
+
+<div class="callout"><strong>Before any joinery:</strong> mill, then measure.
+Every joinery dimension below assumes dressed stock at exactly
+<span class="dim">22 / 26 / 80 mm</span>. If your planer says otherwise, cut
+joints to your measured reality, not to this page.</div>
+
+<h2>Materials</h2>
+<div class="table-wrap">
+<table>
+  <tr><th>Stock</th><th>For</th><th>Rough quantity</th></tr>
+  <tr><td>8/4 red oak</td><td>4 legs (glue-up, milled to 80 sq)</td>
+      <td class="n">≈ 0.9 m of 200 mm-wide board</td></tr>
+  <tr><td>5/4 red oak</td><td>top panel + 2 breadboards</td>
+      <td class="n">≈ 1.7 m² dressed to 26</td></tr>
+  <tr><td>4/4 red oak</td><td>4 aprons</td>
+      <td class="n">≈ 0.5 m² dressed to 22</td></tr>
+  <tr><td>Hardwood scrap</td><td>8 buttons + 6 pegs</td><td class="n">offcuts</td></tr>
+  <tr><td>Hardware</td><td>corner braces</td>
+      <td class="n">4 × M8 × 80 hanger bolt + washer + nut; 16 × #10 × 45 screws</td></tr>
+  <tr><td>Hardware</td><td>button screws</td><td class="n">8 × #8 × 32 mm</td></tr>
+  <tr><td>Consumables</td><td>glue-ups, finish</td>
+      <td class="n">PVA glue; oil-varnish blend</td></tr>
+</table>
+</div>
+<p>Buy 25–30% over the net areas for defect and grain selection. Tools
+assumed: jointer/planer (or hand equivalents), table saw, router or plow
+plane, mortiser or chisels, bandsaw or taper jig, cabinet scraper, clamps
+past 1000&nbsp;mm.</p>
+
+<h2>Cut list</h2>
+<div class="table-wrap">
+<table>
+  <tr><th>Qty</th><th>Part</th><th>T × W × L (mm)</th><th>T × W × L (in)</th><th>Notes</th></tr>
+  <tr><td class="n">4</td><td>Leg</td><td class="n">80 × 80 × 714</td>
+      <td class="n">3-1/8 × 3-1/8 × 28-1/8</td>
+      <td>8/4 glue-up; bolt hole in the inner corner, then taper</td></tr>
+  <tr><td class="n">2</td><td>Long apron</td><td class="n">22 × 100 × 1560</td>
+      <td class="n">7/8 × 3-15/16 × 61-7/16</td>
+      <td>square butt ends</td></tr>
+  <tr><td class="n">2</td><td>Short apron</td><td class="n">22 × 100 × 660</td>
+      <td class="n">7/8 × 3-15/16 × 26</td>
+      <td>square butt ends</td></tr>
+  <tr><td class="n">4</td><td>Corner brace</td><td class="n">22 × 60 × 190</td>
+      <td class="n">7/8 × 2-3/8 × 7-1/2</td>
+      <td>both ends cut 45°; bolt hole mid-height</td></tr>
+  <tr><td class="n">1</td><td>Top panel</td><td class="n">26 × 900 × 1720</td>
+      <td class="n">1 × 35-7/16 × 67-11/16</td>
+      <td>glue-up; includes both 30 mm tongues</td></tr>
+  <tr><td class="n">2</td><td>Breadboard</td><td class="n">26 × 70 × 900</td>
+      <td class="n">1 × 2-3/4 × 35-7/16</td>
+      <td>stopped groove matches tongue</td></tr>
+  <tr><td class="n">8</td><td>Button</td><td class="n">20 × 36 × 40</td>
+      <td class="n">13/16 × 1-7/16 × 1-9/16</td>
+      <td>rabbeted 6 × 6 lip</td></tr>
+</table>
+</div>
+
+<h2>Build sequence</h2>
+<ol class="steps">
+
+<li>
+<h3>Mill all stock</h3>
+<p>Face-glue 8/4 pairs for the legs (oversize, ≈ 90 × 90 × 750), let them
+rest a day, then mill to <span class="dim">80 × 80 × 714</span>. Dress apron
+stock to <span class="dim">22 × 100</span> and top stock to
+<span class="dim">26</span>. Sticker everything overnight; re-check for
+movement before joinery. Choose the two best faces of each leg as the outer
+(show) faces; all joinery happens on the other two.</p>
+</li>
+
+<li>
+<h3>Drill the legs, before tapering</h3>
+<p>Each leg gets one hanger bolt in the <em>inner corner</em> (the arris
+between the two inner faces), centered <span class="dim">30 mm</span> below
+the leg top, pointing at 45° into the corner. While the leg is still square:
+plane or file a small flat about <span class="dim">12 mm</span> wide on that
+arris so the drill can start, then bore a <span class="dim">⌀5.5 × 40</span>
+pilot at 45° (a V-block cradle on the drill press holds the leg perfectly).
+Drive the <span class="dim">M8 × 80</span> hanger bolts at assembly time with
+the double-nut trick, leaving about <span class="dim">35 mm</span> proud.</p>
+<figure>
+<svg viewBox="0 0 700 440" role="img"
+     aria-label="Leg layout: side elevation with the taper from 120 mm below the top to a 48 mm foot, and a top section showing the hanger bolt at 45 degrees into the flatted inner corner">
+  <!-- ===== side elevation, scale 0.5 (leg 40 x 357 px) ===== -->
+  <polygon class="part" points="90,30 130,30 130,90 114,387 90,387"/>
+  <line class="hidden-edge" x1="112" y1="45" x2="130" y2="45"/>
+  <text class="note" x="168" y="48">bolt ⌀8, 30 below top</text>
+  <line class="hidden-edge" x1="90" y1="90" x2="130" y2="90"/>
+  <line class="dline" x1="90" y1="18" x2="130" y2="18"/>
+  <line class="dline" x1="90" y1="14" x2="90" y2="26"/>
+  <line class="dline" x1="130" y1="14" x2="130" y2="26"/>
+  <text class="dtext" x="110" y="12" text-anchor="middle">80</text>
+  <line class="dline" x1="66" y1="30" x2="66" y2="387"/>
+  <line class="dline" x1="60" y1="30" x2="72" y2="30"/>
+  <line class="dline" x1="60" y1="387" x2="72" y2="387"/>
+  <text class="dtext" x="58" y="212" text-anchor="middle"
+        transform="rotate(-90 58 212)">714</text>
+  <line class="dline" x1="152" y1="30" x2="152" y2="90"/>
+  <line class="dline" x1="146" y1="30" x2="158" y2="30"/>
+  <line class="dline" x1="132" y1="90" x2="158" y2="90"/>
+  <text class="dtext" x="162" y="88">120</text>
+  <line class="dline" x1="90" y1="402" x2="114" y2="402"/>
+  <line class="dline" x1="90" y1="396" x2="90" y2="408"/>
+  <line class="dline" x1="114" y1="396" x2="114" y2="408"/>
+  <text class="dtext" x="102" y="420" text-anchor="middle">48</text>
+  <text class="note" x="90" y="440">side elevation, inner face right</text>
+  <text class="note" x="140" y="105">taper starts</text>
+
+  <!-- ===== top section, scale 1.6 (leg 128 x 128 px) ===== -->
+  <!-- outer faces top and right; inner corner bottom-left, flatted -->
+  <polygon class="part" points="400,60 528,60 528,188 414,188 400,174"/>
+  <text class="note" x="464" y="50" text-anchor="middle">outer (show) face</text>
+  <text class="note" x="545" y="124" transform="rotate(90 545 124)"
+        text-anchor="middle">outer (show) face</text>
+  <line class="hidden-edge" x1="382" y1="206" x2="452" y2="136"/>
+  <text class="note" x="360" y="228">M8 hanger bolt, 45°</text>
+  <line class="dline" x1="396" y1="160" x2="376" y2="140"/>
+  <text class="dtext" x="372" y="134" text-anchor="end">flat ~12 wide</text>
+  <text class="note" x="400" y="262">top section: one bolt per leg,</text>
+  <text class="note" x="400" y="278">square to the corner flat</text>
+</svg>
+<figcaption>Leg layout. One hanger bolt per leg, 45° into the flatted inner
+corner, 30&nbsp;mm below the top; the taper starts 120&nbsp;mm below the
+top, after drilling, and lands on a 48&nbsp;mm foot.</figcaption>
+</figure>
+</li>
+
+<li>
+<h3>Taper the legs</h3>
+<p>Taper only the two <em>inner</em> faces, from
+<span class="dim">80</span> at <span class="dim">120 mm</span> below the top
+down to <span class="dim">48</span> at the floor. Outer faces stay dead
+straight. Bandsaw just proud of the line and clean up with a jointer pass or
+hand plane; a table-saw taper jig works equally well. Break the four foot
+edges with a small chamfer so they don't splinter when the table is dragged.</p>
+</li>
+
+<li>
+<h3>Cut the aprons, make the braces</h3>
+<p>Cut aprons dead-square to final length: <span class="dim">1560</span>
+(long) and <span class="dim">660</span> (short); the ends butt the leg
+faces, so a clean crosscut is the whole joint. Plow the button groove:
+<span class="dim">6 × 6 mm</span> on each apron's inner face, its top edge
+<span class="dim">12 mm</span> below the apron's top edge, full length.
+Then the braces: <span class="dim">22 × 60</span> stock, both ends cut at
+45° so the long face measures <span class="dim">186</span> and the short
+face <span class="dim">142</span>. Drill a <span class="dim">⌀9</span>
+clearance hole mid-height, centered; add two countersunk screw pilots per
+end, square to each bearing face.</p>
+<figure>
+<svg viewBox="0 0 700 400" role="img"
+     aria-label="Corner plan: apron ends butt the leg faces at a 12 mm reveal; a 45 degree brace bears on both apron inner faces with two screws per end, and the leg's hanger bolt passes through it to a nut, crossing a 6 mm gap">
+  <!-- plan at brace height, scale 1.6; outer faces top and left -->
+  <!-- leg 80sq with flatted inner corner (bottom-right) -->
+  <polygon class="part" points="60,60 188,60 188,174 174,188 60,188"/>
+  <!-- long apron: extends right, outer face at reveal 12 (y=79.2) -->
+  <polygon class="part" points="188,79.2 640,79.2 640,114.4 188,114.4"/>
+  <polyline points="640,79.2 630,88 646,100 636,114.4"
+            fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <!-- short apron: extends down -->
+  <polygon class="part" points="79.2,188 114.4,188 114.4,370 79.2,370"/>
+  <polyline points="79.2,370 88,360 100,376 114.4,366"
+            fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <!-- corner brace at 45 -->
+  <polygon class="part" points="275.2,114.4 325,114.4 114.4,325 114.4,275.2"/>
+  <!-- hanger bolt through the corner into the brace, nut on the far face -->
+  <line x1="150" y1="150" x2="222" y2="222" stroke="var(--blue)"
+        stroke-width="2" stroke-dasharray="6 3"/>
+  <line x1="214" y1="230" x2="230" y2="214" stroke="var(--blue)"
+        stroke-width="5"/>
+  <text class="dtext" x="238" y="222">washer + nut</text>
+  <text class="dtext" x="66" y="144">M8 hanger bolt</text>
+  <!-- screws: two per end into each apron -->
+  <line class="hidden-edge" x1="288" y1="140" x2="288" y2="95"/>
+  <line class="hidden-edge" x1="312" y1="128" x2="312" y2="95"/>
+  <line class="hidden-edge" x1="140" y1="288" x2="95" y2="288"/>
+  <line class="hidden-edge" x1="128" y1="312" x2="95" y2="312"/>
+  <text class="dtext" x="330" y="138">2 screws per end</text>
+  <!-- 6 mm gap leader between corner and brace face -->
+  <line class="dline" x1="191" y1="197" x2="160" y2="336"/>
+  <text class="dtext" x="140" y="352">6 mm gap</text>
+  <!-- reveal dim 12 -->
+  <line class="dline" x1="44" y1="60" x2="44" y2="79.2"/>
+  <line class="dline" x1="38" y1="60" x2="50" y2="60"/>
+  <line class="dline" x1="38" y1="79.2" x2="50" y2="79.2"/>
+  <text class="dtext" x="34" y="74" text-anchor="end">12</text>
+  <!-- apron thickness 22 -->
+  <line class="dline" x1="572" y1="79.2" x2="572" y2="114.4"/>
+  <line class="dline" x1="566" y1="79.2" x2="578" y2="79.2"/>
+  <line class="dline" x1="566" y1="114.4" x2="578" y2="114.4"/>
+  <text class="dtext" x="584" y="101">22</text>
+  <!-- labels -->
+  <text class="note" x="100" y="130">leg</text>
+  <text class="note" x="380" y="102">long apron</text>
+  <text class="note" x="104" y="200" transform="rotate(90 104 200)">short apron</text>
+  <text class="note" x="230" y="308">corner brace 22 × 60</text>
+  <line class="dline" x1="226" y1="304" x2="170" y2="266"/>
+  <text class="note" x="60" y="396">plan at brace height, one corner</text>
+</svg>
+<figcaption>The corner joint. The brace bears on both apron inner faces and
+is screwed to them; the leg's hanger bolt crosses a 6&nbsp;mm gap so the nut
+pulls the leg tight against the apron ends.</figcaption>
+</figure>
+</li>
+
+<li>
+<h3>Assemble the base, no glue</h3>
+<p>Drive the hanger bolts into the legs (double-nut, ~35&nbsp;mm proud).
+On a flat surface, arrange the four aprons in their rectangle and screw a
+brace across each corner: two <span class="dim">#10 × 45</span> screws per
+end, pilot first, brace tops flush with the apron tops. Stand a leg into
+each corner with its bolt through the brace hole, add washer and nut, and
+run all four finger-tight. Square the frame until the diagonals agree
+within <span class="dim">1 mm</span>, then wrench-tighten evenly. The apron
+ends should sit dead flush against the leg faces with the
+<span class="dim">12 mm</span> reveal all around; the base comes apart with
+a wrench whenever the table needs to move.</p>
+</li>
+
+<li>
+<h3>Glue the top panel, cut the tongues</h3>
+<p>Edge-glue 5/4 boards to just over <span class="dim">910</span> wide,
+alternating growth rings, then flatten and trim to
+<span class="dim">1660 × 900 × 26</span>. Cut a tongue on each end:
+<span class="dim">12 thick × 30 long</span>, centered in the thickness
+(7&nbsp;mm shoulders), and <em>stopped 30&nbsp;mm from each edge</em>; a
+router with an edge guide does this cleanly. The tongue is therefore
+840&nbsp;mm wide.</p>
+</li>
+
+<li>
+<h3>Fit the breadboards</h3>
+<p>Plow a matching stopped groove in each breadboard
+(<span class="dim">12 wide × 31 deep</span>, 840 long) and fit it to the
+tongue: it should tap on with a mallet and no slop. Attach each breadboard
+with glue on <em>the center 100&nbsp;mm only</em>, then drawbore three
+<span class="dim">8 mm</span> pegs: one center, two at ±300. The two outer
+peg holes through the tongue get elongated <span class="dim">5 mm</span>
+side-to-side so the panel can swell and shrink past the fixed pegs.</p>
+<figure>
+<svg viewBox="0 0 740 330" role="img"
+     aria-label="Breadboard end: plan view with stopped 840 mm tongue and three pegs, outer holes slotted; section showing the 12 mm tongue in the grooved breadboard, glued only at the center">
+  <!-- plan view, scale ~0.28 -->
+  <rect class="part" x="60" y="30" width="200" height="252"/>
+  <rect class="part" x="260" y="30" width="19.6" height="252"/>
+  <rect class="void" x="260" y="38.4" width="8.4" height="235.2"/>
+  <circle cx="269.8" cy="156" r="3" fill="var(--blue)"/>
+  <ellipse cx="269.8" cy="72" rx="3" ry="5.5" fill="none"
+           stroke="var(--blue)" stroke-width="1.5"/>
+  <ellipse cx="269.8" cy="240" rx="3" ry="5.5" fill="none"
+           stroke="var(--blue)" stroke-width="1.5"/>
+  <text class="dtext" x="292" y="160">fixed peg, glued zone</text>
+  <text class="dtext" x="292" y="76">slotted hole</text>
+  <text class="dtext" x="292" y="244">slotted hole</text>
+  <line x1="252" y1="142" x2="252" y2="170" stroke="var(--wood)"
+        stroke-width="4"/>
+  <text class="dtext" x="180" y="162" text-anchor="end" fill="var(--wood)">glue center 100 only</text>
+  <line class="dline" x1="260" y1="16" x2="279.6" y2="16"/>
+  <text class="dtext" x="286" y="20">70</text>
+  <line class="dline" x1="240" y1="30" x2="240" y2="38.4"/>
+  <text class="dtext" x="234" y="42" text-anchor="end">30 stop</text>
+  <text class="note" x="60" y="308">plan, one end (panel continues left)</text>
+
+  <!-- section through joint, scale 2.0 -->
+  <polygon class="part" points="450,120 560,120 560,134 620,134 620,158 560,158 560,172 450,172"/>
+  <polygon class="part" points="622,120 700,120 700,172 622,172 622,160 682,160 682,132 622,132"/>
+  <text class="note" x="450" y="108">panel, 26 thick</text>
+  <text class="note" x="640" y="108">breadboard</text>
+  <line class="dline" x1="560" y1="188" x2="620" y2="188"/>
+  <line class="dline" x1="560" y1="182" x2="560" y2="194"/>
+  <line class="dline" x1="620" y1="182" x2="620" y2="194"/>
+  <text class="dtext" x="590" y="206" text-anchor="middle">tongue 30</text>
+  <line class="dline" x1="720" y1="134" x2="720" y2="158"/>
+  <line class="dline" x1="714" y1="134" x2="726" y2="134"/>
+  <line class="dline" x1="714" y1="158" x2="726" y2="158"/>
+  <text class="dtext" x="712" y="126" text-anchor="end">12</text>
+  <text class="note" x="430" y="230">section: 31 mm groove leaves 1 mm tip relief</text>
+</svg>
+<figcaption>Breadboard joint. Only the center is glued; the outer pegs pass
+through slots, so the 900&nbsp;mm panel can move while the breadboard holds
+it flat.</figcaption>
+</figure>
+</li>
+
+<li>
+<h3>Make the buttons</h3>
+<p>From 20&nbsp;mm scrap, make eight buttons <span class="dim">40 long ×
+36 deep</span> overall: rabbet each to leave a <span class="dim">6 × 6</span>
+lip on one end. Shave each lip until, with the lip bottomed in the apron
+groove, the button body stops <span class="dim">1–2 mm</span> shy of the
+apron face; that gap is what lets the screw pull the top down tight.
+Drill and countersink one screw hole per button.</p>
+<figure>
+<svg viewBox="0 0 520 280" role="img"
+     aria-label="Button cross-section: 6 by 6 lip engages the apron groove 12 mm below the apron top, body stops 1 to 2 mm off the apron face, one screw up into the top">
+  <!-- scale 1.8 -->
+  <rect class="part" x="200" y="80" width="39.6" height="180"/>
+  <rect class="part" x="60" y="33.2" width="420" height="46.8"/>
+  <rect x="228.8" y="101.6" width="10.8" height="10.8" fill="var(--paper)"
+        stroke="currentColor" stroke-width="1.2"/>
+  <rect class="part" x="243.2" y="80" width="54" height="36"/>
+  <rect class="part" x="229.4" y="101.6" width="13.8" height="10.2"/>
+  <line x1="270" y1="112" x2="270" y2="52" stroke="var(--blue)"
+        stroke-width="2" stroke-dasharray="6 3"/>
+  <polygon points="266,52 274,52 270,44" fill="var(--blue)"/>
+  <text class="dtext" x="280" y="62">#8 × 32 screw</text>
+  <line class="dline" x1="239.6" y1="130" x2="243.2" y2="130"/>
+  <text class="dtext" x="250" y="134">1–2 mm gap</text>
+  <line class="dline" x1="180" y1="80" x2="180" y2="101.6"/>
+  <line class="dline" x1="174" y1="80" x2="186" y2="80"/>
+  <line class="dline" x1="174" y1="101.6" x2="186" y2="101.6"/>
+  <text class="dtext" x="168" y="95" text-anchor="end">12</text>
+  <text class="note" x="60" y="105">top ↑</text>
+  <text class="note" x="204" y="250">apron</text>
+  <text class="note" x="300" y="105">button</text>
+  <text class="note" x="60" y="276">section: button rides the groove, no glue, no slots needed</text>
+</svg>
+<figcaption>Button attachment. The lip slides freely in the groove: the top
+is held down firmly yet can drift across the seasons.</figcaption>
+</figure>
+</li>
+
+<li>
+<h3>Attach the top</h3>
+<p>Set the top face-down on blankets and center the base on it upside down,
+with equal <span class="dim">40 mm</span> overhang past the leg faces all
+around. Slip the buttons into the grooves: three per long apron (center and
+±500), one centered per short apron. Pilot-drill and drive one
+<span class="dim">#8 × 32</span> screw per button into the top.
+<strong>No glue anywhere in this step.</strong></p>
+</li>
+
+<li>
+<h3>Finish</h3>
+<p>Break all edges. Sand or scrape to 180–220. For a dining top, a wiping
+oil-varnish blend (3–4 coats on top, 2 elsewhere) balances repairability and
+spill resistance; wax after a month if you like sheen. Finish the top's
+underside with the same number of coats as the face, because unequal moisture
+exchange is what cups tabletops.</p>
+</li>
+
+</ol>
+
+<h2>Wood movement, the rules this design obeys</h2>
+<div class="callout">
+<p><strong>The top is never rigidly restrained across its width.</strong>
+Three details cooperate: buttons slide in grooves (no slotted screw holes
+needed), breadboards are glued only at the center with outer pegs in slots,
+and the tongue sits in a groove 1&nbsp;mm deeper than it is long. Skip any
+one of them and a dry winter can split a 900&nbsp;mm oak panel.</p>
+<p>Expect the top's width to change ≈ 9&nbsp;mm through the year. The
+breadboard ends will sit flush with the panel edges only at the moisture
+content you built at; that's normal, and the reason breadboards read as
+honest handwork.</p>
+</div>
+
+<h2>Final checks</h2>
+<ul>
+  <li>Height <span class="dim">740 ± 2</span>; top <span class="dim">1800 ×
+  900</span>; knee clearance <span class="dim">614</span> under the aprons.</li>
+  <li>No rock on a flat floor: trim the proud foot, don't shim.</li>
+  <li>Diagonals of the base within <span class="dim">1 mm</span>.</li>
+  <li>All four brace nuts wrench-tight; re-snug after the first month and
+  after each season's humidity swing.</li>
+  <li>Buttons snug but slideable by hand along the grooves.</li>
+  <li>Both breadboard outer pegs verified to sit in slots, not round holes.</li>
+</ul>
+
+<p class="lede" style="margin-top:3rem">Source of truth:
+<span class="dim">projects/Dining-table-6/dining-table.py</span>. Rerun it
+to regenerate the cut list, STEP model, and renders after any dimension
+change.</p>
+
+</main>
+</body>
+</html>

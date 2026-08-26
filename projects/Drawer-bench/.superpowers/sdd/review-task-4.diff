@@ -1,0 +1,121 @@
+--- projects/Drawer-bench/.superpowers/sdd/snaps/task-4-base.py	2026-08-24 18:04:33.579061715 -0700
++++ projects/Drawer-bench/drawer_bench.py	2026-08-24 18:11:12.428841606 -0700
+@@ -61,20 +61,23 @@
+ # --- Derived ---------------------------------------------------------------
+ FOOT_W = TOP_W - 2 * OH             # 850.9  post outer faces
+ FOOT_D = TOP_D - 2 * OH             # 546.1
+ POST_H = H - TOP_T                  # 463.55
+ OPEN_W = FOOT_W - 2 * POST          # 698.5  between the posts
+ X0, Y0 = OH, OH                     # front-left post min corner
+ XR, YB = OH + FOOT_W, OH + FOOT_D   # right post outer face, rear post outer face
+ PANEL_H = POST_H - GROOVE_STOP      # 425.45 side panels, groove stop to top
+ BACK_H = PANEL_H - RAIL_REAR_H      # 387.35 back panel, under the rear rail
+ RAIL_L = OPEN_W + 2 * GROOVE_D      # 717.55 opening + two stub tenons
++BOT_Z0 = BOT_TOP_Z - T12                     # 45.15 bottom panel underside
++BOT_X0 = X0 + SETBACK + T18 - BOT_GROOVE     # into the side-panel groove
++BOT_W = FOOT_W - 2 * (SETBACK + T18 - BOT_GROOVE)   # 802.2
+ 
+ PARTS = []   # {"name", "solid", "qty", "material", "notes"}: cut list + assembly
+ INST = []    # (name, solid) for every PLACED instance: overlap check
+ 
+ 
+ def _box(x, y, z, dx, dy, dz):
+     """Box with min corner at (x, y, z)."""
+     return Pos(x, y, z) * Box(dx, dy, dz, align=(Align.MIN, Align.MIN, Align.MIN))
+ 
+ 
+@@ -155,23 +158,25 @@
+ assert abs(post_rl.bounding_box().max.Y - YB) < 1e-6
+ 
+ # --- Parts: side panels (qty 2), back panel, rear top rail -----------------
+ # Sides: outer face SETBACK behind the post face, housed GROOVE_D in each
+ # post, bottom edge on the groove stop, top edge flush with the post tops.
+ # Back: same, but stops under the rear top rail, which is tenoned into the
+ # same groove line and takes the figure-8 fasteners for the top.
+ SIDE_Y0 = Y0 + POST - GROOVE_D
+ SIDE_L = FOOT_D - 2 * POST + 2 * GROOVE_D            # 412.75
+ side_l = _box(X0 + SETBACK, SIDE_Y0, GROOVE_STOP, T18, SIDE_L, PANEL_H)
++side_l -= _box(BOT_X0, Y0 + POST, BOT_Z0, BOT_GROOVE + 1, FOOT_D - 2 * POST, T12)
+ BACK_X0 = X0 + POST - GROOVE_D
+ BACK_Y0 = YB - SETBACK - T18
+ back = _box(BACK_X0, BACK_Y0, GROOVE_STOP, RAIL_L, T18, BACK_H)
++back -= _box(X0 + POST, BACK_Y0 - 1, BOT_Z0, OPEN_W, BOT_GROOVE + 1, T12)
+ rail_rear = _box(BACK_X0, BACK_Y0, POST_H - RAIL_REAR_H, RAIL_L, RAIL_T, RAIL_REAR_H)
+ 
+ side_r = mirror_x(side_l)
+ PARTS.append({"name": "side", "solid": side_l, "qty": 2, "material": "ply 18mm",
+               "notes": "face grain vertical on the show face; housed 3/8 in each post"})
+ PARTS.append({"name": "back", "solid": back, "qty": 1, "material": "ply 18mm",
+               "notes": "housed 3/8 in each post; top edge under the rear rail"})
+ PARTS.append({"name": "rail_rear", "solid": rail_rear, "qty": 1, "material": "soft maple",
+               "notes": "stub tenons 3/8 each end are the full section; figure-8 fasteners on top"})
+ INST += [("side_l", side_l), ("side_r", side_r), ("back", back), ("rail_rear", rail_rear)]
+@@ -192,43 +197,66 @@
+ # end into the front-post grooves. Top rail under the top, mid rail centered
+ # on the reveal between the fronts, bottom rail from the floor gap up (its
+ # top face is the bottom panel's top face).
+ RAIL_X0 = X0 + POST - GROOVE_D
+ RAIL_Y0 = Y0 + FRAME_SETBACK
+ REV_MID_Z0 = FLOOR_GAP + FRONT_BOT_H                  # 307.975 reveal bottom
+ RAIL_MID_Z0 = REV_MID_Z0 + REV_MID / 2 - RAIL_MID_H / 2   # 298.45
+ rail_top = _box(RAIL_X0, RAIL_Y0, POST_H - RAIL_TOP_H, RAIL_L, RAIL_T, RAIL_TOP_H)
+ rail_mid = _box(RAIL_X0, RAIL_Y0, RAIL_MID_Z0, RAIL_L, RAIL_T, RAIL_MID_H)
+ rail_bot = _box(RAIL_X0, RAIL_Y0, FLOOR_GAP, RAIL_L, RAIL_T, RAIL_BOT_H)
++rail_bot -= _box(X0 + POST, RAIL_Y0 + RAIL_T - BOT_GROOVE, BOT_Z0, OPEN_W, BOT_GROOVE + 1, T12 + 1)
+ 
+ PARTS.append({"name": "rail_top", "solid": rail_top, "qty": 1, "material": "soft maple",
+               "notes": "stub tenons 3/8 each end, full section"})
+ PARTS.append({"name": "rail_mid", "solid": rail_mid, "qty": 1, "material": "soft maple",
+               "notes": "stub tenons 3/8 each end, full section; carries the top drawer slides"})
+ PARTS.append({"name": "rail_bot", "solid": rail_bot, "qty": 1, "material": "soft maple",
+-              "notes": "stub tenons 3/8 each end, full section"})
++              "notes": "stub tenons 3/8 each end, full section; 1/4 x 1/2 rabbet on the "
++                       "rear-top edge between the shoulders for the bottom panel"})
+ INST += [("rail_top", rail_top), ("rail_mid", rail_mid), ("rail_bot", rail_bot)]
+ 
+ for _r, _z, _h in ((rail_top, POST_H - RAIL_TOP_H, RAIL_TOP_H),
+                    (rail_mid, RAIL_MID_Z0, RAIL_MID_H),
+                    (rail_bot, FLOOR_GAP, RAIL_BOT_H)):
+     assert_housed(_r, post_fl, _box(RAIL_X0, RAIL_Y0, _z, GROOVE_D, RAIL_T, _h))
+ assert abs(rail_bot.bounding_box().max.Z - BOT_TOP_Z) < 1e-6
+ assert abs(rail_top.bounding_box().max.Z - POST_H) < 1e-6
+ assert abs(rail_top.bounding_box().min.Y - Y0 - FRAME_SETBACK) < 1e-6
+ # mid rail is centered on the reveal
+ assert abs((RAIL_MID_Z0 + RAIL_MID_H / 2) - (REV_MID_Z0 + REV_MID / 2)) < 1e-6
+ 
++# --- Part: bottom (1/2 ply dust panel / slide-bracket landing) ---------------
++# Between the posts it spans into the side-panel grooves; ahead of and behind
++# the posts it narrows to the opening width and runs into the bottom-rail
++# rabbet and the back-panel groove. So: a rectangle with four corner notches
++# the size of the post footprint minus the groove reach.
++BOT_Y0 = RAIL_Y0 + RAIL_T - BOT_GROOVE       # into the rail rabbet
++BOT_Y1 = BACK_Y0 + BOT_GROOVE                # into the back groove
++bottom = _box(BOT_X0, Y0 + POST, BOT_Z0, BOT_W, FOOT_D - 2 * POST, T12)
++bottom += _box(X0 + POST, BOT_Y0, BOT_Z0, OPEN_W, Y0 + POST - BOT_Y0, T12)
++bottom += _box(X0 + POST, YB - POST, BOT_Z0, OPEN_W, BOT_Y1 - (YB - POST), T12)
++PARTS.append({"name": "bottom", "solid": bottom, "qty": 1, "material": "ply 12mm",
++              "notes": "notch the four corners 51.85 wide x 39.15 (front) / 51.85 (rear) "
++                       "for the posts; edges in the side/back grooves and the rail rabbet"})
++INST.append(("bottom", bottom))
++
++assert len(bottom.solids()) == 1
++assert abs(bottom.bounding_box().max.Z - BOT_TOP_Z) < 1e-6
++assert_housed(bottom, side_l, _box(BOT_X0, Y0 + POST, BOT_Z0, BOT_GROOVE, FOOT_D - 2 * POST, T12))
++assert_housed(bottom, back, _box(X0 + POST, BACK_Y0, BOT_Z0, OPEN_W, BOT_GROOVE, T12))
++assert_housed(bottom, rail_bot, _box(X0 + POST, BOT_Y0, BOT_Z0, OPEN_W, BOT_GROOVE, T12))
++
+ # --- assembly ---------------------------------------------------------------
+ assembly = (post_fl + post_fr + post_rl + post_rr
+             + side_l + side_r + back + rail_rear
+-            + rail_top + rail_mid + rail_bot)
++            + rail_top + rail_mid + rail_bot + bottom)
+ 
+ # --- global checks ----------------------------------------------------------
+ for p in PARTS:
+     assert len(p["solid"].solids()) == 1, p["name"]
+ for i, (na, a) in enumerate(INST):
+     for nb, b in INST[i + 1:]:
+         assert vol(a & b) < 1e-3, f"overlap {na} x {nb}"
+ 
+ # --- exports ----------------------------------------------------------------
+ TMP = os.environ.get("TMP_STL")

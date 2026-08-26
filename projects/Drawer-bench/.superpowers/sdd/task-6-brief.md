@@ -1,0 +1,78 @@
+### Task 6: Drawer boxes on undermount slides
+
+**Files:**
+- Modify: `projects/Drawer-bench/drawer_bench.py` (insert after the Task 5 block)
+
+**Interfaces:**
+- Consumes: `_box, mirror_x, part, PARTS, INST, X0, POST, OPEN_W, UM_*, SLIDE_LEN, SLIDE_STANDOFF, T12, DADO, RAIL_Y0, BOT_TOP_Z, RAIL_MID_Z0, RAIL_MID_H, RAIL_TOP_H, POST_H, BACK_Y0, BOX_TOP_H, BOX_BOT_H, front_bot, front_top, TOP_W`.
+- Produces: `drawer_bot, drawer_top` (visual compounds), registry parts `drawer_side_{bot,top}`, `drawer_end_{bot,top}`, `drawer_bottom_{bot,top}`, constants `BOX_W, BOX_D, BOX_X0, BOX_Y0, END_LEN, BOX_BOT_Z0, BOX_TOP_Z0`.
+
+- [ ] **Step 1: Add the drawer builder and both boxes**
+
+```python
+# --- Drawer boxes (1/2 ply, undermount geometry as in cabinet_bench) --------
+# Sides run the full box depth; front/back captured in DADO end rabbets in
+# the sides; T12 bottom in DADO grooves all round, underside at UM_RECESS.
+# Box front face on the frame plane (behind the drawer front).
+BOX_W = OPEN_W - UM_WIDTH_LOSS               # 688.5
+BOX_D = SLIDE_LEN                            # 457.2, exactly the slide length
+BOX_X0 = X0 + POST + UM_WIDTH_LOSS / 2
+BOX_Y0 = RAIL_Y0
+END_LEN = BOX_W - 2 * (T12 - DADO)           # 677.2 drawer front/back length
+
+
+def make_drawer(box_h, z0, sfx):
+    """Build one drawer box in place; register parts, return the visual solid."""
+    x0, y0 = BOX_X0, BOX_Y0
+    s = _box(x0, y0, z0, T12, BOX_D, box_h)
+    s -= _box(x0 + T12 - DADO, y0 - 1, z0 - 1, DADO + 1, T12 + 1, box_h + 2)
+    s -= _box(x0 + T12 - DADO, y0 + BOX_D - T12, z0 - 1, DADO + 1, T12 + 1, box_h + 2)
+    s -= _box(x0 + T12 - DADO, y0 - 1, z0 + UM_RECESS, DADO + 1, BOX_D + 2, T12)
+
+    end = _box(x0 + T12 - DADO, y0, z0, END_LEN, T12, box_h)
+    end -= _box(x0 + T12 - DADO - 1, y0 + T12 - DADO, z0 + UM_RECESS,
+                END_LEN + 2, DADO + 1, T12)
+
+    bot = _box(x0 + T12 - DADO, y0 + T12 - DADO, z0 + UM_RECESS,
+               END_LEN, BOX_D - 2 * (T12 - DADO), T12)
+
+    PARTS.append({"name": f"drawer_side_{sfx}", "solid": s, "qty": 2, "material": "ply 12mm",
+                  "notes": "1/4 end rabbets, 1/4 bottom groove at 1/2 up"})
+    PARTS.append({"name": f"drawer_end_{sfx}", "solid": end, "qty": 2, "material": "ply 12mm",
+                  "notes": "1/4 bottom groove at 1/2 up"})
+    PARTS.append({"name": f"drawer_bottom_{sfx}", "solid": bot, "qty": 1, "material": "ply 12mm"})
+
+    s_r = mirror_x(s)
+    end_r = mirror(end, Plane(origin=(0, y0 + BOX_D / 2, 0), x_dir=(1, 0, 0), z_dir=(0, 1, 0)))
+    INST.extend([(f"drawer_side_{sfx}_l", s), (f"drawer_side_{sfx}_r", s_r),
+                 (f"drawer_front_{sfx}", end), (f"drawer_back_{sfx}", end_r),
+                 (f"drawer_bottom_{sfx}", bot)])
+    return s + s_r + end + end_r + bot
+
+
+BOX_BOT_Z0 = BOT_TOP_Z + SLIDE_STANDOFF                    # 65.15  on the bottom rail
+BOX_TOP_Z0 = RAIL_MID_Z0 + RAIL_MID_H + SLIDE_STANDOFF     # 331.85 on the mid rail
+drawer_bot = make_drawer(BOX_BOT_H, BOX_BOT_Z0, "bot")
+drawer_top = make_drawer(BOX_TOP_H, BOX_TOP_Z0, "top")
+
+# Undermount geometry probed from the solids, not just the constants
+for _sfx, _above, _front in (("bot", RAIL_MID_Z0, front_bot),
+                             ("top", POST_H - RAIL_TOP_H, front_top)):
+    _sb = part(f"drawer_side_{_sfx}").bounding_box()
+    _bb = part(f"drawer_bottom_{_sfx}").bounding_box()
+    _fb = _front.bounding_box()
+    assert abs(_bb.min.Z - _sb.min.Z - UM_RECESS) < 1e-6, _sfx
+    assert abs(OPEN_W - (TOP_W - 2 * _sb.min.X) - UM_WIDTH_LOSS) < 1e-6, _sfx
+    assert abs(_sb.size.Y - SLIDE_LEN) < 1e-6, _sfx
+    assert _above - _sb.max.Z >= UM_INSTALL_CLEAR, (_sfx, _above - _sb.max.Z)
+    assert _sb.min.Z > _fb.min.Z and _sb.max.Z < _fb.max.Z, _sfx   # hidden behind its front
+    assert abs(_sb.min.Y - _fb.max.Y) < 1e-6, _sfx                 # starts at the front's back
+assert BACK_Y0 - BOX_Y0 - SLIDE_LEN >= UM_REAR_CLEAR, BACK_Y0 - BOX_Y0 - SLIDE_LEN
+```
+
+- [ ] **Step 2: Extend the assembly, run, render**
+
+Add `+ drawer_bot + drawer_top` to `assembly`. Run with output `$SCRATCH/db-t6-drawers.png`. Expected `OK  parts: [..., 'drawer_side_bot', 'drawer_end_bot', 'drawer_bottom_bot', 'drawer_side_top', 'drawer_end_top', 'drawer_bottom_top']`. The clearances printed by adding a temporary `print` are 23.75 for both boxes and the rear clearance is 32.8. View the PNG (right view): two boxes behind the fronts, each clearly shorter than its front, the bottom box sitting just above the bottom panel, the top box just above the mid rail, both ending well short of the back panel.
+
+---
+
