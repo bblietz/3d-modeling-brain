@@ -2494,7 +2494,7 @@ listening notes from real builds say otherwise. Construction rules live in
 | dispersion | focused, wide | closed back beams and projects; open back spreads and fills |
 | placement | floor, raised, tilted | where the cab sits; the floor adds low end by boundary gain |
 
-Plus `min_power_w` (1.5 x the primary amp's rated power) and `impedance_options_ohm` (the amp's taps).
+Plus `min_power_w` (1.5 x the highest rated amp power in the rig) and `impedance_options_ohm` (the amp's taps).
 
 ## Enclosure type rules
 
@@ -2545,7 +2545,7 @@ Approach overrides genre: clean sets breakup clean; edge of breakup sets moderat
 
 ## Power and impedance
 
-- `min_power_w` = 1.5 x the primary amp's rated power (`POWER_SAFETY_FACTOR`). Hard stop when total handling is below the amp's rated power. Warning below the target; an early-breakup target may accept it explicitly and the acceptance goes into "Decisions locked".
+- `min_power_w` = 1.5 x the highest rated amp power in the rig (`POWER_SAFETY_FACTOR`); the voicing serves the primary amp, the power rule guards against the strongest amp. Hard stop when total handling is below the amp's rated power. Warning below the target; an early-breakup target may accept it explicitly and the acceptance goes into "Decisions locked".
 - Stereo: check each side against the amp's per-channel power. For a stereo amp the intake records the per-channel rating as its rated power, so `min_power_w` / 1.5 is already the per-channel figure the engine checks each side against.
 - Two drivers: parallel first, then series, whichever matches a tap. Unequal impedances get a warning (the spec's rule; the engine still lists any option that matches a tap). Sensitivity more than 2 dB apart gets a warning.
 - Vintage-style 15 W to 30 W speakers are for amps up to 20 W or for two-speaker cabs; the classic AC30 into two Blues is exactly the accepted early-breakup case.
@@ -2556,7 +2556,7 @@ Approach overrides genre: clean sets breakup clean; edge of breakup sets moderat
 - Rule-of-thumb per-driver net volume when there is no T/S data, and for every open back: 34 L (tight), 44 L (balanced), 56 L (big). The site's default box is 44 L net, so it is "balanced".
 - Ported tuning: Fb = Fs x 0.9 (tight), 0.8 (balanced), 0.7 (big), clamped to 45 to 90 Hz. If the predicted alignment is boomy and "big" was not asked, the box grows in 10 percent steps to 68 L, then Fb drops in 5 Hz steps to 45 Hz.
 - Port: round rear port, 75 mm starting diameter, one flanged end, end correction 0.85 x diameter, grown until the worst-case air speed (full Xmax at Fb) is under 17 m/s and the physical length is at least 20 mm. Maximum 150 mm diameter; beyond that the sheet keeps the warning and the fix is a lower Fb, a smaller box, or a front slot.
-- Closed-box character by Qtc: below 0.6 lean, 0.6 to 0.8 tight, 0.8 to 1.0 balanced, 1.0 to 1.2 big, above 1.2 peaky. Ported character by peak height: below 1 dB flat, 1 to 3 dB punchy, above 3 dB boomy.
+- Closed-box character by Qtc: below 0.6 lean, 0.6 to 0.8 tight, 0.8 to 1.0 balanced, 1.0 to 1.2 big, above 1.2 peaky. Ported character by peak height: below 1 dB flat, 1 to 3 dB punchy, above 3 dB boomy. Both scales are half-open intervals: a value on a boundary takes the upper word (Qtc 0.8 is balanced, 1.2 is peaky, a 3.0 dB peak is boomy).
 - Open fraction of the back area: 0.40 open, 0.25 semi-open, as two horizontal panels top and bottom.
 - Internal dimension advisory: no two internal dimensions within 5 percent of 1:1, 2:1, or 3:1. The site's default box trips the 2:1 width-to-depth advisory; noted, not changed.
 
@@ -2571,8 +2571,8 @@ Approach overrides genre: clean sets breakup clean; edge of breakup sets moderat
 
 - Celestion publishes only Fs and Re for its guitar speakers. The only measured Celestion data is Voice Coil magazine's test of the Heritage G12H(55), 16 ohm (https://celestion.com/wp-content/uploads/2019/10/141.pdf): Qts 0.37 to 0.46, Vas 53 to 71 L, Xmax 0.7 mm across two samples. The G12H Anniversary and Vintage 30 notes carry values scaled from that measurement (`data_status: analog`); the other Celestion notes are `missing` and use the rule-of-thumb volumes.
 - WGS publishes T/S values with inconsistent units (Vas labeled in cubic feet at values that can only be liters, Sd of 366 with no unit). Those notes are `estimated` and say what was assumed.
-- The vented model (Small 1973, QL = 7) reproduces Eminence Designer's F3 within about 2 percent for three of four published designs (Beta-12A-2 at 1.75 and 1.25 cu ft, Delta-12A at 0.75 cu ft) and is 6 to 10 percent low for the two larger Delta-12A designs (2.75 cu ft at Fb 55 Hz: 56 Hz against Eminence's 61.9; 1.35 cu ft at Fb 70 Hz: 74 Hz against 78.9). Cause not identified on 2026-09-09.
-- The open-back estimate is a path-length cancellation frequency with a 6 dB per octave roll-off, not a dipole model. It ranks options; it does not predict a curve.
+- The vented model (Small 1973, QL = 7) reproduces Eminence Designer's F3 within about 2 percent for three of four published designs (Beta-12A-2 at 1.75 and 1.25 cu ft, Delta-12A at 0.75 cu ft) and is 6 to 10 percent low for the two larger Delta-12A designs (2.75 cu ft at Fb 55 Hz: 56 Hz against Eminence's 61.9; 1.35 cu ft at Fb 70 Hz: 74 Hz against 78.9). Cause not identified on 2026-09-09. The closed-box check against Eminence's sealed Beta-12A-2 design (0.904 cu ft, Qtc 1.10) reads 6.6 percent low (86 Hz against 92.1). Ported peak height is read off the third-octave grid, so a design within a few tenths of a dB of a threshold can flip words (the Beta-12A-2 1.25 cu ft, 60 Hz design lands at 3.10 dB, boomy by 0.1 dB).
+- The open-back estimate is a path-length cancellation frequency with a 6 dB per octave roll-off, not a dipole model. It ranks options; it does not predict a curve. Under this formula open and semi-open share the same cancellation frequency and roll-off and differ only in panel height, so the estimate cannot rank one above the other on low end; the enclosure rule above is builder lore, unverified.
 - Nothing here has been checked with a microphone. Listening notes go into the speaker notes' Field notes sections after each build.
 
 ## Calibration table
