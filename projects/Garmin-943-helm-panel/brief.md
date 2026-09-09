@@ -107,3 +107,31 @@ Either works. Layer height does not change the window accuracy, so 0.30mm Standa
 Slicer note for future sessions: `bambu-studio --arrange 1` placed this 252 mm part off the plate at y = -145.7, and the slice failed with "no object fully inside the print volume". Rewriting the build item transform to 128, 128, 0 in `3D/3dmodel.model` before `graft_slice.py` fixed it.
 
 Next: print, measure the window with calipers, test the drill guides, rout the panel from the old cover, rough cut and rout the window, test fit the unit, install. Then the retrospective.
+
+## Dimensions in inches
+
+Decimal inches from the mm values, fractions rounded to the nearest 1/64. The mm values govern; Garmin's own template labels the cutout 8 3/4 x 5 1/2, but 139.0 mm is 5.472 in, so the 5 1/2 label is rounded by about 0.7 mm.
+
+| Item | mm | Decimal in | Nearest fraction |
+|---|---|---|---|
+| Unit outside, bezel | 233.0 x 162.3 x 75.8 | 9.173 x 6.390 x 2.984 | 9 11/64 x 6 25/64 x 2 63/64 |
+| Flush cutout | 222.4 x 139.0 | 8.756 x 5.472 | 8 3/4 x 5 15/32 |
+| Mounting hole pattern | 190.9 x 150.5 | 7.516 x 5.925 | 7 33/64 x 5 59/64 |
+| Hole offset from cutout edge, top and bottom | 5.75 | 0.226 | 7/32 |
+| Hole offset from cutout edge, sides | 15.75 | 0.620 | 5/8 |
+| Bezel overlap, each side | 5.3 | 0.209 | 13/64 |
+| Bezel overlap, top and bottom | 11.65 | 0.459 | 29/64 |
+| Rear clearance, housing plus cables | 109.0 | 4.291 | 4 19/64 |
+| Pilot drill | 2.3 | 0.091 | 3/32 |
+| Corner relief drill | 8.0 | 0.315 | 5/16 |
+| Template outside | 252.4 x 189.0 x 12.0 | 9.937 x 7.441 x 0.472 | 9 15/16 x 7 7/16 x 15/32 |
+| Template frame, sides | 15.0 | 0.591 | 19/32 |
+| Template frame, top and bottom | 25.0 | 0.984 | 63/64 |
+| Drill guide as printed | 2.5 | 0.098 | 3/32 |
+| Guide counterbore, dia x depth | 7.0 x 6.0 | 0.276 x 0.236 | 9/32 x 15/64 |
+| Fixing holes, dia | 4.0 | 0.157 | 5/32 |
+| Fixing holes, from center | 75.5 | 2.972 | 2 31/32 |
+| V notch, deep x wide | 2.0 x 4.0 | 0.079 x 0.157 | 5/64 x 5/32 |
+| Corner radius from a 1/4 in bit | 3.2 | 0.126 | 1/8 |
+| Jigsaw allowance | 2.0 | 0.079 | 5/64 |
+| Panel span for 1/2 in stock | 450 | 17.717 | 17 23/32 |
