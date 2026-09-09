@@ -9,3 +9,4 @@
 - [Minimal test coupons](feedback-minimal-test-coupons.md) - coupons hold only the feature under test plus a thin substrate; quote time from a real slice
 - [Keep tools in the vault](project-keep-tools-in-vault.md) - scratchpad is wiped on restarts; pipeline tools and monitors belong in projects/<Name>/pipeline or scripts/
 - [Raised letters recipe](feedback-raised-letters-recipe.md) - VALIDATED by the 14-tag batch: one-wall fill-core modifier + object key + parity check; dead ends not to retry; read knowledge/lettering-x2d.md before any lettering job
+- [Vault GitHub repo](reference-vault-github-repo.md) - private bblietz/3d-modeling-brain, remote origin/main; commit and push after milestones; never commit the printer access code
