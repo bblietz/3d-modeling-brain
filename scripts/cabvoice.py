@@ -427,3 +427,44 @@ def size_port(driver: Driver, vb_l: float, fb_hz: float,
         port.warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s still above "
                              f"{PORT_V_MAX} m/s at the maximum port size")
     return port
+
+
+# ---------------------------------------------------------------------------
+# Open back (empirical path-length estimate, not a T/S model)
+# ---------------------------------------------------------------------------
+
+OPEN_FRACTION = {"open": 0.40, "semi-open": 0.25}
+
+
+def open_back_relative_db(f_cancel_hz: float, f_hz: float) -> float:
+    """dB relative to the closed box: 0 above f_cancel, -6 dB/octave below."""
+    if f_hz >= f_cancel_hz:
+        return 0.0
+    return 20.0 * math.log10(f_hz / f_cancel_hz)
+
+
+@dataclass
+class OpenBackResult:
+    open_fraction: float
+    path_m: float
+    f_cancel_hz: float
+    panel_height_mm: float
+    response: list
+    character: str
+
+
+def open_back(internal_w_mm: float, internal_h_mm: float, internal_d_mm: float,
+              open_fraction: float) -> OpenBackResult:
+    """The open band spans the full width, so the shortest front-to-back
+    path from a centered driver runs out the side: depth + width / 2."""
+    if not 0.0 < open_fraction < 1.0:
+        raise ValueError("open_fraction must be between 0 and 1")
+    path_m = (internal_d_mm + internal_w_mm / 2.0) / 1e3
+    f_cancel = C_SOUND / (2.0 * path_m)
+    panel_height = (1.0 - open_fraction) * internal_h_mm / 2.0
+    response = [(f, open_back_relative_db(f_cancel, f)) for f in RESPONSE_FREQS]
+    return OpenBackResult(
+        open_fraction=open_fraction, path_m=path_m, f_cancel_hz=f_cancel,
+        panel_height_mm=panel_height, response=response,
+        character=f"open, wide dispersion, 6 dB per octave below {f_cancel:.0f} Hz relative to closed",
+    )

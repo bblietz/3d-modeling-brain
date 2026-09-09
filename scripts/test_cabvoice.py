@@ -305,3 +305,33 @@ def test_size_port_slot_stops_at_max_area(drv):
     assert p.area_cm2 == pytest.approx(max_area_cm2, abs=1e-6)
     assert p.slot_h_mm == pytest.approx(max_area_cm2 * 100.0 / 200.0, abs=1e-6)
     assert any("too short" in w for w in p.warnings)
+
+
+# ---- Task 5: open back --------------------------------------------------
+
+def test_open_back_site_default_box():
+    # internal 472 x 421.2 x 229.4 mm: path = 0.2294 + 0.236 = 0.4654 m
+    # f_cancel = 343 / (2 * 0.4654) = 368.5 Hz
+    res = cabvoice.open_back(472.0, 421.2, 229.4, 0.40)
+    assert res.path_m == pytest.approx(0.4654, abs=0.001)
+    assert res.f_cancel_hz == pytest.approx(368.5, abs=1.0)
+    assert res.panel_height_mm == pytest.approx(126.4, abs=0.1)  # (1 - 0.4) * 421.2 / 2
+
+
+def test_open_back_response_rolls_off_6db_per_octave():
+    res = cabvoice.open_back(472.0, 421.2, 229.4, 0.40)
+    table = dict(res.response)
+    assert table[400.0] == pytest.approx(0.0)
+    half = res.f_cancel_hz / 2
+    db = cabvoice.open_back_relative_db(res.f_cancel_hz, half)
+    assert db == pytest.approx(-6.02, abs=0.05)
+
+
+def test_open_fraction_table():
+    assert cabvoice.OPEN_FRACTION["open"] == 0.40
+    assert cabvoice.OPEN_FRACTION["semi-open"] == 0.25
+
+
+def test_open_back_rejects_bad_fraction():
+    with pytest.raises(ValueError):
+        cabvoice.open_back(472.0, 421.2, 229.4, 1.5)
