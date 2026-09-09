@@ -580,3 +580,129 @@ def power_check(handling_w: list, amp_power_w: float, breakup: str = "moderate",
                           f"({POWER_SAFETY_FACTOR} x amp power)")
     return PowerCheck(total, amp_power_w, minimum, "ok",
                       f"handling {total:g} W clears the {minimum:g} W target")
+
+
+# ---------------------------------------------------------------------------
+# Box geometry (mm, tuples are width, height, depth)
+# ---------------------------------------------------------------------------
+
+MM_PER_INCH = 25.4
+PANEL_MM = 18.0
+BACK_MM = 12.0
+BAFFLE_MM = 18.0
+RECESS_MM = 20.0
+CUTOUT_MARGIN_MM = 25.0
+BASE_EXTERNAL_IN = (20.0, 18.0, 11.0)
+
+
+@dataclass
+class Box:
+    external_mm: tuple
+    internal_mm: tuple
+    gross_l: float
+    warnings: list = field(default_factory=list)
+
+
+def internal_from_external(external_mm, panel_mm=PANEL_MM, back_mm=BACK_MM,
+                           baffle_mm=BAFFLE_MM, recess_mm=RECESS_MM) -> tuple:
+    w, h, d = external_mm
+    return (w - 2 * panel_mm, h - 2 * panel_mm, d - recess_mm - baffle_mm - back_mm)
+
+
+def external_from_internal(internal_mm, panel_mm=PANEL_MM, back_mm=BACK_MM,
+                           baffle_mm=BAFFLE_MM, recess_mm=RECESS_MM) -> tuple:
+    w, h, d = internal_mm
+    return (w + 2 * panel_mm, h + 2 * panel_mm, d + recess_mm + baffle_mm + back_mm)
+
+
+def gross_volume_l(internal_mm) -> float:
+    w, h, d = internal_mm
+    return w * h * d / 1e6
+
+
+def dimension_ratio_warnings(internal_mm) -> list:
+    """Advisory: flag internal dimensions within 5 percent of 1:1, 2:1, or 3:1."""
+    names = ("width", "height", "depth")
+    out = []
+    for i in range(3):
+        for j in range(i + 1, 3):
+            a, b = internal_mm[i], internal_mm[j]
+            big, small = max(a, b), min(a, b)
+            r = big / small
+            for n in (1, 2, 3):
+                if abs(r - n) / n < 0.05:
+                    out.append(f"{names[i]} and {names[j]} are within 5 percent of {n}:1 "
+                               f"({r:.2f}); coincident standing waves")
+    return out
+
+
+def make_box(internal_mm, **panel_kwargs) -> Box:
+    return Box(external_mm=external_from_internal(internal_mm, **panel_kwargs),
+               internal_mm=tuple(internal_mm), gross_l=gross_volume_l(internal_mm),
+               warnings=dimension_ratio_warnings(internal_mm))
+
+
+def site_default_box(**panel_kwargs) -> Box:
+    external = tuple(x * MM_PER_INCH for x in BASE_EXTERNAL_IN)
+    return make_box(internal_from_external(external, **panel_kwargs), **panel_kwargs)
+
+
+def min_internal_width_mm(driver_count: int, cutout_mm: float) -> float:
+    return driver_count * cutout_mm + (driver_count + 1) * CUTOUT_MARGIN_MM
+
+
+def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = None,
+                    min_internal_width_mm: float | None = None,
+                    max_external_mm: tuple | None = None, **panel_kwargs) -> Box:
+    """Internal dimensions for a gross volume, starting from the site box
+    proportions. Fixed axes come from a pinned width, the two-driver minimum
+    width, or external limits; free axes scale together to hit the volume."""
+    target = gross_l * 1e6
+    base = list(site_default_box(**panel_kwargs).internal_mm)
+    scale = (target / (base[0] * base[1] * base[2])) ** (1.0 / 3.0)
+    dims = [x * scale for x in base]
+    fixed = [False, False, False]
+    if pinned_external_width_mm is not None:
+        dims[0] = internal_from_external((pinned_external_width_mm, 0, 0), **panel_kwargs)[0]
+        fixed[0] = True
+    if min_internal_width_mm is not None and dims[0] < min_internal_width_mm:
+        dims[0] = min_internal_width_mm
+        fixed[0] = True
+    max_internal = None
+    if max_external_mm is not None:
+        max_internal = internal_from_external(max_external_mm, **panel_kwargs)
+
+    def rescale():
+        free = [i for i in range(3) if not fixed[i]]
+        if not free:
+            return
+        fixed_prod = 1.0
+        for i in range(3):
+            if fixed[i]:
+                fixed_prod *= dims[i]
+        free_prod = 1.0
+        for i in free:
+            free_prod *= dims[i]
+        k = (target / fixed_prod / free_prod) ** (1.0 / len(free))
+        for i in free:
+            dims[i] *= k
+
+    rescale()
+    for _ in range(3):
+        if max_internal is None:
+            break
+        changed = False
+        for i in range(3):
+            if not fixed[i] and dims[i] > max_internal[i]:
+                dims[i] = max_internal[i]
+                fixed[i] = True
+                changed = True
+        if not changed:
+            break
+        rescale()
+    achieved = dims[0] * dims[1] * dims[2]
+    if abs(achieved - target) / target > 0.001:
+        raise ValueError(
+            f"cannot reach {gross_l:.1f} L within the limits; "
+            f"achievable {achieved / 1e6:.1f} L")
+    return make_box(tuple(dims), **panel_kwargs)

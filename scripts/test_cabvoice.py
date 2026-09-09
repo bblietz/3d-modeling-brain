@@ -418,3 +418,57 @@ def test_power_check_rejects_non_positive_amp_power():
         cabvoice.power_check([30.0], 0.0)
     with pytest.raises(ValueError, match="amp_power_w"):
         cabvoice.power_check([30.0], -30.0)
+
+
+# ---- Task 7: box geometry -----------------------------------------------
+
+def test_site_default_box_dimensions():
+    box = cabvoice.site_default_box()
+    assert box.external_mm == pytest.approx((508.0, 457.2, 279.4))
+    assert box.internal_mm == pytest.approx((472.0, 421.2, 229.4))
+    assert box.gross_l == pytest.approx(45.6, abs=0.05)
+
+
+def test_internal_external_roundtrip():
+    ext = (600.0, 500.0, 300.0)
+    assert cabvoice.external_from_internal(cabvoice.internal_from_external(ext)) == pytest.approx(ext)
+
+
+def test_dims_for_volume_reproduces_base():
+    box = cabvoice.dims_for_volume(45.6)
+    assert box.internal_mm == pytest.approx((472.0, 421.2, 229.4), abs=0.5)
+
+
+def test_dims_for_volume_pinned_width_keeps_h_d_ratio():
+    box = cabvoice.dims_for_volume(60.0, pinned_external_width_mm=508.0)
+    w, h, d = box.internal_mm
+    assert w == pytest.approx(472.0)
+    assert h / d == pytest.approx(421.2 / 229.4, rel=1e-6)
+    assert box.gross_l == pytest.approx(60.0, abs=0.01)
+
+
+def test_dims_for_volume_min_width_for_two_drivers():
+    min_w = cabvoice.min_internal_width_mm(2, 283.0)
+    assert min_w == pytest.approx(641.0)
+    box = cabvoice.dims_for_volume(90.0, min_internal_width_mm=min_w)
+    assert box.internal_mm[0] == pytest.approx(641.0)
+    assert box.gross_l == pytest.approx(90.0, abs=0.01)
+
+
+def test_dims_for_volume_clamps_to_max_external():
+    box = cabvoice.dims_for_volume(60.0, max_external_mm=(600.0, 457.2, 400.0))
+    w, h, d = box.internal_mm
+    assert h == pytest.approx(421.2)
+    assert box.external_mm[0] <= 600.0 and box.external_mm[2] <= 400.0
+    assert box.gross_l == pytest.approx(60.0, abs=0.01)
+
+
+def test_dims_for_volume_raises_when_limits_too_small():
+    with pytest.raises(ValueError, match="cannot reach"):
+        cabvoice.dims_for_volume(60.0, max_external_mm=(508.0, 457.2, 279.4))
+
+
+def test_dimension_ratio_warnings():
+    assert cabvoice.dimension_ratio_warnings((472.0, 400.0, 300.0)) == []
+    assert any("2:1" in w for w in cabvoice.dimension_ratio_warnings((472.0, 421.2, 229.4)))
+    assert any("1:1" in w for w in cabvoice.dimension_ratio_warnings((400.0, 400.0, 300.0)))
