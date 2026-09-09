@@ -236,3 +236,64 @@ def test_ported_box_rejects_driver_without_ts(drv):
 ])
 def test_ported_character_thresholds(peak, expected):
     assert cabvoice.ported_character(peak) == expected
+
+
+# ---- Task 4: ports ------------------------------------------------------
+
+def test_port_length_hand_computed():
+    # Vb 40 L, Fb 60 Hz, d 75 mm: A = 4.418e-3 m2
+    # L = c^2 A / (4 pi^2 Fb^2 Vb) - 0.85 d = 91.44 mm - 63.75 mm = 27.7 mm
+    p = cabvoice.port_dims(40.0, 60.0, diameter_mm=75.0)
+    assert p.shape == "round"
+    assert p.area_cm2 == pytest.approx(44.18, abs=0.05)
+    assert p.length_mm == pytest.approx(27.7, abs=0.2)
+    assert p.volume_l == pytest.approx(0.1224, abs=0.002)
+
+
+def test_port_tuning_inverts_length():
+    fb = cabvoice.port_tuning_hz(0.040, 4.418e-3, 0.02769)
+    assert fb == pytest.approx(60.0, abs=0.1)
+
+
+def test_slot_port_uses_effective_diameter():
+    p = cabvoice.port_dims(40.0, 60.0, slot_mm=(200.0, 22.09))
+    assert p.shape == "slot"
+    assert p.area_cm2 == pytest.approx(44.18, abs=0.05)
+    assert p.length_mm == pytest.approx(27.7, abs=0.3)
+
+
+def test_port_dims_requires_exactly_one_shape():
+    with pytest.raises(ValueError):
+        cabvoice.port_dims(40.0, 60.0)
+    with pytest.raises(ValueError):
+        cabvoice.port_dims(40.0, 60.0, diameter_mm=75.0, slot_mm=(200.0, 20.0))
+
+
+def test_port_air_speed_worst_case(drv):
+    # v = Sd Xmax 2 pi Fb / A = 0.053 * 0.001 * 376.99 / 4.418e-3 = 4.52 m/s
+    v = cabvoice.port_air_speed(drv, 60.0, 44.18)
+    assert v == pytest.approx(4.52, abs=0.05)
+
+
+def test_size_port_grows_until_under_limit(drv):
+    drv.xmax_mm = 10.0
+    p = cabvoice.size_port(drv, 40.0, 60.0, diameter_mm=75.0)
+    assert p.air_speed_ms <= cabvoice.PORT_V_MAX
+    assert p.diameter_mm > 75.0
+    assert p.length_mm > 0
+
+
+def test_size_port_grows_when_too_short(drv):
+    # 60 L at 60 Hz: a 75 mm port needs a negative length, about 100 mm works
+    p = cabvoice.size_port(drv, 60.0, 60.0, diameter_mm=75.0)
+    assert p.diameter_mm == pytest.approx(100.0, abs=3.0)
+    assert p.length_mm >= cabvoice.MIN_PORT_LENGTH_MM
+    assert not any("too short" in w for w in p.warnings)
+
+
+def test_size_port_keeps_warning_at_max_size(drv):
+    # 100 L at 100 Hz would need a port over 360 mm across
+    p = cabvoice.size_port(drv, 100.0, 100.0, diameter_mm=75.0)
+    assert p.diameter_mm <= cabvoice.MAX_PORT_DIAMETER_MM * 1.05
+    assert p.length_mm == cabvoice.MIN_PORT_LENGTH_MM
+    assert any("too short" in w for w in p.warnings)

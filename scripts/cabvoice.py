@@ -318,3 +318,112 @@ def ported_box(driver: Driver, vb_l: float, fb_hz: float) -> PortedResult:
     return PortedResult(vb_l=vb_l, fb_hz=fb_hz, alpha=alpha, h=h,
                         f3_hz=f3_from_response(response), peak_db=peak,
                         response=response, character=ported_character(peak))
+
+
+# ---------------------------------------------------------------------------
+# Ports (Helmholtz resonator, one flanged end)
+# ---------------------------------------------------------------------------
+
+MIN_PORT_LENGTH_MM = 20.0
+MAX_PORT_DIAMETER_MM = 150.0
+
+
+@dataclass
+class Port:
+    shape: str
+    diameter_mm: float | None
+    slot_w_mm: float | None
+    slot_h_mm: float | None
+    area_cm2: float
+    length_mm: float
+    volume_l: float
+    air_speed_ms: float | None = None
+    warnings: list = field(default_factory=list)
+
+
+def effective_diameter_m(area_m2: float) -> float:
+    return math.sqrt(4.0 * area_m2 / math.pi)
+
+
+def port_length_m(vb_m3: float, fb_hz: float, area_m2: float) -> float:
+    """Physical port length for tuning fb in a box of vb. May be negative
+    when the port area is too large for the tuning; callers clamp."""
+    d_eff = effective_diameter_m(area_m2)
+    return (C_SOUND ** 2 * area_m2) / (4.0 * math.pi ** 2 * fb_hz ** 2 * vb_m3) \
+        - PORT_END_CORRECTION * d_eff
+
+
+def port_tuning_hz(vb_m3: float, area_m2: float, length_m: float) -> float:
+    """Tuning frequency of an existing port (evaluate mode)."""
+    l_eff = length_m + PORT_END_CORRECTION * effective_diameter_m(area_m2)
+    return (C_SOUND / (2.0 * math.pi)) * math.sqrt(area_m2 / (vb_m3 * l_eff))
+
+
+def _port_area_m2(diameter_mm, slot_mm):
+    if (diameter_mm is None) == (slot_mm is None):
+        raise ValueError("give exactly one of diameter_mm or slot_mm=(w, h)")
+    if diameter_mm is not None:
+        return math.pi * (diameter_mm / 2e3) ** 2
+    w, h = slot_mm
+    return (w / 1e3) * (h / 1e3)
+
+
+def port_dims(vb_l: float, fb_hz: float, diameter_mm: float | None = None,
+              slot_mm: tuple | None = None) -> Port:
+    area = _port_area_m2(diameter_mm, slot_mm)
+    length_m = port_length_m(vb_l / 1e3, fb_hz, area)
+    warnings = []
+    if length_m * 1e3 < MIN_PORT_LENGTH_MM:
+        warnings.append(
+            f"port too short ({length_m * 1e3:.1f} mm) for Fb {fb_hz:.0f} Hz in {vb_l:.1f} L; "
+            f"clamped to {MIN_PORT_LENGTH_MM:.0f} mm, reduce port area or lower Fb")
+        length_m = MIN_PORT_LENGTH_MM / 1e3
+    return Port(
+        shape="round" if diameter_mm is not None else "slot",
+        diameter_mm=diameter_mm,
+        slot_w_mm=None if slot_mm is None else slot_mm[0],
+        slot_h_mm=None if slot_mm is None else slot_mm[1],
+        area_cm2=area * 1e4,
+        length_mm=length_m * 1e3,
+        volume_l=area * length_m * 1e3,
+        warnings=warnings,
+    )
+
+
+def port_air_speed(driver: Driver, fb_hz: float, area_cm2: float) -> float:
+    """Worst-case port air speed in m/s: full Xmax excursion at Fb.
+    Needs only Sd and Xmax, so it also runs for drivers without full T/S."""
+    if driver.sd_cm2 is None or driver.xmax_mm is None:
+        raise ValueError(f"{driver.slug}: sd_cm2 and xmax_mm are needed for the air-speed check")
+    volume_velocity = driver.sd_m2 * driver.xmax_m * 2.0 * math.pi * fb_hz
+    return volume_velocity / (area_cm2 / 1e4)
+
+
+def size_port(driver: Driver, vb_l: float, fb_hz: float,
+              diameter_mm: float = 75.0, slot_mm: tuple | None = None) -> Port:
+    """Port for (vb, fb), enlarged in 10 percent area steps until the
+    worst-case air speed is under PORT_V_MAX and the physical length is at
+    least MIN_PORT_LENGTH_MM. Stops at the MAX_PORT_DIAMETER_MM equivalent
+    area and leaves the warnings in place for the caller."""
+    max_area_cm2 = math.pi * (MAX_PORT_DIAMETER_MM / 20.0) ** 2
+
+    def build(dia, slot):
+        p = port_dims(vb_l, fb_hz, diameter_mm=None if slot else dia, slot_mm=slot)
+        p.air_speed_ms = port_air_speed(driver, fb_hz, p.area_cm2)
+        return p
+
+    port = build(diameter_mm, slot_mm)
+    for _ in range(60):
+        too_fast = port.air_speed_ms > PORT_V_MAX
+        too_short = any("too short" in w for w in port.warnings)
+        if not (too_fast or too_short) or port.area_cm2 >= max_area_cm2:
+            break
+        if slot_mm:
+            slot_mm = (slot_mm[0], slot_mm[1] * 1.1)
+        else:
+            diameter_mm *= math.sqrt(1.1)
+        port = build(diameter_mm, slot_mm)
+    if port.air_speed_ms > PORT_V_MAX:
+        port.warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s still above "
+                             f"{PORT_V_MAX} m/s at the maximum port size")
+    return port
