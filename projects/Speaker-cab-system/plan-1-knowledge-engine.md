@@ -30,7 +30,7 @@ Spec: `projects/Speaker-cab-system/2026-09-08-speaker-cab-system-design.md` (sec
 - Two drivers share one chamber unless `jack_config` is `stereo`, then two equal chambers, one driver each, each voiced as a 1x12.
 - Every predicted number carries `prediction_status: "unverified, ears only"`.
 - `data_status` values: `datasheet`, `third-party`, `analog`, `estimated`, `missing` (the spec's three plus two the research made necessary; spec amended 2026-09-09).
-- Every knowledge note starts with `status: unverified-starting-values` and every value has a source URL or an `estimated` flag with reasoning.
+- Every knowledge note starts with `status: unverified-starting-values` and every value has a source URL, or is flagged unverified (`estimated`, `starting value`, or `builder lore, unverified`) with its reasoning.
 - Vault conventions: Obsidian YAML frontmatter with a globally unique kebab-case `name`, `[[wikilinks]]` by `name`, no em dashes, English, all modeling in mm.
 - Tests live beside the module as `scripts/test_cabvoice.py`, matching the existing `scripts/test_s3dx.py`. Run with `.venv/bin/python -m pytest scripts/test_cabvoice.py -v` from the vault root.
 - Commit after every task with the attribution lines in use for this session.
@@ -41,12 +41,12 @@ Spec: `projects/Speaker-cab-system/2026-09-08-speaker-cab-system-design.md` (sec
 |---|---|
 | `scripts/cabvoice.py` | The engine: constants, frontmatter parsing, `Driver`, closed and ported math, port sizing, open-back estimate, wiring and power checks, box geometry, `propose`, `evaluate`, JSON and markdown output, CLI. |
 | `scripts/test_cabvoice.py` | Unit tests for every function above plus the catalog schema test. |
-| `knowledge/speakers/<slug>.md` | One note per speaker: frontmatter record read by the engine, body with tone descriptors, sources, field notes. 19 seed notes. |
+| `knowledge/speakers/<slug>.md` | One note per speaker: frontmatter record read by the engine, body with tone descriptors, sources, field notes. 20 seed notes. |
 | `knowledge/speaker-cab-construction.md` | Materials, joinery, baffle, bracing, cutouts, grill, backs, ports, hardware, tolex, weight and center of mass method. |
 | `knowledge/speaker-cab-voicing.md` | Tone vocabulary, enclosure rules, amp family, genre, pickup, pedal, venue, placement, jack configuration, power and impedance rules, thresholds, calibration table. |
 | `projects/Speaker-cab-system/fixtures/tone-roots.json` | Sample tone target used by tests and by the calibration run. |
 
-Research findings that shape the catalog tasks (2026-09-09): Celestion publishes only Fs and Re for its guitar speakers, no other Thiele-Small values. Eminence, WGS, and Jensen coverage is recorded in the catalog tasks below. Two Celestion notes (G12H Anniversary, Vintage 30) carry `data_status: analog` with T/S scaled from the one independent measurement that exists (Voice Coil magazine, Heritage G12H(55)), the other Celestion notes are `data_status: missing`, and the engine degrades to the rule-of-thumb table for `missing`. WGS data is `estimated` because its published units are inconsistent.
+Research findings that shape the catalog tasks (2026-09-09): Celestion publishes only Fs and Re for its guitar speakers, no other Thiele-Small values. Eminence, WGS, and Jensen coverage is recorded in the catalog tasks below. Two Celestion notes (G12H Anniversary, Vintage 30) carry `data_status: analog` with T/S scaled from the one independent measurement that exists (Voice Coil magazine, Heritage G12H(55)), the Heritage G12H(55) note itself is `third-party`, the other seven Celestion notes are `data_status: missing`, and the engine degrades to the rule-of-thumb table for `missing`. WGS data is `estimated` because its published units are inconsistent.
 
 ---
 
@@ -559,7 +559,7 @@ git commit -m "cabvoice: closed-box alignment, response, character"
 Reference data for the tests comes from Eminence's published cabinet designs (Eminence Designer simulations, QL = 7):
 - Beta-12A-2, 8 ohm: Fs 47 Hz, Qts 0.46, Qes 0.50, Qms 6.00, Vas 120.1 L, Sd 538.9 cm2, Xmax 4.4 mm, Re 5.0, Le 0.64 mH. Source: https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Beta_12A-2.pdf. Designs from https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Beta_12A-2_cab.pdf: vented Vb 1.75 cu ft, Fb 54.15 Hz, F3 64.18 Hz; vented Vb 1.25 cu ft, Fb 60 Hz, F3 73.47 Hz; sealed Vb 0.904 cu ft, F3 92.1 Hz.
 - Delta-12A, 8 ohm: Fs 55 Hz, Qts 0.43, Qes 0.46, Qms 5.27, Vas 81.3 L, Sd 519.5 cm2, Xmax 2.4 mm, Re 6.3, Le 0.74 mH. Source: https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Delta_12A.pdf. Design from https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Delta_12A_cab.pdf: vented Vb 0.75 cu ft, Fb 110 Hz, F3 100.2 Hz.
-- Not used: Delta-12A designs Vb 2.75 cu ft / Fb 55 / F3 61.87 and Vb 1.35 cu ft / Fb 70 / F3 78.85. Hand evaluation of the model below gives F3 near 54 Hz and 72 Hz for those, 12 to 13 percent low, and the cause was not identified on 2026-09-09. Record this in the voicing note's "Model limits" section (Task 11).
+- Not used: Delta-12A designs Vb 2.75 cu ft / Fb 55 / F3 61.87 and Vb 1.35 cu ft / Fb 70 / F3 78.85. The model below gives F3 near 56 Hz and 74 Hz for those (third-octave table, as the sheet reports it), 6 to 10 percent low, and the cause was not identified on 2026-09-09. Record this in the voicing note's "Model limits" section (Task 11).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1961,6 +1961,14 @@ def test_evaluate_requires_port_for_ported(drv, tone):
         cabvoice.evaluate([drv], [16], "closed-ported", tone, SITE_INTERNAL)
 
 
+def test_evaluate_surfaces_port_warnings(drv, tone):
+    port = cabvoice.port_dims(44.0, 70.0, diameter_mm=100.0)
+    port.length_mm = 23.0
+    port.warnings = ["port note from sizing"]
+    v = cabvoice.evaluate([drv], [16], "closed-ported", tone, SITE_INTERNAL, port=port)
+    assert "port note from sizing" in v.warnings
+
+
 def test_evaluate_open_back(drv, tone):
     v = cabvoice.evaluate([drv], [16], "open", tone, SITE_INTERNAL)
     assert v.prediction["f_cancel_hz"] == pytest.approx(368.5, abs=1.0)
@@ -2061,6 +2069,7 @@ def evaluate(drivers: list, impedances: list, enclosure: str, tone: dict,
                       "path_m": ob.path_m, "panel_height_mm": ob.panel_height_mm,
                       "character": ob.character, "response_relative_db": ob.response}
     elif enclosure == "closed-ported":
+        warnings.extend(port.warnings)
         fb = port_tuning_hz(chamber_net / 1e3, port.area_cm2 / 1e4, port.length_mm / 1e3)
         speed_driver = _air_speed_driver(lead, per_chamber_drivers, warnings)
         port.air_speed_ms = port_air_speed(speed_driver, fb, port.area_cm2)
@@ -2317,7 +2326,7 @@ Note on `port_dims(1.0, 1.0, ...)` in the CLI: it is only used to build a `Port`
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabvoice.py -v`
-Expected: all passed (7 new)
+Expected: all passed (8 new)
 
 - [ ] **Step 5: Commit**
 
@@ -2537,8 +2546,8 @@ Approach overrides genre: clean sets breakup clean; edge of breakup sets moderat
 ## Power and impedance
 
 - `min_power_w` = 1.5 x the primary amp's rated power (`POWER_SAFETY_FACTOR`). Hard stop when total handling is below the amp's rated power. Warning below the target; an early-breakup target may accept it explicitly and the acceptance goes into "Decisions locked".
-- Stereo: check each side against the amp's per-channel power.
-- Two drivers: parallel first, then series, whichever matches a tap. Unequal impedances are refused. Sensitivity more than 2 dB apart gets a warning.
+- Stereo: check each side against the amp's per-channel power. For a stereo amp the intake records the per-channel rating as its rated power, so `min_power_w` / 1.5 is already the per-channel figure the engine checks each side against.
+- Two drivers: parallel first, then series, whichever matches a tap. Unequal impedances get a warning (the spec's rule; the engine still lists any option that matches a tap). Sensitivity more than 2 dB apart gets a warning.
 - Vintage-style 15 W to 30 W speakers are for amps up to 20 W or for two-speaker cabs; the classic AC30 into two Blues is exactly the accepted early-breakup case.
 
 ## Box alignment (Layer 2 values)
@@ -2562,7 +2571,7 @@ Approach overrides genre: clean sets breakup clean; edge of breakup sets moderat
 
 - Celestion publishes only Fs and Re for its guitar speakers. The only measured Celestion data is Voice Coil magazine's test of the Heritage G12H(55), 16 ohm (https://celestion.com/wp-content/uploads/2019/10/141.pdf): Qts 0.37 to 0.46, Vas 53 to 71 L, Xmax 0.7 mm across two samples. The G12H Anniversary and Vintage 30 notes carry values scaled from that measurement (`data_status: analog`); the other Celestion notes are `missing` and use the rule-of-thumb volumes.
 - WGS publishes T/S values with inconsistent units (Vas labeled in cubic feet at values that can only be liters, Sd of 366 with no unit). Those notes are `estimated` and say what was assumed.
-- The vented model (Small 1973, QL = 7) reproduces Eminence Designer's F3 within about 2 percent for three of four published designs (Beta-12A-2 at 1.75 and 1.25 cu ft, Delta-12A at 0.75 cu ft) and is 12 to 13 percent low for the two larger Delta-12A designs (2.75 cu ft at 55 Hz, 1.35 cu ft at 70 Hz). Cause not identified on 2026-09-09.
+- The vented model (Small 1973, QL = 7) reproduces Eminence Designer's F3 within about 2 percent for three of four published designs (Beta-12A-2 at 1.75 and 1.25 cu ft, Delta-12A at 0.75 cu ft) and is 6 to 10 percent low for the two larger Delta-12A designs (2.75 cu ft at Fb 55 Hz: 56 Hz against Eminence's 61.9; 1.35 cu ft at Fb 70 Hz: 74 Hz against 78.9). Cause not identified on 2026-09-09.
 - The open-back estimate is a path-length cancellation frequency with a 6 dB per octave roll-off, not a dipole model. It ranks options; it does not predict a curve.
 - Nothing here has been checked with a microphone. Listening notes go into the speaker notes' Field notes sections after each build.
 
@@ -2739,7 +2748,7 @@ fs_hz: 75
 re_ohm: 7.3
 le_mh: null
 qts: 0.51
-qes: 0.54
+qes: 0.53
 qms: 13.0
 vas_l: 37.9
 xmax_mm: 0.7
@@ -2769,7 +2778,7 @@ status: unverified-starting-values
 ## Data notes
 
 - Celestion publishes Fs 75 Hz, Re 7.3 (8 ohm) and 12.9 (16 ohm), range 70 to 5000 Hz, 156 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg.
-- T/S values are scaled from [[celestion-heritage-g12h55]] (Fs 54.7): Vas 71.3 x (54.7 / 75)^2 = 37.9 L; Qes 0.39 x 75 / 54.7 = 0.54; Qms 9.48 x 75 / 54.7 = 13.0; Qts = 0.54 x 13.0 / 13.54 = 0.51. Xmax and Sd copied. Estimate.
+- T/S values are scaled from [[celestion-heritage-g12h55]] (Fs 54.7): Vas 71.3 x (54.7 / 75)^2 = 37.9 L; Qes 0.39 x 75 / 54.7 = 0.53; Qms 9.48 x 75 / 54.7 = 13.0; Qts = 0.53 x 13.0 / 13.53 = 0.51. Xmax and Sd copied. Estimate.
 
 ## Field notes
 
@@ -3194,7 +3203,7 @@ depth_mm: 129.5
 weight_kg: 3.72
 displacement_l: 2.0
 data_status: datasheet
-sources: [https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Cannabis_Rex.pdf, https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Cannabis_Rex_16.pdf, https://web.archive.org/web/20190107121704/http://www.eminence.com/speakers/speaker-detail/?model=Cannabis_Rex]
+sources: [https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Cannabis_Rex.pdf, https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Cannabis_Rex_16.pdf, "https://web.archive.org/web/20190107121704/http://www.eminence.com/speakers/speaker-detail/?model=Cannabis_Rex"]
 status: unverified-starting-values
 ---
 
@@ -3362,7 +3371,7 @@ depth_mm: 129.5
 weight_kg: 3.76
 displacement_l: 2.0
 data_status: datasheet
-sources: [https://eminence.com/products/texas_heat_4, https://eminence.com/products/texas_heat_16, https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Texas_Heat.pdf, https://web.archive.org/web/20200127095935/https://www.eminence.com/speakers/speaker-detail/?model=Texas_Heat]
+sources: [https://eminence.com/products/texas_heat_4, https://eminence.com/products/texas_heat_16, https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Texas_Heat.pdf, "https://web.archive.org/web/20200127095935/https://www.eminence.com/speakers/speaker-detail/?model=Texas_Heat"]
 status: unverified-starting-values
 ---
 
@@ -3418,7 +3427,7 @@ depth_mm: 129.5
 weight_kg: 3.72
 displacement_l: 2.0
 data_status: datasheet
-sources: [https://eminence.com/products/red-_white_and_blues, https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Red_White_and_Blues.pdf, https://web.archive.org/web/20200125223149/https://www.eminence.com/speakers/speaker-detail/?model=Red_White_and_Blues]
+sources: [https://eminence.com/products/red-_white_and_blues, https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Red_White_and_Blues.pdf, "https://web.archive.org/web/20200125223149/https://www.eminence.com/speakers/speaker-detail/?model=Red_White_and_Blues"]
 status: unverified-starting-values
 ---
 
@@ -3884,5 +3893,6 @@ git push origin main
 ## Self-review notes (written with the plan)
 
 - Spec coverage: Unit 1b Layer 2 functions (closed, ported, port, open-back, wiring, propose, evaluate, JSON and sheet) are Tasks 2 to 9. The speaker catalog schema and seed list are Tasks 1 and 12 to 14 (the seed list gained the Heritage G12H(55) as the analog source, twenty notes instead of nineteen). Knowledge notes are Tasks 10 and 11. Testing section: closed-box formula, Helmholtz hand case, Eminence design checks, air speed, open-back, wiring, schema validation, and the "every speaker proposes" sweep are all present. Error handling: missing T/S degrades with labels (Task 8), analog fallback is the catalog's job (Task 12), blockers stop the CLI with exit 2 (Task 9).
-- Deviations from the spec, recorded here and in the spec amendment of 2026-09-09: `data_status` gained `third-party` and `analog`; tests live at `scripts/test_cabvoice.py` beside the existing `test_s3dx.py` instead of `scripts/tests/`; the ported-alignment test uses Eminence's Beta-12A-2 and Delta-12A published designs because no guitar speaker publishes a recommended box.
+- Deviations from the spec, recorded here and in the spec amendment of 2026-09-09: `data_status` gained `third-party` and `analog`; tests live at `scripts/test_cabvoice.py` beside the existing `test_s3dx.py` instead of `scripts/tests/`; the ported-alignment test uses Eminence's Beta-12A-2 and Delta-12A published designs because no guitar speaker publishes a recommended box; `open_back` takes internal width, height, depth, and open fraction with no `driver_center` and uses path = depth + width / 2, the shortest route from a centered driver out the full-width open band and around the side to the front (ruled with Brian on 2026-09-09: the plan's formula stands, so the calibration note keeps about 370 Hz for the site box).
+- Pre-flight amendments (2026-09-09, before any task was dispatched, after a transcribed run of every code block passed 86/86): three Eminence archive URLs quoted for PyYAML; Delta-12A model-limit numbers corrected to what the engine reports; `evaluate` surfaces `port.warnings` like `propose`, with a test; Vintage 30 Qes rounding; stereo per-channel power convention stated; unequal impedances warn rather than refuse, matching the spec; unverified-value labels named in the constraints; catalog count and Celestion status text corrected. The `propose` and `evaluate` duplication stays until the final whole-branch review fix wave (ruled with Brian).
 - Layer 1 (tone target from the intake, speaker ranking) is prose in Task 11 and is executed by the skill in Plan 3, not by code here.
