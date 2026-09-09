@@ -1,7 +1,7 @@
 ---
 title: Garmin 943xsv helm panel
 type: project-brief
-status: spec-approved, building template
+status: template built, awaiting print and test fit
 created: 2026-09-08
 tags: [boat, helm, garmin, starboard, router-template]
 ---
@@ -47,11 +47,11 @@ Flat black King Starboard panel that replaces the hinged clear cover over the he
 - Window: exactly 222.4 x 139.0 mm, sharp corners. No offset, because the bearing rides on the template edge.
 - Frame: 15 mm on the sides, 25 mm top and bottom, so the outside is 252.4 x 189.0 mm. Fits the 256 x 256 bed with the long edge on X.
 - Thickness 12 mm, so a bearing up to about 10 mm tall rides fully on the template.
-- Four drill guides for the mounting holes: 2.5 mm through holes on the 190.9 x 150.5 mm pattern.
+- Four drill guides for the mounting holes on the 190.9 x 150.5 mm pattern: modeled 2.8 mm so they print about 2.5 mm and clear a 2.3 to 2.4 mm bit. Each has a 7 mm counterbore 6 mm deep from the top face, so the guide is 6 mm long and a standard jobber bit reaches through the panel.
 - Registration: V notches on the outside edges at the four centerline points, to line up with centerlines drawn on the panel.
 - Fixing: double-sided tape plus edge clamps. Two optional 4 mm screw holes on the vertical centerline, 6 mm outside the top and bottom window edges, land under the bezel overlap if screws are preferred.
 - 0.6 mm chamfer on the bed-side window edge so elephant foot cannot narrow the window.
-- The template is symmetric about both centerlines, so it works on the front face with a top-bearing pattern bit or on the back face with a bottom-bearing flush-trim bit.
+- The template is symmetric about both centerlines, so it works on the front face with a top-bearing pattern bit or on the back face with a bottom-bearing flush-trim bit. Drill the pilots from the counterbored face.
 
 ## Process
 
@@ -69,7 +69,7 @@ Rout a scrap of the same stock first if any scrap is available.
 ## Deliverables (this folder)
 
 - `brief.md` (this file).
-- `router-template.FCStd`, `router-template.stl`, `router-template.3mf`.
+- `router-template.py` (build123d source, self-checking), `router-template.stl`, `router-template.3mf`, `images/router-template-4view.png`.
 - Retrospective in `knowledge/learnings/garmin-943-helm-panel.md` after the install.
 
 ## Open inputs from Brian
@@ -81,3 +81,29 @@ Rout a scrap of the same stock first if any scrap is available.
 - Garmin install instructions, GPSMAP 7x3/9x3/12x3/16x3: https://www8.garmin.com/manuals/webhelp/GUID-BF2FF273-008A-482A-A96F-362ADA8996BA/EN-US/GPSMAP_7x3_9x3_12x3_16x3_Install_EN-US.pdf
 - Garmin 9x3 flush mount template, 1:1: https://static.garmin.com/pumac/GPSMAP_9x3_flush_template.pdf
 - Note: the Garmin FAQ page lists "190.9 x 150.5 x 139.0 mm" as a cutout size. That is the hole pitch and cutout height run together, not a cutout. The template governs.
+
+## Build results, 2026-09-09
+
+Built with build123d from `router-template.py`. Every run re-checks the geometry: bounding box 252.4 x 189.0 x 12.0 mm, one solid, window probes prove the opening is 222.4 x 139.0 within 0.05 mm, all four guides clear, counterbores open, notches 2 mm deep, watertight STL, 3MF mesh matches the STL.
+
+| Item | Value |
+|---|---|
+| Outside | 252.4 x 189.0 x 12.0 mm |
+| Window | 222.4 x 139.0 mm, sharp corners, 0.6 mm chamfer on the bed side |
+| Guides | 2.8 mm modeled, 7 x 6 mm counterbore, wall to window edge 2.25 mm |
+| Fixing holes | 4.0 mm at (0, +75.5) and (0, -75.5) |
+| Notches | 90 degree V, 2 mm deep, at the four outer edge midpoints |
+| Volume | 200 cm3 |
+
+Print settings, 0.6 high-flow nozzle, Bambu PLA Basic, textured PEI at 65 C, brim off (the part leaves only 1.8 mm to the bed edge on X, so a brim would not fit). Center the part on the plate after import. Counterbored face up. Times from a real CLI slice with grafted Studio settings:
+
+| Preset | Time | Filament |
+|---|---|---|
+| 0.18mm Balanced Quality, ironing off | 1 h 37 min | 93 g |
+| 0.30mm Standard | 1 h 28 min | 96 g |
+
+Either works. Layer height does not change the window accuracy, so 0.30mm Standard is the sensible choice.
+
+Slicer note for future sessions: `bambu-studio --arrange 1` placed this 252 mm part off the plate at y = -145.7, and the slice failed with "no object fully inside the print volume". Rewriting the build item transform to 128, 128, 0 in `3D/3dmodel.model` before `graft_slice.py` fixed it.
+
+Next: print, measure the window with calipers, test the drill guides, rout the panel from the old cover, rough cut and rout the window, test fit the unit, install. Then the retrospective.
