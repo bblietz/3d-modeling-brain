@@ -8,4 +8,4 @@
 - [Drawer-bench status](project-drawer-bench.md) - CAD built 2026-08-24, provisional dims, seven CAD resolutions pending Brian's review and measurements
 - [Minimal test coupons](feedback-minimal-test-coupons.md) - coupons hold only the feature under test plus a thin substrate; quote time from a real slice
 - [Keep tools in the vault](project-keep-tools-in-vault.md) - scratchpad is wiped on restarts; pipeline tools and monitors belong in projects/<Name>/pipeline or scripts/
-- [Raised letters recipe](feedback-raised-letters-recipe.md) - one-wall fill-core modifier + object key + parity check for small lettering on the X2D; dead ends not to retry; thin coupons first
+- [Raised letters recipe](feedback-raised-letters-recipe.md) - VALIDATED by the 14-tag batch: one-wall fill-core modifier + object key + parity check; dead ends not to retry; read knowledge/lettering-x2d.md before any lettering job

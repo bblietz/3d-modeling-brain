@@ -703,29 +703,64 @@ Fix found offline (fillcore sweep, `exports/fillcore-coupons-02.3mf`):
 - Physical coupons pending: 0.2 full plate printing 2026-08-24 evening
   (V0/V7o/V3); 0.4 thin plate (C0/C7/C8, 15 min) after the nozzle swap.
 
+## Outcome and experiment catalog (2026-09-08)
+
+Result: all 14 tags printed from `projects/Sharks-nametag/final/` with
+clean letters; Brian: "the final print worked. All the kids are happy."
+Turnkey version of what follows: [[lettering-x2d]].
+
+What changed between the first PETG attempt (2026-08-20) and the final
+files (2026-08-26):
+
+- Model: v3.22 clean ball web + hairline seams (fitted centerlines, no
+  free ends); v3.24 YOUTH SOCCER CLUB at 1.2x on the source arc; v3.26
+  base 3.36 mm, YSC raised 0.5; v3.27 `FILLET_R` (kept at 0, dead end).
+- Process: SMOOTH_TOP in flatten_04.py (no ironing, 2 top walls, top 60,
+  seam_gap 0%, small perimeters 30/10, gap fill 40, arachne with
+  distribution 3 / transition deviation 50% / min feature 10% / min bead
+  50%, 50% zig-zag infill, skirt 2/3/1, first layer 30/50, tower brim 5 +
+  rib + fillet), a correct 2 x 3 x 3 flush block.
+- Letters: modifier part (1 wall, all-top, 0.3 mm fill lines, direction
+  90) + object key detect_narrow_internal_solid_infill 0; back inlay
+  counter-modifier (internal_solid_infill_pattern concentric).
+- Tower: rule-placed (closest free spot to center, off the edges).
+- Pipeline (all in pipeline/): batch_roster.py, plates.py, fillcore_mod.py,
+  fillcore_coupons.py, graft_slice.py, toolpath_voids.py,
+  gcode_features.py, backfix_probe.py, flatten_04.py / flatten_02.py;
+  scripts/x2d-status.py for read-only printer telemetry.
+
+Experiments, in order, with outcome (P = physical print, O = offline):
+
+| date | experiment | outcome |
+|---|---|---|
+| 08-06/07 | P1-P3 PLA, ironing + classic walls | letters crisp but bed peel, ball lines lost; PLA rejected (57 C HDT) |
+| 08-20 | P4, P5 PETG v3.23 | first island (M of MAX) spaghetti: un-primed nozzle; fixed by skirt priming + slow first layer |
+| 08-20 | O clean ball + hairline seams (v3.22) | seams 0.6 mm as single arachne beads, kept |
+| 08-21 | P6 v3.24, first complete PETG tag | junction marks on letters, CITY dot pinholes, ironing pits |
+| 08-21/22 | P top-surface coupons A/B/C (2h18m, thin 1h34m) | ironing on PETG pits/smears; no ironing + 2 top walls wins |
+| 08-23 | P solid-text coupons O/P/Q/R | all still holed at junctions; +3% flow worse; marks are geometric |
+| 08-23 | O 13-variant sweep + toolpath void metric | classic walls worse; 1 wall + fill "no better" (object key missing); min feature/bead best; baked |
+| 08-23 | P gate IMG_1530 | ~15 junction specks, failed the bar |
+| 08-23 | O outline micro-fillets r 0.15-0.35 | refuted: voids sit on the medial axis, fillets relocate them |
+| 08-23 | O 0.2 nozzle prediction | zero visible voids predicted at 2.3x time |
+| 08-24 | P7 0.2 letter coupon (W1) | N and CITY perfect, S/A/T/A still marked; brimless tower peeled at the corner |
+| 08-24 | O fill-core sweep at 0.2 (V0-V8o) | 1 wall + all-top + object key = 0.00 mm2; infill_wall_overlap inert; 2 walls worst |
+| 08-24 | O fill-core at 0.4 (C0-C8) | direct transplant worse (0.42 lines); 0.3 mm fill lines + direction fix it |
+| 08-24 | O thin letters-only coupons | 15 min at 0.4 / 38 min at 0.2; layer-count PARITY flips the fill direction |
+| 08-24/25 | P8 0.2 fill-core plate (3h39m) | V7o clean; time and stringing argue against 0.2 |
+| 08-25 | P9 0.4 thin plate (15 min) | Brian: C7 (lines along stems) best, reversing the metric's C8 |
+| 08-25 | P10 gate MAX 18 at 0.4 | passed; object key made back-inlay layers 2-4 rectilinear (hidden), fixed with the concentric modifier |
+| 08-25 | O tower relocation + anti-peel pins | rule encoded; tag toolpaths byte-identical |
+| 08-26 | build final/ (14 singles + 2 plates) | all asserts green; MAX 18 identical to the gate |
+| 08-26..09 | P batch | success, 14/14 |
+
+Studio's calculated flush volumes for this filament set (as printed):
+white->navy 223, white->cyan 260, navy->white 629, navy->cyan 430,
+cyan->white 492, cyan->navy 182 mm3.
+
 ## Open
 
-- Reprint MAX 18 (v3.20: source-faithful geometry, plate-centered,
-  bed-type + infill fixed) on the 0.4 nozzle with correct colors. Plate
-  prep: wash the textured PEI with dish soap and dry; confirm the bed
-  heats to 65C. If any edge lift still appears, switch the batch to
-  brim_type outer_only, brim_width 4.
-- Known accepted drops at slice time (audit_widths.py): banner border
-  0.6, CITY white ring + stencil fragments, swoosh tip ends, C-notch,
-  letter-frame channels. Judge them on the physical print; if any look
-  worse than expected, the v3.19 adaptations exist in the brief log as
-  a menu of per-element options to selectively revisit WITH viewer
-  approval first.
-- Then check: ball seam/rim/ring presence, YOUTH SOCCER CLUB inlay
-  separation, deboss legibility on textured PEI, hole fit on a split
-  ring.
-- 2026-08-23: model is v3.26 (YSC raised, base 3.36); only
-  `sharks-nametag-max-18.3mf` is rebuilt. The 12 other singles and the
-  two-plate file are still v3.25/old recipe: rebuild them with
-  `batch_roster.py` + `plates.py` (no REUSE_STL) once the solid-text
-  recipe is chosen from `exports/solid-text-coupons.3mf` (P/Q/R) and
-  baked into flatten_04.py SMOOTH_TOP + the SMOOTH_KEYS lists
-  (`.venv/bin/python projects/Sharks-nametag/pipeline/batch_roster.py`;
-  flat presets current, re-run flatten_04.py only if Bambu system
-  presets change).
+- Project complete 2026-09-08. Leftovers from the 2026-08-06 full-detail
+  variant (`exports-full/`, `sharks-nametag-max-18-full.3mf`, `-full`
+  STLs) still on disk pending Brian's decision.
 - TEAM_YEARS=2015-2016 constant.
