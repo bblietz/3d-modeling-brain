@@ -260,3 +260,61 @@ def closed_box_for_qtc(driver: Driver, qtc: float) -> float:
     if qtc <= driver.qts:
         raise ValueError(f"target Qtc {qtc} must exceed the driver's Qts {driver.qts}")
     return driver.vas_l / ((qtc / driver.qts) ** 2 - 1.0)
+
+
+# ---------------------------------------------------------------------------
+# Ported box (Small 1973 vented-box fourth-order model)
+# ---------------------------------------------------------------------------
+
+def vented_coeffs(qts: float, alpha: float, h: float, ql: float = QL) -> tuple:
+    """Polynomial coefficients a1, a2, a3 of Small's vented-box response.
+    alpha = Vas / Vb, h = Fb / Fs, ql = box loss Q."""
+    root_h = math.sqrt(h)
+    a1 = (ql + h * qts) / (root_h * ql * qts)
+    a2 = (h + (alpha + 1.0 + h * h) * ql * qts) / (h * ql * qts)
+    a3 = (h * ql + qts) / (root_h * ql * qts)
+    return a1, a2, a3
+
+
+def vented_response_db(f0_hz: float, coeffs: tuple, f_hz: float) -> float:
+    """|G| in dB at f for the fourth-order high-pass with f0 = sqrt(Fs Fb)."""
+    a1, a2, a3 = coeffs
+    s = complex(0.0, f_hz / f0_hz)
+    s2, s3, s4 = s * s, s ** 3, s ** 4
+    g = s4 / (s4 + a1 * s3 + a2 * s2 + a3 * s + 1.0)
+    return 20.0 * math.log10(abs(g))
+
+
+def ported_character(peak_db: float) -> str:
+    if peak_db < 1.0:
+        return "flat"
+    if peak_db < 3.0:
+        return "punchy"
+    return "boomy"
+
+
+@dataclass
+class PortedResult:
+    vb_l: float
+    fb_hz: float
+    alpha: float
+    h: float
+    f3_hz: float | None
+    peak_db: float
+    response: list
+    character: str
+
+
+def ported_box(driver: Driver, vb_l: float, fb_hz: float) -> PortedResult:
+    _require_ts(driver)
+    if vb_l <= 0 or fb_hz <= 0:
+        raise ValueError("vb_l and fb_hz must be positive")
+    alpha = driver.vas_l / vb_l
+    h = fb_hz / driver.fs_hz
+    coeffs = vented_coeffs(driver.qts, alpha, h)
+    f0 = math.sqrt(driver.fs_hz * fb_hz)
+    response = [(f, vented_response_db(f0, coeffs, f)) for f in RESPONSE_FREQS]
+    peak = max(db for _, db in response)
+    return PortedResult(vb_l=vb_l, fb_hz=fb_hz, alpha=alpha, h=h,
+                        f3_hz=f3_from_response(response), peak_db=peak,
+                        response=response, character=ported_character(peak))

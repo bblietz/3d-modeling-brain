@@ -167,3 +167,72 @@ def test_closed_box_rejects_driver_without_ts(drv):
 ])
 def test_closed_character_thresholds(qtc, expected):
     assert cabvoice.closed_character(qtc) == expected
+
+
+# ---- Task 3: ported box -------------------------------------------------
+
+CU_FT_L = 28.3168
+
+
+def _driver(**overrides):
+    meta = cabvoice.parse_frontmatter(FIXTURE_NOTE)
+    meta.update(overrides)
+    return cabvoice.driver_from_meta(meta)
+
+
+BETA_12A2 = dict(name="eminence-beta-12a-2", fs_hz=47, qts=0.46, qes=0.50, qms=6.00,
+                 vas_l=120.1, sd_cm2=538.9, xmax_mm=4.4, re_ohm=5.0, le_mh=0.64,
+                 power_w=250, sensitivity_db=98.0)
+DELTA_12A = dict(name="eminence-delta-12a", fs_hz=55, qts=0.43, qes=0.46, qms=5.27,
+                 vas_l=81.3, sd_cm2=519.5, xmax_mm=2.4, re_ohm=6.3, le_mh=0.74,
+                 power_w=400, sensitivity_db=98.3)
+
+
+def test_vented_coeffs_b4_alignment_is_butterworth():
+    # Qts 0.383, alpha sqrt(2), h 1, lossless: 2.613, 3.414, 2.613
+    a1, a2, a3 = cabvoice.vented_coeffs(0.383, math.sqrt(2), 1.0, ql=1e9)
+    assert a1 == pytest.approx(2.611, abs=0.01)
+    assert a2 == pytest.approx(3.414, abs=0.01)
+    assert a3 == pytest.approx(2.611, abs=0.01)
+    assert cabvoice.vented_response_db(100.0, (a1, a2, a3), 100.0) == pytest.approx(-3.01, abs=0.02)
+    assert cabvoice.vented_response_db(100.0, (a1, a2, a3), 1000.0) == pytest.approx(0.0, abs=0.05)
+
+
+@pytest.mark.parametrize("params,vb_cuft,fb,f3_expected", [
+    (BETA_12A2, 1.75, 54.15, 64.18),
+    (BETA_12A2, 1.25, 60.0, 73.47),
+    (DELTA_12A, 0.75, 110.0, 100.2),
+])
+def test_ported_box_matches_eminence_designs(params, vb_cuft, fb, f3_expected):
+    drv = _driver(**params)
+    res = cabvoice.ported_box(drv, vb_cuft * CU_FT_L, fb)
+    assert res.f3_hz == pytest.approx(f3_expected, rel=0.05)
+    assert res.fb_hz == fb
+    assert res.alpha == pytest.approx(params["vas_l"] / (vb_cuft * CU_FT_L))
+
+
+def test_closed_box_matches_eminence_sealed_design():
+    drv = _driver(**BETA_12A2)
+    res = cabvoice.closed_box(drv, 0.904 * CU_FT_L)
+    assert res.f3_hz == pytest.approx(92.1, rel=0.10)
+
+
+def test_ported_box_reports_peak_and_character():
+    drv = _driver(**DELTA_12A)
+    small = cabvoice.ported_box(drv, 0.75 * CU_FT_L, 110.0)
+    assert small.peak_db > 1.0
+    assert small.character in ("punchy", "boomy")
+    assert small.response[-1][0] == 400.0
+
+
+def test_ported_box_rejects_driver_without_ts(drv):
+    drv.vas_l = None
+    with pytest.raises(ValueError):
+        cabvoice.ported_box(drv, 40.0, 60.0)
+
+
+@pytest.mark.parametrize("peak,expected", [
+    (0.0, "flat"), (0.99, "flat"), (1.0, "punchy"), (2.9, "punchy"), (3.0, "boomy"), (6.0, "boomy"),
+])
+def test_ported_character_thresholds(peak, expected):
+    assert cabvoice.ported_character(peak) == expected
