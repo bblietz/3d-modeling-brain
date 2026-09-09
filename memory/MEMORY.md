@@ -12,3 +12,4 @@
 - [Vault GitHub repo](reference-vault-github-repo.md) - private bblietz/3d-modeling-brain, remote origin/main; commit and push after milestones; never commit the printer access code
 - [Garmin helm panel](project-garmin-helm-panel.md) - Starboard panel + printed 943xsv cutout template, built 2026-09-09, awaiting print and test fit
 - [Model dispatch](feedback-model-dispatch.md) - say which model fits each task, flag when Fable 5.1 beats the active model, never switch silently
+- [Speaker cab system](project-speaker-cab-system.md) - MaximoCabs guitar cab capability; spec approved 2026-09-09, three-phase plan next (knowledge+cabvoice.py, cabmodel.py, /speaker-cab skill)
