@@ -411,3 +411,10 @@ def test_power_check_rule():
     assert not_accepted.status == "warning"
     ok = cabvoice.power_check([60], 30)
     assert ok.status == "ok" and ok.total_handling_w == 60
+
+
+def test_power_check_rejects_non_positive_amp_power():
+    with pytest.raises(ValueError, match="amp_power_w"):
+        cabvoice.power_check([30.0], 0.0)
+    with pytest.raises(ValueError, match="amp_power_w"):
+        cabvoice.power_check([30.0], -30.0)

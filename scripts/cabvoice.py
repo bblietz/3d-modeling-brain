@@ -563,6 +563,8 @@ def power_check(handling_w: list, amp_power_w: float, breakup: str = "moderate",
                 accept_low_headroom: bool = False) -> PowerCheck:
     """Hard stop below the amp's rated power, warning below 1.5 times it.
     An early-breakup target may accept the warning explicitly."""
+    if amp_power_w <= 0:
+        raise ValueError("amp_power_w must be positive")
     total = float(sum(handling_w))
     minimum = POWER_SAFETY_FACTOR * amp_power_w
     if total < amp_power_w:
