@@ -166,3 +166,97 @@ def load_speaker(slug: str, speakers_dir: Path = SPEAKERS_DIR) -> Driver:
 
 def list_speakers(speakers_dir: Path = SPEAKERS_DIR) -> list[str]:
     return sorted(p.stem for p in Path(speakers_dir).glob("*.md"))
+
+
+# ---------------------------------------------------------------------------
+# Response helpers
+# ---------------------------------------------------------------------------
+
+def _third_octave(f_lo: float, f_hi: float) -> list[float]:
+    freqs = []
+    f = f_lo
+    while f < f_hi * 0.999:
+        freqs.append(round(f, 2))
+        f *= 2 ** (1 / 3)
+    freqs.append(float(f_hi))
+    return freqs
+
+
+RESPONSE_FREQS = _third_octave(20.0, 400.0)
+
+
+def f3_from_response(response: list[tuple[float, float]]) -> float | None:
+    """Lowest frequency where the response crosses -3 dB, by linear
+    interpolation between table points. None if never reached."""
+    prev_f, prev_db = None, None
+    for f, db in response:
+        if prev_f is not None and prev_db < -3.0 <= db:
+            frac = (-3.0 - prev_db) / (db - prev_db)
+            return prev_f + frac * (f - prev_f)
+        prev_f, prev_db = f, db
+    if response and response[0][1] >= -3.0:
+        return response[0][0]
+    return None
+
+
+def _require_ts(driver: Driver) -> None:
+    if not driver.has_ts():
+        raise ValueError(
+            f"{driver.slug}: Thiele-Small data missing (data_status={driver.data_status}); "
+            "use the rule-of-thumb path")
+
+
+# ---------------------------------------------------------------------------
+# Closed box
+# ---------------------------------------------------------------------------
+
+def closed_response_db(fc_hz: float, qtc: float, f_hz: float) -> float:
+    """Second-order high-pass magnitude in dB at f for a box with Fc, Qtc."""
+    x = f_hz / fc_hz
+    s = complex(0.0, x)
+    h = s * s / (s * s + s / qtc + 1.0)
+    return 20.0 * math.log10(abs(h))
+
+
+def closed_character(qtc: float) -> str:
+    if qtc < 0.6:
+        return "lean"
+    if qtc < 0.8:
+        return "tight"
+    if qtc < 1.0:
+        return "balanced"
+    if qtc < 1.2:
+        return "big"
+    return "peaky"
+
+
+@dataclass
+class ClosedResult:
+    vb_l: float
+    alpha: float
+    qtc: float
+    fc_hz: float
+    f3_hz: float | None
+    response: list
+    character: str
+
+
+def closed_box(driver: Driver, vb_l: float) -> ClosedResult:
+    _require_ts(driver)
+    if vb_l <= 0:
+        raise ValueError("vb_l must be positive")
+    alpha = driver.vas_l / vb_l
+    qtc = driver.qts * math.sqrt(1.0 + alpha)
+    fc = driver.fs_hz * math.sqrt(1.0 + alpha)
+    response = [(f, closed_response_db(fc, qtc, f)) for f in RESPONSE_FREQS]
+    return ClosedResult(vb_l=vb_l, alpha=alpha, qtc=qtc, fc_hz=fc,
+                        f3_hz=f3_from_response(response), response=response,
+                        character=closed_character(qtc))
+
+
+def closed_box_for_qtc(driver: Driver, qtc: float) -> float:
+    """Net volume in liters that gives the target Qtc."""
+    _require_ts(driver)
+    if qtc <= driver.qts:
+        raise ValueError(f"target Qtc {qtc} must exceed the driver's Qts {driver.qts}")
+    return driver.vas_l / ((qtc / driver.qts) ** 2 - 1.0)

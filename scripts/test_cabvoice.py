@@ -122,3 +122,48 @@ def test_load_speaker_unknown_slug_raises(speakers_dir):
 
 def test_list_speakers(speakers_dir):
     assert cabvoice.list_speakers(speakers_dir) == ["test-driver"]
+
+
+# ---- Task 2: closed box -------------------------------------------------
+
+def test_closed_box_for_qtc_matches_textbook(drv):
+    # Vb = Vas / ((Qtc/Qts)^2 - 1); Qts 0.4, Vas 60 L, Qtc 0.707 -> 28.25 L
+    vb = cabvoice.closed_box_for_qtc(drv, 0.707)
+    assert vb == pytest.approx(28.25, abs=0.05)
+
+
+def test_closed_box_roundtrip(drv):
+    vb = cabvoice.closed_box_for_qtc(drv, 0.9)
+    res = cabvoice.closed_box(drv, vb)
+    assert res.qtc == pytest.approx(0.9, abs=1e-6)
+    assert res.alpha == pytest.approx(60 / vb)
+    assert res.fc_hz == pytest.approx(75 * (0.9 / 0.4))
+
+
+def test_closed_response_is_minus_3db_at_fc_for_butterworth():
+    assert cabvoice.closed_response_db(100.0, 0.7071, 100.0) == pytest.approx(-3.01, abs=0.02)
+    assert cabvoice.closed_response_db(100.0, 0.7071, 1000.0) == pytest.approx(0.0, abs=0.05)
+    assert cabvoice.closed_response_db(100.0, 0.7071, 50.0) == pytest.approx(-12.3, abs=0.2)
+
+
+def test_closed_box_f3_and_response_table(drv):
+    vb = cabvoice.closed_box_for_qtc(drv, 0.7071)
+    res = cabvoice.closed_box(drv, vb)
+    assert res.f3_hz == pytest.approx(res.fc_hz, rel=0.03)
+    freqs = [f for f, _ in res.response]
+    assert freqs[0] == 20.0 and freqs[-1] == 400.0
+    assert len(freqs) == len(cabvoice.RESPONSE_FREQS)
+
+
+def test_closed_box_rejects_driver_without_ts(drv):
+    drv.qts = None
+    with pytest.raises(ValueError):
+        cabvoice.closed_box(drv, 40.0)
+
+
+@pytest.mark.parametrize("qtc,expected", [
+    (0.5, "lean"), (0.6, "tight"), (0.79, "tight"), (0.8, "balanced"),
+    (0.99, "balanced"), (1.0, "big"), (1.19, "big"), (1.2, "peaky"), (1.5, "peaky"),
+])
+def test_closed_character_thresholds(qtc, expected):
+    assert cabvoice.closed_character(qtc) == expected
