@@ -20,6 +20,7 @@ tags: [project, speaker-cab, maximocabs, design, acoustics, woodworking]
 - **Acoustic depth**: Thiele-Small modeling for closed and ported boxes plus documented tone rules. Open-back uses empirical rules. No diffraction or panel simulation.
 - **Validation**: ears only for now. Every predicted number is labeled unverified. Structured listening notes after each build feed the speaker catalog.
 - **Architecture**: approach A, fork furniture plus acoustics script plus knowledge base. Prose-only and standalone-app approaches rejected.
+- **Intake revision (2026-09-09)**: added speaker impedance preference, primary amp, where the cab lives, jack configuration with stereo 2x12, and placement. Dropped modulation-type pedals, asked amp type, and separate transport and stacking lines. Needed-by date and speaker budget left out.
 
 ## Context
 
@@ -47,16 +48,17 @@ Data flows one way: intake to tone target to voicing to geometry to deliverables
 **Intake template, Rig block.** Every field is present in the template even when empty, so a missing answer is visible.
 
 - **Order**: customer, contact, line (tolex or hardwood), driver count (1 or 2), back type (closed-ported, open, semi-open, or recommend).
-- **Amps**: one entry per amp: model, type (tube, solid state, modeling), rated power in W, impedance taps in ohms, head or combo. The skill assigns a voicing family from [[speaker-cab-voicing]] (blackface Fender, tweed Fender, Marshall, Vox, modern high gain, boutique clean, modeling).
+- **Amps**: one entry per amp: model, rated power in W, impedance taps in ohms, head or combo, and which amp is primary. Amp type (tube, solid state, modeling) is derived from the model and asked only when the model is unknown. The voicing serves the primary amp and is checked for compatibility with the others. The skill assigns a voicing family from [[speaker-cab-voicing]] (blackface Fender, tweed Fender, Marshall, Vox, modern high gain, boutique clean, modeling).
 - **Guitars**: pickup type and output (single coil, P90, humbucker, active), and low-end shifters (baritone, 7-string, drop tunings, bass VI).
-- **Pedals**: dirt (fuzz, overdrive, distortion, and which models), boosts and EQ, and whether the amp is a pedal platform or the drive source. Delay, modulation, and reverb are recorded and do not steer the voicing.
-- **Music and use**: genre, approach (clean, edge of breakup, high gain), typical venue, typical volume, mic'd or filling the room by itself.
+- **Pedals**: dirt (fuzz, overdrive, distortion, and which models), boosts and EQ, and whether the amp is a pedal platform or the drive source. Nothing else is asked.
+- **Music and use**: genre, approach (clean, edge of breakup, high gain), typical venue, typical volume, mic'd or filling the room by itself, and placement (on the floor, raised, or tilted back).
 - **Tonal goals**: customer's own words, reference records or players, cabs they love or dislike.
-- **Physical**: weight limit, transport, size limits, head width and depth if the cab is a stack base, stacking with other cabs.
+- **Physical**: weight limit, size limits (including the vehicle it travels in), dimensions to match (head width and depth for a stack base, existing cabs it stacks with), and where it lives (climate, hardwood line only, feeds the wood-movement check).
+- **Connections**: jack configuration: mono, mono with a parallel out, or stereo (2x12 only, one driver per chamber).
 - **Aesthetics**: wood species or tolex color, grill cloth, piping, corners, handle type, jack plate, logo.
-- **Speaker**: chosen from the catalog, customer supplied (datasheet link if available), or recommend.
+- **Speaker**: chosen from the catalog with an impedance preference (8 or 16 ohm), customer supplied (datasheet link if available, impedance stated), or recommend.
 
-**Site note.** Guitars and pedals are not on the site's quote form. The skill's retrospective template has a line to record site-form gaps. Changing the site is out of scope.
+**Site note.** Guitars, pedals, jack configuration, and placement are not on the site's quote form. The skill's retrospective template has a line to record site-form gaps. Changing the site is out of scope.
 
 ## Unit 1b: Voicing engine
 
@@ -72,13 +74,14 @@ From the Rig block the skill writes a **tone target** into `brief.md` and into `
     "top": "chimey | smooth | dark",
     "breakup": "early | moderate | clean",
     "dispersion": "focused | wide",
+    "placement": "floor | raised | tilted",
     "min_power_w": 0,
     "impedance_options_ohm": [4, 8, 16]
   }
 }
 ```
 
-Rules that produce it live in [[speaker-cab-voicing]]: amp family to tendencies, genre and approach to targets, pickups to adjustments, dirt pedals to breakup and low-end adjustments, venue and mic'd-or-not to dispersion. The skill then ranks catalog speakers against the target using each speaker note's descriptors, chooses a back type, and writes one reason line per choice. Brian approves the voicing before any CAD. The approval is recorded in the "Decisions locked" block of `brief.md`.
+Rules that produce it live in [[speaker-cab-voicing]]: amp family to tendencies, genre and approach to targets, pickups to adjustments, dirt pedals to breakup and low-end adjustments, venue and mic'd-or-not to dispersion, placement to the low end (on the floor shifts `low_end` one step toward tight because floor coupling adds low end, tilted counts as raised). The skill then ranks catalog speakers against the target using each speaker note's descriptors, chooses a back type, and writes one reason line per choice. Brian approves the voicing before any CAD. The approval is recorded in the "Decisions locked" block of `brief.md`.
 
 **Power rule.** `min_power_w` is 1.5 times the highest rated amp power. Hard stop if total speaker handling is below the amp's rated power. Warning if below `min_power_w`. A target of `breakup: early` may accept the warning explicitly, and the acceptance is written into "Decisions locked".
 
@@ -96,9 +99,9 @@ Importable module and CLI. All internal units SI (m, m3, Hz, ohm); reports in mm
 - `port_dims(vb_net, fb, diameter or slot w x h)`: Helmholtz, L = (c^2 * A) / (4 * pi^2 * Fb^2 * Vb) minus end correction 0.85 times the effective diameter (one flanged end, one free). Slot ports use the effective diameter of their area. Speed of sound c = 343 m/s.
 - `port_air_speed(driver, fb, area)`: worst case v = Sd * Xmax * 2 * pi * Fb / A. Limit 17 m/s. Above the limit the script enlarges the port and re-solves the length.
 - `open_back(baffle_w, baffle_h, depth, open_fraction, driver_center)`: path = depth plus the distance from the driver center to the nearest open edge of the back. f_cancel = c / (2 * path). Reports f_cancel and a 6 dB per octave roll-off below it relative to the closed response. Open fraction 0.40 of the back area for open-back and 0.25 for semi-open, split as two horizontal panels top and bottom, from [[speaker-cab-construction]].
-- `wiring(drivers, taps)`: series and parallel results for two drivers, matched against the amp taps, with warnings for unequal impedance or sensitivity greater than 2 dB apart. Also emits the jack plate wiring text.
+- `wiring(drivers, taps, jack_config)`: mono gives series and parallel results for two drivers matched against the amp taps; mono with parallel out adds the second jack in parallel; stereo gives one driver per jack at the driver's own impedance. Warnings for unequal impedance or sensitivity greater than 2 dB apart. Also emits the jack plate wiring text.
 - `alignment_character(qtc or peak)`: closed: Qtc below 0.6 lean, 0.6 to 0.8 tight, 0.8 to 1.0 balanced, 1.0 to 1.2 big, above 1.2 peaky. Ported: peak height below 1 dB flat, 1 to 3 dB punchy, above 3 dB boomy. These words are the bridge back to the tone target.
-- Two drivers share one chamber. Per-driver Vb is total net volume divided by two.
+- Two drivers share one chamber unless the jack configuration is stereo. Stereo splits the box with a divider into two equal chambers, one driver each, and each chamber is voiced as a 1x12 with its own port when ported. Per-driver Vb is total net volume divided by two in both cases.
 - Net volume = gross internal volume minus driver displacement (from the speaker note, default 1.5 L with `estimated` flag), minus brace volume (from CAD), minus port volume.
 
 **Modes.**
@@ -150,20 +153,20 @@ Body sections: Character (tone descriptors in the tone-target vocabulary), Best 
 
 **Shape.** Shared library `scripts/cabmodel.py` (build123d). Each order has a thin `projects/Cab-<...>/cab.py` that sets parameters from `voicing.json` and the aesthetics block, calls the library, fills the `PARTS` registry (`name`, `solid`, `qty`, `material`, `notes`), runs asserts, and calls `scripts/cutlist.py`. Same env gates as furniture: `TMP_STL`, `EXPORT`, `SHOW`.
 
-**Parameters.** External W, H, D; panel thickness; line; driver count, cutout diameter, bolt circle and count (from the speaker note); back type; port (shape round or slot, location rear or front, dimensions); grill frame inset; jack plate cutout and position; handle type and position; corner hardware allowance; feet; bracing; open-back panel heights.
+**Parameters.** External W, H, D; panel thickness; line; driver count, cutout diameter, bolt circle and count (from the speaker note); back type; port (shape round or slot, location rear or front, dimensions); grill frame inset; jack configuration, jack plate cutouts and positions; handle type and position; corner hardware allowance; feet or tilt-back legs; bracing; chamber divider; open-back panel heights.
 
 **Construction defaults** (starting values, held in [[speaker-cab-construction]] with `status: unverified-starting-values`, corrected by Brian):
 
 - **Tolex line**: 18 mm Baltic birch shell (top, bottom, two sides) with finger joints at all four shell corners. Fingers are modeled in CAD so the assembly render and STEP are truthful. Cut list parts stay rectangular blanks with a finger machining note. Default finger width 18 mm.
 - **Hardwood line**: four corner posts 38 x 38 mm with the side, top, and bottom panels (19 mm resawn) tenoned through the posts, glued and pinned. Panels declared book-matched with show face and grain direction in the plan phase.
-- **Both**: floating 18 mm birch baffle on 18 x 18 mm cleats with felt isolation strips, set back 20 mm from the front edge. Separate grill frame from 18 x 40 mm strips, cloth wrapped, retained with hook and loop to the baffle. Closed back: 12 mm birch back panel screwed to cleats, removable, with the port and jack plate in it when rear-ported. Open back: two horizontal 12 mm panels top and bottom sized from the open fraction, jack plate in the lower panel. Front slot port: the baffle stops short of the bottom panel, leaving a full-width slot whose depth is set by a shelf behind it, so port length equals shelf depth. Rear round port: a flanged tube through the back panel. Recessed jack plate. Center vertical brace 18 x 60 mm between top and bottom on every 2x12. Handle: top center strap on the tolex line, recessed side handles on the hardwood line, in both cases positioned over the loaded center of mass.
+- **Both**: floating 18 mm birch baffle on 18 x 18 mm cleats with felt isolation strips, set back 20 mm from the front edge. Separate grill frame from 18 x 40 mm strips, cloth wrapped, retained with hook and loop to the baffle. Closed back: 12 mm birch back panel screwed to cleats, removable, with the port and jack plate in it when rear-ported. Open back: two horizontal 12 mm panels top and bottom sized from the open fraction, jack plate in the lower panel. Front slot port: the baffle stops short of the bottom panel, leaving a full-width slot whose depth is set by a shelf behind it, so port length equals shelf depth. Rear round port: a flanged tube through the back panel. Recessed jack plate. Center vertical brace 18 x 60 mm between top and bottom on every mono 2x12. Stereo 2x12: a full-height, full-depth 18 mm divider replaces the brace, with one jack plate and, when ported, one port per chamber. Mono with parallel out: one plate carrying two jacks wired in parallel. Tilt-back legs on the tolex line when placement is tilted. Handle: top center strap on the tolex line, recessed side handles on the hardwood line, in both cases positioned over the loaded center of mass.
 - **Tolex wrap**: not a part. The cut list gains a tolex yardage line computed from the external surface area plus 15 percent, on the 54 in or 32 in roll width from the site's material list.
 
 **Derived quantities.** Weight from part volumes times material density (birch ply 680 kg/m3, species densities in the construction note) plus speaker weight plus 1 kg hardware. Center of mass from the same masses with the speaker at the baffle. Head match: external width equals the head width plus 0 to 10 mm.
 
 **Renders.** `scripts/render_stl.py` four views plus an exploded view. No photoreal finishes. The proposal uses the swatch images from the MaximoCabs repo (`public/materials/`), copied into the order's `images/`.
 
-**Verification.** The library reproduces the site's default 20 x 18 x 11 in 1x12 closed-back within 1 mm on every external dimension. Asserts per order: net internal volume within 5 percent of the voicing target, no interference between port, magnet, brace, and back, magnet depth to back panel clearance at least 25 mm, cutout diameter equals the speaker note, handle within 15 mm of the center of mass on the width axis, expected part count, every part's bounding box within stock limits.
+**Verification.** The library reproduces the site's default 20 x 18 x 11 in 1x12 closed-back within 1 mm on every external dimension. Asserts per order: net internal volume within 5 percent of the voicing target, no interference between port, magnet, brace, and back, magnet depth to back panel clearance at least 25 mm, cutout diameter equals the speaker note, handle within 15 mm of the center of mass on the width axis, expected part count, every part's bounding box within stock limits, and for stereo the two chamber volumes equal within 1 percent.
 
 ## Unit 3: The `/speaker-cab` skill
 
@@ -175,7 +178,7 @@ Body sections: Character (tone descriptors in the tone-target vocabulary), Best 
 2. **Voicing**: Unit 1b. Ends with the tone target, ranked speakers with reasons, back type, `voicing.json`, `voicing.md`, and Brian's approval in "Decisions locked". No CAD before this approval.
 3. **Plan**: ordered part list, joinery per connection, grain and show faces, hardware positions, port location.
 4. **Build loop**: `cab.py`, per-feature render viewed as PNG, asserts, identical to the furniture loop.
-5. **Buildability and acoustic check**: the furniture table's seven rows (stock thickness, rectangularity, grain and show face, joinery fit, stock yield with 3 mm kerf, wood movement, transport) plus: net volume within 5 percent, port clearance, magnet to back clearance, handle over center of mass, impedance and power versus amp, weight versus customer limit, head width match, port air speed, internal dimension ratio advisory. Each row gets a verdict line.
+5. **Buildability and acoustic check**: the furniture table's seven rows (stock thickness, rectangularity, grain and show face, joinery fit, stock yield with 3 mm kerf, wood movement, transport) plus: net volume within 5 percent, port clearance, magnet to back clearance, handle over center of mass, impedance and power versus amp, weight versus customer limit, head width match, port air speed, internal dimension ratio advisory, and for stereo equal chambers and per-chamber port clearance. Each row gets a verdict line.
 6. **Export**: `cutlist.md` and `cutlist.csv` (with the tolex yardage line), `cab.step`, `images/` renders, `voicing.md`, `proposal.md`.
 7. **Handoff**: `brief.md` updated with paths and locked decisions, `.claude/context-check/last-handoff.md` written, git commit and push.
 8. **After the build**: retrospective in `knowledge/learnings/cab-<customer>-<config>.md` using the listening-notes template. The notes are appended, dated, to the Field notes section of the speaker's note. Any corrected construction default is promoted into [[speaker-cab-construction]]. Memory updated when a rule changes.
@@ -194,14 +197,14 @@ Body sections: Character (tone descriptors in the tone-target vocabulary), Best 
 ## Knowledge base
 
 - `knowledge/speaker-cab-construction.md`: materials and thicknesses, species densities, joinery per line, baffle and cleats, bracing, driver cutouts, grill frame, back panels and open fraction, port construction, jack plate, handles, corners, feet, tolex wrap and seam rules, weight and center of mass method.
-- `knowledge/speaker-cab-voicing.md`: tone target vocabulary, enclosure type rules (closed, ported, open, semi-open), amp family table, genre and approach table, pickup adjustments, dirt pedal adjustments, venue and mic'd rules, power and impedance rules with the safety factor, alignment character thresholds, the calibration table of the site's default box with each seed speaker.
+- `knowledge/speaker-cab-voicing.md`: tone target vocabulary, enclosure type rules (closed, ported, open, semi-open), amp family table, genre and approach table, pickup adjustments, dirt pedal adjustments, venue and mic'd rules, placement rule, jack configuration and stereo rule, power and impedance rules with the safety factor, alignment character thresholds, the calibration table of the site's default box with each seed speaker.
 - `knowledge/speakers/<slug>.md`: the catalog above.
 
 All three start with `status: unverified-starting-values`, the same convention as [[woodworking-stock]]. Every number carries a source URL. Datasheets are gathered by web research during implementation. Where a source is missing, the value is marked `estimated` with the reasoning, and the script's output carries the flag forward.
 
 ## Testing
 
-- `scripts/tests/test_cabvoice.py`: closed-box Vb for Qtc 0.707 against Vb = Vas / ((Qtc / Qts)^2 - 1); Helmholtz port length against a hand-computed case; ported alignment against Eminence's published cabinet recommendations for two seed speakers where they exist, otherwise against a hand-computed reference case, within 10 percent on volume and tuning; port air speed and enlargement; open-back cancellation frequency; wiring and impedance cases including mismatches; frontmatter schema validation for every note in `knowledge/speakers/`.
+- `scripts/tests/test_cabvoice.py`: closed-box Vb for Qtc 0.707 against Vb = Vas / ((Qtc / Qts)^2 - 1); Helmholtz port length against a hand-computed case; ported alignment against Eminence's published cabinet recommendations for two seed speakers where they exist, otherwise against a hand-computed reference case, within 10 percent on volume and tuning; port air speed and enlargement; open-back cancellation frequency; wiring and impedance cases for mono, parallel out, and stereo including mismatches; stereo chamber split; frontmatter schema validation for every note in `knowledge/speakers/`.
 - Generator: the asserts above, run via `cab.py`, plus a fixture order that reproduces the site default.
 - Skill: dry run on the sample intake from the site's tests (roots and alt-country, low-volume gigs, small clubs, tight low end and rolled highs, Celestion G12H 16 ohm) ending with every deliverable file present and the check table filled.
 

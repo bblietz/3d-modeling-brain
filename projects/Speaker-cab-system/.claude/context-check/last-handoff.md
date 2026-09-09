@@ -1,7 +1,7 @@
 # Handoff: Speaker-cab-system (2026-09-08)
 
 ## State
-Brainstorming complete via /superpowers:brainstorming. Design spec written and committed at
+Brainstorming complete via /superpowers:brainstorming. Intake fields revised 2026-09-09 (stereo 2x12, placement, impedance, primary amp, climate added; three fields dropped). Design spec written and committed at
 projects/Speaker-cab-system/2026-09-08-speaker-cab-system-design.md. Awaiting Brian's review of the
 written spec, then invoke superpowers:writing-plans to produce the implementation plan (three phases:
 knowledge base and engine, generator, skill).
