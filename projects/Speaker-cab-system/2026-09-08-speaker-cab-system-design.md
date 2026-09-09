@@ -140,12 +140,12 @@ bolt_count: 4
 depth_mm: 0
 weight_kg: 0.0
 displacement_l: 1.5
-data_status: datasheet | estimated | missing
+data_status: datasheet | third-party | analog | estimated | missing
 sources: [https://...]
 status: unverified-starting-values
 ```
 
-Body sections: Character (tone descriptors in the tone-target vocabulary), Best with (amp families, genres), Field notes (listening notes appended after builds, dated). Zero values above are placeholders only in this spec. In the vault every value comes from a datasheet URL or is marked `estimated` with the reasoning.
+Body sections: Character (tone descriptors in the tone-target vocabulary), Best with (amp families, genres), Field notes (listening notes appended after builds, dated). Amendment 2026-09-09 (planning research): Celestion publishes no Thiele-Small data beyond Fs and Re, so `third-party` (an independent measurement) and `analog` (scaled from a measured relative, with `analog_of`) were added to the status values; the seed list gained the Heritage G12H(55) as the measured analog source. Zero values above are placeholders only in this spec. In the vault every value comes from a datasheet URL or is marked `estimated` with the reasoning.
 
 **Seed list.** Site speakers: Celestion G12H-30 Anniversary (the site's "G12H Greenback", confirm with Brian), Celestion Vintage 30, Eminence Cannabis Rex, WGS Veteran 30, Celestion Blue, Celestion Gold, Eminence Tonker. Alternatives: Celestion G12M-25 Greenback, G12M-65 Creamback, G12H-75 Creamback, Celestion Cream, Celestion G12-65 Heritage, Jensen P12N, Jensen C12N, Eminence Swamp Thang, Eminence Texas Heat, Eminence Red White and Blues, WGS ET65, WGS Green Beret. Customer-supplied speakers get a new note from their datasheet.
 
