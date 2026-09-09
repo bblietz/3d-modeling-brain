@@ -294,6 +294,14 @@ def test_size_port_grows_when_too_short(drv):
 def test_size_port_keeps_warning_at_max_size(drv):
     # 100 L at 100 Hz would need a port over 360 mm across
     p = cabvoice.size_port(drv, 100.0, 100.0, diameter_mm=75.0)
-    assert p.diameter_mm <= cabvoice.MAX_PORT_DIAMETER_MM * 1.05
+    assert p.diameter_mm == cabvoice.MAX_PORT_DIAMETER_MM
     assert p.length_mm == cabvoice.MIN_PORT_LENGTH_MM
+    assert any("too short" in w for w in p.warnings)
+
+
+def test_size_port_slot_stops_at_max_area(drv):
+    p = cabvoice.size_port(drv, 100.0, 100.0, slot_mm=(200.0, 22.09))
+    max_area_cm2 = math.pi * (cabvoice.MAX_PORT_DIAMETER_MM / 20.0) ** 2
+    assert p.area_cm2 == pytest.approx(max_area_cm2, abs=1e-6)
+    assert p.slot_h_mm == pytest.approx(max_area_cm2 * 100.0 / 200.0, abs=1e-6)
     assert any("too short" in w for w in p.warnings)

@@ -416,12 +416,12 @@ def size_port(driver: Driver, vb_l: float, fb_hz: float,
     for _ in range(60):
         too_fast = port.air_speed_ms > PORT_V_MAX
         too_short = any("too short" in w for w in port.warnings)
-        if not (too_fast or too_short) or port.area_cm2 >= max_area_cm2:
+        if not (too_fast or too_short) or port.area_cm2 >= max_area_cm2 - 1e-9:
             break
         if slot_mm:
-            slot_mm = (slot_mm[0], slot_mm[1] * 1.1)
+            slot_mm = (slot_mm[0], min(slot_mm[1] * 1.1, max_area_cm2 * 100.0 / slot_mm[0]))
         else:
-            diameter_mm *= math.sqrt(1.1)
+            diameter_mm = min(diameter_mm * math.sqrt(1.1), MAX_PORT_DIAMETER_MM)
         port = build(diameter_mm, slot_mm)
     if port.air_speed_ms > PORT_V_MAX:
         port.warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s still above "
