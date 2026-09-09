@@ -459,6 +459,8 @@ def open_back(internal_w_mm: float, internal_h_mm: float, internal_d_mm: float,
     path from a centered driver runs out the side: depth + width / 2."""
     if not 0.0 < open_fraction < 1.0:
         raise ValueError("open_fraction must be between 0 and 1")
+    if min(internal_w_mm, internal_h_mm, internal_d_mm) <= 0:
+        raise ValueError("internal dimensions must be positive")
     path_m = (internal_d_mm + internal_w_mm / 2.0) / 1e3
     f_cancel = C_SOUND / (2.0 * path_m)
     panel_height = (1.0 - open_fraction) * internal_h_mm / 2.0

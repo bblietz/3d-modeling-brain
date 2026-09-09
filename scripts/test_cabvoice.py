@@ -335,3 +335,10 @@ def test_open_fraction_table():
 def test_open_back_rejects_bad_fraction():
     with pytest.raises(ValueError):
         cabvoice.open_back(472.0, 421.2, 229.4, 1.5)
+
+
+def test_open_back_rejects_non_positive_dimensions():
+    with pytest.raises(ValueError, match="dimensions"):
+        cabvoice.open_back(472.0, 421.2, 0.0, 0.40)
+    with pytest.raises(ValueError, match="dimensions"):
+        cabvoice.open_back(472.0, 421.2, -300.0, 0.40)
