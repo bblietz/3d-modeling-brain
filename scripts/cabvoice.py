@@ -657,20 +657,31 @@ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = Non
     """Internal dimensions for a gross volume, starting from the site box
     proportions. Fixed axes come from a pinned width, the two-driver minimum
     width, or external limits; free axes scale together to hit the volume."""
+    if gross_l <= 0:
+        raise ValueError("gross_l must be positive")
     target = gross_l * 1e6
     base = list(site_default_box(**panel_kwargs).internal_mm)
     scale = (target / (base[0] * base[1] * base[2])) ** (1.0 / 3.0)
     dims = [x * scale for x in base]
     fixed = [False, False, False]
+    conflicts = []
     if pinned_external_width_mm is not None:
         dims[0] = internal_from_external((pinned_external_width_mm, 0, 0), **panel_kwargs)[0]
         fixed[0] = True
     if min_internal_width_mm is not None and dims[0] < min_internal_width_mm:
+        if fixed[0]:
+            conflicts.append(
+                f"pinned width {pinned_external_width_mm:g} mm external is below the "
+                f"{min_internal_width_mm:g} mm internal minimum for the driver count; using the minimum")
         dims[0] = min_internal_width_mm
         fixed[0] = True
     max_internal = None
     if max_external_mm is not None:
         max_internal = internal_from_external(max_external_mm, **panel_kwargs)
+        if fixed[0] and dims[0] > max_internal[0]:
+            raise ValueError(
+                f"width {dims[0]:.0f} mm internal (pinned or the driver-count minimum) "
+                f"exceeds the size limit {max_internal[0]:.0f} mm")
 
     def rescale():
         free = [i for i in range(3) if not fixed[i]]
@@ -705,4 +716,6 @@ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = Non
         raise ValueError(
             f"cannot reach {gross_l:.1f} L within the limits; "
             f"achievable {achieved / 1e6:.1f} L")
-    return make_box(tuple(dims), **panel_kwargs)
+    box = make_box(tuple(dims), **panel_kwargs)
+    box.warnings = conflicts + box.warnings
+    return box

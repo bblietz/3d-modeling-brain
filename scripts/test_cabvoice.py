@@ -472,3 +472,23 @@ def test_dimension_ratio_warnings():
     assert cabvoice.dimension_ratio_warnings((472.0, 400.0, 300.0)) == []
     assert any("2:1" in w for w in cabvoice.dimension_ratio_warnings((472.0, 421.2, 229.4)))
     assert any("1:1" in w for w in cabvoice.dimension_ratio_warnings((400.0, 400.0, 300.0)))
+
+
+def test_dims_for_volume_warns_when_pinned_width_below_minimum():
+    box = cabvoice.dims_for_volume(60.0, pinned_external_width_mm=508.0, min_internal_width_mm=641.0)
+    assert box.internal_mm[0] == pytest.approx(641.0)
+    assert any("pinned width" in w for w in box.warnings)
+
+
+def test_dims_for_volume_rejects_fixed_width_over_limit():
+    with pytest.raises(ValueError, match="size limit"):
+        cabvoice.dims_for_volume(90.0, pinned_external_width_mm=700.0, max_external_mm=(600.0, 457.2, 400.0))
+    with pytest.raises(ValueError, match="size limit"):
+        cabvoice.dims_for_volume(90.0, min_internal_width_mm=641.0, max_external_mm=(600.0, 457.2, 400.0))
+
+
+def test_dims_for_volume_rejects_non_positive_volume():
+    with pytest.raises(ValueError, match="gross_l"):
+        cabvoice.dims_for_volume(0.0)
+    with pytest.raises(ValueError, match="gross_l"):
+        cabvoice.dims_for_volume(-10.0)
