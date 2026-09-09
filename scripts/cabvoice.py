@@ -40,6 +40,7 @@ TS_FIELDS = ("qts", "qes", "qms", "vas_l", "xmax_mm", "sd_cm2")
 POSITIVE_FIELDS = (
     "diameter_in", "power_w", "sensitivity_db", "fs_hz", "re_ohm",
     "cutout_mm", "bolt_circle_mm", "bolt_count", "depth_mm", "weight_kg", "le_mh",
+    "displacement_l",
 ) + TS_FIELDS
 
 

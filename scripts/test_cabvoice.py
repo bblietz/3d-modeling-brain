@@ -99,6 +99,13 @@ def test_validate_speaker_requires_ts_when_datasheet():
     assert any("vas_l" in e for e in errors)
 
 
+def test_validate_speaker_rejects_bad_displacement():
+    meta = cabvoice.parse_frontmatter(FIXTURE_NOTE)
+    meta["displacement_l"] = -1.5
+    errors = cabvoice.validate_speaker(meta)
+    assert any("displacement_l" in e for e in errors)
+
+
 def test_load_speaker_builds_driver(drv):
     assert drv.slug == "test-driver"
     assert drv.has_ts()
