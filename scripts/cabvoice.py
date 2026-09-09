@@ -470,3 +470,111 @@ def open_back(internal_w_mm: float, internal_h_mm: float, internal_d_mm: float,
         panel_height_mm=panel_height, response=response,
         character=f"open, wide dispersion, 6 dB per octave below {f_cancel:.0f} Hz relative to closed",
     )
+
+
+# ---------------------------------------------------------------------------
+# Wiring and power
+# ---------------------------------------------------------------------------
+
+JACK_CONFIGS = ("mono", "mono-parallel-out", "stereo")
+POWER_SAFETY_FACTOR = 1.5
+
+
+@dataclass
+class WiringOption:
+    name: str
+    impedance_ohm: float
+    matches_tap: bool
+    jack_text: str
+
+
+@dataclass
+class WiringResult:
+    jack_config: str
+    options: list
+    recommended: WiringOption | None
+    warnings: list
+
+
+def _matches_tap(z: float, taps: list) -> bool:
+    return any(abs(z - t) / t <= 0.01 for t in taps)
+
+
+def wiring(impedances: list, taps: list, jack_config: str = "mono",
+           sensitivities: list | None = None) -> WiringResult:
+    if jack_config not in JACK_CONFIGS:
+        raise ValueError(f"jack_config must be one of {JACK_CONFIGS}")
+    n = len(impedances)
+    if n not in (1, 2):
+        raise ValueError("wiring supports one or two drivers")
+    if jack_config == "stereo" and n != 2:
+        raise ValueError("stereo needs two drivers")
+    warnings, options = [], []
+    if sensitivities and n == 2 and abs(sensitivities[0] - sensitivities[1]) > 2.0:
+        warnings.append(
+            f"sensitivity mismatch {sensitivities[0]:g} vs {sensitivities[1]:g} dB: "
+            "the louder driver will dominate")
+    if jack_config == "stereo":
+        for i, z in enumerate(impedances, start=1):
+            options.append(WiringOption(
+                f"stereo side {i}", float(z), _matches_tap(z, taps),
+                f"Jack {i}: driver {i} alone, {z:g} ohm"))
+        recommended = options[0] if all(o.matches_tap for o in options) else None
+    elif n == 1:
+        z = float(impedances[0])
+        options.append(WiringOption("single", z, _matches_tap(z, taps),
+                                    f"Single driver, {z:g} ohm"))
+        recommended = options[0] if options[0].matches_tap else None
+    else:
+        z1, z2 = (float(z) for z in impedances)
+        if z1 != z2:
+            warnings.append(
+                f"unequal impedances {z1:g} and {z2:g} ohm split power unevenly; "
+                "use matching drivers")
+        par = 1.0 / (1.0 / z1 + 1.0 / z2)
+        ser = z1 + z2
+        options.append(WiringOption(
+            "parallel", par, _matches_tap(par, taps),
+            f"Parallel: jack + to both driver +, jack - to both driver -, {par:g} ohm"))
+        options.append(WiringOption(
+            "series", ser, _matches_tap(ser, taps),
+            "Series: jack + to driver 1 +, driver 1 - to driver 2 +, "
+            f"driver 2 - to jack -, {ser:g} ohm"))
+        recommended = next((o for o in options if o.matches_tap), None)
+    if jack_config == "mono-parallel-out":
+        warnings.append(
+            "Parallel out: an external cabinet halves the combined load; set the amp tap "
+            "to the combined impedance, not this cabinet's alone.")
+    if recommended is None:
+        warnings.append(f"no wiring option matches amp taps {list(taps)}")
+    return WiringResult(jack_config, options, recommended, warnings)
+
+
+@dataclass
+class PowerCheck:
+    total_handling_w: float
+    amp_power_w: float
+    min_power_w: float
+    status: str
+    message: str
+
+
+def power_check(handling_w: list, amp_power_w: float, breakup: str = "moderate",
+                accept_low_headroom: bool = False) -> PowerCheck:
+    """Hard stop below the amp's rated power, warning below 1.5 times it.
+    An early-breakup target may accept the warning explicitly."""
+    total = float(sum(handling_w))
+    minimum = POWER_SAFETY_FACTOR * amp_power_w
+    if total < amp_power_w:
+        return PowerCheck(total, amp_power_w, minimum, "stop",
+                          f"speaker handling {total:g} W is below the amp's {amp_power_w:g} W")
+    if total < minimum:
+        if breakup == "early" and accept_low_headroom:
+            return PowerCheck(total, amp_power_w, minimum, "ok",
+                              f"handling {total:g} W is under the {minimum:g} W target; "
+                              "accepted for early breakup")
+        return PowerCheck(total, amp_power_w, minimum, "warning",
+                          f"handling {total:g} W is under the {minimum:g} W target "
+                          f"({POWER_SAFETY_FACTOR} x amp power)")
+    return PowerCheck(total, amp_power_w, minimum, "ok",
+                      f"handling {total:g} W clears the {minimum:g} W target")

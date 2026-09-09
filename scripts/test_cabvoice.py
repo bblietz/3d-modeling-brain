@@ -342,3 +342,72 @@ def test_open_back_rejects_non_positive_dimensions():
         cabvoice.open_back(472.0, 421.2, 0.0, 0.40)
     with pytest.raises(ValueError, match="dimensions"):
         cabvoice.open_back(472.0, 421.2, -300.0, 0.40)
+
+
+# ---- Task 6: wiring and power -------------------------------------------
+
+def test_wiring_two_sixteens_parallel_to_eight():
+    res = cabvoice.wiring([16, 16], [4, 8, 16], "mono")
+    names = {o.name: o for o in res.options}
+    assert names["parallel"].impedance_ohm == pytest.approx(8.0)
+    assert names["parallel"].matches_tap
+    assert names["series"].impedance_ohm == pytest.approx(32.0)
+    assert not names["series"].matches_tap
+    assert res.recommended.name == "parallel"
+    assert res.warnings == []
+
+
+def test_wiring_two_eights_prefers_parallel_when_both_match():
+    res = cabvoice.wiring([8, 8], [4, 8, 16], "mono")
+    assert res.recommended.name == "parallel"
+    assert res.recommended.impedance_ohm == pytest.approx(4.0)
+
+
+def test_wiring_single_driver_no_matching_tap():
+    res = cabvoice.wiring([16], [8], "mono")
+    assert res.recommended is None
+    assert any("no wiring option matches" in w for w in res.warnings)
+
+
+def test_wiring_unequal_impedances_warn():
+    res = cabvoice.wiring([8, 16], [4, 8, 16], "mono")
+    assert any("unequal" in w for w in res.warnings)
+    assert res.recommended is None
+
+
+def test_wiring_sensitivity_mismatch_warns():
+    res = cabvoice.wiring([16, 16], [8], "mono", sensitivities=[100.0, 97.0])
+    assert any("sensitivity" in w for w in res.warnings)
+
+
+def test_wiring_stereo_one_option_per_side():
+    res = cabvoice.wiring([8, 8], [8], "stereo")
+    assert [o.name for o in res.options] == ["stereo side 1", "stereo side 2"]
+    assert res.recommended is not None
+    with pytest.raises(ValueError):
+        cabvoice.wiring([8], [8], "stereo")
+
+
+def test_wiring_parallel_out_adds_note():
+    res = cabvoice.wiring([16, 16], [8], "mono-parallel-out")
+    assert any("Parallel out" in w for w in res.warnings)
+
+
+def test_wiring_rejects_bad_config_and_count():
+    with pytest.raises(ValueError):
+        cabvoice.wiring([8], [8], "quad")
+    with pytest.raises(ValueError):
+        cabvoice.wiring([8, 8, 8], [8], "mono")
+
+
+def test_power_check_rule():
+    stop = cabvoice.power_check([15], 30)
+    assert stop.status == "stop" and stop.min_power_w == 45
+    warn = cabvoice.power_check([15, 15], 30)
+    assert warn.status == "warning"
+    accepted = cabvoice.power_check([15, 15], 30, breakup="early", accept_low_headroom=True)
+    assert accepted.status == "ok" and "accepted" in accepted.message
+    not_accepted = cabvoice.power_check([15, 15], 30, breakup="clean", accept_low_headroom=True)
+    assert not_accepted.status == "warning"
+    ok = cabvoice.power_check([60], 30)
+    assert ok.status == "ok" and ok.total_handling_w == 60
