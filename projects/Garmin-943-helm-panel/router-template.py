@@ -2,10 +2,11 @@
 
 Bearing-guided bit rides the window edge, so the window is exactly the
 Garmin cutout. Four drill guides locate the bezel screw pilots. Print flat,
-counterbored face up. See brief.md for the source of every Garmin number.
+counterbored face up. +Y is the unit's top; the template says TOP on the
+counterbored face. See brief.md for the source of every Garmin number.
 
 Run:  .venv/bin/python projects/Garmin-943-helm-panel/router-template.py
-Env:  STAGE=n builds only the first n features (1..6) and exports a scratch
+Env:  STAGE=n builds only the first n features (1..7) and exports a scratch
       STL for the per-feature render. SHOW=1|reset pushes to the OCP viewer.
 """
 import os
@@ -14,11 +15,15 @@ import zipfile
 
 from build123d import *
 
-# ---- Garmin 9x3 flush template (mm) ----
+# ---- Garmin 9x3 flush template 190-02761-05_0D (mm) ----
 CUTOUT_W = 222.4
 CUTOUT_H = 139.0
 HOLE_PITCH_X = 190.9
 HOLE_PITCH_Y = 150.5
+# The drawn hole pattern is not centered on the cutout: its center sits 1.24 mm
+# toward the unit's bottom (top holes 4.5 mm above the cutout, bottom holes 7.0 mm
+# below). Measured from the PDF vectors on 2026-09-09.
+HOLE_SHIFT = 1.24
 PILOT_DRILL = 2.3  # Garmin pilot for wood or plastic
 
 # ---- Template design (mm) ----
@@ -26,16 +31,19 @@ FRAME_SIDE = 15.0  # frame width left and right
 FRAME_TOPBOT = 25.0  # frame width top and bottom
 THICK = 12.0  # bearing up to about 10 mm rides fully on the edge
 GUIDE_DIA = 2.8  # prints about 2.5, clears a 2.3 to 2.4 mm bit
-CBORE_DIA = 7.0
+CBORE_DIA = 6.0  # 7.0 would leave only 1.0 mm between the top counterbores and the window
 CBORE_DEPTH = 6.0  # leaves a 6 mm guide at the panel side
 FIX_HOLE_DIA = 4.0
 FIX_HOLE_OFFSET = 6.0  # outside the window edge, under the bezel overlap
 NOTCH_DEPTH = 2.0  # 90 degree V at each outer edge midpoint
 EF_CHAMFER = 0.6  # bed-side window edge, elephant foot relief
+TEXT_DEPTH = 0.8  # TOP deboss on the counterbored face
+TEXT_SIZE = 8.0
 
 OUTER_W = CUTOUT_W + 2 * FRAME_SIDE  # 252.4
 OUTER_H = CUTOUT_H + 2 * FRAME_TOPBOT  # 189.0
 BED = 256.0
+HOLE_Y = {1: HOLE_PITCH_Y / 2 - HOLE_SHIFT, -1: -HOLE_PITCH_Y / 2 - HOLE_SHIFT}  # +Y is the unit's top
 
 PROJECT = "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Garmin-943-helm-panel"
 NAME = "router-template"
@@ -43,7 +51,7 @@ NAME = "router-template"
 ON_BED = (Align.CENTER, Align.CENTER, Align.MIN)
 
 
-def build(upto=6):
+def build(upto=7):
     # 1. base plate on Z=0
     part = Box(OUTER_W, OUTER_H, THICK, align=ON_BED)
     if upto < 2:
@@ -65,10 +73,10 @@ def build(upto=6):
     if upto < 4:
         return part
 
-    # 4. drill guides with counterbore from the top
+    # 4. drill guides with counterbore from the top, pattern shifted toward the unit's bottom
     for sx in (-1, 1):
         for sy in (-1, 1):
-            x, y = sx * HOLE_PITCH_X / 2, sy * HOLE_PITCH_Y / 2
+            x, y = sx * HOLE_PITCH_X / 2, HOLE_Y[sy]
             part -= Pos(x, y, -1) * Cylinder(GUIDE_DIA / 2, THICK + 2, align=ON_BED)
             part -= Pos(x, y, THICK - CBORE_DEPTH) * Cylinder(CBORE_DIA / 2, CBORE_DEPTH + 1, align=ON_BED)
     if upto < 5:
@@ -89,6 +97,12 @@ def build(upto=6):
         ux, uy = (0, 1) if x == 0 else (1, 0)
         cx, cy = x + ux * d * (1 if x + y > 0 else -1), y + uy * d * (1 if x + y > 0 else -1)
         part -= Pos(cx, cy, -1) * Rot(0, 0, 45) * Box(s, s, THICK + 2, align=ON_BED)
+    if upto < 7:
+        return part
+
+    # 7. TOP deboss in the top band, clear of the fixing hole and the guides
+    label = extrude(Text("TOP", TEXT_SIZE, align=(Align.CENTER, Align.CENTER)), TEXT_DEPTH + 1)
+    part -= Pos(40, CUTOUT_H / 2 + FRAME_TOPBOT / 2 + 2, THICK - TEXT_DEPTH) * label
     return part
 
 
@@ -112,16 +126,20 @@ def check(part):
     big = Pos(0, 0, 1) * Box(CUTOUT_W + 0.1, CUTOUT_H + 0.1, THICK - 2, align=ON_BED)
     assert probe_volume(part, big) > 1.0, "window oversize"
 
-    # each drill guide is clear through the full thickness
+    # each drill guide is clear through the full thickness at the shifted position,
+    # and a pin at the old centered position hits material (the shift really happened)
     for sx in (-1, 1):
         for sy in (-1, 1):
-            pin = Pos(sx * HOLE_PITCH_X / 2, sy * HOLE_PITCH_Y / 2, 0) * Cylinder(
-                GUIDE_DIA / 2 - 0.05, THICK, align=ON_BED
-            )
+            x, y = sx * HOLE_PITCH_X / 2, HOLE_Y[sy]
+            pin = Pos(x, y, 0) * Cylinder(GUIDE_DIA / 2 - 0.05, THICK, align=ON_BED)
             assert probe_volume(part, pin) < 1e-6, "guide blocked"
+            old = Pos(x, sy * HOLE_PITCH_Y / 2, 0) * Cylinder(GUIDE_DIA / 2 - 0.05, THICK - CBORE_DEPTH - 0.1, align=ON_BED)
+            assert probe_volume(part, old) > 0.5, "guide not shifted"
+    # geometry of the shift, as Garmin draws it: 4.5 above the top edge, 7.0 below the bottom edge
+    assert abs((HOLE_Y[1] - CUTOUT_H / 2) - 4.51) < 0.02 and abs((-CUTOUT_H / 2 - HOLE_Y[-1]) - 6.99) < 0.02
 
     # counterbore is open from the top face down to CBORE_DEPTH, guide below it is solid around a 4 mm probe
-    x, y = HOLE_PITCH_X / 2, HOLE_PITCH_Y / 2
+    x, y = HOLE_PITCH_X / 2, HOLE_Y[1]
     cb = Pos(x, y, THICK - CBORE_DEPTH + 0.05) * Cylinder(CBORE_DIA / 2 - 0.05, CBORE_DEPTH - 0.05, align=ON_BED)
     assert probe_volume(part, cb) < 1e-6, "counterbore blocked"
     ring = Pos(x, y, 0) * Cylinder(2.0, THICK - CBORE_DEPTH - 0.05, align=ON_BED)
@@ -134,14 +152,22 @@ def check(part):
         root = Pos(x - nx * 2.5, y - ny * 2.5, 0) * Box(0.2, 0.2, THICK, align=ON_BED)
         assert probe_volume(part, root) > 1e-3, "notch too deep"
 
-    # minimum wall between counterbore and window edge
-    wall = HOLE_PITCH_Y / 2 - CUTOUT_H / 2 - CBORE_DIA / 2
+    # TOP deboss removed material from the top face and nothing below it
+    tx, ty = 40, CUTOUT_H / 2 + FRAME_TOPBOT / 2 + 2
+    slab = Pos(tx, ty, THICK - TEXT_DEPTH + 0.05) * Box(20, TEXT_SIZE, TEXT_DEPTH - 0.05, align=ON_BED)
+    assert probe_volume(part, slab) < 20 * TEXT_SIZE * (TEXT_DEPTH - 0.05) * 0.9, "TOP deboss missing"
+    under = Pos(tx, ty, 0) * Box(20, TEXT_SIZE, THICK - TEXT_DEPTH - 0.05, align=ON_BED)
+    assert abs(probe_volume(part, under) - 20 * TEXT_SIZE * (THICK - TEXT_DEPTH - 0.05)) < 1e-3, "deboss too deep"
+
+    # minimum wall between the top counterbores and the window edge (the tight side)
+    wall = HOLE_Y[1] - CUTOUT_H / 2 - CBORE_DIA / 2
     assert wall >= 1.24, wall
 
-    # volume sanity: frame minus holes, within 2 percent of the analytic frame volume
+    # volume sanity: frame minus holes, within 3 percent of the analytic frame volume
     frame = (OUTER_W * OUTER_H - CUTOUT_W * CUTOUT_H) * THICK
     assert 0.97 * frame < part.volume < frame, (part.volume, frame)
-    return {"size": (size.X, size.Y, size.Z), "volume_cm3": part.volume / 1000, "guide_wall_mm": wall}
+    return {"size": (size.X, size.Y, size.Z), "volume_cm3": part.volume / 1000, "guide_wall_mm": wall,
+            "hole_y": HOLE_Y}
 
 
 def export(part):
@@ -167,9 +193,9 @@ def export(part):
 
 
 if __name__ == "__main__":
-    stage = int(os.environ.get("STAGE", "6"))
+    stage = int(os.environ.get("STAGE", "7"))
     part = build(stage)
-    if stage < 6:
+    if stage < 7:
         out = sys.argv[1] if len(sys.argv) > 1 else f"/tmp/{NAME}-stage{stage}.stl"
         export_stl(part, out)
         print("stage", stage, "->", out, "bbox", part.bounding_box().size)

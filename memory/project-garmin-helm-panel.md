@@ -9,4 +9,6 @@ Brian is replacing the hinged clear cover behind the helm wheel with a fixed bla
 
 **Why:** the compartment opening and perimeter fastening are Brian's to copy from the old cover, so the vault holds only the cutout template and the Garmin mounting data.
 
+Garmin's 9x3 template draws the four screw holes 1.24 mm toward the unit's bottom relative to the cutout (top row 4.5 mm above the cutout, bottom row 7.0 mm below), not centered. The first build assumed centered and had to be fixed; measure hole positions from a template's vector geometry, never derive them from labeled pitches.
+
 **How to apply:** when this comes up again, check `projects/Garmin-943-helm-panel/brief.md` for the Garmin numbers and build results before searching the web again. Verify the window measurement after the print and write the retrospective. Related: [[user-printer-hardware]], [[feedback-minimal-test-coupons]].

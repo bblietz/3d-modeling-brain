@@ -1,4 +1,4 @@
-# Handoff: Garmin 943xsv helm panel, 2026-09-09
+# Handoff: Garmin 943xsv helm panel, 2026-09-09 (revision B)
 
 ## State
 Router template designed, verified, and exported. Nothing printed yet. Brian will rout the panel outline from the old clear cover, so no panel drawing or DXF is needed.
@@ -10,7 +10,8 @@ Files in `projects/Garmin-943-helm-panel/`: `brief.md` (spec, Garmin numbers, bu
 - Garmin flush mount, screws through the bezel edge into the HDPE. No printed bezel frame.
 - Panel outline and perimeter fastening come from the old cover. Out of scope.
 - One printed PLA router template, window exactly 222.4 x 139.0 mm, bearing-guided bit, 12 mm thick, 252.4 x 189.0 mm outside.
-- Drill guides 2.8 mm modeled with 7 x 6 mm counterbores, two optional 4 mm fixing holes on the vertical centerline, four V notches for registration.
+- Drill guides 2.8 mm modeled with 6 x 6 mm counterbores, shifted 1.24 mm toward the unit's bottom as Garmin's template draws them (rows at +74.0 and -76.5 from the window center). TOP debossed on the counterbored face. Two optional 4 mm fixing holes on the vertical centerline, four V notches for registration.
+- Garmin's drawn cutout corners are R3.7, so a 1/4 in bit needs no corner squaring.
 - Vertical cutout placement decided by Brian at layout.
 
 ## Next steps
