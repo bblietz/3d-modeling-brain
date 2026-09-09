@@ -106,7 +106,7 @@ Print settings, 0.6 high-flow nozzle, Bambu PLA Basic, textured PEI at 65 C, bri
 | Preset | Time | Filament |
 |---|---|---|
 | 0.18mm Balanced Quality, ironing off | 1 h 37 min (rev A slice) | 93 g |
-| 0.30mm Standard | see slice log (rev B re-slice) | n/a |
+| 0.30mm Standard | 1h 27m 33s (rev B re-slice) | 96 g |
 
 Either works. Layer height does not change the window accuracy, so 0.30mm Standard is the sensible choice.
 
