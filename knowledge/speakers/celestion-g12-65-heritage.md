@@ -41,6 +41,7 @@ status: unverified-starting-values
 ## Data notes
 
 - Celestion publishes Fs 85 Hz, Re 6.9 (8 ohm) and 11.8 (15 ohm), range 80 to 5000 Hz, 145 mm magnet structure, 4 holes, 128 mm deep, 3.5 kg. No T/S; rule-of-thumb volumes.
+- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
 
 ## Field notes
 

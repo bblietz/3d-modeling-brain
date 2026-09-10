@@ -14,7 +14,7 @@ le_mh: 0.34
 qts: 1.18
 qes: 1.35
 qms: 9.52
-vas_l: 10.5
+vas_l: 22.0
 xmax_mm: 0.8
 sd_cm2: 530
 cutout_mm: 279.4
@@ -43,7 +43,8 @@ WGS's 25 W Greenback style speaker.
 ## Data notes
 
 - WGS prints: Fs 125.3, Re 8.05, Le 0.34, Qes 1.35, Qms 9.52, Qts 1.18, Vas "10.5 cu ft", Sd 366.1, Mms 29.2, BL 11.7, SPL 99.63 dB, mounting as the ET65.
-- Assumptions: Vas taken as 10.5 L; Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. The printed Fs of 125 Hz is high for a Greenback style speaker (Celestion's G12M reads 75 Hz) and may be a new-unit measurement. Estimates.
+- Assumptions: Vas 22.0 L: the printed 10.5 (liters, as for the Veteran 30; its printed Cms of 0.06 mm/N agrees) rescaled by (530 / 366.1)^2 = 2.10 to the assumed Sd; Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. The printed Fs of 125 Hz is high for a Greenback style speaker (Celestion's G12M reads 75 Hz) and may be a new-unit measurement. Estimates.
+- Magnet type, Xmax 0.8 mm, Sd 530 cm2, and the Vas rescale are assumptions stated above, not WGS data; WGS's printed Cms (mm/N) is what confirms the printed Vas is in liters.
 
 ## Field notes
 

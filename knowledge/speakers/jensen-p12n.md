@@ -23,7 +23,7 @@ bolt_count: 8
 depth_mm: 169.4
 weight_kg: 3.1
 data_status: datasheet
-sources: [https://www.jensentone.com/specification-sheet/38, https://www.jensentone.com/dimensions/p12n-dimensional-drawing]
+sources: [https://www.jensentone.com/specification-sheet/38, https://www.jensentone.com/dimensions/p12n-dimensional-drawing, https://www.jensentone.com/vintage-alnico/p12n]
 status: unverified-starting-values
 ---
 
@@ -44,6 +44,7 @@ Vintage alnico, 50 W (100 W musical), 38 mm coil, 826 g alnico magnet.
 
 - 8 ohm T/S from the Jensen spec sheet: Fs 90, Re 6.03, Le 0.87, Qes 0.94, Qms 4.36, Qts 0.77, Vas 34.6 L, Sd 490.9, Xmax 1.0, Mms 30.9 g, BL 10.62. 16 ohm: Fs 91, Re 12, Qts 0.84, Vas 42.2 L, 97.8 dB.
 - Mounting from the dimensional drawing: cutout 277.0, 8 holes 6.5 mm on 293.5, overall 307.0, depth 169.4 mm (88.0 frame plus 81.4 bell), 3.1 kg. No displacement published; the engine assumes 1.5 L.
+- The quote and tone descriptors come from the Jensen product page (https://www.jensentone.com/vintage-alnico/p12n); the historical open-back use is builder lore, unverified.
 
 ## Field notes
 

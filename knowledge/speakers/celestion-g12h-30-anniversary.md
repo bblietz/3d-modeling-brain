@@ -47,6 +47,7 @@ the Heritage G12H(55), is what he stocks; the mounting is identical either way.
 
 - Celestion publishes Fs 85 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 156 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg.
 - T/S values are scaled from [[celestion-heritage-g12h55]] (Fs 54.7): Vas 71.3 x (54.7 / 85)^2 = 29.5 L; Qes 0.39 x 85 / 54.7 = 0.61; Qms 9.48 x 85 / 54.7 = 14.7; Qts = 0.61 x 14.7 / (0.61 + 14.7) = 0.58. Xmax and Sd copied. Treat every prediction from these as an estimate.
+- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
 
 ## Field notes
 
