@@ -12,5 +12,5 @@
 - [Vault GitHub repo](reference-vault-github-repo.md) - private bblietz/3d-modeling-brain, remote origin/main; commit and push after milestones; never commit the printer access code
 - [Garmin helm panel](project-garmin-helm-panel.md) - Starboard panel + printed 943xsv cutout template, built 2026-09-09, awaiting print and test fit
 - [Model dispatch](feedback-model-dispatch.md) - say which model fits each task, flag when Fable 5.1 beats the active model, never switch silently
-- [Speaker cab system](project-speaker-cab-system.md) - MaximoCabs guitar cab capability; plan 1 (cabvoice.py engine, notes, 20-speaker catalog) built and reviewed 2026-09-09; plan 2 generator next, open items in knowledge/learnings/speaker-cab-plan-1.md
+- [Speaker cab system](project-speaker-cab-system.md) - MaximoCabs guitar cab capability; plan 1 (cabvoice.py engine, notes, 20-speaker catalog) built and reviewed 2026-09-09, line and species carried into voicing.json 2026-09-10; plan 2 generator next, open items in knowledge/learnings/speaker-cab-plan-1.md
 - [Friction fit recipe](feedback-friction-fit-recipe.md) - crush ribs not tighter clearance, plus a designed opening feature; read knowledge/friction-fits-x2d.md first
