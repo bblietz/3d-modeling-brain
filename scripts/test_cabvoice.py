@@ -573,6 +573,7 @@ def test_propose_stereo_2x12_closed(drv, tone):
     assert len(v.wiring["options"]) == 2
     assert len(v.power["per_side"]) == 2
     assert v.prediction["model"] == "thiele-small closed"
+    assert v.box["chamber_internal_width_mm"] >= cabvoice.min_internal_width_mm(1, drv.cutout_mm)
 
 
 def test_propose_without_ts_degrades(drv, tone):

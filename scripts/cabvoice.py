@@ -933,7 +933,8 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
     displacement = sum(d.displacement_l for d in drivers)
     if any(d.displacement_estimated for d in drivers):
         warnings.append(f"driver displacement assumed {DEFAULT_DISPLACEMENT_L} L per driver")
-    min_w = min_internal_width_mm(count, max(d.cutout_mm for d in drivers))
+    min_w = (chambers * min_internal_width_mm(per_chamber_drivers, max(d.cutout_mm for d in drivers))
+             + (chambers - 1) * c.panel_mm)
     pk = c.panel_kwargs()
     port, port_l, divider_l, box = None, 0.0, 0.0, None
     for _ in range(2):
