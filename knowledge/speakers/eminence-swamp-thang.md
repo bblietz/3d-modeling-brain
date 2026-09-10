@@ -1,0 +1,51 @@
+---
+name: eminence-swamp-thang
+type: speaker
+brand: Eminence
+model: Swamp Thang 12
+diameter_in: 12
+impedance_ohm: [8, 16]
+power_w: 150
+sensitivity_db: 102
+magnet: ceramic
+fs_hz: 97
+re_ohm: 6.92
+le_mh: 0.42
+qts: 0.53
+qes: 0.55
+qms: 14.43
+vas_l: 41.3
+xmax_mm: 0.8
+sd_cm2: 532.4
+cutout_mm: 281.2
+bolt_circle_mm: 294.4
+bolt_count: 8
+depth_mm: 132.1
+weight_kg: 5.03
+displacement_l: 2.25
+data_status: datasheet
+sources: [https://eminence.com/products/swamp_thang, https://eminence.com/products/swamp_thang_16, https://cdn.shopify.com/s/files/1/0270/8665/1462/files/Swamp_Thang.pdf]
+status: unverified-starting-values
+---
+
+# Eminence Swamp Thang 12
+
+59 oz ceramic magnet, 2 in coil.
+
+## Character
+
+- low_end: big. mids: forward. top: smooth. breakup: clean.
+- Eminence: "Very powerful, thick and chunky tone. Very touch sensitive with good sustain. Awesome bottom end."
+
+## Best with
+
+- Amp families: modern high gain, modeling and solid state, Marshall. Genres: metal and modern high gain, classic rock. Suits baritone and drop tunings.
+
+## Data notes
+
+- 8 ohm T/S from the product page: Fs 97, Re 6.92, Le 0.42, Qes 0.55, Qms 14.43, Qts 0.53, Vas 41.3 L, Sd 532.4, Xmax 0.8, Mms 26 g, BL 14.2. 16 ohm: Fs 113, Re 14.7, Le 0.67, Qes 0.67, Qms 8.6, Qts 0.62, Vas 26.4 L, sensitivity 102.3 dB.
+- Driver volume displaced 0.079 cu ft (2.25 L). Sealed and vented both acceptable. Depth 132.1 mm, 5.03 kg.
+
+## Field notes
+
+- none yet
