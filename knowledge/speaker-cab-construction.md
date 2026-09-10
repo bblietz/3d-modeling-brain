@@ -53,7 +53,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 ## Backs and ports
 
 - **Closed**: 12 mm birch back panel screwed to 18 x 18 mm cleats every 150 mm, removable. The jack plate sits in the back panel.
-- **Closed-ported, rear round port**: a flanged tube through the back panel (ABS or PVC pipe with a plywood flange ring, or a purchased flared port), diameter and length from the voicing sheet, one per chamber. Keep the tube 25 mm clear of the magnet.
+- **Closed-ported, rear round port**: a flanged tube through the back panel (ABS or PVC pipe with a plywood flange ring, or a purchased flared port), diameter and length from the voicing sheet, one per driver in the chamber (a mono 2x12 gets two identical ports, each sized as a 1x12 port in half the chamber; the sheet's `port.count` and `construction.port_count` say how many). Keep the tube 25 mm clear of the magnet.
 - **Closed-ported, front slot port**: the baffle stops short of the bottom panel, leaving a full-chamber-width slot; a shelf behind the slot sets the port length, so port length equals shelf depth. Used when the customer wants no visible rear port or the rear port would be too long for the depth.
 - **Open-back**: two horizontal 12 mm panels, top and bottom, each (1 - open fraction) x internal height / 2 tall, screwed to cleats. Open fraction 0.40 for open, 0.25 for semi-open (from [[speaker-cab-voicing]]). The jack plate sits in the lower panel.
 

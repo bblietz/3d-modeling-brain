@@ -772,6 +772,7 @@ class Constraints:
     brace_l: float = 0.0
     port_diameter_mm: float = 75.0
     port_slot_mm: tuple | None = None
+    port_count: int | None = None      # None: one port per driver in the chamber
     accept_low_headroom: bool = False
 
     def panel_kwargs(self) -> dict:
@@ -819,14 +820,14 @@ def ported_targets(driver: Driver, net_l: float, low_end: str) -> tuple:
     return vb, fb, res, warnings
 
 
-def _air_speed_driver(driver: Driver, count_in_chamber: int, warnings: list) -> Driver:
+def _air_speed_driver(driver: Driver, drivers_per_port: float, warnings: list) -> Driver:
     sd, xmax = driver.sd_cm2, driver.xmax_mm
     if sd is None or xmax is None:
         warnings.append(f"{driver.slug}: port air speed uses assumed Sd {FALLBACK_SD_CM2:g} cm2 "
                         f"and Xmax {FALLBACK_XMAX_MM:g} mm")
         sd = sd if sd is not None else FALLBACK_SD_CM2
         xmax = xmax if xmax is not None else FALLBACK_XMAX_MM
-    return replace(driver, sd_cm2=sd * count_in_chamber, xmax_mm=xmax)
+    return replace(driver, sd_cm2=sd * drivers_per_port, xmax_mm=xmax)
 
 
 def _speaker_summary(driver: Driver, impedance) -> dict:
@@ -938,18 +939,20 @@ def _chamber_w(chambers, w_int, c) -> float:
     return (w_int - c.panel_mm) / 2.0 if chambers == 2 else w_int
 
 
-def _port_report(lead, per_chamber_drivers, chamber_net, port, warnings) -> tuple:
-    """The port as built in its chamber: (actual tuning Hz, port dict)."""
+def _port_report(lead, per_chamber_drivers, chamber_net, port, count, warnings) -> tuple:
+    """The port as built in its chamber: (actual tuning Hz, port dict). count
+    identical ports in a chamber tune like one port in 1/count of the chamber
+    and each carries 1/count of the drivers' volume velocity."""
     warnings.extend(port.warnings)
     area_m2 = port.area_cm2 / 1e4
-    fb = port_tuning_hz(chamber_net / 1e3, area_m2, port.length_mm / 1e3)
-    speed_driver = _air_speed_driver(lead, per_chamber_drivers, warnings)
+    fb = port_tuning_hz(chamber_net / count / 1e3, area_m2, port.length_mm / 1e3)
+    speed_driver = _air_speed_driver(lead, per_chamber_drivers / count, warnings)
     port.air_speed_ms = port_air_speed(speed_driver, fb, port.area_cm2)
     if port.air_speed_ms > PORT_V_MAX and not any("still above" in w for w in port.warnings):
         warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s above {PORT_V_MAX} m/s")
     port.volume_l = area_m2 * port.length_mm   # m2 x mm is liters
     port_dict = {**asdict(port), "location": "front" if port.shape == "slot" else "rear",
-                 "per_chamber": True}
+                 "per_chamber": True, "count": count}
     return fb, port_dict
 
 
@@ -1002,7 +1005,7 @@ def _assemble(name, mode, tone, drivers, impedances, enclosure, jack_config, cha
                       "recess_mm": c.recess_mm, "brace_l": c.brace_l,
                       "pinned_external_width_mm": c.pinned_external_width_mm,
                       "max_external_mm": c.max_external_mm,
-                      "port_count": None if port_dict is None else port_dict.get("count", 1)},
+                      "port_count": None if port_dict is None else port_dict["count"]},
         warnings=_dedupe(warnings), blockers=_dedupe(blockers),
     )
 
@@ -1027,6 +1030,7 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
     min_w = (chambers * min_internal_width_mm(per_chamber_drivers, max(d.cutout_mm for d in drivers))
              + (chambers - 1) * c.panel_mm)
     pk = c.panel_kwargs()
+    port_count = c.port_count or per_chamber_drivers
     port, port_l, divider_l, box = None, 0.0, 0.0, None
     for _ in range(2):
         gross = net_total + displacement + c.brace_l + port_l * chambers + divider_l
@@ -1034,15 +1038,16 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
         w_int, h_int, d_int = box.internal_mm
         divider_l = _divider_l(chambers, h_int, d_int, c)
         if enclosure == "closed-ported":
-            port = size_port(_air_speed_driver(lead, per_chamber_drivers, warnings),
-                             chamber_net, fb, diameter_mm=c.port_diameter_mm,
+            port = size_port(_air_speed_driver(lead, per_chamber_drivers / port_count, warnings),
+                             chamber_net / port_count, fb, diameter_mm=c.port_diameter_mm,
                              slot_mm=c.port_slot_mm)
-            port_l = port.volume_l
+            port_l = port.volume_l * port_count
     warnings.extend(box.warnings)
     chamber_w = _chamber_w(chambers, w_int, c)
     port_dict = None
     if port is not None:
-        fb_actual, port_dict = _port_report(lead, per_chamber_drivers, chamber_net, port, warnings)
+        fb_actual, port_dict = _port_report(lead, per_chamber_drivers, chamber_net, port,
+                                            port_count, warnings)
         if abs(fb_actual - fb) > 0.5:
             warnings.append(f"port clamped at the size cap: tuned {fb_actual:.1f} Hz, target "
                             f"{fb:.1f} Hz; lower Fb or use a smaller box")
@@ -1064,6 +1069,8 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
 def evaluate(drivers: list, impedances: list, enclosure: str, tone: dict,
              internal_mm: tuple, jack_config: str = "mono", port: Port | None = None,
              constraints: Constraints | None = None, name: str = "cab") -> Voicing:
+    """Voicing of an existing box. A supplied port is one of constraints.port_count
+    identical ports per chamber (default one per driver, as in propose)."""
     c = constraints or Constraints()
     lead, count, chambers, per_chamber_drivers, warnings = _setup(
         drivers, impedances, enclosure, tone, jack_config)
@@ -1075,9 +1082,10 @@ def evaluate(drivers: list, impedances: list, enclosure: str, tone: dict,
     w_int, h_int, d_int = box.internal_mm
     divider_l = _divider_l(chambers, h_int, d_int, c)
     displacement = _displacement(drivers, warnings)
+    port_count = c.port_count or per_chamber_drivers
     port_l = 0.0
     if port is not None:
-        port_l = port.area_cm2 / 1e4 * port.length_mm
+        port_l = port.area_cm2 / 1e4 * port.length_mm * port_count
     net_total = box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
     if net_total <= 0:
         raise ValueError("box has no net volume left after displacement, brace, port, and divider")
@@ -1086,7 +1094,8 @@ def evaluate(drivers: list, impedances: list, enclosure: str, tone: dict,
     chamber_w = _chamber_w(chambers, w_int, c)
     fb, port_dict = None, None
     if enclosure == "closed-ported":
-        fb, port_dict = _port_report(lead, per_chamber_drivers, chamber_net, port, warnings)
+        fb, port_dict = _port_report(lead, per_chamber_drivers, chamber_net, port, port_count,
+                                     warnings)
     if not lead.has_ts() and enclosure in ("closed", "closed-ported"):
         detail = "tuning reported, " if enclosure == "closed-ported" else ""
         warnings.append(f"{lead.slug}: no Thiele-Small data ({lead.data_status}); "
@@ -1180,7 +1189,7 @@ def render_markdown(v: Voicing) -> str:
                 else f"slot {p['slot_w_mm']:.0f} x {p['slot_h_mm']:.0f} mm")
         lines += [
             f"- {size}, area {p['area_cm2']:.0f} cm2, length {p['length_mm']:.0f} mm, "
-            f"{p['location']}, one per chamber",
+            f"{p['location']}, {p['count']} per chamber",
             f"- Worst-case air speed {p['air_speed_ms']:.1f} m/s (limit {PORT_V_MAX:.0f} m/s)",
         ]
     pr = v.prediction

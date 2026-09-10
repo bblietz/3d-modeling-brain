@@ -796,6 +796,28 @@ def test_propose_prediction_follows_clamped_port(tone):
     assert any(w.startswith("port clamped at the size cap: tuned") for w in v.warnings)
 
 
+CANNABIS_REX = dict(name="cannabis-rex-like", fs_hz=96, qts=0.64, qes=0.69, qms=9.28, vas_l=45.48,
+                    xmax_mm=0.8, sd_cm2=532.4, re_ohm=6.56, power_w=50, sensitivity_db=101.8,
+                    cutout_mm=281.2, bolt_circle_mm=294.4, bolt_count=8, displacement_l=2.0)
+
+
+def test_propose_mono_2x12_uses_one_port_per_driver(tone):
+    d = _driver(**CANNABIS_REX)
+    one = cabvoice.propose([d], [16], "closed-ported", tone)
+    two = cabvoice.propose([d, d], [16, 16], "closed-ported", tone, jack_config="mono")
+    assert two.port["count"] == 2 and one.port["count"] == 1
+    assert two.construction["port_count"] == 2
+    assert not any("too short" in w or "port clamped" in w for w in two.warnings)
+    assert two.port["diameter_mm"] == pytest.approx(one.port["diameter_mm"])
+    assert two.port["length_mm"] == pytest.approx(one.port["length_mm"])
+    assert two.port["air_speed_ms"] == pytest.approx(one.port["air_speed_ms"])
+    assert two.volumes["port_l"] == pytest.approx(2 * one.volumes["port_l"])
+    assert two.prediction["fb_hz"] == pytest.approx(one.prediction["fb_hz"], abs=1e-6)
+    single = cabvoice.propose([d, d], [16, 16], "closed-ported", tone, jack_config="mono",
+                              constraints=cabvoice.Constraints(port_count=1))
+    assert single.port["count"] == 1 and single.port["diameter_mm"] > two.port["diameter_mm"]
+
+
 def _calibration_module():
     import importlib.util
     path = Path(__file__).parent.parent / "projects/Speaker-cab-system/pipeline/calibration_table.py"
