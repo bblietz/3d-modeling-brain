@@ -163,6 +163,13 @@ def test_validate_speaker_requires_ts_when_datasheet():
     assert any("vas_l" in e for e in errors)
 
 
+def test_validate_speaker_rejects_bad_displacement():
+    meta = cabvoice.parse_frontmatter(FIXTURE_NOTE)
+    meta["displacement_l"] = -1.5
+    errors = cabvoice.validate_speaker(meta)
+    assert any("displacement_l" in e for e in errors)
+
+
 def test_load_speaker_builds_driver(drv):
     assert drv.slug == "test-driver"
     assert drv.has_ts()
@@ -231,6 +238,7 @@ TS_FIELDS = ("qts", "qes", "qms", "vas_l", "xmax_mm", "sd_cm2")
 POSITIVE_FIELDS = (
     "diameter_in", "power_w", "sensitivity_db", "fs_hz", "re_ohm",
     "cutout_mm", "bolt_circle_mm", "bolt_count", "depth_mm", "weight_kg", "le_mh",
+    "displacement_l",
 ) + TS_FIELDS
 
 
@@ -361,7 +369,7 @@ def list_speakers(speakers_dir: Path = SPEAKERS_DIR) -> list[str]:
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabvoice.py -v`
-Expected: 9 passed
+Expected: 10 passed
 
 - [ ] **Step 5: Commit**
 
@@ -537,7 +545,7 @@ def closed_box_for_qtc(driver: Driver, qtc: float) -> float:
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabvoice.py -v`
-Expected: all passed (9 from Task 1 plus 14 here)
+Expected: all passed (10 from Task 1 plus 14 here)
 
 - [ ] **Step 5: Commit**
 
@@ -609,16 +617,18 @@ def test_ported_box_matches_eminence_designs(params, vb_cuft, fb, f3_expected):
 
 
 def test_closed_box_matches_eminence_sealed_design():
+    # Eminence's sealed Beta-12A-2 design (0.904 cu ft) publishes F3 92.1 Hz; the
+    # engine reads 86.0 Hz (6.6 percent low, see the voicing note's model limits).
     drv = _driver(**BETA_12A2)
     res = cabvoice.closed_box(drv, 0.904 * CU_FT_L)
-    assert res.f3_hz == pytest.approx(92.1, rel=0.10)
+    assert res.f3_hz == pytest.approx(86.0, abs=1.0)
 
 
 def test_ported_box_reports_peak_and_character():
     drv = _driver(**DELTA_12A)
     small = cabvoice.ported_box(drv, 0.75 * CU_FT_L, 110.0)
-    assert small.peak_db > 1.0
-    assert small.character in ("punchy", "boomy")
+    assert small.peak_db == pytest.approx(5.81, abs=0.1)
+    assert small.character == "boomy"
     assert small.response[-1][0] == 400.0
 
 
@@ -787,8 +797,31 @@ def test_size_port_grows_when_too_short(drv):
 def test_size_port_keeps_warning_at_max_size(drv):
     # 100 L at 100 Hz would need a port over 360 mm across
     p = cabvoice.size_port(drv, 100.0, 100.0, diameter_mm=75.0)
-    assert p.diameter_mm <= cabvoice.MAX_PORT_DIAMETER_MM * 1.05
+    assert p.diameter_mm == cabvoice.MAX_PORT_DIAMETER_MM
     assert p.length_mm == cabvoice.MIN_PORT_LENGTH_MM
+    assert any("too short" in w for w in p.warnings)
+
+
+def test_size_port_warns_still_above_limit(drv):
+    drv.xmax_mm = 30.0
+    p = cabvoice.size_port(drv, 100.0, 100.0, diameter_mm=75.0)
+    assert p.diameter_mm == cabvoice.MAX_PORT_DIAMETER_MM
+    assert p.air_speed_ms > cabvoice.PORT_V_MAX
+    assert any("still above" in w for w in p.warnings)
+
+
+def test_port_dims_rejects_non_positive_geometry():
+    with pytest.raises(ValueError, match="diameter"):
+        cabvoice.port_dims(40.0, 60.0, diameter_mm=0.0)
+    with pytest.raises(ValueError, match="slot"):
+        cabvoice.port_dims(40.0, 60.0, slot_mm=(200.0, -5.0))
+
+
+def test_size_port_slot_stops_at_max_area(drv):
+    p = cabvoice.size_port(drv, 100.0, 100.0, slot_mm=(200.0, 22.09))
+    max_area_cm2 = math.pi * (cabvoice.MAX_PORT_DIAMETER_MM / 20.0) ** 2
+    assert p.area_cm2 == pytest.approx(max_area_cm2, abs=1e-6)
+    assert p.slot_h_mm == pytest.approx(max_area_cm2 * 100.0 / 200.0, abs=1e-6)
     assert any("too short" in w for w in p.warnings)
 ```
 
@@ -845,8 +878,12 @@ def _port_area_m2(diameter_mm, slot_mm):
     if (diameter_mm is None) == (slot_mm is None):
         raise ValueError("give exactly one of diameter_mm or slot_mm=(w, h)")
     if diameter_mm is not None:
+        if diameter_mm <= 0:
+            raise ValueError("diameter_mm must be positive")
         return math.pi * (diameter_mm / 2e3) ** 2
     w, h = slot_mm
+    if w <= 0 or h <= 0:
+        raise ValueError("slot_mm must be two positive numbers")
     return (w / 1e3) * (h / 1e3)
 
 
@@ -898,12 +935,12 @@ def size_port(driver: Driver, vb_l: float, fb_hz: float,
     for _ in range(60):
         too_fast = port.air_speed_ms > PORT_V_MAX
         too_short = any("too short" in w for w in port.warnings)
-        if not (too_fast or too_short) or port.area_cm2 >= max_area_cm2:
+        if not (too_fast or too_short) or port.area_cm2 >= max_area_cm2 - 1e-9:
             break
         if slot_mm:
-            slot_mm = (slot_mm[0], slot_mm[1] * 1.1)
+            slot_mm = (slot_mm[0], min(slot_mm[1] * 1.1, max_area_cm2 * 100.0 / slot_mm[0]))
         else:
-            diameter_mm *= math.sqrt(1.1)
+            diameter_mm = min(diameter_mm * math.sqrt(1.1), MAX_PORT_DIAMETER_MM)
         port = build(diameter_mm, slot_mm)
     if port.air_speed_ms > PORT_V_MAX:
         port.warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s still above "
@@ -914,7 +951,7 @@ def size_port(driver: Driver, vb_l: float, fb_hz: float,
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabvoice.py -v`
-Expected: all passed (8 new)
+Expected: all passed (9 new)
 
 - [ ] **Step 5: Commit**
 
@@ -968,6 +1005,13 @@ def test_open_fraction_table():
 def test_open_back_rejects_bad_fraction():
     with pytest.raises(ValueError):
         cabvoice.open_back(472.0, 421.2, 229.4, 1.5)
+
+
+def test_open_back_rejects_non_positive_dimensions():
+    with pytest.raises(ValueError, match="dimensions"):
+        cabvoice.open_back(472.0, 421.2, 0.0, 0.40)
+    with pytest.raises(ValueError, match="dimensions"):
+        cabvoice.open_back(472.0, 421.2, -300.0, 0.40)
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -1010,6 +1054,8 @@ def open_back(internal_w_mm: float, internal_h_mm: float, internal_d_mm: float,
     path from a centered driver runs out the side: depth + width / 2."""
     if not 0.0 < open_fraction < 1.0:
         raise ValueError("open_fraction must be between 0 and 1")
+    if min(internal_w_mm, internal_h_mm, internal_d_mm) <= 0:
+        raise ValueError("internal dimensions must be positive")
     path_m = (internal_d_mm + internal_w_mm / 2.0) / 1e3
     f_cancel = C_SOUND / (2.0 * path_m)
     panel_height = (1.0 - open_fraction) * internal_h_mm / 2.0
@@ -1024,7 +1070,7 @@ def open_back(internal_w_mm: float, internal_h_mm: float, internal_d_mm: float,
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabvoice.py -v`
-Expected: all passed (4 new)
+Expected: all passed (5 new)
 
 - [ ] **Step 5: Commit**
 
@@ -1117,6 +1163,13 @@ def test_power_check_rule():
     assert not_accepted.status == "warning"
     ok = cabvoice.power_check([60], 30)
     assert ok.status == "ok" and ok.total_handling_w == 60
+
+
+def test_power_check_rejects_non_positive_amp_power():
+    with pytest.raises(ValueError, match="amp_power_w"):
+        cabvoice.power_check([30.0], 0.0)
+    with pytest.raises(ValueError, match="amp_power_w"):
+        cabvoice.power_check([30.0], -30.0)
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -1200,8 +1253,8 @@ def wiring(impedances: list, taps: list, jack_config: str = "mono",
         recommended = next((o for o in options if o.matches_tap), None)
     if jack_config == "mono-parallel-out":
         warnings.append(
-            "Parallel out: an external cabinet halves the combined load; set the amp tap "
-            "to the combined impedance, not this cabinet's alone.")
+            "Parallel out: an external cabinet of the same impedance halves the combined "
+            "load; set the amp tap to the combined impedance, not this cabinet's alone.")
     if recommended is None:
         warnings.append(f"no wiring option matches amp taps {list(taps)}")
     return WiringResult(jack_config, options, recommended, warnings)
@@ -1220,6 +1273,8 @@ def power_check(handling_w: list, amp_power_w: float, breakup: str = "moderate",
                 accept_low_headroom: bool = False) -> PowerCheck:
     """Hard stop below the amp's rated power, warning below 1.5 times it.
     An early-breakup target may accept the warning explicitly."""
+    if amp_power_w <= 0:
+        raise ValueError("amp_power_w must be positive")
     total = float(sum(handling_w))
     minimum = POWER_SAFETY_FACTOR * amp_power_w
     if total < amp_power_w:
@@ -1240,7 +1295,7 @@ def power_check(handling_w: list, amp_power_w: float, breakup: str = "moderate",
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabvoice.py -v`
-Expected: all passed (9 new)
+Expected: all passed (10 new)
 
 - [ ] **Step 5: Commit**
 
@@ -1280,6 +1335,11 @@ def test_internal_external_roundtrip():
     assert cabvoice.external_from_internal(cabvoice.internal_from_external(ext)) == pytest.approx(ext)
 
 
+def test_make_box_rejects_non_positive_internals():
+    with pytest.raises(ValueError, match="positive"):
+        cabvoice.make_box((472.0, 0.0, 229.4))
+
+
 def test_dims_for_volume_reproduces_base():
     box = cabvoice.dims_for_volume(45.6)
     assert box.internal_mm == pytest.approx((472.0, 421.2, 229.4), abs=0.5)
@@ -1314,10 +1374,36 @@ def test_dims_for_volume_raises_when_limits_too_small():
         cabvoice.dims_for_volume(60.0, max_external_mm=(508.0, 457.2, 279.4))
 
 
+def test_dims_for_volume_non_strict_returns_the_box_that_fits():
+    box = cabvoice.dims_for_volume(60.0, max_external_mm=(508.0, 457.2, 279.4), strict=False)
+    assert box.gross_l == pytest.approx(45.6, abs=0.05)
+    assert any(w.startswith("cannot reach 60.0 L") for w in box.warnings)
+
+
 def test_dimension_ratio_warnings():
     assert cabvoice.dimension_ratio_warnings((472.0, 400.0, 300.0)) == []
     assert any("2:1" in w for w in cabvoice.dimension_ratio_warnings((472.0, 421.2, 229.4)))
     assert any("1:1" in w for w in cabvoice.dimension_ratio_warnings((400.0, 400.0, 300.0)))
+
+
+def test_dims_for_volume_warns_when_pinned_width_below_minimum():
+    box = cabvoice.dims_for_volume(60.0, pinned_external_width_mm=508.0, min_internal_width_mm=641.0)
+    assert box.internal_mm[0] == pytest.approx(641.0)
+    assert any("pinned width" in w for w in box.warnings)
+
+
+def test_dims_for_volume_rejects_fixed_width_over_limit():
+    with pytest.raises(ValueError, match="size limit"):
+        cabvoice.dims_for_volume(90.0, pinned_external_width_mm=700.0, max_external_mm=(600.0, 457.2, 400.0))
+    with pytest.raises(ValueError, match="size limit"):
+        cabvoice.dims_for_volume(90.0, min_internal_width_mm=641.0, max_external_mm=(600.0, 457.2, 400.0))
+
+
+def test_dims_for_volume_rejects_non_positive_volume():
+    with pytest.raises(ValueError, match="gross_l"):
+        cabvoice.dims_for_volume(0.0)
+    with pytest.raises(ValueError, match="gross_l"):
+        cabvoice.dims_for_volume(-10.0)
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -1385,6 +1471,8 @@ def dimension_ratio_warnings(internal_mm) -> list:
 
 
 def make_box(internal_mm, **panel_kwargs) -> Box:
+    if min(internal_mm) <= 0:
+        raise ValueError("internal dimensions must be positive")
     return Box(external_mm=external_from_internal(internal_mm, **panel_kwargs),
                internal_mm=tuple(internal_mm), gross_l=gross_volume_l(internal_mm),
                warnings=dimension_ratio_warnings(internal_mm))
@@ -1401,24 +1489,38 @@ def min_internal_width_mm(driver_count: int, cutout_mm: float) -> float:
 
 def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = None,
                     min_internal_width_mm: float | None = None,
-                    max_external_mm: tuple | None = None, **panel_kwargs) -> Box:
+                    max_external_mm: tuple | None = None, strict: bool = True,
+                    **panel_kwargs) -> Box:
     """Internal dimensions for a gross volume, starting from the site box
     proportions. Fixed axes come from a pinned width, the two-driver minimum
-    width, or external limits; free axes scale together to hit the volume."""
+    width, or external limits; free axes scale together to hit the volume.
+    When the limits cannot hold the volume, strict raises; otherwise the
+    largest box that fits comes back with a "cannot reach" warning."""
+    if gross_l <= 0:
+        raise ValueError("gross_l must be positive")
     target = gross_l * 1e6
     base = list(site_default_box(**panel_kwargs).internal_mm)
     scale = (target / (base[0] * base[1] * base[2])) ** (1.0 / 3.0)
     dims = [x * scale for x in base]
     fixed = [False, False, False]
+    conflicts = []
     if pinned_external_width_mm is not None:
         dims[0] = internal_from_external((pinned_external_width_mm, 0, 0), **panel_kwargs)[0]
         fixed[0] = True
     if min_internal_width_mm is not None and dims[0] < min_internal_width_mm:
+        if fixed[0]:
+            conflicts.append(
+                f"pinned width {pinned_external_width_mm:g} mm external is below the "
+                f"{min_internal_width_mm:g} mm internal minimum for the driver count; using the minimum")
         dims[0] = min_internal_width_mm
         fixed[0] = True
     max_internal = None
     if max_external_mm is not None:
         max_internal = internal_from_external(max_external_mm, **panel_kwargs)
+        if fixed[0] and dims[0] > max_internal[0]:
+            raise ValueError(
+                f"width {dims[0]:.1f} mm internal (pinned or the driver-count minimum) "
+                f"exceeds the size limit {max_internal[0]:.1f} mm internal")
 
     def rescale():
         free = [i for i in range(3) if not fixed[i]]
@@ -1450,16 +1552,20 @@ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = Non
         rescale()
     achieved = dims[0] * dims[1] * dims[2]
     if abs(achieved - target) / target > 0.001:
-        raise ValueError(
-            f"cannot reach {gross_l:.1f} L within the limits; "
-            f"achievable {achieved / 1e6:.1f} L")
-    return make_box(tuple(dims), **panel_kwargs)
+        message = (f"cannot reach {gross_l:.1f} L within the internal size limit; "
+                   f"achievable {achieved / 1e6:.1f} L")
+        if strict:
+            raise ValueError(message)
+        conflicts.append(message)
+    box = make_box(tuple(dims), **panel_kwargs)
+    box.warnings = conflicts + box.warnings
+    return box
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabvoice.py -v`
-Expected: all passed (8 new)
+Expected: all passed (11 new)
 
 - [ ] **Step 5: Commit**
 
@@ -1544,6 +1650,16 @@ def test_per_driver_net_without_ts_is_rule_of_thumb(drv):
     assert any("no Thiele-Small" in w for w in warns)
 
 
+def test_ported_targets_grows_then_lowers_fb():
+    # Qts 1.0, Vas 20 L: boomy at every step, so the box grows in 10 percent
+    # steps to the last one under 68 L (64.3 L), then Fb drops 5 Hz at a time to 45.
+    d = _driver(qts=1.0, vas_l=20.0)
+    vb, fb, res, warns = cabvoice.ported_targets(d, 30.0, "balanced")
+    assert vb == pytest.approx(64.3, abs=0.05) and fb == 45.0
+    assert res.character == "boomy"
+    assert any("stays boomy" in w for w in warns)
+
+
 def test_propose_closed_ported_1x12(drv, tone):
     tone["low_end"] = "balanced"
     tone["min_power_w"] = 90              # a 60 W amp
@@ -1582,6 +1698,16 @@ def test_propose_stereo_2x12_closed(drv, tone):
     assert len(v.wiring["options"]) == 2
     assert len(v.power["per_side"]) == 2
     assert v.prediction["model"] == "thiele-small closed"
+    assert v.box["chamber_internal_width_mm"] >= cabvoice.min_internal_width_mm(1, drv.cutout_mm)
+
+
+def test_propose_stereo_volumes_reconcile(drv, tone):
+    tone["impedance_options_ohm"] = [16]
+    v = cabvoice.propose([drv, drv], [16, 16], "closed-ported", tone, jack_config="stereo")
+    vol = v.volumes
+    parts = vol["net_total_l"] + vol["displacement_l"] + vol["brace_l"] + vol["port_l"] + vol["divider_l"]
+    assert vol["gross_l"] == pytest.approx(parts, abs=0.01)
+    assert vol["port_l"] == pytest.approx(2 * v.port["volume_l"], abs=1e-6)
 
 
 def test_propose_without_ts_degrades(drv, tone):
@@ -1608,6 +1734,25 @@ def test_propose_honours_pinned_width(drv, tone):
     c = cabvoice.Constraints(pinned_external_width_mm=660.0)
     v = cabvoice.propose([drv], [16], "closed", tone, constraints=c)
     assert v.box["external_mm"][0] == pytest.approx(660.0)
+
+
+def test_propose_impossible_box_presents_tradeoff(drv, tone, speakers_dir, tmp_path):
+    tone["low_end"] = "big"                  # 68 L per driver against the site's 45.6 L box
+    c = cabvoice.Constraints(max_external_mm=(508.0, 457.2, 279.4))
+    v = cabvoice.propose([drv], [16], "closed", tone, constraints=c)
+    assert v.volumes["gross_l"] == pytest.approx(45.6, abs=0.05)
+    assert v.prediction["qtc"] == pytest.approx(cabvoice.closed_box(drv, v.volumes["per_driver_net_l"]).qtc)
+    blocker = next(b for b in v.blockers if "cannot fit the size limit" in b)
+    assert "69.5 L" in blocker and "45.6 L" in blocker and "Qtc" in blocker
+    assert not any("cannot reach" in w for w in v.warnings)
+    big_tone = tmp_path / "tone.json"
+    big_tone.write_text(json.dumps(tone))
+    out = tmp_path / "out"
+    rc = cabvoice.main(["propose", "--speakers-dir", str(speakers_dir), "--speaker", "test-driver",
+                        "--impedance", "16", "--enclosure", "closed", "--tone", str(big_tone),
+                        "--max-external", "508", "457.2", "279.4", "--out", str(out)])
+    assert rc == 2
+    assert "cannot fit the size limit" in json.loads((out / "voicing.json").read_text())["blockers"][0]
 
 
 def test_propose_rejects_bad_inputs(drv, tone):
@@ -1681,6 +1826,7 @@ class Constraints:
     brace_l: float = 0.0
     port_diameter_mm: float = 75.0
     port_slot_mm: tuple | None = None
+    port_count: int | None = None      # None: one port per driver in the chamber
     accept_low_headroom: bool = False
 
     def panel_kwargs(self) -> dict:
@@ -1701,8 +1847,9 @@ def per_driver_net_l(driver: Driver, enclosure: str, low_end: str) -> tuple:
     vb = driver.vas_l / ALPHA_TARGET[low_end]
     if vb < lo or vb > hi:
         clamped = min(max(vb, lo), hi)
-        warnings.append(f"{driver.slug}: Thiele-Small volume {vb:.1f} L for '{low_end}' "
-                        f"clamped to the practical range {lo:.0f} to {hi:.0f} L ({clamped:.1f} L)")
+        warnings.append(f"{driver.slug}: Thiele-Small volume {vb:.1f} L for '{low_end}' is "
+                        f"outside the practical range {lo:.0f} to {hi:.0f} L; started from the "
+                        f"clamped {clamped:.1f} L")
         vb = clamped
     return vb, "thiele-small", warnings
 
@@ -1728,14 +1875,16 @@ def ported_targets(driver: Driver, net_l: float, low_end: str) -> tuple:
     return vb, fb, res, warnings
 
 
-def _air_speed_driver(driver: Driver, count_in_chamber: int, warnings: list) -> Driver:
+def _air_speed_driver(driver: Driver, drivers_per_port: float, warnings: list) -> Driver:
     sd, xmax = driver.sd_cm2, driver.xmax_mm
-    if sd is None or xmax is None:
-        warnings.append(f"{driver.slug}: port air speed uses assumed Sd {FALLBACK_SD_CM2:g} cm2 "
-                        f"and Xmax {FALLBACK_XMAX_MM:g} mm")
-        sd = sd if sd is not None else FALLBACK_SD_CM2
-        xmax = xmax if xmax is not None else FALLBACK_XMAX_MM
-    return replace(driver, sd_cm2=sd * count_in_chamber, xmax_mm=xmax)
+    assumed = []
+    if sd is None:
+        sd, assumed = FALLBACK_SD_CM2, assumed + [f"Sd {FALLBACK_SD_CM2:g} cm2"]
+    if xmax is None:
+        xmax, assumed = FALLBACK_XMAX_MM, assumed + [f"Xmax {FALLBACK_XMAX_MM:g} mm"]
+    if assumed:
+        warnings.append(f"{driver.slug}: port air speed uses assumed " + " and ".join(assumed))
+    return replace(driver, sd_cm2=sd * drivers_per_port, xmax_mm=xmax)
 
 
 def _speaker_summary(driver: Driver, impedance) -> dict:
@@ -1745,7 +1894,8 @@ def _speaker_summary(driver: Driver, impedance) -> dict:
             "analog_of": driver.analog_of, "cutout_mm": driver.cutout_mm,
             "bolt_circle_mm": driver.bolt_circle_mm, "bolt_count": driver.bolt_count,
             "depth_mm": driver.depth_mm, "weight_kg": driver.weight_kg,
-            "displacement_l": driver.displacement_l}
+            "displacement_l": driver.displacement_l,
+            "displacement_estimated": driver.displacement_estimated}
 
 
 def _mm_to_in(dims) -> tuple:
@@ -1769,6 +1919,7 @@ class Voicing:
     prediction: dict
     wiring: dict
     power: dict
+    construction: dict
     warnings: list
     blockers: list
     prediction_status: str = PREDICTION_STATUS
@@ -1818,89 +1969,179 @@ def _electrical(drivers, impedances, tone, jack_config, c, warnings, blockers):
     return wiring_dict, power_dict
 
 
-def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
-            jack_config: str = "mono", constraints: Constraints | None = None,
-            name: str = "cab") -> Voicing:
-    c = constraints or Constraints()
+def _setup(drivers, impedances, enclosure, tone, jack_config) -> tuple:
+    """Validated inputs: (lead, count, chambers, per_chamber_drivers, warnings)."""
     _check_inputs(drivers, impedances, enclosure, tone, jack_config)
-    warnings, blockers = [], []
+    warnings = []
     lead = drivers[0]
     count = len(drivers)
     if count == 2 and drivers[1].slug != lead.slug:
         warnings.append("mixed drivers: the alignment uses the first driver's parameters")
+    chambers = 2 if jack_config == "stereo" else 1
+    return lead, count, chambers, count // chambers, warnings
+
+
+def _displacement(drivers, warnings) -> float:
+    if any(d.displacement_estimated for d in drivers):
+        warnings.append(f"driver displacement assumed {DEFAULT_DISPLACEMENT_L} L per driver")
+    return sum(d.displacement_l for d in drivers)
+
+
+def _divider_l(chambers, h_int, d_int, c) -> float:
+    return (c.panel_mm * h_int * d_int / 1e6) if chambers == 2 else 0.0
+
+
+def _chamber_w(chambers, w_int, c) -> float:
+    return (w_int - c.panel_mm) / 2.0 if chambers == 2 else w_int
+
+
+def _port_report(lead, per_chamber_drivers, chamber_net, port, count, warnings) -> tuple:
+    """The port as built in its chamber: (actual tuning Hz, port dict). count
+    identical ports in a chamber tune like one port in 1/count of the chamber
+    and each carries 1/count of the drivers' volume velocity."""
+    warnings.extend(port.warnings)
+    area_m2 = port.area_cm2 / 1e4
+    fb = port_tuning_hz(chamber_net / count / 1e3, area_m2, port.length_mm / 1e3)
+    speed_driver = _air_speed_driver(lead, per_chamber_drivers / count, warnings)
+    port.air_speed_ms = port_air_speed(speed_driver, fb, port.area_cm2)
+    if port.air_speed_ms > PORT_V_MAX and not any("still above" in w for w in port.warnings):
+        warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s above {PORT_V_MAX} m/s")
+    port.volume_l = area_m2 * port.length_mm   # m2 x mm is liters
+    port_dict = {**asdict(port), "location": "front" if port.shape == "slot" else "rear",
+                 "per_chamber": True, "count": count}
+    return fb, port_dict
+
+
+NO_TS_CHARACTER = "unpredicted (no Thiele-Small data)"
+
+
+def _predict(lead, enclosure, per_driver_net, fb, chamber_w, h_int, d_int) -> dict:
+    if enclosure in ("open", "semi-open"):
+        ob = open_back(chamber_w, h_int, d_int, OPEN_FRACTION[enclosure])
+        return {"model": "open-back path estimate", "f_cancel_hz": ob.f_cancel_hz,
+                "path_m": ob.path_m, "panel_height_mm": ob.panel_height_mm,
+                "character": ob.character, "response_relative_db": ob.response}
+    if enclosure == "closed-ported":
+        if not lead.has_ts():
+            return {"model": "rule-of-thumb", "fb_hz": fb, "character": NO_TS_CHARACTER}
+        pb = ported_box(lead, per_driver_net, fb)
+        return {"model": "thiele-small vented", "fb_hz": fb, "alpha": pb.alpha, "h": pb.h,
+                "f3_hz": pb.f3_hz, "peak_db": pb.peak_db, "character": pb.character,
+                "response_db": pb.response}
+    if not lead.has_ts():
+        return {"model": "rule-of-thumb", "character": NO_TS_CHARACTER}
+    cb = closed_box(lead, per_driver_net)
+    return {"model": "thiele-small closed", "qtc": cb.qtc, "fc_hz": cb.fc_hz, "f3_hz": cb.f3_hz,
+            "character": cb.character, "response_db": cb.response}
+
+
+def _prediction_summary(prediction: dict) -> str:
+    if "qtc" in prediction:
+        return f"Qtc {prediction['qtc']:.2f}, {prediction['character']}"
+    if "peak_db" in prediction:
+        return (f"Fb {prediction['fb_hz']:.0f} Hz, peak {prediction['peak_db']:.1f} dB, "
+                f"{prediction['character']}")
+    return prediction["character"]
+
+
+def _volumes(method, per_driver_net, per_chamber_drivers, chambers, displacement, brace_l,
+             port_l_total, divider_l, gross_l) -> dict:
+    chamber_net = per_driver_net * per_chamber_drivers
+    return {"method": method, "per_driver_net_l": per_driver_net,
+            "per_chamber_net_l": chamber_net, "net_total_l": chamber_net * chambers,
+            "displacement_l": displacement, "brace_l": brace_l, "port_l": port_l_total,
+            "divider_l": divider_l, "gross_l": gross_l}
+
+
+def _assemble(name, mode, tone, drivers, impedances, enclosure, jack_config, chambers, count,
+              volumes, box, chamber_w, port_dict, prediction, wiring_dict, power_dict,
+              warnings, blockers, c) -> Voicing:
+    return Voicing(
+        name=name, mode=mode, tone_target=dict(tone),
+        speakers=[_speaker_summary(d, z) for d, z in zip(drivers, impedances)],
+        enclosure={"type": enclosure, "driver_count": count, "chambers": chambers,
+                   "jack_config": jack_config, "open_fraction": OPEN_FRACTION.get(enclosure)},
+        volumes=volumes,
+        box={"internal_mm": box.internal_mm, "external_mm": box.external_mm,
+             "internal_in": _mm_to_in(box.internal_mm), "external_in": _mm_to_in(box.external_mm),
+             "chamber_internal_width_mm": chamber_w},
+        port=port_dict, prediction=prediction, wiring=wiring_dict, power=power_dict,
+        construction={"panel_mm": c.panel_mm, "back_mm": c.back_mm, "baffle_mm": c.baffle_mm,
+                      "recess_mm": c.recess_mm, "brace_l": c.brace_l,
+                      "pinned_external_width_mm": c.pinned_external_width_mm,
+                      "max_external_mm": c.max_external_mm,
+                      "port_count": None if port_dict is None else port_dict["count"]},
+        warnings=_dedupe(warnings), blockers=_dedupe(blockers),
+    )
+
+
+def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
+            jack_config: str = "mono", constraints: Constraints | None = None,
+            name: str = "cab") -> Voicing:
+    c = constraints or Constraints()
+    lead, count, chambers, per_chamber_drivers, warnings = _setup(
+        drivers, impedances, enclosure, tone, jack_config)
+    blockers = []
     low_end = tone["low_end"]
     per_driver_net, method, w = per_driver_net_l(lead, enclosure, low_end)
     warnings.extend(w)
-    fb, ported = None, None
+    fb = None
     if enclosure == "closed-ported":
-        per_driver_net, fb, ported, w = ported_targets(lead, per_driver_net, low_end)
+        per_driver_net, fb, _, w = ported_targets(lead, per_driver_net, low_end)
         warnings.extend(w)
-    chambers = 2 if jack_config == "stereo" else 1
-    per_chamber_drivers = count // chambers
     chamber_net = per_driver_net * per_chamber_drivers
     net_total = chamber_net * chambers
-    displacement = sum(d.displacement_l for d in drivers)
-    if any(d.displacement_estimated for d in drivers):
-        warnings.append(f"driver displacement assumed {DEFAULT_DISPLACEMENT_L} L per driver")
-    min_w = min_internal_width_mm(count, max(d.cutout_mm for d in drivers))
+    displacement = _displacement(drivers, warnings)
+    min_w = (chambers * min_internal_width_mm(per_chamber_drivers, max(d.cutout_mm for d in drivers))
+             + (chambers - 1) * c.panel_mm)
     pk = c.panel_kwargs()
-    port, port_l, divider_l, box = None, 0.0, 0.0, None
-    for _ in range(2):
+    port_count = c.port_count or per_chamber_drivers
+    net_target = net_total
+    port, port_l, divider_l, box, limited = None, 0.0, 0.0, None, False
+    last_gross = None
+    for _ in range(5):   # until the gross settles: the port and divider depend on the box
         gross = net_total + displacement + c.brace_l + port_l * chambers + divider_l
-        box = dims_for_volume(gross, c.pinned_external_width_mm, min_w, c.max_external_mm, **pk)
+        box = dims_for_volume(gross, c.pinned_external_width_mm, min_w, c.max_external_mm,
+                              strict=False, **pk)
         w_int, h_int, d_int = box.internal_mm
-        divider_l = (c.panel_mm * h_int * d_int / 1e6) if chambers == 2 else 0.0
+        divider_l = _divider_l(chambers, h_int, d_int, c)
+        if any(w.startswith("cannot reach") for w in box.warnings):
+            # The size limit wins: voice the box that fits and present the trade-off.
+            box.warnings = [w for w in box.warnings if not w.startswith("cannot reach")]
+            limited = True
+            net_total = box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
+            chamber_net = net_total / chambers
+            per_driver_net = chamber_net / per_chamber_drivers
         if enclosure == "closed-ported":
-            port = size_port(_air_speed_driver(lead, per_chamber_drivers, warnings),
-                             chamber_net, fb, diameter_mm=c.port_diameter_mm,
+            port = size_port(_air_speed_driver(lead, per_chamber_drivers / port_count, warnings),
+                             chamber_net / port_count, fb, diameter_mm=c.port_diameter_mm,
                              slot_mm=c.port_slot_mm)
-            port_l = port.volume_l
+            port_l = port.volume_l * port_count
+        if last_gross is not None and abs(box.gross_l - last_gross) < 0.01:
+            break
+        last_gross = box.gross_l
     warnings.extend(box.warnings)
-    chamber_w = (w_int - c.panel_mm) / 2.0 if chambers == 2 else w_int
+    chamber_w = _chamber_w(chambers, w_int, c)
     port_dict = None
-    if enclosure in ("open", "semi-open"):
-        ob = open_back(chamber_w, h_int, d_int, OPEN_FRACTION[enclosure])
-        prediction = {"model": "open-back path estimate", "f_cancel_hz": ob.f_cancel_hz,
-                      "path_m": ob.path_m, "panel_height_mm": ob.panel_height_mm,
-                      "character": ob.character, "response_relative_db": ob.response}
-    elif enclosure == "closed-ported":
-        warnings.extend(port.warnings)
-        port_dict = {**asdict(port), "location": "rear", "per_chamber": True}
-        if ported is not None:
-            prediction = {"model": "thiele-small vented", "fb_hz": fb, "alpha": ported.alpha,
-                          "h": ported.h, "f3_hz": ported.f3_hz, "peak_db": ported.peak_db,
-                          "character": ported.character, "response_db": ported.response}
-        else:
-            prediction = {"model": "rule-of-thumb", "fb_hz": fb,
-                          "character": "unpredicted (no Thiele-Small data)"}
-    else:
-        if lead.has_ts():
-            cb = closed_box(lead, per_driver_net)
-            prediction = {"model": "thiele-small closed", "qtc": cb.qtc, "fc_hz": cb.fc_hz,
-                          "f3_hz": cb.f3_hz, "character": cb.character, "response_db": cb.response}
-        else:
-            prediction = {"model": "rule-of-thumb",
-                          "character": "unpredicted (no Thiele-Small data)"}
+    if port is not None:
+        fb_actual, port_dict = _port_report(lead, per_chamber_drivers, chamber_net, port,
+                                            port_count, warnings)
+        if abs(fb_actual - fb) > 0.5:
+            warnings.append(f"port clamped at the size cap: tuned {fb_actual:.1f} Hz, target "
+                            f"{fb:.1f} Hz; lower Fb or use a smaller box")
+        fb = fb_actual   # the prediction follows the port as built
+    prediction = _predict(lead, enclosure, per_driver_net, fb, chamber_w, h_int, d_int)
+    if limited:
+        target_gross = net_target + displacement + c.brace_l + port_l * chambers + divider_l
+        blockers.append(f"target {target_gross:.1f} L cannot fit the size limit; achievable "
+                        f"{box.gross_l:.1f} L gives {_prediction_summary(prediction)}")
     wiring_dict, power_dict = _electrical(drivers, impedances, tone, jack_config, c,
                                           warnings, blockers)
-    return Voicing(
-        name=name, mode="propose", tone_target=dict(tone),
-        speakers=[_speaker_summary(d, z) for d, z in zip(drivers, impedances)],
-        enclosure={"type": enclosure, "driver_count": count, "chambers": chambers,
-                   "jack_config": jack_config,
-                   "open_fraction": OPEN_FRACTION.get(enclosure)},
-        volumes={"method": method, "per_driver_net_l": per_driver_net,
-                 "per_chamber_net_l": chamber_net, "net_total_l": net_total,
-                 "displacement_l": displacement, "brace_l": c.brace_l,
-                 "port_l": port_l * chambers, "divider_l": divider_l,
-                 "gross_l": box.gross_l},
-        box={"internal_mm": box.internal_mm, "external_mm": box.external_mm,
-             "internal_in": _mm_to_in(box.internal_mm),
-             "external_in": _mm_to_in(box.external_mm),
-             "chamber_internal_width_mm": chamber_w},
-        port=port_dict, prediction=prediction, wiring=wiring_dict, power=power_dict,
-        warnings=_dedupe(warnings), blockers=_dedupe(blockers),
-    )
+    volumes = _volumes(method, per_driver_net, per_chamber_drivers, chambers, displacement,
+                       c.brace_l, port_l * chambers, divider_l, box.gross_l)
+    return _assemble(name, "propose", tone, drivers, impedances, enclosure, jack_config, chambers,
+                     count, volumes, box, chamber_w, port_dict, prediction, wiring_dict,
+                     power_dict, warnings, blockers, c)
 ```
 
 - [ ] **Step 5: Run tests to verify they pass**
@@ -1954,6 +2195,7 @@ def test_evaluate_ported_reports_tuning_from_port(drv, tone):
     assert v.volumes["port_l"] == pytest.approx(0.18, abs=0.01)
     assert v.port["length_mm"] == 23.0
     assert v.port["air_speed_ms"] > 0
+    assert v.port["volume_l"] == pytest.approx(v.volumes["port_l"], abs=1e-6)
 
 
 def test_evaluate_requires_port_for_ported(drv, tone):
@@ -1967,6 +2209,12 @@ def test_evaluate_surfaces_port_warnings(drv, tone):
     port.warnings = ["port note from sizing"]
     v = cabvoice.evaluate([drv], [16], "closed-ported", tone, SITE_INTERNAL, port=port)
     assert "port note from sizing" in v.warnings
+
+
+def test_evaluate_rejects_port_on_closed(drv, tone):
+    port = cabvoice.port_dims(44.0, 70.0, diameter_mm=100.0)
+    with pytest.raises(ValueError, match="closed enclosure"):
+        cabvoice.evaluate([drv], [16], "closed", tone, SITE_INTERNAL, port=port)
 
 
 def test_evaluate_open_back(drv, tone):
@@ -2002,6 +2250,33 @@ def test_cli_propose_and_list(speakers_dir, tmp_path):
     assert listed.stdout.strip() == "test-driver"
 
 
+def test_voicing_json_has_construction_block(drv, tone, tmp_path):
+    c = cabvoice.Constraints(pinned_external_width_mm=660.0, brace_l=0.3)
+    v = cabvoice.propose([drv], [16], "closed-ported", tone, constraints=c)
+    json_path, _ = cabvoice.write_voicing(v, tmp_path)
+    con = json.loads(json_path.read_text())["construction"]
+    assert con == {"panel_mm": 18.0, "back_mm": 12.0, "baffle_mm": 18.0, "recess_mm": 20.0,
+                   "brace_l": 0.3, "pinned_external_width_mm": 660.0, "max_external_mm": None,
+                   "port_count": 1}
+    closed = cabvoice.propose([drv], [16], "closed", tone)
+    assert closed.construction["port_count"] is None
+
+
+def test_cli_evaluate_ported(speakers_dir, tmp_path):
+    out = tmp_path / "out"
+    cmd = [sys.executable, str(Path(cabvoice.__file__)), "evaluate",
+           "--speakers-dir", str(speakers_dir), "--speaker", "test-driver",
+           "--impedance", "16", "--enclosure", "closed-ported", "--tone", str(TONE_FIXTURE),
+           "--internal", "472", "421.2", "229.4", "--port-diameter", "100", "--port-length", "23",
+           "--out", str(out)]
+    run = subprocess.run(cmd, capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    data = json.loads((out / "voicing.json").read_text())
+    assert data["mode"] == "evaluate" and 65.0 < data["prediction"]["fb_hz"] < 75.0
+    assert data["port"]["count"] == 1 and data["port"]["location"] == "rear"
+    assert "16 ohm" in (out / "voicing.md").read_text()
+
+
 def test_cli_exit_code_2_on_blockers(speakers_dir, tmp_path):
     blocked_tone = tmp_path / "tone.json"
     blocked_tone.write_text(json.dumps({
@@ -2035,84 +2310,47 @@ Append to `scripts/cabvoice.py`:
 def evaluate(drivers: list, impedances: list, enclosure: str, tone: dict,
              internal_mm: tuple, jack_config: str = "mono", port: Port | None = None,
              constraints: Constraints | None = None, name: str = "cab") -> Voicing:
+    """Voicing of an existing box. A supplied port is one of constraints.port_count
+    identical ports per chamber (default one per driver, as in propose)."""
     c = constraints or Constraints()
-    _check_inputs(drivers, impedances, enclosure, tone, jack_config)
+    lead, count, chambers, per_chamber_drivers, warnings = _setup(
+        drivers, impedances, enclosure, tone, jack_config)
     if enclosure == "closed-ported" and port is None:
         raise ValueError("closed-ported evaluate needs a port (from port_dims) with its length")
-    warnings, blockers = [], []
-    lead = drivers[0]
-    count = len(drivers)
-    if count == 2 and drivers[1].slug != lead.slug:
-        warnings.append("mixed drivers: the alignment uses the first driver's parameters")
+    if enclosure != "closed-ported" and port is not None:
+        raise ValueError(f"a port does not apply to a {enclosure} enclosure")
+    blockers = []
     box = make_box(tuple(internal_mm), **c.panel_kwargs())
     warnings.extend(box.warnings)
     w_int, h_int, d_int = box.internal_mm
-    chambers = 2 if jack_config == "stereo" else 1
-    per_chamber_drivers = count // chambers
-    divider_l = (c.panel_mm * h_int * d_int / 1e6) if chambers == 2 else 0.0
-    displacement = sum(d.displacement_l for d in drivers)
-    if any(d.displacement_estimated for d in drivers):
-        warnings.append(f"driver displacement assumed {DEFAULT_DISPLACEMENT_L} L per driver")
+    divider_l = _divider_l(chambers, h_int, d_int, c)
+    displacement = _displacement(drivers, warnings)
+    port_count = c.port_count or per_chamber_drivers
     port_l = 0.0
     if port is not None:
-        port_l = port.area_cm2 / 1e4 * port.length_mm / 1e3 * 1e3
+        port_l = port.area_cm2 / 1e4 * port.length_mm * port_count
     net_total = box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
     if net_total <= 0:
         raise ValueError("box has no net volume left after displacement, brace, port, and divider")
     chamber_net = net_total / chambers
     per_driver_net = chamber_net / per_chamber_drivers
-    chamber_w = (w_int - c.panel_mm) / 2.0 if chambers == 2 else w_int
-    port_dict = None
-    if enclosure in ("open", "semi-open"):
-        ob = open_back(chamber_w, h_int, d_int, OPEN_FRACTION[enclosure])
-        prediction = {"model": "open-back path estimate", "f_cancel_hz": ob.f_cancel_hz,
-                      "path_m": ob.path_m, "panel_height_mm": ob.panel_height_mm,
-                      "character": ob.character, "response_relative_db": ob.response}
-    elif enclosure == "closed-ported":
-        warnings.extend(port.warnings)
-        fb = port_tuning_hz(chamber_net / 1e3, port.area_cm2 / 1e4, port.length_mm / 1e3)
-        speed_driver = _air_speed_driver(lead, per_chamber_drivers, warnings)
-        port.air_speed_ms = port_air_speed(speed_driver, fb, port.area_cm2)
-        if port.air_speed_ms > PORT_V_MAX:
-            warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s above {PORT_V_MAX} m/s")
-        port_dict = {**asdict(port), "location": "rear", "per_chamber": True}
-        if lead.has_ts():
-            pb = ported_box(lead, per_driver_net, fb)
-            prediction = {"model": "thiele-small vented", "fb_hz": fb, "alpha": pb.alpha,
-                          "h": pb.h, "f3_hz": pb.f3_hz, "peak_db": pb.peak_db,
-                          "character": pb.character, "response_db": pb.response}
-        else:
-            warnings.append(f"{lead.slug}: no Thiele-Small data ({lead.data_status}); "
-                            "tuning reported, no response prediction")
-            prediction = {"model": "rule-of-thumb", "fb_hz": fb,
-                          "character": "unpredicted (no Thiele-Small data)"}
-    else:
-        if lead.has_ts():
-            cb = closed_box(lead, per_driver_net)
-            prediction = {"model": "thiele-small closed", "qtc": cb.qtc, "fc_hz": cb.fc_hz,
-                          "f3_hz": cb.f3_hz, "character": cb.character, "response_db": cb.response}
-        else:
-            warnings.append(f"{lead.slug}: no Thiele-Small data ({lead.data_status}); "
-                            "no response prediction")
-            prediction = {"model": "rule-of-thumb",
-                          "character": "unpredicted (no Thiele-Small data)"}
+    chamber_w = _chamber_w(chambers, w_int, c)
+    fb, port_dict = None, None
+    if enclosure == "closed-ported":
+        fb, port_dict = _port_report(lead, per_chamber_drivers, chamber_net, port, port_count,
+                                     warnings)
+    if not lead.has_ts() and enclosure in ("closed", "closed-ported"):
+        detail = "tuning reported, " if enclosure == "closed-ported" else ""
+        warnings.append(f"{lead.slug}: no Thiele-Small data ({lead.data_status}); "
+                        f"{detail}no response prediction")
+    prediction = _predict(lead, enclosure, per_driver_net, fb, chamber_w, h_int, d_int)
     wiring_dict, power_dict = _electrical(drivers, impedances, tone, jack_config, c,
                                           warnings, blockers)
-    return Voicing(
-        name=name, mode="evaluate", tone_target=dict(tone),
-        speakers=[_speaker_summary(d, z) for d, z in zip(drivers, impedances)],
-        enclosure={"type": enclosure, "driver_count": count, "chambers": chambers,
-                   "jack_config": jack_config, "open_fraction": OPEN_FRACTION.get(enclosure)},
-        volumes={"method": "evaluate", "per_driver_net_l": per_driver_net,
-                 "per_chamber_net_l": chamber_net, "net_total_l": net_total,
-                 "displacement_l": displacement, "brace_l": c.brace_l,
-                 "port_l": port_l * chambers, "divider_l": divider_l, "gross_l": box.gross_l},
-        box={"internal_mm": box.internal_mm, "external_mm": box.external_mm,
-             "internal_in": _mm_to_in(box.internal_mm), "external_in": _mm_to_in(box.external_mm),
-             "chamber_internal_width_mm": chamber_w},
-        port=port_dict, prediction=prediction, wiring=wiring_dict, power=power_dict,
-        warnings=_dedupe(warnings), blockers=_dedupe(blockers),
-    )
+    volumes = _volumes("evaluate", per_driver_net, per_chamber_drivers, chambers, displacement,
+                       c.brace_l, port_l * chambers, divider_l, box.gross_l)
+    return _assemble(name, "evaluate", tone, drivers, impedances, enclosure, jack_config, chambers,
+                     count, volumes, box, chamber_w, port_dict, prediction, wiring_dict,
+                     power_dict, warnings, blockers, c)
 
 
 # ---------------------------------------------------------------------------
@@ -2148,11 +2386,14 @@ def render_markdown(v: Voicing) -> str:
         "## Summary",
         "",
     ]
-    spk = ", ".join(f"{s['brand']} {s['model']} {s['impedance_ohm']} ohm ({s['data_status']})"
+    spk = ", ".join(f"{s['brand']} {s['model']} {s['impedance_ohm']:g} ohm ({s['data_status']})"
                     for s in v.speakers)
     e = v.enclosure
+    lines += [f"- Drivers: {e['driver_count']} x {spk}"]
+    lines += [f"- {s['brand']} {s['model']}: cutout {s['cutout_mm']:.0f} mm, {s['bolt_count']} bolts "
+              f"on {s['bolt_circle_mm']:.1f} mm, depth {s['depth_mm']:.0f} mm, {s['weight_kg']:.1f} kg"
+              for s in v.speakers]
     lines += [
-        f"- Drivers: {e['driver_count']} x {spk}",
         f"- Enclosure: {e['type']}, {e['chambers']} chamber(s), jack configuration {e['jack_config']}",
         f"- Character: {v.prediction.get('character')}",
         f"- Volume method: {v.volumes['method']}",
@@ -2182,10 +2423,11 @@ def render_markdown(v: Voicing) -> str:
         f"- Internal: {_fmt_dims(v.box['internal_mm'], v.box['internal_in'])}",
         f"- External: {_fmt_dims(v.box['external_mm'], v.box['external_in'])}",
         f"- Chamber internal width: {v.box['chamber_internal_width_mm']:.0f} mm",
-        "",
-        "## Port",
-        "",
     ]
+    if v.prediction.get("panel_height_mm") is not None:
+        lines.append(f"- Open-back panels: two, top and bottom, each "
+                     f"{v.prediction['panel_height_mm']:.0f} mm tall")
+    lines += ["", "## Port", ""]
     if v.port is None:
         lines.append("No port (closed or open back).")
     else:
@@ -2194,7 +2436,7 @@ def render_markdown(v: Voicing) -> str:
                 else f"slot {p['slot_w_mm']:.0f} x {p['slot_h_mm']:.0f} mm")
         lines += [
             f"- {size}, area {p['area_cm2']:.0f} cm2, length {p['length_mm']:.0f} mm, "
-            f"{p['location']}, one per chamber",
+            f"{p['location']}, {p['count']} per chamber",
             f"- Worst-case air speed {p['air_speed_ms']:.1f} m/s (limit {PORT_V_MAX:.0f} m/s)",
         ]
     pr = v.prediction
@@ -3832,6 +4074,27 @@ def test_catalog_analog_notes_point_at_existing_notes():
             assert drv.analog_of in slugs, slug
 
 
+AMP_FAMILIES = ("Blackface Fender", "Tweed Fender", "Marshall", "Vox", "Modern high gain",
+                "Boutique clean", "Modeling and solid state")
+
+
+GENRES = ("Roots, country, alt-country", "Blues", "Classic rock", "Indie and alternative", "Jazz",
+          "Metal and modern high gain", "Worship and pop", "Funk and R&B")
+
+
+def test_catalog_best_with_uses_table_labels():
+    voicing = (Path(__file__).parent.parent / "knowledge/speaker-cab-voicing.md").read_text()
+    for label in AMP_FAMILIES + GENRES:
+        assert f"| {label} |" in voicing, label
+    for slug in cabvoice.list_speakers(CATALOG):
+        text = (CATALOG / f"{slug}.md").read_text()
+        best_with = text.split("## Best with", 1)[1].split("\n## ", 1)[0]
+        line = next(l for l in best_with.splitlines() if l.startswith("- Amp families:"))
+        assert any(f in line for f in AMP_FAMILIES), slug
+        assert any(g in line for g in GENRES), slug
+        assert "[[speaker-cab-voicing]]" in line, slug
+
+
 def test_every_catalog_speaker_proposes_without_exception(tone):
     for slug in cabvoice.list_speakers(CATALOG):
         drv = cabvoice.load_speaker(slug, CATALOG)
@@ -3839,6 +4102,92 @@ def test_every_catalog_speaker_proposes_without_exception(tone):
         for enclosure in cabvoice.ENCLOSURE_TYPES:
             v = cabvoice.propose([drv], [z], enclosure, tone, name=slug)
             assert v.volumes["gross_l"] > v.volumes["net_total_l"] > 0, (slug, enclosure)
+
+
+def _matrix_params():
+    return [pytest.param(slug, enclosure, jack, n, id=f"{slug}-{enclosure}-{jack}-{n}")
+            for slug in cabvoice.list_speakers(CATALOG)
+            for enclosure in cabvoice.ENCLOSURE_TYPES
+            for jack, n in (("mono", 1), ("mono", 2), ("stereo", 2))]
+
+
+def _port_from_json(port_dict):
+    if port_dict is None:
+        return None
+    slot = None if port_dict["shape"] == "round" else (port_dict["slot_w_mm"], port_dict["slot_h_mm"])
+    port = cabvoice.port_dims(1.0, 1.0, diameter_mm=port_dict["diameter_mm"], slot_mm=slot)
+    port.length_mm = port_dict["length_mm"]
+    port.warnings = []
+    return port
+
+
+@pytest.mark.parametrize("slug,enclosure,jack,n", _matrix_params())
+def test_evaluate_reproduces_propose(tone, slug, enclosure, jack, n):
+    d = cabvoice.load_speaker(slug, CATALOG)
+    z = 16 if 16 in d.impedance_ohm else d.impedance_ohm[0]
+    p = cabvoice.propose([d] * n, [z] * n, enclosure, tone, jack_config=jack, name=slug)
+    e = cabvoice.evaluate([d] * n, [z] * n, enclosure, tone, p.box["internal_mm"],
+                          jack_config=jack, port=_port_from_json(p.port), name=slug)
+    for key, tol in (("fb_hz", 0.05), ("f3_hz", 0.05), ("peak_db", 0.01), ("qtc", 0.01)):
+        a, b = p.prediction.get(key), e.prediction.get(key)
+        assert (a is None) == (b is None), key
+        if a is not None:
+            assert a == pytest.approx(b, abs=tol), key
+    assert p.prediction["character"] == e.prediction["character"]
+    assert p.volumes["per_driver_net_l"] == pytest.approx(e.volumes["per_driver_net_l"], abs=0.05)
+
+
+def test_propose_prediction_follows_clamped_port(tone):
+    # Fs 111 Hz puts the tight Fb at the 90 Hz cap; Vas 90 L gives a 60 L box, where
+    # even a 150 mm port needs less than 20 mm and is clamped, so the port tunes lower.
+    d = _driver(fs_hz=111.0, vas_l=90.0)
+    v = cabvoice.propose([d], [16], "closed-ported", tone)
+    assert v.port["diameter_mm"] == cabvoice.MAX_PORT_DIAMETER_MM
+    assert v.port["length_mm"] == cabvoice.MIN_PORT_LENGTH_MM
+    actual = cabvoice.port_tuning_hz(v.volumes["per_chamber_net_l"] / 1e3,
+                                     v.port["area_cm2"] / 1e4, v.port["length_mm"] / 1e3)
+    assert actual < 89.0
+    assert v.prediction["fb_hz"] == pytest.approx(actual, abs=1e-9)
+    assert any(w.startswith("port clamped at the size cap: tuned") for w in v.warnings)
+
+
+CANNABIS_REX = dict(name="cannabis-rex-like", fs_hz=96, qts=0.64, qes=0.69, qms=9.28, vas_l=45.48,
+                    xmax_mm=0.8, sd_cm2=532.4, re_ohm=6.56, power_w=50, sensitivity_db=101.8,
+                    cutout_mm=281.2, bolt_circle_mm=294.4, bolt_count=8, displacement_l=2.0)
+
+
+def test_propose_mono_2x12_uses_one_port_per_driver(tone):
+    d = _driver(**CANNABIS_REX)
+    one = cabvoice.propose([d], [16], "closed-ported", tone)
+    two = cabvoice.propose([d, d], [16, 16], "closed-ported", tone, jack_config="mono")
+    assert two.port["count"] == 2 and one.port["count"] == 1
+    assert two.construction["port_count"] == 2
+    assert not any("too short" in w or "port clamped" in w for w in two.warnings)
+    assert two.port["diameter_mm"] == pytest.approx(one.port["diameter_mm"])
+    assert two.port["length_mm"] == pytest.approx(one.port["length_mm"])
+    assert two.port["air_speed_ms"] == pytest.approx(one.port["air_speed_ms"])
+    assert two.volumes["port_l"] == pytest.approx(2 * one.volumes["port_l"])
+    assert two.prediction["fb_hz"] == pytest.approx(one.prediction["fb_hz"], abs=1e-6)
+    single = cabvoice.propose([d, d], [16, 16], "closed-ported", tone, jack_config="mono",
+                              constraints=cabvoice.Constraints(port_count=1))
+    assert single.port["count"] == 1 and single.port["diameter_mm"] > two.port["diameter_mm"]
+
+
+def _calibration_module():
+    import importlib.util
+    path = Path(__file__).parent.parent / "projects/Speaker-cab-system/pipeline/calibration_table.py"
+    spec = importlib.util.spec_from_file_location("calibration_table", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_calibration_table_matches_engine():
+    cal = _calibration_module()
+    text = (Path(__file__).parent.parent / "knowledge/speaker-cab-voicing.md").read_text()
+    section = text.split("## Calibration table", 1)[1].split("\n## ", 1)[0]
+    assert f'prediction_status "{cabvoice.PREDICTION_STATUS}"' in section
+    assert cal.note_rows(text) == cal.calibration_rows()
 ```
 
 - [ ] **Step 2: Run the whole suite**
@@ -3919,3 +4268,4 @@ git push origin main
 - Deviations from the spec, recorded here and in the spec amendment of 2026-09-09: `data_status` gained `third-party` and `analog`; tests live at `scripts/test_cabvoice.py` beside the existing `test_s3dx.py` instead of `scripts/tests/`; the ported-alignment test uses Eminence's Beta-12A-2 and Delta-12A published designs because no guitar speaker publishes a recommended box; `open_back` takes internal width, height, depth, and open fraction with no `driver_center` and uses path = depth + width / 2, the shortest route from a centered driver out the full-width open band and around the side to the front (ruled with Brian on 2026-09-09: the plan's formula stands, so the calibration note keeps about 370 Hz for the site box).
 - Pre-flight amendments (2026-09-09, before any task was dispatched, after a transcribed run of every code block passed 86/86): three Eminence archive URLs quoted for PyYAML; Delta-12A model-limit numbers corrected to what the engine reports; `evaluate` surfaces `port.warnings` like `propose`, with a test; Vintage 30 Qes rounding; stereo per-channel power convention stated; unequal impedances warn rather than refuse, matching the spec; unverified-value labels named in the constraints; catalog count and Celestion status text corrected. The `propose` and `evaluate` duplication stays until the final whole-branch review fix wave (ruled with Brian).
 - Layer 1 (tone target from the intake, speaker ranking) is prose in Task 11 and is executed by the skill in Plan 3, not by code here.
+- Final whole-branch review fix wave (2026-09-09, commits 81bffcf to a3312e3, reviewed on Fable 5.1): `propose` and `evaluate` share helpers (`_setup`, `_displacement`, `_divider_l`, `_chamber_w`, `_port_report`, `_predict`, `_volumes`, `_assemble`); the prediction follows the port as built when the size cap clamps it; one port per driver in a chamber (`Constraints.port_count`, ruled with Brian); slot ports are front ports; an impossible box becomes a blocker with the achievable prediction and exit 2 with files written; voicing.json carries a `construction` block; positive-number guards, wording, and sheet lines per the review; the calibration table regenerated with the prediction status in its header (script now at projects/Speaker-cab-system/pipeline/calibration_table.py); catalog labels normalized to the voicing note's tables. The code blocks in Tasks 1 to 9 above were synced to the landed code by projects/Speaker-cab-system/pipeline/sync_plan_code.py, so they read as shipped; the propose-versus-evaluate matrix test and the calibration test sit at the end of scripts/test_cabvoice.py after Task 15's tests, and the per-task expected counts count only each task's own tests.
