@@ -636,6 +636,7 @@ def test_evaluate_ported_reports_tuning_from_port(drv, tone):
     assert v.volumes["port_l"] == pytest.approx(0.18, abs=0.01)
     assert v.port["length_mm"] == 23.0
     assert v.port["air_speed_ms"] > 0
+    assert v.port["volume_l"] == pytest.approx(v.volumes["port_l"], abs=1e-6)
 
 
 def test_evaluate_requires_port_for_ported(drv, tone):

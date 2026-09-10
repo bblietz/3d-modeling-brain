@@ -1042,6 +1042,7 @@ def evaluate(drivers: list, impedances: list, enclosure: str, tone: dict,
         port.air_speed_ms = port_air_speed(speed_driver, fb, port.area_cm2)
         if port.air_speed_ms > PORT_V_MAX:
             warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s above {PORT_V_MAX} m/s")
+        port.volume_l = port_l
         port_dict = {**asdict(port), "location": "rear", "per_chamber": True}
         if lead.has_ts():
             pb = ported_box(lead, per_driver_net, fb)
