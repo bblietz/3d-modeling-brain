@@ -2660,12 +2660,12 @@ Vintage 30 notes scale their estimates from it.
 
 ## Best with
 
-- Amp families: Marshall, tweed Fender. Genres: classic rock, blues.
+- Amp families: Marshall, Tweed Fender. Genres: Classic rock; Blues. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 55 Hz, Re 6.53 (8 ohm) and 12.11 (15 ohm), range 55 to 5000 Hz, 168 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg.
-- Thiele-Small values are Voice Coil Test Bench sample 1 (16 ohm): Fs 54.7, Re 12.17, Qms 9.48, Qes 0.39, Qts 0.37, Vas 71.3 L, Sd 543 cm2, Xmax 0.7 mm. Sample 2 read Fs 67.1, Qts 0.46, Vas 53.2 L, so expect that much spread between units. Le not tabulated.
+- Celestion publishes Fs 55 Hz, Re 6.53 (8 ohm) and 12.11 (15 ohm), range 55 to 5000 Hz, 168 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
+- Thiele-Small values are Voice Coil Test Bench sample 1 (16 ohm), LTD model column: Fs 54.7, Re 12.17, Qms 9.48, Qes 0.39, Qts 0.37, Vas 71.3 L, Sd 543 cm2, Xmax 0.7 mm. Sample 2 read Fs 67.1, Qts 0.46, Vas 53.2 L, so expect that much spread between units. Le not tabulated.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
@@ -2711,7 +2711,7 @@ status: unverified-starting-values
 # Celestion G12H Anniversary
 
 The MaximoCabs site's "G12H Greenback, 30 W". The current 30 W G12H with the
-75 Hz cone and a bare 50 oz ceramic magnet. Confirm with Brian that this, not
+85 Hz cone and a bare 50 oz ceramic magnet. Confirm with Brian that this, not
 the Heritage G12H(55), is what he stocks; the mounting is identical either way.
 
 ## Character
@@ -2721,12 +2721,12 @@ the Heritage G12H(55), is what he stocks; the mounting is identical either way.
 
 ## Best with
 
-- Amp families: Marshall, tweed Fender, Vox. Genres: classic rock, blues, indie.
+- Amp families: Marshall, Tweed Fender, Vox. Genres: Classic rock; Blues; Indie and alternative. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 85 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 156 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg.
-- T/S values are scaled from [[celestion-heritage-g12h55]] (Fs 54.7): Vas 71.3 x (54.7 / 85)^2 = 29.5 L; Qes 0.39 x 85 / 54.7 = 0.61; Qms 9.48 x 85 / 54.7 = 14.7; Qts = 0.61 x 14.7 / (0.61 + 14.7) = 0.58. Xmax and Sd copied. Treat every prediction from these as an estimate.
+- Celestion publishes Fs 85 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 156 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
+- T/S values are scaled from [[celestion-heritage-g12h55]] (Fs 54.7): Vas 71.3 x (54.7 / 85)^2 = 29.5 L; Qes 0.39 x 85 / 54.7 = 0.61; Qms 9.48 x 85 / 54.7 = 14.7; Qts = 0.61 x 14.7 / (0.61 + 14.7) = 0.58 (the rounded factors shown give 0.59; the unrounded chain gives 0.58, the frontmatter value). Xmax and Sd copied. Treat every prediction from these as an estimate.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
@@ -2776,11 +2776,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Marshall, modern high gain, boutique clean. Genres: classic rock, metal, worship and pop.
+- Amp families: Marshall, Modern high gain, Boutique clean. Genres: Classic rock; Metal and modern high gain; Worship and pop. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 75 Hz, Re 7.3 (8 ohm) and 12.9 (16 ohm), range 70 to 5000 Hz, 156 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg.
+- Celestion publishes Fs 75 Hz, Re 7.3 (8 ohm) and 12.9 (16 ohm), range 70 to 5000 Hz, 156 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - T/S values are scaled from [[celestion-heritage-g12h55]] (Fs 54.7): Vas 71.3 x (54.7 / 75)^2 = 37.9 L; Qes 0.39 x 75 / 54.7 = 0.53; Qms 9.48 x 75 / 54.7 = 13.0; Qts = 0.53 x 13.0 / 13.53 = 0.51. Xmax and Sd copied. Estimate.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
@@ -2832,11 +2832,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Vox, boutique clean up to 15 W, or two Blues under a 30 W amp (the accepted early-breakup case). Genres: indie and alternative, blues, worship at low volume.
+- Amp families: Vox, Boutique clean up to 15 W, or two Blues under a 30 W amp (the accepted early-breakup case). Genres: Indie and alternative; Blues; Worship and pop at low volume. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 75 Hz, Re 6.4 (8 ohm) and 11.8 (15 ohm), range 75 to 5000 Hz, 128 mm alnico structure, 4 holes, 165 mm deep, 4.2 kg. No T/S; the engine uses rule-of-thumb volumes.
+- Celestion publishes Fs 75 Hz, Re 6.4 (8 ohm) and 11.8 (15 ohm), range 75 to 5000 Hz, 128 mm alnico structure, 4 holes, 165 mm deep, 4.2 kg. No T/S; the engine uses rule-of-thumb volumes. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
@@ -2885,11 +2885,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Vox, boutique clean, blackface Fender. Genres: indie and alternative, blues, worship and pop.
+- Amp families: Vox, Boutique clean, Blackface Fender. Genres: Indie and alternative; Blues; Worship and pop. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 75 Hz, Re 6.4 (8 ohm) and 11.8 (15 ohm), range 75 to 5000 Hz, 128 mm alnico structure, 4 holes, 165 mm deep, 4.2 kg. No T/S; rule-of-thumb volumes.
+- Celestion publishes Fs 75 Hz, Re 6.4 (8 ohm) and 11.8 (15 ohm), range 75 to 5000 Hz, 128 mm alnico structure, 4 holes, 165 mm deep, 4.2 kg. No T/S; rule-of-thumb volumes. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
@@ -2938,11 +2938,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Marshall, Vox, tweed Fender. Genres: classic rock, blues, indie. Two per cabinet under amps over 20 W.
+- Amp families: Marshall, Vox, Tweed Fender. Genres: Classic rock; Blues; Indie and alternative. Two per cabinet under amps over 20 W. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 75 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 150 mm magnet structure (35 oz), 4 holes, 130 mm deep, 3.6 kg. No T/S; rule-of-thumb volumes.
+- Celestion publishes Fs 75 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 150 mm magnet structure (35 oz), 4 holes, 130 mm deep, 3.6 kg. No T/S; rule-of-thumb volumes. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
@@ -2991,11 +2991,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Marshall, boutique clean, modern high gain at moderate gain. Genres: classic rock, blues, worship and pop.
+- Amp families: Marshall, Boutique clean, Modern high gain at moderate gain. Genres: Classic rock; Blues; Worship and pop. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 75 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 150 mm magnet structure, 8 holes, 130 mm deep, 3.6 kg. No T/S; rule-of-thumb volumes.
+- Celestion publishes Fs 75 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 150 mm magnet structure, 8 holes, 130 mm deep, 3.6 kg. No T/S; rule-of-thumb volumes. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
@@ -3044,11 +3044,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: modern high gain, blackface Fender, modeling and solid state. Genres: metal, classic rock, funk and R&B.
+- Amp families: Modern high gain, Blackface Fender, Modeling and solid state. Genres: Metal and modern high gain; Classic rock; Funk and R&B. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 75 Hz, Re 6.37 (8 ohm) and 12.5 (16 ohm), range 70 to 5000 Hz, 168 mm magnet structure (50 oz), 8 holes, 138 mm deep, 4.7 kg. No T/S; rule-of-thumb volumes.
+- Celestion publishes Fs 75 Hz, Re 6.37 (8 ohm) and 12.5 (16 ohm), range 70 to 5000 Hz, 168 mm magnet structure (50 oz), 8 holes, 138 mm deep, 4.7 kg. No T/S; rule-of-thumb volumes. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
@@ -3097,11 +3097,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: boutique clean, blackface Fender, Vox at any power. Genres: worship and pop, jazz, indie and alternative.
+- Amp families: Boutique clean, Blackface Fender, Vox at any power. Genres: Worship and pop; Jazz; Indie and alternative. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 75 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 128 mm alnico structure, 8 holes, 165 mm deep, 4.2 kg. No T/S; rule-of-thumb volumes.
+- Celestion publishes Fs 75 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 128 mm alnico structure, 8 holes, 165 mm deep, 4.2 kg. No T/S; rule-of-thumb volumes. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
@@ -3150,11 +3150,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Marshall, modern high gain at moderate gain. Genres: classic rock, blues.
+- Amp families: Marshall, Modern high gain at moderate gain. Genres: Classic rock; Blues. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 85 Hz, Re 6.9 (8 ohm) and 11.8 (15 ohm), range 80 to 5000 Hz, 145 mm magnet structure, 4 holes, 128 mm deep, 3.5 kg. No T/S; rule-of-thumb volumes.
+- Celestion publishes Fs 85 Hz, Re 6.9 (8 ohm) and 11.8 (15 ohm), range 80 to 5000 Hz, 145 mm magnet structure, 4 holes, 128 mm deep, 3.5 kg. No T/S; rule-of-thumb volumes. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
@@ -3229,11 +3229,11 @@ Hemp cone, 38 oz ceramic magnet, 1.75 in coil. On the MaximoCabs tolex line list
 
 ## Best with
 
-- Amp families: blackface Fender, boutique clean, tweed Fender. Genres: roots and country, jazz, indie and alternative, blues.
+- Amp families: Blackface Fender, Boutique clean, Tweed Fender. Genres: Roots, country, alt-country; Jazz; Indie and alternative; Blues. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- 8 ohm T/S from Eminence's archived spec page (2019): Fs 96, Re 6.56, Le 0.44, Qes 0.69, Qms 9.28, Qts 0.64, Vas 45.48 L, Sd 532.4, Xmax 0.8, Mms 24 g, BL 11.8. 16 ohm PDF gives Fs 101, Re 13.10 only.
+- 8 ohm T/S from Eminence's archived spec page (2019): Fs 96, Re 6.56, Le 0.44, Qes 0.69, Qms 9.28, Qts 0.64, Vas 45.48 L, Sd 532.4, Xmax 0.8, Mms 24 g, BL 11.8. 16 ohm PDF gives Fs 101, Re 13.10 only. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Driver volume displaced 0.071 cu ft (2.0 L). Enclosure: closed back or open back acceptable. Depth 129.5 mm, 3.72 kg.
 - Bolt count 8 is not printed by Eminence (its sheets give hole diameter 6.4 mm and bolt circle 294.4 mm); standard Eminence 12 inch frame, a starting value to verify on the first unit.
 
@@ -3286,11 +3286,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: modeling and solid state, boutique clean, blackface Fender at high volume. Genres: jazz, worship and pop, funk and R&B.
+- Amp families: Modeling and solid state, Boutique clean, Blackface Fender at high volume. Genres: Jazz; Worship and pop; Funk and R&B. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- 8 ohm T/S from the product page: Fs 89, Re 7.36, Le 0.47, Qes 0.49, Qms 10.02, Qts 0.47, Vas 34.1 L, Sd 519.5, Xmax 0.8, Mms 36 g, BL 17.4. 16 ohm PDF: Fs 97, Re 14.63, sensitivity 102.0 dB, 4.99 kg.
+- 8 ohm T/S from the product page: Fs 89, Re 7.36, Le 0.47, Qes 0.49, Qms 10.02, Qts 0.47, Vas 34.1 L, Sd 519.5, Xmax 0.8, Mms 36 g, BL 17.4. 16 ohm PDF: Fs 97, Re 14.63, sensitivity 102.0 dB, 4.99 kg. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Driver volume displaced 0.079 cu ft (2.25 L). Sealed and vented both acceptable. Depth 132.1 mm, 5.03 kg.
 - Bolt count 8 is not printed by Eminence (its sheets give hole diameter 6.4 mm and bolt circle 294.4 mm); standard Eminence 12 inch frame, a starting value to verify on the first unit.
 
@@ -3343,11 +3343,12 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: modern high gain, modeling and solid state, Marshall. Genres: metal and modern high gain, classic rock. Suits baritone and drop tunings.
+- Amp families: Modern high gain, Modeling and solid state, Marshall. Genres: Metal and modern high gain; Classic rock. Suits baritone and drop tunings. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- 8 ohm T/S from the product page: Fs 97, Re 6.92, Le 0.42, Qes 0.55, Qms 14.43, Qts 0.53, Vas 41.3 L, Sd 532.4, Xmax 0.8, Mms 26 g, BL 14.2. 16 ohm: Fs 113, Re 14.7, Le 0.67, Qes 0.67, Qms 8.6, Qts 0.62, Vas 26.4 L, sensitivity 102.3 dB.
+- 8 ohm T/S from the product page: Fs 97, Re 6.92, Le 0.42, Qes 0.55, Qms 14.43, Qts 0.53, Vas 41.3 L, Sd 532.4, Xmax 0.8, Mms 26 g, BL 14.2. 16 ohm: Fs 113, Re 14.7, Le 0.67, Qes 0.67, Qms 8.6, Qts 0.62, Vas 26.4 L, sensitivity 102.3 dB. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
+- The frontmatter holds the 8 ohm set; a 16 ohm choice is voiced with it until a per-impedance schema lands (see the model limits in [[speaker-cab-voicing]]).
 - Driver volume displaced 0.079 cu ft (2.25 L). Sealed and vented both acceptable. Depth 132.1 mm, 5.03 kg.
 - Bolt count 8 is not printed by Eminence (its sheets give hole diameter 6.4 mm and bolt circle 294.4 mm); standard Eminence 12 inch frame, a starting value to verify on the first unit.
 
@@ -3400,11 +3401,12 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: tweed Fender, Marshall, blackface Fender. Genres: blues, classic rock, roots and country.
+- Amp families: Tweed Fender, Marshall, Blackface Fender. Genres: Blues; Classic rock; Roots, country, alt-country. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- 8 ohm T/S from Eminence's archived spec page (2020): Fs 79, Re 7.3, Le 0.54, Qes 0.68, Qms 13.88, Qts 0.65, Vas 50.9 L, Sd 519.5, Xmax 0.8, Mms 31 g, BL 12.8. 4 ohm: Fs 89, Re 3.78, Qts 0.68, Vas 39 L, 99.0 dB. 16 ohm: Fs 91, Re 14.7, Qts 0.81, Vas 44.5 L, 100.2 dB.
+- 8 ohm T/S from Eminence's archived spec page (2020): Fs 79, Re 7.3, Le 0.54, Qes 0.68, Qms 13.88, Qts 0.65, Vas 50.9 L, Sd 519.5, Xmax 0.8, Mms 31 g, BL 12.8. 4 ohm: Fs 89, Re 3.78, Qts 0.68, Vas 39 L, 99.0 dB. 16 ohm: Fs 91, Re 14.7, Qts 0.81, Vas 44.5 L, 100.2 dB. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
+- The frontmatter holds the 8 ohm set; a 16 ohm choice is voiced with it until a per-impedance schema lands (see the model limits in [[speaker-cab-voicing]]).
 - Driver volume displaced 0.071 cu ft (2.0 L). Sealed and vented both acceptable. Depth 129.5 mm, 3.76 kg.
 - Bolt count 8 is not printed by Eminence (its sheets give hole diameter 6.4 mm and bolt circle 294.4 mm); standard Eminence 12 inch frame, a starting value to verify on the first unit.
 
@@ -3457,11 +3459,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: blackface Fender, modeling and solid state, boutique clean. Genres: funk and R&B, worship and pop, roots and country.
+- Amp families: Blackface Fender, Modeling and solid state, Boutique clean. Genres: Funk and R&B; Worship and pop; Roots, country, alt-country. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- 8 ohm T/S from Eminence's archived spec page (2020): Fs 110, Re 6.42, Le 0.43, Qes 0.89, Qms 7.19, Qts 0.79, Vas 30.8 L, Sd 532.4, Xmax 0.8, Mms 30 g, BL 12.3. The current PDF prints only Fs and Re.
+- 8 ohm T/S from Eminence's archived spec page (2020): Fs 110, Re 6.42, Le 0.43, Qes 0.89, Qms 7.19, Qts 0.79, Vas 30.8 L, Sd 532.4, Xmax 0.8, Mms 30 g, BL 12.3. The current PDF prints only Fs and Re. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Driver volume displaced 0.071 cu ft (2.0 L). Closed back or open back acceptable. Depth 129.5 mm, 3.72 kg.
 - Bolt count 8 is not printed by Eminence (its sheets give hole diameter 6.4 mm and bolt circle 294.4 mm); standard Eminence 12 inch frame, a starting value to verify on the first unit.
 
@@ -3536,7 +3538,7 @@ Warehouse Guitar Speakers' take on the Vintage 30. On both MaximoCabs lists.
 
 ## Best with
 
-- Amp families: modern high gain, Marshall, boutique clean. Genres: classic rock, metal and modern high gain, worship and pop.
+- Amp families: Modern high gain, Marshall, Boutique clean. Genres: Classic rock; Metal and modern high gain; Worship and pop. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
@@ -3592,7 +3594,7 @@ WGS's G12-65 style speaker.
 
 ## Best with
 
-- Amp families: Marshall, blackface Fender, boutique clean. Genres: classic rock, blues, indie and alternative. Qts above 0.9: prefers open or semi-open backs.
+- Amp families: Marshall, Blackface Fender, Boutique clean. Genres: Classic rock; Blues; Indie and alternative. Qts above 0.9: prefers open or semi-open backs. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
@@ -3648,13 +3650,13 @@ WGS's 25 W Greenback style speaker.
 
 ## Best with
 
-- Amp families: Marshall, Vox, tweed Fender. Genres: classic rock, blues. Qts 1.18 as printed: prefers open or semi-open backs; two per cabinet for amps over 20 W.
+- Amp families: Marshall, Vox, Tweed Fender. Genres: Classic rock; Blues. Qts 1.18 as printed: prefers open or semi-open backs; two per cabinet for amps over 20 W. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
 - WGS prints: Fs 125.3, Re 8.05, Le 0.34, Qes 1.35, Qms 9.52, Qts 1.18, Vas "10.5 cu ft", Sd 366.1, Mms 29.2, BL 11.7, SPL 99.63 dB, mounting as the ET65.
-- Assumptions: Vas 22.0 L: the printed 10.5 (liters, as for the Veteran 30; its printed Cms of 0.06 mm/N agrees) rescaled by (530 / 366.1)^2 = 2.096 to the assumed Sd; Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. The printed Fs of 125 Hz is high for a Greenback style speaker (Celestion's G12M reads 75 Hz) and may be a new-unit measurement. Estimates.
-- Magnet type, Xmax 0.8 mm, Sd 530 cm2, and the Vas rescale are assumptions stated above, not WGS data; WGS's printed Cms (mm/N) is what confirms the printed Vas is in liters.
+- Assumptions: Vas 22.0 L: the printed 10.5 (liters, as for the Veteran 30; its printed Cms of 0.06 mm/N agrees within 7 percent) rescaled by (530 / 366.1)^2 = 2.096 to the assumed Sd; Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. The printed Fs of 125 Hz is high for a Greenback style speaker (Celestion's G12M reads 75 Hz) and may be a new-unit measurement. Estimates.
+- Magnet type, Xmax 0.8 mm, Sd 530 cm2, and the Vas rescale are assumptions stated above, not WGS data; depth 128.6 mm and weight 3.4 kg are assumed as the ET65's, since WGS prints only "mounting as the ET65"; WGS's printed Cms (mm/N) is what confirms the printed Vas is in liters.
 
 ## Field notes
 
@@ -3706,7 +3708,7 @@ Vintage alnico, 50 W (100 W musical), 38 mm coil, 826 g alnico magnet.
 
 ## Best with
 
-- Amp families: tweed Fender, blackface Fender. Genres: blues, roots and country, jazz. Historically an open-back combo speaker; prefers open or semi-open.
+- Amp families: Tweed Fender, Blackface Fender. Genres: Blues; Roots, country, alt-country; Jazz. Historically an open-back combo speaker; prefers open or semi-open. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
@@ -3762,7 +3764,7 @@ Vintage ceramic, 50 W (100 W musical), 38 mm coil, 810 g ferrite magnet.
 
 ## Best with
 
-- Amp families: blackface Fender, tweed Fender. Genres: roots and country, jazz, blues. Qts above 1: prefers open or semi-open; closed boxes under about 59 L net come out peaky (Qtc 1.26 at 44 L; 1.18, big, at the 68 L clamp).
+- Amp families: Blackface Fender, Tweed Fender. Genres: Roots, country, alt-country; Jazz; Blues. Qts above 1: prefers open or semi-open; closed boxes under about 59 L net come out peaky (Qtc 1.26 at 44 L; 1.18, big, at the 68 L clamp). Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

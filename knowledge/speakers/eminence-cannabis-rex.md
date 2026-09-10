@@ -39,11 +39,11 @@ Hemp cone, 38 oz ceramic magnet, 1.75 in coil. On the MaximoCabs tolex line list
 
 ## Best with
 
-- Amp families: blackface Fender, boutique clean, tweed Fender. Genres: roots and country, jazz, indie and alternative, blues.
+- Amp families: Blackface Fender, Boutique clean, Tweed Fender. Genres: Roots, country, alt-country; Jazz; Indie and alternative; Blues. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- 8 ohm T/S from Eminence's archived spec page (2019): Fs 96, Re 6.56, Le 0.44, Qes 0.69, Qms 9.28, Qts 0.64, Vas 45.48 L, Sd 532.4, Xmax 0.8, Mms 24 g, BL 11.8. 16 ohm PDF gives Fs 101, Re 13.10 only.
+- 8 ohm T/S from Eminence's archived spec page (2019): Fs 96, Re 6.56, Le 0.44, Qes 0.69, Qms 9.28, Qts 0.64, Vas 45.48 L, Sd 532.4, Xmax 0.8, Mms 24 g, BL 11.8. 16 ohm PDF gives Fs 101, Re 13.10 only. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Driver volume displaced 0.071 cu ft (2.0 L). Enclosure: closed back or open back acceptable. Depth 129.5 mm, 3.72 kg.
 - Bolt count 8 is not printed by Eminence (its sheets give hole diameter 6.4 mm and bolt circle 294.4 mm); standard Eminence 12 inch frame, a starting value to verify on the first unit.
 

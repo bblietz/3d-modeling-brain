@@ -39,11 +39,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: blackface Fender, modeling and solid state, boutique clean. Genres: funk and R&B, worship and pop, roots and country.
+- Amp families: Blackface Fender, Modeling and solid state, Boutique clean. Genres: Funk and R&B; Worship and pop; Roots, country, alt-country. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- 8 ohm T/S from Eminence's archived spec page (2020): Fs 110, Re 6.42, Le 0.43, Qes 0.89, Qms 7.19, Qts 0.79, Vas 30.8 L, Sd 532.4, Xmax 0.8, Mms 30 g, BL 12.3. The current PDF prints only Fs and Re.
+- 8 ohm T/S from Eminence's archived spec page (2020): Fs 110, Re 6.42, Le 0.43, Qes 0.89, Qms 7.19, Qts 0.79, Vas 30.8 L, Sd 532.4, Xmax 0.8, Mms 30 g, BL 12.3. The current PDF prints only Fs and Re. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Driver volume displaced 0.071 cu ft (2.0 L). Closed back or open back acceptable. Depth 129.5 mm, 3.72 kg.
 - Bolt count 8 is not printed by Eminence (its sheets give hole diameter 6.4 mm and bolt circle 294.4 mm); standard Eminence 12 inch frame, a starting value to verify on the first unit.
 

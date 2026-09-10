@@ -39,11 +39,12 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: tweed Fender, Marshall, blackface Fender. Genres: blues, classic rock, roots and country.
+- Amp families: Tweed Fender, Marshall, Blackface Fender. Genres: Blues; Classic rock; Roots, country, alt-country. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- 8 ohm T/S from Eminence's archived spec page (2020): Fs 79, Re 7.3, Le 0.54, Qes 0.68, Qms 13.88, Qts 0.65, Vas 50.9 L, Sd 519.5, Xmax 0.8, Mms 31 g, BL 12.8. 4 ohm: Fs 89, Re 3.78, Qts 0.68, Vas 39 L, 99.0 dB. 16 ohm: Fs 91, Re 14.7, Qts 0.81, Vas 44.5 L, 100.2 dB.
+- 8 ohm T/S from Eminence's archived spec page (2020): Fs 79, Re 7.3, Le 0.54, Qes 0.68, Qms 13.88, Qts 0.65, Vas 50.9 L, Sd 519.5, Xmax 0.8, Mms 31 g, BL 12.8. 4 ohm: Fs 89, Re 3.78, Qts 0.68, Vas 39 L, 99.0 dB. 16 ohm: Fs 91, Re 14.7, Qts 0.81, Vas 44.5 L, 100.2 dB. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
+- The frontmatter holds the 8 ohm set; a 16 ohm choice is voiced with it until a per-impedance schema lands (see the model limits in [[speaker-cab-voicing]]).
 - Driver volume displaced 0.071 cu ft (2.0 L). Sealed and vented both acceptable. Depth 129.5 mm, 3.76 kg.
 - Bolt count 8 is not printed by Eminence (its sheets give hole diameter 6.4 mm and bolt circle 294.4 mm); standard Eminence 12 inch frame, a starting value to verify on the first unit.
 

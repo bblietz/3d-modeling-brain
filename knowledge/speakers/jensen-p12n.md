@@ -38,7 +38,7 @@ Vintage alnico, 50 W (100 W musical), 38 mm coil, 826 g alnico magnet.
 
 ## Best with
 
-- Amp families: tweed Fender, blackface Fender. Genres: blues, roots and country, jazz. Historically an open-back combo speaker; prefers open or semi-open.
+- Amp families: Tweed Fender, Blackface Fender. Genres: Blues; Roots, country, alt-country; Jazz. Historically an open-back combo speaker; prefers open or semi-open. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

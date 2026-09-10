@@ -38,13 +38,13 @@ WGS's 25 W Greenback style speaker.
 
 ## Best with
 
-- Amp families: Marshall, Vox, tweed Fender. Genres: classic rock, blues. Qts 1.18 as printed: prefers open or semi-open backs; two per cabinet for amps over 20 W.
+- Amp families: Marshall, Vox, Tweed Fender. Genres: Classic rock; Blues. Qts 1.18 as printed: prefers open or semi-open backs; two per cabinet for amps over 20 W. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
 - WGS prints: Fs 125.3, Re 8.05, Le 0.34, Qes 1.35, Qms 9.52, Qts 1.18, Vas "10.5 cu ft", Sd 366.1, Mms 29.2, BL 11.7, SPL 99.63 dB, mounting as the ET65.
-- Assumptions: Vas 22.0 L: the printed 10.5 (liters, as for the Veteran 30; its printed Cms of 0.06 mm/N agrees) rescaled by (530 / 366.1)^2 = 2.096 to the assumed Sd; Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. The printed Fs of 125 Hz is high for a Greenback style speaker (Celestion's G12M reads 75 Hz) and may be a new-unit measurement. Estimates.
-- Magnet type, Xmax 0.8 mm, Sd 530 cm2, and the Vas rescale are assumptions stated above, not WGS data; WGS's printed Cms (mm/N) is what confirms the printed Vas is in liters.
+- Assumptions: Vas 22.0 L: the printed 10.5 (liters, as for the Veteran 30; its printed Cms of 0.06 mm/N agrees within 7 percent) rescaled by (530 / 366.1)^2 = 2.096 to the assumed Sd; Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. The printed Fs of 125 Hz is high for a Greenback style speaker (Celestion's G12M reads 75 Hz) and may be a new-unit measurement. Estimates.
+- Magnet type, Xmax 0.8 mm, Sd 530 cm2, and the Vas rescale are assumptions stated above, not WGS data; depth 128.6 mm and weight 3.4 kg are assumed as the ET65's, since WGS prints only "mounting as the ET65"; WGS's printed Cms (mm/N) is what confirms the printed Vas is in liters.
 
 ## Field notes
 

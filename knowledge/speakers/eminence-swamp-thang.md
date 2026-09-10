@@ -39,11 +39,12 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: modern high gain, modeling and solid state, Marshall. Genres: metal and modern high gain, classic rock. Suits baritone and drop tunings.
+- Amp families: Modern high gain, Modeling and solid state, Marshall. Genres: Metal and modern high gain; Classic rock. Suits baritone and drop tunings. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- 8 ohm T/S from the product page: Fs 97, Re 6.92, Le 0.42, Qes 0.55, Qms 14.43, Qts 0.53, Vas 41.3 L, Sd 532.4, Xmax 0.8, Mms 26 g, BL 14.2. 16 ohm: Fs 113, Re 14.7, Le 0.67, Qes 0.67, Qms 8.6, Qts 0.62, Vas 26.4 L, sensitivity 102.3 dB.
+- 8 ohm T/S from the product page: Fs 97, Re 6.92, Le 0.42, Qes 0.55, Qms 14.43, Qts 0.53, Vas 41.3 L, Sd 532.4, Xmax 0.8, Mms 26 g, BL 14.2. 16 ohm: Fs 113, Re 14.7, Le 0.67, Qes 0.67, Qms 8.6, Qts 0.62, Vas 26.4 L, sensitivity 102.3 dB. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
+- The frontmatter holds the 8 ohm set; a 16 ohm choice is voiced with it until a per-impedance schema lands (see the model limits in [[speaker-cab-voicing]]).
 - Driver volume displaced 0.079 cu ft (2.25 L). Sealed and vented both acceptable. Depth 132.1 mm, 5.03 kg.
 - Bolt count 8 is not printed by Eminence (its sheets give hole diameter 6.4 mm and bolt circle 294.4 mm); standard Eminence 12 inch frame, a starting value to verify on the first unit.
 

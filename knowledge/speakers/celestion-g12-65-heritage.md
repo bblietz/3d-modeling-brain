@@ -36,11 +36,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Marshall, modern high gain at moderate gain. Genres: classic rock, blues.
+- Amp families: Marshall, Modern high gain at moderate gain. Genres: Classic rock; Blues. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 85 Hz, Re 6.9 (8 ohm) and 11.8 (15 ohm), range 80 to 5000 Hz, 145 mm magnet structure, 4 holes, 128 mm deep, 3.5 kg. No T/S; rule-of-thumb volumes.
+- Celestion publishes Fs 85 Hz, Re 6.9 (8 ohm) and 11.8 (15 ohm), range 80 to 5000 Hz, 145 mm magnet structure, 4 holes, 128 mm deep, 3.5 kg. No T/S; rule-of-thumb volumes. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes

@@ -39,11 +39,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: modeling and solid state, boutique clean, blackface Fender at high volume. Genres: jazz, worship and pop, funk and R&B.
+- Amp families: Modeling and solid state, Boutique clean, Blackface Fender at high volume. Genres: Jazz; Worship and pop; Funk and R&B. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- 8 ohm T/S from the product page: Fs 89, Re 7.36, Le 0.47, Qes 0.49, Qms 10.02, Qts 0.47, Vas 34.1 L, Sd 519.5, Xmax 0.8, Mms 36 g, BL 17.4. 16 ohm PDF: Fs 97, Re 14.63, sensitivity 102.0 dB, 4.99 kg.
+- 8 ohm T/S from the product page: Fs 89, Re 7.36, Le 0.47, Qes 0.49, Qms 10.02, Qts 0.47, Vas 34.1 L, Sd 519.5, Xmax 0.8, Mms 36 g, BL 17.4. 16 ohm PDF: Fs 97, Re 14.63, sensitivity 102.0 dB, 4.99 kg. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Driver volume displaced 0.079 cu ft (2.25 L). Sealed and vented both acceptable. Depth 132.1 mm, 5.03 kg.
 - Bolt count 8 is not printed by Eminence (its sheets give hole diameter 6.4 mm and bolt circle 294.4 mm); standard Eminence 12 inch frame, a starting value to verify on the first unit.
 

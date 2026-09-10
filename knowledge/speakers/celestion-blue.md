@@ -36,11 +36,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Vox, boutique clean up to 15 W, or two Blues under a 30 W amp (the accepted early-breakup case). Genres: indie and alternative, blues, worship at low volume.
+- Amp families: Vox, Boutique clean up to 15 W, or two Blues under a 30 W amp (the accepted early-breakup case). Genres: Indie and alternative; Blues; Worship and pop at low volume. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 75 Hz, Re 6.4 (8 ohm) and 11.8 (15 ohm), range 75 to 5000 Hz, 128 mm alnico structure, 4 holes, 165 mm deep, 4.2 kg. No T/S; the engine uses rule-of-thumb volumes.
+- Celestion publishes Fs 75 Hz, Re 6.4 (8 ohm) and 11.8 (15 ohm), range 75 to 5000 Hz, 128 mm alnico structure, 4 holes, 165 mm deep, 4.2 kg. No T/S; the engine uses rule-of-thumb volumes. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes

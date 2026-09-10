@@ -826,6 +826,26 @@ def test_catalog_analog_notes_point_at_existing_notes():
             assert drv.analog_of in slugs, slug
 
 
+# Mirrors the amp-family and genre row labels in knowledge/speaker-cab-voicing.md.
+AMP_FAMILIES = ("Blackface Fender", "Tweed Fender", "Marshall", "Vox", "Modern high gain",
+                "Boutique clean", "Modeling and solid state")
+GENRES = ("Roots, country, alt-country", "Blues", "Classic rock", "Indie and alternative", "Jazz",
+          "Metal and modern high gain", "Worship and pop", "Funk and R&B")
+
+
+def test_catalog_best_with_uses_table_labels():
+    voicing = (Path(__file__).parent.parent / "knowledge/speaker-cab-voicing.md").read_text()
+    for label in AMP_FAMILIES + GENRES:
+        assert f"| {label} |" in voicing, label
+    for slug in cabvoice.list_speakers(CATALOG):
+        text = (CATALOG / f"{slug}.md").read_text()
+        best_with = text.split("## Best with", 1)[1].split("\n## ", 1)[0]
+        line = next(l for l in best_with.splitlines() if l.startswith("- Amp families:"))
+        assert any(f in line for f in AMP_FAMILIES), slug
+        assert any(g in line for g in GENRES), slug
+        assert "[[speaker-cab-voicing]]" in line, slug
+
+
 def test_every_catalog_speaker_proposes_without_exception(tone):
     for slug in cabvoice.list_speakers(CATALOG):
         drv = cabvoice.load_speaker(slug, CATALOG)

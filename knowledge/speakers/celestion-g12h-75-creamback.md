@@ -36,11 +36,11 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: modern high gain, blackface Fender, modeling and solid state. Genres: metal, classic rock, funk and R&B.
+- Amp families: Modern high gain, Blackface Fender, Modeling and solid state. Genres: Metal and modern high gain; Classic rock; Funk and R&B. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
-- Celestion publishes Fs 75 Hz, Re 6.37 (8 ohm) and 12.5 (16 ohm), range 70 to 5000 Hz, 168 mm magnet structure (50 oz), 8 holes, 138 mm deep, 4.7 kg. No T/S; rule-of-thumb volumes.
+- Celestion publishes Fs 75 Hz, Re 6.37 (8 ohm) and 12.5 (16 ohm), range 70 to 5000 Hz, 168 mm magnet structure (50 oz), 8 holes, 138 mm deep, 4.7 kg. No T/S; rule-of-thumb volumes. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
