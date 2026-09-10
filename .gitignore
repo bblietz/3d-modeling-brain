@@ -18,3 +18,4 @@ __pycache__/
 
 # Slicer CLI leftovers
 result.json
+__pycache__/
