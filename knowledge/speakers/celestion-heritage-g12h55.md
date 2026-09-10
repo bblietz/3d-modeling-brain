@@ -47,7 +47,7 @@ Vintage 30 notes scale their estimates from it.
 
 - Celestion publishes Fs 55 Hz, Re 6.53 (8 ohm) and 12.11 (15 ohm), range 55 to 5000 Hz, 168 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg.
 - Thiele-Small values are Voice Coil Test Bench sample 1 (16 ohm): Fs 54.7, Re 12.17, Qms 9.48, Qes 0.39, Qts 0.37, Vas 71.3 L, Sd 543 cm2, Xmax 0.7 mm. Sample 2 read Fs 67.1, Qts 0.46, Vas 53.2 L, so expect that much spread between units. Le not tabulated.
-- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
 

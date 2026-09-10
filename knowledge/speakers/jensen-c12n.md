@@ -38,7 +38,7 @@ Vintage ceramic, 50 W (100 W musical), 38 mm coil, 810 g ferrite magnet.
 
 ## Best with
 
-- Amp families: blackface Fender, tweed Fender. Genres: roots and country, jazz, blues. Qts above 1: prefers open or semi-open; any practical closed box is peaky.
+- Amp families: blackface Fender, tweed Fender. Genres: roots and country, jazz, blues. Qts above 1: prefers open or semi-open; closed boxes under about 59 L net come out peaky (Qtc 1.26 at 44 L; 1.18, big, at the 68 L clamp).
 
 ## Data notes
 

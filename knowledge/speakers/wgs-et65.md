@@ -43,7 +43,7 @@ WGS's G12-65 style speaker.
 ## Data notes
 
 - WGS prints: Fs 98.69, Re 8.05, Le 0.35, Qes 1.1, Qms 5.38, Qts 0.91, Vas blank, Sd 366.1, Mms 29.51, BL 11.58, SPL 99.45 dB, 8 slots on 11 3/4 in, cutout 11 in, depth 5 1/16 in, 7.5 lb.
-- Assumptions: Vas 35.8 L: 17.1 L estimated from the Veteran 30's printed 18.53 L scaled by (94.84 / 98.69)^2, then rescaled by (530 / 366.1)^2 = 2.10 because the printed figures were computed with WGS's Sd of 366.1; Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. Estimates.
+- Assumptions: Vas 35.8 L: 17.1 L estimated from the Veteran 30's printed 18.53 L scaled by (94.84 / 98.69)^2, then rescaled by (530 / 366.1)^2 = 2.096 because the printed figures were computed with WGS's Sd of 366.1 (WGS's printed Cms of 0.09 mm/N gives 35.1 L at Sd 530, within 2 percent); Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. Estimates.
 - Magnet type, Xmax 0.8 mm, Sd 530 cm2, and the Vas rescale are assumptions stated above, not WGS data; WGS's printed Cms (mm/N) is what confirms the printed Vas is in liters.
 
 ## Field notes

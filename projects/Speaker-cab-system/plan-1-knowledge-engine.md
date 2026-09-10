@@ -2666,7 +2666,7 @@ Vintage 30 notes scale their estimates from it.
 
 - Celestion publishes Fs 55 Hz, Re 6.53 (8 ohm) and 12.11 (15 ohm), range 55 to 5000 Hz, 168 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg.
 - Thiele-Small values are Voice Coil Test Bench sample 1 (16 ohm): Fs 54.7, Re 12.17, Qms 9.48, Qes 0.39, Qts 0.37, Vas 71.3 L, Sd 543 cm2, Xmax 0.7 mm. Sample 2 read Fs 67.1, Qts 0.46, Vas 53.2 L, so expect that much spread between units. Le not tabulated.
-- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
 
@@ -2727,7 +2727,7 @@ the Heritage G12H(55), is what he stocks; the mounting is identical either way.
 
 - Celestion publishes Fs 85 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 156 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg.
 - T/S values are scaled from [[celestion-heritage-g12h55]] (Fs 54.7): Vas 71.3 x (54.7 / 85)^2 = 29.5 L; Qes 0.39 x 85 / 54.7 = 0.61; Qms 9.48 x 85 / 54.7 = 14.7; Qts = 0.61 x 14.7 / (0.61 + 14.7) = 0.58. Xmax and Sd copied. Treat every prediction from these as an estimate.
-- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
 
@@ -2782,7 +2782,7 @@ status: unverified-starting-values
 
 - Celestion publishes Fs 75 Hz, Re 7.3 (8 ohm) and 12.9 (16 ohm), range 70 to 5000 Hz, 156 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg.
 - T/S values are scaled from [[celestion-heritage-g12h55]] (Fs 54.7): Vas 71.3 x (54.7 / 75)^2 = 37.9 L; Qes 0.39 x 75 / 54.7 = 0.53; Qms 9.48 x 75 / 54.7 = 13.0; Qts = 0.53 x 13.0 / 13.53 = 0.51. Xmax and Sd copied. Estimate.
-- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
 
@@ -2837,7 +2837,7 @@ status: unverified-starting-values
 ## Data notes
 
 - Celestion publishes Fs 75 Hz, Re 6.4 (8 ohm) and 11.8 (15 ohm), range 75 to 5000 Hz, 128 mm alnico structure, 4 holes, 165 mm deep, 4.2 kg. No T/S; the engine uses rule-of-thumb volumes.
-- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
 
@@ -2890,7 +2890,7 @@ status: unverified-starting-values
 ## Data notes
 
 - Celestion publishes Fs 75 Hz, Re 6.4 (8 ohm) and 11.8 (15 ohm), range 75 to 5000 Hz, 128 mm alnico structure, 4 holes, 165 mm deep, 4.2 kg. No T/S; rule-of-thumb volumes.
-- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
 
@@ -2943,7 +2943,7 @@ status: unverified-starting-values
 ## Data notes
 
 - Celestion publishes Fs 75 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 150 mm magnet structure (35 oz), 4 holes, 130 mm deep, 3.6 kg. No T/S; rule-of-thumb volumes.
-- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
 
@@ -2996,7 +2996,7 @@ status: unverified-starting-values
 ## Data notes
 
 - Celestion publishes Fs 75 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 150 mm magnet structure, 8 holes, 130 mm deep, 3.6 kg. No T/S; rule-of-thumb volumes.
-- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
 
@@ -3049,7 +3049,7 @@ status: unverified-starting-values
 ## Data notes
 
 - Celestion publishes Fs 75 Hz, Re 6.37 (8 ohm) and 12.5 (16 ohm), range 70 to 5000 Hz, 168 mm magnet structure (50 oz), 8 holes, 138 mm deep, 4.7 kg. No T/S; rule-of-thumb volumes.
-- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
 
@@ -3102,7 +3102,7 @@ status: unverified-starting-values
 ## Data notes
 
 - Celestion publishes Fs 75 Hz, Re 6.7 (8 ohm) and 13.1 (16 ohm), range 75 to 5000 Hz, 128 mm alnico structure, 8 holes, 165 mm deep, 4.2 kg. No T/S; rule-of-thumb volumes.
-- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
 
@@ -3155,7 +3155,7 @@ status: unverified-starting-values
 ## Data notes
 
 - Celestion publishes Fs 85 Hz, Re 6.9 (8 ohm) and 11.8 (15 ohm), range 80 to 5000 Hz, 145 mm magnet structure, 4 holes, 128 mm deep, 3.5 kg. No T/S; rule-of-thumb volumes.
-- Bolt circle 297 mm is not published by Celestion (its pages give the cut-out, depth, and hole count only); it is the common 12 inch guitar speaker pattern, a starting value to verify on the first unit.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
 
 ## Field notes
 
@@ -3541,7 +3541,7 @@ Warehouse Guitar Speakers' take on the Vintage 30. On both MaximoCabs lists.
 ## Data notes
 
 - WGS prints: Fs 94.84, Re 7.99, Le 0.35, Qes 0.78, Qms 12.15, Qts 0.74, Vas "18.53 cu ft", Sd "366.1", Mms 28.88, BL 13.25, SPL 99.84 dB, 8 slots on 11.7 in, cutout 11.1 in, depth 5 3/16 in, 10 lb. Impedance measured is not stated; Re near 8 implies the 8 ohm unit.
-- Assumptions in the frontmatter: Vas 38.8 L: WGS prints 18.53 labeled cu ft, but 525 L is impossible for a 12 inch guitar speaker, so the printed figure is liters (its printed Cms of 0.1 mm/N gives the same 18.5 L) and it was computed with WGS's own Sd of 366.1, so it is rescaled by (530 / 366.1)^2 = 2.10 to the assumed Sd; Sd set to 530 cm2 (typical 12 inch, the printed 366.1 has no unit and is too small); Xmax 0.8 mm (Eminence-typical, not published); magnet ceramic (not published, the design is a ceramic V30 clone). Predictions from these are estimates.
+- Assumptions in the frontmatter: Vas 38.8 L: WGS prints 18.53 labeled cu ft, but 525 L is impossible for a 12 inch guitar speaker, so the printed figure is liters (its printed Cms of 0.1 mm/N gives the same 18.5 L) and it was computed with WGS's own Sd of 366.1, so it is rescaled by (530 / 366.1)^2 = 2.096 to the assumed Sd; Sd set to 530 cm2 (typical 12 inch, the printed 366.1 has no unit and is too small); Xmax 0.8 mm (Eminence-typical, not published); magnet ceramic (not published, the design is a ceramic V30 clone). Predictions from these are estimates.
 - Magnet type, Xmax 0.8 mm, Sd 530 cm2, and the Vas rescale are assumptions stated above, not WGS data; WGS's printed Cms (mm/N) is what confirms the printed Vas is in liters.
 
 ## Field notes
@@ -3597,7 +3597,7 @@ WGS's G12-65 style speaker.
 ## Data notes
 
 - WGS prints: Fs 98.69, Re 8.05, Le 0.35, Qes 1.1, Qms 5.38, Qts 0.91, Vas blank, Sd 366.1, Mms 29.51, BL 11.58, SPL 99.45 dB, 8 slots on 11 3/4 in, cutout 11 in, depth 5 1/16 in, 7.5 lb.
-- Assumptions: Vas 35.8 L: 17.1 L estimated from the Veteran 30's printed 18.53 L scaled by (94.84 / 98.69)^2, then rescaled by (530 / 366.1)^2 = 2.10 because the printed figures were computed with WGS's Sd of 366.1; Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. Estimates.
+- Assumptions: Vas 35.8 L: 17.1 L estimated from the Veteran 30's printed 18.53 L scaled by (94.84 / 98.69)^2, then rescaled by (530 / 366.1)^2 = 2.096 because the printed figures were computed with WGS's Sd of 366.1 (WGS's printed Cms of 0.09 mm/N gives 35.1 L at Sd 530, within 2 percent); Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. Estimates.
 - Magnet type, Xmax 0.8 mm, Sd 530 cm2, and the Vas rescale are assumptions stated above, not WGS data; WGS's printed Cms (mm/N) is what confirms the printed Vas is in liters.
 
 ## Field notes
@@ -3653,7 +3653,7 @@ WGS's 25 W Greenback style speaker.
 ## Data notes
 
 - WGS prints: Fs 125.3, Re 8.05, Le 0.34, Qes 1.35, Qms 9.52, Qts 1.18, Vas "10.5 cu ft", Sd 366.1, Mms 29.2, BL 11.7, SPL 99.63 dB, mounting as the ET65.
-- Assumptions: Vas 22.0 L: the printed 10.5 (liters, as for the Veteran 30; its printed Cms of 0.06 mm/N agrees) rescaled by (530 / 366.1)^2 = 2.10 to the assumed Sd; Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. The printed Fs of 125 Hz is high for a Greenback style speaker (Celestion's G12M reads 75 Hz) and may be a new-unit measurement. Estimates.
+- Assumptions: Vas 22.0 L: the printed 10.5 (liters, as for the Veteran 30; its printed Cms of 0.06 mm/N agrees) rescaled by (530 / 366.1)^2 = 2.096 to the assumed Sd; Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. The printed Fs of 125 Hz is high for a Greenback style speaker (Celestion's G12M reads 75 Hz) and may be a new-unit measurement. Estimates.
 - Magnet type, Xmax 0.8 mm, Sd 530 cm2, and the Vas rescale are assumptions stated above, not WGS data; WGS's printed Cms (mm/N) is what confirms the printed Vas is in liters.
 
 ## Field notes
@@ -3762,7 +3762,7 @@ Vintage ceramic, 50 W (100 W musical), 38 mm coil, 810 g ferrite magnet.
 
 ## Best with
 
-- Amp families: blackface Fender, tweed Fender. Genres: roots and country, jazz, blues. Qts above 1: prefers open or semi-open; any practical closed box is peaky.
+- Amp families: blackface Fender, tweed Fender. Genres: roots and country, jazz, blues. Qts above 1: prefers open or semi-open; closed boxes under about 59 L net come out peaky (Qtc 1.26 at 44 L; 1.18, big, at the 68 L clamp).
 
 ## Data notes
 
