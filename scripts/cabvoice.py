@@ -993,3 +993,296 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
         port=port_dict, prediction=prediction, wiring=wiring_dict, power=power_dict,
         warnings=_dedupe(warnings), blockers=_dedupe(blockers),
     )
+
+
+# ---------------------------------------------------------------------------
+# Evaluate an existing box
+# ---------------------------------------------------------------------------
+
+def evaluate(drivers: list, impedances: list, enclosure: str, tone: dict,
+             internal_mm: tuple, jack_config: str = "mono", port: Port | None = None,
+             constraints: Constraints | None = None, name: str = "cab") -> Voicing:
+    c = constraints or Constraints()
+    _check_inputs(drivers, impedances, enclosure, tone, jack_config)
+    if enclosure == "closed-ported" and port is None:
+        raise ValueError("closed-ported evaluate needs a port (from port_dims) with its length")
+    warnings, blockers = [], []
+    lead = drivers[0]
+    count = len(drivers)
+    if count == 2 and drivers[1].slug != lead.slug:
+        warnings.append("mixed drivers: the alignment uses the first driver's parameters")
+    box = make_box(tuple(internal_mm), **c.panel_kwargs())
+    warnings.extend(box.warnings)
+    w_int, h_int, d_int = box.internal_mm
+    chambers = 2 if jack_config == "stereo" else 1
+    per_chamber_drivers = count // chambers
+    divider_l = (c.panel_mm * h_int * d_int / 1e6) if chambers == 2 else 0.0
+    displacement = sum(d.displacement_l for d in drivers)
+    if any(d.displacement_estimated for d in drivers):
+        warnings.append(f"driver displacement assumed {DEFAULT_DISPLACEMENT_L} L per driver")
+    port_l = 0.0
+    if port is not None:
+        port_l = port.area_cm2 / 1e4 * port.length_mm / 1e3 * 1e3
+    net_total = box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
+    if net_total <= 0:
+        raise ValueError("box has no net volume left after displacement, brace, port, and divider")
+    chamber_net = net_total / chambers
+    per_driver_net = chamber_net / per_chamber_drivers
+    chamber_w = (w_int - c.panel_mm) / 2.0 if chambers == 2 else w_int
+    port_dict = None
+    if enclosure in ("open", "semi-open"):
+        ob = open_back(chamber_w, h_int, d_int, OPEN_FRACTION[enclosure])
+        prediction = {"model": "open-back path estimate", "f_cancel_hz": ob.f_cancel_hz,
+                      "path_m": ob.path_m, "panel_height_mm": ob.panel_height_mm,
+                      "character": ob.character, "response_relative_db": ob.response}
+    elif enclosure == "closed-ported":
+        warnings.extend(port.warnings)
+        fb = port_tuning_hz(chamber_net / 1e3, port.area_cm2 / 1e4, port.length_mm / 1e3)
+        speed_driver = _air_speed_driver(lead, per_chamber_drivers, warnings)
+        port.air_speed_ms = port_air_speed(speed_driver, fb, port.area_cm2)
+        if port.air_speed_ms > PORT_V_MAX:
+            warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s above {PORT_V_MAX} m/s")
+        port_dict = {**asdict(port), "location": "rear", "per_chamber": True}
+        if lead.has_ts():
+            pb = ported_box(lead, per_driver_net, fb)
+            prediction = {"model": "thiele-small vented", "fb_hz": fb, "alpha": pb.alpha,
+                          "h": pb.h, "f3_hz": pb.f3_hz, "peak_db": pb.peak_db,
+                          "character": pb.character, "response_db": pb.response}
+        else:
+            warnings.append(f"{lead.slug}: no Thiele-Small data ({lead.data_status}); "
+                            "tuning reported, no response prediction")
+            prediction = {"model": "rule-of-thumb", "fb_hz": fb,
+                          "character": "unpredicted (no Thiele-Small data)"}
+    else:
+        if lead.has_ts():
+            cb = closed_box(lead, per_driver_net)
+            prediction = {"model": "thiele-small closed", "qtc": cb.qtc, "fc_hz": cb.fc_hz,
+                          "f3_hz": cb.f3_hz, "character": cb.character, "response_db": cb.response}
+        else:
+            warnings.append(f"{lead.slug}: no Thiele-Small data ({lead.data_status}); "
+                            "no response prediction")
+            prediction = {"model": "rule-of-thumb",
+                          "character": "unpredicted (no Thiele-Small data)"}
+    wiring_dict, power_dict = _electrical(drivers, impedances, tone, jack_config, c,
+                                          warnings, blockers)
+    return Voicing(
+        name=name, mode="evaluate", tone_target=dict(tone),
+        speakers=[_speaker_summary(d, z) for d, z in zip(drivers, impedances)],
+        enclosure={"type": enclosure, "driver_count": count, "chambers": chambers,
+                   "jack_config": jack_config, "open_fraction": OPEN_FRACTION.get(enclosure)},
+        volumes={"method": "evaluate", "per_driver_net_l": per_driver_net,
+                 "per_chamber_net_l": chamber_net, "net_total_l": net_total,
+                 "displacement_l": displacement, "brace_l": c.brace_l,
+                 "port_l": port_l * chambers, "divider_l": divider_l, "gross_l": box.gross_l},
+        box={"internal_mm": box.internal_mm, "external_mm": box.external_mm,
+             "internal_in": _mm_to_in(box.internal_mm), "external_in": _mm_to_in(box.external_mm),
+             "chamber_internal_width_mm": chamber_w},
+        port=port_dict, prediction=prediction, wiring=wiring_dict, power=power_dict,
+        warnings=_dedupe(warnings), blockers=_dedupe(blockers),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Output: voicing.json and voicing.md
+# ---------------------------------------------------------------------------
+
+def _fmt_dims(mm, inches) -> str:
+    return (f"{mm[0]:.0f} x {mm[1]:.0f} x {mm[2]:.0f} mm "
+            f"({inches[0]:.2f} x {inches[1]:.2f} x {inches[2]:.2f} in, W x H x D)")
+
+
+def _liters(l: float) -> str:
+    return f"{l:.1f} L ({l / 28.3168:.2f} cu ft)"
+
+
+def render_markdown(v: Voicing) -> str:
+    import datetime as _dt
+    slug = v.name.lower().replace(" ", "-")
+    lines = [
+        "---",
+        f"name: {slug}-voicing",
+        "type: voicing-sheet",
+        f"project: {v.name}",
+        f"created: {_dt.date.today().isoformat()}",
+        "status: unverified-prediction",
+        "tags: [speaker-cab, voicing]",
+        "---",
+        "",
+        f"# Voicing sheet: {v.name}",
+        "",
+        f"Mode: {v.mode}. Every number here is a prediction: {v.prediction_status}.",
+        "",
+        "## Summary",
+        "",
+    ]
+    spk = ", ".join(f"{s['brand']} {s['model']} {s['impedance_ohm']} ohm ({s['data_status']})"
+                    for s in v.speakers)
+    e = v.enclosure
+    lines += [
+        f"- Drivers: {e['driver_count']} x {spk}",
+        f"- Enclosure: {e['type']}, {e['chambers']} chamber(s), jack configuration {e['jack_config']}",
+        f"- Character: {v.prediction.get('character')}",
+        f"- Volume method: {v.volumes['method']}",
+        "",
+        "## Tone target",
+        "",
+    ]
+    lines += [f"- {k}: {val}" for k, val in v.tone_target.items()]
+    vol = v.volumes
+    lines += [
+        "",
+        "## Volumes",
+        "",
+        "| Quantity | Value |",
+        "|---|---|",
+        f"| Net per driver | {_liters(vol['per_driver_net_l'])} |",
+        f"| Net per chamber | {_liters(vol['per_chamber_net_l'])} |",
+        f"| Net total | {_liters(vol['net_total_l'])} |",
+        f"| Driver displacement | {vol['displacement_l']:.2f} L |",
+        f"| Brace | {vol['brace_l']:.2f} L |",
+        f"| Port | {vol['port_l']:.2f} L |",
+        f"| Divider | {vol['divider_l']:.2f} L |",
+        f"| Gross internal | {_liters(vol['gross_l'])} |",
+        "",
+        "## Dimensions",
+        "",
+        f"- Internal: {_fmt_dims(v.box['internal_mm'], v.box['internal_in'])}",
+        f"- External: {_fmt_dims(v.box['external_mm'], v.box['external_in'])}",
+        f"- Chamber internal width: {v.box['chamber_internal_width_mm']:.0f} mm",
+        "",
+        "## Port",
+        "",
+    ]
+    if v.port is None:
+        lines.append("No port (closed or open back).")
+    else:
+        p = v.port
+        size = (f"round {p['diameter_mm']:.0f} mm" if p['shape'] == "round"
+                else f"slot {p['slot_w_mm']:.0f} x {p['slot_h_mm']:.0f} mm")
+        lines += [
+            f"- {size}, area {p['area_cm2']:.0f} cm2, length {p['length_mm']:.0f} mm, "
+            f"{p['location']}, one per chamber",
+            f"- Worst-case air speed {p['air_speed_ms']:.1f} m/s (limit {PORT_V_MAX:.0f} m/s)",
+        ]
+    pr = v.prediction
+    lines += ["", "## Prediction", "", f"- Model: {pr['model']}", f"- Character: {pr['character']}"]
+    for key, label in (("qtc", "Qtc"), ("fc_hz", "Fc"), ("fb_hz", "Fb"), ("f3_hz", "F3"),
+                       ("peak_db", "Peak"), ("f_cancel_hz", "Cancellation frequency"),
+                       ("panel_height_mm", "Open-back panel height")):
+        if pr.get(key) is not None:
+            unit = {"qtc": "", "peak_db": " dB", "panel_height_mm": " mm"}.get(key, " Hz")
+            lines.append(f"- {label}: {pr[key]:.2f}{unit}")
+    table = pr.get("response_db") or pr.get("response_relative_db")
+    if table:
+        title = "relative to closed" if "response_relative_db" in pr else "relative to passband"
+        lines += ["", f"| Hz | dB ({title}) |", "|---|---|"]
+        lines += [f"| {f:.0f} | {db:+.1f} |" for f, db in table if f >= 50.0]
+    lines += ["", "## Wiring", ""]
+    rec = v.wiring["recommended"]
+    lines.append("- Recommended: " + (f"{rec['name']}, {rec['impedance_ohm']:g} ohm. {rec['jack_text']}"
+                                       if rec else "none matches the amp taps"))
+    for o in v.wiring["options"]:
+        lines.append(f"- Option {o['name']}: {o['impedance_ohm']:g} ohm, "
+                     f"{'matches' if o['matches_tap'] else 'no'} tap")
+    pw = v.power
+    lines += ["", "## Power", "",
+              f"- Amp {pw['amp_power_w']:g} W, handling {pw['total_handling_w']:g} W, "
+              f"target {pw['min_power_w']:g} W: {pw['status']}. {pw['message']}"]
+    lines += ["", "## Warnings", ""]
+    lines += [f"- {w}" for w in v.warnings] or ["- none"]
+    lines += ["", "## Blockers", ""]
+    lines += [f"- {b}" for b in v.blockers] or ["- none"]
+    lines += ["", f"Prediction status: {v.prediction_status}.", ""]
+    return "\n".join(lines)
+
+
+def write_voicing(v: Voicing, out_dir: Path) -> tuple:
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    json_path = out_dir / "voicing.json"
+    md_path = out_dir / "voicing.md"
+    json_path.write_text(json.dumps(v.to_dict(), indent=2))
+    md_path.write_text(render_markdown(v))
+    return json_path, md_path
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+def _build_parser():
+    import argparse
+    ap = argparse.ArgumentParser(description="Guitar speaker cabinet voicing engine")
+    sub = ap.add_subparsers(dest="command", required=True)
+
+    def common(p):
+        p.add_argument("--speakers-dir", default=str(SPEAKERS_DIR))
+        p.add_argument("--speaker", action="append", required=True, help="slug, repeat for two drivers")
+        p.add_argument("--impedance", action="append", type=float, required=True)
+        p.add_argument("--enclosure", choices=ENCLOSURE_TYPES, required=True)
+        p.add_argument("--tone", required=True, help="tone target JSON file")
+        p.add_argument("--jack", choices=JACK_CONFIGS, default="mono")
+        p.add_argument("--brace-l", type=float, default=0.0)
+        p.add_argument("--accept-low-headroom", action="store_true")
+        p.add_argument("--name", default="cab")
+        p.add_argument("--out", required=True, help="directory for voicing.json and voicing.md")
+
+    pp = sub.add_parser("propose")
+    common(pp)
+    pp.add_argument("--pinned-width", type=float, help="external width mm")
+    pp.add_argument("--max-external", type=float, nargs=3, metavar=("W", "H", "D"))
+    pp.add_argument("--port-diameter", type=float, default=75.0)
+    pp.add_argument("--port-slot", type=float, nargs=2, metavar=("W", "H"))
+
+    pe = sub.add_parser("evaluate")
+    common(pe)
+    pe.add_argument("--internal", type=float, nargs=3, required=True, metavar=("W", "H", "D"))
+    pe.add_argument("--port-diameter", type=float)
+    pe.add_argument("--port-slot", type=float, nargs=2, metavar=("W", "H"))
+    pe.add_argument("--port-length", type=float)
+
+    pl = sub.add_parser("list")
+    pl.add_argument("--speakers-dir", default=str(SPEAKERS_DIR))
+    return ap
+
+
+def main(argv=None) -> int:
+    import sys
+    args = _build_parser().parse_args(argv)
+    if args.command == "list":
+        print("\n".join(list_speakers(Path(args.speakers_dir))))
+        return 0
+    try:
+        drivers = [load_speaker(s, Path(args.speakers_dir)) for s in args.speaker]
+        tone = json.loads(Path(args.tone).read_text())
+        c = Constraints(brace_l=args.brace_l, accept_low_headroom=args.accept_low_headroom)
+        if args.command == "propose":
+            c.pinned_external_width_mm = args.pinned_width
+            c.max_external_mm = tuple(args.max_external) if args.max_external else None
+            c.port_diameter_mm = args.port_diameter
+            c.port_slot_mm = tuple(args.port_slot) if args.port_slot else None
+            v = propose(drivers, args.impedance, args.enclosure, tone, args.jack, c, args.name)
+        else:
+            port = None
+            if args.enclosure == "closed-ported":
+                if args.port_length is None or (args.port_diameter is None and args.port_slot is None):
+                    raise ValueError("evaluate closed-ported needs --port-length and --port-diameter or --port-slot")
+                port = port_dims(1.0, 1.0, diameter_mm=args.port_diameter,
+                                 slot_mm=tuple(args.port_slot) if args.port_slot else None)
+                port.length_mm = args.port_length
+                port.warnings = []
+            v = evaluate(drivers, args.impedance, args.enclosure, tone, tuple(args.internal),
+                         args.jack, port, c, args.name)
+    except (ValueError, FileNotFoundError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    json_path, md_path = write_voicing(v, Path(args.out))
+    print(f"wrote {json_path} and {md_path}")
+    if v.blockers:
+        print("blocked: " + "; ".join(v.blockers), file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

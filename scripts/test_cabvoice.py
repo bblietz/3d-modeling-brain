@@ -610,3 +610,91 @@ def test_propose_rejects_bad_inputs(drv, tone):
     tone["top"] = "sparkly"
     with pytest.raises(ValueError):
         cabvoice.propose([drv], [16], "closed", tone)
+
+
+# ---- Task 9: evaluate, writers, CLI -------------------------------------
+
+SITE_INTERNAL = (472.0, 421.2, 229.4)
+
+
+def test_evaluate_site_default_closed(drv, tone):
+    v = cabvoice.evaluate([drv], [16], "closed", tone, SITE_INTERNAL, name="site-closed")
+    assert v.mode == "evaluate"
+    assert v.volumes["gross_l"] == pytest.approx(45.6, abs=0.05)
+    assert v.volumes["net_total_l"] == pytest.approx(44.1, abs=0.05)
+    # alpha = 60 / 44.1 = 1.36, Qtc = 0.4 * sqrt(2.36) = 0.614
+    assert v.prediction["qtc"] == pytest.approx(0.614, abs=0.005)
+    assert v.prediction["character"] == "tight"
+    assert v.box["external_in"] == pytest.approx((20.0, 18.0, 11.0), abs=0.01)
+
+
+def test_evaluate_ported_reports_tuning_from_port(drv, tone):
+    port = cabvoice.port_dims(44.0, 70.0, diameter_mm=100.0)
+    port.length_mm = 23.0
+    v = cabvoice.evaluate([drv], [16], "closed-ported", tone, SITE_INTERNAL, port=port)
+    assert 65.0 < v.prediction["fb_hz"] < 75.0
+    assert v.volumes["port_l"] == pytest.approx(0.18, abs=0.01)
+    assert v.port["length_mm"] == 23.0
+    assert v.port["air_speed_ms"] > 0
+
+
+def test_evaluate_requires_port_for_ported(drv, tone):
+    with pytest.raises(ValueError, match="port"):
+        cabvoice.evaluate([drv], [16], "closed-ported", tone, SITE_INTERNAL)
+
+
+def test_evaluate_surfaces_port_warnings(drv, tone):
+    port = cabvoice.port_dims(44.0, 70.0, diameter_mm=100.0)
+    port.length_mm = 23.0
+    port.warnings = ["port note from sizing"]
+    v = cabvoice.evaluate([drv], [16], "closed-ported", tone, SITE_INTERNAL, port=port)
+    assert "port note from sizing" in v.warnings
+
+
+def test_evaluate_open_back(drv, tone):
+    v = cabvoice.evaluate([drv], [16], "open", tone, SITE_INTERNAL)
+    assert v.prediction["f_cancel_hz"] == pytest.approx(368.5, abs=1.0)
+
+
+def test_write_voicing_and_markdown(drv, tone, tmp_path):
+    v = cabvoice.propose([drv], [16], "closed-ported", tone, name="Cab-Test-1x12-tolex")
+    json_path, md_path = cabvoice.write_voicing(v, tmp_path)
+    data = json.loads(json_path.read_text())
+    assert data["name"] == "Cab-Test-1x12-tolex"
+    assert data["prediction_status"] == "unverified, ears only"
+    md = md_path.read_text()
+    assert md.startswith("---\nname: cab-test-1x12-tolex-voicing\n")
+    assert "unverified, ears only" in md
+    assert "## Wiring" in md and "## Prediction" in md
+    assert "Port" in md
+
+
+def test_cli_propose_and_list(speakers_dir, tmp_path):
+    out = tmp_path / "out"
+    cmd = [sys.executable, str(Path(cabvoice.__file__)), "propose",
+           "--speakers-dir", str(speakers_dir), "--speaker", "test-driver",
+           "--impedance", "16", "--enclosure", "closed-ported",
+           "--tone", str(TONE_FIXTURE), "--name", "cli-test", "--out", str(out)]
+    run = subprocess.run(cmd, capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    assert (out / "voicing.json").exists() and (out / "voicing.md").exists()
+    listed = subprocess.run([sys.executable, str(Path(cabvoice.__file__)), "list",
+                             "--speakers-dir", str(speakers_dir)],
+                            capture_output=True, text=True)
+    assert listed.stdout.strip() == "test-driver"
+
+
+def test_cli_exit_code_2_on_blockers(speakers_dir, tmp_path):
+    blocked_tone = tmp_path / "tone.json"
+    blocked_tone.write_text(json.dumps({
+        "low_end": "tight", "mids": "neutral", "top": "smooth", "breakup": "clean",
+        "dispersion": "focused", "placement": "floor", "min_power_w": 60,
+        "impedance_options_ohm": [4]}))
+    out = tmp_path / "out"
+    cmd = [sys.executable, str(Path(cabvoice.__file__)), "propose",
+           "--speakers-dir", str(speakers_dir), "--speaker", "test-driver",
+           "--impedance", "16", "--enclosure", "closed", "--tone", str(blocked_tone),
+           "--out", str(out)]
+    run = subprocess.run(cmd, capture_output=True, text=True)
+    assert run.returncode == 2
+    assert (out / "voicing.json").exists()
