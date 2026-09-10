@@ -35,4 +35,8 @@ Plan 1 of [[speaker-cab-system-design]] landed on 2026-09-09: `scripts/cabvoice.
 
 ## Open items carried to Plans 2 and 3
 
-__OPEN_ITEMS__
+- **Plan 2 (generator):** read `construction`, `port.location`, `port.count`, and each speaker's `displacement_estimated` from voicing.json rather than parsing warning text; assert the cutout fits the baffle height (the engine enforces only a minimum width); model the hardwood line's 19 mm shell and corner posts and compare with the 18 mm voicing (1 to 2 percent of volume); round port diameters to purchasable tube sizes and re-solve the length with `port_dims`.
+- **Plan 3 (skill):** treat CLI exit 1 as an input error and exit 2 as blockers (argparse also exits 2); present the impossible-box trade-off from the blocker text; the ranking needs the canonical keys the fix wave introduced plus a stated precedence (amp-family table over a note's own list); "lowest tuning in range" for low-end shifters needs an Fb override in `Constraints`; the plain-language reading the spec asks for belongs in the skill's template, not the engine.
+- **Catalog schema:** one Thiele-Small set per note; 16 ohm Eminence variants (Texas Heat, Swamp Thang) differ enough to be a different cabinet, so add a per-impedance set before the first 16 ohm Eminence order.
+- **Engine refinements to weigh with Brian:** peak height is read off a 14-point third-octave grid (up to 0.3 dB low; a finer internal grid would move borderline punchy/boomy words); an unconstrained proposal always carries the 2:1 width-to-depth advisory because the site box is 2.06:1; PyYAML is imported but declared nowhere in the vault.
+- **Process:** put a propose-versus-evaluate matrix test in every engine plan from the start; the two whole-branch findings that no task review could see (the clamped-port tuning and the unportable mono 2x12) fell out of running the two modes against each other across every configuration.

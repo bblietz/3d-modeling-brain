@@ -305,3 +305,15 @@ ASA AND creeps under sustained load, so it needs one size up:
 A thin ribbed panel (1/8 in skin plus 12 mm ribs on the hidden back) would beat
 solid 3/8 in for less material, and is the right answer if weight ever matters.
 Not built; the flat 3/8 in panel is stiff enough.
+
+## Material verdict, 2026-09-09
+
+Starboard is the better material for this part; the full comparison is in
+[[marine-materials]]. ASA is stiffer, creeps less and takes more heat, but all
+three are cured by thicker sheet, which is nearly free. Starboard's advantages
+(impervious to water, tough, immune to sunscreen and solvents, one piece with
+no bonded seams) cannot be engineered into a printed panel.
+
+Both paths are built and ready: rout 1/2 in Starboard using the printed
+template, or print the four ASA tiles. The printed route stays worthwhile if
+features a router cannot make are ever wanted.
