@@ -1187,6 +1187,9 @@ Append to `scripts/cabvoice.py`:
 # ---------------------------------------------------------------------------
 
 JACK_CONFIGS = ("mono", "mono-parallel-out", "stereo")
+
+
+LINES = ("tolex", "hardwood")
 POWER_SAFETY_FACTOR = 1.5
 
 
@@ -1827,6 +1830,33 @@ class Constraints:
     port_diameter_mm: float = 75.0
     port_slot_mm: tuple | None = None
     port_count: int | None = None      # None: one port per driver in the chamber
+    line: str = "tolex"
+    species: str | None = None
+    accept_low_headroom: bool = False
+
+    def __post_init__(self):
+        if self.line not in LINES:
+            raise ValueError(f"line must be one of {', '.join(LINES)}")
+        if self.species is not None:
+            self.species = self.species.strip() or None
+
+    def panel_kwargs(self) -> dict:
+        return dict(panel_mm=self.panel_mm, back_mm=self.back_mm,
+                    baffle_mm=self.baffle_mm, recess_mm=self.recess_mm)
+
+
+@dataclass
+class Constraints:
+    pinned_external_width_mm: float | None = None
+    max_external_mm: tuple | None = None
+    panel_mm: float = PANEL_MM
+    back_mm: float = BACK_MM
+    baffle_mm: float = BAFFLE_MM
+    recess_mm: float = RECESS_MM
+    brace_l: float = 0.0
+    port_diameter_mm: float = 75.0
+    port_slot_mm: tuple | None = None
+    port_count: int | None = None      # None: one port per driver in the chamber
     accept_low_headroom: bool = False
 
     def panel_kwargs(self) -> dict:
@@ -2053,6 +2083,36 @@ def _volumes(method, per_driver_net, per_chamber_drivers, chambers, displacement
             "divider_l": divider_l, "gross_l": gross_l}
 
 
+def _wall_material(c: Constraints) -> str:
+    if c.line == "tolex":
+        return "baltic birch plywood"
+    return c.species or "hardwood, species not set"
+
+
+def _assemble(name, mode, tone, drivers, impedances, enclosure, jack_config, chambers, count,
+              volumes, box, chamber_w, port_dict, prediction, wiring_dict, power_dict,
+              warnings, blockers, c) -> Voicing:
+    return Voicing(
+        name=name, mode=mode, tone_target=dict(tone),
+        speakers=[_speaker_summary(d, z) for d, z in zip(drivers, impedances)],
+        enclosure={"type": enclosure, "driver_count": count, "chambers": chambers,
+                   "jack_config": jack_config, "open_fraction": OPEN_FRACTION.get(enclosure)},
+        volumes=volumes,
+        box={"internal_mm": box.internal_mm, "external_mm": box.external_mm,
+             "internal_in": _mm_to_in(box.internal_mm), "external_in": _mm_to_in(box.external_mm),
+             "chamber_internal_width_mm": chamber_w},
+        port=port_dict, prediction=prediction, wiring=wiring_dict, power=power_dict,
+        construction={"panel_mm": c.panel_mm, "back_mm": c.back_mm, "baffle_mm": c.baffle_mm,
+                      "recess_mm": c.recess_mm, "brace_l": c.brace_l,
+                      "pinned_external_width_mm": c.pinned_external_width_mm,
+                      "max_external_mm": c.max_external_mm,
+                      "port_count": None if port_dict is None else port_dict["count"],
+                      "line": c.line, "species": c.species,
+                      "wall_material": _wall_material(c)},
+        warnings=_dedupe(warnings), blockers=_dedupe(blockers),
+    )
+
+
 def _assemble(name, mode, tone, drivers, impedances, enclosure, jack_config, chambers, count,
               volumes, box, chamber_w, port_dict, prediction, wiring_dict, power_dict,
               warnings, blockers, c) -> Voicing:
@@ -2257,6 +2317,19 @@ def test_voicing_json_has_construction_block(drv, tone, tmp_path):
     con = json.loads(json_path.read_text())["construction"]
     assert con == {"panel_mm": 18.0, "back_mm": 12.0, "baffle_mm": 18.0, "recess_mm": 20.0,
                    "brace_l": 0.3, "pinned_external_width_mm": 660.0, "max_external_mm": None,
+                   "port_count": 1, "line": "tolex", "species": None,
+                   "wall_material": "baltic birch plywood"}
+    closed = cabvoice.propose([drv], [16], "closed", tone)
+    assert closed.construction["port_count"] is None
+
+
+def test_voicing_json_has_construction_block(drv, tone, tmp_path):
+    c = cabvoice.Constraints(pinned_external_width_mm=660.0, brace_l=0.3)
+    v = cabvoice.propose([drv], [16], "closed-ported", tone, constraints=c)
+    json_path, _ = cabvoice.write_voicing(v, tmp_path)
+    con = json.loads(json_path.read_text())["construction"]
+    assert con == {"panel_mm": 18.0, "back_mm": 12.0, "baffle_mm": 18.0, "recess_mm": 20.0,
+                   "brace_l": 0.3, "pinned_external_width_mm": 660.0, "max_external_mm": None,
                    "port_count": 1}
     closed = cabvoice.propose([drv], [16], "closed", tone)
     assert closed.construction["port_count"] is None
@@ -2423,6 +2496,113 @@ def render_markdown(v: Voicing) -> str:
         f"- Internal: {_fmt_dims(v.box['internal_mm'], v.box['internal_in'])}",
         f"- External: {_fmt_dims(v.box['external_mm'], v.box['external_in'])}",
         f"- Chamber internal width: {v.box['chamber_internal_width_mm']:.0f} mm",
+        f"- Construction: {v.construction['line']} line, walls {v.construction['wall_material']}; "
+        f"voiced with {v.construction['panel_mm']:g} mm walls",
+    ]
+    if v.prediction.get("panel_height_mm") is not None:
+        lines.append(f"- Open-back panels: two, top and bottom, each "
+                     f"{v.prediction['panel_height_mm']:.0f} mm tall")
+    lines += ["", "## Port", ""]
+    if v.port is None:
+        lines.append("No port (closed or open back).")
+    else:
+        p = v.port
+        size = (f"round {p['diameter_mm']:.0f} mm" if p['shape'] == "round"
+                else f"slot {p['slot_w_mm']:.0f} x {p['slot_h_mm']:.0f} mm")
+        lines += [
+            f"- {size}, area {p['area_cm2']:.0f} cm2, length {p['length_mm']:.0f} mm, "
+            f"{p['location']}, {p['count']} per chamber",
+            f"- Worst-case air speed {p['air_speed_ms']:.1f} m/s (limit {PORT_V_MAX:.0f} m/s)",
+        ]
+    pr = v.prediction
+    lines += ["", "## Prediction", "", f"- Model: {pr['model']}", f"- Character: {pr['character']}"]
+    for key, label in (("qtc", "Qtc"), ("fc_hz", "Fc"), ("fb_hz", "Fb"), ("f3_hz", "F3"),
+                       ("peak_db", "Peak"), ("f_cancel_hz", "Cancellation frequency"),
+                       ("panel_height_mm", "Open-back panel height")):
+        if pr.get(key) is not None:
+            unit = {"qtc": "", "peak_db": " dB", "panel_height_mm": " mm"}.get(key, " Hz")
+            lines.append(f"- {label}: {pr[key]:.2f}{unit}")
+    table = pr.get("response_db") or pr.get("response_relative_db")
+    if table:
+        title = "relative to closed" if "response_relative_db" in pr else "relative to passband"
+        lines += ["", f"| Hz | dB ({title}) |", "|---|---|"]
+        lines += [f"| {f:.0f} | {db:+.1f} |" for f, db in table if f >= 50.0]
+    lines += ["", "## Wiring", ""]
+    rec = v.wiring["recommended"]
+    lines.append("- Recommended: " + (f"{rec['name']}, {rec['impedance_ohm']:g} ohm. {rec['jack_text']}"
+                                       if rec else "none matches the amp taps"))
+    for o in v.wiring["options"]:
+        lines.append(f"- Option {o['name']}: {o['impedance_ohm']:g} ohm, "
+                     f"{'matches' if o['matches_tap'] else 'no'} tap")
+    pw = v.power
+    lines += ["", "## Power", "",
+              f"- Amp {pw['amp_power_w']:g} W, handling {pw['total_handling_w']:g} W, "
+              f"target {pw['min_power_w']:g} W: {pw['status']}. {pw['message']}"]
+    lines += ["", "## Warnings", ""]
+    lines += [f"- {w}" for w in v.warnings] or ["- none"]
+    lines += ["", "## Blockers", ""]
+    lines += [f"- {b}" for b in v.blockers] or ["- none"]
+    lines += ["", f"Prediction status: {v.prediction_status}.", ""]
+    return "\n".join(lines)
+
+
+def render_markdown(v: Voicing) -> str:
+    import datetime as _dt
+    slug = v.name.lower().replace(" ", "-")
+    lines = [
+        "---",
+        f"name: {slug}-voicing",
+        "type: voicing-sheet",
+        f"project: {v.name}",
+        f"created: {_dt.date.today().isoformat()}",
+        "status: unverified-prediction",
+        "tags: [speaker-cab, voicing]",
+        "---",
+        "",
+        f"# Voicing sheet: {v.name}",
+        "",
+        f"Mode: {v.mode}. Every number here is a prediction: {v.prediction_status}.",
+        "",
+        "## Summary",
+        "",
+    ]
+    spk = ", ".join(f"{s['brand']} {s['model']} {s['impedance_ohm']:g} ohm ({s['data_status']})"
+                    for s in v.speakers)
+    e = v.enclosure
+    lines += [f"- Drivers: {e['driver_count']} x {spk}"]
+    lines += [f"- {s['brand']} {s['model']}: cutout {s['cutout_mm']:.0f} mm, {s['bolt_count']} bolts "
+              f"on {s['bolt_circle_mm']:.1f} mm, depth {s['depth_mm']:.0f} mm, {s['weight_kg']:.1f} kg"
+              for s in v.speakers]
+    lines += [
+        f"- Enclosure: {e['type']}, {e['chambers']} chamber(s), jack configuration {e['jack_config']}",
+        f"- Character: {v.prediction.get('character')}",
+        f"- Volume method: {v.volumes['method']}",
+        "",
+        "## Tone target",
+        "",
+    ]
+    lines += [f"- {k}: {val}" for k, val in v.tone_target.items()]
+    vol = v.volumes
+    lines += [
+        "",
+        "## Volumes",
+        "",
+        "| Quantity | Value |",
+        "|---|---|",
+        f"| Net per driver | {_liters(vol['per_driver_net_l'])} |",
+        f"| Net per chamber | {_liters(vol['per_chamber_net_l'])} |",
+        f"| Net total | {_liters(vol['net_total_l'])} |",
+        f"| Driver displacement | {vol['displacement_l']:.2f} L |",
+        f"| Brace | {vol['brace_l']:.2f} L |",
+        f"| Port | {vol['port_l']:.2f} L |",
+        f"| Divider | {vol['divider_l']:.2f} L |",
+        f"| Gross internal | {_liters(vol['gross_l'])} |",
+        "",
+        "## Dimensions",
+        "",
+        f"- Internal: {_fmt_dims(v.box['internal_mm'], v.box['internal_in'])}",
+        f"- External: {_fmt_dims(v.box['external_mm'], v.box['external_in'])}",
+        f"- Chamber internal width: {v.box['chamber_internal_width_mm']:.0f} mm",
     ]
     if v.prediction.get("panel_height_mm") is not None:
         lines.append(f"- Open-back panels: two, top and bottom, each "
@@ -2498,6 +2678,8 @@ def _build_parser():
         p.add_argument("--tone", required=True, help="tone target JSON file")
         p.add_argument("--jack", choices=JACK_CONFIGS, default="mono")
         p.add_argument("--brace-l", type=float, default=0.0)
+        p.add_argument("--line", choices=LINES, default="tolex")
+        p.add_argument("--species", default=None)
         p.add_argument("--accept-low-headroom", action="store_true")
         p.add_argument("--name", default="cab")
         p.add_argument("--out", required=True, help="directory for voicing.json and voicing.md")
@@ -2530,7 +2712,8 @@ def main(argv=None) -> int:
     try:
         drivers = [load_speaker(s, Path(args.speakers_dir)) for s in args.speaker]
         tone = json.loads(Path(args.tone).read_text())
-        c = Constraints(brace_l=args.brace_l, accept_low_headroom=args.accept_low_headroom)
+        c = Constraints(brace_l=args.brace_l, accept_low_headroom=args.accept_low_headroom,
+                        line=args.line, species=args.species)
         if args.command == "propose":
             c.pinned_external_width_mm = args.pinned_width
             c.max_external_mm = tuple(args.max_external) if args.max_external else None
@@ -4188,6 +4371,39 @@ def test_calibration_table_matches_engine():
     section = text.split("## Calibration table", 1)[1].split("\n## ", 1)[0]
     assert f'prediction_status "{cabvoice.PREDICTION_STATUS}"' in section
     assert cal.note_rows(text) == cal.calibration_rows()
+
+
+def test_constraints_rejects_unknown_line():
+    with pytest.raises(ValueError, match="line"):
+        cabvoice.Constraints(line="ply")
+
+
+def test_construction_block_carries_line_and_species(drv, tone):
+    v = cabvoice.propose([drv], [16], "closed", tone,
+                         constraints=cabvoice.Constraints(line="hardwood", species="black walnut"))
+    assert v.construction["line"] == "hardwood"
+    assert v.construction["species"] == "black walnut"
+    assert v.construction["wall_material"] == "black walnut"
+    md = cabvoice.render_markdown(v)
+    assert "hardwood line" in md
+    assert "black walnut" in md
+    default = cabvoice.propose([drv], [16], "closed", tone)
+    assert default.construction["line"] == "tolex"
+    assert default.construction["species"] is None
+    assert default.construction["wall_material"] == "baltic birch plywood"
+
+
+def test_cli_line_and_species_flags(speakers_dir, tmp_path):
+    out = tmp_path / "out"
+    cmd = [sys.executable, str(Path(cabvoice.__file__)), "propose",
+           "--speakers-dir", str(speakers_dir), "--speaker", "test-driver",
+           "--impedance", "16", "--enclosure", "closed-ported",
+           "--tone", str(TONE_FIXTURE), "--name", "cli-test",
+           "--line", "hardwood", "--species", "sapele", "--out", str(out)]
+    run = subprocess.run(cmd, capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    data = json.loads((out / "voicing.json").read_text())
+    assert data["construction"]["species"] == "sapele"
 ```
 
 - [ ] **Step 2: Run the whole suite**
@@ -4269,3 +4485,4 @@ git push origin main
 - Pre-flight amendments (2026-09-09, before any task was dispatched, after a transcribed run of every code block passed 86/86): three Eminence archive URLs quoted for PyYAML; Delta-12A model-limit numbers corrected to what the engine reports; `evaluate` surfaces `port.warnings` like `propose`, with a test; Vintage 30 Qes rounding; stereo per-channel power convention stated; unequal impedances warn rather than refuse, matching the spec; unverified-value labels named in the constraints; catalog count and Celestion status text corrected. The `propose` and `evaluate` duplication stays until the final whole-branch review fix wave (ruled with Brian).
 - Layer 1 (tone target from the intake, speaker ranking) is prose in Task 11 and is executed by the skill in Plan 3, not by code here.
 - Final whole-branch review fix wave (2026-09-09, commits 81bffcf to a3312e3, reviewed on Fable 5.1): `propose` and `evaluate` share helpers (`_setup`, `_displacement`, `_divider_l`, `_chamber_w`, `_port_report`, `_predict`, `_volumes`, `_assemble`); the prediction follows the port as built when the size cap clamps it; one port per driver in a chamber (`Constraints.port_count`, ruled with Brian); slot ports are front ports; an impossible box becomes a blocker with the achievable prediction and exit 2 with files written; voicing.json carries a `construction` block; positive-number guards, wording, and sheet lines per the review; the calibration table regenerated with the prediction status in its header (script now at projects/Speaker-cab-system/pipeline/calibration_table.py); catalog labels normalized to the voicing note's tables. The code blocks in Tasks 1 to 9 above were synced to the landed code by projects/Speaker-cab-system/pipeline/sync_plan_code.py, so they read as shipped; the propose-versus-evaluate matrix test and the calibration test sit at the end of scripts/test_cabvoice.py after Task 15's tests, and the per-task expected counts count only each task's own tests.
+- Post-plan Task 16 (2026-09-10, commit 63a6763, brief .superpowers/sdd/task-16-brief.md): `Constraints.line` and `Constraints.species` travel into voicing.json's `construction` block (`line`, `species`, `wall_material`) and the sheet's Dimensions section, with `--line` and `--species` CLI flags; no calculation reads them. The voicing note's model limits now state that wall material and stiffness are outside the model. Code blocks re-synced by the pipeline tool.
