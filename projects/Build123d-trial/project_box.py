@@ -1,19 +1,28 @@
 """Parametric project box with friction-fit lid (build123d).
 
-Single-color PLA, Bambu Lab X2D, 0.6 mm high-flow nozzle.
+Single-color PLA, Bambu Lab X2D. Target nozzle is set by NOZZLE below.
 Both parts are modeled in their print orientation, sitting on Z=0:
   - box: floor on bed, open top up
   - lid: plate on bed, plug pointing up
 
 Running this file builds both parts, runs assertion checks (dimensions,
-clearance, solids count, volume, watertightness, overhangs), and exports
-box.stl, lid.stl, and project-box.3mf next to this file.
+clearance, solids count, volume, watertightness, overhangs, and a
+re-measure of the fit on the tessellated meshes), and exports box.stl,
+lid.stl, and project-box.3mf next to this file.
+
+project-box.3mf carries geometry only. The print-ready file with the
+X2D presets, bed type, plate temps and ironing package baked in is built
+by pipeline/make_print_3mf.py.
 """
 
 import math
+import xml.etree.ElementTree as ET
+import zipfile
 from pathlib import Path
 
+import numpy as np
 import trimesh
+from trimesh.intersections import mesh_plane
 from build123d import (
     Align,
     Axis,
@@ -55,7 +64,19 @@ LEAD_IN = 0.8         # 45-degree lead-in chamfer on plug free edge
 # printed 44.98 vs 45.2 designed, plug 44.67 vs 45.0, so the as-printed
 # gap runs ~0.055 mm per side looser than designed and a plain-clearance
 # friction fit would need designed interference. Ribs bridge the gap
-# instead: predicted crush ~0.15 mm per side at each rib.
+# instead: predicted crush ~0.145 mm per side at each rib.
+#
+# CALIBRATION PROVENANCE - PLUG_CLEAR and RIB_PROUD are not portable
+# constants, they are the result of one calibration:
+#   nozzle 0.6 high-flow | wall generator classic (X2D stock preset)
+#   PLA Basic, the spool loaded 2026-07-31 | 0.18 mm layers
+# Any of these changing invalidates the fit, so re-run a coupon first:
+#   - filament brand or line: a coupon-validated +0.02 mm interference
+#     printed smash-tight after a manufacturer change (clawd-mascot).
+#   - nozzle: changes the extrusion width the 0.35 mm crest is built from.
+#   - wall generator: classic can absorb a sub-line-width crest into the
+#     perimeter; arachne gives it its own variable-width bead.
+# See knowledge/friction-fits-x2d.md.
 RIB_R = 1.0           # rib cylinder radius
 RIB_PROUD = 0.35      # rib tip beyond plug face
 RIB_LEAD = 0.5        # 45-degree lead-in chamfer on rib top
@@ -75,8 +96,36 @@ PLUG_L = CAV_L - 2 * PLUG_CLEAR   # 74.9
 PLUG_W = CAV_W - 2 * PLUG_CLEAR   # 44.9
 PLUG_R = CAV_R - PLUG_CLEAR       # 3.45
 
-# Printability (X2D, 0.6 mm high-flow nozzle: 2 perimeters = 1.24 mm)
-MIN_WALL = 1.24
+# ------------------------------------------------------------- target profile
+# NOZZLE is the nozzle this part is designed to be printed with. The box is
+# a coarse part with 2.4 mm walls and a flat ironed lid top, so 0.6 high-flow
+# is the right nozzle: full speed and strength, and the ironing package in
+# pipeline/make_print_3mf.py is a set of 0.6 numbers (0.55 top line width).
+#
+# PRE-FLIGHT, every time (knowledge/printer-x2d.md):
+#   1. Resident nozzle is 0.2 mm in BOTH positions since 2026-08-23, so
+#      printing this part needs a physical swap back to the 0.6 high-flow.
+#   2. Confirm what is actually mounted with scripts/x2d-status.py (reads
+#      the printer over LAN), not from memory.
+#   3. Select the 0.6 printer preset in Studio's Prepare tab BEFORE opening
+#      the project. Studio silently re-profiles an imported project to the
+#      resident machine and re-slices; no mismatch warning fires anywhere.
+NOZZLE = 0.6
+LAYER_H = 0.18        # target process preset layer height
+FIRST_LAYER_H = 0.3   # first layer shifts the whole layer grid
+
+# Minimum printable wall = 2 perimeters. This is a hard slicer floor, not a
+# quality preference: the stock X2D quality presets use the CLASSIC wall
+# generator with detect_thin_wall off, so anything thinner is silently not
+# printed at all and no slice-time warning appears.
+MIN_WALL_BY_NOZZLE = {0.2: 0.44, 0.4: 0.84, 0.6: 1.24}
+MIN_WALL = MIN_WALL_BY_NOZZLE[NOZZLE]
+
+# Tessellation band for re-measuring the fit on the exported meshes. Source
+# features that pass at 0.88-0.90 mm have measured 0.80-0.83 mm on the mesh
+# (sharks-nametag), and 0.15 mm clearance is inside the band where the
+# faceting of the r=3.45 / r=3.60 corner fillets matters.
+MESH_BAND = 0.05
 
 GAP_3MF = 10.0        # gap between parts in the combined 3MF
 
@@ -201,10 +250,11 @@ export_stl(lid_part, str(lid_stl))
 
 # Combined 3MF, parts side by side on Z=0 with GAP_3MF between them
 shift = (BOX_L + GAP_3MF) / 2
+three_mf = OUT_DIR / "project-box.3mf"
 mesher = Mesher()
 mesher.add_shape(Pos(-shift, 0, 0) * box_part)
 mesher.add_shape(Pos(+shift, 0, 0) * lid_part)
-mesher.write(str(OUT_DIR / "project-box.3mf"))
+mesher.write(str(three_mf))
 
 # ---------------------------------------------------------------- checks: mesh (trimesh)
 # Exact chamfer surfaces are 45 degrees; STL triangulation of the conical
@@ -212,8 +262,10 @@ mesher.write(str(OUT_DIR / "project-box.3mf"))
 # 2-degree tessellation margin (a real overhang error would far exceed it).
 OVERHANG_NZ = -math.sin(math.radians(45 + 2))
 
+meshes = {}
 for name, path in [("box", box_stl), ("lid", lid_stl)]:
     mesh = trimesh.load_mesh(str(path))
+    meshes[name] = mesh
     assert mesh.is_watertight, f"{name}.stl is not watertight"
     assert mesh.is_winding_consistent, f"{name}.stl winding inconsistent"
     # Overhang: any face steeper than 45 degrees that is not sitting on the bed
@@ -222,8 +274,103 @@ for name, path in [("box", box_stl), ("lid", lid_stl)]:
     bad = (mesh.face_normals[:, 2] < OVERHANG_NZ) & ~on_bed
     assert not bad.any(), f"{name}.stl has {bad.sum()} faces with overhang > 45 deg"
 
+
+# --------------------------------------------------- checks: fit on the mesh
+# The asserts above measure the B-rep at 1e-4. What actually gets printed is
+# the tessellation, where the chorded corner fillets cut inside the true
+# surface. Re-measure the fit on the exported STLs and confirm it survives.
+def section_xy(mesh, z):
+    """XY points where the mesh crosses the Z=z plane."""
+    segs = mesh_plane(mesh, plane_normal=[0, 0, 1], plane_origin=[0, 0, z])
+    assert len(segs), f"no section at z={z}"
+    return segs.reshape(-1, 3)[:, :2]
+
+
+# Box cavity: at mid height the section has two loops. Cavity points are the
+# only ones inside both design half-extents; every point on the outer loop
+# (including the corner arcs) breaks at least one.
+box_pts = section_xy(meshes["box"], BOX_H / 2)
+inner = box_pts[
+    (np.abs(box_pts[:, 0]) <= CAV_L / 2 + 0.3) & (np.abs(box_pts[:, 1]) <= CAV_W / 2 + 0.3)
+]
+assert len(inner), "no cavity loop found in the box mesh section"
+m_cav_x, m_cav_y = np.ptp(inner[:, 0]), np.ptp(inner[:, 1])
+
+# Lid at mid-plug height: full section is the rib envelope; the rib-free
+# middle of each side gives the plug body faces (same windows as the B-rep).
+lid_pts = section_xy(meshes["lid"], z_mid)
+m_env_x, m_env_y = np.ptp(lid_pts[:, 0]), np.ptp(lid_pts[:, 1])
+m_body_x = np.ptp(lid_pts[np.abs(lid_pts[:, 1]) < 5][:, 0])
+m_body_y = np.ptp(lid_pts[np.abs(lid_pts[:, 0]) < 5][:, 1])
+
+for label, measured, design in [
+    ("cavity X", m_cav_x, CAV_L),
+    ("cavity Y", m_cav_y, CAV_W),
+    ("plug body X", m_body_x, PLUG_L),
+    ("plug body Y", m_body_y, PLUG_W),
+    ("rib envelope X", m_env_x, PLUG_L + 2 * RIB_PROUD),
+    ("rib envelope Y", m_env_y, PLUG_W + 2 * RIB_PROUD),
+]:
+    assert abs(measured - design) < MESH_BAND, (
+        f"mesh {label} = {measured:.3f} vs design {design:.3f} "
+        f"(over the {MESH_BAND} mm tessellation band)"
+    )
+
+m_clear_x = (m_cav_x - m_body_x) / 2
+m_clear_y = (m_cav_y - m_body_y) / 2
+m_rib_x = (m_env_x - m_cav_x) / 2
+m_rib_y = (m_env_y - m_cav_y) / 2
+# The ribs own the fit, so the interference is the number that must survive
+# tessellation; a mesh that ate half of it would print loose.
+for label, measured in [("X", m_rib_x), ("Y", m_rib_y)]:
+    assert measured > (RIB_PROUD - PLUG_CLEAR) * 0.8, (
+        f"mesh rib interference {label} = {measured:.3f} mm, "
+        f"under 80% of the designed {RIB_PROUD - PLUG_CLEAR:.3f} mm"
+    )
+
+# ------------------------------------------------------------- checks: 3MF
+# trimesh cannot load 3MF without networkx, so verify by parsing the model
+# part inside the zip. The 3MF is what goes to the slicer; nothing else here
+# would catch a Mesher that wrote the wrong object count or placement.
+NS = {"m": "http://schemas.microsoft.com/3dmanufacturing/core/2015/02"}
+with zipfile.ZipFile(three_mf) as zf:
+    model = ET.fromstring(zf.read("3D/3dmodel.model"))
+
+# Mesher also emits an empty component wrapper per shape; the build items are
+# what the slicer places, and they point at the mesh objects.
+items = model.findall(".//m:build/m:item", NS)
+assert len(items) == 2, f"3MF has {len(items)} build items, expected 2"
+
+by_id = {o.get("id"): o for o in model.findall(".//m:resources/m:object", NS)}
+obj_bounds = []
+for item in items:
+    obj = by_id[item.get("objectid")]
+    verts = np.array(
+        [
+            [float(v.get("x")), float(v.get("y")), float(v.get("z"))]
+            for v in obj.findall(".//m:mesh/m:vertices/m:vertex", NS)
+        ]
+    )
+    assert len(verts), f"3MF build item points at object {obj.get('id')} with no mesh"
+    obj_bounds.append((verts.min(axis=0), verts.max(axis=0)))
+
+# Identify by size rather than document order (object order is not guaranteed)
+obj_bounds.sort(key=lambda b: (b[1] - b[0])[2])
+lid_lo, lid_hi = obj_bounds[0]
+box_lo, box_hi = obj_bounds[1]
+for label, lo, hi, size in [
+    ("3MF box", box_lo, box_hi, (BOX_L, BOX_W, BOX_H)),
+    ("3MF lid", lid_lo, lid_hi, (BOX_L, BOX_W, LID_T + PLUG_H)),
+]:
+    got = hi - lo
+    assert np.allclose(got, size, atol=MESH_BAND), f"{label} bbox {got} vs {size}"
+    assert abs(lo[2]) < MESH_BAND, f"{label} does not sit on Z=0 (min Z {lo[2]:.3f})"
+gap = lid_lo[0] - box_hi[0] if lid_lo[0] > box_hi[0] else box_lo[0] - lid_hi[0]
+assert abs(gap - GAP_3MF) < MESH_BAND, f"3MF part gap {gap:.3f} vs {GAP_3MF}"
+
 # ---------------------------------------------------------------- report
 print("ALL CHECKS PASSED")
+print(f"target: {NOZZLE} mm nozzle, {LAYER_H} mm layers, min wall {MIN_WALL} mm")
 print(f"box:  bbox {box_bb.size.X:.3f} x {box_bb.size.Y:.3f} x {box_bb.size.Z:.3f} mm, "
       f"volume {box_part.volume:.1f} mm^3")
 print(f"lid:  bbox {lid_bb.size.X:.3f} x {lid_bb.size.Y:.3f} x {lid_bb.size.Z:.3f} mm, "
@@ -233,7 +380,30 @@ print(f"plug body (measured): {body_x_bb.size.X:.3f} x {body_y_bb.size.Y:.3f} mm
 print(f"rib envelope (measured): {env_bb.size.X:.3f} x {env_bb.size.Y:.3f} mm")
 print(f"clearance per side (measured): X {clear_x:.3f} mm, Y {clear_y:.3f} mm")
 print(f"rib interference per side (design): X {rib_int_x:.3f} mm, Y {rib_int_y:.3f} mm")
-print(f"exports: {box_stl}, {lid_stl}, {OUT_DIR / 'project-box.3mf'}")
+print("on the exported mesh:")
+print(f"  cavity {m_cav_x:.3f} x {m_cav_y:.3f} mm, plug body {m_body_x:.3f} x {m_body_y:.3f} mm, "
+      f"rib envelope {m_env_x:.3f} x {m_env_y:.3f} mm")
+print(f"  clearance per side X {m_clear_x:.3f} mm, Y {m_clear_y:.3f} mm; "
+      f"rib interference X {m_rib_x:.3f} mm, Y {m_rib_y:.3f} mm")
+
+# Layer grid: a FIRST_LAYER_H first layer over LAYER_H layers offsets the
+# whole grid, so a designed Z that is an exact multiple of the layer height
+# does not land on a slice plane. Advisory: the slicer rounds to the layer
+# below, which shortens the feature by up to one layer.
+print(f"layer grid ({FIRST_LAYER_H} mm first layer, {LAYER_H} mm layers):")
+for label, z in [
+    ("lid plate top / plug root", LID_T),
+    ("plug tip", LID_T + PLUG_H),
+    ("scoop root (thinnest plate)", LID_T - SCOOP_D),
+    ("box rim", BOX_H),
+    ("cavity floor", FLOOR),
+]:
+    n = (z - FIRST_LAYER_H) / LAYER_H
+    off = (round(n) - n) * LAYER_H
+    flag = "on a layer" if abs(off) < 1e-6 else f"{abs(off):.3f} mm off the nearest layer"
+    print(f"  z {z:5.2f} -> layer {n:6.2f}: {flag}")
+
+print(f"exports: {box_stl}, {lid_stl}, {three_mf}")
 
 # SHOW=1 pushes the parts to a running OCP CAD Viewer (.venv/bin/python -m ocp_vscode)
 import os

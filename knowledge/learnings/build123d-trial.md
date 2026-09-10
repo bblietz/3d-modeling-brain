@@ -113,12 +113,80 @@ for [[3d-model]] work. Outcome: qualified; decision recorded in
   which makes orientation mistakes visually obvious - do that for any
   flipped part from the start.
 
+## Back-applying six weeks of learnings (2026-09-10)
+
+v4 was still unprinted, and the project files had drifted behind what the
+rest of the vault had learned since 2026-07-31. What the audit found, and
+what changed:
+
+- **The recipe was trapped in this retrospective.** The crush-rib fit is
+  general knowledge, not a fact about one box, and there was no turnkey
+  note for it. Promoted to [[friction-fits-x2d]] following the
+  `<topic>-x2d.md` pattern; this file stays as the history.
+- **Fit constants were being read as constants.** `PLUG_CLEAR` and
+  `RIB_PROUD` are one calibration - 0.6 high-flow, classic wall
+  generator, PLA Basic, one spool. [[clawd-mascot]] had already shown a
+  coupon-validated interference going smash-tight after a filament brand
+  change. The provenance and the re-coupon triggers now sit in the source
+  next to the numbers.
+- **The nozzle assumption was stale and invisible.** The source declared
+  "0.6 mm high-flow" in a docstring and hardcoded `MIN_WALL = 1.24`; the
+  resident nozzle has been 0.2 in both positions since 2026-08-23. Now a
+  `NOZZLE` constant drives `MIN_WALL` off the floor table
+  {0.2: 0.44, 0.4: 0.84, 0.6: 1.24}, and the pre-flight (swap the nozzle,
+  confirm with `scripts/x2d-status.py`, pick the printer preset in Studio
+  BEFORE opening) is written into the file and the brief.
+- **The min-wall rule changed meaning.** It was a quality preference in
+  July. Since the Sharks prints it is a hard slicer floor: the stock X2D
+  quality presets run the classic generator with thin-wall detection off,
+  so under two perimeters prints *nothing*, silently.
+- **Asserts measured the B-rep; the slicer eats the mesh.** Added a
+  re-measure of cavity, plug body and rib envelope on the exported STL.
+  Result: tessellating the R3.45 / R3.60 fillets costs the rib envelope
+  0.001 mm (75.599 vs 75.600). The fit survives - now as a measured fact
+  with an assert behind it, where before it was an assumption.
+- **The 3MF was written and never checked.** Now parsed back out of the
+  zip (build items, meshes, bounding boxes, Z=0, gap), since trimesh
+  cannot read 3MF without networkx.
+- **Print settings were hand-made and unreproducible.** Layer height and
+  ironing existed nowhere in code; the ironing 3MFs were one-off GUI
+  saves. Now `pipeline/make_print_3mf.py` builds the print file from the
+  STLs plus a text settings template, per [[project-keep-tools-in-vault]].
+- **Two live defects in the old print file.** `project-box-ironing.3mf`
+  carried the textured plate at **55 C** (the flattened-preset value;
+  Bambu stock PLA on textured PEI wants 65) and had an **empty filament
+  diff slot**, so the GUI would silently reset the temperature on open.
+  The Cool Plate / 35 C version of that same bug shredded a Sharks print
+  on 2026-08-07. Both fixed in the new file.
+- **`different_settings_to_system` is positional and scope-aware:**
+  [0] process, [1..N] the N filaments, [N+1] machine. Bed temps are
+  filament-scope. `scripts/apply_smooth_top.py` only ever writes slot 0,
+  which is why the new pipeline handles the slots itself rather than
+  calling it.
+- **The flattener was avoided, not used.** `scripts/flatten_presets.py`
+  still reads the stale 02.07.00.08 bundle and never merges the machine
+  preset's `include` gcode. The settings template is instead the
+  `project_settings.config` Studio 02.08.02.61 wrote for this project,
+  kept as JSON so it is diffable.
+
+Still open: **v4 has never been printed.** v3 (ribs, no scoops) is the
+last fit-validated print. The scoops are modelled and asserted but their
+nail gap is unproven, and the fit numbers were calibrated on a nozzle that
+is not currently installed.
+
 ## Files and settings
 
 - `projects/Build123d-trial/project_box.py` (canonical parametric
-  source), `box.stl`, `lid.stl`, `project-box.3mf` (both parts, 10 mm
-  gap), `images/final-*.png`, `brief.md`.
+  source), `box.stl`, `lid.stl`, `project-box.3mf` (geometry only, both
+  parts, 10 mm gap), `images/final-*.png`, `brief.md`.
+- `projects/Build123d-trial/pipeline/make_print_3mf.py` +
+  `x2d-pla-0.6-settings.json` build `project-box-print.3mf`, the print
+  file: X2D 0.6 nozzle 0.18 mm presets, Textured PEI Plate at 65 C, PLA
+  smooth-top ironing package, Manual filament map.
+- The `lid-*-ironing.3mf` files and `project-box-ironing.3mf` are
+  superseded history, not print files. `result.json` is a Bambu Studio
+  CLI artifact, dropped in the output directory on every export.
 - Print orientation: box floor on bed, lid plate on bed with plug up; no
   supports needed.
 
-Related: [[printer-x2d]]
+Related: [[printer-x2d]], [[friction-fits-x2d]]
