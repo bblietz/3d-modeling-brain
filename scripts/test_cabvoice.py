@@ -212,16 +212,18 @@ def test_ported_box_matches_eminence_designs(params, vb_cuft, fb, f3_expected):
 
 
 def test_closed_box_matches_eminence_sealed_design():
+    # Eminence's sealed Beta-12A-2 design (0.904 cu ft) publishes F3 92.1 Hz; the
+    # engine reads 86.0 Hz (6.6 percent low, see the voicing note's model limits).
     drv = _driver(**BETA_12A2)
     res = cabvoice.closed_box(drv, 0.904 * CU_FT_L)
-    assert res.f3_hz == pytest.approx(92.1, rel=0.10)
+    assert res.f3_hz == pytest.approx(86.0, abs=1.0)
 
 
 def test_ported_box_reports_peak_and_character():
     drv = _driver(**DELTA_12A)
     small = cabvoice.ported_box(drv, 0.75 * CU_FT_L, 110.0)
-    assert small.peak_db > 1.0
-    assert small.character in ("punchy", "boomy")
+    assert small.peak_db == pytest.approx(5.81, abs=0.1)
+    assert small.character == "boomy"
     assert small.response[-1][0] == 400.0
 
 
@@ -297,6 +299,21 @@ def test_size_port_keeps_warning_at_max_size(drv):
     assert p.diameter_mm == cabvoice.MAX_PORT_DIAMETER_MM
     assert p.length_mm == cabvoice.MIN_PORT_LENGTH_MM
     assert any("too short" in w for w in p.warnings)
+
+
+def test_size_port_warns_still_above_limit(drv):
+    drv.xmax_mm = 30.0
+    p = cabvoice.size_port(drv, 100.0, 100.0, diameter_mm=75.0)
+    assert p.diameter_mm == cabvoice.MAX_PORT_DIAMETER_MM
+    assert p.air_speed_ms > cabvoice.PORT_V_MAX
+    assert any("still above" in w for w in p.warnings)
+
+
+def test_port_dims_rejects_non_positive_geometry():
+    with pytest.raises(ValueError, match="diameter"):
+        cabvoice.port_dims(40.0, 60.0, diameter_mm=0.0)
+    with pytest.raises(ValueError, match="slot"):
+        cabvoice.port_dims(40.0, 60.0, slot_mm=(200.0, -5.0))
 
 
 def test_size_port_slot_stops_at_max_area(drv):
@@ -434,6 +451,11 @@ def test_internal_external_roundtrip():
     assert cabvoice.external_from_internal(cabvoice.internal_from_external(ext)) == pytest.approx(ext)
 
 
+def test_make_box_rejects_non_positive_internals():
+    with pytest.raises(ValueError, match="positive"):
+        cabvoice.make_box((472.0, 0.0, 229.4))
+
+
 def test_dims_for_volume_reproduces_base():
     box = cabvoice.dims_for_volume(45.6)
     assert box.internal_mm == pytest.approx((472.0, 421.2, 229.4), abs=0.5)
@@ -541,6 +563,16 @@ def test_per_driver_net_without_ts_is_rule_of_thumb(drv):
     assert any("no Thiele-Small" in w for w in warns)
 
 
+def test_ported_targets_grows_then_lowers_fb():
+    # Qts 1.0, Vas 20 L: boomy at every step, so the box grows in 10 percent
+    # steps to the last one under 68 L (64.3 L), then Fb drops 5 Hz at a time to 45.
+    d = _driver(qts=1.0, vas_l=20.0)
+    vb, fb, res, warns = cabvoice.ported_targets(d, 30.0, "balanced")
+    assert vb == pytest.approx(64.3, abs=0.05) and fb == 45.0
+    assert res.character == "boomy"
+    assert any("stays boomy" in w for w in warns)
+
+
 def test_propose_closed_ported_1x12(drv, tone):
     tone["low_end"] = "balanced"
     tone["min_power_w"] = 90              # a 60 W amp
@@ -580,6 +612,15 @@ def test_propose_stereo_2x12_closed(drv, tone):
     assert len(v.power["per_side"]) == 2
     assert v.prediction["model"] == "thiele-small closed"
     assert v.box["chamber_internal_width_mm"] >= cabvoice.min_internal_width_mm(1, drv.cutout_mm)
+
+
+def test_propose_stereo_volumes_reconcile(drv, tone):
+    tone["impedance_options_ohm"] = [16]
+    v = cabvoice.propose([drv, drv], [16, 16], "closed-ported", tone, jack_config="stereo")
+    vol = v.volumes
+    parts = vol["net_total_l"] + vol["displacement_l"] + vol["brace_l"] + vol["port_l"] + vol["divider_l"]
+    assert vol["gross_l"] == pytest.approx(parts, abs=0.01)
+    assert vol["port_l"] == pytest.approx(2 * v.port["volume_l"], abs=1e-6)
 
 
 def test_propose_without_ts_degrades(drv, tone):
@@ -677,6 +718,12 @@ def test_evaluate_surfaces_port_warnings(drv, tone):
     assert "port note from sizing" in v.warnings
 
 
+def test_evaluate_rejects_port_on_closed(drv, tone):
+    port = cabvoice.port_dims(44.0, 70.0, diameter_mm=100.0)
+    with pytest.raises(ValueError, match="closed enclosure"):
+        cabvoice.evaluate([drv], [16], "closed", tone, SITE_INTERNAL, port=port)
+
+
 def test_evaluate_open_back(drv, tone):
     v = cabvoice.evaluate([drv], [16], "open", tone, SITE_INTERNAL)
     assert v.prediction["f_cancel_hz"] == pytest.approx(368.5, abs=1.0)
@@ -708,6 +755,33 @@ def test_cli_propose_and_list(speakers_dir, tmp_path):
                              "--speakers-dir", str(speakers_dir)],
                             capture_output=True, text=True)
     assert listed.stdout.strip() == "test-driver"
+
+
+def test_voicing_json_has_construction_block(drv, tone, tmp_path):
+    c = cabvoice.Constraints(pinned_external_width_mm=660.0, brace_l=0.3)
+    v = cabvoice.propose([drv], [16], "closed-ported", tone, constraints=c)
+    json_path, _ = cabvoice.write_voicing(v, tmp_path)
+    con = json.loads(json_path.read_text())["construction"]
+    assert con == {"panel_mm": 18.0, "back_mm": 12.0, "baffle_mm": 18.0, "recess_mm": 20.0,
+                   "brace_l": 0.3, "pinned_external_width_mm": 660.0, "max_external_mm": None,
+                   "port_count": 1}
+    closed = cabvoice.propose([drv], [16], "closed", tone)
+    assert closed.construction["port_count"] is None
+
+
+def test_cli_evaluate_ported(speakers_dir, tmp_path):
+    out = tmp_path / "out"
+    cmd = [sys.executable, str(Path(cabvoice.__file__)), "evaluate",
+           "--speakers-dir", str(speakers_dir), "--speaker", "test-driver",
+           "--impedance", "16", "--enclosure", "closed-ported", "--tone", str(TONE_FIXTURE),
+           "--internal", "472", "421.2", "229.4", "--port-diameter", "100", "--port-length", "23",
+           "--out", str(out)]
+    run = subprocess.run(cmd, capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    data = json.loads((out / "voicing.json").read_text())
+    assert data["mode"] == "evaluate" and 65.0 < data["prediction"]["fb_hz"] < 75.0
+    assert data["port"]["count"] == 1 and data["port"]["location"] == "rear"
+    assert "16 ohm" in (out / "voicing.md").read_text()
 
 
 def test_cli_exit_code_2_on_blockers(speakers_dir, tmp_path):
@@ -763,22 +837,11 @@ def test_every_catalog_speaker_proposes_without_exception(tone):
 
 # ---- Final review: propose versus evaluate, calibration table -----------
 
-# Two-pass stereo loop: gross drifts with the divider, net off by 0.055 L.
-_DRIFT_CASES = {("eminence-red-white-and-blues", "closed-ported", "stereo", 2),
-                ("wgs-veteran-30", "closed-ported", "stereo", 2)}
-
-
 def _matrix_params():
-    params = []
-    for slug in cabvoice.list_speakers(CATALOG):
-        for enclosure in cabvoice.ENCLOSURE_TYPES:
-            for jack, n in (("mono", 1), ("mono", 2), ("stereo", 2)):
-                case = (slug, enclosure, jack, n)
-                marks = []
-                if case in _DRIFT_CASES:
-                    marks.append(pytest.mark.xfail(strict=True, reason="two-pass stereo volume drift"))
-                params.append(pytest.param(*case, id=f"{slug}-{enclosure}-{jack}-{n}", marks=marks))
-    return params
+    return [pytest.param(slug, enclosure, jack, n, id=f"{slug}-{enclosure}-{jack}-{n}")
+            for slug in cabvoice.list_speakers(CATALOG)
+            for enclosure in cabvoice.ENCLOSURE_TYPES
+            for jack, n in (("mono", 1), ("mono", 2), ("stereo", 2))]
 
 
 def _port_from_json(port_dict):

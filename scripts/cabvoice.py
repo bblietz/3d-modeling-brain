@@ -4,6 +4,10 @@ projects/Speaker-cab-system/2026-09-08-speaker-cab-system-design.md).
 Pure functions over a Driver record loaded from the YAML frontmatter of
 knowledge/speakers/<slug>.md. All internal math is SI. Every prediction is
 unverified until listening notes say otherwise.
+
+CLI exit codes: 0 sheet written; 1 input error (speaker note, tone target, or an
+engine ValueError), nothing written; 2 blockers, sheet still written (argparse
+usage errors also exit 2).
 """
 
 from __future__ import annotations
@@ -363,8 +367,12 @@ def _port_area_m2(diameter_mm, slot_mm):
     if (diameter_mm is None) == (slot_mm is None):
         raise ValueError("give exactly one of diameter_mm or slot_mm=(w, h)")
     if diameter_mm is not None:
+        if diameter_mm <= 0:
+            raise ValueError("diameter_mm must be positive")
         return math.pi * (diameter_mm / 2e3) ** 2
     w, h = slot_mm
+    if w <= 0 or h <= 0:
+        raise ValueError("slot_mm must be two positive numbers")
     return (w / 1e3) * (h / 1e3)
 
 
@@ -543,8 +551,8 @@ def wiring(impedances: list, taps: list, jack_config: str = "mono",
         recommended = next((o for o in options if o.matches_tap), None)
     if jack_config == "mono-parallel-out":
         warnings.append(
-            "Parallel out: an external cabinet halves the combined load; set the amp tap "
-            "to the combined impedance, not this cabinet's alone.")
+            "Parallel out: an external cabinet of the same impedance halves the combined "
+            "load; set the amp tap to the combined impedance, not this cabinet's alone.")
     if recommended is None:
         warnings.append(f"no wiring option matches amp taps {list(taps)}")
     return WiringResult(jack_config, options, recommended, warnings)
@@ -637,6 +645,8 @@ def dimension_ratio_warnings(internal_mm) -> list:
 
 
 def make_box(internal_mm, **panel_kwargs) -> Box:
+    if min(internal_mm) <= 0:
+        raise ValueError("internal dimensions must be positive")
     return Box(external_mm=external_from_internal(internal_mm, **panel_kwargs),
                internal_mm=tuple(internal_mm), gross_l=gross_volume_l(internal_mm),
                warnings=dimension_ratio_warnings(internal_mm))
@@ -683,8 +693,8 @@ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = Non
         max_internal = internal_from_external(max_external_mm, **panel_kwargs)
         if fixed[0] and dims[0] > max_internal[0]:
             raise ValueError(
-                f"width {dims[0]:.0f} mm internal (pinned or the driver-count minimum) "
-                f"exceeds the size limit {max_internal[0]:.0f} mm")
+                f"width {dims[0]:.1f} mm internal (pinned or the driver-count minimum) "
+                f"exceeds the size limit {max_internal[0]:.1f} mm internal")
 
     def rescale():
         free = [i for i in range(3) if not fixed[i]]
@@ -716,7 +726,7 @@ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = Non
         rescale()
     achieved = dims[0] * dims[1] * dims[2]
     if abs(achieved - target) / target > 0.001:
-        message = (f"cannot reach {gross_l:.1f} L within the limits; "
+        message = (f"cannot reach {gross_l:.1f} L within the internal size limit; "
                    f"achievable {achieved / 1e6:.1f} L")
         if strict:
             raise ValueError(message)
@@ -798,8 +808,9 @@ def per_driver_net_l(driver: Driver, enclosure: str, low_end: str) -> tuple:
     vb = driver.vas_l / ALPHA_TARGET[low_end]
     if vb < lo or vb > hi:
         clamped = min(max(vb, lo), hi)
-        warnings.append(f"{driver.slug}: Thiele-Small volume {vb:.1f} L for '{low_end}' "
-                        f"clamped to the practical range {lo:.0f} to {hi:.0f} L ({clamped:.1f} L)")
+        warnings.append(f"{driver.slug}: Thiele-Small volume {vb:.1f} L for '{low_end}' is "
+                        f"outside the practical range {lo:.0f} to {hi:.0f} L; started from the "
+                        f"clamped {clamped:.1f} L")
         vb = clamped
     return vb, "thiele-small", warnings
 
@@ -827,11 +838,13 @@ def ported_targets(driver: Driver, net_l: float, low_end: str) -> tuple:
 
 def _air_speed_driver(driver: Driver, drivers_per_port: float, warnings: list) -> Driver:
     sd, xmax = driver.sd_cm2, driver.xmax_mm
-    if sd is None or xmax is None:
-        warnings.append(f"{driver.slug}: port air speed uses assumed Sd {FALLBACK_SD_CM2:g} cm2 "
-                        f"and Xmax {FALLBACK_XMAX_MM:g} mm")
-        sd = sd if sd is not None else FALLBACK_SD_CM2
-        xmax = xmax if xmax is not None else FALLBACK_XMAX_MM
+    assumed = []
+    if sd is None:
+        sd, assumed = FALLBACK_SD_CM2, assumed + [f"Sd {FALLBACK_SD_CM2:g} cm2"]
+    if xmax is None:
+        xmax, assumed = FALLBACK_XMAX_MM, assumed + [f"Xmax {FALLBACK_XMAX_MM:g} mm"]
+    if assumed:
+        warnings.append(f"{driver.slug}: port air speed uses assumed " + " and ".join(assumed))
     return replace(driver, sd_cm2=sd * drivers_per_port, xmax_mm=xmax)
 
 
@@ -842,7 +855,8 @@ def _speaker_summary(driver: Driver, impedance) -> dict:
             "analog_of": driver.analog_of, "cutout_mm": driver.cutout_mm,
             "bolt_circle_mm": driver.bolt_circle_mm, "bolt_count": driver.bolt_count,
             "depth_mm": driver.depth_mm, "weight_kg": driver.weight_kg,
-            "displacement_l": driver.displacement_l}
+            "displacement_l": driver.displacement_l,
+            "displacement_estimated": driver.displacement_estimated}
 
 
 def _mm_to_in(dims) -> tuple:
@@ -1047,7 +1061,8 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
     port_count = c.port_count or per_chamber_drivers
     net_target = net_total
     port, port_l, divider_l, box, limited = None, 0.0, 0.0, None, False
-    for _ in range(2):
+    last_gross = None
+    for _ in range(5):   # until the gross settles: the port and divider depend on the box
         gross = net_total + displacement + c.brace_l + port_l * chambers + divider_l
         box = dims_for_volume(gross, c.pinned_external_width_mm, min_w, c.max_external_mm,
                               strict=False, **pk)
@@ -1065,6 +1080,9 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
                              chamber_net / port_count, fb, diameter_mm=c.port_diameter_mm,
                              slot_mm=c.port_slot_mm)
             port_l = port.volume_l * port_count
+        if last_gross is not None and abs(box.gross_l - last_gross) < 0.01:
+            break
+        last_gross = box.gross_l
     warnings.extend(box.warnings)
     chamber_w = _chamber_w(chambers, w_int, c)
     port_dict = None
@@ -1103,6 +1121,8 @@ def evaluate(drivers: list, impedances: list, enclosure: str, tone: dict,
         drivers, impedances, enclosure, tone, jack_config)
     if enclosure == "closed-ported" and port is None:
         raise ValueError("closed-ported evaluate needs a port (from port_dims) with its length")
+    if enclosure != "closed-ported" and port is not None:
+        raise ValueError(f"a port does not apply to a {enclosure} enclosure")
     blockers = []
     box = make_box(tuple(internal_mm), **c.panel_kwargs())
     warnings.extend(box.warnings)
@@ -1170,11 +1190,14 @@ def render_markdown(v: Voicing) -> str:
         "## Summary",
         "",
     ]
-    spk = ", ".join(f"{s['brand']} {s['model']} {s['impedance_ohm']} ohm ({s['data_status']})"
+    spk = ", ".join(f"{s['brand']} {s['model']} {s['impedance_ohm']:g} ohm ({s['data_status']})"
                     for s in v.speakers)
     e = v.enclosure
+    lines += [f"- Drivers: {e['driver_count']} x {spk}"]
+    lines += [f"- {s['brand']} {s['model']}: cutout {s['cutout_mm']:.0f} mm, {s['bolt_count']} bolts "
+              f"on {s['bolt_circle_mm']:.1f} mm, depth {s['depth_mm']:.0f} mm, {s['weight_kg']:.1f} kg"
+              for s in v.speakers]
     lines += [
-        f"- Drivers: {e['driver_count']} x {spk}",
         f"- Enclosure: {e['type']}, {e['chambers']} chamber(s), jack configuration {e['jack_config']}",
         f"- Character: {v.prediction.get('character')}",
         f"- Volume method: {v.volumes['method']}",
@@ -1204,10 +1227,11 @@ def render_markdown(v: Voicing) -> str:
         f"- Internal: {_fmt_dims(v.box['internal_mm'], v.box['internal_in'])}",
         f"- External: {_fmt_dims(v.box['external_mm'], v.box['external_in'])}",
         f"- Chamber internal width: {v.box['chamber_internal_width_mm']:.0f} mm",
-        "",
-        "## Port",
-        "",
     ]
+    if v.prediction.get("panel_height_mm") is not None:
+        lines.append(f"- Open-back panels: two, top and bottom, each "
+                     f"{v.prediction['panel_height_mm']:.0f} mm tall")
+    lines += ["", "## Port", ""]
     if v.port is None:
         lines.append("No port (closed or open back).")
     else:
