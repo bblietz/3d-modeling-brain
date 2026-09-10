@@ -1,4 +1,4 @@
-"""Helm panel for the Garmin GPSMAP 943xsv, printed in four interlocking tiles.
+"""Helm panel for the Garmin GPSMAP 943xsv, routed from 1/2 in King Starboard.
 
 Replaces the hinged clear cover behind the wheel. The 943xsv flush mounts
 through the window; the window and its pilot holes come from garmin_9x3.py,
@@ -21,8 +21,8 @@ ASA, not PLA: a dark panel at a helm passes the PLA softening point.
 
 Run:  .venv/bin/python projects/Garmin-943-helm-panel/helm-panel.py
 Env:  STAGE=n builds only the first n panel features (1..5). SHOW=1|reset
-      pushes to the OCP viewer. TILES=0 skips the split and exports the
-      one-piece panel only.
+      pushes to the OCP viewer. TILES=1 also builds the printed ASA
+      alternative: four interlocking tiles plus bowtie keys.
 """
 import os
 import sys
@@ -45,16 +45,16 @@ IN = 25.4
 # ---- Panel, provisional until Brian measures ----
 PANEL_W = 18.5 * IN  # 469.9
 PANEL_H = 11.5 * IN  # 292.1
-PANEL_T = 0.375 * IN  # 9.525. Was 1/2 in, inherited from a rule written for
-# HDPE sheet; for printed ASA 3/8 in deflects 0.21 mm under the unit plus a
-# firm screen press, which is stiff enough. See brief.md for the numbers.
+PANEL_T = 0.5 * IN  # 12.7. Brian chose 1/2 in King Starboard 2026-09-09.
+# HDPE is softer than printed ASA AND creeps, so it needs one size up: 1/2 in
+# Starboard lands where 3/8 in printed ASA does. See brief.md for the numbers.
 CORNER_R = 0.5 * IN  # 12.7, ASSUMPTION: confirm against the old cover
 EDGE_ROUND = 0.125 * IN  # 3.175, 1/8 in roundover on the front face only
 
 # ---- Window ----
 CUTOUT_R = 0.25 * IN / 2  # 3.175
 CUTOUT_DY = 0.0  # positive moves the window toward the panel top
-PILOT_DEPTH = 7.0  # blind, so nothing pokes through the back
+PILOT_DEPTH = 10.0  # blind in 12.7 stock, leaving 2.7 mm behind the screw
 
 # ---- Split and interlock ----
 BED = 256.0
@@ -339,7 +339,10 @@ if __name__ == "__main__":
     print("panel ok  %.1f x %.1f x %.2f mm  %.0f cm3" % (PANEL_W, PANEL_H, PANEL_T, panel_volume / 1000))
     print("  bezel margin mm:", {k: round(v, 1) for k, v in margins.items()})
 
-    if os.environ.get("TILES") == "0":
+    # The part is routed from one piece of 1/2 in Starboard, so the one-piece
+    # panel is the deliverable. TILES=1 builds the printed-in-ASA alternative,
+    # which is kept for the case where features a router cannot cut are wanted.
+    if os.environ.get("TILES") != "1":
         raise SystemExit
 
     pocketed = cut_pockets(panel)

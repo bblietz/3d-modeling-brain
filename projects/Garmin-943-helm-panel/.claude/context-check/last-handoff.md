@@ -1,4 +1,4 @@
-# Handoff: Garmin 943xsv helm panel, 2026-09-09 (revision B)
+# Handoff: Garmin 943xsv helm panel, 2026-09-09 (revision C: Starboard chosen)
 
 ## State
 Router template designed, verified, and exported. Nothing printed yet. The full panel is now modeled too, at Brian's provisional 18.5 x 11.5 in; he will send exact measurements and photos later.
@@ -15,7 +15,8 @@ Files in `projects/Garmin-943-helm-panel/`: `brief.md` (spec, Garmin numbers, bu
 - Vertical cutout placement decided by Brian at layout (`CUTOUT_DY` in helm-panel.py, currently 0).
 - Panel modeled at 469.9 x 292.1 x 12.7 mm, R12.7 corners, 1/8 in roundover on the outside face, blind 2.3 mm pilots. 1/2 in stock because the span exceeds the 450 mm rule.
 - Garmin dimensions live in garmin_9x3.py, imported by both models. Do not re-inline them.
-- Panel is printed, not routed: split into four 234.95 x 146.05 x 9.525 mm tiles (3/8 in, set 2026-09-09; 1/2 in was an HDPE-sheet rule that should not have carried over to printing) at x=0 and y=0, joined by 10 loose bowtie keys dropped in from the back (integral dovetails cannot work on a 2x2 grid).
+- DECIDED 2026-09-09: the panel is ONE PIECE of 1/2 in black King Starboard, routed using the printed template. The printed path below is the kept alternative, not the plan.
+- Printed alternative (TILES=1): split into four 234.95 x 146.05 x 9.525 mm tiles (3/8 in, set 2026-09-09; 1/2 in was an HDPE-sheet rule that should not have carried over to printing) at x=0 and y=0, joined by 10 loose bowtie keys dropped in from the back (integral dovetails cannot work on a 2x2 grid).
 - ASA, not PLA. Textured PEI 100 C, 0.6 nozzle, 0.30 mm, 5 mm outer brim, each tile FRONT FACE UP. 7 h 54 min and 376 g total across four plates.
 - helm-panel-all-plates.3mf is THE print file: one project, four plates (three tiles, then tile BR plus all ten keys). Two plates is impossible; two tiles only fit as diagonal pairs at 248x247 with no brim room.
 - Studio's plate grid is two columns running in negative Y, not one row along X. Recorded in knowledge/printer-x2d.md.

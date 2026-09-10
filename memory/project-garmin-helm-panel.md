@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-Brian is replacing the hinged clear cover behind the helm wheel with a fixed black King Starboard panel that flush mounts a Garmin GPSMAP 943xsv. He routs the panel outline from the old cover himself. The panel is now PRINTED in four interlocking ASA tiles rather than cut from Starboard, joined by loose bowtie keys dropped in from the back. The other designed part is a printed router template (window exactly 222.4 x 139.0 mm, four 2.8 mm pilot guides on 190.9 x 150.5 mm) in `projects/Garmin-943-helm-panel/`, built 2026-09-09 with build123d, not yet printed as of that date.
+Brian is replacing the hinged clear cover behind the helm wheel with a fixed black King Starboard panel that flush mounts a Garmin GPSMAP 943xsv. He routs the panel outline from the old cover himself. Decided 2026-09-09: the panel is ONE PIECE of 1/2 in black King Starboard, routed from the old cover as a pattern. A four-tile printed ASA version was built and kept as an alternative, but Starboard won because ASA's advantages are cured by thicker sheet while Starboard's imperviousness and toughness cannot be printed. The designed part is a printed router template (window exactly 222.4 x 139.0 mm, four 2.8 mm pilot guides on 190.9 x 150.5 mm) in `projects/Garmin-943-helm-panel/`, built 2026-09-09 with build123d, not yet printed as of that date.
 
 **Why:** the compartment opening and perimeter fastening are Brian's to copy from the old cover, so the vault holds only the cutout template and the Garmin mounting data.
 

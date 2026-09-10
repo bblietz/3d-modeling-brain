@@ -1,7 +1,7 @@
 ---
 title: Garmin 943xsv helm panel
 type: project-brief
-status: template built; panel modeled and split into four printable tiles; awaiting Brian's measurements and photos
+status: DECIDED 1/2 in Starboard, routed one piece. Template printed-ready. Awaiting Brian's measurements and photos
 created: 2026-09-08
 tags: [boat, helm, garmin, starboard, router-template]
 ---
@@ -317,3 +317,76 @@ no bonded seams) cannot be engineered into a printed panel.
 Both paths are built and ready: rout 1/2 in Starboard using the printed
 template, or print the four ASA tiles. The printed route stays worthwhile if
 features a router cannot make are ever wanted.
+
+## DECISION, 2026-09-09: 1/2 in black King Starboard, routed in one piece
+
+Brian chose Starboard over the printed ASA tiles. Rationale is in
+[[marine-materials]]: ASA's advantages (stiffness, creep, heat) are all cured
+by thicker sheet, which is nearly free, while Starboard's (impervious to water,
+tough, immune to sunscreen and solvents, seamless) cannot be engineered into a
+printed part. 1/2 in because HDPE is softer than printed ASA and creeps, so it
+needs one size up; it lands at 0.23 mm total deflection, matching 3/8 in ASA.
+
+An HDPE filament was considered and rejected. The only seriously engineered PE
+filament, Braskem FL300PE, died when Braskem shut down Xtellar (announced June
+2024, wound down 2025); what remains is white-label stock with no datasheets.
+Printed unfilled polyolefin measures about 380 to 575 MPa flexural, roughly
+HALF of HDPE sheet, and polyethylene cannot be glued, which would leave the
+tile seams permanently unbonded. Bambu Studio does ship Generic PE and PP
+profiles compatible with the X2D 0.6 nozzle (PE at 210 C, bed 55 C, 8 mm3/s),
+but Bambu sells no such filament and there are no credible reports of anyone
+printing HDPE on these machines. If a polyolefin part is ever genuinely needed,
+mill it from sheet or print PP-GF.
+
+### The part
+
+One piece of 1/2 in (12.7 mm) black King Starboard, 469.9 x 292.1 mm
+provisional. Model is `helm-panel.stl` / `.step`, 1346 cm3, about 1.29 kg.
+The window, its R3.175 corners and the four blind 2.3 mm pilots are unchanged;
+only the thickness and the one-piece construction differ from the ASA version.
+
+### Shop process
+
+1. Pattern the outline from the old clear cover. Corner radius comes from the
+   cover, not from the model's assumed 1/2 in.
+2. Lay out the cutout centrelines. Register the printed template on its notches
+   with TOP toward the unit's top. Tape and clamp.
+3. Drill the four 2.3 mm pilots through the template guides.
+4. Drill an 8 mm relief hole inside each window corner, jigsaw the window out
+   leaving about 2 mm.
+5. Rout the window to the template. Bit reach: the BEARING rides the template
+   and the CUTTER only has to span the workpiece, so any pattern or flush-trim
+   bit with at least 5/8 in of cutting length works; a common 1 in bit clears
+   12.7 mm stock by 12.7 mm. Use a 1/4 in bit so the corners come out at
+   R3.175, matching Garmin's drawn R3.7 without needing to be squared.
+6. Roundover the front face perimeter, 1/8 in.
+7. Test fit the unit dry before any screws.
+
+Routing HDPE: use a SHARP carbide spiral, ideally a single-flute or O-flute
+ground for plastics, and keep the feed rate up. A dull bit or a slow feed melts
+HDPE and re-welds the chips into the cut. Do not let the bit dwell.
+
+### Fastening
+
+- Garmin's four screws take a 2.3 mm pilot and get 10 mm of engagement in
+  12.7 mm stock, which is ample. Do NOT overtighten: HDPE creeps and the
+  threads will strip or slowly loosen.
+- Perimeter screws must be free to move. Black HDPE grows about 2.5 mm across
+  469.9 mm over a 30 C swing, so drill oversized clearance holes (about 6.5 mm
+  for a #10 shank) and fit finishing washers. Tight holes will bow the panel.
+- Nothing bonds to HDPE. All fastening is mechanical; do not plan on adhesive.
+
+### Materials
+
+Black King Starboard, 1/2 in, at least 19 x 12 in. A 24 x 27 in cut piece is
+the usual smallest practical purchase. Stainless #10 oval-head screws and
+finishing washers for the perimeter.
+
+### The printed alternative, kept
+
+`helm-panel.py` still builds the four-tile ASA version under `TILES=1`, and
+`helm-panel-all-plates.3mf` (four plates, 7 h 54 min, 376 g) is still valid at
+3/8 in ASA. That path stays worthwhile only if features a router cannot cut are
+ever wanted: a recessed pocket, a cable channel, integrated ribs. Note it is
+self-consistent at 3/8 in ASA and is NOT derived from the 1/2 in Starboard
+panel.
