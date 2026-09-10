@@ -8,7 +8,7 @@ tags: [learning, speaker-cab, process, sdd]
 
 # Speaker cab Plan 1 retrospective
 
-Plan 1 of [[speaker-cab-system-design]] landed on 2026-09-09: `scripts/cabvoice.py` with __TESTS__ tests, [[speaker-cab-construction]], [[speaker-cab-voicing]] with its calibration table, and twenty notes in `knowledge/speakers/`. Fifteen tasks, each implemented by a fresh Sonnet 5 subagent from a task brief and reviewed by a Fable 5.1 subagent, then a Fable 5.1 whole-branch review and one fix wave. The ledger of every review, fix, and ruling is `.superpowers/sdd/progress.md` (git-ignored, vault root).
+Plan 1 of [[speaker-cab-system-design]] landed on 2026-09-09: `scripts/cabvoice.py` with 348 tests, [[speaker-cab-construction]], [[speaker-cab-voicing]] with its calibration table, and twenty notes in `knowledge/speakers/`. Fifteen tasks, each implemented by a fresh Sonnet 5 subagent from a task brief and reviewed by a Fable 5.1 subagent, then a Fable 5.1 whole-branch review and one fix wave. The ledger of every review, fix, and ruling is `.superpowers/sdd/progress.md` (git-ignored, vault root).
 
 ## What worked
 
@@ -24,7 +24,7 @@ Plan 1 of [[speaker-cab-system-design]] landed on 2026-09-09: `scripts/cabvoice.
 - **Amendments that introduced new defects.** The first voicing-note amendment made two rules deterministic in a way that broke them (a genre point aimed at a table that names no speakers; a power step that moved the engine's hard stop). Both were caught on re-review, but a rule change deserves the same check as code: trace what consumes it before writing it.
 - **Prose numbers drifting from the code.** "12 to 13 percent low", "19 seed notes", "three of four designs", and the stereo per-channel wording were all wrong in ways the code was not. Prose that quotes a computed number should be generated or checked by running the code.
 - **The scratchpad is wiped by a restart.** The mirror, the sync tool, and three drafts vanished when the session process restarted mid-review. Tools and drafts belong in the vault (`projects/<Name>/pipeline/`), as [[project-keep-tools-in-vault]] already says.
-- **Concurrent sessions in one repository.** Another session committed Garmin work to main mid-run. Explicit-path commits kept the histories clean, but every review range had to be recorded by SHA rather than taken from HEAD.
+- **Concurrent sessions in one repository.** Another session committed Garmin work to main mid-run, and its staging swept this very file into two of its commits while it was an untracked draft. Explicit-path commits on this side kept the engine's history clean, but every review range had to be recorded by SHA rather than taken from HEAD, and drafts in a shared working tree are not private.
 
 ## Starting values set during execution (revisit with listening notes)
 
