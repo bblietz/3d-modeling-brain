@@ -699,3 +699,38 @@ def test_cli_exit_code_2_on_blockers(speakers_dir, tmp_path):
     run = subprocess.run(cmd, capture_output=True, text=True)
     assert run.returncode == 2
     assert (out / "voicing.json").exists()
+
+
+# ---- Task 15: catalog ---------------------------------------------------
+
+CATALOG = Path(__file__).parent.parent / "knowledge/speakers"
+
+
+def test_catalog_has_twenty_valid_notes():
+    slugs = cabvoice.list_speakers(CATALOG)
+    assert len(slugs) >= 20
+    for slug in slugs:
+        text = (CATALOG / f"{slug}.md").read_text()
+        meta = cabvoice.parse_frontmatter(text)
+        assert cabvoice.validate_speaker(meta) == [], slug
+        assert meta["name"] == slug, slug
+        assert "## Field notes" in text and "## Character" in text, slug
+        drv = cabvoice.load_speaker(slug, CATALOG)
+        assert drv.cutout_mm > 270 and drv.bolt_circle_mm > drv.cutout_mm, slug
+
+
+def test_catalog_analog_notes_point_at_existing_notes():
+    slugs = set(cabvoice.list_speakers(CATALOG))
+    for slug in slugs:
+        drv = cabvoice.load_speaker(slug, CATALOG)
+        if drv.data_status == "analog":
+            assert drv.analog_of in slugs, slug
+
+
+def test_every_catalog_speaker_proposes_without_exception(tone):
+    for slug in cabvoice.list_speakers(CATALOG):
+        drv = cabvoice.load_speaker(slug, CATALOG)
+        z = 16 if 16 in drv.impedance_ohm else drv.impedance_ohm[0]
+        for enclosure in cabvoice.ENCLOSURE_TYPES:
+            v = cabvoice.propose([drv], [z], enclosure, tone, name=slug)
+            assert v.volumes["gross_l"] > v.volumes["net_total_l"] > 0, (slug, enclosure)
