@@ -1,30 +1,24 @@
 Continuing work on 3d-modeling-brain (vault, branch main), project Speaker-cab-system: the custom guitar speaker cabinet capability for MaximoCabs. Done so far:
-- Brainstormed and approved the design spec: projects/Speaker-cab-system/2026-09-08-speaker-cab-system-design.md (intake revised 2026-09-09; data_status amended to five values).
-- Researched speaker datasheets: Celestion publishes only Fs and Re (only measured data is Voice Coil's Heritage G12H(55) test); Eminence and Jensen publish full T/S; WGS units are inconsistent. Vented model hand-checked against Eminence designs (3 of 4 within 2 percent).
-- Wrote Plan 1 (15 tasks, complete code, 3888 lines): projects/Speaker-cab-system/plan-1-knowledge-engine.md, committed 55502b4 and pushed to origin/main.
-- Memory saved: memory/project-speaker-cab-system.md (indexed in memory/MEMORY.md).
-- Brian chose subagent-driven execution. superpowers:subagent-driven-development was invoked but NO task has been dispatched yet and no progress ledger exists for this project.
+- Spec approved 2026-09-08/09: projects/Speaker-cab-system/2026-09-08-speaker-cab-system-design.md.
+- Plan 1 executed 2026-09-09 by subagent-driven development (15 tasks, each implemented by a fresh Sonnet 5 subagent from a task brief and reviewed by a Fable 5.1 subagent, then a Fable 5.1 whole-branch review, one fix wave, and a clean re-review): scripts/cabvoice.py (propose, evaluate, voicing.json and voicing.md writers, CLI) with scripts/test_cabvoice.py (348 tests including a 240-case propose-versus-evaluate matrix and a calibration-table test), knowledge/speaker-cab-construction.md, knowledge/speaker-cab-voicing.md with the calibration table, twenty speaker notes in knowledge/speakers/, fixture projects/Speaker-cab-system/fixtures/tone-roots.json, tools in projects/Speaker-cab-system/pipeline/ (calibration_table.py, sync_plan_code.py).
+- The plan document's code blocks were synced to the landed code, so it reads as shipped; retrospective at knowledge/learnings/speaker-cab-plan-1.md; ledger of every review, fix, and ruling at .superpowers/sdd/progress.md (git-ignored, vault root).
 
-Current state: git clean, main in sync with origin/main at 55502b4. Nothing from Plan 1 is built yet (no scripts/cabvoice.py, no knowledge/speakers/). Existing tests: scripts/test_s3dx.py only. Python venv at .venv (3.12, pyyaml, pytest, numpy).
+Current state: git clean, main pushed to origin; engine state as of commit f458416. Run tests with .venv/bin/python -m pytest scripts/test_cabvoice.py -v from the vault root. Run the engine with .venv/bin/python scripts/cabvoice.py propose|evaluate|list (exit 0 ok, 1 input error, 2 blockers). Another session works on projects/Garmin-943-helm-panel in this same repository and pushes main; commit with explicit paths only.
 
 Files that matter:
-- projects/Speaker-cab-system/plan-1-knowledge-engine.md: the plan; single source of requirements for every task, values verbatim.
-- projects/Speaker-cab-system/2026-09-08-speaker-cab-system-design.md: approved spec (Units 1b, catalog, knowledge, testing, error handling bind Plan 1).
-- projects/Speaker-cab-system/.claude/context-check/last-handoff.md: project-local handoff with the locked-decisions block (vault convention, committed).
-- skills/furniture/SKILL.md, scripts/cutlist.py: patterns Plans 2 and 3 fork later; not needed for Plan 1.
+- projects/Speaker-cab-system/2026-09-08-speaker-cab-system-design.md: the spec; Unit 2 (generator) and Unit 3 (skill) are next.
+- projects/Speaker-cab-system/plan-1-knowledge-engine.md: Plan 1 as executed; its self-review notes list every deviation and the fix wave.
+- scripts/cabvoice.py and scripts/test_cabvoice.py: the engine and tests; voicing.json (with its construction block, port location and count, prediction status, warnings, blockers) is Plan 2's input.
+- knowledge/speaker-cab-voicing.md: the rules the /speaker-cab skill applies, model limits, calibration table.
+- knowledge/learnings/speaker-cab-plan-1.md: retrospective, including the open items carried to Plans 2 and 3.
+- skills/furniture/SKILL.md and scripts/cutlist.py: patterns Plans 2 and 3 fork.
 
 Decisions already locked:
-- Range 1x12 and 2x12 (mono, mono with parallel out, stereo with divided chamber), closed-ported and open-back; no 4x12, combos, iso or bass cabs.
-- Deliverables: builder package plus customer proposal; no pricing, no site configurator.
-- Acoustics: Thiele-Small closed and Small vented model (QL 7), open-back path estimate; box sized by Vas/alpha (1.5, 1.0, 0.65) clamped 30 to 68 L per driver; rule-of-thumb 34/44/56 L; Fb = Fs x 0.9/0.8/0.7 clamped 45 to 90 Hz; port 75 mm start, 17 m/s, 20 mm minimum length, 150 mm max diameter.
-- Validation ears only; every prediction labeled "unverified, ears only".
-- data_status values: datasheet, third-party, analog, estimated, missing. Celestion: G12H Anniversary and Vintage 30 are analogs of celestion-heritage-g12h55; the other seven are missing. WGS estimated. Eminence and Jensen datasheet. Twenty notes.
-- Tests live at scripts/test_cabvoice.py (beside test_s3dx.py), run with .venv/bin/python -m pytest scripts/test_cabvoice.py -v.
-- Plans 2 (cabmodel.py generator) and 3 (/speaker-cab skill) are written only after Plan 1 lands.
-- Execution mode: subagent-driven, fresh implementer per task, task review after each, final whole-branch review.
+- Range 1x12 and 2x12 (mono, mono with parallel out, stereo with divided chamber), closed-ported and open-back; no 4x12, combos, iso or bass cabs. Deliverables: builder package plus customer proposal; no pricing, no site configurator.
+- Acoustics: Thiele-Small closed and Small vented model (QL 7), open-back path estimate with path = depth + width/2 (no driver_center; ruled 2026-09-09); box sized by Vas/alpha (1.5, 1.0, 0.65) clamped 30 to 68 L per driver; rule-of-thumb 34/44/56 L; Fb = Fs x 0.9/0.8/0.7 clamped 45 to 90 Hz; port 75 mm start, 17 m/s, 20 mm minimum length, 150 mm hard maximum diameter; thresholds are half-open intervals; one port per driver in a chamber (ruled 2026-09-09); slot ports are front ports; the prediction follows the port as built.
+- Validation ears only; every prediction labeled "unverified, ears only". data_status values: datasheet, third-party, analog, estimated, missing.
+- Starting values set during execution (revisit with listening notes): ranking gives 1 point for the amp-family row and 1 for a Best with genre match, amp-family table wins over a note's own list, genre keys are the genre table's row labels; active pickups prefer 25 percent more handling (min_power_w unchanged); WGS Vas rescaled by (530/366.1)^2; stereo minimum width includes the divider.
+- Vault commits straight to main with explicit paths; attribution trailers on every commit; push after milestones.
+- Plans 2 (cabmodel.py generator) and 3 (/speaker-cab skill) are written now that Plan 1 has landed; execution stays subagent-driven with a fresh implementer per task, a Fable 5.1 review after each, a pre-flight transcription run before dispatch, and a propose-versus-evaluate style matrix test in any engine plan.
 
-Open item for Brian (ask once, first thing): the vault commits straight to main (all prior work, including the spec and plan, landed on main). The SDD skill wants explicit consent to implement on main or a worktree. Get that answer, then proceed.
-
-Next action: run the SDD pre-flight plan scan, then dispatch Task 1 (frontmatter loader and Driver record) with the task brief from
-/home/brian/.claude/plugins/cache/superpowers-marketplace/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief projects/Speaker-cab-system/plan-1-knowledge-engine.md 1
-on the cheapest model tier (the plan contains the complete code), record the base commit before dispatch, review with scripts/review-package BASE HEAD, and keep the ledger at .superpowers/sdd/progress.md (the Drawer-bench precedent kept its ledger under projects/Drawer-bench/.superpowers/sdd/; either location is fine, but check both before re-dispatching anything).
+Next action: brainstorm and write Plan 2 (parametric cabinet generator, scripts/cabmodel.py) from the spec's Unit 2, taking voicing.json from cabvoice.py as its input; start from the retrospective's Plan 2 open items (consume construction and port fields from the JSON, assert cutout height, hardwood post displacement, round ports to tube sizes). Then Plan 3 (the /speaker-cab skill), whose open items are also in the retrospective.
