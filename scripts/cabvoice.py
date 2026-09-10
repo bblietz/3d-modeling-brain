@@ -860,6 +860,7 @@ class Voicing:
     prediction: dict
     wiring: dict
     power: dict
+    construction: dict
     warnings: list
     blockers: list
     prediction_status: str = PREDICTION_STATUS
@@ -909,30 +910,120 @@ def _electrical(drivers, impedances, tone, jack_config, c, warnings, blockers):
     return wiring_dict, power_dict
 
 
-def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
-            jack_config: str = "mono", constraints: Constraints | None = None,
-            name: str = "cab") -> Voicing:
-    c = constraints or Constraints()
+# Shared by propose and evaluate.
+
+def _setup(drivers, impedances, enclosure, tone, jack_config) -> tuple:
+    """Validated inputs: (lead, count, chambers, per_chamber_drivers, warnings)."""
     _check_inputs(drivers, impedances, enclosure, tone, jack_config)
-    warnings, blockers = [], []
+    warnings = []
     lead = drivers[0]
     count = len(drivers)
     if count == 2 and drivers[1].slug != lead.slug:
         warnings.append("mixed drivers: the alignment uses the first driver's parameters")
+    chambers = 2 if jack_config == "stereo" else 1
+    return lead, count, chambers, count // chambers, warnings
+
+
+def _displacement(drivers, warnings) -> float:
+    if any(d.displacement_estimated for d in drivers):
+        warnings.append(f"driver displacement assumed {DEFAULT_DISPLACEMENT_L} L per driver")
+    return sum(d.displacement_l for d in drivers)
+
+
+def _divider_l(chambers, h_int, d_int, c) -> float:
+    return (c.panel_mm * h_int * d_int / 1e6) if chambers == 2 else 0.0
+
+
+def _chamber_w(chambers, w_int, c) -> float:
+    return (w_int - c.panel_mm) / 2.0 if chambers == 2 else w_int
+
+
+def _port_report(lead, per_chamber_drivers, chamber_net, port, warnings) -> tuple:
+    """The port as built in its chamber: (actual tuning Hz, port dict)."""
+    warnings.extend(port.warnings)
+    area_m2 = port.area_cm2 / 1e4
+    fb = port_tuning_hz(chamber_net / 1e3, area_m2, port.length_mm / 1e3)
+    speed_driver = _air_speed_driver(lead, per_chamber_drivers, warnings)
+    port.air_speed_ms = port_air_speed(speed_driver, fb, port.area_cm2)
+    if port.air_speed_ms > PORT_V_MAX and not any("still above" in w for w in port.warnings):
+        warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s above {PORT_V_MAX} m/s")
+    port.volume_l = area_m2 * port.length_mm   # m2 x mm is liters
+    port_dict = {**asdict(port), "location": "front" if port.shape == "slot" else "rear",
+                 "per_chamber": True}
+    return fb, port_dict
+
+
+NO_TS_CHARACTER = "unpredicted (no Thiele-Small data)"
+
+
+def _predict(lead, enclosure, per_driver_net, fb, chamber_w, h_int, d_int) -> dict:
+    if enclosure in ("open", "semi-open"):
+        ob = open_back(chamber_w, h_int, d_int, OPEN_FRACTION[enclosure])
+        return {"model": "open-back path estimate", "f_cancel_hz": ob.f_cancel_hz,
+                "path_m": ob.path_m, "panel_height_mm": ob.panel_height_mm,
+                "character": ob.character, "response_relative_db": ob.response}
+    if enclosure == "closed-ported":
+        if not lead.has_ts():
+            return {"model": "rule-of-thumb", "fb_hz": fb, "character": NO_TS_CHARACTER}
+        pb = ported_box(lead, per_driver_net, fb)
+        return {"model": "thiele-small vented", "fb_hz": fb, "alpha": pb.alpha, "h": pb.h,
+                "f3_hz": pb.f3_hz, "peak_db": pb.peak_db, "character": pb.character,
+                "response_db": pb.response}
+    if not lead.has_ts():
+        return {"model": "rule-of-thumb", "character": NO_TS_CHARACTER}
+    cb = closed_box(lead, per_driver_net)
+    return {"model": "thiele-small closed", "qtc": cb.qtc, "fc_hz": cb.fc_hz, "f3_hz": cb.f3_hz,
+            "character": cb.character, "response_db": cb.response}
+
+
+def _volumes(method, per_driver_net, per_chamber_drivers, chambers, displacement, brace_l,
+             port_l_total, divider_l, gross_l) -> dict:
+    chamber_net = per_driver_net * per_chamber_drivers
+    return {"method": method, "per_driver_net_l": per_driver_net,
+            "per_chamber_net_l": chamber_net, "net_total_l": chamber_net * chambers,
+            "displacement_l": displacement, "brace_l": brace_l, "port_l": port_l_total,
+            "divider_l": divider_l, "gross_l": gross_l}
+
+
+def _assemble(name, mode, tone, drivers, impedances, enclosure, jack_config, chambers, count,
+              volumes, box, chamber_w, port_dict, prediction, wiring_dict, power_dict,
+              warnings, blockers, c) -> Voicing:
+    return Voicing(
+        name=name, mode=mode, tone_target=dict(tone),
+        speakers=[_speaker_summary(d, z) for d, z in zip(drivers, impedances)],
+        enclosure={"type": enclosure, "driver_count": count, "chambers": chambers,
+                   "jack_config": jack_config, "open_fraction": OPEN_FRACTION.get(enclosure)},
+        volumes=volumes,
+        box={"internal_mm": box.internal_mm, "external_mm": box.external_mm,
+             "internal_in": _mm_to_in(box.internal_mm), "external_in": _mm_to_in(box.external_mm),
+             "chamber_internal_width_mm": chamber_w},
+        port=port_dict, prediction=prediction, wiring=wiring_dict, power=power_dict,
+        construction={"panel_mm": c.panel_mm, "back_mm": c.back_mm, "baffle_mm": c.baffle_mm,
+                      "recess_mm": c.recess_mm, "brace_l": c.brace_l,
+                      "pinned_external_width_mm": c.pinned_external_width_mm,
+                      "max_external_mm": c.max_external_mm,
+                      "port_count": None if port_dict is None else port_dict.get("count", 1)},
+        warnings=_dedupe(warnings), blockers=_dedupe(blockers),
+    )
+
+
+def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
+            jack_config: str = "mono", constraints: Constraints | None = None,
+            name: str = "cab") -> Voicing:
+    c = constraints or Constraints()
+    lead, count, chambers, per_chamber_drivers, warnings = _setup(
+        drivers, impedances, enclosure, tone, jack_config)
+    blockers = []
     low_end = tone["low_end"]
     per_driver_net, method, w = per_driver_net_l(lead, enclosure, low_end)
     warnings.extend(w)
-    fb, ported = None, None
+    fb = None
     if enclosure == "closed-ported":
-        per_driver_net, fb, ported, w = ported_targets(lead, per_driver_net, low_end)
+        per_driver_net, fb, _, w = ported_targets(lead, per_driver_net, low_end)
         warnings.extend(w)
-    chambers = 2 if jack_config == "stereo" else 1
-    per_chamber_drivers = count // chambers
     chamber_net = per_driver_net * per_chamber_drivers
     net_total = chamber_net * chambers
-    displacement = sum(d.displacement_l for d in drivers)
-    if any(d.displacement_estimated for d in drivers):
-        warnings.append(f"driver displacement assumed {DEFAULT_DISPLACEMENT_L} L per driver")
+    displacement = _displacement(drivers, warnings)
     min_w = (chambers * min_internal_width_mm(per_chamber_drivers, max(d.cutout_mm for d in drivers))
              + (chambers - 1) * c.panel_mm)
     pk = c.panel_kwargs()
@@ -941,58 +1032,25 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
         gross = net_total + displacement + c.brace_l + port_l * chambers + divider_l
         box = dims_for_volume(gross, c.pinned_external_width_mm, min_w, c.max_external_mm, **pk)
         w_int, h_int, d_int = box.internal_mm
-        divider_l = (c.panel_mm * h_int * d_int / 1e6) if chambers == 2 else 0.0
+        divider_l = _divider_l(chambers, h_int, d_int, c)
         if enclosure == "closed-ported":
             port = size_port(_air_speed_driver(lead, per_chamber_drivers, warnings),
                              chamber_net, fb, diameter_mm=c.port_diameter_mm,
                              slot_mm=c.port_slot_mm)
             port_l = port.volume_l
     warnings.extend(box.warnings)
-    chamber_w = (w_int - c.panel_mm) / 2.0 if chambers == 2 else w_int
+    chamber_w = _chamber_w(chambers, w_int, c)
     port_dict = None
-    if enclosure in ("open", "semi-open"):
-        ob = open_back(chamber_w, h_int, d_int, OPEN_FRACTION[enclosure])
-        prediction = {"model": "open-back path estimate", "f_cancel_hz": ob.f_cancel_hz,
-                      "path_m": ob.path_m, "panel_height_mm": ob.panel_height_mm,
-                      "character": ob.character, "response_relative_db": ob.response}
-    elif enclosure == "closed-ported":
-        warnings.extend(port.warnings)
-        port_dict = {**asdict(port), "location": "rear", "per_chamber": True}
-        if ported is not None:
-            prediction = {"model": "thiele-small vented", "fb_hz": fb, "alpha": ported.alpha,
-                          "h": ported.h, "f3_hz": ported.f3_hz, "peak_db": ported.peak_db,
-                          "character": ported.character, "response_db": ported.response}
-        else:
-            prediction = {"model": "rule-of-thumb", "fb_hz": fb,
-                          "character": "unpredicted (no Thiele-Small data)"}
-    else:
-        if lead.has_ts():
-            cb = closed_box(lead, per_driver_net)
-            prediction = {"model": "thiele-small closed", "qtc": cb.qtc, "fc_hz": cb.fc_hz,
-                          "f3_hz": cb.f3_hz, "character": cb.character, "response_db": cb.response}
-        else:
-            prediction = {"model": "rule-of-thumb",
-                          "character": "unpredicted (no Thiele-Small data)"}
+    if port is not None:
+        _, port_dict = _port_report(lead, per_chamber_drivers, chamber_net, port, warnings)
+    prediction = _predict(lead, enclosure, per_driver_net, fb, chamber_w, h_int, d_int)
     wiring_dict, power_dict = _electrical(drivers, impedances, tone, jack_config, c,
                                           warnings, blockers)
-    return Voicing(
-        name=name, mode="propose", tone_target=dict(tone),
-        speakers=[_speaker_summary(d, z) for d, z in zip(drivers, impedances)],
-        enclosure={"type": enclosure, "driver_count": count, "chambers": chambers,
-                   "jack_config": jack_config,
-                   "open_fraction": OPEN_FRACTION.get(enclosure)},
-        volumes={"method": method, "per_driver_net_l": per_driver_net,
-                 "per_chamber_net_l": chamber_net, "net_total_l": net_total,
-                 "displacement_l": displacement, "brace_l": c.brace_l,
-                 "port_l": port_l * chambers, "divider_l": divider_l,
-                 "gross_l": box.gross_l},
-        box={"internal_mm": box.internal_mm, "external_mm": box.external_mm,
-             "internal_in": _mm_to_in(box.internal_mm),
-             "external_in": _mm_to_in(box.external_mm),
-             "chamber_internal_width_mm": chamber_w},
-        port=port_dict, prediction=prediction, wiring=wiring_dict, power=power_dict,
-        warnings=_dedupe(warnings), blockers=_dedupe(blockers),
-    )
+    volumes = _volumes(method, per_driver_net, per_chamber_drivers, chambers, displacement,
+                       c.brace_l, port_l * chambers, divider_l, box.gross_l)
+    return _assemble(name, "propose", tone, drivers, impedances, enclosure, jack_config, chambers,
+                     count, volumes, box, chamber_w, port_dict, prediction, wiring_dict,
+                     power_dict, warnings, blockers, c)
 
 
 # ---------------------------------------------------------------------------
@@ -1003,84 +1061,40 @@ def evaluate(drivers: list, impedances: list, enclosure: str, tone: dict,
              internal_mm: tuple, jack_config: str = "mono", port: Port | None = None,
              constraints: Constraints | None = None, name: str = "cab") -> Voicing:
     c = constraints or Constraints()
-    _check_inputs(drivers, impedances, enclosure, tone, jack_config)
+    lead, count, chambers, per_chamber_drivers, warnings = _setup(
+        drivers, impedances, enclosure, tone, jack_config)
     if enclosure == "closed-ported" and port is None:
         raise ValueError("closed-ported evaluate needs a port (from port_dims) with its length")
-    warnings, blockers = [], []
-    lead = drivers[0]
-    count = len(drivers)
-    if count == 2 and drivers[1].slug != lead.slug:
-        warnings.append("mixed drivers: the alignment uses the first driver's parameters")
+    blockers = []
     box = make_box(tuple(internal_mm), **c.panel_kwargs())
     warnings.extend(box.warnings)
     w_int, h_int, d_int = box.internal_mm
-    chambers = 2 if jack_config == "stereo" else 1
-    per_chamber_drivers = count // chambers
-    divider_l = (c.panel_mm * h_int * d_int / 1e6) if chambers == 2 else 0.0
-    displacement = sum(d.displacement_l for d in drivers)
-    if any(d.displacement_estimated for d in drivers):
-        warnings.append(f"driver displacement assumed {DEFAULT_DISPLACEMENT_L} L per driver")
+    divider_l = _divider_l(chambers, h_int, d_int, c)
+    displacement = _displacement(drivers, warnings)
     port_l = 0.0
     if port is not None:
-        port_l = port.area_cm2 / 1e4 * port.length_mm / 1e3 * 1e3
+        port_l = port.area_cm2 / 1e4 * port.length_mm
     net_total = box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
     if net_total <= 0:
         raise ValueError("box has no net volume left after displacement, brace, port, and divider")
     chamber_net = net_total / chambers
     per_driver_net = chamber_net / per_chamber_drivers
-    chamber_w = (w_int - c.panel_mm) / 2.0 if chambers == 2 else w_int
-    port_dict = None
-    if enclosure in ("open", "semi-open"):
-        ob = open_back(chamber_w, h_int, d_int, OPEN_FRACTION[enclosure])
-        prediction = {"model": "open-back path estimate", "f_cancel_hz": ob.f_cancel_hz,
-                      "path_m": ob.path_m, "panel_height_mm": ob.panel_height_mm,
-                      "character": ob.character, "response_relative_db": ob.response}
-    elif enclosure == "closed-ported":
-        warnings.extend(port.warnings)
-        fb = port_tuning_hz(chamber_net / 1e3, port.area_cm2 / 1e4, port.length_mm / 1e3)
-        speed_driver = _air_speed_driver(lead, per_chamber_drivers, warnings)
-        port.air_speed_ms = port_air_speed(speed_driver, fb, port.area_cm2)
-        if port.air_speed_ms > PORT_V_MAX:
-            warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s above {PORT_V_MAX} m/s")
-        port.volume_l = port_l
-        port_dict = {**asdict(port), "location": "rear", "per_chamber": True}
-        if lead.has_ts():
-            pb = ported_box(lead, per_driver_net, fb)
-            prediction = {"model": "thiele-small vented", "fb_hz": fb, "alpha": pb.alpha,
-                          "h": pb.h, "f3_hz": pb.f3_hz, "peak_db": pb.peak_db,
-                          "character": pb.character, "response_db": pb.response}
-        else:
-            warnings.append(f"{lead.slug}: no Thiele-Small data ({lead.data_status}); "
-                            "tuning reported, no response prediction")
-            prediction = {"model": "rule-of-thumb", "fb_hz": fb,
-                          "character": "unpredicted (no Thiele-Small data)"}
-    else:
-        if lead.has_ts():
-            cb = closed_box(lead, per_driver_net)
-            prediction = {"model": "thiele-small closed", "qtc": cb.qtc, "fc_hz": cb.fc_hz,
-                          "f3_hz": cb.f3_hz, "character": cb.character, "response_db": cb.response}
-        else:
-            warnings.append(f"{lead.slug}: no Thiele-Small data ({lead.data_status}); "
-                            "no response prediction")
-            prediction = {"model": "rule-of-thumb",
-                          "character": "unpredicted (no Thiele-Small data)"}
+    chamber_w = _chamber_w(chambers, w_int, c)
+    fb, port_dict = None, None
+    if enclosure == "closed-ported":
+        fb, port_dict = _port_report(lead, per_chamber_drivers, chamber_net, port, warnings)
+    if not lead.has_ts() and enclosure in ("closed", "closed-ported"):
+        detail = "tuning reported, " if enclosure == "closed-ported" else ""
+        warnings.append(f"{lead.slug}: no Thiele-Small data ({lead.data_status}); "
+                        f"{detail}no response prediction")
+    prediction = _predict(lead, enclosure, per_driver_net, fb, chamber_w, h_int, d_int)
     wiring_dict, power_dict = _electrical(drivers, impedances, tone, jack_config, c,
                                           warnings, blockers)
-    return Voicing(
-        name=name, mode="evaluate", tone_target=dict(tone),
-        speakers=[_speaker_summary(d, z) for d, z in zip(drivers, impedances)],
-        enclosure={"type": enclosure, "driver_count": count, "chambers": chambers,
-                   "jack_config": jack_config, "open_fraction": OPEN_FRACTION.get(enclosure)},
-        volumes={"method": "evaluate", "per_driver_net_l": per_driver_net,
-                 "per_chamber_net_l": chamber_net, "net_total_l": net_total,
-                 "displacement_l": displacement, "brace_l": c.brace_l,
-                 "port_l": port_l * chambers, "divider_l": divider_l, "gross_l": box.gross_l},
-        box={"internal_mm": box.internal_mm, "external_mm": box.external_mm,
-             "internal_in": _mm_to_in(box.internal_mm), "external_in": _mm_to_in(box.external_mm),
-             "chamber_internal_width_mm": chamber_w},
-        port=port_dict, prediction=prediction, wiring=wiring_dict, power=power_dict,
-        warnings=_dedupe(warnings), blockers=_dedupe(blockers),
-    )
+    volumes = _volumes("evaluate", per_driver_net, per_chamber_drivers, chambers, displacement,
+                       c.brace_l, port_l * chambers, divider_l, box.gross_l)
+    return _assemble(name, "evaluate", tone, drivers, impedances, enclosure, jack_config, chambers,
+                     count, volumes, box, chamber_w, port_dict, prediction, wiring_dict,
+                     power_dict, warnings, blockers, c)
 
 
 # ---------------------------------------------------------------------------

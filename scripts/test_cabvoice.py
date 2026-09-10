@@ -734,3 +734,75 @@ def test_every_catalog_speaker_proposes_without_exception(tone):
         for enclosure in cabvoice.ENCLOSURE_TYPES:
             v = cabvoice.propose([drv], [z], enclosure, tone, name=slug)
             assert v.volumes["gross_l"] > v.volumes["net_total_l"] > 0, (slug, enclosure)
+
+
+# ---- Final review: propose versus evaluate, calibration table -----------
+
+_C1_MONO_2X12 = ("celestion-g12-65-heritage", "eminence-cannabis-rex", "eminence-red-white-and-blues",
+                 "eminence-swamp-thang", "eminence-texas-heat", "eminence-tonker", "jensen-p12n",
+                 "wgs-veteran-30")
+# C1: propose reports the target Fb when size_port clamps at the 150 mm cap.
+_C1_CASES = {(slug, "closed-ported", "mono", 2) for slug in _C1_MONO_2X12} | {
+    ("eminence-red-white-and-blues", "closed-ported", "mono", 1),
+    ("eminence-red-white-and-blues", "closed-ported", "stereo", 2)}
+# Two-pass stereo loop: gross drifts with the divider, net off by 0.055 L.
+_DRIFT_CASES = {("eminence-red-white-and-blues", "closed-ported", "stereo", 2),
+                ("wgs-veteran-30", "closed-ported", "stereo", 2)}
+
+
+def _matrix_params():
+    params = []
+    for slug in cabvoice.list_speakers(CATALOG):
+        for enclosure in cabvoice.ENCLOSURE_TYPES:
+            for jack, n in (("mono", 1), ("mono", 2), ("stereo", 2)):
+                case = (slug, enclosure, jack, n)
+                marks = []
+                if case in _C1_CASES:
+                    marks.append(pytest.mark.xfail(strict=True, reason="C1: prediction ignores the clamped port"))
+                if case in _DRIFT_CASES:
+                    marks.append(pytest.mark.xfail(strict=True, reason="two-pass stereo volume drift"))
+                params.append(pytest.param(*case, id=f"{slug}-{enclosure}-{jack}-{n}", marks=marks))
+    return params
+
+
+def _port_from_json(port_dict):
+    if port_dict is None:
+        return None
+    slot = None if port_dict["shape"] == "round" else (port_dict["slot_w_mm"], port_dict["slot_h_mm"])
+    port = cabvoice.port_dims(1.0, 1.0, diameter_mm=port_dict["diameter_mm"], slot_mm=slot)
+    port.length_mm = port_dict["length_mm"]
+    port.warnings = []
+    return port
+
+
+@pytest.mark.parametrize("slug,enclosure,jack,n", _matrix_params())
+def test_evaluate_reproduces_propose(tone, slug, enclosure, jack, n):
+    d = cabvoice.load_speaker(slug, CATALOG)
+    z = 16 if 16 in d.impedance_ohm else d.impedance_ohm[0]
+    p = cabvoice.propose([d] * n, [z] * n, enclosure, tone, jack_config=jack, name=slug)
+    e = cabvoice.evaluate([d] * n, [z] * n, enclosure, tone, p.box["internal_mm"],
+                          jack_config=jack, port=_port_from_json(p.port), name=slug)
+    for key, tol in (("fb_hz", 0.05), ("f3_hz", 0.05), ("peak_db", 0.01), ("qtc", 0.01)):
+        a, b = p.prediction.get(key), e.prediction.get(key)
+        assert (a is None) == (b is None), key
+        if a is not None:
+            assert a == pytest.approx(b, abs=tol), key
+    assert p.prediction["character"] == e.prediction["character"]
+    assert p.volumes["per_driver_net_l"] == pytest.approx(e.volumes["per_driver_net_l"], abs=0.05)
+
+
+def _calibration_module():
+    import importlib.util
+    path = Path(__file__).parent.parent / "projects/Speaker-cab-system/pipeline/calibration_table.py"
+    spec = importlib.util.spec_from_file_location("calibration_table", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_calibration_table_matches_engine():
+    cal = _calibration_module()
+    text = (Path(__file__).parent.parent / "knowledge/speaker-cab-voicing.md").read_text()
+    section = text.split("## Calibration table", 1)[1].split("\n## ", 1)[0]
+    assert f'prediction_status "{cabvoice.PREDICTION_STATUS}"' in section
+    assert cal.note_rows(text) == cal.calibration_rows()
