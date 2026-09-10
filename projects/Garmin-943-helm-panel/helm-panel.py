@@ -45,14 +45,16 @@ IN = 25.4
 # ---- Panel, provisional until Brian measures ----
 PANEL_W = 18.5 * IN  # 469.9
 PANEL_H = 11.5 * IN  # 292.1
-PANEL_T = 0.5 * IN  # 12.7
+PANEL_T = 0.375 * IN  # 9.525. Was 1/2 in, inherited from a rule written for
+# HDPE sheet; for printed ASA 3/8 in deflects 0.21 mm under the unit plus a
+# firm screen press, which is stiff enough. See brief.md for the numbers.
 CORNER_R = 0.5 * IN  # 12.7, ASSUMPTION: confirm against the old cover
 EDGE_ROUND = 0.125 * IN  # 3.175, 1/8 in roundover on the front face only
 
 # ---- Window ----
 CUTOUT_R = 0.25 * IN / 2  # 3.175
 CUTOUT_DY = 0.0  # positive moves the window toward the panel top
-PILOT_DEPTH = 10.0  # blind in 12.7 stock, so nothing pokes through the back
+PILOT_DEPTH = 7.0  # blind, so nothing pokes through the back
 
 # ---- Split and interlock ----
 BED = 256.0
@@ -62,12 +64,17 @@ SEAM_CHAMFER = 0.5  # front-face seam edges, so the joint reads as a panel line
 KEY_L = 36.0  # bowtie length, across the seam
 KEY_WAIST = 12.0  # width at the seam
 KEY_END = 20.0  # width at the ends
-KEY_DEPTH = 8.0  # pocket depth from the BACK face; leaves 4.7 mm of front skin
+KEY_DEPTH = 6.0  # pocket depth from the BACK face; leaves 3.5 mm of front skin
 KEY_CLEAR = 0.2  # per face, the vault's snug fit
 KEY_T = KEY_DEPTH - 0.2  # key sits 0.2 mm below the back face
 
 PROJECT = "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Garmin-943-helm-panel"
 NAME = "helm-panel"
+
+# Guards, so changing PANEL_T fails loudly instead of quietly cutting through
+assert KEY_DEPTH + 2.0 <= PANEL_T, "pocket leaves under 2 mm of front skin"
+assert PILOT_DEPTH + 2.0 <= PANEL_T, "pilot leaves under 2 mm behind it"
+assert EDGE_ROUND < PANEL_T / 2, "roundover eats more than half the thickness"
 
 ON_BED = (Align.CENTER, Align.CENTER, Align.MIN)
 CENTERED = (Align.CENTER, Align.CENTER, Align.CENTER)

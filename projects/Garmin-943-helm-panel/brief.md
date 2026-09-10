@@ -156,15 +156,15 @@ Built from `helm-panel.py`. PROVISIONAL: the outline is Brian's estimate of 18.5
 
 | Item | mm | in |
 |---|---|---|
-| Panel | 469.9 x 292.1 x 12.7 | 18.5 x 11.5 x 1/2 |
+| Panel | 469.9 x 292.1 x 9.525 | 18.5 x 11.5 x 3/8 |
 | Corner radius | 12.7 | 1/2 |
 | Edge roundover, outside face only | 3.175 | 1/8 |
 | Window | 222.4 x 139.0, R3.175 corners | Garmin cutout |
 | Window vertical offset | 0.0, centered | set at layout |
-| Pilots | 2.3 mm, 10 mm deep, blind | 3/32 |
-| Volume | 1345 cm3 | about 1.29 kg in HDPE |
+| Pilots | 2.3 mm, 7 mm deep, blind | 3/32 |
+| Volume | 1008 cm3 | about 0.60 kg printed in ASA |
 
-Thickness follows the rule already in this brief: the 469.9 mm span exceeds 450 mm, so 1/2 in stock rather than 3/8 in.
+Thickness is 3/8 in, set 2026-09-09 after Brian questioned the 1/2 in. The 1/2 in came from a rule written for HDPE sheet and should not have survived the switch to printing.
 
 Clearances the model checks on every run:
 
@@ -198,9 +198,9 @@ Brian asked for the panel printed rather than routed, which means splitting it t
 |---|---|
 | Tiles | 4, each 234.95 x 146.05 x 12.7 mm |
 | Bed margin per tile | 10.5 mm in X, 55 mm in Y |
-| Keys | 10 identical bowties, 36 x 20 mm, 12 mm waist, 7.8 mm thick |
+| Keys | 10 identical bowties, 36 x 20 mm, 12 mm waist, 5.8 mm thick |
 | Keys per seam | 2 in the top web, 2 in the bottom, 3 in each side web |
-| Pocket | 8 mm deep from the back, leaving 4.7 mm of front skin |
+| Pocket | 6 mm deep from the back, leaving 3.5 mm of front skin |
 | Key clearance | 0.2 mm per face, a true perpendicular offset |
 | Seam chamfer | 0.5 mm on the front edges, so the joint reads as a panel line |
 
@@ -210,9 +210,9 @@ The model verifies the joint rather than assuming it: every key is placed into i
 
 | Plate | Time | Filament |
 |---|---|---|
-| Each of the four tiles | 2 h 05 min | 104 g |
-| The ten keys together | 35 min | 23 g |
-| Total | 8 h 55 min | 439 g |
+| Each of the four tiles | 1 h 51 min | 89 g |
+| The ten keys together | 30 min | 19 g |
+| Total | 7 h 53 min | 375 g |
 
 ASA, not PLA. A dark panel at a helm passes the PLA softening point and would sag. The X2D is enclosed, which is what ASA needs. Textured PEI plate at 100 C, 0.6 nozzle, 0.30 mm layers, 5 mm outer brim because large flat ASA lifts at the corners.
 
@@ -245,11 +245,11 @@ The deliverable is `helm-panel-all-plates.3mf`: one file, four plates.
 
 | Plate | Contents | Time | Filament |
 |---|---|---|---|
-| 1 | tile TL | 2 h 05 min | 104 g |
-| 2 | tile TR | 2 h 05 min | 104 g |
-| 3 | tile BL | 2 h 05 min | 104 g |
-| 4 | tile BR plus all ten keys | 2 h 40 min | 128 g |
-| Total | | 8 h 55 min | 440 g |
+| 1 | tile TL | 1 h 51 min | 89 g |
+| 2 | tile TR | 1 h 50 min | 89 g |
+| 3 | tile BL | 1 h 51 min | 89 g |
+| 4 | tile BR plus all ten keys | 2 h 22 min | 109 g |
+| Total | | 7 h 54 min | 376 g |
 
 Consolidating the keys onto plate 4 saves a fifth print job. The per-tile
 files remain for reprinting a single tile.
@@ -269,3 +269,39 @@ single row along X. Plate p (0-indexed) sits at
 which is indistinguishable for two plates and wrong from the third onward:
 plates 3 and 4 came back empty until this was fixed. Now in
 [[printer-x2d]].
+
+## Thickness, settled 2026-09-09
+
+Brian asked whether 1/8 in would do. It will not, in printed plastic. Stiffness
+goes as the cube of thickness, so 1/8 in is 64 times floppier than the 1/2 in
+the model started at. Deflection at the Garmin screws, from the 1.6 kg unit
+plus a firm 30 N screen press, modelling the web between the Garmin screws and
+the perimeter fixings as a 65 mm cantilever over a 50 mm tributary width, ASA
+at 2000 MPa with a 30 percent knockdown for sparse infill:
+
+| Thickness | Printed ASA | Note |
+|---|---|---|
+| 1/8 in | 5.60 mm | panel visibly flexes, gasket stops sealing |
+| 3/16 in | 1.66 mm | still spongy |
+| 1/4 in | 0.70 mm | acceptable, but too thin for a 6 mm bowtie pocket |
+| 3/8 in | 0.21 mm | CHOSEN |
+| 1/2 in | 0.09 mm | the old value, over-built for a printed part |
+
+1/8 in also breaks two things outright: the bowtie pockets cannot exist in a
+3.2 mm panel, and the Garmin screws would have 3.2 mm of thread engagement,
+forcing the nut plate option. 1/8 in is fine in ALUMINIUM, which deflects
+0.11 mm at that thickness because it is 35 times stiffer than ASA; that is
+probably where the number came from.
+
+If the panel is ever cut from Starboard instead, HDPE is softer than printed
+ASA AND creeps under sustained load, so it needs one size up:
+
+| Starboard | Press now | Long-term sag | Total |
+|---|---|---|---|
+| 1/4 in | 1.09 mm | 0.75 mm | 1.84 mm, too much |
+| 3/8 in | 0.32 mm | 0.22 mm | 0.54 mm, minimum |
+| 1/2 in | 0.14 mm | 0.09 mm | 0.23 mm, matches 3/8 in printed ASA |
+
+A thin ribbed panel (1/8 in skin plus 12 mm ribs on the hidden back) would beat
+solid 3/8 in for less material, and is the right answer if weight ever matters.
+Not built; the flat 3/8 in panel is stiff enough.
