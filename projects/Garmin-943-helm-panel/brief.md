@@ -227,3 +227,45 @@ Files: `helm-panel-tile-{TL,TR,BL,BR}.stl` and `helm-panel-key.stl`, plus five r
 - `bambu-studio --export-3mf` exits 243 and writes nothing when given an absolute path while `--outputdir` is also set. Pass a bare filename.
 - A CLI-made project 3MF still cannot be sliced by the CLI (rc 156, "slicing or export error for partplate 1"); the live X2D extruder and variant keys are only written by the GUI. `projects/Sharks-nametag/pipeline/graft_slice.py` supplies them to a throwaway copy for verification. Studio itself resolves them on open, so the shipped file needs no graft.
 - The CLI default `curr_bed_type` of "Cool Plate" resolves to a 0 C bed for ASA, not merely a cold one as with PLA. `make_plate.py` overrides it and lists the override in `different_settings_to_system`, which Studio confirmed by showing the process preset as modified.
+
+## One file, four plates, 2026-09-09
+
+Brian asked for a single 3MF with two plates, one per half. Two plates is not
+achievable, and the reason is worth recording.
+
+Two tiles DO fit a 256 mm bed, but only as diagonal pairs. A search over every
+rotation and a 1 mm translation grid found TL+BR and TR+BL fitting in
+248 x 247 mm; top/bottom and left/right pairs do not fit at all, because each
+tile's leg (123.75 mm) is wider than the notch it would have to nest into
+(111.2 mm). Even the diagonal pair leaves 4 mm of bed margin and 0.5 mm
+between the parts, and ASA on a 235 mm flat part needs a brim. There is
+nowhere to put one, so the pairing was rejected.
+
+The deliverable is `helm-panel-all-plates.3mf`: one file, four plates.
+
+| Plate | Contents | Time | Filament |
+|---|---|---|---|
+| 1 | tile TL | 2 h 05 min | 104 g |
+| 2 | tile TR | 2 h 05 min | 104 g |
+| 3 | tile BL | 2 h 05 min | 104 g |
+| 4 | tile BR plus all ten keys | 2 h 40 min | 128 g |
+| Total | | 8 h 55 min | 440 g |
+
+Consolidating the keys onto plate 4 saves a fifth print job. The per-tile
+files remain for reprinting a single tile.
+
+Built and verified by `make_multiplate.py`: every plate slices for real, the
+layout check refuses any part within 10 mm of another or 5 mm of the bed edge,
+and Studio's own reader is asked how many objects it finds on each plate. That
+last check is the one that matters, because a mis-authored plate round trips
+cleanly and renders blank. Confirmed by opening the file in Studio: four
+plates, all populated, ASA on textured PEI, process shown as modified.
+
+### The plate grid, corrected
+
+Studio lays plates in a two-column grid whose rows run in negative Y, not in a
+single row along X. Plate p (0-indexed) sits at
+`((p % 2) * 307.2, -(p // 2) * 307.2)`. The vault had recorded a single row,
+which is indistinguishable for two plates and wrong from the third onward:
+plates 3 and 4 came back empty until this was fixed. Now in
+[[printer-x2d]].

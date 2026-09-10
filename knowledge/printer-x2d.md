@@ -33,6 +33,21 @@ Before printing fine-detail work, verify BOTH the physically installed nozzle AN
   PLA in the post-process step, with the temp keys listed in the
   FILAMENT diff slots (different_settings_to_system[1..3]); check the
   bed temp readout at print start ([[sharks-nametag]]).
+- Multi-plate project 3MFs: Bambu Studio lays plates out in a TWO-COLUMN
+  grid whose rows run in NEGATIVE Y, not in a single row along X. Plate p
+  (0-indexed) sits at `((p % 2) * 307.2, -(p // 2) * 307.2)`, stride
+  256 x 1.2. A single row is indistinguishable from this for the first two
+  plates, which is why the earlier single-row note looked correct; with four
+  plates it puts plates 3 and 4 off-grid, and they round trip cleanly while
+  rendering EMPTY in the GUI and failing `--slice` with rc 206 "no object
+  fully inside the print volume". Probed 2026-09-09 against three candidate
+  layouts; see `projects/Garmin-943-helm-panel/make_multiplate.py`.
+- Authoring plates: the CLI does not keep objects in input order, so map each
+  object id by the source filename it carries in `model_settings.config`, not
+  by document position. Mapping by position silently scatters parts onto the
+  wrong plates.
+- `bambu-studio --export-3mf` exits 243 and writes nothing when handed an
+  absolute path while `--outputdir` is also set. Pass a bare filename.
 - Walls: at least 2 perimeters wide (see table above). This is a hard
   floor, not a quality preference: Bambu's stock X2D quality presets
   (e.g. 0.12mm High Quality) use the CLASSIC wall generator with

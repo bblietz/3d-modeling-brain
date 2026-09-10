@@ -17,7 +17,9 @@ Files in `projects/Garmin-943-helm-panel/`: `brief.md` (spec, Garmin numbers, bu
 - Garmin dimensions live in garmin_9x3.py, imported by both models. Do not re-inline them.
 - Panel is printed, not routed: split into four 234.95 x 146.05 x 12.7 mm tiles at x=0 and y=0, joined by 10 loose bowtie keys dropped in from the back (integral dovetails cannot work on a 2x2 grid).
 - ASA, not PLA. Textured PEI 100 C, 0.6 nozzle, 0.30 mm, 5 mm outer brim, each tile FRONT FACE UP. 8 h 55 min and 439 g total across five plates.
-- make_plate.py builds and verifies the five Bambu project 3MFs; it slices them via Sharks-nametag/pipeline/graft_slice.py because the CLI cannot slice its own project files.
+- helm-panel-all-plates.3mf is THE print file: one project, four plates (three tiles, then tile BR plus all ten keys). Two plates is impossible; two tiles only fit as diagonal pairs at 248x247 with no brim room.
+- Studio's plate grid is two columns running in negative Y, not one row along X. Recorded in knowledge/printer-x2d.md.
+- make_plate.py builds the per-tile 3MFs and make_multiplate.py the combined one; it slices them via Sharks-nametag/pipeline/graft_slice.py because the CLI cannot slice its own project files.
 
 ## Next steps
 1. Brian prints the template (0.30mm Standard, 0.6 nozzle, brim off, centered on plate, counterbored face up, about 1 h 28 min).
