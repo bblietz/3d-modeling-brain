@@ -485,6 +485,7 @@ def open_back(internal_w_mm: float, internal_h_mm: float, internal_d_mm: float,
 # ---------------------------------------------------------------------------
 
 JACK_CONFIGS = ("mono", "mono-parallel-out", "stereo")
+LINES = ("tolex", "hardwood")
 POWER_SAFETY_FACTOR = 1.5
 
 
@@ -788,7 +789,15 @@ class Constraints:
     port_diameter_mm: float = 75.0
     port_slot_mm: tuple | None = None
     port_count: int | None = None      # None: one port per driver in the chamber
+    line: str = "tolex"
+    species: str | None = None
     accept_low_headroom: bool = False
+
+    def __post_init__(self):
+        if self.line not in LINES:
+            raise ValueError(f"line must be one of {', '.join(LINES)}")
+        if self.species is not None:
+            self.species = self.species.strip() or None
 
     def panel_kwargs(self) -> dict:
         return dict(panel_mm=self.panel_mm, back_mm=self.back_mm,
@@ -1016,6 +1025,12 @@ def _volumes(method, per_driver_net, per_chamber_drivers, chambers, displacement
             "divider_l": divider_l, "gross_l": gross_l}
 
 
+def _wall_material(c: Constraints) -> str:
+    if c.line == "tolex":
+        return "baltic birch plywood"
+    return c.species or "hardwood, species not set"
+
+
 def _assemble(name, mode, tone, drivers, impedances, enclosure, jack_config, chambers, count,
               volumes, box, chamber_w, port_dict, prediction, wiring_dict, power_dict,
               warnings, blockers, c) -> Voicing:
@@ -1033,7 +1048,9 @@ def _assemble(name, mode, tone, drivers, impedances, enclosure, jack_config, cha
                       "recess_mm": c.recess_mm, "brace_l": c.brace_l,
                       "pinned_external_width_mm": c.pinned_external_width_mm,
                       "max_external_mm": c.max_external_mm,
-                      "port_count": None if port_dict is None else port_dict["count"]},
+                      "port_count": None if port_dict is None else port_dict["count"],
+                      "line": c.line, "species": c.species,
+                      "wall_material": _wall_material(c)},
         warnings=_dedupe(warnings), blockers=_dedupe(blockers),
     )
 
@@ -1227,6 +1244,8 @@ def render_markdown(v: Voicing) -> str:
         f"- Internal: {_fmt_dims(v.box['internal_mm'], v.box['internal_in'])}",
         f"- External: {_fmt_dims(v.box['external_mm'], v.box['external_in'])}",
         f"- Chamber internal width: {v.box['chamber_internal_width_mm']:.0f} mm",
+        f"- Construction: {v.construction['line']} line, walls {v.construction['wall_material']}; "
+        f"voiced with {v.construction['panel_mm']:g} mm walls",
     ]
     if v.prediction.get("panel_height_mm") is not None:
         lines.append(f"- Open-back panels: two, top and bottom, each "
@@ -1302,6 +1321,8 @@ def _build_parser():
         p.add_argument("--tone", required=True, help="tone target JSON file")
         p.add_argument("--jack", choices=JACK_CONFIGS, default="mono")
         p.add_argument("--brace-l", type=float, default=0.0)
+        p.add_argument("--line", choices=LINES, default="tolex")
+        p.add_argument("--species", default=None)
         p.add_argument("--accept-low-headroom", action="store_true")
         p.add_argument("--name", default="cab")
         p.add_argument("--out", required=True, help="directory for voicing.json and voicing.md")
@@ -1334,7 +1355,8 @@ def main(argv=None) -> int:
     try:
         drivers = [load_speaker(s, Path(args.speakers_dir)) for s in args.speaker]
         tone = json.loads(Path(args.tone).read_text())
-        c = Constraints(brace_l=args.brace_l, accept_low_headroom=args.accept_low_headroom)
+        c = Constraints(brace_l=args.brace_l, accept_low_headroom=args.accept_low_headroom,
+                        line=args.line, species=args.species)
         if args.command == "propose":
             c.pinned_external_width_mm = args.pinned_width
             c.max_external_mm = tuple(args.max_external) if args.max_external else None

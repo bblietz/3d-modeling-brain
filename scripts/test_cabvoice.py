@@ -764,7 +764,8 @@ def test_voicing_json_has_construction_block(drv, tone, tmp_path):
     con = json.loads(json_path.read_text())["construction"]
     assert con == {"panel_mm": 18.0, "back_mm": 12.0, "baffle_mm": 18.0, "recess_mm": 20.0,
                    "brace_l": 0.3, "pinned_external_width_mm": 660.0, "max_external_mm": None,
-                   "port_count": 1}
+                   "port_count": 1, "line": "tolex", "species": None,
+                   "wall_material": "baltic birch plywood"}
     closed = cabvoice.propose([drv], [16], "closed", tone)
     assert closed.construction["port_count"] is None
 
@@ -941,3 +942,38 @@ def test_calibration_table_matches_engine():
     section = text.split("## Calibration table", 1)[1].split("\n## ", 1)[0]
     assert f'prediction_status "{cabvoice.PREDICTION_STATUS}"' in section
     assert cal.note_rows(text) == cal.calibration_rows()
+
+
+# ---- Task 16: line and species --------------------------------------------
+
+def test_constraints_rejects_unknown_line():
+    with pytest.raises(ValueError, match="line"):
+        cabvoice.Constraints(line="ply")
+
+
+def test_construction_block_carries_line_and_species(drv, tone):
+    v = cabvoice.propose([drv], [16], "closed", tone,
+                         constraints=cabvoice.Constraints(line="hardwood", species="black walnut"))
+    assert v.construction["line"] == "hardwood"
+    assert v.construction["species"] == "black walnut"
+    assert v.construction["wall_material"] == "black walnut"
+    md = cabvoice.render_markdown(v)
+    assert "hardwood line" in md
+    assert "black walnut" in md
+    default = cabvoice.propose([drv], [16], "closed", tone)
+    assert default.construction["line"] == "tolex"
+    assert default.construction["species"] is None
+    assert default.construction["wall_material"] == "baltic birch plywood"
+
+
+def test_cli_line_and_species_flags(speakers_dir, tmp_path):
+    out = tmp_path / "out"
+    cmd = [sys.executable, str(Path(cabvoice.__file__)), "propose",
+           "--speakers-dir", str(speakers_dir), "--speaker", "test-driver",
+           "--impedance", "16", "--enclosure", "closed-ported",
+           "--tone", str(TONE_FIXTURE), "--name", "cli-test",
+           "--line", "hardwood", "--species", "sapele", "--out", str(out)]
+    run = subprocess.run(cmd, capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    data = json.loads((out / "voicing.json").read_text())
+    assert data["construction"]["species"] == "sapele"

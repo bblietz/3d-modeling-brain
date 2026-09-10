@@ -86,4 +86,4 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 - External 20 x 18 x 11 in (508 x 457.2 x 279.4 mm), 1x12 closed-ported.
 - Internal with the rules above: 472 x 421.2 x 229.4 mm, gross 45.6 L, net about 44 L after one driver.
-- The engine voices both lines with the tolex line's 18 mm walls; the hardwood line's 19 mm panels and corner posts take 1 to 2 percent more of the same external size, inside the model's error, so no separate voicing.
+- The engine voices both lines with the tolex line's 18 mm walls; the hardwood line's 19 mm panels and corner posts take 1 to 2 percent more of the same external size, inside the model's error, so no separate voicing. The line and species travel in voicing.json's construction block so the generator picks the density and joinery.
