@@ -20,9 +20,13 @@ the geometry changed; everything about the assumptions around it did.
 
 - **Target nozzle is 0.6 high-flow**, set by `NOZZLE` in `project_box.py`.
   The box is a coarse part with 2.4 mm walls and a flat ironed top, and
-  the ironing package is a set of 0.6 numbers. The resident nozzle is
-  0.2 in both positions since 2026-08-23, so printing needs a swap. This
-  is stated in the source, the brief and the pipeline output.
+  the ironing package is a set of 0.6 numbers. Printer-verified 2026-09-10:
+  0.6 mm HH01 is already on the main nozzle, so no swap is needed.
+- **Never state the installed nozzle from a note.** The memory note said
+  0.2 in both positions and the first pass wrote "swap back to 0.6" into
+  the source, brief and handoff before the printer was queried. The note
+  was a nozzle generation stale. `scripts/x2d-status.py` is the source of
+  truth; the note has been corrected.
 - **`project-box-print.3mf` is the print file.** Every other 3MF in the
   directory is superseded history and must not be printed - the
   `-ironing` ones carry a 55 C textured plate with an empty filament diff
@@ -44,7 +48,8 @@ the geometry changed; everything about the assumptions around it did.
 
 ## Next
 
-1. Swap to the 0.6 high-flow nozzle; confirm with `scripts/x2d-status.py`.
+1. Re-confirm the nozzle with `scripts/x2d-status.py` (0.6 HH01 as of
+   2026-09-10, so no swap expected).
 2. Select the 0.6 nozzle printer preset in Studio's Prepare tab BEFORE
    opening the project.
 3. Open `project-box-print.3mf` and confirm the plate renders both parts.
@@ -53,10 +58,13 @@ the geometry changed; everything about the assumptions around it did.
    it only works on Studio-saved projects.
 4. Print. Record the v4 result in `knowledge/learnings/build123d-trial.md`:
    does the fingernail scoop actually open the lid barehanded, and does
-   the rib fit still hold after the nozzle swap.
+   the rib fit still hold. The fit was calibrated on this same 0.6
+   high-flow nozzle, so the open variable is the filament spool.
 
-## Blocked, unrelated to this work
+## Resolved during this session
 
-`scripts/x2d-status.py` cannot reach the printer:
-`~/.config/BambuStudioBeta/BambuStudio.conf` is **0 bytes**, so the LAN
-access code is gone. Re-enter it in Studio Beta, or set `X2D_ACCESS_CODE`.
+`scripts/x2d-status.py` was failing: `~/.config/BambuStudioBeta/BambuStudio.conf`
+is **0 bytes**, so its access-code lookup found nothing. The code survives
+in the older `~/.config/BambuStudio/BambuStudio.conf` and works against the
+printer today. The script now falls back to it. The Beta config being empty
+is still worth a look - it means Studio Beta lost more than the access code.

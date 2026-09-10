@@ -130,12 +130,21 @@ what changed:
   change. The provenance and the re-coupon triggers now sit in the source
   next to the numbers.
 - **The nozzle assumption was stale and invisible.** The source declared
-  "0.6 mm high-flow" in a docstring and hardcoded `MIN_WALL = 1.24`; the
-  resident nozzle has been 0.2 in both positions since 2026-08-23. Now a
+  "0.6 mm high-flow" in a docstring and hardcoded `MIN_WALL = 1.24`. Now a
   `NOZZLE` constant drives `MIN_WALL` off the floor table
-  {0.2: 0.44, 0.4: 0.84, 0.6: 1.24}, and the pre-flight (swap the nozzle,
-  confirm with `scripts/x2d-status.py`, pick the printer preset in Studio
-  BEFORE opening) is written into the file and the brief.
+  {0.2: 0.44, 0.4: 0.84, 0.6: 1.24}, and the pre-flight (confirm with
+  `scripts/x2d-status.py`, pick the printer preset in Studio BEFORE
+  opening) is written into the file and the brief.
+- **The note about the nozzle was stale too, and nearly shipped as an
+  instruction.** The memory note said 0.2 in both positions since
+  2026-08-23, so the first pass wrote "swap back to the 0.6 high-flow"
+  into the source, the brief and the handoff. Querying the printer on
+  2026-09-10 showed 0.6 HH01 already mounted on the main nozzle. The
+  vault's own rule - trust the printer readout, not the inventory - was
+  followed one step too late, because `scripts/x2d-status.py` was failing
+  on a truncated Studio config and the note got used as the fallback. A
+  broken pre-flight check is worse than no check: it silently promotes a
+  note to ground truth.
 - **The min-wall rule changed meaning.** It was a quality preference in
   July. Since the Sharks prints it is a hard slicer floor: the stock X2D
   quality presets run the classic generator with thin-wall detection off,

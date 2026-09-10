@@ -5,9 +5,11 @@ Sends ONLY status requests (pushing.pushall, info.get_version). Never a
 control command. Works with the printer in cloud mode; Developer Mode is
 not needed for reads (verified 2026-08-20).
 
-Credentials: the LAN access code is read from Bambu Studio's live config
-(~/.config/BambuStudioBeta/BambuStudio.conf, key access_code.<serial>);
-override with env X2D_ACCESS_CODE. IP and serial default to the printer
+Credentials: the LAN access code is read from Bambu Studio's config, key
+access_code.<serial>, trying the Beta config first and falling back to the
+older one (the Beta config was found truncated to 0 bytes on 2026-09-10,
+while the older one still held a working code); override with env
+X2D_ACCESS_CODE. The code itself never enters the vault. IP and serial default to the printer
 discovered 2026-08-20 (knowledge/x2d-printer-control.md); override with
 X2D_IP / X2D_SERIAL.
 
@@ -24,21 +26,31 @@ import paho.mqtt.client as mqtt
 
 DEFAULT_IP = "192.168.1.68"
 DEFAULT_SERIAL = "20P6AJ641301478"
-CONF = Path.home() / ".config/BambuStudioBeta/BambuStudio.conf"
+CONFS = [
+    Path.home() / ".config/BambuStudioBeta/BambuStudio.conf",
+    Path.home() / ".config/BambuStudio/BambuStudio.conf",
+]
 
 
 def access_code(serial):
     code = os.environ.get("X2D_ACCESS_CODE")
     if code:
         return code
-    try:
-        conf = json.load(open(CONF))
-    except Exception as e:
-        sys.exit(f"cannot read {CONF}: {e}; set X2D_ACCESS_CODE")
-    code = conf.get("access_code", {}).get(serial)
-    if not code:
-        sys.exit(f"no access_code.{serial} in {CONF}; set X2D_ACCESS_CODE")
-    return code
+    tried = []
+    for conf_path in CONFS:
+        try:
+            conf = json.load(open(conf_path))
+        except Exception as e:
+            tried.append(f"{conf_path}: {e}")
+            continue
+        code = conf.get("access_code", {}).get(serial)
+        if code:
+            return code
+        tried.append(f"{conf_path}: no access_code.{serial}")
+    sys.exit(
+        "no LAN access code found; set X2D_ACCESS_CODE, or read it off the "
+        "printer screen under Settings > Network.\n  " + "\n  ".join(tried)
+    )
 
 
 def decode_nozzle(t):

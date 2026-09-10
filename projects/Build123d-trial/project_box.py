@@ -103,11 +103,12 @@ PLUG_R = CAV_R - PLUG_CLEAR       # 3.45
 # pipeline/make_print_3mf.py is a set of 0.6 numbers (0.55 top line width).
 #
 # PRE-FLIGHT, every time (knowledge/printer-x2d.md):
-#   1. Resident nozzle is 0.2 mm in BOTH positions since 2026-08-23, so
-#      printing this part needs a physical swap back to the 0.6 high-flow.
-#   2. Confirm what is actually mounted with scripts/x2d-status.py (reads
-#      the printer over LAN), not from memory.
-#   3. Select the 0.6 printer preset in Studio's Prepare tab BEFORE opening
+#   1. Confirm what is actually mounted with scripts/x2d-status.py, which
+#      reads it off the printer. Never from a note: on 2026-09-10 the
+#      hardware note was a full nozzle generation out of date.
+#      Last read 2026-09-10: main nozzle 0.6 mm HH01 (hardened, high flow),
+#      auxiliary 0.6 mm HS01 - so this part needs no swap today.
+#   2. Select the 0.6 printer preset in Studio's Prepare tab BEFORE opening
 #      the project. Studio silently re-profiles an imported project to the
 #      resident machine and re-slices; no mismatch warning fires anywhere.
 NOZZLE = 0.6

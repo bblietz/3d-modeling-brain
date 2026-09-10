@@ -5,7 +5,7 @@ updated: 2026-09-10
 status: v3 fit validated (very snug); v4 adds fingernail scoops, never printed
 tool: build123d 0.11.1
 printer: Bambu Lab X2D
-nozzle: 0.6 mm high-flow (NOT the resident nozzle - see Before printing)
+nozzle: 0.6 mm high-flow (printer-verified installed 2026-09-10)
 material: PLA, single color
 ---
 
@@ -119,16 +119,18 @@ Superseded, kept as history - do not print any of these:
 
 ## Before printing
 
-1. **Swap the nozzle.** This part is designed for the 0.6 high-flow. The
-   resident nozzle has been 0.2 mm in both positions since 2026-08-23.
-2. **Confirm what is mounted** with `scripts/x2d-status.py`, from the
-   printer, not from memory.
-3. **Select the 0.6 nozzle printer preset in Studio's Prepare tab BEFORE
+1. **Confirm what is mounted** with `scripts/x2d-status.py`, from the
+   printer, never from a note. Read 2026-09-10: main nozzle 0.6 mm HH01
+   (hardened, high flow), auxiliary 0.6 mm HS01. This part is designed for
+   the 0.6 high-flow, so no swap is needed today - but the hardware note
+   in memory was a full nozzle generation stale when that was checked, so
+   check again rather than trusting this line.
+2. **Select the 0.6 nozzle printer preset in Studio's Prepare tab BEFORE
    opening the project.** Studio silently re-profiles an imported project
    to the resident machine and re-slices it. No mismatch warning fires
    anywhere, and a 0.4-designed file opened as 0.6 has already cost one
    ruined print on another project.
-4. **Open `project-box-print.3mf` in Studio and look at the plate.** A
+3. **Open `project-box-print.3mf` in Studio and look at the plate.** A
    hand-patched 3MF has passed a CLI round trip and still rendered empty.
    CLI slicing is not an alternative check here: it only succeeds on
    Studio-saved projects and fails on CLI-composed ones with "No valid
