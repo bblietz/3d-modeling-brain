@@ -1042,7 +1042,11 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
     chamber_w = _chamber_w(chambers, w_int, c)
     port_dict = None
     if port is not None:
-        _, port_dict = _port_report(lead, per_chamber_drivers, chamber_net, port, warnings)
+        fb_actual, port_dict = _port_report(lead, per_chamber_drivers, chamber_net, port, warnings)
+        if abs(fb_actual - fb) > 0.5:
+            warnings.append(f"port clamped at the size cap: tuned {fb_actual:.1f} Hz, target "
+                            f"{fb:.1f} Hz; lower Fb or use a smaller box")
+        fb = fb_actual   # the prediction follows the port as built
     prediction = _predict(lead, enclosure, per_driver_net, fb, chamber_w, h_int, d_int)
     wiring_dict, power_dict = _electrical(drivers, impedances, tone, jack_config, c,
                                           warnings, blockers)

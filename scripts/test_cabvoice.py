@@ -738,13 +738,6 @@ def test_every_catalog_speaker_proposes_without_exception(tone):
 
 # ---- Final review: propose versus evaluate, calibration table -----------
 
-_C1_MONO_2X12 = ("celestion-g12-65-heritage", "eminence-cannabis-rex", "eminence-red-white-and-blues",
-                 "eminence-swamp-thang", "eminence-texas-heat", "eminence-tonker", "jensen-p12n",
-                 "wgs-veteran-30")
-# C1: propose reports the target Fb when size_port clamps at the 150 mm cap.
-_C1_CASES = {(slug, "closed-ported", "mono", 2) for slug in _C1_MONO_2X12} | {
-    ("eminence-red-white-and-blues", "closed-ported", "mono", 1),
-    ("eminence-red-white-and-blues", "closed-ported", "stereo", 2)}
 # Two-pass stereo loop: gross drifts with the divider, net off by 0.055 L.
 _DRIFT_CASES = {("eminence-red-white-and-blues", "closed-ported", "stereo", 2),
                 ("wgs-veteran-30", "closed-ported", "stereo", 2)}
@@ -757,8 +750,6 @@ def _matrix_params():
             for jack, n in (("mono", 1), ("mono", 2), ("stereo", 2)):
                 case = (slug, enclosure, jack, n)
                 marks = []
-                if case in _C1_CASES:
-                    marks.append(pytest.mark.xfail(strict=True, reason="C1: prediction ignores the clamped port"))
                 if case in _DRIFT_CASES:
                     marks.append(pytest.mark.xfail(strict=True, reason="two-pass stereo volume drift"))
                 params.append(pytest.param(*case, id=f"{slug}-{enclosure}-{jack}-{n}", marks=marks))
@@ -789,6 +780,20 @@ def test_evaluate_reproduces_propose(tone, slug, enclosure, jack, n):
             assert a == pytest.approx(b, abs=tol), key
     assert p.prediction["character"] == e.prediction["character"]
     assert p.volumes["per_driver_net_l"] == pytest.approx(e.volumes["per_driver_net_l"], abs=0.05)
+
+
+def test_propose_prediction_follows_clamped_port(tone):
+    # Fs 111 Hz puts the tight Fb at the 90 Hz cap; Vas 90 L gives a 60 L box, where
+    # even a 150 mm port needs less than 20 mm and is clamped, so the port tunes lower.
+    d = _driver(fs_hz=111.0, vas_l=90.0)
+    v = cabvoice.propose([d], [16], "closed-ported", tone)
+    assert v.port["diameter_mm"] == cabvoice.MAX_PORT_DIAMETER_MM
+    assert v.port["length_mm"] == cabvoice.MIN_PORT_LENGTH_MM
+    actual = cabvoice.port_tuning_hz(v.volumes["per_chamber_net_l"] / 1e3,
+                                     v.port["area_cm2"] / 1e4, v.port["length_mm"] / 1e3)
+    assert actual < 89.0
+    assert v.prediction["fb_hz"] == pytest.approx(actual, abs=1e-9)
+    assert any(w.startswith("port clamped at the size cap: tuned") for w in v.warnings)
 
 
 def _calibration_module():
