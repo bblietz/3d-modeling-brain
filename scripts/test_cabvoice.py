@@ -468,6 +468,12 @@ def test_dims_for_volume_raises_when_limits_too_small():
         cabvoice.dims_for_volume(60.0, max_external_mm=(508.0, 457.2, 279.4))
 
 
+def test_dims_for_volume_non_strict_returns_the_box_that_fits():
+    box = cabvoice.dims_for_volume(60.0, max_external_mm=(508.0, 457.2, 279.4), strict=False)
+    assert box.gross_l == pytest.approx(45.6, abs=0.05)
+    assert any(w.startswith("cannot reach 60.0 L") for w in box.warnings)
+
+
 def test_dimension_ratio_warnings():
     assert cabvoice.dimension_ratio_warnings((472.0, 400.0, 300.0)) == []
     assert any("2:1" in w for w in cabvoice.dimension_ratio_warnings((472.0, 421.2, 229.4)))
@@ -600,6 +606,25 @@ def test_propose_honours_pinned_width(drv, tone):
     c = cabvoice.Constraints(pinned_external_width_mm=660.0)
     v = cabvoice.propose([drv], [16], "closed", tone, constraints=c)
     assert v.box["external_mm"][0] == pytest.approx(660.0)
+
+
+def test_propose_impossible_box_presents_tradeoff(drv, tone, speakers_dir, tmp_path):
+    tone["low_end"] = "big"                  # 68 L per driver against the site's 45.6 L box
+    c = cabvoice.Constraints(max_external_mm=(508.0, 457.2, 279.4))
+    v = cabvoice.propose([drv], [16], "closed", tone, constraints=c)
+    assert v.volumes["gross_l"] == pytest.approx(45.6, abs=0.05)
+    assert v.prediction["qtc"] == pytest.approx(cabvoice.closed_box(drv, v.volumes["per_driver_net_l"]).qtc)
+    blocker = next(b for b in v.blockers if "cannot fit the size limit" in b)
+    assert "69.5 L" in blocker and "45.6 L" in blocker and "Qtc" in blocker
+    assert not any("cannot reach" in w for w in v.warnings)
+    big_tone = tmp_path / "tone.json"
+    big_tone.write_text(json.dumps(tone))
+    out = tmp_path / "out"
+    rc = cabvoice.main(["propose", "--speakers-dir", str(speakers_dir), "--speaker", "test-driver",
+                        "--impedance", "16", "--enclosure", "closed", "--tone", str(big_tone),
+                        "--max-external", "508", "457.2", "279.4", "--out", str(out)])
+    assert rc == 2
+    assert "cannot fit the size limit" in json.loads((out / "voicing.json").read_text())["blockers"][0]
 
 
 def test_propose_rejects_bad_inputs(drv, tone):

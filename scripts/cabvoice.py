@@ -653,10 +653,13 @@ def min_internal_width_mm(driver_count: int, cutout_mm: float) -> float:
 
 def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = None,
                     min_internal_width_mm: float | None = None,
-                    max_external_mm: tuple | None = None, **panel_kwargs) -> Box:
+                    max_external_mm: tuple | None = None, strict: bool = True,
+                    **panel_kwargs) -> Box:
     """Internal dimensions for a gross volume, starting from the site box
     proportions. Fixed axes come from a pinned width, the two-driver minimum
-    width, or external limits; free axes scale together to hit the volume."""
+    width, or external limits; free axes scale together to hit the volume.
+    When the limits cannot hold the volume, strict raises; otherwise the
+    largest box that fits comes back with a "cannot reach" warning."""
     if gross_l <= 0:
         raise ValueError("gross_l must be positive")
     target = gross_l * 1e6
@@ -713,9 +716,11 @@ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = Non
         rescale()
     achieved = dims[0] * dims[1] * dims[2]
     if abs(achieved - target) / target > 0.001:
-        raise ValueError(
-            f"cannot reach {gross_l:.1f} L within the limits; "
-            f"achievable {achieved / 1e6:.1f} L")
+        message = (f"cannot reach {gross_l:.1f} L within the limits; "
+                   f"achievable {achieved / 1e6:.1f} L")
+        if strict:
+            raise ValueError(message)
+        conflicts.append(message)
     box = make_box(tuple(dims), **panel_kwargs)
     box.warnings = conflicts + box.warnings
     return box
@@ -979,6 +984,15 @@ def _predict(lead, enclosure, per_driver_net, fb, chamber_w, h_int, d_int) -> di
             "character": cb.character, "response_db": cb.response}
 
 
+def _prediction_summary(prediction: dict) -> str:
+    if "qtc" in prediction:
+        return f"Qtc {prediction['qtc']:.2f}, {prediction['character']}"
+    if "peak_db" in prediction:
+        return (f"Fb {prediction['fb_hz']:.0f} Hz, peak {prediction['peak_db']:.1f} dB, "
+                f"{prediction['character']}")
+    return prediction["character"]
+
+
 def _volumes(method, per_driver_net, per_chamber_drivers, chambers, displacement, brace_l,
              port_l_total, divider_l, gross_l) -> dict:
     chamber_net = per_driver_net * per_chamber_drivers
@@ -1031,12 +1045,21 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
              + (chambers - 1) * c.panel_mm)
     pk = c.panel_kwargs()
     port_count = c.port_count or per_chamber_drivers
-    port, port_l, divider_l, box = None, 0.0, 0.0, None
+    net_target = net_total
+    port, port_l, divider_l, box, limited = None, 0.0, 0.0, None, False
     for _ in range(2):
         gross = net_total + displacement + c.brace_l + port_l * chambers + divider_l
-        box = dims_for_volume(gross, c.pinned_external_width_mm, min_w, c.max_external_mm, **pk)
+        box = dims_for_volume(gross, c.pinned_external_width_mm, min_w, c.max_external_mm,
+                              strict=False, **pk)
         w_int, h_int, d_int = box.internal_mm
         divider_l = _divider_l(chambers, h_int, d_int, c)
+        if any(w.startswith("cannot reach") for w in box.warnings):
+            # The size limit wins: voice the box that fits and present the trade-off.
+            box.warnings = [w for w in box.warnings if not w.startswith("cannot reach")]
+            limited = True
+            net_total = box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
+            chamber_net = net_total / chambers
+            per_driver_net = chamber_net / per_chamber_drivers
         if enclosure == "closed-ported":
             port = size_port(_air_speed_driver(lead, per_chamber_drivers / port_count, warnings),
                              chamber_net / port_count, fb, diameter_mm=c.port_diameter_mm,
@@ -1053,6 +1076,10 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
                             f"{fb:.1f} Hz; lower Fb or use a smaller box")
         fb = fb_actual   # the prediction follows the port as built
     prediction = _predict(lead, enclosure, per_driver_net, fb, chamber_w, h_int, d_int)
+    if limited:
+        target_gross = net_target + displacement + c.brace_l + port_l * chambers + divider_l
+        blockers.append(f"target {target_gross:.1f} L cannot fit the size limit; achievable "
+                        f"{box.gross_l:.1f} L gives {_prediction_summary(prediction)}")
     wiring_dict, power_dict = _electrical(drivers, impedances, tone, jack_config, c,
                                           warnings, blockers)
     volumes = _volumes(method, per_driver_net, per_chamber_drivers, chambers, displacement,
