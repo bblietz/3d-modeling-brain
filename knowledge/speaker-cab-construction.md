@@ -41,7 +41,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 - 18 mm birch, floating: sits on 18 x 18 mm cleats glued to the shell, with a felt strip between cleat and baffle, held with screws through the cleats. Site: "floating 3/4 in birch with felt isolation".
 - Front face of the baffle sits 20 mm behind the front edge of the shell (the recess that holds the grill frame).
 - Driver cutout, bolt circle, and bolt count come from the speaker note (`cutout_mm`, `bolt_circle_mm`, `bolt_count`). Typical: Celestion 283 mm cutout on a 297 mm circle, Eminence 281 mm on 294 mm, Jensen 277 mm on 293.5 mm. Driver mounts from the front of the baffle onto T-nuts fitted from the back. Bolts M6 or 1/4-20.
-- Cutout margin: at least 25 mm from a cutout edge to any shell panel, brace, or the other cutout. Minimum internal width for two drivers = 2 x cutout + 3 x 25 mm.
+- Cutout margin: at least 25 mm from a cutout edge to any shell panel, brace, or the other cutout. Minimum internal width for two drivers = 2 x cutout + 3 x 25 mm; for stereo add the 18 mm divider.
 - Magnet clearance: at least 25 mm from the back of the magnet to the inside of the back panel, and 25 mm from any port tube or brace.
 
 ## Bracing and dividers
@@ -84,5 +84,6 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 ## Site defaults (calibration)
 
-- External 20 x 18 x 11 in (508 x 457.2 x 279.4 mm), 1x12 closed-back ported.
+- External 20 x 18 x 11 in (508 x 457.2 x 279.4 mm), 1x12 closed-ported.
 - Internal with the rules above: 472 x 421.2 x 229.4 mm, gross 45.6 L, net about 44 L after one driver.
+- The engine voices both lines with the tolex line's 18 mm walls; the hardwood line's 19 mm panels and corner posts take 1 to 2 percent more of the same external size, inside the model's error, so no separate voicing.
