@@ -15,16 +15,8 @@ import zipfile
 
 from build123d import *
 
-# ---- Garmin 9x3 flush template 190-02761-05_0D (mm) ----
-CUTOUT_W = 222.4
-CUTOUT_H = 139.0
-HOLE_PITCH_X = 190.9
-HOLE_PITCH_Y = 150.5
-# The drawn hole pattern is not centered on the cutout: its center sits 1.24 mm
-# toward the unit's bottom (top holes 4.5 mm above the cutout, bottom holes 7.0 mm
-# below). Measured from the PDF vectors on 2026-09-09.
-HOLE_SHIFT = 1.24
-PILOT_DRILL = 2.3  # Garmin pilot for wood or plastic
+# ---- Garmin 9x3 flush template 190-02761-05_0D (mm), shared with helm-panel.py ----
+from garmin_9x3 import CUTOUT_H, CUTOUT_W, HOLE_PITCH_X, HOLE_PITCH_Y, HOLE_SHIFT, HOLE_Y, PILOT_DRILL
 
 # ---- Template design (mm) ----
 FRAME_SIDE = 15.0  # frame width left and right
@@ -43,7 +35,6 @@ TEXT_SIZE = 8.0
 OUTER_W = CUTOUT_W + 2 * FRAME_SIDE  # 252.4
 OUTER_H = CUTOUT_H + 2 * FRAME_TOPBOT  # 189.0
 BED = 256.0
-HOLE_Y = {1: HOLE_PITCH_Y / 2 - HOLE_SHIFT, -1: -HOLE_PITCH_Y / 2 - HOLE_SHIFT}  # +Y is the unit's top
 
 PROJECT = "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Garmin-943-helm-panel"
 NAME = "router-template"

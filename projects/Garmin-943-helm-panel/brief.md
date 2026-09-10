@@ -1,7 +1,7 @@
 ---
 title: Garmin 943xsv helm panel
 type: project-brief
-status: template built, awaiting print and test fit
+status: template built; panel modeled at provisional size, awaiting Brian's measurements and photos
 created: 2026-09-08
 tags: [boat, helm, garmin, starboard, router-template]
 ---
@@ -72,7 +72,9 @@ Rout a scrap of the same stock first if any scrap is available.
 ## Deliverables (this folder)
 
 - `brief.md` (this file).
+- `garmin_9x3.py` (shared Garmin dimensions, imported by both models so they cannot drift).
 - `router-template.py` (build123d source, self-checking), `router-template.stl`, `router-template.3mf`, `images/router-template-4view.png`.
+- `helm-panel.py` (build123d source, self-checking), `helm-panel.stl`, `helm-panel.step`, `images/helm-panel-4view.png`.
 - Retrospective in `knowledge/learnings/garmin-943-helm-panel.md` after the install.
 
 ## Open inputs from Brian
@@ -147,3 +149,37 @@ Decimal inches from the mm values, fractions rounded to the nearest 1/64. The mm
 | Corner radius from a 1/4 in bit | 3.2 | 0.126 | 1/8 |
 | Jigsaw allowance | 2.0 | 0.079 | 5/64 |
 | Panel span for 1/2 in stock | 450 | 17.717 | 17 23/32 |
+
+## Panel model, 2026-09-09
+
+Built from `helm-panel.py`. PROVISIONAL: the outline is Brian's estimate of 18.5 x 11.5 in. He will supply exact measurements and photos. Changing `PANEL_W` and `PANEL_H` regenerates the whole model, so nothing below is hand-fitted.
+
+| Item | mm | in |
+|---|---|---|
+| Panel | 469.9 x 292.1 x 12.7 | 18.5 x 11.5 x 1/2 |
+| Corner radius | 12.7 | 1/2 |
+| Edge roundover, outside face only | 3.175 | 1/8 |
+| Window | 222.4 x 139.0, R3.175 corners | Garmin cutout |
+| Window vertical offset | 0.0, centered | set at layout |
+| Pilots | 2.3 mm, 10 mm deep, blind | 3/32 |
+| Volume | 1345 cm3 | about 1.29 kg in HDPE |
+
+Thickness follows the rule already in this brief: the 469.9 mm span exceeds 450 mm, so 1/2 in stock rather than 3/8 in.
+
+Clearances the model checks on every run:
+
+| Measure | Side | Top | Bottom |
+|---|---|---|---|
+| Panel material between window and edge | 123.7 | 76.5 | 76.5 |
+| Panel beyond the bezel trim caps | 118.1 | 64.1 | 61.6 |
+
+Not printable. At 469.9 mm the panel is 1.8x the X2D bed. It is routed from sheet; the STL and STEP are for viewing, layout and CAD interop only. Only the router template gets printed.
+
+Assumption to confirm against the old cover: the 12.7 mm corner radius. Brian did not specify one, and the old cover sets what looks right.
+
+Open points for a panel this size in black HDPE, worth deciding when the measurements arrive:
+
+- Black HDPE expands about 0.15 mm per metre per degree C. Over 470 mm a 30 C swing moves the panel about 2 mm. Perimeter screws through slightly oversized holes, rather than tight ones, let it move without bowing.
+- 1/2 in Starboard unsupported across 470 mm will flex under a hand pressing the touchscreen. If the opening is open-backed, a cleat or two behind the panel near the window is worth adding.
+
+Both depend on what the opening actually looks like, so they wait on the photos.

@@ -1,7 +1,7 @@
 # Handoff: Garmin 943xsv helm panel, 2026-09-09 (revision B)
 
 ## State
-Router template designed, verified, and exported. Nothing printed yet. Brian will rout the panel outline from the old clear cover, so no panel drawing or DXF is needed.
+Router template designed, verified, and exported. Nothing printed yet. The full panel is now modeled too, at Brian's provisional 18.5 x 11.5 in; he will send exact measurements and photos later.
 
 Files in `projects/Garmin-943-helm-panel/`: `brief.md` (spec, Garmin numbers, build results, print settings), `router-template.py` (build123d source with self-checks), `router-template.stl`, `router-template.3mf`, `images/router-template-4view.png`.
 
@@ -12,7 +12,10 @@ Files in `projects/Garmin-943-helm-panel/`: `brief.md` (spec, Garmin numbers, bu
 - One printed PLA router template, window exactly 222.4 x 139.0 mm, bearing-guided bit, 12 mm thick, 252.4 x 189.0 mm outside.
 - Drill guides 2.8 mm modeled with 6 x 6 mm counterbores, shifted 1.24 mm toward the unit's bottom as Garmin's template draws them (rows at +74.0 and -76.5 from the window center). TOP debossed on the counterbored face. Two optional 4 mm fixing holes on the vertical centerline, four V notches for registration.
 - Garmin's drawn cutout corners are R3.7, so a 1/4 in bit needs no corner squaring.
-- Vertical cutout placement decided by Brian at layout.
+- Vertical cutout placement decided by Brian at layout (`CUTOUT_DY` in helm-panel.py, currently 0).
+- Panel modeled at 469.9 x 292.1 x 12.7 mm, R12.7 corners, 1/8 in roundover on the outside face, blind 2.3 mm pilots. 1/2 in stock because the span exceeds the 450 mm rule.
+- Garmin dimensions live in garmin_9x3.py, imported by both models. Do not re-inline them.
+- Panel is NOT printable (1.8x the bed); it is routed from sheet.
 
 ## Next steps
 1. Brian prints the template (0.30mm Standard, 0.6 nozzle, brim off, centered on plate, counterbored face up, about 1 h 28 min).
