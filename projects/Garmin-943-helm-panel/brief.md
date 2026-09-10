@@ -1,7 +1,7 @@
 ---
 title: Garmin 943xsv helm panel
 type: project-brief
-status: template built; panel modeled at provisional size, awaiting Brian's measurements and photos
+status: template built; panel modeled and split into four printable tiles; awaiting Brian's measurements and photos
 created: 2026-09-08
 tags: [boat, helm, garmin, starboard, router-template]
 ---
@@ -173,7 +173,7 @@ Clearances the model checks on every run:
 | Panel material between window and edge | 123.7 | 76.5 | 76.5 |
 | Panel beyond the bezel trim caps | 118.1 | 64.1 | 61.6 |
 
-Not printable. At 469.9 mm the panel is 1.8x the X2D bed. It is routed from sheet; the STL and STEP are for viewing, layout and CAD interop only. Only the router template gets printed.
+At 469.9 mm the panel is 1.8x the X2D bed, so printing it means splitting it. See the tiles section below. The one-piece `helm-panel.stl` and `.step` remain the design intent and the reference for routing it from sheet instead.
 
 Assumption to confirm against the old cover: the 12.7 mm corner radius. Brian did not specify one, and the old cover sets what looks right.
 
@@ -183,3 +183,47 @@ Open points for a panel this size in black HDPE, worth deciding when the measure
 - 1/2 in Starboard unsupported across 470 mm will flex under a hand pressing the touchscreen. If the opening is open-backed, a cleat or two behind the panel near the window is worth adding.
 
 Both depend on what the opening actually looks like, so they wait on the photos.
+
+## Split into printable tiles, 2026-09-09
+
+Brian asked for the panel printed rather than routed, which means splitting it to fit the bed.
+
+**Why four.** 292.1 mm exceeds the 256 mm bed, so a split in Y is forced no matter how the panel is turned; each resulting half is still 469.9 mm wide, so a split in X is forced too. Four is the minimum, and rotating on the bed does not help because 469.9 exceeds even the 362 mm bed diagonal.
+
+**Where the seams go.** Straight cuts at x=0 and y=0. Both seams are interrupted by the window, so the vertical seam exists only in the top and bottom webs and the horizontal seam only in the left and right webs. No four tiles ever meet in solid material, and no Garmin screw lands on a seam: the pilots sit at x = +/-95.45, clear of both.
+
+**Why loose keys and not integral dovetails.** A 2x2 grid cannot be assembled with dovetails cut into the tiles. The top-left tile would have to slide in Y to engage its neighbour across the vertical seam and in X to engage the one below, at the same time. Instead each seam carries bowtie pockets cut into the BACK face, and separate bowtie keys drop straight in along Z after the tiles are laid flat. No over-constraint, and the front face is never broken by the joint.
+
+| Item | Value |
+|---|---|
+| Tiles | 4, each 234.95 x 146.05 x 12.7 mm |
+| Bed margin per tile | 10.5 mm in X, 55 mm in Y |
+| Keys | 10 identical bowties, 36 x 20 mm, 12 mm waist, 7.8 mm thick |
+| Keys per seam | 2 in the top web, 2 in the bottom, 3 in each side web |
+| Pocket | 8 mm deep from the back, leaving 4.7 mm of front skin |
+| Key clearance | 0.2 mm per face, a true perpendicular offset |
+| Seam chamfer | 0.5 mm on the front edges, so the joint reads as a panel line |
+
+The model verifies the joint rather than assuming it: every key is placed into its actual pocket in the actual tiles and asserted to touch nothing, the four tiles are reconciled against the one-piece panel volume exactly, and the chamfer sliver is predicted and bounded.
+
+**Print settings**, from real slices of each plate:
+
+| Plate | Time | Filament |
+|---|---|---|
+| Each of the four tiles | 2 h 05 min | 104 g |
+| The ten keys together | 35 min | 23 g |
+| Total | 8 h 55 min | 439 g |
+
+ASA, not PLA. A dark panel at a helm passes the PLA softening point and would sag. The X2D is enclosed, which is what ASA needs. Textured PEI plate at 100 C, 0.6 nozzle, 0.30 mm layers, 5 mm outer brim because large flat ASA lifts at the corners.
+
+Orient each tile FRONT FACE UP. The perimeter roundover is then a clean top fillet rather than a near-horizontal overhang at the bed, and the presentation face can be ironed. The bowtie pockets end up on the bed side and bridge across at 8 mm, which is well within range.
+
+Assemble face down on a flat surface, drop the keys in from the back, and bond. ASA solvent-welds with acetone, which gives a stronger joint than epoxy on this material.
+
+Files: `helm-panel-tile-{TL,TR,BL,BR}.stl` and `helm-panel-key.stl`, plus five ready-to-print Bambu projects `helm-panel-tile-*.3mf` and `helm-panel-keys.3mf`. Built by `make_plate.py`.
+
+### Slicer findings worth keeping
+
+- `bambu-studio --export-3mf` exits 243 and writes nothing when given an absolute path while `--outputdir` is also set. Pass a bare filename.
+- A CLI-made project 3MF still cannot be sliced by the CLI (rc 156, "slicing or export error for partplate 1"); the live X2D extruder and variant keys are only written by the GUI. `projects/Sharks-nametag/pipeline/graft_slice.py` supplies them to a throwaway copy for verification. Studio itself resolves them on open, so the shipped file needs no graft.
+- The CLI default `curr_bed_type` of "Cool Plate" resolves to a 0 C bed for ASA, not merely a cold one as with PLA. `make_plate.py` overrides it and lists the override in `different_settings_to_system`, which Studio confirmed by showing the process preset as modified.

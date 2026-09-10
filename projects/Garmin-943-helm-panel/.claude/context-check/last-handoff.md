@@ -15,7 +15,9 @@ Files in `projects/Garmin-943-helm-panel/`: `brief.md` (spec, Garmin numbers, bu
 - Vertical cutout placement decided by Brian at layout (`CUTOUT_DY` in helm-panel.py, currently 0).
 - Panel modeled at 469.9 x 292.1 x 12.7 mm, R12.7 corners, 1/8 in roundover on the outside face, blind 2.3 mm pilots. 1/2 in stock because the span exceeds the 450 mm rule.
 - Garmin dimensions live in garmin_9x3.py, imported by both models. Do not re-inline them.
-- Panel is NOT printable (1.8x the bed); it is routed from sheet.
+- Panel is printed, not routed: split into four 234.95 x 146.05 x 12.7 mm tiles at x=0 and y=0, joined by 10 loose bowtie keys dropped in from the back (integral dovetails cannot work on a 2x2 grid).
+- ASA, not PLA. Textured PEI 100 C, 0.6 nozzle, 0.30 mm, 5 mm outer brim, each tile FRONT FACE UP. 8 h 55 min and 439 g total across five plates.
+- make_plate.py builds and verifies the five Bambu project 3MFs; it slices them via Sharks-nametag/pipeline/graft_slice.py because the CLI cannot slice its own project files.
 
 ## Next steps
 1. Brian prints the template (0.30mm Standard, 0.6 nozzle, brim off, centered on plate, counterbored face up, about 1 h 28 min).
