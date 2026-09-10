@@ -492,3 +492,120 @@ def test_dims_for_volume_rejects_non_positive_volume():
         cabvoice.dims_for_volume(0.0)
     with pytest.raises(ValueError, match="gross_l"):
         cabvoice.dims_for_volume(-10.0)
+
+
+# ---- Task 8: tone target and propose ------------------------------------
+
+TONE_FIXTURE = Path(__file__).parent.parent / "projects/Speaker-cab-system/fixtures/tone-roots.json"
+
+
+@pytest.fixture()
+def tone():
+    return json.loads(TONE_FIXTURE.read_text())
+
+
+def test_validate_tone_target_ok(tone):
+    assert cabvoice.validate_tone_target(tone) == []
+
+
+def test_validate_tone_target_reports_bad_values(tone):
+    tone["low_end"] = "huge"
+    tone["min_power_w"] = 0
+    del tone["impedance_options_ohm"]
+    errors = cabvoice.validate_tone_target(tone)
+    assert any("low_end" in e for e in errors)
+    assert any("min_power_w" in e for e in errors)
+    assert any("impedance_options_ohm" in e for e in errors)
+
+
+def test_per_driver_net_uses_alpha_and_clamps(drv):
+    net, method, warns = cabvoice.per_driver_net_l(drv, "closed-ported", "balanced")
+    assert method == "thiele-small" and net == pytest.approx(60.0) and warns == []
+    net, _, warns = cabvoice.per_driver_net_l(drv, "closed-ported", "big")
+    assert net == pytest.approx(cabvoice.NET_L_RANGE[1])
+    assert any("clamped" in w for w in warns)
+    net, method, _ = cabvoice.per_driver_net_l(drv, "open", "big")
+    assert method == "rule-of-thumb" and net == cabvoice.RULE_OF_THUMB_NET_L["big"]
+
+
+def test_per_driver_net_without_ts_is_rule_of_thumb(drv):
+    drv.qts = None
+    net, method, warns = cabvoice.per_driver_net_l(drv, "closed", "tight")
+    assert method == "rule-of-thumb" and net == 34.0
+    assert any("no Thiele-Small" in w for w in warns)
+
+
+def test_propose_closed_ported_1x12(drv, tone):
+    tone["low_end"] = "balanced"
+    tone["min_power_w"] = 90              # a 60 W amp
+    v = cabvoice.propose([drv], [16], "closed-ported", tone, name="test-1x12")
+    assert v.mode == "propose" and v.name == "test-1x12"
+    assert v.volumes["method"] == "thiele-small"
+    assert v.volumes["per_driver_net_l"] == pytest.approx(60.0)
+    assert v.port is not None and v.port["shape"] == "round"
+    assert v.prediction["model"] == "thiele-small vented"
+    assert v.prediction["fb_hz"] == pytest.approx(60.0)
+    assert v.wiring["recommended"]["impedance_ohm"] == 16
+    assert v.blockers == []
+    assert v.power["status"] == "warning"          # 60 W handling under the 90 W target
+    assert v.box["external_mm"][0] > v.box["internal_mm"][0]
+    assert v.volumes["gross_l"] == pytest.approx(
+        v.volumes["net_total_l"] + v.volumes["displacement_l"] + v.volumes["port_l"], abs=0.05)
+    assert v.prediction_status == "unverified, ears only"
+
+
+def test_propose_open_2x12_mono(drv, tone):
+    v = cabvoice.propose([drv, drv], [16, 16], "open", tone, jack_config="mono")
+    assert v.enclosure["chambers"] == 1 and v.enclosure["driver_count"] == 2
+    assert v.enclosure["open_fraction"] == 0.40
+    assert v.volumes["method"] == "rule-of-thumb"
+    assert v.box["internal_mm"][0] >= cabvoice.min_internal_width_mm(2, 283.0)
+    assert v.port is None
+    assert "f_cancel_hz" in v.prediction
+    assert v.wiring["recommended"]["name"] == "parallel"
+
+
+def test_propose_stereo_2x12_closed(drv, tone):
+    tone["impedance_options_ohm"] = [16]
+    v = cabvoice.propose([drv, drv], [16, 16], "closed", tone, jack_config="stereo")
+    assert v.enclosure["chambers"] == 2
+    assert v.volumes["divider_l"] > 0
+    assert len(v.wiring["options"]) == 2
+    assert len(v.power["per_side"]) == 2
+    assert v.prediction["model"] == "thiele-small closed"
+
+
+def test_propose_without_ts_degrades(drv, tone):
+    for key in cabvoice.TS_FIELDS:
+        setattr(drv, key, None)
+    drv.data_status = "missing"
+    v = cabvoice.propose([drv], [16], "closed-ported", tone)
+    assert v.volumes["method"] == "rule-of-thumb"
+    assert v.prediction["model"] == "rule-of-thumb"
+    assert v.port is not None
+    assert any("no Thiele-Small" in w for w in v.warnings)
+    assert any("assumed Sd" in w for w in v.warnings)
+
+
+def test_propose_blocks_on_taps_and_power(drv, tone):
+    tone["impedance_options_ohm"] = [4]
+    tone["min_power_w"] = 300
+    v = cabvoice.propose([drv], [16], "closed", tone)
+    assert any("impedance taps" in b for b in v.blockers)
+    assert any("below the amp" in b for b in v.blockers)
+
+
+def test_propose_honours_pinned_width(drv, tone):
+    c = cabvoice.Constraints(pinned_external_width_mm=660.0)
+    v = cabvoice.propose([drv], [16], "closed", tone, constraints=c)
+    assert v.box["external_mm"][0] == pytest.approx(660.0)
+
+
+def test_propose_rejects_bad_inputs(drv, tone):
+    with pytest.raises(ValueError):
+        cabvoice.propose([drv], [16], "bandpass", tone)
+    with pytest.raises(ValueError):
+        cabvoice.propose([drv], [16], "closed", tone, jack_config="stereo")
+    tone["top"] = "sparkly"
+    with pytest.raises(ValueError):
+        cabvoice.propose([drv], [16], "closed", tone)
