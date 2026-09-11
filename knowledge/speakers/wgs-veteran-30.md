@@ -21,6 +21,9 @@ cutout_mm: 281.9
 bolt_circle_mm: 297.2
 bolt_count: 8
 depth_mm: 131.8
+frame_diameter_mm: 309.6
+magnet_diameter_mm: 156
+magnet_diameter_estimated: true
 weight_kg: 4.54
 data_status: estimated
 sources: [https://wgsusa.com/products/12-veteran-30-60-watts]
@@ -45,6 +48,7 @@ Warehouse Guitar Speakers' take on the Vintage 30. On both MaximoCabs lists.
 - WGS prints: Fs 94.84, Re 7.99, Le 0.35, Qes 0.78, Qms 12.15, Qts 0.74, Vas "18.53 cu ft", Sd "366.1", Mms 28.88, BL 13.25, SPL 99.84 dB, 8 slots on 11.7 in, cutout 11.1 in, depth 5 3/16 in, 10 lb. Impedance measured is not stated; Re near 8 implies the 8 ohm unit.
 - Assumptions in the frontmatter: Vas 38.8 L: WGS prints 18.53 labeled cu ft, but 525 L is impossible for a 12 inch guitar speaker, so the printed figure is liters (its printed Cms of 0.1 mm/N gives the same 18.5 L) and it was computed with WGS's own Sd of 366.1, so it is rescaled by (530 / 366.1)^2 = 2.096 to the assumed Sd; Sd set to 530 cm2 (typical 12 inch, the printed 366.1 has no unit and is too small); Xmax 0.8 mm (Eminence-typical, not published); magnet ceramic (not published, the design is a ceramic V30 clone). Predictions from these are estimates.
 - Magnet type, Xmax 0.8 mm, Sd 530 cm2, and the Vas rescale are assumptions stated above, not WGS data; WGS's printed Cms (mm/N) is what confirms the printed Vas is in liters.
+- Magnet diameter 156 mm is estimated (by analogy to the Celestion Vintage 30 it clones); frame diameter 309.6 mm is published. See [[speaker-envelopes-and-port-stock]].
 
 ## Field notes
 

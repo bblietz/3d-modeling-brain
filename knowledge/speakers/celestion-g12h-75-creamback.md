@@ -21,6 +21,9 @@ cutout_mm: 283
 bolt_circle_mm: 297
 bolt_count: 8
 depth_mm: 138
+frame_diameter_mm: 309
+magnet_diameter_mm: 168
+magnet_diameter_estimated: false
 weight_kg: 4.7
 data_status: missing
 sources: [https://celestion.com/product/g12h-75-creamback/]
@@ -42,6 +45,7 @@ status: unverified-starting-values
 
 - Celestion publishes Fs 75 Hz, Re 6.37 (8 ohm) and 12.5 (16 ohm), range 70 to 5000 Hz, 168 mm magnet structure (50 oz), 8 holes, 138 mm deep, 4.7 kg. No T/S; rule-of-thumb volumes. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
+- Frame diameter 309 mm and magnet diameter 168 mm from the maker's drawing. See [[speaker-envelopes-and-port-stock]].
 
 ## Field notes
 

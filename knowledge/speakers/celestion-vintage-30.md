@@ -21,6 +21,9 @@ cutout_mm: 283
 bolt_circle_mm: 297
 bolt_count: 4
 depth_mm: 135
+frame_diameter_mm: 309
+magnet_diameter_mm: 156
+magnet_diameter_estimated: false
 weight_kg: 4.7
 data_status: analog
 analog_of: celestion-heritage-g12h55
@@ -44,6 +47,8 @@ status: unverified-starting-values
 - Celestion publishes Fs 75 Hz, Re 7.3 (8 ohm) and 12.9 (16 ohm), range 70 to 5000 Hz, 156 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
 - T/S values are scaled from [[celestion-heritage-g12h55]] (Fs 54.7): Vas 71.3 x (54.7 / 75)^2 = 37.9 L; Qes 0.39 x 75 / 54.7 = 0.53; Qms 9.48 x 75 / 54.7 = 13.0; Qts = 0.53 x 13.0 / 13.53 = 0.51. Xmax and Sd copied. Estimate.
 - Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
+- Frame diameter 309 mm and magnet diameter 156 mm from the maker's drawing. See [[speaker-envelopes-and-port-stock]].
+- The 141.pdf source is Voice Coil magazine (February 2015), not a Celestion spec sheet.
 
 ## Field notes
 

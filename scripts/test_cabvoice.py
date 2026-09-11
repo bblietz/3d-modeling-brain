@@ -33,6 +33,9 @@ bolt_circle_mm: 297
 bolt_count: 4
 depth_mm: 135
 weight_kg: 4.7
+frame_diameter_mm: 309
+magnet_diameter_mm: 156
+magnet_diameter_estimated: false
 displacement_l: 1.5
 data_status: datasheet
 sources: [https://example.com/datasheet]
@@ -977,3 +980,54 @@ def test_cli_line_and_species_flags(speakers_dir, tmp_path):
     assert run.returncode == 0, run.stderr
     data = json.loads((out / "voicing.json").read_text())
     assert data["construction"]["species"] == "sapele"
+
+
+# ---- Plan 2 Task 1: frame and magnet diameters --------------------------
+
+def test_validate_speaker_accepts_envelope_fields():
+    meta = cabvoice.parse_frontmatter(FIXTURE_NOTE)
+    assert cabvoice.validate_speaker(meta) == []
+    meta["magnet_diameter_mm"] = None            # optional: the generator falls back to 185 mm
+    assert cabvoice.validate_speaker(meta) == []
+
+
+def test_validate_speaker_requires_frame_diameter_and_bool_flag():
+    meta = cabvoice.parse_frontmatter(FIXTURE_NOTE)
+    del meta["frame_diameter_mm"]
+    assert any("frame_diameter_mm" in e for e in cabvoice.validate_speaker(meta))
+    meta = cabvoice.parse_frontmatter(FIXTURE_NOTE)
+    meta["magnet_diameter_estimated"] = "yes"
+    assert any("magnet_diameter_estimated" in e for e in cabvoice.validate_speaker(meta))
+    meta = cabvoice.parse_frontmatter(FIXTURE_NOTE)
+    meta["magnet_diameter_mm"] = -5
+    assert any("magnet_diameter_mm" in e for e in cabvoice.validate_speaker(meta))
+
+
+def test_driver_carries_envelope_fields(drv):
+    assert drv.frame_diameter_mm == 309
+    assert drv.magnet_diameter_mm == 156
+    assert drv.magnet_diameter_estimated is False
+    assert _driver(magnet_diameter_mm=None).magnet_diameter_mm is None
+    assert _driver(magnet_diameter_estimated=True).magnet_diameter_estimated is True
+
+
+def test_voicing_speakers_block_carries_envelope_fields(drv, tone, tmp_path):
+    v = cabvoice.propose([drv], [16], "closed", tone)
+    cabvoice.write_voicing(v, tmp_path)
+    s = json.loads((tmp_path / "voicing.json").read_text())["speakers"][0]
+    assert s["frame_diameter_mm"] == 309
+    assert s["magnet_diameter_mm"] == 156
+    assert s["magnet_diameter_estimated"] is False
+
+
+def test_catalog_notes_carry_envelope_fields():
+    for slug in cabvoice.list_speakers(CATALOG):
+        d = cabvoice.load_speaker(slug, CATALOG)
+        assert 300.0 < d.frame_diameter_mm < 320.0, slug
+        assert d.magnet_diameter_mm is not None and 120.0 <= d.magnet_diameter_mm <= 190.0, slug
+        text = (CATALOG / f"{slug}.md").read_text()
+        data_notes = text.split("## Data notes", 1)[1].split("\n## ", 1)[0]
+        assert "[[speaker-envelopes-and-port-stock]]" in data_notes, slug
+        assert ("is estimated" in data_notes) == d.magnet_diameter_estimated, slug
+        if "2019/10/141.pdf" in text.split("\n---\n", 1)[0]:
+            assert "Voice Coil magazine" in data_notes, slug

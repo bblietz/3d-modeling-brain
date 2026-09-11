@@ -21,6 +21,9 @@ cutout_mm: 279.4
 bolt_circle_mm: 298.5
 bolt_count: 8
 depth_mm: 128.6
+frame_diameter_mm: 309.6
+magnet_diameter_mm: 150
+magnet_diameter_estimated: true
 weight_kg: 3.4
 data_status: estimated
 sources: [https://wgsusa.com/products/12-green-beret-25-watts]
@@ -45,6 +48,7 @@ WGS's 25 W Greenback style speaker.
 - WGS prints: Fs 125.3, Re 8.05, Le 0.34, Qes 1.35, Qms 9.52, Qts 1.18, Vas "10.5 cu ft", Sd 366.1, Mms 29.2, BL 11.7, SPL 99.63 dB, mounting as the ET65.
 - Assumptions: Vas 22.0 L: the printed 10.5 (liters, as for the Veteran 30; its printed Cms of 0.06 mm/N agrees within 7 percent) rescaled by (530 / 366.1)^2 = 2.096 to the assumed Sd; Sd 530 cm2; Xmax 0.8 mm; magnet ceramic. The printed Fs of 125 Hz is high for a Greenback style speaker (Celestion's G12M reads 75 Hz) and may be a new-unit measurement. Estimates.
 - Magnet type, Xmax 0.8 mm, Sd 530 cm2, and the Vas rescale are assumptions stated above, not WGS data; depth 128.6 mm and weight 3.4 kg are assumed as the ET65's, since WGS prints only "mounting as the ET65"; WGS's printed Cms (mm/N) is what confirms the printed Vas is in liters.
+- Magnet diameter 150 mm is estimated (by analogy to the Celestion G12M it clones, 145 to 150 mm band); frame diameter 309.6 mm is published. See [[speaker-envelopes-and-port-stock]].
 
 ## Field notes
 

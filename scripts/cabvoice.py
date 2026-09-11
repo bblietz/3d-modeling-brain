@@ -36,7 +36,7 @@ REQUIRED_FIELDS = (
     "name", "type", "brand", "model", "diameter_in", "impedance_ohm",
     "power_w", "sensitivity_db", "magnet", "fs_hz", "re_ohm",
     "cutout_mm", "bolt_circle_mm", "bolt_count", "depth_mm", "weight_kg",
-    "data_status", "sources", "status",
+    "frame_diameter_mm", "data_status", "sources", "status",
 )
 # May be null only when data_status is "missing".
 TS_FIELDS = ("qts", "qes", "qms", "vas_l", "xmax_mm", "sd_cm2")
@@ -44,7 +44,7 @@ TS_FIELDS = ("qts", "qes", "qms", "vas_l", "xmax_mm", "sd_cm2")
 POSITIVE_FIELDS = (
     "diameter_in", "power_w", "sensitivity_db", "fs_hz", "re_ohm",
     "cutout_mm", "bolt_circle_mm", "bolt_count", "depth_mm", "weight_kg", "le_mh",
-    "displacement_l",
+    "displacement_l", "frame_diameter_mm", "magnet_diameter_mm",
 ) + TS_FIELDS
 
 
@@ -89,6 +89,9 @@ def validate_speaker(meta: dict) -> list[str]:
             errors.append(f"{key} must be a positive number, got {val!r}")
     if status == "analog" and not meta.get("analog_of"):
         errors.append("analog_of is required when data_status is 'analog'")
+    est = meta.get("magnet_diameter_estimated")
+    if est is not None and not isinstance(est, bool):
+        errors.append(f"magnet_diameter_estimated must be true or false, got {est!r}")
     return errors
 
 
@@ -118,6 +121,9 @@ class Driver:
     weight_kg: float
     displacement_l: float
     displacement_estimated: bool
+    frame_diameter_mm: float
+    magnet_diameter_mm: float | None
+    magnet_diameter_estimated: bool
     data_status: str
     analog_of: str | None
     sources: list = field(default_factory=list)
@@ -156,6 +162,9 @@ def driver_from_meta(meta: dict) -> Driver:
         weight_kg=meta["weight_kg"],
         displacement_l=disp if disp is not None else DEFAULT_DISPLACEMENT_L,
         displacement_estimated=disp is None,
+        frame_diameter_mm=meta["frame_diameter_mm"],
+        magnet_diameter_mm=meta.get("magnet_diameter_mm"),
+        magnet_diameter_estimated=bool(meta.get("magnet_diameter_estimated", False)),
         data_status=meta["data_status"], analog_of=meta.get("analog_of"),
         sources=list(meta["sources"]),
     )
@@ -865,7 +874,10 @@ def _speaker_summary(driver: Driver, impedance) -> dict:
             "bolt_circle_mm": driver.bolt_circle_mm, "bolt_count": driver.bolt_count,
             "depth_mm": driver.depth_mm, "weight_kg": driver.weight_kg,
             "displacement_l": driver.displacement_l,
-            "displacement_estimated": driver.displacement_estimated}
+            "displacement_estimated": driver.displacement_estimated,
+            "frame_diameter_mm": driver.frame_diameter_mm,
+            "magnet_diameter_mm": driver.magnet_diameter_mm,
+            "magnet_diameter_estimated": driver.magnet_diameter_estimated}
 
 
 def _mm_to_in(dims) -> tuple:

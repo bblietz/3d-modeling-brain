@@ -21,6 +21,9 @@ cutout_mm: 277
 bolt_circle_mm: 293.5
 bolt_count: 8
 depth_mm: 121
+frame_diameter_mm: 307
+magnet_diameter_mm: 134
+magnet_diameter_estimated: false
 weight_kg: 3.3
 data_status: datasheet
 sources: [https://www.jensentone.com/specification-sheet/16, https://www.jensentone.com/dimensions/c12n-dimensional-drawing, https://www.jensentone.com/vintage-ceramic/c12n]
@@ -45,6 +48,7 @@ Vintage ceramic, 50 W (100 W musical), 38 mm coil, 810 g ferrite magnet.
 - 8 ohm T/S from the Jensen spec sheet: Fs 113, Re 6.05, Le 0.9, Qes 1.18, Qms 7.52, Qts 1.02, Vas 22.6 L, Sd 490.9, Xmax 1.0, Mms 29.9 g, BL 10.46. 4 ohm: Fs 113.3, Qts 0.82, Vas 22.8 L, 98.4 dB. 16 ohm: Fs 110, Re 12.5, Qts 1.06, Vas 28 L, 97.5 dB.
 - Mounting from the dimensional drawing: cutout 277.0, 8 holes 6.5 mm on 293.5, depth 121.0 mm, 3.3 kg. No displacement published; the engine assumes 1.5 L.
 - The quote and tone descriptors come from the Jensen product page (https://www.jensentone.com/vintage-ceramic/c12n); the closed-box remark follows from Qts 1.02 (Qtc 1.26 at 44 L, 1.18 at the 68 L clamp), a starting value.
+- Frame diameter 307 mm and magnet diameter 134 mm from the maker's drawing. See [[speaker-envelopes-and-port-stock]].
 
 ## Field notes
 

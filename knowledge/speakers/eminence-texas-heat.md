@@ -21,6 +21,9 @@ cutout_mm: 281.2
 bolt_circle_mm: 294.4
 bolt_count: 8
 depth_mm: 129.5
+frame_diameter_mm: 305.6
+magnet_diameter_mm: 150
+magnet_diameter_estimated: true
 weight_kg: 3.76
 displacement_l: 2.0
 data_status: datasheet
@@ -47,6 +50,7 @@ status: unverified-starting-values
 - The frontmatter holds the 8 ohm set; a 16 ohm choice is voiced with it until a per-impedance schema lands (see the model limits in [[speaker-cab-voicing]]).
 - Driver volume displaced 0.071 cu ft (2.0 L). Sealed and vented both acceptable. Depth 129.5 mm, 3.76 kg.
 - Bolt count 8 is not printed by Eminence (its sheets give hole diameter 6.4 mm and bolt circle 294.4 mm); standard Eminence 12 inch frame, a starting value to verify on the first unit.
+- Magnet diameter 150 mm is estimated (top of the 135 to 150 mm band from the published magnet weight and ferrite density); frame diameter 305.6 mm is published. See [[speaker-envelopes-and-port-stock]].
 
 ## Field notes
 
