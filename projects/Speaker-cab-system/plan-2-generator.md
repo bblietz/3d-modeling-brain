@@ -22,7 +22,7 @@ tags: [project, speaker-cab, plan, generator, cad]
 ## Global Constraints
 
 - Millimetres everywhere. Sheet tuples are (width, height, depth) as in voicing.json. The cab frame is X width centered at 0, Y depth with the external front face at 0 and positive toward the back, Z height with the floor at 0; blank positions are (x, y, z) min corners in that frame.
-- Locked engine values that the layout mirrors and asserts: `BAFFLE_MM 18.0`, `BACK_MM 12.0`, `RECESS_MM 20.0`, `CUTOUT_MARGIN_MM 25.0`, `MM_PER_INCH 25.4`, `PREDICTION_STATUS "unverified, ears only"`.
+- Locked engine values that the layout mirrors: `BAFFLE_MM 18.0`, `BACK_MM 12.0`, `RECESS_MM 20.0`, `CUTOUT_MARGIN_MM 25.0`, `MM_PER_INCH 25.4` (each asserted against `cabvoice` at import) and `PREDICTION_STATUS "unverified, ears only"` (not asserted at import: the `sheet` check mirrors it and warns when the sheet's value differs from the engine's).
 - New engine values (Task 2): `PORT_TUBE_ID_MM (52.0, 77.3, 101.5, 153.2)`, `PORT_TUBE_OD_MM {52.0: 60.3, 77.3: 88.9, 101.5: 114.3, 153.2: 168.3}`, `MAX_PORT_DIAMETER_MM 153.2` (was 150.0), `DEFAULT_PORT_DIAMETER_MM 77.3` (was 75.0), `SHELL_MARGIN_MM 44.0`, `CUTOUT_GAP_MM 68.0`, `HARDWOOD_FLOOR_EXTRA_MM 2.0`; `min_internal_width_mm(n, cutout) = n * cutout + (n - 1) * 68 + 2 * 44`; `min_internal_height_mm(cutout, slot_h) = cutout + 88 (+ slot_h + 18 with a slot)`; both floors plus 2 on hardwood and re-applied after every rescale; `volumes.inside_parts_l` (cleats, stiffeners, shelf, cheeks, brace, tube wall, flange ring) added to gross like `brace_l`; `volumes.port_l` is the port air inside the gross box.
 - Layout constants (Task 4, names exact): `PANEL_MM {"tolex": 18.0, "hardwood": 19.0}`, `CLEAT_MM 18.0`, `GRILL_STRIP_T_MM 12.0`, `GRILL_STRIP_W_MM 40.0`, `GRILL_CLEARANCE_MM 2.0`, `FLANGE_T_MM 5.0`, `SPACER_MM 5.0`, `BRACE_MM (18.0, 60.0)`, `DIVIDER_MM 18.0`, `STIFFENER_MM (18.0, 40.0)`, `SPAN_MAX_MM 450.0`, `BOLT_HOLE_MM 6.5`, `DADO_MM 6.0`, `BASKET_LEN_MM 100.0`, `COVER_MM 12.0`, `GENERIC_MAGNET_MM 185.0`, `CLEARANCE_MM 25.0`, `JACK_CLEAR_MM 25.0`, `HARDWARE_KG 1.0`, `TOLEX_WASTE 1.15`, `ROLL_MM {54: 1371.6, 32: 812.8}`, `STOCK_SHEET_MM (2440.0, 1220.0)`, `STOCK_HARDWOOD_MM (3050.0, 600.0)`, `FLANGE_RING_T_MM 12.0`, `FLANGE_RING_EXTRA_MM 60.0`, `BIRCH_DENSITY 680.0`, `SPECIES_DENSITY {"black walnut": 610.0, "black cherry": 560.0, "hard maple": 705.0, "sapele": 670.0}`.
 - Joinery: fingers half the shell thickness, odd count, both ends full, front finger on top and bottom, sides start with a gap; dovetails hardwood only, tails on the sides, pins on top and bottom, half-pins both ends, slope 1:8, pin half the thickness, tails about 30 mm. Cut list rows for comb panels are rectangular blanks (`dims`) with the schedule in the note.
@@ -1691,7 +1691,9 @@ def test_constants_match_engine():
     assert L.RECESS_MM == cabvoice.RECESS_MM == 20.0
     assert L.BAFFLE_MM == cabvoice.BAFFLE_MM == 18.0
     assert L.BACK_MM == cabvoice.BACK_MM == 12.0
-    assert L.SHELL_MARGIN_MM == 44.0 and L.CUTOUT_GAP_MM == 68.0 and L.CUTOUT_MARGIN_MM == 25.0
+    assert L.CUTOUT_MARGIN_MM == cabvoice.CUTOUT_MARGIN_MM == 25.0
+    assert L.MM_PER_INCH == cabvoice.MM_PER_INCH == 25.4
+    assert L.SHELL_MARGIN_MM == 44.0 and L.CUTOUT_GAP_MM == 68.0
     assert set(L.PORT_TUBE_OD_MM) == {52.0, 77.3, 101.5, 153.2}
 
 
@@ -1781,6 +1783,13 @@ def test_order_from_errors():
         L.order_from(two, L.Aesthetics())
     spec = L.order_from(good, L.Aesthetics())
     assert spec.shell_mm == 18.0 and spec.port.count == 1 and spec.closed
+
+
+def test_order_from_port_missing_key_is_a_value_error():
+    bad = sheet(port="round")
+    del bad["port"]["count"]
+    with pytest.raises(ValueError, match="count"):
+        L.order_from(bad, L.Aesthetics())
 
 
 def test_shell_blanks_tolex_and_hardwood():
@@ -1890,6 +1899,8 @@ YARD_M = 0.9144
 assert RECESS_MM == cabvoice.RECESS_MM
 assert BAFFLE_MM == cabvoice.BAFFLE_MM
 assert BACK_MM == cabvoice.BACK_MM
+assert CUTOUT_MARGIN_MM == cabvoice.CUTOUT_MARGIN_MM
+assert MM_PER_INCH == cabvoice.MM_PER_INCH
 
 JOINTS = ("finger", "dovetail")
 BAFFLE_MOUNTS = ("floating", "fixed")
@@ -2220,6 +2231,16 @@ def _speaker_from(s: dict) -> Speaker:
         magnet_diameter_estimated=bool(s["magnet_diameter_estimated"]))
 
 
+def _port_from(p: dict) -> PortSpec:
+    return PortSpec(
+        shape=p["shape"],
+        diameter_mm=None if p["diameter_mm"] is None else float(p["diameter_mm"]),
+        slot_w_mm=None if p["slot_w_mm"] is None else float(p["slot_w_mm"]),
+        slot_h_mm=None if p["slot_h_mm"] is None else float(p["slot_h_mm"]),
+        length_mm=float(p["length_mm"]), location=p["location"],
+        count=int(p["count"]))
+
+
 def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
     """CabSpec from a voicing.json dict and the aesthetics block.
     ValueError on sheet blockers, missing keys, a dovetail on the tolex line,
@@ -2244,6 +2265,7 @@ def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
         jack_config = enc["jack_config"]
         open_fraction = enc["open_fraction"]
         port = voicing["port"]
+        port_spec = None if port is None else _port_from(port)
         net_total = float(vols["net_total_l"])
         per_chamber = float(vols["per_chamber_net_l"])
         inside = vols.get("inside_parts_l")
@@ -2265,15 +2287,7 @@ def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
         raise ValueError(f"unknown enclosure type {enclosure_type!r}")
     if (back_mm, baffle_mm, recess_mm) != (BACK_MM, BAFFLE_MM, RECESS_MM):
         raise ValueError("sheet construction thicknesses differ from the layout constants")
-    port_spec = None
-    if port is not None:
-        port_spec = PortSpec(
-            shape=port["shape"],
-            diameter_mm=None if port["diameter_mm"] is None else float(port["diameter_mm"]),
-            slot_w_mm=None if port["slot_w_mm"] is None else float(port["slot_w_mm"]),
-            slot_h_mm=None if port["slot_h_mm"] is None else float(port["slot_h_mm"]),
-            length_mm=float(port["length_mm"]), location=port["location"],
-            count=int(port["count"]))
+    if port_spec is not None:
         if port_spec.shape == "slot" and (port_spec.slot_w_mm is None or port_spec.slot_h_mm is None):
             raise ValueError("slot port without slot dimensions")
         if port_spec.shape == "round" and port_spec.diameter_mm is None:
@@ -2456,7 +2470,7 @@ def shell_blanks(spec: CabSpec) -> list:
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cablayout.py -q`
-Expected: `9 passed`
+Expected: `10 passed`
 
 - [ ] **Step 5: Commit**
 
@@ -2897,7 +2911,7 @@ def stiffener_blanks(spec: CabSpec, fr: Frame) -> tuple:
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cablayout.py -q`
-Expected: `16 passed`
+Expected: `17 passed`
 
 - [ ] **Step 5: Commit**
 
@@ -3449,7 +3463,7 @@ def trim_hardware(spec: CabSpec, fr: Frame) -> list:
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cablayout.py -q`
-Expected: `24 passed`
+Expected: `25 passed`
 
 - [ ] **Step 5: Commit**
 
@@ -3540,6 +3554,18 @@ def test_check_names_and_site_box_verdicts():
     assert by["magnet to back"].level == "pass" and "112.4" in by["magnet to back"].message
     assert by["spans"].level == "warn" and by["stock"].level == "pass"
     assert by["part count"].message == f"{lay.part_count} parts"
+
+
+def test_sheet_check_warns_when_prediction_status_differs():
+    spec = spec_for(port="round", net=42.5)
+    assert {c.name: c for c in L.check_layout(L.layout(spec), spec)}["sheet"].level == "pass"
+    stale = sheet(port="round", net=42.5)
+    stale["prediction_status"] = "calibrated 2026-09-10"
+    spec = L.order_from(stale, L.Aesthetics())
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["sheet"].level == "warn"
+    assert by["sheet"].message == (f"sheet prediction_status 'calibrated 2026-09-10' differs "
+                                   f"from the engine's '{cabvoice.PREDICTION_STATUS}'")
 
 
 def test_checks_catch_violations():
@@ -3886,7 +3912,11 @@ def _stock_fits(blank: Blank, spec: CabSpec) -> bool:
 def check_layout(lay: Layout, spec: CabSpec) -> list:
     fr = frame(spec)
     checks = []
-    checks.append(Check("sheet", "pass", f"prediction {spec.prediction_status}; no blockers on the sheet"))
+    if spec.prediction_status == cabvoice.PREDICTION_STATUS:
+        checks.append(Check("sheet", "pass", f"prediction {spec.prediction_status}; no blockers on the sheet"))
+    else:
+        checks.append(Check("sheet", "warn", f"sheet prediction_status '{spec.prediction_status}' differs "
+                                             f"from the engine's '{cabvoice.PREDICTION_STATUS}'"))
     # net volume
     msgs, level = [], "pass"
     for ch in lay.chambers:
@@ -4062,7 +4092,7 @@ def layout_report(lay: Layout, checks: list) -> dict:
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cablayout.py -q`
-Expected: `34 passed` in under 60 seconds.
+Expected: `36 passed` in under 60 seconds.
 
 - [ ] **Step 5: Commit**
 

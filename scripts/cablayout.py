@@ -77,6 +77,8 @@ YARD_M = 0.9144
 assert RECESS_MM == cabvoice.RECESS_MM
 assert BAFFLE_MM == cabvoice.BAFFLE_MM
 assert BACK_MM == cabvoice.BACK_MM
+assert CUTOUT_MARGIN_MM == cabvoice.CUTOUT_MARGIN_MM
+assert MM_PER_INCH == cabvoice.MM_PER_INCH
 
 JOINTS = ("finger", "dovetail")
 BAFFLE_MOUNTS = ("floating", "fixed")
@@ -407,6 +409,16 @@ def _speaker_from(s: dict) -> Speaker:
         magnet_diameter_estimated=bool(s["magnet_diameter_estimated"]))
 
 
+def _port_from(p: dict) -> PortSpec:
+    return PortSpec(
+        shape=p["shape"],
+        diameter_mm=None if p["diameter_mm"] is None else float(p["diameter_mm"]),
+        slot_w_mm=None if p["slot_w_mm"] is None else float(p["slot_w_mm"]),
+        slot_h_mm=None if p["slot_h_mm"] is None else float(p["slot_h_mm"]),
+        length_mm=float(p["length_mm"]), location=p["location"],
+        count=int(p["count"]))
+
+
 def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
     """CabSpec from a voicing.json dict and the aesthetics block.
     ValueError on sheet blockers, missing keys, a dovetail on the tolex line,
@@ -431,6 +443,7 @@ def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
         jack_config = enc["jack_config"]
         open_fraction = enc["open_fraction"]
         port = voicing["port"]
+        port_spec = None if port is None else _port_from(port)
         net_total = float(vols["net_total_l"])
         per_chamber = float(vols["per_chamber_net_l"])
         inside = vols.get("inside_parts_l")
@@ -452,15 +465,7 @@ def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
         raise ValueError(f"unknown enclosure type {enclosure_type!r}")
     if (back_mm, baffle_mm, recess_mm) != (BACK_MM, BAFFLE_MM, RECESS_MM):
         raise ValueError("sheet construction thicknesses differ from the layout constants")
-    port_spec = None
-    if port is not None:
-        port_spec = PortSpec(
-            shape=port["shape"],
-            diameter_mm=None if port["diameter_mm"] is None else float(port["diameter_mm"]),
-            slot_w_mm=None if port["slot_w_mm"] is None else float(port["slot_w_mm"]),
-            slot_h_mm=None if port["slot_h_mm"] is None else float(port["slot_h_mm"]),
-            length_mm=float(port["length_mm"]), location=port["location"],
-            count=int(port["count"]))
+    if port_spec is not None:
         if port_spec.shape == "slot" and (port_spec.slot_w_mm is None or port_spec.slot_h_mm is None):
             raise ValueError("slot port without slot dimensions")
         if port_spec.shape == "round" and port_spec.diameter_mm is None:

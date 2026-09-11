@@ -55,7 +55,9 @@ def test_constants_match_engine():
     assert L.RECESS_MM == cabvoice.RECESS_MM == 20.0
     assert L.BAFFLE_MM == cabvoice.BAFFLE_MM == 18.0
     assert L.BACK_MM == cabvoice.BACK_MM == 12.0
-    assert L.SHELL_MARGIN_MM == 44.0 and L.CUTOUT_GAP_MM == 68.0 and L.CUTOUT_MARGIN_MM == 25.0
+    assert L.CUTOUT_MARGIN_MM == cabvoice.CUTOUT_MARGIN_MM == 25.0
+    assert L.MM_PER_INCH == cabvoice.MM_PER_INCH == 25.4
+    assert L.SHELL_MARGIN_MM == 44.0 and L.CUTOUT_GAP_MM == 68.0
     assert set(L.PORT_TUBE_OD_MM) == {52.0, 77.3, 101.5, 153.2}
 
 
@@ -145,6 +147,13 @@ def test_order_from_errors():
         L.order_from(two, L.Aesthetics())
     spec = L.order_from(good, L.Aesthetics())
     assert spec.shell_mm == 18.0 and spec.port.count == 1 and spec.closed
+
+
+def test_order_from_port_missing_key_is_a_value_error():
+    bad = sheet(port="round")
+    del bad["port"]["count"]
+    with pytest.raises(ValueError, match="count"):
+        L.order_from(bad, L.Aesthetics())
 
 
 def test_shell_blanks_tolex_and_hardwood():
@@ -492,6 +501,18 @@ def test_check_names_and_site_box_verdicts():
     assert by["magnet to back"].level == "pass" and "112.4" in by["magnet to back"].message
     assert by["spans"].level == "warn" and by["stock"].level == "pass"
     assert by["part count"].message == f"{lay.part_count} parts"
+
+
+def test_sheet_check_warns_when_prediction_status_differs():
+    spec = spec_for(port="round", net=42.5)
+    assert {c.name: c for c in L.check_layout(L.layout(spec), spec)}["sheet"].level == "pass"
+    stale = sheet(port="round", net=42.5)
+    stale["prediction_status"] = "calibrated 2026-09-10"
+    spec = L.order_from(stale, L.Aesthetics())
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["sheet"].level == "warn"
+    assert by["sheet"].message == (f"sheet prediction_status 'calibrated 2026-09-10' differs "
+                                   f"from the engine's '{cabvoice.PREDICTION_STATUS}'")
 
 
 def test_checks_catch_violations():
