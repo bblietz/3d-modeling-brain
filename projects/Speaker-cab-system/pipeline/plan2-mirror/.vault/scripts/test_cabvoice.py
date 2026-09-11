@@ -874,10 +874,13 @@ def test_every_catalog_speaker_proposes_without_exception(tone):
 # ---- Final review: propose versus evaluate, calibration table -----------
 
 def _matrix_params():
-    return [pytest.param(slug, enclosure, jack, n, id=f"{slug}-{enclosure}-{jack}-{n}")
-            for slug in cabvoice.list_speakers(CATALOG)
-            for enclosure in cabvoice.ENCLOSURE_TYPES
+    rows = [(enclosure, jack, n, None) for enclosure in cabvoice.ENCLOSURE_TYPES
             for jack, n in (("mono", 1), ("mono", 2), ("stereo", 2))]
+    rows.append(("closed-ported", "mono", 1, (352.0, 40.0)))    # a slot port, evaluated as built
+    return [pytest.param(slug, enclosure, jack, n, slot,
+                         id=f"{slug}-{enclosure}-{jack}-{n}" + ("-slot" if slot else ""))
+            for slug in cabvoice.list_speakers(CATALOG)
+            for enclosure, jack, n, slot in rows]
 
 
 def _port_from_json(port_dict):
@@ -890,13 +893,15 @@ def _port_from_json(port_dict):
     return port
 
 
-@pytest.mark.parametrize("slug,enclosure,jack,n", _matrix_params())
-def test_evaluate_reproduces_propose(tone, slug, enclosure, jack, n):
+@pytest.mark.parametrize("slug,enclosure,jack,n,slot", _matrix_params())
+def test_evaluate_reproduces_propose(tone, slug, enclosure, jack, n, slot):
     d = cabvoice.load_speaker(slug, CATALOG)
     z = 16 if 16 in d.impedance_ohm else d.impedance_ohm[0]
-    p = cabvoice.propose([d] * n, [z] * n, enclosure, tone, jack_config=jack, name=slug)
+    c = cabvoice.Constraints(port_slot_mm=slot)
+    p = cabvoice.propose([d] * n, [z] * n, enclosure, tone, jack_config=jack, constraints=c,
+                         name=slug)
     e = cabvoice.evaluate([d] * n, [z] * n, enclosure, tone, p.box["internal_mm"],
-                          jack_config=jack, port=_port_from_json(p.port), name=slug)
+                          jack_config=jack, port=_port_from_json(p.port), constraints=c, name=slug)
     for key, tol in (("fb_hz", 0.05), ("f3_hz", 0.05), ("peak_db", 0.01), ("qtc", 0.01)):
         a, b = p.prediction.get(key), e.prediction.get(key)
         assert (a is None) == (b is None), key
@@ -1190,14 +1195,20 @@ def test_inside_parts_site_box_by_hand():
     two = cabvoice.inside_parts_l(wide, "closed", 2, 1, "mono", None, "tolex")
     one_wide = cabvoice.inside_parts_l(wide, "closed", 1, 1, "mono", None, "tolex")
     assert two - one_wide == pytest.approx(18 * 60 * 421.2 / 1e6 - 2 * 18 * 40 * 193.4 / 1e6, abs=0.01)
-    # a slot: shelf full width x length x 18, no bottom baffle cleat, shorter side cleats
+    # a slot: shelf full width x length x 18 less its 18 mm through the baffle (the shelf
+    # starts at the baffle face), no bottom baffle cleat, shorter side cleats
     slot = cabvoice.port_dims(1.0, 1.0, slot_mm=(472.0, 40.0))
     slot.length_mm = 120.0
     slotted = cabvoice.inside_parts_l(site, "closed-ported", 1, 1, "mono", slot, "tolex")
-    shelf = 472 * 120 * 18 / 1e6
+    shelf = 472 * (120 - 18) * 18 / 1e6
     lost_cleats = (472 * 18 * 18 + 2 * 40 * 18 * 18) / 1e6      # bottom cleat, 40 mm off each side cleat
     lost_bottom_stiffener = 18 * 40 * (193.4 - (229.4 - 120.0)) / 1e6
     assert slotted == pytest.approx(closed + shelf - lost_cleats - lost_bottom_stiffener, abs=0.01)
+    # a narrower slot adds two 60 mm cheeks, the same 102 mm inside the box
+    narrow = cabvoice.port_dims(1.0, 1.0, slot_mm=(352.0, 40.0))
+    narrow.length_mm = 120.0
+    cheeked = cabvoice.inside_parts_l(site, "closed-ported", 1, 1, "mono", narrow, "tolex")
+    assert cheeked - slotted == pytest.approx(2 * 60 * (120 - 18) * 40 / 1e6, abs=1e-9)
 
 
 def test_evaluate_site_box_reports_inside_parts(drv, tone):
@@ -1209,3 +1220,62 @@ def test_evaluate_site_box_reports_inside_parts(drv, tone):
     assert v.volumes["net_total_l"] == pytest.approx(42.1, abs=0.05)
     md = cabvoice.render_markdown(v)
     assert "| Inside parts (cleats, stiffeners, shelf, ring) | 1.80 L |" in md
+
+
+@pytest.mark.parametrize("jack,n,slot,max_external", [
+    pytest.param("mono", 1, None, (508.0, 457.2, 279.4), id="1x12-round"),
+    pytest.param("mono", 2, None, (800.0, 500.0, 350.0), id="mono-2x12-round"),
+    pytest.param("stereo", 2, None, (800.0, 500.0, 350.0), id="stereo-2x12-round"),
+    pytest.param("mono", 1, (472.0, 25.0), (508.0, 457.2, 279.4), id="1x12-slot"),
+    pytest.param("mono", 2, (352.0, 40.0), (800.0, 500.0, 350.0), id="mono-2x12-slot"),
+    pytest.param("stereo", 2, (352.0, 40.0), (800.0, 500.0, 350.0), id="stereo-2x12-slot"),
+])
+def test_propose_limited_ported_volumes_reconcile(drv, tone, jack, n, slot, max_external):
+    # "big" asks 68 L per driver, more than these limits hold: the size limit wins and the
+    # net must follow the port and inside parts as finally sized, not the previous pass's
+    tone["low_end"] = "big"
+    tone["impedance_options_ohm"] = [16]
+    c = cabvoice.Constraints(max_external_mm=max_external, port_slot_mm=slot)
+    v = cabvoice.propose([drv] * n, [16] * n, "closed-ported", tone, jack_config=jack, constraints=c)
+    assert any("cannot fit the size limit" in b for b in v.blockers)
+    vol = v.volumes
+    parts = (vol["net_total_l"] + vol["displacement_l"] + vol["brace_l"] + vol["port_l"]
+             + vol["divider_l"] + vol["inside_parts_l"])
+    assert vol["gross_l"] == pytest.approx(parts, abs=0.01)
+    # the port is tuned for the chamber net as reported
+    tuned = cabvoice.port_tuning_hz(vol["per_chamber_net_l"] / v.port["count"] / 1e3,
+                                    v.port["area_cm2"] / 1e4, v.port["length_mm"] / 1e3)
+    assert v.prediction["fb_hz"] == pytest.approx(tuned, abs=1e-9)
+    # both floors hold against the port as finally sized
+    w, h, _ = v.box["internal_mm"]
+    assert w >= cabvoice.min_internal_width_mm(n, drv.cutout_mm) - 1e-6
+    slot_h = v.port["slot_h_mm"] if v.port["shape"] == "slot" else None
+    assert h >= cabvoice.min_internal_height_mm(drv.cutout_mm, slot_h) - 1e-6
+
+
+def test_size_port_clamps_the_start_to_the_largest_tube(drv):
+    p = cabvoice.size_port(drv, 40.0, 60.0, diameter_mm=200.0)
+    assert p.diameter_mm == 153.2
+    assert not any("snapped" in w for w in p.warnings)      # clamped before the loop, not snapped down
+
+
+def test_inside_parts_tube_wall_tolerates_float_noise():
+    site = (472.0, 421.2, 229.4)
+    exact = cabvoice.port_dims(1.0, 1.0, diameter_mm=101.5)
+    noisy = cabvoice.port_dims(1.0, 1.0, diameter_mm=101.5 + 1e-6)
+    exact.length_mm = noisy.length_mm = 40.0
+    a = cabvoice.inside_parts_l(site, "closed-ported", 1, 1, "mono", exact, "tolex")
+    b = cabvoice.inside_parts_l(site, "closed-ported", 1, 1, "mono", noisy, "tolex")
+    assert b == pytest.approx(a, abs=1e-6)
+
+
+def test_inside_parts_uses_the_divider_thickness(drv, tone):
+    wide = (722.0, 421.2, 229.4)
+    thin = cabvoice.inside_parts_l(wide, "closed", 2, 2, "stereo", None, "tolex")
+    thick = cabvoice.inside_parts_l(wide, "closed", 2, 2, "stereo", None, "tolex", panel_mm=19.0)
+    # a 19 mm divider takes 0.5 mm off each of the eight 18 x 18 cleat runs across the chambers
+    assert thin - thick == pytest.approx(8 * 0.5 * 18 * 18 / 1e6, abs=1e-9)
+    tone["impedance_options_ohm"] = [16]
+    v = cabvoice.evaluate([drv, drv], [16, 16], "closed", tone, wide, jack_config="stereo",
+                          constraints=cabvoice.Constraints(panel_mm=19.0))
+    assert v.volumes["inside_parts_l"] == pytest.approx(thick, abs=1e-9)

@@ -435,11 +435,14 @@ def size_port(driver: Driver, vb_l: float, fb_hz: float,
               slot_mm: tuple | None = None) -> Port:
     """Port for (vb, fb), enlarged in 10 percent area steps until the
     worst-case air speed is under PORT_V_MAX and the physical length is at
-    least MIN_PORT_LENGTH_MM. Stops at the MAX_PORT_DIAMETER_MM equivalent
-    area and leaves the warnings in place for the caller. A round port is
-    then snapped up to the next purchasable tube (PORT_TUBE_ID_MM) and
-    re-solved, so the sheet describes a tube that can be bought."""
+    least MIN_PORT_LENGTH_MM. A round start above MAX_PORT_DIAMETER_MM is
+    clamped to it first. Stops at the MAX_PORT_DIAMETER_MM equivalent area
+    and leaves the warnings in place for the caller. A round port is then
+    snapped up to the next purchasable tube (PORT_TUBE_ID_MM) and re-solved,
+    so the sheet describes a tube that can be bought."""
     max_area_cm2 = math.pi * (MAX_PORT_DIAMETER_MM / 20.0) ** 2
+    if not slot_mm:
+        diameter_mm = min(diameter_mm, MAX_PORT_DIAMETER_MM)
 
     def build(dia, slot):
         p = port_dims(vb_l, fb_hz, diameter_mm=None if slot else dia, slot_mm=slot)
@@ -824,16 +827,20 @@ def _port_inside_l(port: Port) -> float:
 
 def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int,
                    jack_config: str, port: Port | None, line: str,
-                   port_count: int | None = None) -> float:
-    """Liters taken by the parts the generator builds inside the air box that
-    the brace, divider, and port terms do not carry, estimated the way
-    scripts/cablayout.py builds them: 18 x 18 cleats along the baffle (top,
-    bottom unless a slot port, two outer sides) and the back (closed: a full
-    frame; open: top, bottom, and the panel-height side cleats), the mono 2x12
-    center brace, 18 x 40 stiffeners across any shell or back span over 450 mm
-    between glued members (the back one stops above the jack plate), the slot
-    shelf and cheeks, and a round port's tube wall and flange ring. Every part
-    is birch on both lines; line is accepted for the call signature."""
+                   port_count: int | None = None, panel_mm: float = PANEL_MM) -> float:
+    """Liters taken by the parts the generator builds inside the air box,
+    estimated the way scripts/cablayout.py builds them: 18 x 18 cleats along
+    the baffle (top, bottom unless a slot port, two outer sides) and the back
+    (closed: a full frame; open: top, bottom, and the panel-height side
+    cleats), the modeled center brace of a mono 2x12 (Constraints.brace_l and
+    --brace-l mean extra bracing beyond it), 18 x 40 stiffeners across any
+    shell or back span over 450 mm between glued members (the back one stops
+    above the jack plate), the slot shelf and cheeks behind the baffle (the
+    shelf starts at the baffle face, so its 18 mm through the baffle lies
+    outside the box), and a round port's tube wall and flange ring. The
+    divider and the port air have their own volume terms. Every part is birch
+    on both lines; line and jack_config are accepted for symmetry with the
+    callers and unused. panel_mm is the divider thickness of a stereo box."""
     w, h, d = internal_mm
     per_chamber = driver_count // chambers
     count = port_count or per_chamber
@@ -841,7 +848,7 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
     slot = port is not None and port.shape == "slot"
     slot_h = port.slot_h_mm if slot else 0.0
     shelf = port.length_mm if slot else 0.0
-    w_c = (w - PANEL_MM) / 2.0 if chambers == 2 else w
+    w_c = (w - panel_mm) / 2.0 if chambers == 2 else w
     c2 = CLEAT_MM ** 2
     total = 0.0
     # baffle cleats (floating baffle, the default)
@@ -887,15 +894,17 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
     if slot:
         avail = w_c - (count - 1) * PANEL_MM
         cheek = (avail - count * port.slot_w_mm) / 2.0
-        per_chamber_parts = w_c * shelf * BAFFLE_MM + (count - 1) * PANEL_MM * shelf * slot_h
+        inside = max(shelf - BAFFLE_MM, 0.0)      # the shelf's run through the baffle is outside
+        per_chamber_parts = w_c * inside * BAFFLE_MM + (count - 1) * PANEL_MM * inside * slot_h
         if cheek > 0.5:
-            per_chamber_parts += 2 * cheek * shelf * slot_h
+            per_chamber_parts += 2 * cheek * inside * slot_h
         total += chambers * per_chamber_parts
     # round port: tube wall inside the box and the flange ring (the ring is the
     # whole port when the tube would not reach past the back panel)
     if port is not None and port.shape == "round":
         id_mm, length = port.diameter_mm, port.length_mm
-        od = PORT_TUBE_OD_MM.get(id_mm, id_mm + 2 * TUBE_WALL_FALLBACK_MM)
+        od = next((od for tube, od in PORT_TUBE_OD_MM.items() if abs(tube - id_mm) < 0.05),
+                  id_mm + 2 * TUBE_WALL_FALLBACK_MM)
         ring_od = od + FLANGE_RING_EXTRA_MM
         if length > 2 * BACK_MM:
             tube = math.pi / 4.0 * (od ** 2 - id_mm ** 2) * (length - BACK_MM)
@@ -955,7 +964,7 @@ class Constraints:
     back_mm: float = BACK_MM
     baffle_mm: float = BAFFLE_MM
     recess_mm: float = RECESS_MM
-    brace_l: float = 0.0
+    brace_l: float = 0.0               # extra bracing beyond the modeled mono 2x12 center brace
     port_diameter_mm: float = DEFAULT_PORT_DIAMETER_MM
     port_slot_mm: tuple | None = None
     port_count: int | None = None      # None: one port per driver in the chamber
@@ -1254,8 +1263,9 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
     port_count = c.port_count or per_chamber_drivers
     net_target = net_total
     port, port_l, divider_l, inside_l, box, limited = None, 0.0, 0.0, 0.0, None, False
-    last_gross = None
-    for _ in range(10):   # until the gross settles: port, divider, and inside parts depend on the box
+    last = None   # (gross, parts) of the previous pass
+    for _ in range(10):   # until the box and its parts settle: port, divider, and inside parts
+                          # depend on the box, and the net follows them when the size limit wins
         gross = net_total + displacement + c.brace_l + port_l * chambers + divider_l + inside_l
         slot_h = None
         if enclosure == "closed-ported" and c.port_slot_mm:
@@ -1269,6 +1279,9 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
             # The size limit wins: voice the box that fits and present the trade-off.
             box.warnings = [w for w in box.warnings if not w.startswith("cannot reach")]
             limited = True
+        if abs(box.gross_l - gross) > 0.001:
+            # The net is what the box holds when the limit pins it under the request
+            # (dims_for_volume passes a shortfall under 0.1 percent without the warning).
             net_total = (box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
                          - inside_l)
             chamber_net = net_total / chambers
@@ -1279,10 +1292,13 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
                              slot_mm=c.port_slot_mm)
             port_l = _port_inside_l(port) * port_count
         inside_l = inside_parts_l(box.internal_mm, enclosure, count, chambers, jack_config, port,
-                                  c.line, port_count)
-        if last_gross is not None and abs(box.gross_l - last_gross) < 0.001:
+                                  c.line, port_count, panel_mm=c.panel_mm)
+        parts = port_l * chambers + divider_l + inside_l
+        floor_held = slot_h is None or abs(port.slot_h_mm - slot_h) < 1e-9
+        if (last is not None and floor_held and abs(box.gross_l - last[0]) < 0.001
+                and abs(parts - last[1]) < 0.001):
             break
-        last_gross = box.gross_l
+        last = (box.gross_l, parts)
     warnings.extend(box.warnings)
     chamber_w = _chamber_w(chambers, w_int, c)
     port_dict = None
@@ -1335,7 +1351,7 @@ def evaluate(drivers: list, impedances: list, enclosure: str, tone: dict,
     if port is not None:
         port_l = _port_inside_l(port) * port_count
     inside_l = inside_parts_l(box.internal_mm, enclosure, count, chambers, jack_config, port,
-                              c.line, port_count)
+                              c.line, port_count, panel_mm=c.panel_mm)
     net_total = (box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
                  - inside_l)
     if net_total <= 0:
@@ -1509,7 +1525,9 @@ def _build_parser():
         p.add_argument("--enclosure", choices=ENCLOSURE_TYPES, required=True)
         p.add_argument("--tone", required=True, help="tone target JSON file")
         p.add_argument("--jack", choices=JACK_CONFIGS, default="mono")
-        p.add_argument("--brace-l", type=float, default=0.0)
+        p.add_argument("--brace-l", type=float, default=0.0,
+                       help="liters of extra bracing beyond the modeled mono 2x12 center brace, "
+                            "which the inside parts already carry")
         p.add_argument("--line", choices=LINES, default="tolex")
         p.add_argument("--species", default=None)
         p.add_argument("--accept-low-headroom", action="store_true")

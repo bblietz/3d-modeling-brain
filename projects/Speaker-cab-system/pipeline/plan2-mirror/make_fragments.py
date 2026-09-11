@@ -136,7 +136,8 @@ t2_tests_mod = [symbol(TESTS, n) for n in (
     "test_propose_closed_ported_1x12", "test_propose_stereo_2x12_closed",
     "test_propose_stereo_volumes_reconcile", "test_propose_impossible_box_presents_tradeoff",
     "test_evaluate_site_default_closed", "test_evaluate_ported_reports_tuning_from_port",
-    "test_evaluate_reproduces_propose", "test_propose_mono_2x12_uses_one_port_per_driver")]
+    "_matrix_params", "test_evaluate_reproduces_propose",
+    "test_propose_mono_2x12_uses_one_port_per_driver")]
 t2_engine = [
     ("port constants (replace the two lines `MIN_PORT_LENGTH_MM = 20.0` and `MAX_PORT_DIAMETER_MM = 150.0`)",
      between(ENGINE, "MIN_PORT_LENGTH_MM = 20.0", "\n\n@dataclass\nclass Port")),
@@ -167,19 +168,19 @@ task2 = f"""### Task 2: Engine touches: tube table, shell margins, height floor
 
 **Files:**
 - Modify: `scripts/cabvoice.py` (port constants, `snap_tube_id`, `size_port`, box and inside-part constants, `min_internal_width_mm`, `min_internal_height_mm`, `dims_for_volume`, `_port_inside_l`, `inside_parts_l`, `Constraints`, `_volumes`, `propose`, `evaluate`, `render_markdown`, `_build_parser`)
-- Modify: `scripts/test_cabvoice.py` (ten existing tests, new Task 2 tests)
+- Modify: `scripts/test_cabvoice.py` (ten existing tests and the `_matrix_params` helper, new Task 2 tests)
 - Modify: `knowledge/speaker-cab-voicing.md` (calibration table regenerated)
 - Mirror source (byte-identical): `projects/Speaker-cab-system/pipeline/plan2-mirror/.vault/scripts/cabvoice.py`, `.vault/scripts/test_cabvoice.py`, `plan2-mirror/.vault/plan/calibration_table.md`
 
 **Interfaces:**
 - Consumes: Task 1's engine (frame and magnet fields present).
-- Produces: `PORT_TUBE_ID_MM = (52.0, 77.3, 101.5, 153.2)`, `PORT_TUBE_OD_MM` dict, `MAX_PORT_DIAMETER_MM = 153.2`, `DEFAULT_PORT_DIAMETER_MM = 77.3`, `snap_tube_id(diameter_mm) -> float`, `SHELL_MARGIN_MM = 44.0`, `CUTOUT_GAP_MM = 68.0`, `CUTOUT_MARGIN_MM = 25.0` (kept), `HARDWOOD_FLOOR_EXTRA_MM = 2.0`, the inside-part constants (`CLEAT_MM`, `STIFFENER_MM`, `SPAN_MAX_MM`, `BRACE_MM`, `JACK_PLATE_H_MM`, `JACK_CLEAR_MM`, `FLANGE_RING_T_MM`, `FLANGE_RING_EXTRA_MM`, `TUBE_WALL_FALLBACK_MM`), `min_internal_width_mm(driver_count, cutout_mm)`, `min_internal_height_mm(cutout_mm, slot_h_mm=None)`, `dims_for_volume(..., max_external_mm=None, min_internal_height_mm=None, strict=True, ...)`, `inside_parts_l(internal_mm, enclosure, driver_count, chambers, jack_config, port, line, port_count=None) -> float`, and a `volumes.inside_parts_l` key in every sheet with the identity gross = net + displacement + brace + port + divider + inside_parts, where `volumes.port_l` is the port air inside the box (a tube's length through the back panel and a slot's through the baffle are outside it; `port.volume_l` stays the whole port). Every round port in a `voicing.json` has `port.diameter_mm` in the tube table; `cablayout` (Task 4) imports the constants and `PORT_TUBE_OD_MM` for the tube outside diameter, and its measured net must land within 1.5 percent of `volumes.net_total_l`.
+- Produces: `PORT_TUBE_ID_MM = (52.0, 77.3, 101.5, 153.2)`, `PORT_TUBE_OD_MM` dict, `MAX_PORT_DIAMETER_MM = 153.2`, `DEFAULT_PORT_DIAMETER_MM = 77.3`, `snap_tube_id(diameter_mm) -> float`, `SHELL_MARGIN_MM = 44.0`, `CUTOUT_GAP_MM = 68.0`, `CUTOUT_MARGIN_MM = 25.0` (kept), `HARDWOOD_FLOOR_EXTRA_MM = 2.0`, the inside-part constants (`CLEAT_MM`, `STIFFENER_MM`, `SPAN_MAX_MM`, `BRACE_MM`, `JACK_PLATE_H_MM`, `JACK_CLEAR_MM`, `FLANGE_RING_T_MM`, `FLANGE_RING_EXTRA_MM`, `TUBE_WALL_FALLBACK_MM`), `min_internal_width_mm(driver_count, cutout_mm)`, `min_internal_height_mm(cutout_mm, slot_h_mm=None)`, `dims_for_volume(..., max_external_mm=None, min_internal_height_mm=None, strict=True, ...)`, `inside_parts_l(internal_mm, enclosure, driver_count, chambers, jack_config, port, line, port_count=None, panel_mm=PANEL_MM) -> float`, and a `volumes.inside_parts_l` key in every sheet with the identity gross = net + displacement + brace + port + divider + inside_parts, where `volumes.port_l` is the port air inside the box (a tube's length through the back panel and a slot's through the baffle are outside it; `port.volume_l` stays the whole port). Every round port in a `voicing.json` has `port.diameter_mm` in the tube table; `cablayout` (Task 4) imports the constants and `PORT_TUBE_OD_MM` for the tube outside diameter, and its measured net must land within 1.5 percent of `volumes.net_total_l`.
 
 Changes to Plan 1 starting values, all recorded in the construction and voicing notes by Task 13: `MAX_PORT_DIAMETER_MM` 150 to 153.2 (the 6 inch tube), the round port start 75 to 77.3 mm (the 3 inch tube), the shell margin 25 to 44 mm, the 2x12 cutout gap 25 to 68 mm (so the 2x12 width floor moves from 641 to 722 mm internal, and the stereo floor no longer adds the divider separately), a new height floor, and 2 mm on both floors for the hardwood line (its 19 mm panels take 1 mm per side from the 18 mm voicing box). A round port is snapped up to the next tube after the air-speed loop and re-solved, the sheet's prediction follows the tube (the fix-wave rule), and a warning names the snap. `dims_for_volume` re-applies the floors after every rescale (before this a width floor could shrink the height under its own floor on rescale), and both floors are checked against the size limit (a floor above the limit raises, as the pinned width already did). The volumes identity gains `inside_parts_l`, the cleats, stiffeners, mono 2x12 brace, slot shelf and cheeks, tube wall and flange ring that the generator builds inside the air box, estimated the way `scripts/cablayout.py` lays them out, and `port_l` becomes the port air inside the box; both change every sheet's net (the site box drops from 44.1 to 42.5 L closed) so the whole calibration table moves.
 
 - [ ] **Step 1: Write the failing tests**
 
-In `scripts/test_cabvoice.py` replace these four tests with the versions below:
+In `scripts/test_cabvoice.py` replace these tests (and the `_matrix_params` helper) with the versions below:
 
 {"".join(block(c) + chr(10) for c in t2_tests_mod)}
 Append at the end of the file:
@@ -198,7 +199,7 @@ In `scripts/cabvoice.py` replace each of these with the version below (full text
 - [ ] **Step 4: Run the tests (calibration test still fails)**
 
 Run: `{VAULT_RUN}`
-Expected: 367 passed, 1 failed (`test_calibration_table_matches_engine`, the note still holds the Plan 1 table).
+Expected: 396 passed, 1 failed (`test_calibration_table_matches_engine`, the note still holds the Plan 1 table).
 
 - [ ] **Step 5: Regenerate the calibration table**
 
@@ -209,7 +210,7 @@ Expected: `wrote 20 rows to .../knowledge/speaker-cab-voicing.md`. Every row cha
 - [ ] **Step 6: Run the tests to verify they pass**
 
 Run: `{VAULT_RUN}`
-Expected: 368 passed.
+Expected: 397 passed.
 
 - [ ] **Step 7: Commit**
 
