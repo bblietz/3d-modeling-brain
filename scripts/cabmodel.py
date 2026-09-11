@@ -290,3 +290,61 @@ def main(argv=None) -> int:
     png = render_kind(args.render, demo(args.demo), args.out)
     print(f"rendered {args.render} of {args.demo} -> {png}")
     return 0
+
+
+# === TASK 9 ===
+def is_interior(name: str) -> bool:
+    return name.startswith(INTERIOR_PREFIXES)
+
+
+def is_back(name: str) -> bool:
+    return name.startswith(BACK_PREFIX)
+
+
+def is_port(name: str) -> bool:
+    return name.startswith(PORT_PREFIXES)
+
+
+def _solids_for(layout, keep) -> dict:
+    out = {}
+    for blank in layout.parts:
+        if keep(blank.name):
+            out[blank.name] = blank_solid(blank)
+    return out
+
+
+def interior_solids(layout) -> dict:
+    """Solids for every interior blank (baffle, cleats, grill strips, brace,
+    divider, stiffeners, shelf, cheeks), keyed by blank name."""
+    return _solids_for(layout, is_interior)
+
+
+def overlap_volume(a, b) -> float:
+    """Boolean intersection volume of two shapes, 0 for an empty result."""
+    try:
+        cut = a & b
+    except Exception:
+        return 0.0
+    if cut is None:
+        return 0.0
+    try:
+        return float(cut.volume)
+    except Exception:
+        return 0.0
+
+
+def _bbox_overlap(a, b, margin=0.5) -> bool:
+    ba, bb = a.bounding_box(), b.bounding_box()
+    return (ba.min.X < bb.max.X + margin and bb.min.X < ba.max.X + margin
+            and ba.min.Y < bb.max.Y + margin and bb.min.Y < ba.max.Y + margin
+            and ba.min.Z < bb.max.Z + margin and bb.min.Z < ba.max.Z + margin)
+
+
+def assert_no_overlap(a, b, tol_mm3=1.0) -> float:
+    """Intersection volume of a and b; AssertionError above tol_mm3. Touching
+    faces intersect in a zero-volume sliver, so 1 mm3 is the working tolerance."""
+    if not _bbox_overlap(a, b):
+        return 0.0
+    v = overlap_volume(a, b)
+    assert v <= tol_mm3, f"{getattr(a, 'label', '?')} overlaps {getattr(b, 'label', '?')} by {v:.1f} mm3"
+    return v

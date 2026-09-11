@@ -123,3 +123,68 @@ def test_render_writes_a_png(tmp_path):
     png = M.render([M.blank_solid(b) for b in L.shell_blanks(spec)], tmp_path / "shell.png",
                    views=[(30, -60)])
     assert png.exists() and png.stat().st_size > 10_000
+
+
+# === TASK 9 ===
+def _layout_2x12_slot():
+    spec = spec_for(drivers=2, port="slot", net=74.0, external=(760.0, 480.0, 300.0))
+    return spec, L.layout(spec)
+
+
+def test_interior_solids_match_their_blanks_and_never_overlap():
+    spec, lay = _layout_2x12_slot()
+    inter = M.interior_solids(lay)
+    names = sorted(inter)
+    assert {"baffle", "brace", "shelf", "cheek_center_0", "cheek_left", "cheek_right",
+            "grill_top", "grill_bottom", "grill_left", "grill_right",
+            "cleat_baffle_top", "cleat_baffle_left", "cleat_baffle_right",
+            "cleat_back_top", "cleat_back_bottom", "cleat_back_left", "cleat_back_right",
+            "stiffener_back"} == set(names)
+    by = {p.name: p for p in lay.parts}
+    for name, s in inter.items():
+        assert len(s.solids()) == 1, name
+        assert abs(s.volume - L.blank_volume_mm3(by[name])) < 1.0, name
+    for i, a in enumerate(names):
+        for b in names[i + 1:]:
+            assert M.assert_no_overlap(inter[a], inter[b]) <= 1.0, (a, b)
+
+
+def test_baffle_volume_with_cutouts_and_bolts_is_analytic():
+    spec, lay = _layout_2x12_slot()
+    baffle = next(p for p in lay.parts if p.name == "baffle")
+    s = M.blank_solid(baffle)
+    dx, dy, dz = baffle.size
+    holes = sum(len(f["centers"]) for f in baffle.features if f["type"] == "holes")
+    cutouts = [f["d"] for f in baffle.features if f["type"] == "cutout"]
+    expected = dx * dy * dz - sum(math.pi / 4 * d ** 2 * dy for d in cutouts) \
+        - holes * math.pi / 4 * L.BOLT_HOLE_MM ** 2 * dy
+    assert len(cutouts) == 2 and holes == 8
+    assert abs(s.volume - expected) < 1.0
+
+
+def test_brace_notch_and_grill_half_laps():
+    spec, lay = _layout_2x12_slot()
+    by = {p.name: p for p in lay.parts}
+    brace = M.blank_solid(by["brace"])
+    bw, bd = L.BRACE_MM
+    _, _, bz = by["brace"].size
+    notch = bw * (L.CLEAT_MM - L.BRACE_SETBACK_MM) * L.CLEAT_MM     # top cleat notch only (slot: no bottom cleat)
+    assert abs(brace.volume - (bw * bd * bz - notch)) < 1.0
+    strips = {n: M.blank_solid(by[n]) for n in ("grill_top", "grill_bottom", "grill_left", "grill_right")}
+    union = _union(list(strips.values()))
+    assert len(union.solids()) == 1
+    assert abs(union.volume - sum(s.volume for s in strips.values())) < 1.0
+    t, w = L.GRILL_STRIP_T_MM, L.GRILL_STRIP_W_MM
+    lap = w * w * t / 2.0
+    top = by["grill_top"]
+    assert abs(strips["grill_top"].volume - (top.size[0] * t * w - 2 * lap)) < 1.0
+
+
+def test_overlap_volume_reports_real_collisions():
+    a = M._box(0, 0, 0, 10, 10, 10)
+    b = M._box(5, 0, 0, 15, 10, 10)
+    c = M._box(10, 0, 0, 20, 10, 10)
+    assert abs(M.overlap_volume(a, b) - 500.0) < 1e-6
+    assert M.assert_no_overlap(a, c) < 1e-6
+    with pytest.raises(AssertionError):
+        M.assert_no_overlap(a, b)
