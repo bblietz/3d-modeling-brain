@@ -54,7 +54,7 @@ Site copy mismatch to fix on the MaximoCabs site (out of scope here): `src/conte
 ### 3.2 `scripts/cabmodel.py` (build123d)
 
 - `build(layout) -> CabBuild`: `parts` registry in the furniture shape (`name`, `solid`, `dims`, `qty`, `material`, `notes`), one named solid per part; `components` (speaker envelopes, jack plates, handle, feet) for renders and interference only; `assembly` compound; `air` (one solid per chamber).
-- `check_build(cab, layout) -> list[Check]`: boolean interference between every pair that must not touch (envelope against port, brace, divider, back, cleats, shelf; flange against grill frame opening is analytic), measured air volume within 1 percent of the layout's net, part count equals the layout's, each blank's solid-to-bounding-box ratio recorded.
+- `check_build(cab, layout) -> list[Check]`: boolean interference between every pair that must not touch (envelope against port, brace, divider, back, cleats, shelf; flange against grill frame opening is analytic), measured air volume within 1 percent of the layout's net, solid count equals the layout's part count, each blank's solid-to-bounding-box ratio recorded.
 - `export(cab, layout, out_dir)`: `cab.step`, temporary STLs for `scripts/render_stl.py` (iso, front, top, right, plus an exploded view built by translating each part away from the assembly center along its centroid direction), `cutlist.md` and `cutlist.csv` with the tolex line, `cab.json`.
 - Algebra mode, `align=(Align.CENTER, Align.CENTER, Align.MIN)` idiom, cutting tools extended 1 mm past coincident faces, per the furniture rules. Two identical build123d failures on one feature escalate to FreeCAD per the spec.
 
@@ -88,7 +88,7 @@ All numbers are starting values recorded in [[speaker-cab-construction]] with `s
 
 | Check | Level | Rule |
 |---|---|---|
-| sheet | layout | `blockers` empty and `prediction_status` present, else input error |
+| sheet | layout | `blockers` empty, else input error; `prediction_status` present, and a warn when it differs from the engine's `PREDICTION_STATUS` |
 | site default | fixture test | external dimensions within 1 mm of 508 x 457.2 x 279.4 |
 | net volume | layout and CAD | each chamber within 5 percent of the sheet's per-chamber net; CAD measured air within 1 percent of the layout |
 | stereo balance | layout | chamber volumes equal within 1 percent |
@@ -101,7 +101,8 @@ All numbers are starting values recorded in [[speaker-cab-construction]] with `s
 | head match | layout | external width = head width + 0 to 10 mm when `head_width_mm` is given |
 | line | layout | dovetail only on hardwood; species density known |
 | stock | layout | ply blanks within 2440 x 1220; hardwood panels within 3050 x 600 glued-up (flagged) |
-| part count | CAD | equals the layout's table |
+| part count | layout | the layout's part count, reported |
+| solid count | CAD | one solid per blank, equal to the layout's part count |
 | rectangularity | CAD | ratio recorded per blank; comb panels list by blank dims, non-rectangular parts get the emitter's drawing note |
 
 ## 6. Shared-code touches
@@ -113,7 +114,7 @@ All numbers are starting values recorded in [[speaker-cab-construction]] with `s
 ## 7. Tests
 
 - `scripts/test_cablayout.py`: unit tests per rule (finger parity and front-edge rule, dovetail schedule, margins and floors, port placement order and blocker text, slot cheeks, open-back panel heights, volumes against hand-computed cases, center of mass, yardage on both roll widths, Aesthetics validation). Matrix: every catalog speaker x five enclosures x four driver and jack configurations (1x12, 2x12 mono, mono-parallel-out, stereo) x three line and joint pairs (tolex finger, hardwood finger, hardwood dovetail), each on a live `cabvoice.propose` with the fixture tone (`fixtures/tone-roots.json`): about 1200 cases, each either lays out clean or returns a named blocker, and every clean layout's net volume agrees with its sheet within 5 percent.
-- `scripts/test_cabmodel.py`: twelve representative CAD builds by default (all sixty behind `CAB_FULL_MATRIX=1`), each proving measured air within 1 percent of the layout, no interference, part count, STEP written; the fixture build and its 1 mm test; renders written to a temporary directory.
+- `scripts/test_cabmodel.py`: twelve representative CAD builds by default (all sixty behind `CAB_FULL_MATRIX=1`), each proving measured air within 1 percent of the layout, no interference, solid count equal to the layout's part count, STEP written; the fixture build and its 1 mm test; renders written to a temporary directory.
 - Engine: `scripts/test_cabvoice.py` updated for the tube snap, floors, and new fields; the calibration table test pinned to the regenerated table.
 
 ## 8. Deliverables and files
@@ -171,3 +172,4 @@ Found while the plan's code was developed and tested in the mirror; each is a de
 - **Check list.** A `jack plate` warning (open-back lower panel too short for the plate) joins the checks; the order is sheet, net volume, stereo balance, cutout, grill opening, port fit, magnet to back, handle, head match, line, jack plate, stock, part count, spans. `Chamber.port_air` entries are dicts of type box or cylinder.
 - **Stiffeners** skip open-back panels; the back stiffener stops 25 mm above the jack plate; mass subtracts every feature exactly, so the shared corner blocks need no separate correction.
 - **Fixture sheet.** The 77.3 mm tube cannot tune the site box above the 20 mm minimum length, so the fixture uses the 101.5 mm tube at 40 mm (Fb 67 Hz); the site's 30 W speaker against the shared 60 W target is a power blocker, so the fixture carries its own tone file with `min_power_w` 45.
+- **Sheet check.** `check_layout`'s `sheet` verdict warns when the sheet's `prediction_status` differs from the engine's constant (Task 4 review).

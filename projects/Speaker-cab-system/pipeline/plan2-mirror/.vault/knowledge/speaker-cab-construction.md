@@ -30,7 +30,7 @@ grill frame on the speaker flanges, and margins the generator can assert.
 | Black cherry, resawn | Hardwood line shell | 19 mm | 560 kg/m3 | https://www.wood-database.com/black-cherry/ |
 | Hard maple, resawn | Hardwood line shell | 19 mm | 705 kg/m3 | https://www.wood-database.com/hard-maple/ |
 | Sapele, resawn | Hardwood line shell | 19 mm | 670 kg/m3 | https://www.wood-database.com/sapele/ |
-| PVC or ABS pipe, Schedule 40 | Rear round port tubes | inside 52.0, 77.3, 101.5, 153.2 mm (outside 60.3, 88.9, 114.3, 168.3) | ignored in mass | [[speaker-envelopes-and-port-stock]]; which size Brian buys is not settled |
+| PVC or ABS pipe, Schedule 40 | Rear round port tubes | inside 52.0, 77.3, 101.5, 153.2 mm (outside 60.3, 88.9, 114.3, 168.3) | 1400 kg/m3 (in the mass) | [[speaker-envelopes-and-port-stock]]; which size Brian buys is not settled |
 
 Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-stock]]. Hardwood shell panels are glued up from resawn boards; the generator's stock check uses 3050 x 600 mm per panel as a starting limit.
 
@@ -51,7 +51,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 - 18 mm birch on both lines. Front face 20 mm behind the front edge of the shell (the recess that holds the grill frame). Driver mounts from the front of the baffle onto T-nuts fitted from the back. Bolts M6 or 1/4-20, 6.5 mm holes on the note's bolt circle, first hole at twelve o'clock.
 - **Floating (default)**: 1 mm clearance to each side, on 18 x 18 mm cleats glued to the shell, felt strip between cleat and baffle, held with screws through the cleats, removable. Site: "floating 3/4 in birch with felt isolation".
-- **Fixed (option)**: glued into a 6 mm deep dado in all four shell panels, blank 12 mm larger in width and height, no baffle cleats. On hardwood see the cross-grain rule above.
+- **Fixed (option)**: glued into a 6 mm deep dado in all four shell panels (three with a front slot port, where the shelf carries the baffle's bottom edge), blank 12 mm larger in width and height, no baffle cleats. On hardwood see the cross-grain rule above.
 - Driver cutout, bolt circle, bolt count, frame diameter, and magnet diameter come from the speaker note. Typical: Celestion 283 mm cutout on a 297 mm circle, Eminence 281 mm on 294 mm, Jensen 277 mm on 293.5 mm; frames 306 to 310 mm, so the flange overhangs the cutout by 11 to 15 mm; flange thickness 5 mm starting value.
 - **Margins**: at least 44 mm from a cutout edge to any shell panel (grill strip 40 plus 2 mm clearance plus 2), 25 mm from a cutout edge to the brace or divider, so the two cutouts of a 2x12 sit 68 mm apart (18 plus 2 x 25). Minimum internal width = n x cutout + (n - 1) x 68 + 2 x 44, the same for mono and stereo since the divider replaces the brace (2x12 with 283 mm cutouts: 722 mm internal, 758 mm external, 29.8 in). Minimum internal height = cutout + 88, plus slot height + 18 with a front slot port.
 - **Speaker envelope** (for clearance checks): behind the baffle a basket cylinder at the cutout diameter for the first 100 mm from the baffle front face, then the magnet cylinder at the note's magnet diameter plus 12 mm cover allowance (185 mm when the note has none), total length the note's depth. At least 25 mm from any envelope part to the back panel, a port tube, a cleat, a shelf, a stiffener, the brace, or the divider.
@@ -97,6 +97,6 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 ## Site defaults (calibration)
 
 - External 20 x 18 x 11 in (508 x 457.2 x 279.4 mm), 1x12 closed-ported.
-- Internal with the rules above: 472 x 421.2 x 229.4 mm, gross 45.6 L, net about 44 L after one driver.
+- Internal with the rules above: 472 x 421.2 x 229.4 mm, gross 45.6 L, net about 42.5 L closed and 42.1 L ported after one driver and the inside parts.
 - The engine voices both lines with the tolex line's 18 mm walls; the hardwood line's 19 mm panels take about 1 percent more of the same external size, inside the model's error, so no separate voicing. The line and species travel in voicing.json's construction block so the generator picks the density and joinery.
 - A slot-ported 1x12 on the site box grows from 18.0 to 18.3 in tall through the engine's height floor; a 2x12 starts at 29.8 in wide.

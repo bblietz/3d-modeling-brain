@@ -151,6 +151,8 @@ Body sections: Character (tone descriptors in the tone-target vocabulary), Best 
 
 ## Unit 2: Parametric cabinet generator
 
+> Amended 2026-09-10 by [[2026-09-10-plan-2-generator-design]]: finger joints on both lines with a dovetail option on hardwood (no corner posts), a layout kernel plus CAD layer, the grill frame on the flanges with 44 mm margins, a baffle mount option, tube-snapped port diameters, and speaker envelopes from new catalog fields. Where this section and the addendum differ, the addendum governs.
+
 **Shape.** Shared library `scripts/cabmodel.py` (build123d). Each order has a thin `projects/Cab-<...>/cab.py` that sets parameters from `voicing.json` and the aesthetics block, calls the library, fills the `PARTS` registry (`name`, `solid`, `qty`, `material`, `notes`), runs asserts, and calls `scripts/cutlist.py`. Same env gates as furniture: `TMP_STL`, `EXPORT`, `SHOW`.
 
 **Parameters.** External W, H, D; panel thickness; line; driver count, cutout diameter, bolt circle and count (from the speaker note); back type; port (shape round or slot, location rear or front, dimensions); grill frame inset; jack configuration, jack plate cutouts and positions; handle type and position; corner hardware allowance; feet or tilt-back legs; bracing; chamber divider; open-back panel heights.
