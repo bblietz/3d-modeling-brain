@@ -352,3 +352,77 @@ def assert_no_overlap(a, b, tol_mm3=1.0) -> float:
     if v > tol_mm3:
         raise AssertionError(f"{_label(a)} overlaps {_label(b)} by {v:.1f} mm3")
     return v
+
+
+# === TASK 10 ===
+FOOT_H_MM = 16.0
+PLATE_T_MM = 2.0
+STRAP_T_MM = 25.0
+STRAP_W_MM = 25.0
+STRAP_EXTRA_MM = 40.0
+RECESSED_DEPTH_MM = 12.0
+
+
+def back_solids(layout) -> dict:
+    """Closed back or the two open-back panels, keyed by blank name."""
+    return _solids_for(layout, is_back)
+
+
+def port_solids(layout) -> dict:
+    """Port tubes and flange rings, keyed by blank name."""
+    return _solids_for(layout, is_port)
+
+
+def envelope_solid(env) -> object:
+    """Stepped cylinder behind the baffle (basket, then magnet with its cover
+    allowance) plus the flange disc in front of it."""
+    solid = _cyl_y(env.center[0], env.center[1], env.basket_d, env.y0, env.y0 + env.basket_len)
+    if env.magnet_len > 0:
+        y0 = env.y0 + env.basket_len
+        solid = solid + _cyl_y(env.center[0], env.center[1], env.magnet_d, y0, y0 + env.magnet_len)
+    solid = solid + _cyl_y(env.center[0], env.center[1], env.flange_d, env.y0 - env.flange_t, env.y0)
+    return _largest_solid(solid)
+
+
+def component_solids(layout) -> dict:
+    """Placeholders for the render and the interference checks, never in the
+    cut list: speaker envelopes, jack plates, the handle, the feet."""
+    spec = layout.spec
+    fr = L.frame(spec)
+    out = {}
+    for env in layout.envelopes:
+        s = envelope_solid(env)
+        s.label = f"speaker_{env.speaker}"
+        out[s.label] = s
+    n_plate = 0
+    for hw in layout.hardware:
+        if hw.item == "jack plate":
+            w, h = hw.cutout
+            x, _, z = hw.position
+            s = _box(x - w / 2, fr.D - PLATE_T_MM, z - h / 2, x + w / 2, fr.D, z + h / 2)
+            s.label = f"jack_plate_{n_plate}"
+            out[s.label] = s
+            n_plate += 1
+        elif hw.item == "strap handle":
+            x, y, z = hw.position
+            half = spec.aesthetics.handle_screw_spacing_mm / 2.0 + STRAP_EXTRA_MM / 2.0
+            s = _box(x - half, y - STRAP_W_MM / 2, z, x + half, y + STRAP_W_MM / 2, z + STRAP_T_MM)
+            s.label = "strap_handle"
+            out[s.label] = s
+        elif hw.item == "recessed handle":
+            w, h = hw.cutout
+            x, y, z = hw.position
+            if x < 0:
+                s = _box(x, y - w / 2, z - h / 2, x + RECESSED_DEPTH_MM, y + w / 2, z + h / 2)
+                s.label = "recessed_handle_left"
+            else:
+                s = _box(x - RECESSED_DEPTH_MM, y - w / 2, z - h / 2, x, y + w / 2, z + h / 2)
+                s.label = "recessed_handle_right"
+            out[s.label] = s
+        elif hw.item == "foot":
+            x, y, _ = hw.position
+            s = Pos(x, y, -FOOT_H_MM) * Cylinder(spec.aesthetics.foot_diameter_mm / 2.0, FOOT_H_MM,
+                                                 align=(Align.CENTER, Align.CENTER, Align.MIN))
+            s.label = f"foot_{len([k for k in out if k.startswith('foot_')])}"
+            out[s.label] = s
+    return out

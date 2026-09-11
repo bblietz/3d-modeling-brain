@@ -203,3 +203,55 @@ def test_overlap_volume_surfaces_a_failed_boolean(monkeypatch):
         M.overlap_volume(a, b)
     with pytest.raises(RuntimeError, match="forced boolean failure"):
         M.assert_no_overlap(a, b)
+
+
+# === TASK 10 ===
+def test_back_and_port_solids_site_box():
+    spec = spec_for(port="round")
+    lay = L.layout(spec)
+    backs, ports = M.back_solids(lay), M.port_solids(lay)
+    assert set(backs) == {"back"} and set(ports) == {"port_tube_0_0", "port_ring_0_0"}
+    by = {p.name: p for p in lay.parts}
+    for name, s in list(backs.items()) + list(ports.items()):
+        assert abs(s.volume - L.blank_volume_mm3(by[name])) < 1.0, name
+    rp = lay.round_ports[0]
+    back = backs["back"]
+    W, H, D = spec.external_mm
+    # the back carries the tube hole and the jack plate hole
+    plate_w, plate_h = spec.aesthetics.jack_plate_cutout_mm
+    full = (W - 36.0) * L.BACK_MM * (H - 36.0)
+    expected = full - math.pi / 4 * rp.od_mm ** 2 * L.BACK_MM - plate_w * plate_h * L.BACK_MM
+    assert abs(back.volume - expected) < 1.0
+    for p in ports.values():
+        assert M.assert_no_overlap(back, p) < 1.0
+
+
+def test_open_back_panels():
+    spec = spec_for(enclosure="open", port=None, open_fraction=0.4)
+    lay = L.layout(spec)
+    backs = M.back_solids(lay)
+    assert set(backs) == {"back_upper", "back_lower"}
+    h_p = L.open_panel_height(spec, L.frame(spec))
+    for name, s in backs.items():
+        bb = s.bounding_box()
+        assert abs((bb.max.Z - bb.min.Z) - h_p) < 1e-6
+    assert M.assert_no_overlap(backs["back_upper"], backs["back_lower"]) < 1e-6
+
+
+def test_envelope_stepped_cylinder_and_components():
+    spec = spec_for(port="round")
+    lay = L.layout(spec)
+    env = lay.envelopes[0]
+    s = M.envelope_solid(env)
+    expected = (math.pi / 4 * env.basket_d ** 2 * env.basket_len
+                + math.pi / 4 * env.magnet_d ** 2 * env.magnet_len
+                + math.pi / 4 * env.flange_d ** 2 * env.flange_t)
+    assert abs(s.volume - expected) < 1.0
+    bb = s.bounding_box()
+    assert abs(bb.min.Y - (env.y0 - env.flange_t)) < 1e-6
+    assert abs(bb.max.Y - (env.y0 + env.basket_len + env.magnet_len)) < 1e-6
+    comps = M.component_solids(lay)
+    assert {"speaker_0", "jack_plate_0", "strap_handle", "foot_0", "foot_1", "foot_2", "foot_3"} == set(comps)
+    spec2 = spec_for(port="round", aesthetics=L.Aesthetics(handle="recessed-side"))
+    comps2 = M.component_solids(L.layout(spec2))
+    assert {"recessed_handle_left", "recessed_handle_right"} <= set(comps2)
