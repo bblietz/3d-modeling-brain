@@ -87,8 +87,13 @@ def _fmt(mm):
     return f"{round(mm, 1):g}"
 
 
-def write_cut_list(parts, md_path, csv_path=None, title="Cut list"):
-    """Write the cut list markdown (and optional CSV); return the rows."""
+def write_cut_list(parts, md_path, csv_path=None, title="Cut list", extra_lines=None):
+    """Write the cut list markdown (and optional CSV); return the rows.
+
+    extra_lines: optional materials that are not cut parts (tolex yardage,
+    grill cloth), each {"part", "qty", "unit", "material", "notes"}; they
+    appear under "Materials not cut" in the markdown and as CSV rows with
+    empty dimensions."""
     rows = cut_list_rows(parts)
     lines = ["---", "type: cutlist", f"project: {title}", "---", "",
              f"# Cut list - {title}", "",
@@ -110,6 +115,10 @@ def write_cut_list(parts, md_path, csv_path=None, title="Cut list"):
         unit = "part" if qty == 1 else "parts"
         lines.append(f"- {mat}: {qty} {unit}, {area:.2f} m2 face area "
                      "(no kerf/waste allowance)")
+    if extra_lines:
+        lines += ["", "## Materials not cut", ""]
+        for x in extra_lines:
+            lines.append(f"- {x['qty']:g} {x['unit']} {x['part']}: {x['material']}. {x['notes']}")
     with open(md_path, "w") as f:
         f.write("\n".join(lines) + "\n")
     if csv_path:
@@ -120,4 +129,6 @@ def write_cut_list(parts, md_path, csv_path=None, title="Cut list"):
             for r in rows:
                 writer.writerow([r["qty"], r["name"], _fmt(r["t"]), _fmt(r["w"]),
                                  _fmt(r["l"]), r["material"], r["notes"]])
+            for x in extra_lines or ():
+                writer.writerow([x["qty"], x["part"], "", "", "", x["material"], x["notes"]])
     return rows
