@@ -423,6 +423,23 @@ def test_round_port_longer_than_the_box_reaches_the_baffle():
     assert "longest tube that fits at this diameter is 155 mm" in blockers[0]
 
 
+def test_round_port_blocker_remedy_shortens_the_tube():
+    # the engine's port length grows as Fb falls and as the tube widens
+    # (cabvoice.port_length_m), so the remedy must point the other way
+    spec = spec_for(port="round")
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    s = sheet(port="round")
+    s["port"]["length_mm"] = 240.0                  # stays behind the baffle, finds no spot
+    _, _, _, blockers = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    tail = "raise Fb, use a smaller tube or a larger box, or a front slot"
+    assert blockers[0].endswith(tail) and "lower Fb" not in blockers[0]
+    s["port"]["length_mm"] = 250.0                  # reaches the baffle: the same tail
+    _, _, _, blockers = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    assert blockers[0].endswith(tail)
+
+
 def test_round_port_takes_the_below_direction_in_a_narrow_box():
     # 371 mm wide inside: outboard at the magnet standoff hits the wall, so the
     # tube drops below the driver at the same radial distance
@@ -448,9 +465,12 @@ def test_round_port_count_two_second_tube_clears_the_first():
     assert blockers == [] and len(ports) == 2 and len(feats) == 2
     assert [b.name for b in blanks] == ["port_tube_0_0", "port_ring_0_0", "port_tube_0_1", "port_ring_0_1"]
     (x0, z0), (x1, z1) = ports[0].center, ports[1].center
-    assert (x0, z0) == pytest.approx((69.45, 228.6)) and (x1, z1) == pytest.approx((0.0, 129.15))
+    # the outboard scan runs out of wall; the below scan stops where the second
+    # ring clears the first ring edge to edge (148.9 mm), not just the first tube
+    assert (x0, z0) == pytest.approx((69.45, 228.6)) and (x1, z1) == pytest.approx((0.0, 94.15))
     assert math.hypot(x1 - x0, z1 - z0) >= 88.9 + 25.0 - 1e-9        # tube to tube, 25 mm clear
     assert math.hypot(x1 - x0, z1 - z0) >= 74.45 + 44.45 - 1e-9      # ring over the other tube
+    assert math.hypot(x1 - x0, z1 - z0) >= 74.45 + 74.45 - 1e-9      # ring to ring, edge to edge
 
 
 def test_tube_geometry_non_stock_fallback():

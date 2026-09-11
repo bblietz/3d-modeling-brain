@@ -3070,6 +3070,23 @@ def test_round_port_longer_than_the_box_reaches_the_baffle():
     assert "longest tube that fits at this diameter is 155 mm" in blockers[0]
 
 
+def test_round_port_blocker_remedy_shortens_the_tube():
+    # the engine's port length grows as Fb falls and as the tube widens
+    # (cabvoice.port_length_m), so the remedy must point the other way
+    spec = spec_for(port="round")
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    s = sheet(port="round")
+    s["port"]["length_mm"] = 240.0                  # stays behind the baffle, finds no spot
+    _, _, _, blockers = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    tail = "raise Fb, use a smaller tube or a larger box, or a front slot"
+    assert blockers[0].endswith(tail) and "lower Fb" not in blockers[0]
+    s["port"]["length_mm"] = 250.0                  # reaches the baffle: the same tail
+    _, _, _, blockers = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    assert blockers[0].endswith(tail)
+
+
 def test_round_port_takes_the_below_direction_in_a_narrow_box():
     # 371 mm wide inside: outboard at the magnet standoff hits the wall, so the
     # tube drops below the driver at the same radial distance
@@ -3095,9 +3112,12 @@ def test_round_port_count_two_second_tube_clears_the_first():
     assert blockers == [] and len(ports) == 2 and len(feats) == 2
     assert [b.name for b in blanks] == ["port_tube_0_0", "port_ring_0_0", "port_tube_0_1", "port_ring_0_1"]
     (x0, z0), (x1, z1) = ports[0].center, ports[1].center
-    assert (x0, z0) == pytest.approx((69.45, 228.6)) and (x1, z1) == pytest.approx((0.0, 129.15))
+    # the outboard scan runs out of wall; the below scan stops where the second
+    # ring clears the first ring edge to edge (148.9 mm), not just the first tube
+    assert (x0, z0) == pytest.approx((69.45, 228.6)) and (x1, z1) == pytest.approx((0.0, 94.15))
     assert math.hypot(x1 - x0, z1 - z0) >= 88.9 + 25.0 - 1e-9        # tube to tube, 25 mm clear
     assert math.hypot(x1 - x0, z1 - z0) >= 74.45 + 44.45 - 1e-9      # ring over the other tube
+    assert math.hypot(x1 - x0, z1 - z0) >= 74.45 + 74.45 - 1e-9      # ring to ring, edge to edge
 
 
 def test_tube_geometry_non_stock_fallback():
@@ -3251,7 +3271,10 @@ def _envelope_segments(env: Envelope) -> list:
     """[(y_front, y_rear, radius)] steps of the envelope: basket, then magnet
     when there is one. The rearmost face is pushed back by CLEARANCE_MM (an
     axial standoff) so a tube ending within that distance behind the driver
-    must also clear it radially."""
+    must also clear it radially. Only the rearmost face carries it: the basket
+    cylinder is a bounding model of a frame that really tapers, so a standoff
+    on the basket's rear annulus would raise false blockers against a modeling
+    artifact, while the magnet rear is the real flat face."""
     segs = [(env.y0, env.y0 + env.basket_len, env.basket_d / 2.0)]
     if env.magnet_len > 0:
         segs.append((env.y0 + env.basket_len, env.y0 + env.basket_len + env.magnet_len,
@@ -3280,7 +3303,7 @@ def _tube_clear(center, r, ya, yb, chamber, fr, obstacles, envelopes, tubes) -> 
         for (s0, s1, er) in _envelope_segments(env):
             if _overlap(ya, yb, s0, s1) and math.hypot(cx - ex, cz - ez) - r - er < need:
                 return False
-    for (tx, tz, tr, ty0, ty1) in tubes:
+    for (tx, tz, tr, ty0, ty1, _) in tubes:
         if _overlap(ya, yb, ty0, ty1) and math.hypot(cx - tx, cz - tz) - r - tr < need:
             return False
     return True
@@ -3288,7 +3311,8 @@ def _tube_clear(center, r, ya, yb, chamber, fr, obstacles, envelopes, tubes) -> 
 
 def _ring_clear(center, rr, yb, chamber, fr, obstacles, tubes) -> bool:
     """The flange ring (radius rr, glued to the back over [yb - 12, yb]) must
-    not overlap a cleat, stiffener, plate keep-out, another tube, or a wall."""
+    not overlap a cleat, stiffener, plate keep-out, another tube or its ring,
+    or a wall."""
     if rr <= 0:
         return True
     cx, cz = center
@@ -3299,8 +3323,11 @@ def _ring_clear(center, rr, yb, chamber, fr, obstacles, tubes) -> bool:
     for box in obstacles:
         if _overlap(ya, yb, box[0][1], box[1][1]) and _circle_box_gap(cx, cz, rr, box) < -1e-6:
             return False
-    for (tx, tz, tr, ty0, ty1) in tubes:
-        if _overlap(ya, yb, ty0, ty1) and math.hypot(cx - tx, cz - tz) - rr - tr < -1e-6:
+    for (tx, tz, tr, ty0, ty1, trr) in tubes:
+        d = math.hypot(cx - tx, cz - tz)
+        if _overlap(ya, yb, ty0, ty1) and d - rr - tr < -1e-6:
+            return False
+        if d - rr - trr < -1e-6:        # every ring sits on the back, so rings share the y span
             return False
     return True
 
@@ -3391,10 +3418,10 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
                 else:
                     blockers.append(f"port fit: chamber {c} port {j}: tube {id_mm:.1f} x {L:.0f} mm "
                                     f"{why}; longest tube that fits at this diameter is {fit:.0f} mm; "
-                                    "lower Fb, use a larger tube, or a front slot")
+                                    "raise Fb, use a smaller tube or a larger box, or a front slot")
                 continue
             cx, cz = spot
-            tubes.append((cx, cz, r, ya, yb))
+            tubes.append((cx, cz, r, ya, yb, rr))
             sfx = f"_{c}_{j}"
             has_tube = L > 2 * BACK_MM
             if has_tube:
@@ -3541,7 +3568,7 @@ def trim_hardware(spec: CabSpec, fr: Frame) -> list:
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cablayout.py -q`
-Expected: `30 passed`
+Expected: `31 passed`
 
 - [ ] **Step 5: Commit**
 
@@ -4170,7 +4197,7 @@ def layout_report(lay: Layout, checks: list) -> dict:
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cablayout.py -q`
-Expected: `41 passed` in under 60 seconds.
+Expected: `42 passed` in under 60 seconds.
 
 - [ ] **Step 5: Commit**
 
@@ -5576,7 +5603,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 ## Backs and ports
 
 - **Closed**: 12 mm birch back panel, flush with the rear edge, screwed to 18 x 18 mm cleats every 150 mm, removable. The jack plate sits in the back panel.
-- **Closed-ported, rear round port**: a Schedule 40 PVC or ABS tube through the back panel with a 12 mm plywood flange ring (outside diameter tube plus 60 mm) glued to the inside face; inside diameter snapped by the voicing engine to the tube table above, length from the voicing sheet measured through the back panel, one per driver in the chamber (a mono 2x12 gets two identical ports, each sized as a 1x12 port in half the chamber; the sheet's `port.count` and `construction.port_count` say how many). Placement order: outboard of the driver at driver height, below the driver, lower outboard corner, above the driver; the first spot with 25 mm clearance to the speaker envelope, walls, cleats, brace, divider, and jack plate wins. When no spot fits, the generator names the longest tube that does; the voicing is then re-run with a larger diameter or a slot.
+- **Closed-ported, rear round port**: a Schedule 40 PVC or ABS tube through the back panel with a 12 mm plywood flange ring (outside diameter tube plus 60 mm) glued to the inside face; inside diameter snapped by the voicing engine to the tube table above, length from the voicing sheet measured through the back panel, one per driver in the chamber (a mono 2x12 gets two identical ports, each sized as a 1x12 port in half the chamber; the sheet's `port.count` and `construction.port_count` say how many). Placement order: outboard of the driver at driver height, below the driver, lower outboard corner, above the driver; the first spot with 25 mm clearance to the speaker envelope, walls, cleats, brace, divider, and jack plate wins. When no spot fits, the generator names the longest tube that does; the voicing is then re-run with a higher Fb, a smaller tube, a larger box, or a front slot.
 - **Closed-ported, front slot port**: the baffle stops short of the bottom panel by the slot height plus an 18 mm shelf; the shelf's front edge is flush with the baffle face, its depth equals the port length, and it doubles as the bottom baffle cleat. A slot narrower than the chamber gets two cheeks; a mono 2x12 gets two slots split by an 18 mm center cheek in line with the brace. The shelf must leave at least max(25 mm, slot height) of free depth behind it. Round rear tubes are a bass-cab convention; the published vented guitar cabs (EV TL806, Mesa Thiele) use the front slot.
 - **Open-back**: two horizontal 12 mm panels, top and bottom, each (1 - open fraction) x internal height / 2 tall, screwed to cleats. Open fraction 0.40 for open, 0.25 for semi-open (from [[speaker-cab-voicing]]). The jack plate sits in the lower panel. Stereo keeps the divider and one plate per chamber.
 

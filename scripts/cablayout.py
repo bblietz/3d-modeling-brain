@@ -1007,7 +1007,10 @@ def _envelope_segments(env: Envelope) -> list:
     """[(y_front, y_rear, radius)] steps of the envelope: basket, then magnet
     when there is one. The rearmost face is pushed back by CLEARANCE_MM (an
     axial standoff) so a tube ending within that distance behind the driver
-    must also clear it radially."""
+    must also clear it radially. Only the rearmost face carries it: the basket
+    cylinder is a bounding model of a frame that really tapers, so a standoff
+    on the basket's rear annulus would raise false blockers against a modeling
+    artifact, while the magnet rear is the real flat face."""
     segs = [(env.y0, env.y0 + env.basket_len, env.basket_d / 2.0)]
     if env.magnet_len > 0:
         segs.append((env.y0 + env.basket_len, env.y0 + env.basket_len + env.magnet_len,
@@ -1036,7 +1039,7 @@ def _tube_clear(center, r, ya, yb, chamber, fr, obstacles, envelopes, tubes) -> 
         for (s0, s1, er) in _envelope_segments(env):
             if _overlap(ya, yb, s0, s1) and math.hypot(cx - ex, cz - ez) - r - er < need:
                 return False
-    for (tx, tz, tr, ty0, ty1) in tubes:
+    for (tx, tz, tr, ty0, ty1, _) in tubes:
         if _overlap(ya, yb, ty0, ty1) and math.hypot(cx - tx, cz - tz) - r - tr < need:
             return False
     return True
@@ -1044,7 +1047,8 @@ def _tube_clear(center, r, ya, yb, chamber, fr, obstacles, envelopes, tubes) -> 
 
 def _ring_clear(center, rr, yb, chamber, fr, obstacles, tubes) -> bool:
     """The flange ring (radius rr, glued to the back over [yb - 12, yb]) must
-    not overlap a cleat, stiffener, plate keep-out, another tube, or a wall."""
+    not overlap a cleat, stiffener, plate keep-out, another tube or its ring,
+    or a wall."""
     if rr <= 0:
         return True
     cx, cz = center
@@ -1055,8 +1059,11 @@ def _ring_clear(center, rr, yb, chamber, fr, obstacles, tubes) -> bool:
     for box in obstacles:
         if _overlap(ya, yb, box[0][1], box[1][1]) and _circle_box_gap(cx, cz, rr, box) < -1e-6:
             return False
-    for (tx, tz, tr, ty0, ty1) in tubes:
-        if _overlap(ya, yb, ty0, ty1) and math.hypot(cx - tx, cz - tz) - rr - tr < -1e-6:
+    for (tx, tz, tr, ty0, ty1, trr) in tubes:
+        d = math.hypot(cx - tx, cz - tz)
+        if _overlap(ya, yb, ty0, ty1) and d - rr - tr < -1e-6:
+            return False
+        if d - rr - trr < -1e-6:        # every ring sits on the back, so rings share the y span
             return False
     return True
 
@@ -1147,10 +1154,10 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
                 else:
                     blockers.append(f"port fit: chamber {c} port {j}: tube {id_mm:.1f} x {L:.0f} mm "
                                     f"{why}; longest tube that fits at this diameter is {fit:.0f} mm; "
-                                    "lower Fb, use a larger tube, or a front slot")
+                                    "raise Fb, use a smaller tube or a larger box, or a front slot")
                 continue
             cx, cz = spot
-            tubes.append((cx, cz, r, ya, yb))
+            tubes.append((cx, cz, r, ya, yb, rr))
             sfx = f"_{c}_{j}"
             has_tube = L > 2 * BACK_MM
             if has_tube:
