@@ -10,6 +10,8 @@ from pathlib import Path
 import pytest
 
 HERE = Path(__file__).resolve().parent
+FIXTURES = next(p / "projects" / "Speaker-cab-system" / "fixtures" for p in (HERE, *HERE.parents)
+                if (p / "projects" / "Speaker-cab-system" / "fixtures" / "tone-roots.json").exists())
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 SCRIPTS = HERE.parents[3] / "scripts"
@@ -657,7 +659,7 @@ def test_fixture_site_default_lays_out():
 
 
 # --- matrix: every catalog speaker x enclosure x configuration x line, on live proposals
-TONE = json.loads((HERE.parents[1] / "fixtures" / "tone-roots.json").read_text())
+TONE = json.loads((FIXTURES / "tone-roots.json").read_text())
 TONE["min_power_w"] = 10          # so low-power speakers pass the power check and reach the layout
 ENCLOSURES = [("closed", None), ("closed-ported", None), ("closed-ported", (300.0, 40.0)),
               ("open", None), ("semi-open", None)]

@@ -1646,6 +1646,8 @@ from pathlib import Path
 import pytest
 
 HERE = Path(__file__).resolve().parent
+FIXTURES = next(p / "projects" / "Speaker-cab-system" / "fixtures" for p in (HERE, *HERE.parents)
+                if (p / "projects" / "Speaker-cab-system" / "fixtures" / "tone-roots.json").exists())
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 SCRIPTS = HERE.parents[3] / "scripts"
@@ -3726,7 +3728,7 @@ def test_fixture_site_default_lays_out():
 
 
 # --- matrix: every catalog speaker x enclosure x configuration x line, on live proposals
-TONE = json.loads((HERE.parents[1] / "fixtures" / "tone-roots.json").read_text())
+TONE = json.loads((FIXTURES / "tone-roots.json").read_text())
 TONE["min_power_w"] = 10          # so low-power speakers pass the power check and reach the layout
 ENCLOSURES = [("closed", None), ("closed-ported", None), ("closed-ported", (300.0, 40.0)),
               ("open", None), ("semi-open", None)]
@@ -4197,7 +4199,7 @@ def layout_report(lay: Layout, checks: list) -> dict:
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cablayout.py -q`
-Expected: `42 passed` in under 60 seconds.
+Expected: `41 passed, 1 skipped` in under 60 seconds (the site-default fixture test skips until Task 12 lands the fixture, then passes).
 
 - [ ] **Step 5: Commit**
 
@@ -4238,6 +4240,8 @@ from pathlib import Path
 import pytest
 
 HERE = Path(__file__).resolve().parent
+FIXTURES = next(p / "projects" / "Speaker-cab-system" / "fixtures" for p in (HERE, *HERE.parents)
+                if (p / "projects" / "Speaker-cab-system" / "fixtures" / "tone-roots.json").exists())
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 SCRIPTS = HERE.parents[3] / "scripts"
@@ -5103,7 +5107,7 @@ def test_export_writes_every_deliverable(tmp_path):
 
 
 # --- CAD matrix: live proposals through layout and build
-TONE = json.loads((HERE.parents[1] / "fixtures" / "tone-roots.json").read_text())
+TONE = json.loads((FIXTURES / "tone-roots.json").read_text())
 TONE["min_power_w"] = 30
 MATRIX_SPEAKER = "eminence-cannabis-rex"
 ENCLOSURES = [("closed", None), ("closed-ported", None), ("closed-ported", "slot"), ("open", None), ("semi-open", None)]
@@ -5505,7 +5509,7 @@ Expected: every check line `pass` or `warn`, `exit 0`, and the files `cab.json`,
 - [ ] **Step 5: Run the fixture test**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabmodel.py -q`
-Expected: `20 passed`
+Expected: `20 passed`. `scripts/test_cablayout.py` now reports `42 passed` too, with the site-default fixture present.
 
 - [ ] **Step 6: Commit**
 

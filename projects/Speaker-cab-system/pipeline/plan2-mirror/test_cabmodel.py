@@ -12,6 +12,8 @@ from pathlib import Path
 import pytest
 
 HERE = Path(__file__).resolve().parent
+FIXTURES = next(p / "projects" / "Speaker-cab-system" / "fixtures" for p in (HERE, *HERE.parents)
+                if (p / "projects" / "Speaker-cab-system" / "fixtures" / "tone-roots.json").exists())
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 SCRIPTS = HERE.parents[3] / "scripts"
@@ -305,7 +307,7 @@ def test_export_writes_every_deliverable(tmp_path):
 
 
 # --- CAD matrix: live proposals through layout and build
-TONE = json.loads((HERE.parents[1] / "fixtures" / "tone-roots.json").read_text())
+TONE = json.loads((FIXTURES / "tone-roots.json").read_text())
 TONE["min_power_w"] = 30
 MATRIX_SPEAKER = "eminence-cannabis-rex"
 ENCLOSURES = [("closed", None), ("closed-ported", None), ("closed-ported", "slot"), ("open", None), ("semi-open", None)]
