@@ -4609,7 +4609,8 @@ def demo(name: str):
         c = cabvoice.Constraints(line="tolex", port_slot_mm=(300.0, 40.0))
         first = cabvoice.propose([drv, drv], [z, z], "closed-ported", tone, "mono", c, name)
         w_int = first.to_dict()["box"]["internal_mm"][0]
-        c.port_slot_mm = ((w_int - L.DIVIDER_MM) / 2.0 - 1.0, 40.0)
+        # two slots spanning the chamber, split only by the 18 mm center cheek (no end cheek slivers)
+        c.port_slot_mm = ((w_int - L.DIVIDER_MM) / 2.0, 40.0)
         v = cabvoice.propose([drv, drv], [z, z], "closed-ported", tone, "mono", c, name)
     elif name == "2x12-stereo-dovetail":
         c = cabvoice.Constraints(line="hardwood", species="black walnut")
@@ -4757,7 +4758,22 @@ def test_overlap_volume_reports_real_collisions():
     c = M._box(10, 0, 0, 20, 10, 10)
     assert abs(M.overlap_volume(a, b) - 500.0) < 1e-6
     assert M.assert_no_overlap(a, c) < 1e-6
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="unlabeled overlaps unlabeled by 500.0 mm3"):
+        M.assert_no_overlap(a, b)
+
+
+def test_overlap_volume_surfaces_a_failed_boolean(monkeypatch):
+    a = M._box(0, 0, 0, 10, 10, 10).solids()[0]
+    b = M._box(5, 0, 0, 15, 10, 10).solids()[0]
+    monkeypatch.setattr(type(a), "intersect", lambda self, *args, **kw: None)
+    assert M.overlap_volume(a, b) == 0.0        # None is build123d's "no intersection", not a failure
+
+    def failing(self, *args, **kw):
+        raise RuntimeError("forced boolean failure")
+    monkeypatch.setattr(type(a), "intersect", failing)
+    with pytest.raises(RuntimeError, match="forced boolean failure"):
+        M.overlap_volume(a, b)
+    with pytest.raises(RuntimeError, match="forced boolean failure"):
         M.assert_no_overlap(a, b)
 ```
 <!-- /code -->
@@ -4801,17 +4817,14 @@ def interior_solids(layout) -> dict:
 
 
 def overlap_volume(a, b) -> float:
-    """Boolean intersection volume of two shapes, 0 for an empty result."""
-    try:
-        cut = a & b
-    except Exception:
-        return 0.0
+    """Boolean intersection volume of two shapes; 0 when they only touch or
+    are apart (build123d answers None, or an empty Compound, for no
+    intersection). A boolean that fails raises out of here, so a broken
+    intersect can never pass an interference check as a clean 0."""
+    cut = a & b
     if cut is None:
         return 0.0
-    try:
-        return float(cut.volume)
-    except Exception:
-        return 0.0
+    return float(cut.volume)
 
 
 def _bbox_overlap(a, b, margin=0.5) -> bool:
@@ -4821,13 +4834,19 @@ def _bbox_overlap(a, b, margin=0.5) -> bool:
             and ba.min.Z < bb.max.Z + margin and bb.min.Z < ba.max.Z + margin)
 
 
+def _label(shape) -> str:
+    return getattr(shape, "label", "") or "unlabeled"
+
+
 def assert_no_overlap(a, b, tol_mm3=1.0) -> float:
-    """Intersection volume of a and b; AssertionError above tol_mm3. Touching
-    faces intersect in a zero-volume sliver, so 1 mm3 is the working tolerance."""
+    """Intersection volume of a and b; AssertionError above tol_mm3 (raised
+    explicitly, so python -O cannot strip it). Touching faces intersect in a
+    zero-volume sliver, so 1 mm3 is the working tolerance."""
     if not _bbox_overlap(a, b):
         return 0.0
     v = overlap_volume(a, b)
-    assert v <= tol_mm3, f"{getattr(a, 'label', '?')} overlaps {getattr(b, 'label', '?')} by {v:.1f} mm3"
+    if v > tol_mm3:
+        raise AssertionError(f"{_label(a)} overlaps {_label(b)} by {v:.1f} mm3")
     return v
 ```
 <!-- /code -->
@@ -4835,7 +4854,7 @@ def assert_no_overlap(a, b, tol_mm3=1.0) -> float:
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabmodel.py -q`
-Expected: `11 passed`
+Expected: `12 passed`
 
 - [ ] **Step 5: Render and view**
 
@@ -5009,7 +5028,7 @@ def component_solids(layout) -> dict:
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabmodel.py -q`
-Expected: `14 passed`
+Expected: `15 passed`
 
 - [ ] **Step 5: Render and view**
 
@@ -5342,7 +5361,7 @@ if __name__ == "__main__":
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabmodel.py -q`
-Expected: `19 passed` (default matrix; `CAB_FULL_MATRIX=1` runs all sixty builds and is not required for the commit)
+Expected: `20 passed` (default matrix; `CAB_FULL_MATRIX=1` runs all sixty builds and is not required for the commit)
 
 - [ ] **Step 5: Render and view**
 
@@ -5511,7 +5530,7 @@ Expected: every check line `pass` or `warn`, `exit 0`, and the files `cab.json`,
 - [ ] **Step 5: Run the fixture test**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabmodel.py -q`
-Expected: `20 passed`. `scripts/test_cablayout.py` now reports `42 passed` too, with the site-default fixture present.
+Expected: `21 passed`. `scripts/test_cablayout.py` now reports `42 passed` too, with the site-default fixture present.
 
 - [ ] **Step 6: Commit**
 

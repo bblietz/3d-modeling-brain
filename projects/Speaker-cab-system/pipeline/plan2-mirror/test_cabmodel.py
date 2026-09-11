@@ -186,7 +186,22 @@ def test_overlap_volume_reports_real_collisions():
     c = M._box(10, 0, 0, 20, 10, 10)
     assert abs(M.overlap_volume(a, b) - 500.0) < 1e-6
     assert M.assert_no_overlap(a, c) < 1e-6
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="unlabeled overlaps unlabeled by 500.0 mm3"):
+        M.assert_no_overlap(a, b)
+
+
+def test_overlap_volume_surfaces_a_failed_boolean(monkeypatch):
+    a = M._box(0, 0, 0, 10, 10, 10).solids()[0]
+    b = M._box(5, 0, 0, 15, 10, 10).solids()[0]
+    monkeypatch.setattr(type(a), "intersect", lambda self, *args, **kw: None)
+    assert M.overlap_volume(a, b) == 0.0        # None is build123d's "no intersection", not a failure
+
+    def failing(self, *args, **kw):
+        raise RuntimeError("forced boolean failure")
+    monkeypatch.setattr(type(a), "intersect", failing)
+    with pytest.raises(RuntimeError, match="forced boolean failure"):
+        M.overlap_volume(a, b)
+    with pytest.raises(RuntimeError, match="forced boolean failure"):
         M.assert_no_overlap(a, b)
 
 
