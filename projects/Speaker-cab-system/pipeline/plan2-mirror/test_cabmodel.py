@@ -269,10 +269,10 @@ def test_build_air_volume_matches_the_layout_and_nothing_collides():
     assert len(cab.parts) == len(lay.parts) == cab.assembly.solids().__len__()
     assert [e["name"] for e in cab.parts] == [b.name for b in lay.parts]
     by = {c.name: c for c in M.check_build(cab, lay)}
-    assert set(by) == {"interference", "air volume", "part count", "rectangularity"}
+    assert set(by) == {"interference", "air volume", "solid count", "rectangularity"}
     assert by["interference"].level == "pass", by["interference"].message
     assert by["air volume"].level == "pass", by["air volume"].message
-    assert by["part count"].level == "pass"
+    assert by["solid count"].level == "pass"
     measured = cab.air[0].volume / 1e6 - lay.chambers[0].displacement_l
     assert abs(measured - lay.net_l[0]) / lay.net_l[0] < 0.001
     assert "baffle" in by["rectangularity"].message
@@ -303,11 +303,12 @@ def test_export_writes_every_deliverable(tmp_path):
     cab = M.build(lay)
     checks = L.check_layout(lay, lay.spec) + M.check_build(cab, lay)
     files = M.export(cab, lay, checks, tmp_path)
+    assert files["step"] == "cab.step" and files["cab_json"] == "cab.json" and files["images"][0] == "images/cab-iso.png"
     for key in ("step", "cutlist_md", "cutlist_csv", "cab_json"):
-        assert Path(files[key]).exists(), key
-    assert len(files["images"]) == 5 and all(Path(p).exists() for p in files["images"])
+        assert (tmp_path / files[key]).exists(), key
+    assert len(files["images"]) == 5 and all((tmp_path / p).exists() for p in files["images"])
     report = json.loads((tmp_path / "cab.json").read_text())
-    assert report["external_in"] == [20.0, 18.0, 11.0]
+    assert report["files"] == files and report["external_in"] == [20.0, 18.0, 11.0]
     assert {c["name"] for c in report["checks"]} >= {"sheet", "interference", "air volume"}
     md = (tmp_path / "cutlist.md").read_text()
     assert "## Materials not cut" in md and "tolex wrap" in md and "Fender Style Black" in md
@@ -386,7 +387,7 @@ def test_cad_matrix_solids_agree_with_the_layout(tmp_path):
         label = (enclosure, slot, n, jack, line, joint, extra)
         assert by["interference"].level == "pass", (label, by["interference"].message)
         assert by["air volume"].level == "pass", (label, by["air volume"].message)
-        assert by["part count"].level == "pass", label
+        assert by["solid count"].level == "pass", label
         step = tmp_path / f"case{k}.step"
         M.export_step(cab.assembly, str(step))
         assert step.exists() and step.stat().st_size > 1000
@@ -407,3 +408,50 @@ def test_site_default_fixture(tmp_path):
     assert (tmp_path / "cab.step").exists() and (tmp_path / "images" / "cab-exploded.png").exists()
     assert all(c["level"] != "blocker" for c in report["checks"])
     assert "interference" in proc.stdout and "exported" in proc.stdout
+
+
+CHECK_LINES = ["sheet", "net volume", "stereo balance", "cutout", "grill opening", "port fit", "magnet to back",
+               "handle", "head match", "line", "jack plate", "stock", "part count", "spans",
+               "interference", "air volume", "solid count", "rectangularity"]
+
+
+def _order_dir(tmp_path):
+    """The template copied to the design's per-order depth, projects/Cab-<order>/,
+    in a scratch vault whose scripts/ is this suite's module directory."""
+    vault = tmp_path / "vault"
+    order = vault / "projects" / "Cab-probe"
+    order.mkdir(parents=True)
+    (vault / "scripts").symlink_to(HERE, target_is_directory=True)
+    for name in ("cab.py", "voicing.json"):
+        (order / name).write_bytes((SITE_DEFAULT / name).read_bytes())
+    return order
+
+
+def test_cab_py_finds_the_vault_from_an_order_directory(tmp_path):
+    order = _order_dir(tmp_path)
+    env = {k: v for k, v in os.environ.items() if k not in ("EXPORT", "TMP_STL", "SHOW", "PYTHONPATH")}
+    proc = subprocess.run([sys.executable, "cab.py"], cwd=order, env=env, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    printed = [line[:16].strip() for line in proc.stdout.splitlines()]
+    assert printed == CHECK_LINES[:14] and not (order / "cab.json").exists()
+    proc = subprocess.run([sys.executable, str(order / "cab.py")], cwd=tmp_path, env=env, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+
+
+def test_cab_py_exits_2_on_a_blocker_and_still_exports(tmp_path):
+    order = _order_dir(tmp_path)
+    v = json.loads((order / "voicing.json").read_text())
+    v["volumes"]["net_total_l"] *= 1.3
+    v["volumes"]["per_chamber_net_l"] *= 1.3
+    (order / "voicing.json").write_text(json.dumps(v, indent=2))
+    out = tmp_path / "out"
+    env = dict(os.environ, EXPORT="1", CAB_OUT=str(out))
+    env.pop("PYTHONPATH", None)
+    proc = subprocess.run([sys.executable, str(order / "cab.py")], env=env, capture_output=True, text=True)
+    assert proc.returncode == 2, proc.stdout + proc.stderr
+    lines = proc.stdout.splitlines()
+    assert [line[:16].strip() for line in lines if not line.startswith("exported")] == CHECK_LINES
+    assert any(line.startswith("net volume") and " blocker " in line for line in lines)
+    report = json.loads((out / "cab.json").read_text())
+    assert report["files"]["cab_json"] == "cab.json" and (out / "cab.step").exists()
+    assert [c["level"] for c in report["checks"] if c["name"] == "net volume"] == ["blocker"]

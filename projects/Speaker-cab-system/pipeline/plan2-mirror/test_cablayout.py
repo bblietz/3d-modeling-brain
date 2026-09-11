@@ -60,8 +60,10 @@ def test_constants_match_engine():
     assert L.BACK_MM == cabvoice.BACK_MM == 12.0
     assert L.CUTOUT_MARGIN_MM == cabvoice.CUTOUT_MARGIN_MM == 25.0
     assert L.MM_PER_INCH == cabvoice.MM_PER_INCH == 25.4
-    assert L.SHELL_MARGIN_MM == 44.0 and L.CUTOUT_GAP_MM == 68.0
-    assert set(L.PORT_TUBE_OD_MM) == {52.0, 77.3, 101.5, 153.2}
+    assert L.SHELL_MARGIN_MM == cabvoice.SHELL_MARGIN_MM == 44.0
+    assert L.CUTOUT_GAP_MM == cabvoice.CUTOUT_GAP_MM == 68.0
+    assert L.PORT_TUBE_OD_MM == cabvoice.PORT_TUBE_OD_MM and set(L.PORT_TUBE_OD_MM) == {52.0, 77.3, 101.5, 153.2}
+    assert not hasattr(L, "FOOT_DEFAULT_INSET_MM")     # the inset lives in Aesthetics.foot_inset_mm
 
 
 def test_finger_schedule_is_odd_with_full_ends():
@@ -200,6 +202,17 @@ def test_baffle_fixed_dados():
     slot = spec_for(port="slot", aesthetics=L.Aesthetics(baffle_mount="fixed"))
     _, _, dados = L.baffle_and_cutouts(slot, L.frame(slot))
     assert "bottom" not in dados
+    # layout() notes the dado on every shell row it cuts, plus the cross-grain glue rule on hardwood
+    dado = "; 6 mm deep x 18 mm dado for the baffle, front face 20 mm behind the front edge"
+    shell = ("side_left", "side_right", "top", "bottom")
+    notes = {p.name: p.notes for p in L.layout(spec).parts if p.name in shell}
+    assert len(notes) == 4 and all(n.endswith(dado) for n in notes.values())
+    hw = spec_for(line="hardwood", species="black walnut", aesthetics=L.Aesthetics(baffle_mount="fixed"))
+    notes = {p.name: p.notes for p in L.layout(hw).parts if p.name in shell}
+    assert all(n.endswith(dado + "; glued in the front 100 mm only") for n in notes.values())
+    notes = {p.name: p.notes for p in L.layout(slot).parts if p.name in shell}
+    assert "dado" not in notes["bottom"] and all("dado" in notes[n] for n in ("side_left", "side_right", "top"))
+    assert all("dado" not in p.notes for p in L.layout(spec_for()).parts if p.name in shell)
 
 
 def test_2x12_cutout_spacing_and_stereo_centers():
@@ -347,6 +360,8 @@ def test_round_port_placement_and_blockers():
     assert p.center == pytest.approx((44.45 + 25.0, 228.6)) and p.od_mm == 88.9 and p.ring_od_mm == 148.9
     assert [b.name for b in blanks] == ["port_tube_0_0", "port_ring_0_0"]
     assert blanks[0].shape == "tube" and blanks[0].size == (88.9, 40.0, 77.3) and blanks[0].chamber == 0
+    assert blanks[0].blank_mm == pytest.approx((5.8, 88.9, 40.0))     # wall x OD x length on the cut list
+    assert "planed" not in blanks[1].notes
     assert blanks[1].size == pytest.approx((148.9, 12.0, 88.9)) and blanks[1].pos == pytest.approx((p.center[0], 255.4, 228.6))
     assert feats == [{"type": "cutout", "center": p.center, "d": 88.9}]
     # a tube reaching the magnet must stand off by the magnet radius
@@ -373,7 +388,8 @@ def test_round_port_placement_and_blockers():
     _, cut_t, _ = L.baffle_and_cutouts(big, frt)
     env_t = L.speaker_envelopes(big, frt, cut_t)
     _, _, _, blk = L.round_ports(big, frt, env_t, [])
-    assert blk and blk[0].endswith("use a front slot") and "no round port of 153.2 mm" in blk[0]
+    assert blk and blk[0].endswith("raise Fb, use a smaller tube or a larger box, or a front slot")
+    assert "no round port of 153.2 mm" in blk[0]
     tiny["port"]["diameter_mm"] = 77.3
     small = L.order_from(tiny, L.Aesthetics())
     ports_s, _, _, blk = L.round_ports(small, frt, env_t, [])
@@ -390,7 +406,7 @@ def test_round_port_short_length_uses_the_ring_alone():
     ports, blanks, feats, blockers = L.round_ports(spec, fr, envs, [])
     assert [b.name for b in blanks] == ["port_ring_0_0"]
     assert blanks[0].size == (148.9, 8.0, 77.3) and feats[0]["d"] == 77.3
-    assert "no tube" in blanks[0].notes
+    assert "no tube" in blanks[0].notes and "planed to 8 mm" in blanks[0].notes
 
 
 def test_round_port_stands_off_behind_the_magnet():
@@ -490,9 +506,16 @@ def test_slot_port_cheeks_center_and_blockers():
     assert slots[0].x0 == pytest.approx(-150.0) and slots[0].cheek_w_mm == pytest.approx(86.0)
     assert [b.name for b in blanks] == ["shelf", "cheek_left", "cheek_right"]
     assert blanks[0].pos == (-236.0, 20.0, 58.0) and blanks[0].size == (472.0, 60.0, 18.0)
+    assert all("glued up from 18 mm birch" in b.notes for b in blanks[1:])      # 86 mm cheeks
+    flush = sheet(port="slot")
+    flush["port"]["slot_w_mm"] = 436.0                                         # 18 mm cheeks: one thickness
+    _, blanks, _ = L.slot_ports(L.order_from(flush, L.Aesthetics()), fr)
+    assert [b.name for b in blanks] == ["shelf", "cheek_left", "cheek_right"]
+    assert all("glued up" not in b.notes for b in blanks)
     two = spec_for(drivers=2, port="slot", external=(722.0 + 36.0, 457.2, 279.4))
     slots, blanks, blockers = L.slot_ports(two, L.frame(two))
     assert blockers == [] and len(slots) == 2 and "cheek_center_0" in [b.name for b in blanks]
+    assert all("glued up" not in b.notes for b in blanks if b.name.startswith("cheek_center"))
     assert slots[1].x0 - slots[0].x1 == pytest.approx(18.0)
     narrow = spec_for(drivers=2, port="slot")     # two 300 mm slots in a 472 mm chamber
     _, _, blockers = L.slot_ports(narrow, L.frame(narrow))
@@ -642,7 +665,9 @@ def test_report_and_to_dict_are_json():
     rep = L.layout_report(lay, checks)
     json.dumps(rep)
     json.dumps(lay.to_dict())
-    assert rep["external_in"] == [20.0, 18.0, 11.0] and rep["internal_mm"] == pytest.approx([472.0, 421.2, 229.4])
+    assert rep["external_in"] == [20.0, 18.0, 11.0] and rep["internal_mm"] == [472.0, 421.2, 229.4]
+    assert rep["volumes"]["gross_l"] == [round(lay.chambers[0].gross_l, 3)]
+    assert rep["mass"]["com_mm"] == [round(v, 3) for v in lay.com_mm]
     assert rep["speakers"] == ["celestion-g12h-30-anniversary"] and rep["tolex"]["roll_in"] == 54
     assert {c["name"] for c in rep["checks"]} == set(CHECK_NAMES)
     assert rep["prediction_status"] == "unverified, ears only" and "generated" in rep

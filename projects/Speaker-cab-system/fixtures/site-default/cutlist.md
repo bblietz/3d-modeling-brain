@@ -7,7 +7,7 @@ project: site-default
 
 | Qty | Part | T x W x L (mm) | T x W x L (in) | Material | Notes |
 |---|---|---|---|---|---|
-| 1 | port_tube_0_0 | 0 x 114.3 x 40 | 0 x 4-1/2 x 1-9/16 | PVC 4 in sch 40 | cut to 40 mm, 101.5 mm inside diameter, glued through the back panel and the flange ring |
+| 1 | port_tube_0_0 | 6.4 x 114.3 x 40 | 1/4 x 4-1/2 x 1-9/16 | PVC 4 in sch 40 | cut to 40 mm, 101.5 mm inside diameter, glued through the back panel and the flange ring |
 | 1 | back | 12 x 421.2 x 472 | 1/2 x 16-9/16 x 18-9/16 | baltic birch 12 mm | 12 mm birch back, removable, screwed to the cleats every 150 mm |
 | 2 | grill_top/grill_bottom | 12 x 40 x 468 | 1/2 x 1-9/16 x 18-7/16 | baltic birch 12 mm | grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle |
 | 2 | grill_left/grill_right | 12 x 40 x 417.2 | 1/2 x 1-9/16 x 16-7/16 | baltic birch 12 mm | grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle |

@@ -1,6 +1,8 @@
 """Site-default order: the 20 x 18 x 11 in 1x12 closed-ported tolex cab.
-Copy this file into a new order directory next to its voicing.json, edit the
-aesthetics constants, then run it from anywhere:
+Copy this file into a new order directory (projects/Cab-<order>/) next to its
+voicing.json, edit the aesthetics constants, then run it from any working
+directory; it finds the vault by walking up to the directory holding
+scripts/cablayout.py:
 
     python cab.py                 layout and checks only (prints every verdict)
     TMP_STL=/tmp/cab.stl python cab.py   also writes an STL for render_stl.py
@@ -17,8 +19,17 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-VAULT = HERE.parents[3]
-sys.path.insert(0, str(VAULT / "scripts"))
+
+
+def vault_root(start: Path) -> Path:
+    """The first directory at or above start holding scripts/cablayout.py."""
+    for p in (start, *start.parents):
+        if (p / "scripts" / "cablayout.py").exists():
+            return p
+    raise SystemExit(f"cab.py: no vault above {start} (no directory holding scripts/cablayout.py)")
+
+
+sys.path.insert(0, str(vault_root(HERE) / "scripts"))
 import cablayout as L  # noqa: E402
 
 # --- aesthetics block (from the intake) --------------------------------------
@@ -53,7 +64,7 @@ if os.environ.get("TMP_STL") or os.environ.get("EXPORT") or os.environ.get("SHOW
     if os.environ.get("EXPORT"):
         out = Path(os.environ.get("CAB_OUT") or HERE)
         files = M.export(cab, lay, checks, out)
-        print(f"exported {files['step']} and {len(files['images'])} renders")
+        print(f"exported {files['step']} and {len(files['images'])} renders to {out}")
     if os.environ.get("SHOW"):
         from ocp_vscode import show
         show(*cab.solids(), names=[e["name"] for e in cab.parts])

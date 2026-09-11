@@ -19,8 +19,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
-import os
 import subprocess
 import sys
 import tempfile
@@ -259,26 +257,26 @@ RENDER_KINDS = ("shell", "interior", "rear", "assembly", "exploded")
 
 
 def render_kind(kind: str, layout, png_path):
-    """Per-feature renders for the build loop; later kinds need the later
-    task units (interior_solids, back_solids, build, exploded)."""
-    g = globals()
+    """Per-feature renders for the build loop. The later kinds call the later
+    task units (interior_solids, back_solids, port_solids, component_solids,
+    build, exploded); the names resolve when the kind is rendered."""
     if kind == "shell":
         solids = [blank_solid(b) for b in layout.parts if b.name in SHELL_NAMES]
         return render(solids, png_path, views=[(30, -60), (20, -150)])
     if kind == "interior":
-        return render(list(g["interior_solids"](layout).values()), png_path, views=[(25, -60), (15, 120)])
+        return render(list(interior_solids(layout).values()), png_path, views=[(25, -60), (15, 120)])
     if kind == "rear":
-        solids = list(g["back_solids"](layout).values()) + list(g["port_solids"](layout).values())
-        comps = g["component_solids"](layout)
+        solids = list(back_solids(layout).values()) + list(port_solids(layout).values())
+        comps = component_solids(layout)
         solids += [v for k, v in comps.items() if k.startswith("speaker_") or k.startswith("jack_plate_")]
         solids += [blank_solid(b) for b in layout.parts if b.name in ("brace", "divider")]
         return render(solids, png_path, views=[(20, 140), (0, 90)])
     if kind == "assembly":
-        cab = g["build"](layout)
+        cab = build(layout)
         return render([e["solid"] for e in cab.parts] + list(cab.components.values()), png_path)
     if kind == "exploded":
-        cab = g["build"](layout)
-        return render([g["exploded"](cab)], png_path, views=[(30, -60)])
+        cab = build(layout)
+        return render([exploded(cab)], png_path, views=[(30, -60)])
     raise ValueError(f"unknown render kind {kind!r}")
 
 
@@ -477,7 +475,7 @@ def build(layout) -> CabBuild:
 
 
 def check_build(cab: CabBuild, layout) -> list:
-    """What only CAD can prove: interference, measured air volume, part
+    """What only CAD can prove: interference, measured air volume, solid
     count, rectangularity. Same Check shape as cablayout.check_layout."""
     checks = []
     named = [(e["name"], e["solid"]) for e in cab.parts] + list(cab.components.items())
@@ -506,7 +504,7 @@ def check_build(cab: CabBuild, layout) -> list:
             level = "blocker"
     checks.append(L.Check("air volume", level, "; ".join(msgs)))
     n_cad, n_lay = len(cab.parts), len(layout.parts)
-    checks.append(L.Check("part count", "pass" if n_cad == n_lay else "blocker",
+    checks.append(L.Check("solid count", "pass" if n_cad == n_lay else "blocker",
                           f"{n_cad} solids for {n_lay} blanks"))
     shaped = []
     for e in cab.parts:
@@ -549,27 +547,23 @@ def tolex_line(layout) -> dict | None:
 
 def export(cab: CabBuild, layout, checks: list, out_dir) -> dict:
     """cab.step, four renders plus the exploded view under images/, the cut
-    list with the tolex line, and cab.json. Returns the files dict."""
+    list with the tolex line, and cab.json. Returns the files dict, every
+    path relative to out_dir; cab.json carries the same dict."""
     out_dir = Path(out_dir)
-    images = out_dir / "images"
-    images.mkdir(parents=True, exist_ok=True)
+    (out_dir / "images").mkdir(parents=True, exist_ok=True)
+    files = {"step": "cab.step", "images": [f"images/cab-{view}.png" for view in RENDER_VIEWS] + ["images/cab-exploded.png"],
+             "cutlist_md": "cutlist.md", "cutlist_csv": "cutlist.csv", "cab_json": "cab.json"}
     everything = cab.solids() + list(cab.components.values())
-    step = out_dir / "cab.step"
-    export_step(compound_of(everything), str(step))
-    files = {"step": str(step), "images": []}
-    for view, (elev, azim) in RENDER_VIEWS.items():
-        png = render(everything, images / f"cab-{view}.png", views=[(elev, azim)])
-        files["images"].append(str(png))
-    png = render([exploded(cab)], images / "cab-exploded.png", views=[(30, -60)])
-    files["images"].append(str(png))
+    export_step(compound_of(everything), str(out_dir / files["step"]))
+    for (elev, azim), png in zip(RENDER_VIEWS.values(), files["images"]):
+        render(everything, out_dir / png, views=[(elev, azim)])
+    render([exploded(cab)], out_dir / files["images"][-1], views=[(30, -60)])
     extra = [tolex_line(layout)] if layout.tolex else None
-    md, csv = out_dir / "cutlist.md", out_dir / "cutlist.csv"
-    cutlist.write_cut_list(cab.parts, str(md), csv_path=str(csv), title=layout.spec.name, extra_lines=extra)
-    files["cutlist_md"], files["cutlist_csv"] = str(md), str(csv)
+    cutlist.write_cut_list(cab.parts, str(out_dir / files["cutlist_md"]), csv_path=str(out_dir / files["cutlist_csv"]),
+                           title=layout.spec.name, extra_lines=extra)
     report = L.layout_report(layout, checks)
     report["files"] = files
-    (out_dir / "cab.json").write_text(json.dumps(report, indent=2) + "\n")
-    files["cab_json"] = str(out_dir / "cab.json")
+    (out_dir / files["cab_json"]).write_text(json.dumps(report, indent=2) + "\n")
     return files
 
 

@@ -1696,8 +1696,10 @@ def test_constants_match_engine():
     assert L.BACK_MM == cabvoice.BACK_MM == 12.0
     assert L.CUTOUT_MARGIN_MM == cabvoice.CUTOUT_MARGIN_MM == 25.0
     assert L.MM_PER_INCH == cabvoice.MM_PER_INCH == 25.4
-    assert L.SHELL_MARGIN_MM == 44.0 and L.CUTOUT_GAP_MM == 68.0
-    assert set(L.PORT_TUBE_OD_MM) == {52.0, 77.3, 101.5, 153.2}
+    assert L.SHELL_MARGIN_MM == cabvoice.SHELL_MARGIN_MM == 44.0
+    assert L.CUTOUT_GAP_MM == cabvoice.CUTOUT_GAP_MM == 68.0
+    assert L.PORT_TUBE_OD_MM == cabvoice.PORT_TUBE_OD_MM and set(L.PORT_TUBE_OD_MM) == {52.0, 77.3, 101.5, 153.2}
+    assert not hasattr(L, "FOOT_DEFAULT_INSET_MM")     # the inset lives in Aesthetics.foot_inset_mm
 
 
 def test_finger_schedule_is_odd_with_full_ends():
@@ -1895,7 +1897,6 @@ TUBE_WALL_FALLBACK_MM = 5.5
 JACK_CLEAR_MM = 25.0
 BAFFLE_CLEARANCE_MM = 1.0     # floating baffle side clearance
 BRACE_SETBACK_MM = 2.0        # brace front face behind the baffle back face
-FOOT_DEFAULT_INSET_MM = 32.0
 GRILL_FRONT_MM = 3.0          # grill frame face behind the front edge
 YARD_M = 0.9144
 
@@ -1903,6 +1904,9 @@ assert RECESS_MM == cabvoice.RECESS_MM
 assert BAFFLE_MM == cabvoice.BAFFLE_MM
 assert BACK_MM == cabvoice.BACK_MM
 assert CUTOUT_MARGIN_MM == cabvoice.CUTOUT_MARGIN_MM
+assert SHELL_MARGIN_MM == cabvoice.SHELL_MARGIN_MM
+assert CUTOUT_GAP_MM == cabvoice.CUTOUT_GAP_MM
+assert PORT_TUBE_OD_MM == cabvoice.PORT_TUBE_OD_MM
 assert MM_PER_INCH == cabvoice.MM_PER_INCH
 
 JOINTS = ("finger", "dovetail")
@@ -2525,6 +2529,17 @@ def test_baffle_fixed_dados():
     slot = spec_for(port="slot", aesthetics=L.Aesthetics(baffle_mount="fixed"))
     _, _, dados = L.baffle_and_cutouts(slot, L.frame(slot))
     assert "bottom" not in dados
+    # layout() notes the dado on every shell row it cuts, plus the cross-grain glue rule on hardwood
+    dado = "; 6 mm deep x 18 mm dado for the baffle, front face 20 mm behind the front edge"
+    shell = ("side_left", "side_right", "top", "bottom")
+    notes = {p.name: p.notes for p in L.layout(spec).parts if p.name in shell}
+    assert len(notes) == 4 and all(n.endswith(dado) for n in notes.values())
+    hw = spec_for(line="hardwood", species="black walnut", aesthetics=L.Aesthetics(baffle_mount="fixed"))
+    notes = {p.name: p.notes for p in L.layout(hw).parts if p.name in shell}
+    assert all(n.endswith(dado + "; glued in the front 100 mm only") for n in notes.values())
+    notes = {p.name: p.notes for p in L.layout(slot).parts if p.name in shell}
+    assert "dado" not in notes["bottom"] and all("dado" in notes[n] for n in ("side_left", "side_right", "top"))
+    assert all("dado" not in p.notes for p in L.layout(spec_for()).parts if p.name in shell)
 
 
 def test_2x12_cutout_spacing_and_stereo_centers():
@@ -2994,6 +3009,8 @@ def test_round_port_placement_and_blockers():
     assert p.center == pytest.approx((44.45 + 25.0, 228.6)) and p.od_mm == 88.9 and p.ring_od_mm == 148.9
     assert [b.name for b in blanks] == ["port_tube_0_0", "port_ring_0_0"]
     assert blanks[0].shape == "tube" and blanks[0].size == (88.9, 40.0, 77.3) and blanks[0].chamber == 0
+    assert blanks[0].blank_mm == pytest.approx((5.8, 88.9, 40.0))     # wall x OD x length on the cut list
+    assert "planed" not in blanks[1].notes
     assert blanks[1].size == pytest.approx((148.9, 12.0, 88.9)) and blanks[1].pos == pytest.approx((p.center[0], 255.4, 228.6))
     assert feats == [{"type": "cutout", "center": p.center, "d": 88.9}]
     # a tube reaching the magnet must stand off by the magnet radius
@@ -3020,7 +3037,8 @@ def test_round_port_placement_and_blockers():
     _, cut_t, _ = L.baffle_and_cutouts(big, frt)
     env_t = L.speaker_envelopes(big, frt, cut_t)
     _, _, _, blk = L.round_ports(big, frt, env_t, [])
-    assert blk and blk[0].endswith("use a front slot") and "no round port of 153.2 mm" in blk[0]
+    assert blk and blk[0].endswith("raise Fb, use a smaller tube or a larger box, or a front slot")
+    assert "no round port of 153.2 mm" in blk[0]
     tiny["port"]["diameter_mm"] = 77.3
     small = L.order_from(tiny, L.Aesthetics())
     ports_s, _, _, blk = L.round_ports(small, frt, env_t, [])
@@ -3037,7 +3055,7 @@ def test_round_port_short_length_uses_the_ring_alone():
     ports, blanks, feats, blockers = L.round_ports(spec, fr, envs, [])
     assert [b.name for b in blanks] == ["port_ring_0_0"]
     assert blanks[0].size == (148.9, 8.0, 77.3) and feats[0]["d"] == 77.3
-    assert "no tube" in blanks[0].notes
+    assert "no tube" in blanks[0].notes and "planed to 8 mm" in blanks[0].notes
 
 
 def test_round_port_stands_off_behind_the_magnet():
@@ -3137,9 +3155,16 @@ def test_slot_port_cheeks_center_and_blockers():
     assert slots[0].x0 == pytest.approx(-150.0) and slots[0].cheek_w_mm == pytest.approx(86.0)
     assert [b.name for b in blanks] == ["shelf", "cheek_left", "cheek_right"]
     assert blanks[0].pos == (-236.0, 20.0, 58.0) and blanks[0].size == (472.0, 60.0, 18.0)
+    assert all("glued up from 18 mm birch" in b.notes for b in blanks[1:])      # 86 mm cheeks
+    flush = sheet(port="slot")
+    flush["port"]["slot_w_mm"] = 436.0                                         # 18 mm cheeks: one thickness
+    _, blanks, _ = L.slot_ports(L.order_from(flush, L.Aesthetics()), fr)
+    assert [b.name for b in blanks] == ["shelf", "cheek_left", "cheek_right"]
+    assert all("glued up" not in b.notes for b in blanks)
     two = spec_for(drivers=2, port="slot", external=(722.0 + 36.0, 457.2, 279.4))
     slots, blanks, blockers = L.slot_ports(two, L.frame(two))
     assert blockers == [] and len(slots) == 2 and "cheek_center_0" in [b.name for b in blanks]
+    assert all("glued up" not in b.notes for b in blanks if b.name.startswith("cheek_center"))
     assert slots[1].x0 - slots[0].x1 == pytest.approx(18.0)
     narrow = spec_for(drivers=2, port="slot")     # two 300 mm slots in a 472 mm chamber
     _, _, blockers = L.slot_ports(narrow, L.frame(narrow))
@@ -3214,11 +3239,11 @@ def back_blanks(spec: CabSpec, fr: Frame) -> list:
                   notes=note + "; carries the jack plate")]
 
 
-def _attach(parts: list, name: str, features: list) -> None:
+def _attach(parts: list, name: str, features: list) -> Blank:
     for p in parts:
         if p.name == name:
             p.features.extend(features)
-            return
+            return p
     raise KeyError(f"no blank named {name}")
 
 
@@ -3417,7 +3442,8 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
                        else f"finds no spot with {CLEARANCE_MM:.0f} mm clearance")
                 if fit is None:
                     blockers.append(f"port fit: chamber {c} port {j}: no round port of "
-                                    f"{id_mm:.1f} mm fits with {CLEARANCE_MM:.0f} mm clearance; use a front slot")
+                                    f"{id_mm:.1f} mm fits with {CLEARANCE_MM:.0f} mm clearance; "
+                                    "raise Fb, use a smaller tube or a larger box, or a front slot")
                 else:
                     blockers.append(f"port fit: chamber {c} port {j}: tube {id_mm:.1f} x {L:.0f} mm "
                                     f"{why}; longest tube that fits at this diameter is {fit:.0f} mm; "
@@ -3430,7 +3456,7 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
             if has_tube:
                 blanks.append(Blank(f"port_tube{sfx}", 1, mat, PVC_DENSITY, shape="tube",
                                     pos=(cx, fr.D - L, cz), size=(od, L, id_mm),
-                                    blank_mm=(0.0, od, L), chamber=c,
+                                    blank_mm=((od - id_mm) / 2.0, od, L), chamber=c,   # wall x OD x length
                                     notes=f"cut to {L:.0f} mm, {id_mm:.1f} mm inside diameter, glued "
                                           "through the back panel and the flange ring"
                                           + ("; " + tube_note if tube_note else "")))
@@ -3443,10 +3469,16 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
                                 pos=(cx, fr.D - BACK_MM - ring_t, cz), size=(ring_od, ring_t, ring_id),
                                 blank_mm=(ring_t, ring_od, ring_od), chamber=c,
                                 notes="flange ring cut from 12 mm ply, glued to the inside face of the back"
-                                      + ("" if has_tube else f"; the ring is the port ({ring_t:.0f} mm beyond the panel), no tube")))
+                                      + ("" if has_tube else f"; the ring is the port ({ring_t:.0f} mm beyond the panel), no tube")
+                                      + (f"; planed to {ring_t:g} mm" if ring_t < FLANGE_RING_T_MM - 1e-6 else "")))
             feats.append({"type": "cutout", "center": (cx, cz), "d": hole})
             ports.append(RoundPort(c, (cx, cz), id_mm, od, L, ring_od, fr.D - L, fr.D))
     return ports, blanks, feats, blockers
+
+
+def _glue_up(t: float) -> str:
+    """Cheeks thicker than one 18 mm sheet are laminated."""
+    return "; glued up from 18 mm birch" if t > BAFFLE_MM + 1e-6 else ""
 
 
 def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
@@ -3486,7 +3518,7 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
             for side, x_c in (("left", xa), ("right", xb - cheek)):
                 blanks.append(Blank(f"cheek_{side}{sfx}", 1, mat18, BIRCH_DENSITY, pos=(x_c, fr.y_bf, fr.z0),
                                     size=(cheek, L, s_h), blank_mm=_blank_dims(cheek, L, s_h),
-                                    chamber=c, notes="slot cheek, fills the slot end, glued"))
+                                    chamber=c, notes="slot cheek, fills the slot end, glued" + _glue_up(cheek)))
         x = xa + cheek
         for j in range(n):
             slots.append(SlotPort(c, x, x + s_w, s_h, L, cheek))
@@ -3495,7 +3527,8 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
                 blanks.append(Blank(f"cheek_center{sfx}_{j}", 1, mat18, BIRCH_DENSITY,
                                     pos=(x, fr.y_bf, fr.z0), size=(DIVIDER_MM, L, s_h),
                                     blank_mm=_blank_dims(DIVIDER_MM, L, s_h), chamber=c,
-                                    notes="center cheek between the two slots, in line with the brace"))
+                                    notes="center cheek between the two slots, in line with the brace"
+                                          + _glue_up(DIVIDER_MM)))
                 x += DIVIDER_MM
     return slots, blanks, blockers
 
@@ -3711,7 +3744,9 @@ def test_report_and_to_dict_are_json():
     rep = L.layout_report(lay, checks)
     json.dumps(rep)
     json.dumps(lay.to_dict())
-    assert rep["external_in"] == [20.0, 18.0, 11.0] and rep["internal_mm"] == pytest.approx([472.0, 421.2, 229.4])
+    assert rep["external_in"] == [20.0, 18.0, 11.0] and rep["internal_mm"] == [472.0, 421.2, 229.4]
+    assert rep["volumes"]["gross_l"] == [round(lay.chambers[0].gross_l, 3)]
+    assert rep["mass"]["com_mm"] == [round(v, 3) for v in lay.com_mm]
     assert rep["speakers"] == ["celestion-g12h-30-anniversary"] and rep["tolex"]["roll_in"] == 54
     assert {c["name"] for c in rep["checks"]} == set(CHECK_NAMES)
     assert rep["prediction_status"] == "unverified, ears only" and "generated" in rep
@@ -3944,7 +3979,11 @@ def layout(spec: CabSpec) -> Layout:
     parts = shell_blanks(spec)
     baffle, cutouts, dados = baffle_and_cutouts(spec, fr)
     for name, feat in dados.items():
-        _attach(parts, name, [feat])
+        panel = _attach(parts, name, [feat])
+        panel.notes += (f"; {DADO_MM:g} mm deep x {BAFFLE_MM:g} mm dado for the baffle, "
+                        f"front face {fr.y_bf:g} mm behind the front edge")
+        if spec.line == "hardwood":
+            panel.notes += "; glued in the front 100 mm only"
     parts.append(baffle)
     parts += cleat_blanks(spec, fr)
     parts += grill_frame_blanks(spec, fr)
@@ -4159,11 +4198,20 @@ def check_layout(lay: Layout, spec: CabSpec) -> list:
     return checks
 
 
+def _round3(obj):
+    """Floats rounded to 3 decimals, recursively, so the report carries no float noise."""
+    if isinstance(obj, dict):
+        return {k: _round3(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_round3(v) for v in obj]
+    return round(obj, 3) if isinstance(obj, float) else obj
+
+
 def layout_report(lay: Layout, checks: list) -> dict:
     spec = lay.spec
     fr = frame(spec)
     W, H, D = spec.external_mm
-    return {
+    return _round3({
         "name": spec.name,
         "generated": date.today().isoformat(),
         "line": spec.line, "species": spec.species,
@@ -4193,7 +4241,7 @@ def layout_report(lay: Layout, checks: list) -> dict:
                    "material": p.material, "notes": p.notes} for p in lay.parts],
         "checks": [{"name": c.name, "level": c.level, "message": c.message} for c in checks],
         "prediction_status": spec.prediction_status,
-    }
+    })
 ```
 <!-- /code -->
 
@@ -4387,8 +4435,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
-import os
 import subprocess
 import sys
 import tempfile
@@ -4627,26 +4673,26 @@ RENDER_KINDS = ("shell", "interior", "rear", "assembly", "exploded")
 
 
 def render_kind(kind: str, layout, png_path):
-    """Per-feature renders for the build loop; later kinds need the later
-    task units (interior_solids, back_solids, build, exploded)."""
-    g = globals()
+    """Per-feature renders for the build loop. The later kinds call the later
+    task units (interior_solids, back_solids, port_solids, component_solids,
+    build, exploded); the names resolve when the kind is rendered."""
     if kind == "shell":
         solids = [blank_solid(b) for b in layout.parts if b.name in SHELL_NAMES]
         return render(solids, png_path, views=[(30, -60), (20, -150)])
     if kind == "interior":
-        return render(list(g["interior_solids"](layout).values()), png_path, views=[(25, -60), (15, 120)])
+        return render(list(interior_solids(layout).values()), png_path, views=[(25, -60), (15, 120)])
     if kind == "rear":
-        solids = list(g["back_solids"](layout).values()) + list(g["port_solids"](layout).values())
-        comps = g["component_solids"](layout)
+        solids = list(back_solids(layout).values()) + list(port_solids(layout).values())
+        comps = component_solids(layout)
         solids += [v for k, v in comps.items() if k.startswith("speaker_") or k.startswith("jack_plate_")]
         solids += [blank_solid(b) for b in layout.parts if b.name in ("brace", "divider")]
         return render(solids, png_path, views=[(20, 140), (0, 90)])
     if kind == "assembly":
-        cab = g["build"](layout)
+        cab = build(layout)
         return render([e["solid"] for e in cab.parts] + list(cab.components.values()), png_path)
     if kind == "exploded":
-        cab = g["build"](layout)
-        return render([g["exploded"](cab)], png_path, views=[(30, -60)])
+        cab = build(layout)
+        return render([exploded(cab)], png_path, views=[(30, -60)])
     raise ValueError(f"unknown render kind {kind!r}")
 
 
@@ -5074,10 +5120,10 @@ def test_build_air_volume_matches_the_layout_and_nothing_collides():
     assert len(cab.parts) == len(lay.parts) == cab.assembly.solids().__len__()
     assert [e["name"] for e in cab.parts] == [b.name for b in lay.parts]
     by = {c.name: c for c in M.check_build(cab, lay)}
-    assert set(by) == {"interference", "air volume", "part count", "rectangularity"}
+    assert set(by) == {"interference", "air volume", "solid count", "rectangularity"}
     assert by["interference"].level == "pass", by["interference"].message
     assert by["air volume"].level == "pass", by["air volume"].message
-    assert by["part count"].level == "pass"
+    assert by["solid count"].level == "pass"
     measured = cab.air[0].volume / 1e6 - lay.chambers[0].displacement_l
     assert abs(measured - lay.net_l[0]) / lay.net_l[0] < 0.001
     assert "baffle" in by["rectangularity"].message
@@ -5108,11 +5154,12 @@ def test_export_writes_every_deliverable(tmp_path):
     cab = M.build(lay)
     checks = L.check_layout(lay, lay.spec) + M.check_build(cab, lay)
     files = M.export(cab, lay, checks, tmp_path)
+    assert files["step"] == "cab.step" and files["cab_json"] == "cab.json" and files["images"][0] == "images/cab-iso.png"
     for key in ("step", "cutlist_md", "cutlist_csv", "cab_json"):
-        assert Path(files[key]).exists(), key
-    assert len(files["images"]) == 5 and all(Path(p).exists() for p in files["images"])
+        assert (tmp_path / files[key]).exists(), key
+    assert len(files["images"]) == 5 and all((tmp_path / p).exists() for p in files["images"])
     report = json.loads((tmp_path / "cab.json").read_text())
-    assert report["external_in"] == [20.0, 18.0, 11.0]
+    assert report["files"] == files and report["external_in"] == [20.0, 18.0, 11.0]
     assert {c["name"] for c in report["checks"]} >= {"sheet", "interference", "air volume"}
     md = (tmp_path / "cutlist.md").read_text()
     assert "## Materials not cut" in md and "tolex wrap" in md and "Fender Style Black" in md
@@ -5191,7 +5238,7 @@ def test_cad_matrix_solids_agree_with_the_layout(tmp_path):
         label = (enclosure, slot, n, jack, line, joint, extra)
         assert by["interference"].level == "pass", (label, by["interference"].message)
         assert by["air volume"].level == "pass", (label, by["air volume"].message)
-        assert by["part count"].level == "pass", label
+        assert by["solid count"].level == "pass", label
         step = tmp_path / f"case{k}.step"
         M.export_step(cab.assembly, str(step))
         assert step.exists() and step.stat().st_size > 1000
@@ -5259,7 +5306,7 @@ def build(layout) -> CabBuild:
 
 
 def check_build(cab: CabBuild, layout) -> list:
-    """What only CAD can prove: interference, measured air volume, part
+    """What only CAD can prove: interference, measured air volume, solid
     count, rectangularity. Same Check shape as cablayout.check_layout."""
     checks = []
     named = [(e["name"], e["solid"]) for e in cab.parts] + list(cab.components.items())
@@ -5288,7 +5335,7 @@ def check_build(cab: CabBuild, layout) -> list:
             level = "blocker"
     checks.append(L.Check("air volume", level, "; ".join(msgs)))
     n_cad, n_lay = len(cab.parts), len(layout.parts)
-    checks.append(L.Check("part count", "pass" if n_cad == n_lay else "blocker",
+    checks.append(L.Check("solid count", "pass" if n_cad == n_lay else "blocker",
                           f"{n_cad} solids for {n_lay} blanks"))
     shaped = []
     for e in cab.parts:
@@ -5331,27 +5378,23 @@ def tolex_line(layout) -> dict | None:
 
 def export(cab: CabBuild, layout, checks: list, out_dir) -> dict:
     """cab.step, four renders plus the exploded view under images/, the cut
-    list with the tolex line, and cab.json. Returns the files dict."""
+    list with the tolex line, and cab.json. Returns the files dict, every
+    path relative to out_dir; cab.json carries the same dict."""
     out_dir = Path(out_dir)
-    images = out_dir / "images"
-    images.mkdir(parents=True, exist_ok=True)
+    (out_dir / "images").mkdir(parents=True, exist_ok=True)
+    files = {"step": "cab.step", "images": [f"images/cab-{view}.png" for view in RENDER_VIEWS] + ["images/cab-exploded.png"],
+             "cutlist_md": "cutlist.md", "cutlist_csv": "cutlist.csv", "cab_json": "cab.json"}
     everything = cab.solids() + list(cab.components.values())
-    step = out_dir / "cab.step"
-    export_step(compound_of(everything), str(step))
-    files = {"step": str(step), "images": []}
-    for view, (elev, azim) in RENDER_VIEWS.items():
-        png = render(everything, images / f"cab-{view}.png", views=[(elev, azim)])
-        files["images"].append(str(png))
-    png = render([exploded(cab)], images / "cab-exploded.png", views=[(30, -60)])
-    files["images"].append(str(png))
+    export_step(compound_of(everything), str(out_dir / files["step"]))
+    for (elev, azim), png in zip(RENDER_VIEWS.values(), files["images"]):
+        render(everything, out_dir / png, views=[(elev, azim)])
+    render([exploded(cab)], out_dir / files["images"][-1], views=[(30, -60)])
     extra = [tolex_line(layout)] if layout.tolex else None
-    md, csv = out_dir / "cutlist.md", out_dir / "cutlist.csv"
-    cutlist.write_cut_list(cab.parts, str(md), csv_path=str(csv), title=layout.spec.name, extra_lines=extra)
-    files["cutlist_md"], files["cutlist_csv"] = str(md), str(csv)
+    cutlist.write_cut_list(cab.parts, str(out_dir / files["cutlist_md"]), csv_path=str(out_dir / files["cutlist_csv"]),
+                           title=layout.spec.name, extra_lines=extra)
     report = L.layout_report(layout, checks)
     report["files"] = files
-    (out_dir / "cab.json").write_text(json.dumps(report, indent=2) + "\n")
-    files["cab_json"] = str(out_dir / "cab.json")
+    (out_dir / files["cab_json"]).write_text(json.dumps(report, indent=2) + "\n")
     return files
 
 
@@ -5438,6 +5481,53 @@ def test_site_default_fixture(tmp_path):
     assert (tmp_path / "cab.step").exists() and (tmp_path / "images" / "cab-exploded.png").exists()
     assert all(c["level"] != "blocker" for c in report["checks"])
     assert "interference" in proc.stdout and "exported" in proc.stdout
+
+
+CHECK_LINES = ["sheet", "net volume", "stereo balance", "cutout", "grill opening", "port fit", "magnet to back",
+               "handle", "head match", "line", "jack plate", "stock", "part count", "spans",
+               "interference", "air volume", "solid count", "rectangularity"]
+
+
+def _order_dir(tmp_path):
+    """The template copied to the design's per-order depth, projects/Cab-<order>/,
+    in a scratch vault whose scripts/ is this suite's module directory."""
+    vault = tmp_path / "vault"
+    order = vault / "projects" / "Cab-probe"
+    order.mkdir(parents=True)
+    (vault / "scripts").symlink_to(HERE, target_is_directory=True)
+    for name in ("cab.py", "voicing.json"):
+        (order / name).write_bytes((SITE_DEFAULT / name).read_bytes())
+    return order
+
+
+def test_cab_py_finds_the_vault_from_an_order_directory(tmp_path):
+    order = _order_dir(tmp_path)
+    env = {k: v for k, v in os.environ.items() if k not in ("EXPORT", "TMP_STL", "SHOW", "PYTHONPATH")}
+    proc = subprocess.run([sys.executable, "cab.py"], cwd=order, env=env, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    printed = [line[:16].strip() for line in proc.stdout.splitlines()]
+    assert printed == CHECK_LINES[:14] and not (order / "cab.json").exists()
+    proc = subprocess.run([sys.executable, str(order / "cab.py")], cwd=tmp_path, env=env, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+
+
+def test_cab_py_exits_2_on_a_blocker_and_still_exports(tmp_path):
+    order = _order_dir(tmp_path)
+    v = json.loads((order / "voicing.json").read_text())
+    v["volumes"]["net_total_l"] *= 1.3
+    v["volumes"]["per_chamber_net_l"] *= 1.3
+    (order / "voicing.json").write_text(json.dumps(v, indent=2))
+    out = tmp_path / "out"
+    env = dict(os.environ, EXPORT="1", CAB_OUT=str(out))
+    env.pop("PYTHONPATH", None)
+    proc = subprocess.run([sys.executable, str(order / "cab.py")], env=env, capture_output=True, text=True)
+    assert proc.returncode == 2, proc.stdout + proc.stderr
+    lines = proc.stdout.splitlines()
+    assert [line[:16].strip() for line in lines if not line.startswith("exported")] == CHECK_LINES
+    assert any(line.startswith("net volume") and " blocker " in line for line in lines)
+    report = json.loads((out / "cab.json").read_text())
+    assert report["files"]["cab_json"] == "cab.json" and (out / "cab.step").exists()
+    assert [c["level"] for c in report["checks"] if c["name"] == "net volume"] == ["blocker"]
 ```
 <!-- /code -->
 
@@ -5451,8 +5541,10 @@ Create `projects/Speaker-cab-system/fixtures/site-default/cab.py` with exactly t
 <!-- code: fixtures/site-default/cab.py all -->
 ```python
 """Site-default order: the 20 x 18 x 11 in 1x12 closed-ported tolex cab.
-Copy this file into a new order directory next to its voicing.json, edit the
-aesthetics constants, then run it from anywhere:
+Copy this file into a new order directory (projects/Cab-<order>/) next to its
+voicing.json, edit the aesthetics constants, then run it from any working
+directory; it finds the vault by walking up to the directory holding
+scripts/cablayout.py:
 
     python cab.py                 layout and checks only (prints every verdict)
     TMP_STL=/tmp/cab.stl python cab.py   also writes an STL for render_stl.py
@@ -5469,8 +5561,17 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-VAULT = HERE.parents[3]
-sys.path.insert(0, str(VAULT / "scripts"))
+
+
+def vault_root(start: Path) -> Path:
+    """The first directory at or above start holding scripts/cablayout.py."""
+    for p in (start, *start.parents):
+        if (p / "scripts" / "cablayout.py").exists():
+            return p
+    raise SystemExit(f"cab.py: no vault above {start} (no directory holding scripts/cablayout.py)")
+
+
+sys.path.insert(0, str(vault_root(HERE) / "scripts"))
 import cablayout as L  # noqa: E402
 
 # --- aesthetics block (from the intake) --------------------------------------
@@ -5505,7 +5606,7 @@ if os.environ.get("TMP_STL") or os.environ.get("EXPORT") or os.environ.get("SHOW
     if os.environ.get("EXPORT"):
         out = Path(os.environ.get("CAB_OUT") or HERE)
         files = M.export(cab, lay, checks, out)
-        print(f"exported {files['step']} and {len(files['images'])} renders")
+        print(f"exported {files['step']} and {len(files['images'])} renders to {out}")
     if os.environ.get("SHOW"):
         from ocp_vscode import show
         show(*cab.solids(), names=[e["name"] for e in cab.parts])
@@ -5532,7 +5633,7 @@ Expected: every check line `pass` or `warn`, `exit 0`, and the files `cab.json`,
 - [ ] **Step 5: Run the fixture test**
 
 Run: `.venv/bin/python -m pytest scripts/test_cabmodel.py -q`
-Expected: `21 passed`. `scripts/test_cablayout.py` now reports `42 passed` too, with the site-default fixture present.
+Expected: `23 passed`. `scripts/test_cablayout.py` now reports `42 passed` too, with the site-default fixture present.
 
 - [ ] **Step 6: Commit**
 
@@ -5595,7 +5696,7 @@ grill frame on the speaker flanges, and margins the generator can assert.
 | Black cherry, resawn | Hardwood line shell | 19 mm | 560 kg/m3 | https://www.wood-database.com/black-cherry/ |
 | Hard maple, resawn | Hardwood line shell | 19 mm | 705 kg/m3 | https://www.wood-database.com/hard-maple/ |
 | Sapele, resawn | Hardwood line shell | 19 mm | 670 kg/m3 | https://www.wood-database.com/sapele/ |
-| PVC or ABS pipe, Schedule 40 | Rear round port tubes | inside 52.0, 77.3, 101.5, 153.2 mm (outside 60.3, 88.9, 114.3, 168.3) | ignored in mass | [[speaker-envelopes-and-port-stock]]; which size Brian buys is not settled |
+| PVC or ABS pipe, Schedule 40 | Rear round port tubes | inside 52.0, 77.3, 101.5, 153.2 mm (outside 60.3, 88.9, 114.3, 168.3) | 1400 kg/m3 (in the mass) | [[speaker-envelopes-and-port-stock]]; which size Brian buys is not settled |
 
 Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-stock]]. Hardwood shell panels are glued up from resawn boards; the generator's stock check uses 3050 x 600 mm per panel as a starting limit.
 
@@ -5616,7 +5717,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 - 18 mm birch on both lines. Front face 20 mm behind the front edge of the shell (the recess that holds the grill frame). Driver mounts from the front of the baffle onto T-nuts fitted from the back. Bolts M6 or 1/4-20, 6.5 mm holes on the note's bolt circle, first hole at twelve o'clock.
 - **Floating (default)**: 1 mm clearance to each side, on 18 x 18 mm cleats glued to the shell, felt strip between cleat and baffle, held with screws through the cleats, removable. Site: "floating 3/4 in birch with felt isolation".
-- **Fixed (option)**: glued into a 6 mm deep dado in all four shell panels, blank 12 mm larger in width and height, no baffle cleats. On hardwood see the cross-grain rule above.
+- **Fixed (option)**: glued into a 6 mm deep dado in all four shell panels (three with a front slot port, where the shelf carries the baffle's bottom edge), blank 12 mm larger in width and height, no baffle cleats. On hardwood see the cross-grain rule above.
 - Driver cutout, bolt circle, bolt count, frame diameter, and magnet diameter come from the speaker note. Typical: Celestion 283 mm cutout on a 297 mm circle, Eminence 281 mm on 294 mm, Jensen 277 mm on 293.5 mm; frames 306 to 310 mm, so the flange overhangs the cutout by 11 to 15 mm; flange thickness 5 mm starting value.
 - **Margins**: at least 44 mm from a cutout edge to any shell panel (grill strip 40 plus 2 mm clearance plus 2), 25 mm from a cutout edge to the brace or divider, so the two cutouts of a 2x12 sit 68 mm apart (18 plus 2 x 25). Minimum internal width = n x cutout + (n - 1) x 68 + 2 x 44, the same for mono and stereo since the divider replaces the brace (2x12 with 283 mm cutouts: 722 mm internal, 758 mm external, 29.8 in). Minimum internal height = cutout + 88, plus slot height + 18 with a front slot port.
 - **Speaker envelope** (for clearance checks): behind the baffle a basket cylinder at the cutout diameter for the first 100 mm from the baffle front face, then the magnet cylinder at the note's magnet diameter plus 12 mm cover allowance (185 mm when the note has none), total length the note's depth. At least 25 mm from any envelope part to the back panel, a port tube, a cleat, a shelf, a stiffener, the brace, or the divider.
@@ -5662,7 +5763,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 ## Site defaults (calibration)
 
 - External 20 x 18 x 11 in (508 x 457.2 x 279.4 mm), 1x12 closed-ported.
-- Internal with the rules above: 472 x 421.2 x 229.4 mm, gross 45.6 L, net about 44 L after one driver.
+- Internal with the rules above: 472 x 421.2 x 229.4 mm, gross 45.6 L, net about 42.5 L closed and 42.1 L ported after one driver and the inside parts.
 - The engine voices both lines with the tolex line's 18 mm walls; the hardwood line's 19 mm panels take about 1 percent more of the same external size, inside the model's error, so no separate voicing. The line and species travel in voicing.json's construction block so the generator picks the density and joinery.
 - A slot-ported 1x12 on the site box grows from 18.0 to 18.3 in tall through the engine's height floor; a 2x12 starts at 29.8 in wide.
 ````

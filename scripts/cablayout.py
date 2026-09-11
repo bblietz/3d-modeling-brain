@@ -70,7 +70,6 @@ TUBE_WALL_FALLBACK_MM = 5.5
 JACK_CLEAR_MM = 25.0
 BAFFLE_CLEARANCE_MM = 1.0     # floating baffle side clearance
 BRACE_SETBACK_MM = 2.0        # brace front face behind the baffle back face
-FOOT_DEFAULT_INSET_MM = 32.0
 GRILL_FRONT_MM = 3.0          # grill frame face behind the front edge
 YARD_M = 0.9144
 
@@ -78,6 +77,9 @@ assert RECESS_MM == cabvoice.RECESS_MM
 assert BAFFLE_MM == cabvoice.BAFFLE_MM
 assert BACK_MM == cabvoice.BACK_MM
 assert CUTOUT_MARGIN_MM == cabvoice.CUTOUT_MARGIN_MM
+assert SHELL_MARGIN_MM == cabvoice.SHELL_MARGIN_MM
+assert CUTOUT_GAP_MM == cabvoice.CUTOUT_GAP_MM
+assert PORT_TUBE_OD_MM == cabvoice.PORT_TUBE_OD_MM
 assert MM_PER_INCH == cabvoice.MM_PER_INCH
 
 JOINTS = ("finger", "dovetail")
@@ -947,11 +949,11 @@ def back_blanks(spec: CabSpec, fr: Frame) -> list:
                   notes=note + "; carries the jack plate")]
 
 
-def _attach(parts: list, name: str, features: list) -> None:
+def _attach(parts: list, name: str, features: list) -> Blank:
     for p in parts:
         if p.name == name:
             p.features.extend(features)
-            return
+            return p
     raise KeyError(f"no blank named {name}")
 
 
@@ -1150,7 +1152,8 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
                        else f"finds no spot with {CLEARANCE_MM:.0f} mm clearance")
                 if fit is None:
                     blockers.append(f"port fit: chamber {c} port {j}: no round port of "
-                                    f"{id_mm:.1f} mm fits with {CLEARANCE_MM:.0f} mm clearance; use a front slot")
+                                    f"{id_mm:.1f} mm fits with {CLEARANCE_MM:.0f} mm clearance; "
+                                    "raise Fb, use a smaller tube or a larger box, or a front slot")
                 else:
                     blockers.append(f"port fit: chamber {c} port {j}: tube {id_mm:.1f} x {L:.0f} mm "
                                     f"{why}; longest tube that fits at this diameter is {fit:.0f} mm; "
@@ -1163,7 +1166,7 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
             if has_tube:
                 blanks.append(Blank(f"port_tube{sfx}", 1, mat, PVC_DENSITY, shape="tube",
                                     pos=(cx, fr.D - L, cz), size=(od, L, id_mm),
-                                    blank_mm=(0.0, od, L), chamber=c,
+                                    blank_mm=((od - id_mm) / 2.0, od, L), chamber=c,   # wall x OD x length
                                     notes=f"cut to {L:.0f} mm, {id_mm:.1f} mm inside diameter, glued "
                                           "through the back panel and the flange ring"
                                           + ("; " + tube_note if tube_note else "")))
@@ -1176,10 +1179,16 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
                                 pos=(cx, fr.D - BACK_MM - ring_t, cz), size=(ring_od, ring_t, ring_id),
                                 blank_mm=(ring_t, ring_od, ring_od), chamber=c,
                                 notes="flange ring cut from 12 mm ply, glued to the inside face of the back"
-                                      + ("" if has_tube else f"; the ring is the port ({ring_t:.0f} mm beyond the panel), no tube")))
+                                      + ("" if has_tube else f"; the ring is the port ({ring_t:.0f} mm beyond the panel), no tube")
+                                      + (f"; planed to {ring_t:g} mm" if ring_t < FLANGE_RING_T_MM - 1e-6 else "")))
             feats.append({"type": "cutout", "center": (cx, cz), "d": hole})
             ports.append(RoundPort(c, (cx, cz), id_mm, od, L, ring_od, fr.D - L, fr.D))
     return ports, blanks, feats, blockers
+
+
+def _glue_up(t: float) -> str:
+    """Cheeks thicker than one 18 mm sheet are laminated."""
+    return "; glued up from 18 mm birch" if t > BAFFLE_MM + 1e-6 else ""
 
 
 def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
@@ -1219,7 +1228,7 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
             for side, x_c in (("left", xa), ("right", xb - cheek)):
                 blanks.append(Blank(f"cheek_{side}{sfx}", 1, mat18, BIRCH_DENSITY, pos=(x_c, fr.y_bf, fr.z0),
                                     size=(cheek, L, s_h), blank_mm=_blank_dims(cheek, L, s_h),
-                                    chamber=c, notes="slot cheek, fills the slot end, glued"))
+                                    chamber=c, notes="slot cheek, fills the slot end, glued" + _glue_up(cheek)))
         x = xa + cheek
         for j in range(n):
             slots.append(SlotPort(c, x, x + s_w, s_h, L, cheek))
@@ -1228,7 +1237,8 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
                 blanks.append(Blank(f"cheek_center{sfx}_{j}", 1, mat18, BIRCH_DENSITY,
                                     pos=(x, fr.y_bf, fr.z0), size=(DIVIDER_MM, L, s_h),
                                     blank_mm=_blank_dims(DIVIDER_MM, L, s_h), chamber=c,
-                                    notes="center cheek between the two slots, in line with the brace"))
+                                    notes="center cheek between the two slots, in line with the brace"
+                                          + _glue_up(DIVIDER_MM)))
                 x += DIVIDER_MM
     return slots, blanks, blockers
 
@@ -1436,7 +1446,11 @@ def layout(spec: CabSpec) -> Layout:
     parts = shell_blanks(spec)
     baffle, cutouts, dados = baffle_and_cutouts(spec, fr)
     for name, feat in dados.items():
-        _attach(parts, name, [feat])
+        panel = _attach(parts, name, [feat])
+        panel.notes += (f"; {DADO_MM:g} mm deep x {BAFFLE_MM:g} mm dado for the baffle, "
+                        f"front face {fr.y_bf:g} mm behind the front edge")
+        if spec.line == "hardwood":
+            panel.notes += "; glued in the front 100 mm only"
     parts.append(baffle)
     parts += cleat_blanks(spec, fr)
     parts += grill_frame_blanks(spec, fr)
@@ -1651,11 +1665,20 @@ def check_layout(lay: Layout, spec: CabSpec) -> list:
     return checks
 
 
+def _round3(obj):
+    """Floats rounded to 3 decimals, recursively, so the report carries no float noise."""
+    if isinstance(obj, dict):
+        return {k: _round3(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_round3(v) for v in obj]
+    return round(obj, 3) if isinstance(obj, float) else obj
+
+
 def layout_report(lay: Layout, checks: list) -> dict:
     spec = lay.spec
     fr = frame(spec)
     W, H, D = spec.external_mm
-    return {
+    return _round3({
         "name": spec.name,
         "generated": date.today().isoformat(),
         "line": spec.line, "species": spec.species,
@@ -1685,4 +1708,4 @@ def layout_report(lay: Layout, checks: list) -> dict:
                    "material": p.material, "notes": p.notes} for p in lay.parts],
         "checks": [{"name": c.name, "level": c.level, "message": c.message} for c in checks],
         "prediction_status": spec.prediction_status,
-    }
+    })
