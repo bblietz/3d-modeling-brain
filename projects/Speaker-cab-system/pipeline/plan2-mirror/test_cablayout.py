@@ -12,6 +12,7 @@ import pytest
 HERE = Path(__file__).resolve().parent
 FIXTURES = next(p / "projects" / "Speaker-cab-system" / "fixtures" for p in (HERE, *HERE.parents)
                 if (p / "projects" / "Speaker-cab-system" / "fixtures" / "tone-roots.json").exists())
+SITE_DEFAULT = (HERE / "fixtures" / "site-default") if (HERE / "fixtures" / "site-default" / "cab.py").exists() else FIXTURES / "site-default"
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 SCRIPTS = HERE.parents[3] / "scripts"
@@ -648,7 +649,7 @@ def test_report_and_to_dict_are_json():
 
 
 def test_fixture_site_default_lays_out():
-    path = HERE / "fixtures" / "site-default" / "voicing.json"
+    path = SITE_DEFAULT / "voicing.json"
     if not path.exists():
         pytest.skip("fixture sheet not written yet")
     spec = L.order_from(L.load_voicing(path), L.Aesthetics(tolex_color="British Style Red"))

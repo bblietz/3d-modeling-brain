@@ -14,6 +14,7 @@ import pytest
 HERE = Path(__file__).resolve().parent
 FIXTURES = next(p / "projects" / "Speaker-cab-system" / "fixtures" for p in (HERE, *HERE.parents)
                 if (p / "projects" / "Speaker-cab-system" / "fixtures" / "tone-roots.json").exists())
+SITE_DEFAULT = (HERE / "fixtures" / "site-default") if (HERE / "fixtures" / "site-default" / "cab.py").exists() else FIXTURES / "site-default"
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 SCRIPTS = HERE.parents[3] / "scripts"
@@ -377,7 +378,7 @@ def test_cad_matrix_solids_agree_with_the_layout(tmp_path):
 
 # === TASK 12 ===
 def test_site_default_fixture(tmp_path):
-    fixture = HERE / "fixtures" / "site-default"
+    fixture = SITE_DEFAULT
     env = dict(os.environ, EXPORT="1", CAB_OUT=str(tmp_path))
     if (HERE / "cabvoice.py").exists():          # mirror run: the template's sys.path points at scripts/
         env["PYTHONPATH"] = str(HERE)
