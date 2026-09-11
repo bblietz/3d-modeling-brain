@@ -1,0 +1,10 @@
+{
+  "low_end": "tight",
+  "mids": "neutral",
+  "top": "smooth",
+  "breakup": "moderate",
+  "dispersion": "focused",
+  "placement": "floor",
+  "min_power_w": 60,
+  "impedance_options_ohm": [8, 16]
+}

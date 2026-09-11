@@ -167,3 +167,19 @@ Task order: engine flags, the minimum, and the width blocker; layout port mouth 
 - Two committed fixture orders produced by dry runs with a scripted answer sheet.
 - Everything in the Plan 2 addendum's sections 12 and 13 and the Plan 2 retrospective's locked block stands.
 - Execution on main with explicit-path commits and each implementer's own attribution trailer.
+
+## 15. Amendments during plan writing (2026-09-11, evening)
+
+Found while the plan's code and note text were developed and tested in the mirror and reviewed there; each is a deliberate deviation from the sections above and governs where they differ.
+
+- **The port loop reads five blocker texts.** The layout's `port fit` blocker names the longest table tube that fits at the 24 mm minimum (or says no table tube fits), names the longest tube that fits at the same diameter when only the length is the problem, names the deepest shelf that fits for a front slot (or says none does), and reports slots wider than a rescaled chamber. The skill's loop gives one automatic re-run to the named tube (section 5 step 2), one to the next tube down the table when only the length is too long (a smaller area needs a shorter port at the same tuning), and one to the new chamber width when a slot outgrows its chamber; every other text goes straight to the trade-off stop. Section 5 step 1's "the tube the blocker names" is the first of these.
+- **`--verify` writes nothing** and requires `--customer` (the customer's name is a verified fact). Every run without `--verify` rewrites `checks.md`, so the operator rows are judged after the last such run and again after a proposal is regenerated. Section 3.3's "written on every run" reads "every run without `--verify`".
+- **`alignment` shows Fb and F3** on a ported box (F3 alone on a closed one, the cancellation frequency on an open one), since Fb is what the loop's decisions turn on; the proposal still carries no predicted frequency.
+- **The proposal template puts the configuration on its own line** (`- Cabinet: Tolex 1x12, closed-back, ported` then `- Configuration: 1x12`).
+- **The height floor over the size limit is a blocker** on the written sheet like the width floor (section 6 bullet 5 named the width only).
+- **`port_dims`'s remedy sentence corrected**: a too-short port is lengthened by a larger port, a lower Fb, or a smaller box (length is proportional to area).
+- **`port mouth` warns on the site default itself** (its 101.5 mm rear tube's mouth sits 84 mm behind the magnet with 18 percent of the mouth facing it), on every 1x12 front slot whose bottom panel needs a stiffener (Plan 2 starts it at the shelf's rear edge, so it reads as a 0 mm obstruction covering about 8 percent), and on slots in shallow boxes (the floor-level back cleat). Section 9's expectation that the site default passes is withdrawn; the construction note records the three cases with their per-order remedies; coverage is reported for information and does not gate the warn.
+- **The catalog's Best with section is three bullets**: `Amp families` (unchanged text), `Genres` (keys only), and a third line keeping each note's qualifier sentences and the wikilink, so nothing was dropped (section 7 said two lines).
+- **The calibration table moves one row** with the 24 mm minimum: Eminence Red White and Blues, proposed Fb 74 to 73 Hz, its clamped port now 24 mm.
+- **The bridge is strict on ported boxes** (flat serves tight, punchy serves balanced, boomy serves big only), and the site box reads punchy with every catalog speaker, so a tight target always proposes; both dry-run fixtures are therefore tone-driven boxes, not the site box. A tolerance is Brian's call.
+- **`SKILL.md` is 381 lines**, above the furniture skill's length, carrying the two full command blocks, the five-form loop, the exit table, and the operator-row table.

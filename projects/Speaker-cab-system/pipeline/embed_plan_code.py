@@ -1,4 +1,4 @@
-"""Embed mirror code into the Plan 2 document.
+"""Embed mirror code into a plan document (Plan 2 by default).
 
 The plan carries marker pairs; everything between a pair is regenerated from
 the mirror directory so the plan's code blocks are byte-identical to the
@@ -11,9 +11,10 @@ tested mirror files:
     <!-- include: task1.md -->                   a markdown fragment inserted verbatim
     <!-- /include -->
 
-Paths are relative to projects/Speaker-cab-system/pipeline/plan2-mirror/.
+Paths are relative to the mirror directory: plan2-mirror by default, or the
+directory under pipeline/ named by --mirror (Plan 3 uses --mirror plan3-mirror).
 Usage, from the vault root:
-    .venv/bin/python projects/Speaker-cab-system/pipeline/embed_plan_code.py [--check] [--plan PATH]
+    .venv/bin/python projects/Speaker-cab-system/pipeline/embed_plan_code.py [--check] [--plan PATH] [--mirror NAME]
 --check exits 1 when the plan would change (the plan is out of sync with the mirror).
 """
 import re, sys, pathlib
@@ -88,8 +89,11 @@ def embed(text: str) -> str:
 
 
 def main(argv):
+    global MIRROR
     check = "--check" in argv
     plan = PLAN
+    if "--mirror" in argv:
+        MIRROR = HERE / argv[argv.index("--mirror") + 1]
     if "--plan" in argv:
         plan = pathlib.Path(argv[argv.index("--plan") + 1])
     old = plan.read_text()

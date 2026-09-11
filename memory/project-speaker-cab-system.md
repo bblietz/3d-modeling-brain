@@ -1,6 +1,6 @@
 ---
 name: project-speaker-cab-system
-description: Custom guitar speaker cab capability for MaximoCabs; plan 1 (knowledge base + cabvoice.py) built 2026-09-09, plan 2 (cablayout.py + cabmodel.py generator, engine and catalog touches, site-default fixture) built 2026-09-11; plan 3 (the skill) next
+description: Custom guitar speaker cab capability for MaximoCabs; plan 1 (knowledge base + cabvoice.py) built 2026-09-09, plan 2 (cablayout.py + cabmodel.py generator, engine and catalog touches, site-default fixture) built 2026-09-11; plan 3 (the /speaker-cab skill) designed and planned 2026-09-11, execution next
 metadata:
   type: project
 ---
