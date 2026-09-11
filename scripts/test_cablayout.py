@@ -170,3 +170,122 @@ def test_shell_blanks_tolex_and_hardwood():
     assert hw[0].material == "black walnut 19 mm" and hw[0].density == 610.0
     assert hw[0].blank_mm[0] == 19.0 and "through dovetail" in hw[0].notes
     assert L.HARDWOOD_GRAIN_NOTE in hw[0].notes
+
+
+# === TASK 5 ===
+def test_baffle_floating_dims_and_bolts():
+    spec = spec_for()
+    fr = L.frame(spec)
+    baffle, cutouts, dados = L.baffle_and_cutouts(spec, fr)
+    assert baffle.pos == (-235.0, 20.0, 19.0) and baffle.size == (470.0, 18.0, 419.2)
+    assert dados == {}
+    co = cutouts[0]
+    assert co.center == (0.0, 228.6) and co.diameter == 283 and co.chamber == 0
+    assert co.bolt_centers[0] == pytest.approx((0.0, 228.6 + 148.5))
+    assert len(co.bolt_centers) == 4
+    assert baffle.features[0] == {"type": "cutout", "center": (0.0, 228.6), "d": 283}
+    assert "floating" in baffle.notes and "T-nuts" in baffle.notes
+
+
+def test_baffle_fixed_dados():
+    spec = spec_for(aesthetics=L.Aesthetics(baffle_mount="fixed"))
+    fr = L.frame(spec)
+    baffle, _, dados = L.baffle_and_cutouts(spec, fr)
+    assert baffle.size == (484.0, 18.0, 433.2) and baffle.pos == (-242.0, 20.0, 12.0)
+    assert set(dados) == {"side_left", "side_right", "top", "bottom"}
+    assert dados["side_left"]["box"] == ((-242.0, 20.0, 12.0), (-236.0, 38.0, 445.2))
+    slot = spec_for(port="slot", aesthetics=L.Aesthetics(baffle_mount="fixed"))
+    _, _, dados = L.baffle_and_cutouts(slot, L.frame(slot))
+    assert "bottom" not in dados
+
+
+def test_2x12_cutout_spacing_and_stereo_centers():
+    spec = spec_for(drivers=2)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, L.frame(spec))
+    assert [c.center[0] for c in cutouts] == [-175.5, 175.5]
+    assert (cutouts[1].center[0] - 141.5) - (cutouts[0].center[0] + 141.5) == pytest.approx(68.0)
+    st = spec_for(external=(800.0, 457.2, 279.4), drivers=2, chambers=2, jack="stereo")
+    fr = L.frame(st)
+    assert fr.chambers == [(-382.0, -9.0), (9.0, 382.0)]
+    _, cutouts, _ = L.baffle_and_cutouts(st, fr)
+    assert [c.center[0] for c in cutouts] == pytest.approx([-186.0, 186.0]) and [c.chamber for c in cutouts] == [0, 1]
+    tight = spec_for(external=(722.0 + 36.0, 457.2, 279.4), drivers=2, chambers=2, jack="stereo")
+    _, cutouts, _ = L.baffle_and_cutouts(tight, L.frame(tight))
+    assert cutouts[0].center[0] + 141.5 == pytest.approx(-9.0 - 25.0)   # 25 mm to the divider
+    assert cutouts[0].center[0] - 141.5 == pytest.approx(-361.0 + 44.0)  # 44 mm to the shell
+
+
+def test_cleats_by_mount_port_and_chambers():
+    spec = spec_for()
+    names = [p.name for p in L.cleat_blanks(spec, L.frame(spec))]
+    assert names == ["cleat_baffle_top", "cleat_baffle_bottom", "cleat_baffle_left", "cleat_baffle_right",
+                     "cleat_back_top", "cleat_back_bottom", "cleat_back_left", "cleat_back_right"]
+    top = L.cleat_blanks(spec, L.frame(spec))[0]
+    assert top.pos == (-236.0, 38.0, 421.2) and top.size == (472.0, 18.0, 18.0) and top.chamber == 0
+    slot = spec_for(port="slot")
+    assert "cleat_baffle_bottom" not in [p.name for p in L.cleat_blanks(slot, L.frame(slot))]
+    fixed = spec_for(aesthetics=L.Aesthetics(baffle_mount="fixed"))
+    assert all(p.name.startswith("cleat_back") for p in L.cleat_blanks(fixed, L.frame(fixed)))
+    st = spec_for(external=(800.0, 457.2, 279.4), drivers=2, chambers=2, jack="stereo")
+    st_names = [p.name for p in L.cleat_blanks(st, L.frame(st))]
+    assert "cleat_baffle_right_0" not in st_names and "cleat_baffle_left_1" not in st_names
+    assert "cleat_baffle_left_0" in st_names and "cleat_baffle_right_1" in st_names
+    hw = spec_for(line="hardwood", species="cherry")
+    assert L.HARDWOOD_CLEAT_NOTE in L.cleat_blanks(hw, L.frame(hw))[0].notes
+    op = spec_for(enclosure="open", port=None, open_fraction=0.4)
+    op_names = [p.name for p in L.cleat_blanks(op, L.frame(op))]
+    assert "cleat_back_left_upper" in op_names and "cleat_back_right_lower" in op_names
+
+
+def test_grill_frame_geometry():
+    spec = spec_for()
+    strips = L.grill_frame_blanks(spec, L.frame(spec))
+    assert [s.name for s in strips] == ["grill_top", "grill_bottom", "grill_left", "grill_right"]
+    top, left = strips[0], strips[2]
+    assert top.pos == (-234.0, 3.0, 397.2) and top.size == (468.0, 12.0, 40.0)
+    assert left.pos == (-234.0, 3.0, 20.0) and left.size == (40.0, 12.0, 417.2)
+    assert len(top.features) == 2 and len(left.features) == 2
+    assert top.features[0]["box"][0][1] == 3.0 and top.features[0]["box"][1][1] == 9.0
+    assert left.features[0]["box"][0][1] == 9.0 and left.features[0]["box"][1][1] == 15.0
+    assert all(s.chamber is None for s in strips)
+    slot = spec_for(port="slot")
+    fr = L.frame(slot)
+    bottom = L.grill_frame_blanks(slot, fr)[1]
+    assert bottom.pos[2] == pytest.approx(fr.shelf_top + 2.0)
+
+
+def test_brace_and_divider():
+    assert L.brace_blank(spec_for(), L.frame(spec_for())) == []
+    two = spec_for(drivers=2)
+    (brace,) = L.brace_blank(two, L.frame(two))
+    assert brace.pos == (-9.0, 40.0, 18.0) and brace.size == (18.0, 60.0, 421.2)
+    assert len(brace.features) == 2 and brace.features[0]["box"] == ((-9.0, 40.0, 421.2), (9.0, 56.0, 439.2))
+    fixed = spec_for(drivers=2, aesthetics=L.Aesthetics(baffle_mount="fixed"))
+    assert L.brace_blank(fixed, L.frame(fixed))[0].features == []
+    slot = spec_for(drivers=2, port="slot")
+    fr = L.frame(slot)
+    b = L.brace_blank(slot, fr)[0]
+    assert b.pos[2] == pytest.approx(fr.shelf_top) and len(b.features) == 1
+    st = spec_for(external=(800.0, 457.2, 279.4), drivers=2, chambers=2, jack="stereo")
+    assert L.brace_blank(st, L.frame(st)) == []
+    (div,) = L.divider_blank(st, L.frame(st))
+    assert div.pos == (-9.0, 38.0, 18.0) and div.size == pytest.approx((18.0, 229.4, 421.2)) and div.chamber is None
+    assert L.divider_blank(two, L.frame(two)) == []
+
+
+def test_stiffeners_follow_the_span_rule():
+    spec = spec_for()
+    parts, notes = L.stiffener_blanks(spec, L.frame(spec))
+    assert [p.name for p in parts] == ["stiffener_top", "stiffener_bottom", "stiffener_back"]
+    top = parts[0]
+    assert top.pos == pytest.approx((-20.0, 56.0, 421.2)) and top.size == pytest.approx((40.0, 193.4, 18.0))
+    back = parts[2]
+    assert back.pos[2] == pytest.approx(18.0 + 18.0 + 25.0 + 70.0 + 25.0)
+    narrow = spec_for(external=(470.0, 457.2, 279.4))
+    assert L.stiffener_blanks(narrow, L.frame(narrow)) == ([], [])
+    two = spec_for(drivers=2)      # brace halves the top and bottom spans, not the back
+    names = [p.name for p in L.stiffener_blanks(two, L.frame(two))[0]]
+    assert names == ["stiffener_back"]
+    tall = spec_for(external=(470.0, 520.0, 279.4))
+    names = [p.name for p in L.stiffener_blanks(tall, L.frame(tall))[0]]
+    assert names == ["stiffener_side_left", "stiffener_side_right"]

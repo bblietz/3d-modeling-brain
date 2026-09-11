@@ -642,3 +642,282 @@ def shell_blanks(spec: CabSpec) -> list:
                         {"type": "edge_cuts", "x": right, "polys": bot_polys}]),
     ]
     return parts
+
+
+# === TASK 5 ===
+def _suffix(spec: CabSpec, c: int) -> str:
+    return f"_{c}" if spec.chambers == 2 else ""
+
+
+def _blank_dims(t: float, a: float, b: float) -> tuple:
+    return (t, min(a, b), max(a, b))
+
+
+def cutout_centers(spec: CabSpec, fr: Frame) -> list:
+    """[(x, chamber)] per driver. 1x12 at the chamber center; mono 2x12 at
+    +-(cutout + 68) / 2; stereo 44 mm outboard and 25 mm inboard of the
+    divider at the minimum width, the surplus split evenly beyond that."""
+    if spec.driver_count == 1:
+        return [(fr.chamber_centers[0], 0)]
+    if spec.chambers == 2:
+        out = []
+        for i, (xa, xb) in enumerate(fr.chambers):
+            cut = spec.speakers[i].cutout_mm
+            surplus = (xb - xa) - (cut + SHELL_MARGIN_MM + CUTOUT_MARGIN_MM)
+            off = DIVIDER_MM / 2.0 + CUTOUT_MARGIN_MM + cut / 2.0 + surplus / 2.0
+            out.append((-off if i == 0 else off, i))
+        return out
+    c0, c1 = spec.speakers[0].cutout_mm, spec.speakers[1].cutout_mm
+    return [(-(c0 / 2.0 + CUTOUT_GAP_MM / 2.0), 0), (c1 / 2.0 + CUTOUT_GAP_MM / 2.0, 0)]
+
+
+def baffle_and_cutouts(spec: CabSpec, fr: Frame) -> tuple:
+    """(baffle Blank, cutouts, dados) where dados maps a shell blank name to
+    the notch feature a fixed baffle needs on that panel."""
+    a = spec.aesthetics
+    dx, dz = fr.x_b1 - fr.x_b0, fr.z_b1 - fr.z_b0
+    zc = (fr.z_vis0 + fr.z1) / 2.0
+    centers = cutout_centers(spec, fr)
+    cutouts, features = [], []
+    for i, (xc, chamber) in enumerate(centers):
+        s = spec.speakers[i]
+        r = s.bolt_circle_mm / 2.0
+        bolts = []
+        for k in range(s.bolt_count):
+            ang = math.radians(90.0 - k * 360.0 / s.bolt_count)
+            bolts.append((xc + r * math.cos(ang), zc + r * math.sin(ang)))
+        cutouts.append(Cutout(i, chamber, (xc, zc), s.cutout_mm, s.bolt_circle_mm,
+                              s.bolt_count, bolts))
+        features.append({"type": "cutout", "center": (xc, zc), "d": s.cutout_mm})
+        features.append({"type": "holes", "centers": bolts, "d": BOLT_HOLE_MM})
+    if a.baffle_mount == "floating":
+        note = ("floating baffle: 1 mm clearance per side, felt strips on the cleats, "
+                "screwed through the cleats, removable")
+    else:
+        note = "fixed baffle: glued into 6 mm dados, blank 12 mm oversize"
+        if spec.line == "hardwood":
+            note += "; glued in the front 100 mm of each dado only (cross-grain rule)"
+    if fr.slot_h:
+        note += "; bottom edge rests on the slot port shelf"
+    mounts = ", ".join(f"{s.bolt_count} bolts on a {s.bolt_circle_mm:g} mm circle"
+                       for s in spec.speakers)
+    note += f"; speakers front-mounted on T-nuts, {mounts}"
+    baffle = Blank("baffle", 1, birch(BAFFLE_MM), BIRCH_DENSITY,
+                   pos=(fr.x_b0, fr.y_bf, fr.z_b0), size=(dx, BAFFLE_MM, dz),
+                   blank_mm=_blank_dims(BAFFLE_MM, dz, dx), features=features, notes=note)
+    dados = {}
+    if a.baffle_mount == "fixed":
+        y0, y1 = fr.y_bf, fr.y_bb
+        zlo = fr.z_b0
+        dados["side_left"] = {"type": "notch", "box": ((fr.x0 - DADO_MM, y0, zlo), (fr.x0, y1, fr.z1 + DADO_MM))}
+        dados["side_right"] = {"type": "notch", "box": ((fr.x1, y0, zlo), (fr.x1 + DADO_MM, y1, fr.z1 + DADO_MM))}
+        dados["top"] = {"type": "notch", "box": ((fr.x0 - DADO_MM, y0, fr.z1), (fr.x1 + DADO_MM, y1, fr.z1 + DADO_MM))}
+        if not fr.slot_h:
+            dados["bottom"] = {"type": "notch", "box": ((fr.x0 - DADO_MM, y0, fr.z0 - DADO_MM), (fr.x1 + DADO_MM, y1, fr.z0))}
+    return baffle, cutouts, dados
+
+
+def _cleat(name, pos, size, axis, chamber, note) -> Blank:
+    length = {"X": size[0], "Y": size[1], "Z": size[2]}[axis]
+    return Blank(name, 1, birch(CLEAT_MM), BIRCH_DENSITY, pos=pos, size=size,
+                 blank_mm=(CLEAT_MM, CLEAT_MM, length), notes=note, chamber=chamber,
+                 length_axis=axis)
+
+
+def cleat_blanks(spec: CabSpec, fr: Frame) -> list:
+    """Baffle cleats (floating baffle only) and back cleats, per chamber, on
+    the shell faces. The divider carries no cleats: the baffle and the back
+    screw into its edges."""
+    parts = []
+    base = "18 x 18 birch cleat, screws every 150 mm"
+    if spec.line == "hardwood":
+        base += "; " + HARDWOOD_CLEAT_NOTE
+    bnote = base + "; felt strip between cleat and baffle"
+    y_cleat = fr.D - BACK_MM - CLEAT_MM
+    for c, (xa, xb) in enumerate(fr.chambers):
+        sfx = _suffix(spec, c)
+        if spec.aesthetics.baffle_mount == "floating":
+            zlo = fr.z_vis0 if fr.slot_h else fr.z0 + CLEAT_MM
+            parts.append(_cleat(f"cleat_baffle_top{sfx}", (xa, fr.y_bb, fr.z1 - CLEAT_MM),
+                                (xb - xa, CLEAT_MM, CLEAT_MM), "X", c, bnote))
+            if not fr.slot_h:
+                parts.append(_cleat(f"cleat_baffle_bottom{sfx}", (xa, fr.y_bb, fr.z0),
+                                    (xb - xa, CLEAT_MM, CLEAT_MM), "X", c, bnote))
+            if xa == fr.x0:
+                parts.append(_cleat(f"cleat_baffle_left{sfx}", (xa, fr.y_bb, zlo),
+                                    (CLEAT_MM, CLEAT_MM, fr.z1 - CLEAT_MM - zlo), "Z", c, bnote))
+            if xb == fr.x1:
+                parts.append(_cleat(f"cleat_baffle_right{sfx}", (xb - CLEAT_MM, fr.y_bb, zlo),
+                                    (CLEAT_MM, CLEAT_MM, fr.z1 - CLEAT_MM - zlo), "Z", c, bnote))
+        if spec.closed:
+            parts.append(_cleat(f"cleat_back_top{sfx}", (xa, y_cleat, fr.z1 - CLEAT_MM),
+                                (xb - xa, CLEAT_MM, CLEAT_MM), "X", c, base))
+            parts.append(_cleat(f"cleat_back_bottom{sfx}", (xa, y_cleat, fr.z0),
+                                (xb - xa, CLEAT_MM, CLEAT_MM), "X", c, base))
+            if xa == fr.x0:
+                parts.append(_cleat(f"cleat_back_left{sfx}", (xa, y_cleat, fr.z0 + CLEAT_MM),
+                                    (CLEAT_MM, CLEAT_MM, fr.z1 - fr.z0 - 2 * CLEAT_MM), "Z", c, base))
+            if xb == fr.x1:
+                parts.append(_cleat(f"cleat_back_right{sfx}", (xb - CLEAT_MM, y_cleat, fr.z0 + CLEAT_MM),
+                                    (CLEAT_MM, CLEAT_MM, fr.z1 - fr.z0 - 2 * CLEAT_MM), "Z", c, base))
+        else:
+            h_p = open_panel_height(spec, fr)
+            parts.append(_cleat(f"cleat_back_top{sfx}", (xa, y_cleat, fr.z1 - CLEAT_MM),
+                                (xb - xa, CLEAT_MM, CLEAT_MM), "X", c, base))
+            parts.append(_cleat(f"cleat_back_bottom{sfx}", (xa, y_cleat, fr.z0),
+                                (xb - xa, CLEAT_MM, CLEAT_MM), "X", c, base))
+            for side, x_c in (("left", xa), ("right", xb - CLEAT_MM)):
+                if (side == "left" and xa != fr.x0) or (side == "right" and xb != fr.x1):
+                    continue
+                parts.append(_cleat(f"cleat_back_{side}_upper{sfx}", (x_c, y_cleat, fr.z1 - h_p),
+                                    (CLEAT_MM, CLEAT_MM, h_p - CLEAT_MM), "Z", c, base))
+                parts.append(_cleat(f"cleat_back_{side}_lower{sfx}", (x_c, y_cleat, fr.z0 + CLEAT_MM),
+                                    (CLEAT_MM, CLEAT_MM, h_p - CLEAT_MM), "Z", c, base))
+    return parts
+
+
+def open_panel_height(spec: CabSpec, fr: Frame) -> float:
+    f = spec.open_fraction if spec.open_fraction is not None else cabvoice.OPEN_FRACTION.get(spec.enclosure_type, 0.4)
+    return (1.0 - f) * (fr.z1 - fr.z0) / 2.0
+
+
+def grill_frame_blanks(spec: CabSpec, fr: Frame) -> list:
+    """Four 12 x 40 strips with half-lap corners, 2 mm inside the opening,
+    face 3 mm behind the front edge, resting on the flanges and 5 mm felt
+    corner spacers. Covers only the baffle above the shelf with a slot port."""
+    t, w = GRILL_STRIP_T_MM, GRILL_STRIP_W_MM
+    xg0, xg1 = fr.x0 + GRILL_CLEARANCE_MM, fr.x1 - GRILL_CLEARANCE_MM
+    zg0, zg1 = fr.z_vis0 + GRILL_CLEARANCE_MM, fr.z1 - GRILL_CLEARANCE_MM
+    y0, ym, y1 = GRILL_FRONT_MM, GRILL_FRONT_MM + t / 2.0, GRILL_FRONT_MM + t
+    note = ("grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled "
+            "at the back, rests on the speaker flanges and 5 mm felt corner spacers, "
+            "hook and loop to the baffle")
+    mat = birch(GRILL_STRIP_T_MM)
+    corners_x = ((xg0, xg0 + w), (xg1 - w, xg1))
+    corners_z = ((zg0, zg0 + w), (zg1 - w, zg1))
+    horiz_notches = [{"type": "notch", "box": ((cx[0], y0, cz[0]), (cx[1], ym, cz[1]))}
+                     for cx in corners_x for cz in corners_z]
+    vert_notches = [{"type": "notch", "box": ((cx[0], ym, cz[0]), (cx[1], y1, cz[1]))}
+                    for cx in corners_x for cz in corners_z]
+    top = Blank("grill_top", 1, mat, BIRCH_DENSITY, pos=(xg0, y0, zg1 - w), size=(xg1 - xg0, t, w),
+                blank_mm=(t, w, xg1 - xg0), length_axis="X", notes=note,
+                features=[n for n in horiz_notches if n["box"][0][2] == zg1 - w])
+    bottom = Blank("grill_bottom", 1, mat, BIRCH_DENSITY, pos=(xg0, y0, zg0), size=(xg1 - xg0, t, w),
+                   blank_mm=(t, w, xg1 - xg0), length_axis="X", notes=note,
+                   features=[n for n in horiz_notches if n["box"][0][2] == zg0])
+    left = Blank("grill_left", 1, mat, BIRCH_DENSITY, pos=(xg0, y0, zg0), size=(w, t, zg1 - zg0),
+                 blank_mm=(t, w, zg1 - zg0), length_axis="Z", notes=note,
+                 features=[n for n in vert_notches if n["box"][0][0] == xg0])
+    right = Blank("grill_right", 1, mat, BIRCH_DENSITY, pos=(xg1 - w, y0, zg0), size=(w, t, zg1 - zg0),
+                  blank_mm=(t, w, zg1 - zg0), length_axis="Z", notes=note,
+                  features=[n for n in vert_notches if n["box"][0][0] == xg1 - w])
+    return [top, bottom, left, right]
+
+
+def brace_blank(spec: CabSpec, fr: Frame) -> list:
+    """Center brace 18 x 60 on a mono 2x12, 2 mm behind the baffle, between
+    the bottom (or the shelf) and the top, notched around the baffle cleats."""
+    if not (spec.driver_count == 2 and spec.chambers == 1):
+        return []
+    bw, bd = BRACE_MM
+    zb0 = fr.z_vis0 if fr.slot_h else fr.z0
+    y0 = fr.y_bb + BRACE_SETBACK_MM
+    features = []
+    if spec.aesthetics.baffle_mount == "floating":
+        features.append({"type": "notch", "box": ((-bw / 2, y0, fr.z1 - CLEAT_MM), (bw / 2, fr.y_bb + CLEAT_MM, fr.z1))})
+        if not fr.slot_h:
+            features.append({"type": "notch", "box": ((-bw / 2, y0, fr.z0), (bw / 2, fr.y_bb + CLEAT_MM, fr.z0 + CLEAT_MM))})
+    note = ("center brace 18 x 60 birch, glued to top and bottom"
+            + (" (bottom end on the slot shelf)" if fr.slot_h else "")
+            + (", notched around the baffle cleats" if features else ""))
+    return [Blank("brace", 1, birch(bw), BIRCH_DENSITY, pos=(-bw / 2, y0, zb0),
+                  size=(bw, bd, fr.z1 - zb0), blank_mm=(bw, bd, fr.z1 - zb0),
+                  features=features, notes=note, chamber=0, length_axis="Z")]
+
+
+def divider_blank(spec: CabSpec, fr: Frame) -> list:
+    if spec.chambers != 2:
+        return []
+    note = ("full-height divider 18 mm birch glued to top, bottom, and back; the baffle "
+            "screws into its front edge over a felt strip and the back panel into its "
+            "rear edge; two sealed chambers")
+    return [Blank("divider", 1, birch(DIVIDER_MM), BIRCH_DENSITY,
+                  pos=(-DIVIDER_MM / 2, fr.y_bb, fr.z0),
+                  size=(DIVIDER_MM, fr.y_bi - fr.y_bb, fr.z1 - fr.z0),
+                  blank_mm=_blank_dims(DIVIDER_MM, fr.y_bi - fr.y_bb, fr.z1 - fr.z0),
+                  notes=note, chamber=None)]
+
+
+def _chamber_of(fr: Frame, x: float) -> int:
+    for c, (xa, xb) in enumerate(fr.chambers):
+        if xa <= x <= xb:
+            return c
+    return 0
+
+
+def stiffener_blanks(spec: CabSpec, fr: Frame) -> tuple:
+    """(blanks, span notes): one 18 x 40 stiffener glued flat across the
+    middle of any shell or back panel span over 450 mm between glued members.
+    Open-back panels are left alone (short and removable)."""
+    sw, sd = STIFFENER_MM       # 18 proud, 40 flat on the panel
+    floating = spec.aesthetics.baffle_mount == "floating"
+    y_cleat = fr.D - BACK_MM - CLEAT_MM
+    ya_default = fr.y_bb + (CLEAT_MM if floating else 0.0)
+    if spec.chambers == 2:
+        segs = list(fr.chambers)
+    elif spec.driver_count == 2:
+        segs = [(fr.x0, -BRACE_MM[0] / 2), (BRACE_MM[0] / 2, fr.x1)]
+    else:
+        segs = [(fr.x0, fr.x1)]
+    parts, notes = [], []
+    note = "stiffener 18 x 40 birch glued flat across the middle of a span over 450 mm"
+    mat = birch(sw)
+    for (xa, xb) in segs:
+        span = xb - xa
+        if span <= SPAN_MAX_MM:
+            continue
+        xc = (xa + xb) / 2.0
+        c = _chamber_of(fr, xc)
+        sfx = _suffix(spec, c)
+        ya, yb = ya_default, y_cleat
+        if yb - ya > 50.0:
+            parts.append(Blank(f"stiffener_top{sfx}", 1, mat, BIRCH_DENSITY,
+                               pos=(xc - sd / 2, ya, fr.z1 - sw), size=(sd, yb - ya, sw),
+                               blank_mm=(sw, sd, yb - ya), notes=note, chamber=c, length_axis="Y"))
+            notes.append(f"top panel span {span:.0f} mm over {SPAN_MAX_MM:.0f}: stiffener added")
+        yab = max(ya_default, fr.y_bf + fr.shelf_depth) if fr.slot_h else ya_default
+        if yb - yab > 50.0:
+            parts.append(Blank(f"stiffener_bottom{sfx}", 1, mat, BIRCH_DENSITY,
+                               pos=(xc - sd / 2, yab, fr.z0), size=(sd, yb - yab, sw),
+                               blank_mm=(sw, sd, yb - yab), notes=note, chamber=c, length_axis="Y"))
+            notes.append(f"bottom panel span {span:.0f} mm over {SPAN_MAX_MM:.0f}: stiffener added")
+    # back panel: spans split by the divider only
+    if spec.closed:
+        back_segs = list(fr.chambers)
+        h_plate = spec.aesthetics.jack_plate_cutout_mm[1]
+        for (xa, xb) in back_segs:
+            span = xb - xa
+            if span <= SPAN_MAX_MM:
+                continue
+            xc = (xa + xb) / 2.0
+            c = _chamber_of(fr, xc)
+            sfx = _suffix(spec, c)
+            za = fr.z0 + CLEAT_MM + JACK_CLEAR_MM + h_plate + CLEARANCE_MM
+            zb = fr.z1 - CLEAT_MM
+            if zb - za > 50.0:
+                parts.append(Blank(f"stiffener_back{sfx}", 1, mat, BIRCH_DENSITY,
+                                   pos=(xc - sd / 2, fr.y_bi - sw, za), size=(sd, sw, zb - za),
+                                   blank_mm=(sw, sd, zb - za), notes=note + "; stops above the jack plate",
+                                   chamber=c, length_axis="Z"))
+                notes.append(f"back panel span {span:.0f} mm over {SPAN_MAX_MM:.0f}: stiffener added")
+    # side panels: span along z, split by the shelf with a slot port
+    side_span = max(fr.slot_h, fr.z1 - fr.z_vis0) if fr.slot_h else fr.z1 - fr.z0
+    if side_span > SPAN_MAX_MM:
+        zc = (fr.z_vis0 + fr.z1) / 2.0 if fr.slot_h else (fr.z0 + fr.z1) / 2.0
+        ya, yb = ya_default, y_cleat
+        for side, x_c, c in (("left", fr.x0, 0), ("right", fr.x1 - sw, len(fr.chambers) - 1)):
+            parts.append(Blank(f"stiffener_side_{side}", 1, mat, BIRCH_DENSITY,
+                               pos=(x_c, ya, zc - sd / 2), size=(sw, yb - ya, sd),
+                               blank_mm=(sw, sd, yb - ya), notes=note, chamber=c, length_axis="Y"))
+        notes.append(f"side panel span {side_span:.0f} mm over {SPAN_MAX_MM:.0f}: stiffeners added")
+    return parts, notes
