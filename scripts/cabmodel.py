@@ -426,3 +426,152 @@ def component_solids(layout) -> dict:
             s.label = f"foot_{len([k for k in out if k.startswith('foot_')])}"
             out[s.label] = s
     return out
+
+
+# === TASK 11 ===
+AIR_TOL_PCT = 1.0
+OVERLAP_TOL_MM3 = 1.0
+RECT_RATIO_MIN = 0.98
+EXPLODE_FACTOR = 0.6
+
+
+@dataclass
+class CabBuild:
+    layout: object
+    parts: list                      # furniture PARTS entries, one per blank, in layout order
+    components: dict                 # placeholders: speakers, plates, handle, feet
+    assembly: object                 # Compound of the part solids
+    air: list = field(default_factory=list)   # one shape per chamber (air with the parts removed)
+
+    def solids(self) -> list:
+        return [e["solid"] for e in self.parts]
+
+
+def _port_air_tool(entry: dict):
+    if entry["type"] == "box":
+        (x0, y0, z0), (x1, y1, z1) = entry["box"]
+        return _box(x0, y0, z0, x1, y1, z1)
+    cx, cz = entry["center"]
+    y0, y1 = entry["y"]
+    return _cyl_y(cx, cz, entry["d"], y0, y1)
+
+
+def build(layout) -> CabBuild:
+    """Every blank as one named solid, the component placeholders, the
+    assembly, and one air shape per chamber (the chamber box minus every
+    solid the layout puts inside it minus its port air)."""
+    parts = [part_entry(b, blank_solid(b)) for b in layout.parts]
+    components = component_solids(layout)
+    assembly = compound_of(e["solid"] for e in parts)
+    air = []
+    for ch in layout.chambers:
+        (x0, y0, z0), (x1, y1, z1) = ch.box
+        shape = _box(x0, y0, z0, x1, y1, z1)
+        for entry, blank in zip(parts, layout.parts):
+            if blank.chamber == ch.index:
+                shape = shape - entry["solid"]
+        for pa in ch.port_air:
+            shape = shape - _port_air_tool(pa)
+        air.append(shape)
+    return CabBuild(layout=layout, parts=parts, components=components, assembly=assembly, air=air)
+
+
+def check_build(cab: CabBuild, layout) -> list:
+    """What only CAD can prove: interference, measured air volume, part
+    count, rectangularity. Same Check shape as cablayout.check_layout."""
+    checks = []
+    named = [(e["name"], e["solid"]) for e in cab.parts] + list(cab.components.items())
+    worst, worst_pair, collisions = 0.0, None, []
+    for i, (na, a) in enumerate(named):
+        for nb, b in named[i + 1:]:
+            if not _bbox_overlap(a, b):
+                continue
+            v = overlap_volume(a, b)
+            if v > worst:
+                worst, worst_pair = v, (na, nb)
+            if v > OVERLAP_TOL_MM3:
+                collisions.append(f"{na} x {nb} {v:.0f} mm3")
+    if collisions:
+        checks.append(L.Check("interference", "blocker", "; ".join(collisions)))
+    else:
+        checks.append(L.Check("interference", "pass",
+                              f"{len(named)} solids, no pair overlaps by more than {OVERLAP_TOL_MM3:g} mm3"
+                              + (f" (worst {worst_pair[0]} x {worst_pair[1]} {worst:.2f} mm3)" if worst_pair else "")))
+    msgs, level = [], "pass"
+    for ch, shape in zip(layout.chambers, cab.air):
+        measured = shape.volume / 1e6 - ch.displacement_l
+        delta = (measured - ch.net_l) / ch.net_l * 100.0
+        msgs.append(f"chamber {ch.index} measured {measured:.2f} L vs layout {ch.net_l:.2f} L ({delta:+.2f} percent)")
+        if abs(delta) > AIR_TOL_PCT:
+            level = "blocker"
+    checks.append(L.Check("air volume", level, "; ".join(msgs)))
+    n_cad, n_lay = len(cab.parts), len(layout.parts)
+    checks.append(L.Check("part count", "pass" if n_cad == n_lay else "blocker",
+                          f"{n_cad} solids for {n_lay} blanks"))
+    shaped = []
+    for e in cab.parts:
+        bb = e["solid"].bounding_box()
+        bbox = (bb.max.X - bb.min.X) * (bb.max.Y - bb.min.Y) * (bb.max.Z - bb.min.Z)
+        ratio = e["solid"].volume / bbox if bbox > 0 else 1.0
+        if ratio < RECT_RATIO_MIN:
+            shaped.append(f"{e['name']} {ratio:.0%}")
+    checks.append(L.Check("rectangularity", "pass",
+                          ("blanks below 98 percent of their bounding box (cut list uses the blank dims): "
+                           + ", ".join(shaped)) if shaped else "every part is a plain rectangular blank"))
+    return checks
+
+
+def exploded(cab: CabBuild, factor: float = EXPLODE_FACTOR):
+    """Every part and component moved away from the assembly center along
+    its own centroid offset, 2 x factor x that offset, so the outer parts
+    travel about factor times the external dimension on each axis."""
+    bb = cab.assembly.bounding_box()
+    cx, cy, cz = (bb.min.X + bb.max.X) / 2, (bb.min.Y + bb.max.Y) / 2, (bb.min.Z + bb.max.Z) / 2
+    moved = []
+    for solid in cab.solids() + list(cab.components.values()):
+        sb = solid.bounding_box()
+        ox, oy, oz = (sb.min.X + sb.max.X) / 2 - cx, (sb.min.Y + sb.max.Y) / 2 - cy, (sb.min.Z + sb.max.Z) / 2 - cz
+        m = Pos(2 * factor * ox, 2 * factor * oy, 2 * factor * oz) * solid
+        m.label = getattr(solid, "label", "")
+        moved.append(m)
+    return compound_of(moved)
+
+
+def tolex_line(layout) -> dict | None:
+    t = layout.tolex
+    if t is None:
+        return None
+    color = layout.spec.aesthetics.tolex_color or "color not chosen"
+    return {"part": "tolex wrap", "qty": round(t["length_yd"], 2), "unit": "yd",
+            "material": f"tolex {color}, {t['roll_in']} in roll",
+            "notes": f"{t['area_m2']:.2f} m2 external area x 1.15; {t['length_m']:.2f} m"}
+
+
+def export(cab: CabBuild, layout, checks: list, out_dir) -> dict:
+    """cab.step, four renders plus the exploded view under images/, the cut
+    list with the tolex line, and cab.json. Returns the files dict."""
+    out_dir = Path(out_dir)
+    images = out_dir / "images"
+    images.mkdir(parents=True, exist_ok=True)
+    everything = cab.solids() + list(cab.components.values())
+    step = out_dir / "cab.step"
+    export_step(compound_of(everything), str(step))
+    files = {"step": str(step), "images": []}
+    for view, (elev, azim) in RENDER_VIEWS.items():
+        png = render(everything, images / f"cab-{view}.png", views=[(elev, azim)])
+        files["images"].append(str(png))
+    png = render([exploded(cab)], images / "cab-exploded.png", views=[(30, -60)])
+    files["images"].append(str(png))
+    extra = [tolex_line(layout)] if layout.tolex else None
+    md, csv = out_dir / "cutlist.md", out_dir / "cutlist.csv"
+    cutlist.write_cut_list(cab.parts, str(md), csv_path=str(csv), title=layout.spec.name, extra_lines=extra)
+    files["cutlist_md"], files["cutlist_csv"] = str(md), str(csv)
+    report = L.layout_report(layout, checks)
+    report["files"] = files
+    (out_dir / "cab.json").write_text(json.dumps(report, indent=2) + "\n")
+    files["cab_json"] = str(out_dir / "cab.json")
+    return files
+
+
+if __name__ == "__main__":
+    sys.exit(main())

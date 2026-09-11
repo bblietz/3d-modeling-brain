@@ -255,3 +255,139 @@ def test_envelope_stepped_cylinder_and_components():
     spec2 = spec_for(port="round", aesthetics=L.Aesthetics(handle="recessed-side"))
     comps2 = M.component_solids(L.layout(spec2))
     assert {"recessed_handle_left", "recessed_handle_right"} <= set(comps2)
+
+
+# === TASK 11 ===
+def _site_layout(**aest):
+    a = L.Aesthetics(tolex_color="Fender Style Black", **aest)
+    return L.layout(L.order_from(sheet(port="round"), a))
+
+
+def test_build_air_volume_matches_the_layout_and_nothing_collides():
+    lay = _site_layout()
+    cab = M.build(lay)
+    assert len(cab.parts) == len(lay.parts) == cab.assembly.solids().__len__()
+    assert [e["name"] for e in cab.parts] == [b.name for b in lay.parts]
+    by = {c.name: c for c in M.check_build(cab, lay)}
+    assert set(by) == {"interference", "air volume", "part count", "rectangularity"}
+    assert by["interference"].level == "pass", by["interference"].message
+    assert by["air volume"].level == "pass", by["air volume"].message
+    assert by["part count"].level == "pass"
+    measured = cab.air[0].volume / 1e6 - lay.chambers[0].displacement_l
+    assert abs(measured - lay.net_l[0]) / lay.net_l[0] < 0.001
+    assert "baffle" in by["rectangularity"].message
+
+
+def test_check_build_reports_a_collision():
+    lay = _site_layout()
+    cab = M.build(lay)
+    # push the back panel 5 mm into the box: it must hit the back cleats
+    idx = next(i for i, e in enumerate(cab.parts) if e["name"] == "back")
+    cab.parts[idx]["solid"] = M.Pos(0, -5.0, 0) * cab.parts[idx]["solid"]
+    cab.parts[idx]["solid"].label = "back"
+    by = {c.name: c for c in M.check_build(cab, lay)}
+    assert by["interference"].level == "blocker" and "back" in by["interference"].message
+
+
+def test_exploded_moves_every_part_outward():
+    lay = _site_layout()
+    cab = M.build(lay)
+    ex = M.exploded(cab, factor=0.6)
+    bb, ab = ex.bounding_box(), cab.assembly.bounding_box()
+    assert bb.max.X - bb.min.X > (ab.max.X - ab.min.X) * 1.8
+    assert len(ex.solids()) == len(cab.parts) + len(cab.components)
+
+
+def test_export_writes_every_deliverable(tmp_path):
+    lay = _site_layout()
+    cab = M.build(lay)
+    checks = L.check_layout(lay, lay.spec) + M.check_build(cab, lay)
+    files = M.export(cab, lay, checks, tmp_path)
+    for key in ("step", "cutlist_md", "cutlist_csv", "cab_json"):
+        assert Path(files[key]).exists(), key
+    assert len(files["images"]) == 5 and all(Path(p).exists() for p in files["images"])
+    report = json.loads((tmp_path / "cab.json").read_text())
+    assert report["external_in"] == [20.0, 18.0, 11.0]
+    assert {c["name"] for c in report["checks"]} >= {"sheet", "interference", "air volume"}
+    md = (tmp_path / "cutlist.md").read_text()
+    assert "## Materials not cut" in md and "tolex wrap" in md and "Fender Style Black" in md
+    assert "finger joint" in md
+    # hardwood: no tolex line
+    spec = L.order_from(sheet(line="hardwood", species="black walnut", port="round"),
+                        L.Aesthetics(corner_joint="dovetail"))
+    lay2 = L.layout(spec)
+    cab2 = M.build(lay2)
+    M.export(cab2, lay2, L.check_layout(lay2, spec), tmp_path / "hw")
+    md2 = (tmp_path / "hw" / "cutlist.md").read_text()
+    assert "Materials not cut" not in md2 and "through dovetail" in md2
+
+
+# --- CAD matrix: live proposals through layout and build
+TONE = json.loads((FIXTURES / "tone-roots.json").read_text())
+TONE["min_power_w"] = 30
+MATRIX_SPEAKER = "eminence-cannabis-rex"
+ENCLOSURES = [("closed", None), ("closed-ported", None), ("closed-ported", "slot"), ("open", None), ("semi-open", None)]
+CONFIGS = [(1, "mono"), (2, "mono"), (2, "mono-parallel-out"), (2, "stereo")]
+LINES = [("tolex", None, "finger"), ("hardwood", "black walnut", "finger"), ("hardwood", "black walnut", "dovetail")]
+DEFAULT_CASES = [
+    # enclosure, slot, drivers, jack, line index, extra aesthetics
+    ("closed", None, 1, "mono", 0, {}),
+    ("closed-ported", None, 1, "mono", 0, {}),
+    ("closed-ported", "slot", 1, "mono", 1, {}),
+    ("open", None, 1, "mono", 0, {"handle": "recessed-side"}),
+    ("semi-open", None, 1, "mono", 2, {}),
+    ("closed", None, 2, "mono", 0, {}),
+    ("closed-ported", None, 2, "mono", 1, {"baffle_mount": "fixed"}),
+    ("closed-ported", "slot", 2, "mono", 0, {}),
+    ("closed", None, 2, "stereo", 2, {}),
+    ("closed-ported", None, 2, "stereo", 0, {}),
+    ("open", None, 2, "mono-parallel-out", 0, {}),
+    ("semi-open", None, 2, "stereo", 0, {"baffle_mount": "fixed"}),
+]
+
+
+def _matrix_cases():
+    if os.environ.get("CAB_FULL_MATRIX"):
+        return [(enc, slot, n, jack, li, {}) for enc, slot in ENCLOSURES for n, jack in CONFIGS
+                for li in range(len(LINES))]
+    return DEFAULT_CASES
+
+
+def _sheet_for(drv, enclosure, slot, n, jack, line, species):
+    z = drv.impedance_ohm[0]
+    c = cabvoice.Constraints(line=line, species=species, port_slot_mm=(300.0, 40.0) if slot else None)
+    v = cabvoice.propose([drv] * n, [z] * n, enclosure, TONE, jack, c, "cad-matrix").to_dict()
+    if slot and n == 2 and jack != "stereo":
+        # two slots spanning the chamber, split only by the 18 mm center cheek (no end cheek slivers);
+        # the width comes from the layout frame, not the engine's internal width (2 mm wider on hardwood)
+        xa, xb = L.frame(L.order_from(v, L.Aesthetics())).chambers[0]
+        c.port_slot_mm = (((xb - xa) - L.DIVIDER_MM) / 2.0, 40.0)
+        v = cabvoice.propose([drv] * n, [z] * n, enclosure, TONE, jack, c, "cad-matrix").to_dict()
+    return v
+
+
+def test_cad_matrix_solids_agree_with_the_layout(tmp_path):
+    t0 = time.time()
+    drv = cabvoice.load_speaker(MATRIX_SPEAKER)
+    cases = _matrix_cases()
+    layout_blockers = {}
+    for k, (enclosure, slot, n, jack, li, extra) in enumerate(cases):
+        line, species, joint = LINES[li]
+        v = _sheet_for(drv, enclosure, slot, n, jack, line, species)
+        assert not v["blockers"], (enclosure, slot, n, jack, line, v["blockers"])
+        spec = L.order_from(v, L.Aesthetics(corner_joint=joint, **extra))
+        lay = L.layout(spec)
+        for c in L.check_layout(lay, spec):
+            if c.level == "blocker":
+                layout_blockers.setdefault(c.name, []).append((enclosure, slot, n, jack, line))
+                assert c.name in ("port fit", "net volume"), (enclosure, slot, n, jack, line, c.message)
+        cab = M.build(lay)
+        by = {c.name: c for c in M.check_build(cab, lay)}
+        label = (enclosure, slot, n, jack, line, joint, extra)
+        assert by["interference"].level == "pass", (label, by["interference"].message)
+        assert by["air volume"].level == "pass", (label, by["air volume"].message)
+        assert by["part count"].level == "pass", label
+        step = tmp_path / f"case{k}.step"
+        M.export_step(cab.assembly, str(step))
+        assert step.exists() and step.stat().st_size > 1000
+    print(f"\ncad matrix {len(cases)} builds in {time.time() - t0:.0f} s; layout blockers {layout_blockers}")
