@@ -2,8 +2,9 @@
 name: 2026-09-11-plan-3-skill-design
 description: Design addendum for Unit 3, the /speaker-cab skill (SKILL.md and templates, scripts/cabreport.py, engine and layout touches, two fixture orders), from the 2026-09-11 brainstorm with Brian; supersedes the Unit 3 details it names
 type: design
-status: approved-pending-user-review
+status: approved
 created: 2026-09-11
+approved: 2026-09-11
 tags: [project, speaker-cab, maximocabs, design, skill, workflow]
 ---
 
