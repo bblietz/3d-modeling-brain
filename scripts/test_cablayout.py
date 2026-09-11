@@ -526,3 +526,199 @@ def test_trim_hardware():
     hw = spec_for(line="hardwood", species="sapele", aesthetics=L.Aesthetics(feet="tilt-back", piping=True))
     items = [h.item for h in L.trim_hardware(hw, L.frame(hw))]
     assert "corner" not in items and items.count("tilt-back leg") == 2 and "piping" in items
+
+
+# === TASK 7 ===
+def test_site_box_volumes_hand_computed():
+    spec = spec_for(external=(476.0, 457.2, 279.4), enclosure="closed", net=40.0)
+    lay = L.layout(spec)
+    gross = 440.0 * 421.2 * 229.4 / 1e6
+    cleats = (4 * 440.0 * 18.0 * 18.0 + 4 * (421.2 - 36.0) * 18.0 * 18.0) / 1e6
+    assert lay.gross_l == pytest.approx(gross)
+    assert lay.net_l[0] == pytest.approx(gross - cleats - 1.5, abs=1e-6)
+    assert lay.chambers[0].port_air == [] and lay.chambers[0].displacement_l == 1.5
+
+
+def test_port_air_and_inside_parts_reduce_net():
+    closed = L.layout(spec_for(enclosure="closed"))
+    ported = L.layout(spec_for(port="round"))
+    tube_wall = math.pi / 4 * (88.9 ** 2 - 77.3 ** 2) * 28.0 / 1e6
+    ring = math.pi / 4 * (148.9 ** 2 - 88.9 ** 2) * 12.0 / 1e6
+    bore = math.pi / 4 * 77.3 ** 2 * 28.0 / 1e6
+    assert closed.net_l[0] - ported.net_l[0] == pytest.approx(tube_wall + ring + bore, abs=1e-6)
+    assert ported.chambers[0].port_air[0]["type"] == "cylinder"
+    slot = L.layout(spec_for(port="slot"))
+    assert slot.chambers[0].port_air[0]["type"] == "box"
+    assert slot.net_l[0] < closed.net_l[0]
+
+
+def test_mass_and_com():
+    lay = L.layout(spec_for(port="round"))
+    assert abs(lay.com_mm[0]) < 2.0 and lay.com_mm[1] < 279.4 / 2 and 200 < lay.com_mm[2] < 260
+    assert lay.mass_kg["speakers"] == 4.7 and lay.mass_kg["hardware"] == 1.0
+    assert lay.mass_kg["total"] == pytest.approx(lay.mass_kg["parts"] + 5.7)
+    assert 10.0 < lay.mass_kg["parts"] < 13.0
+    hw = L.layout(spec_for(line="hardwood", species="cherry", port="round"))
+    assert hw.mass_kg["parts"] < lay.mass_kg["parts"] + 0.5     # cherry is lighter than birch
+
+
+def test_tolex_yardage():
+    t54 = L.tolex_yardage(spec_for())
+    assert t54["area_m2"] == pytest.approx(1.003869) and t54["length_m"] == pytest.approx(0.84168, abs=1e-4)
+    assert t54["length_yd"] == pytest.approx(0.84168 / 0.9144, abs=1e-4)
+    t32 = L.tolex_yardage(spec_for(aesthetics=L.Aesthetics(tolex_roll_in=32)))
+    assert t32["length_m"] == pytest.approx(1.42030, abs=1e-4)
+    assert L.tolex_yardage(spec_for(line="hardwood", species="walnut")) is None
+    lay = L.layout(spec_for(aesthetics=L.Aesthetics(tolex_color="British Style Red")))
+    tolex = [h for h in lay.hardware if h.item == "tolex"][0]
+    assert "British Style Red" in tolex.notes and "0.84 m" in tolex.notes
+
+
+CHECK_NAMES = ["sheet", "net volume", "stereo balance", "cutout", "grill opening", "port fit",
+               "magnet to back", "handle", "head match", "line", "jack plate", "stock",
+               "part count", "spans"]
+
+
+def test_check_names_and_site_box_verdicts():
+    spec = spec_for(port="round", net=42.5)
+    lay = L.layout(spec)
+    checks = L.check_layout(lay, spec)
+    assert [c.name for c in checks] == CHECK_NAMES
+    by = {c.name: c for c in checks}
+    assert by["net volume"].level == "pass" and by["port fit"].level == "pass"
+    assert by["cutout"].level == "pass" and by["grill opening"].level == "pass"
+    assert by["magnet to back"].level == "pass" and "112.4" in by["magnet to back"].message
+    assert by["spans"].level == "warn" and by["stock"].level == "pass"
+    assert by["part count"].message == f"{lay.part_count} parts"
+
+
+def test_sheet_check_warns_when_prediction_status_differs():
+    spec = spec_for(port="round", net=42.5)
+    assert {c.name: c for c in L.check_layout(L.layout(spec), spec)}["sheet"].level == "pass"
+    stale = sheet(port="round", net=42.5)
+    stale["prediction_status"] = "calibrated 2026-09-10"
+    spec = L.order_from(stale, L.Aesthetics())
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["sheet"].level == "warn"
+    assert by["sheet"].message == (f"sheet prediction_status 'calibrated 2026-09-10' differs "
+                                   f"from the engine's '{cabvoice.PREDICTION_STATUS}'")
+
+
+def test_checks_catch_violations():
+    small = spec_for(external=(360.0, 360.0, 279.4), enclosure="closed", net=15.0)
+    by = {c.name: c for c in L.check_layout(L.layout(small), small)}
+    assert by["cutout"].level == "blocker" and "shell" in by["cutout"].message
+    assert by["grill opening"].level == "blocker"
+    wrong = spec_for(enclosure="closed", net=60.0)
+    by = {c.name: c for c in L.check_layout(L.layout(wrong), wrong)}
+    assert by["net volume"].level == "blocker"
+    shallow = spec_for(external=(508.0, 457.2, 180.0), enclosure="closed", net=30.0)
+    by = {c.name: c for c in L.check_layout(L.layout(shallow), shallow)}
+    assert by["magnet to back"].level == "blocker"
+    head = spec_for(enclosure="closed", net=42.5, aesthetics=L.Aesthetics(head_width_mm=520.0))
+    by = {c.name: c for c in L.check_layout(L.layout(head), head)}
+    assert by["head match"].level == "warn"
+    oak = spec_for(line="hardwood", species="oak", enclosure="closed", net=42.0)
+    by = {c.name: c for c in L.check_layout(L.layout(oak), oak)}
+    assert by["line"].level == "blocker" and "oak" in by["line"].message
+
+
+def test_stereo_layout_balances():
+    st = spec_for(external=(800.0, 457.2, 279.4), drivers=2, chambers=2, jack="stereo", port="round", net=80.0)
+    lay = L.layout(st)
+    by = {c.name: c for c in L.check_layout(lay, st)}
+    assert by["stereo balance"].level == "pass" and lay.net_l[0] == pytest.approx(lay.net_l[1])
+    assert len(lay.round_ports) == 2 and lay.round_ports[0].center[0] < 0 < lay.round_ports[1].center[0]
+    assert [p.name for p in lay.parts if p.name.startswith("cleat_baffle_top")] == ["cleat_baffle_top_0", "cleat_baffle_top_1"]
+
+
+def test_report_and_to_dict_are_json():
+    spec = spec_for(port="round", net=42.5)
+    lay = L.layout(spec)
+    checks = L.check_layout(lay, spec)
+    rep = L.layout_report(lay, checks)
+    json.dumps(rep)
+    json.dumps(lay.to_dict())
+    assert rep["external_in"] == [20.0, 18.0, 11.0] and rep["internal_mm"] == pytest.approx([472.0, 421.2, 229.4])
+    assert rep["speakers"] == ["celestion-g12h-30-anniversary"] and rep["tolex"]["roll_in"] == 54
+    assert {c["name"] for c in rep["checks"]} == set(CHECK_NAMES)
+    assert rep["prediction_status"] == "unverified, ears only" and "generated" in rep
+
+
+def test_fixture_site_default_lays_out():
+    path = HERE / "fixtures" / "site-default" / "voicing.json"
+    if not path.exists():
+        pytest.skip("fixture sheet not written yet")
+    spec = L.order_from(L.load_voicing(path), L.Aesthetics(tolex_color="British Style Red"))
+    lay = L.layout(spec)
+    by = {c.name: c for c in L.check_layout(lay, spec)}
+    assert lay.spec.external_mm == (508.0, 457.2, 279.4)
+    assert all(by[n].level != "blocker" for n in CHECK_NAMES), [(n, by[n].message) for n in CHECK_NAMES if by[n].level == "blocker"]
+
+
+# --- matrix: every catalog speaker x enclosure x configuration x line, on live proposals
+TONE = json.loads((HERE.parents[0] / "projects" / "Speaker-cab-system" / "fixtures" / "tone-roots.json").read_text())
+TONE["min_power_w"] = 10          # so low-power speakers pass the power check and reach the layout
+ENCLOSURES = [("closed", None), ("closed-ported", None), ("closed-ported", (300.0, 40.0)),
+              ("open", None), ("semi-open", None)]
+CONFIGS = [(1, "mono"), (2, "mono"), (2, "mono-parallel-out"), (2, "stereo")]
+LINES = [("tolex", None, "finger"), ("hardwood", "black walnut", "finger"), ("hardwood", "black walnut", "dovetail")]
+ALLOWED_BLOCKERS = {"port fit", "net volume", "magnet to back"}
+
+
+def test_matrix_every_configuration_lays_out_or_names_its_blocker():
+    t0 = time.time()
+    slugs = cabvoice.list_speakers()
+    assert len(slugs) == 20
+    stats = {"cases": 0, "engine_blocked": 0, "clean": 0, "blocked": 0}
+    reasons = {}
+    worst = (0.0, None)
+    for slug in slugs:
+        drv = cabvoice.load_speaker(slug)
+        z = drv.impedance_ohm[0]
+        for enclosure, slot in ENCLOSURES:
+            for n, jack in CONFIGS:
+                for line, species, joint in LINES:
+                    stats["cases"] += 1
+                    c = cabvoice.Constraints(line=line, species=species, port_slot_mm=slot)
+                    v = cabvoice.propose([drv] * n, [z] * n, enclosure, TONE, jack, c, "matrix").to_dict()
+                    aest = L.Aesthetics(corner_joint=joint)
+                    if v["blockers"]:
+                        stats["engine_blocked"] += 1
+                        with pytest.raises(ValueError):
+                            L.order_from(v, aest)
+                        continue
+                    # the engine must hold its own floors (hardwood floors carry the 2 mm extra)
+                    w_int, h_int, _ = v["box"]["internal_mm"]
+                    cut = max(s["cutout_mm"] for s in v["speakers"])
+                    slot_h = v["port"]["slot_h_mm"] if (v["port"] and v["port"]["shape"] == "slot") else None
+                    extra = cabvoice.HARDWOOD_FLOOR_EXTRA_MM if line == "hardwood" else 0.0
+                    assert w_int >= cabvoice.min_internal_width_mm(n, cut) + extra - 1e-6, (slug, enclosure, n, jack, line)
+                    assert h_int >= cabvoice.min_internal_height_mm(cut, slot_h) + extra - 1e-6, (slug, enclosure, n, jack, line)
+                    spec = L.order_from(v, aest)
+                    assert spec.sheet_inside_parts_l is not None
+                    lay = L.layout(spec)
+                    checks = L.check_layout(lay, spec)
+                    blockers = [ch for ch in checks if ch.level == "blocker"]
+                    by = {ch.name: ch for ch in checks}
+                    # the engine's floors and the layout's margins agree everywhere, both lines
+                    assert by["cutout"].level == "pass", (slug, enclosure, n, jack, line, by["cutout"].message)
+                    assert by["grill opening"].level == "pass", (slug, enclosure, n, jack, line)
+                    assert by["stereo balance"].level == "pass", (slug, enclosure, n, jack, line)
+                    assert by["line"].level == "pass"
+                    if blockers:
+                        stats["blocked"] += 1
+                        for b in blockers:
+                            assert b.name in ALLOWED_BLOCKERS, (slug, enclosure, n, jack, line, b.name, b.message)
+                            reasons[b.name] = reasons.get(b.name, 0) + 1
+                    else:
+                        stats["clean"] += 1
+                        assert by["net volume"].level == "pass"
+                        for ch in lay.chambers:
+                            delta = (ch.net_l - ch.sheet_net_l) / ch.sheet_net_l * 100.0
+                            assert abs(delta) <= 5.0
+                            if abs(delta) > abs(worst[0]):
+                                worst = (delta, (slug, enclosure, slot is not None, n, jack, line))
+    print(f"\nmatrix {stats} reasons {reasons} worst net delta {worst[0]:+.2f} percent at {worst[1]} in {time.time() - t0:.1f} s")
+    assert stats["cases"] == 1200
+    assert stats["clean"] > 0

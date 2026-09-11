@@ -1298,3 +1298,391 @@ def trim_hardware(spec: CabSpec, fr: Frame) -> list:
     out.append(Hardware("grill cloth", (0.0, GRILL_FRONT_MM, fr.H / 2.0), None, "grill frame",
                         a.grill_cloth or "grill cloth not chosen"))
     return out
+
+
+# === TASK 7 ===
+def _clip(box, cb):
+    """Intersection of two ((x0,y0,z0),(x1,y1,z1)) boxes, or None."""
+    lo = tuple(max(a, b) for a, b in zip(box[0], cb[0]))
+    hi = tuple(min(a, b) for a, b in zip(box[1], cb[1]))
+    if any(h - l <= 0 for l, h in zip(lo, hi)):
+        return None
+    return (lo, hi)
+
+
+def _vol(box) -> float:
+    if box is None:
+        return 0.0
+    return math.prod(h - l for l, h in zip(box[0], box[1]))
+
+
+def _poly_area(poly) -> float:
+    s = 0.0
+    for i in range(len(poly)):
+        y0, z0 = poly[i]
+        y1, z1 = poly[(i + 1) % len(poly)]
+        s += y0 * z1 - y1 * z0
+    return abs(s) / 2.0
+
+
+def feature_volume_mm3(blank: Blank, feat: dict, clip_to=None) -> float:
+    """Material a feature removes from a box blank (clipped to a box when given)."""
+    box = blank.box if clip_to is None else _clip(blank.box, clip_to)
+    if box is None:
+        return 0.0
+    dx, dy, dz = (h - l for l, h in zip(box[0], box[1]))
+    kind = feat["type"]
+    if kind == "edge_cuts":
+        x0, x1 = feat["x"]
+        return sum(_poly_area(p) for p in feat["polys"]) * (x1 - x0)
+    if kind == "cutout":
+        return math.pi / 4.0 * feat["d"] ** 2 * dy
+    if kind == "holes":
+        return len(feat["centers"]) * math.pi / 4.0 * feat["d"] ** 2 * dy
+    if kind == "rect_hole":
+        return feat["w"] * feat["h"] * (dy if feat["axis"] == "y" else dx)
+    if kind == "notch":
+        return _vol(_clip(feat["box"], box))
+    return 0.0
+
+
+def blank_volume_mm3(blank: Blank, clip_to=None) -> float:
+    """Solid volume of a blank after its features, optionally clipped to a box."""
+    if blank.shape == "box":
+        box = blank.box if clip_to is None else _clip(blank.box, clip_to)
+        if box is None:
+            return 0.0
+        return _vol(box) - sum(feature_volume_mm3(blank, f, clip_to) for f in blank.features)
+    cx, y0, cz = blank.pos
+    od, length, id_mm = blank.size
+    ya, yb = y0, y0 + length
+    if clip_to is not None:
+        ya, yb = max(ya, clip_to[0][1]), min(yb, clip_to[1][1])
+        if yb <= ya:
+            return 0.0
+    return math.pi / 4.0 * (od ** 2 - id_mm ** 2) * (yb - ya)
+
+
+def chamber_volumes(spec: CabSpec, fr: Frame, parts: list, rports: list, slots: list) -> list:
+    out = []
+    for c, (xa, xb) in enumerate(fr.chambers):
+        cb = ((xa, fr.y_bb, fr.z0), (xb, fr.y_bi, fr.z1))
+        gross = _vol(cb)
+        inside = sum(blank_volume_mm3(p, cb) for p in parts if p.chamber == c)
+        port_air, air = [], 0.0
+        for s in slots:
+            if s.chamber != c:
+                continue
+            box = ((s.x0, fr.y_bf, fr.z0), (s.x1, fr.y_bf + s.shelf_depth_mm, fr.z0 + s.slot_h_mm))
+            port_air.append({"type": "box", "box": box})
+            air += _vol(_clip(box, cb))
+        for rp in rports:
+            if rp.chamber != c:
+                continue
+            y0, y1 = max(rp.y0, fr.y_bb), fr.y_bi
+            port_air.append({"type": "cylinder", "center": rp.center, "d": rp.id_mm, "y": (y0, y1)})
+            air += math.pi / 4.0 * rp.id_mm ** 2 * max(0.0, y1 - y0)
+        disp = sum(spec.speakers[i].displacement_l for i in range(spec.driver_count)
+                   if _chamber_of(fr, _cutout_x(spec, fr, i)) == c)
+        net = (gross - inside - air) / 1e6 - disp
+        out.append(Chamber(c, cb, port_air, gross / 1e6, net, disp, spec.per_chamber_net_l))
+    return out
+
+
+def _cutout_x(spec: CabSpec, fr: Frame, i: int) -> float:
+    return cutout_centers(spec, fr)[i][0]
+
+
+def mass_and_com(spec: CabSpec, fr: Frame, parts: list, cutouts: list) -> tuple:
+    """(mass dict, center of mass): blank volumes times density, speakers at
+    the baffle at the cutout centers, 1 kg of hardware at the cab center."""
+    total, mx, my, mz = 0.0, 0.0, 0.0, 0.0
+    parts_kg = 0.0
+    for p in parts:
+        m = blank_volume_mm3(p) * p.density / 1e9
+        (x0, y0, z0), (x1, y1, z1) = p.box
+        cx, cy, cz = (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2
+        parts_kg += m
+        total += m
+        mx, my, mz = mx + m * cx, my + m * cy, mz + m * cz
+    speakers_kg = 0.0
+    for co in cutouts:
+        m = spec.speakers[co.speaker].weight_kg
+        speakers_kg += m
+        total += m
+        mx += m * co.center[0]
+        my += m * (fr.y_bf + BAFFLE_MM / 2.0)
+        mz += m * co.center[1]
+    total += HARDWARE_KG
+    my += HARDWARE_KG * fr.D / 2.0
+    mz += HARDWARE_KG * fr.H / 2.0
+    com = (mx / total, my / total, mz / total)
+    return {"parts": parts_kg, "speakers": speakers_kg, "hardware": HARDWARE_KG, "total": total}, com
+
+
+def tolex_yardage(spec: CabSpec) -> dict | None:
+    if spec.line != "tolex":
+        return None
+    W, H, D = spec.external_mm
+    area = 2.0 * (W * H + W * D + H * D) / 1e6
+    roll = ROLL_MM[spec.aesthetics.tolex_roll_in] / 1e3
+    length = area * TOLEX_WASTE / roll
+    return {"roll_in": spec.aesthetics.tolex_roll_in, "area_m2": area,
+            "length_m": length, "length_yd": length / YARD_M}
+
+
+def layout(spec: CabSpec) -> Layout:
+    fr = frame(spec)
+    parts = shell_blanks(spec)
+    baffle, cutouts, dados = baffle_and_cutouts(spec, fr)
+    for name, feat in dados.items():
+        _attach(parts, name, [feat])
+    parts.append(baffle)
+    parts += cleat_blanks(spec, fr)
+    parts += grill_frame_blanks(spec, fr)
+    parts += brace_blank(spec, fr)
+    parts += divider_blank(spec, fr)
+    stiff, span_notes = stiffener_blanks(spec, fr)
+    parts += stiff
+    parts += back_blanks(spec, fr)
+    envelopes = speaker_envelopes(spec, fr, cutouts)
+    plates, plate_feats, plate_warn = jack_plates(spec, fr)
+    for panel, feats in plate_feats.items():
+        _attach(parts, panel, feats)
+    slots, slot_blanks, slot_blockers = slot_ports(spec, fr)
+    parts += slot_blanks
+    obstacles = [p.box for p in parts
+                 if p.shape == "box" and (p.chamber is not None or p.name == "divider")]
+    for hw in plates:
+        w, h = hw.cutout
+        x, _, z = hw.position
+        obstacles.append(((x - w / 2, fr.D - 40.0, z - h / 2), (x + w / 2, fr.D, z + h / 2)))
+    rports, port_blanks, back_feats, port_blockers = round_ports(spec, fr, envelopes, obstacles)
+    parts += port_blanks
+    if back_feats:
+        _attach(parts, "back", back_feats)
+    chambers = chamber_volumes(spec, fr, parts, rports, slots)
+    mass, com = mass_and_com(spec, fr, parts, cutouts)
+    handles, handle_feats, handle_warn = handle_hardware(spec, fr, com)
+    for panel, feats in handle_feats.items():
+        _attach(parts, panel, feats)
+    hardware = plates + handles + trim_hardware(spec, fr)
+    tolex = tolex_yardage(spec)
+    if tolex is not None:
+        hardware.append(Hardware("tolex", (0.0, fr.D / 2.0, fr.H / 2.0), None, "",
+                                 f"{spec.aesthetics.tolex_color or 'tolex color not chosen'}, "
+                                 f"{tolex['roll_in']} in roll: {tolex['length_m']:.2f} m "
+                                 f"({tolex['length_yd']:.2f} yd), six faces x 1.15"))
+    notes = ([f"blocker: {b}" for b in slot_blockers + port_blockers]
+             + [f"warn: {w}" for w in plate_warn + handle_warn]
+             + [f"span: {s}" for s in span_notes])
+    return Layout(spec=spec, parts=parts, cutouts=cutouts, round_ports=rports, slot_ports=slots,
+                  hardware=hardware, envelopes=envelopes, chambers=chambers,
+                  gross_l=sum(ch.gross_l for ch in chambers), net_l=[ch.net_l for ch in chambers],
+                  mass_kg=mass, com_mm=com, tolex=tolex, part_count=len(parts), notes=notes)
+
+
+def layout_inside_parts_l(lay: Layout) -> float:
+    """Cleats, stiffeners, shelf, cheeks, brace, tube and ring inside the air
+    boxes: gross minus net minus displacement minus port air, all chambers."""
+    total = 0.0
+    for ch in lay.chambers:
+        air = 0.0
+        for pa in ch.port_air:
+            if pa["type"] == "box":
+                air += _vol(_clip(pa["box"], ch.box))
+            else:
+                y0, y1 = pa["y"]
+                air += math.pi / 4.0 * pa["d"] ** 2 * max(0.0, y1 - y0)
+        total += ch.gross_l - ch.net_l - ch.displacement_l - air / 1e6
+    return total
+
+
+def _stock_fits(blank: Blank, spec: CabSpec) -> bool:
+    if blank.shape != "box":
+        return True
+    t, w, l = blank.blank_mm
+    limit = STOCK_HARDWOOD_MM if (spec.line == "hardwood" and "birch" not in blank.material
+                                  and "PVC" not in blank.material) else STOCK_SHEET_MM
+    long_, short = max(limit), min(limit)
+    a, b = max(w, l), min(w, l)
+    return a <= long_ + 1e-6 and b <= short + 1e-6
+
+
+def check_layout(lay: Layout, spec: CabSpec) -> list:
+    fr = frame(spec)
+    checks = []
+    if spec.prediction_status == cabvoice.PREDICTION_STATUS:
+        checks.append(Check("sheet", "pass", f"prediction {spec.prediction_status}; no blockers on the sheet"))
+    else:
+        checks.append(Check("sheet", "warn", f"sheet prediction_status '{spec.prediction_status}' differs "
+                                             f"from the engine's '{cabvoice.PREDICTION_STATUS}'"))
+    # net volume
+    msgs, level = [], "pass"
+    for ch in lay.chambers:
+        delta = (ch.net_l - ch.sheet_net_l) / ch.sheet_net_l * 100.0
+        msgs.append(f"chamber {ch.index} net {ch.net_l:.1f} L vs sheet {ch.sheet_net_l:.1f} L ({delta:+.1f} percent)")
+        if abs(delta) > 5.0:
+            level = "blocker"
+    inside = layout_inside_parts_l(lay)
+    if spec.sheet_inside_parts_l is not None:
+        msgs.append(f"inside parts {inside:.2f} L vs sheet allowance {spec.sheet_inside_parts_l:.2f} L")
+    else:
+        msgs.append(f"inside parts {inside:.2f} L (sheet carries no allowance)")
+    if any(n.startswith("blocker: port fit") for n in lay.notes):
+        msgs.append("port not built, so its tube and ring are missing from the inside parts")
+    checks.append(Check("net volume", level, "; ".join(msgs)))
+    if len(lay.chambers) == 2:
+        n0, n1 = lay.chambers[0].net_l, lay.chambers[1].net_l
+        diff = abs(n0 - n1) / ((n0 + n1) / 2.0) * 100.0
+        checks.append(Check("stereo balance", "pass" if diff <= 1.0 else "blocker",
+                            f"chambers {n0:.2f} and {n1:.2f} L differ by {diff:.2f} percent"))
+    else:
+        checks.append(Check("stereo balance", "pass", "single chamber"))
+    # cutout margins
+    problems = []
+    brace = spec.driver_count == 2 and spec.chambers == 1
+    for co in lay.cutouts:
+        xa, xb = fr.chambers[co.chamber]
+        xc, zc = co.center
+        r = co.diameter / 2.0
+        s = spec.speakers[co.speaker]
+        if abs(co.diameter - s.cutout_mm) > 1e-6:
+            problems.append(f"cutout {co.speaker} diameter {co.diameter:g} differs from the note")
+        for side, gap, wall in (("left", xc - r - xa, xa == fr.x0), ("right", xb - (xc + r), xb == fr.x1)):
+            need = SHELL_MARGIN_MM if wall else CUTOUT_MARGIN_MM
+            what = "shell" if wall else "divider"
+            if gap < need - 1e-6:
+                problems.append(f"cutout {co.speaker}: {gap:.1f} mm to the {side} {what}, {need:g} needed")
+        if brace:
+            gap = abs(xc) - r - BRACE_MM[0] / 2.0
+            if gap < CUTOUT_MARGIN_MM - 1e-6:
+                problems.append(f"cutout {co.speaker}: {gap:.1f} mm to the brace, {CUTOUT_MARGIN_MM:g} needed")
+        low, high = zc - r - fr.z_vis0, fr.z1 - (zc + r)
+        if low < SHELL_MARGIN_MM - 1e-6:
+            problems.append(f"cutout {co.speaker}: {low:.1f} mm to the baffle bottom, {SHELL_MARGIN_MM:g} needed")
+        if high < SHELL_MARGIN_MM - 1e-6:
+            problems.append(f"cutout {co.speaker}: {high:.1f} mm to the top, {SHELL_MARGIN_MM:g} needed")
+    if len(lay.cutouts) == 2 and spec.chambers == 1:
+        a, b = lay.cutouts
+        gap = (b.center[0] - b.diameter / 2.0) - (a.center[0] + a.diameter / 2.0)
+        if gap < CUTOUT_GAP_MM - 1e-6:
+            problems.append(f"cutouts {gap:.1f} mm apart, {CUTOUT_GAP_MM:g} needed")
+    checks.append(Check("cutout", "blocker" if problems else "pass",
+                        "; ".join(problems) if problems else
+                        f"{len(lay.cutouts)} cutout(s) at the note diameter with {SHELL_MARGIN_MM:g} mm shell margins"))
+    # grill opening
+    inner_x0, inner_x1 = fr.x0 + GRILL_CLEARANCE_MM + GRILL_STRIP_W_MM, fr.x1 - GRILL_CLEARANCE_MM - GRILL_STRIP_W_MM
+    inner_z0, inner_z1 = fr.z_vis0 + GRILL_CLEARANCE_MM + GRILL_STRIP_W_MM, fr.z1 - GRILL_CLEARANCE_MM - GRILL_STRIP_W_MM
+    problems = []
+    for co in lay.cutouts:
+        xc, zc = co.center
+        r = co.diameter / 2.0
+        if (xc - r - inner_x0 < GRILL_CLEARANCE_MM - 1e-6 or inner_x1 - (xc + r) < GRILL_CLEARANCE_MM - 1e-6
+                or zc - r - inner_z0 < GRILL_CLEARANCE_MM - 1e-6 or inner_z1 - (zc + r) < GRILL_CLEARANCE_MM - 1e-6):
+            problems.append(f"grill strip covers cutout {co.speaker}")
+    checks.append(Check("grill opening", "blocker" if problems else "pass",
+                        "; ".join(problems) if problems else "strip inner edges clear every cutout by 2 mm"))
+    # port fit
+    port_blockers = [n[len("blocker: "):] for n in lay.notes if n.startswith("blocker: port fit")]
+    if spec.port is None:
+        checks.append(Check("port fit", "pass", "no port"))
+    elif port_blockers:
+        checks.append(Check("port fit", "blocker", "; ".join(port_blockers)))
+    elif spec.port.shape == "round":
+        pos = ", ".join(f"chamber {p.chamber} at x {p.center[0]:.0f} z {p.center[1]:.0f} ({p.id_mm:g} x {p.length_mm:.0f} mm)"
+                        for p in lay.round_ports)
+        checks.append(Check("port fit", "pass", f"round port(s) placed with {CLEARANCE_MM:g} mm clearance: {pos}"))
+    else:
+        pos = ", ".join(f"chamber {s.chamber} slot {s.x1 - s.x0:.0f} x {s.slot_h_mm:g} mm, shelf {s.shelf_depth_mm:.0f} mm"
+                        for s in lay.slot_ports)
+        checks.append(Check("port fit", "pass", f"slot port(s) built: {pos}"))
+    # magnet to back
+    if spec.closed:
+        problems, best = [], None
+        for env in lay.envelopes:
+            gap = fr.y_bi - (env.y0 + env.basket_len + env.magnet_len)
+            best = gap if best is None else min(best, gap)
+            if gap < CLEARANCE_MM - 1e-6:
+                problems.append(f"speaker {env.speaker} magnet {gap:.1f} mm from the back, {CLEARANCE_MM:g} needed")
+        checks.append(Check("magnet to back", "blocker" if problems else "pass",
+                            "; ".join(problems) if problems else f"at least {best:.1f} mm behind every magnet"))
+    else:
+        checks.append(Check("magnet to back", "pass", "open back"))
+    # handle
+    handle_warn = [n[len("warn: "):] for n in lay.notes if n.startswith("warn: ") and "handle" in n]
+    straps = [h for h in lay.hardware if h.item == "strap handle"]
+    if straps:
+        off = abs(straps[0].position[0] - lay.com_mm[0])
+        level = "pass" if off <= 15.0 and not handle_warn else "warn"
+        checks.append(Check("handle", level, f"strap handle {off:.1f} mm from the center of mass on the width axis"
+                            + ("; " + "; ".join(handle_warn) if handle_warn else "")))
+    else:
+        checks.append(Check("handle", "warn" if handle_warn else "pass",
+                            "; ".join(handle_warn) if handle_warn else "recessed side handles at the depth center of mass"))
+    # head match
+    head = spec.aesthetics.head_width_mm
+    if head is None:
+        checks.append(Check("head match", "pass", "no head width given"))
+    else:
+        d = fr.W - head
+        checks.append(Check("head match", "pass" if 0.0 <= d <= 10.0 else "warn",
+                            f"external width {fr.W:.0f} mm is head width {head:g} mm {d:+.0f} mm"))
+    # line
+    problems = []
+    if spec.aesthetics.corner_joint == "dovetail" and spec.line != "hardwood":
+        problems.append("dovetail corners are a hardwood option")
+    if spec.line == "hardwood" and species_density(spec.species) is None:
+        problems.append(f"species density unknown for {spec.species!r}")
+    checks.append(Check("line", "blocker" if problems else "pass",
+                        "; ".join(problems) if problems else f"{spec.line} line, {spec.wall_material}"))
+    # jack plate fit
+    plate_warn = [n[len("warn: "):] for n in lay.notes if n.startswith("warn: jack plate")]
+    checks.append(Check("jack plate", "warn" if plate_warn else "pass",
+                        "; ".join(plate_warn) if plate_warn else "plates fit above the cleat"))
+    # stock
+    over = [p.name for p in lay.parts if not _stock_fits(p, spec)]
+    checks.append(Check("stock", "warn" if over else "pass",
+                        "over stock: " + ", ".join(over) if over else "every blank fits the stock limits"))
+    checks.append(Check("part count", "pass", f"{lay.part_count} parts"))
+    spans = [n[len("span: "):] for n in lay.notes if n.startswith("span: ")]
+    checks.append(Check("spans", "warn" if spans else "pass",
+                        "; ".join(spans) if spans else f"no panel span over {SPAN_MAX_MM:.0f} mm"))
+    return checks
+
+
+def layout_report(lay: Layout, checks: list) -> dict:
+    spec = lay.spec
+    fr = frame(spec)
+    W, H, D = spec.external_mm
+    return {
+        "name": spec.name,
+        "generated": date.today().isoformat(),
+        "line": spec.line, "species": spec.species,
+        "corner_joint": spec.aesthetics.corner_joint,
+        "baffle_mount": spec.aesthetics.baffle_mount,
+        "external_mm": [W, H, D],
+        "external_in": [round(v / MM_PER_INCH, 2) for v in (W, H, D)],
+        "internal_mm": [fr.x1 - fr.x0, fr.z1 - fr.z0, fr.y_bi - fr.y_bb],
+        "enclosure": {"type": spec.enclosure_type, "driver_count": spec.driver_count,
+                      "chambers": spec.chambers, "jack_config": spec.jack_config,
+                      "open_fraction": spec.open_fraction},
+        "speakers": [s.slug for s in spec.speakers],
+        "volumes": {"gross_l": [ch.gross_l for ch in lay.chambers],
+                    "net_l": [ch.net_l for ch in lay.chambers],
+                    "sheet_net_l": [ch.sheet_net_l for ch in lay.chambers],
+                    "delta_pct": [(ch.net_l - ch.sheet_net_l) / ch.sheet_net_l * 100.0 for ch in lay.chambers],
+                    "inside_parts_l": layout_inside_parts_l(lay),
+                    "sheet_inside_parts_l": spec.sheet_inside_parts_l},
+        "mass": {"total_kg": lay.mass_kg["total"], "parts_kg": lay.mass_kg["parts"],
+                 "speakers_kg": lay.mass_kg["speakers"], "hardware_kg": lay.mass_kg["hardware"],
+                 "com_mm": list(lay.com_mm)},
+        "hardware": [{"item": h.item, "position_mm": list(h.position),
+                      "cutout_mm": None if h.cutout is None else list(h.cutout),
+                      "panel": h.panel, "notes": h.notes} for h in lay.hardware],
+        "tolex": lay.tolex,
+        "parts": [{"name": p.name, "qty": p.qty, "blank_mm": list(p.blank_mm),
+                   "material": p.material, "notes": p.notes} for p in lay.parts],
+        "checks": [{"name": c.name, "level": c.level, "message": c.message} for c in checks],
+        "prediction_status": spec.prediction_status,
+    }
