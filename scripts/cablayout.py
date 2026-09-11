@@ -921,3 +921,364 @@ def stiffener_blanks(spec: CabSpec, fr: Frame) -> tuple:
                                blank_mm=(sw, sd, yb - ya), notes=note, chamber=c, length_axis="Y"))
         notes.append(f"side panel span {side_span:.0f} mm over {SPAN_MAX_MM:.0f}: stiffeners added")
     return parts, notes
+
+
+# === TASK 6 ===
+def back_blanks(spec: CabSpec, fr: Frame) -> list:
+    """Closed: one 12 mm back flush with the rear edge. Open and semi-open:
+    two 12 mm panels top and bottom sized from the open fraction."""
+    mat = birch(BACK_MM)
+    w = fr.x1 - fr.x0
+    if spec.closed:
+        note = "12 mm birch back, removable, screwed to the cleats every 150 mm"
+        if spec.chambers == 2:
+            note += " and into the divider's rear edge"
+        return [Blank("back", 1, mat, BIRCH_DENSITY, pos=(fr.x0, fr.D - BACK_MM, fr.z0),
+                      size=(w, BACK_MM, fr.z1 - fr.z0),
+                      blank_mm=_blank_dims(BACK_MM, fr.z1 - fr.z0, w), notes=note)]
+    h_p = open_panel_height(spec, fr)
+    f = 1.0 - 2.0 * h_p / (fr.z1 - fr.z0)
+    note = (f"open back panel 12 mm birch, {h_p:.0f} mm tall "
+            f"((1 - {f:.2f}) x internal height / 2), screwed to the cleats")
+    return [Blank("back_upper", 1, mat, BIRCH_DENSITY, pos=(fr.x0, fr.D - BACK_MM, fr.z1 - h_p),
+                  size=(w, BACK_MM, h_p), blank_mm=_blank_dims(BACK_MM, h_p, w), notes=note),
+            Blank("back_lower", 1, mat, BIRCH_DENSITY, pos=(fr.x0, fr.D - BACK_MM, fr.z0),
+                  size=(w, BACK_MM, h_p), blank_mm=_blank_dims(BACK_MM, h_p, w),
+                  notes=note + "; carries the jack plate")]
+
+
+def _attach(parts: list, name: str, features: list) -> None:
+    for p in parts:
+        if p.name == name:
+            p.features.extend(features)
+            return
+    raise KeyError(f"no blank named {name}")
+
+
+def jack_plates(spec: CabSpec, fr: Frame) -> tuple:
+    """(hardware, features by panel name, warnings): one recessed plate per
+    chamber at the bottom center of the back (or the lower open panel),
+    25 mm above the cleat."""
+    w, h = spec.aesthetics.jack_plate_cutout_mm
+    panel = "back" if spec.closed else "back_lower"
+    z_p = fr.z0 + CLEAT_MM + JACK_CLEAR_MM + h / 2.0
+    text = {"mono": "one 1/4 in jack",
+            "mono-parallel-out": "two 1/4 in jacks wired in parallel on one plate",
+            "stereo": "one 1/4 in jack per chamber plate"}.get(spec.jack_config, spec.jack_config)
+    finish = "brass" if spec.line == "hardwood" else "metal"
+    hardware, features, warnings = [], {panel: []}, []
+    for c, xc in enumerate(fr.chamber_centers):
+        hardware.append(Hardware("jack plate", (xc, fr.D, z_p), (w, h), panel,
+                                 f"recessed {finish} plate, cutout {w:g} x {h:g} mm, {text}"))
+        features[panel].append({"type": "rect_hole", "axis": "y", "center": (xc, z_p), "w": w, "h": h})
+    if not spec.closed:
+        top = fr.z0 + open_panel_height(spec, fr)
+        if z_p + h / 2.0 + 10.0 > top:
+            warnings.append(f"jack plate cutout {h:g} mm tall does not fit the "
+                            f"{top - fr.z0:.0f} mm lower open-back panel with 25 mm above the cleat")
+    return hardware, features, warnings
+
+
+def speaker_envelopes(spec: CabSpec, fr: Frame, cutouts: list) -> list:
+    out = []
+    for co in cutouts:
+        s = spec.speakers[co.speaker]
+        basket_len = min(BASKET_LEN_MM, s.depth_mm)
+        magnet_len = max(0.0, s.depth_mm - BASKET_LEN_MM)
+        magnet_d = (s.magnet_diameter_mm + COVER_MM if s.magnet_diameter_mm is not None
+                    else GENERIC_MAGNET_MM)
+        out.append(Envelope(co.speaker, co.chamber, co.center, fr.y_bf, s.cutout_mm, basket_len,
+                            magnet_d, magnet_len, s.frame_diameter_mm, FLANGE_T_MM))
+    return out
+
+
+def _overlap(a0, a1, b0, b1) -> bool:
+    return min(a1, b1) - max(a0, b0) > 1e-9
+
+
+def _circle_box_gap(cx, cz, r, box) -> float:
+    (x0, _, z0), (x1, _, z1) = box
+    dx = max(x0 - cx, 0.0, cx - x1)
+    dz = max(z0 - cz, 0.0, cz - z1)
+    return math.hypot(dx, dz) - r
+
+
+def _tube_clear(center, r, ya, yb, chamber, fr, obstacles, envelopes, tubes) -> bool:
+    """True when a tube of radius r along y in [ya, yb] at center (x, z)
+    keeps CLEARANCE_MM from every obstacle box, envelope segment, other tube,
+    and the chamber walls."""
+    cx, cz = center
+    xa, xb = fr.chambers[chamber]
+    need = CLEARANCE_MM - 1e-6
+    if cx - r - xa < need or xb - (cx + r) < need:
+        return False
+    if cz - r - fr.z0 < need or fr.z1 - (cz + r) < need:
+        return False
+    for box in obstacles:
+        if _overlap(ya, yb, box[0][1], box[1][1]) and _circle_box_gap(cx, cz, r, box) < need:
+            return False
+    for env in envelopes:
+        ex, ez = env.center
+        segs = [(env.y0, env.y0 + env.basket_len, env.basket_d / 2.0)]
+        if env.magnet_len > 0:
+            segs.append((env.y0 + env.basket_len, env.y0 + env.basket_len + env.magnet_len,
+                         env.magnet_d / 2.0))
+        for (s0, s1, er) in segs:
+            if _overlap(ya, yb, s0, s1) and math.hypot(cx - ex, cz - ez) - r - er < need:
+                return False
+    for (tx, tz, tr, ty0, ty1) in tubes:
+        if _overlap(ya, yb, ty0, ty1) and math.hypot(cx - tx, cz - tz) - r - tr < need:
+            return False
+    return True
+
+
+def _ring_clear(center, rr, yb, chamber, fr, obstacles, tubes) -> bool:
+    """The flange ring (radius rr, glued to the back over [yb - 12, yb]) must
+    not overlap a cleat, stiffener, plate keep-out, another tube, or a wall."""
+    if rr <= 0:
+        return True
+    cx, cz = center
+    xa, xb = fr.chambers[chamber]
+    ya = yb - FLANGE_RING_T_MM
+    if cx - rr < xa - 1e-6 or cx + rr > xb + 1e-6 or cz - rr < fr.z0 - 1e-6 or cz + rr > fr.z1 + 1e-6:
+        return False
+    for box in obstacles:
+        if _overlap(ya, yb, box[0][1], box[1][1]) and _circle_box_gap(cx, cz, rr, box) < -1e-6:
+            return False
+    for (tx, tz, tr, ty0, ty1) in tubes:
+        if _overlap(ya, yb, ty0, ty1) and math.hypot(cx - tx, cz - tz) - rr - tr < -1e-6:
+            return False
+    return True
+
+
+def _radial_requirement(env: Envelope, ya, yb, r) -> float:
+    need = 0.0
+    segs = [(env.y0, env.y0 + env.basket_len, env.basket_d / 2.0)]
+    if env.magnet_len > 0:
+        segs.append((env.y0 + env.basket_len, env.y0 + env.basket_len + env.magnet_len,
+                     env.magnet_d / 2.0))
+    for (s0, s1, er) in segs:
+        if _overlap(ya, yb, s0, s1):
+            need = max(need, er)
+    return need + CLEARANCE_MM + r
+
+
+PLACE_STEP_MM = 5.0
+
+
+def _place_tube(env: Envelope, sign: float, r, ya, yb, fr, obstacles, envelopes, tubes, ring_r=0.0):
+    """First clear spot for a tube of radius r beside its driver: outboard at
+    driver height, below, lower outboard diagonal, above, each direction
+    scanned outward from the radial requirement in 5 mm steps until the
+    chamber wall stops it."""
+    xd, zd = env.center
+    req = _radial_requirement(env, ya, yb, r)
+    xa, xb = fr.chambers[env.chamber]
+    inv = 1.0 / math.sqrt(2.0)
+    for (ux, uz) in ((sign, 0.0), (0.0, -1.0), (sign * inv, -inv), (0.0, 1.0)):
+        dist = req
+        while True:
+            cand = (xd + ux * dist, zd + uz * dist)
+            if not (xa <= cand[0] <= xb and fr.z0 <= cand[1] <= fr.z1):
+                break
+            if (_tube_clear(cand, r, ya, yb, env.chamber, fr, obstacles, envelopes, tubes)
+                    and _ring_clear(cand, ring_r, yb, env.chamber, fr, obstacles, tubes)):
+                return cand
+            dist += PLACE_STEP_MM
+    return None
+
+
+def tube_geometry(id_mm: float) -> tuple:
+    """(od, material, note) for a tube inside diameter."""
+    if id_mm in PORT_TUBE_OD_MM:
+        return PORT_TUBE_OD_MM[id_mm], f"PVC {PORT_TUBE_NOMINAL[id_mm]} sch 40", ""
+    od = id_mm + 2 * TUBE_WALL_FALLBACK_MM
+    return od, f"tube {id_mm:.1f} mm ID", "not a stock tube size; wall assumed 5.5 mm"
+
+
+def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> tuple:
+    """(RoundPorts, blanks, back features, blockers). One port per driver in
+    the chamber (spec.port.count per chamber), each beside its driver."""
+    port = spec.port
+    if port is None or port.shape != "round":
+        return [], [], [], []
+    id_mm, L = port.diameter_mm, port.length_mm
+    od, mat, tube_note = tube_geometry(id_mm)
+    r = od / 2.0
+    ring_od = od + FLANGE_RING_EXTRA_MM
+    ports, blanks, feats, blockers = [], [], [], []
+    tubes = []
+    by_chamber = {}
+    for env in envelopes:
+        by_chamber.setdefault(env.chamber, []).append(env)
+    for c in range(len(fr.chambers)):
+        envs = by_chamber.get(c, [])
+        count = port.count
+        for j in range(count):
+            env = envs[min(j, len(envs) - 1)] if envs else None
+            if env is None:
+                blockers.append(f"port fit: chamber {c} has no driver to place a port beside")
+                continue
+            sign = -1.0 if env.center[0] < 0 else 1.0
+            ya, yb = fr.D - L, fr.D - BACK_MM
+            rr = ring_od / 2.0
+            spot = _place_tube(env, sign, r, ya, yb, fr, obstacles, envelopes, tubes, rr)
+            if spot is None:
+                fit = None
+                Lf = L - 5.0
+                while Lf >= 2 * BACK_MM:
+                    if _place_tube(env, sign, r, fr.D - Lf, yb, fr, obstacles, envelopes, tubes, rr):
+                        fit = Lf
+                        break
+                    Lf -= 5.0
+                if fit is None:
+                    blockers.append(f"port fit: chamber {c} port {j}: no round port of "
+                                    f"{id_mm:.1f} mm fits with {CLEARANCE_MM:.0f} mm clearance; use a front slot")
+                else:
+                    blockers.append(f"port fit: chamber {c} port {j}: tube {id_mm:.1f} x {L:.0f} mm "
+                                    f"finds no spot with {CLEARANCE_MM:.0f} mm clearance; longest tube that "
+                                    f"fits at this diameter is {fit:.0f} mm; lower Fb, use a larger tube, "
+                                    "or a front slot")
+                continue
+            cx, cz = spot
+            tubes.append((cx, cz, r, ya, yb))
+            sfx = f"_{c}_{j}"
+            has_tube = L > 2 * BACK_MM
+            if has_tube:
+                blanks.append(Blank(f"port_tube{sfx}", 1, mat, PVC_DENSITY, shape="tube",
+                                    pos=(cx, fr.D - L, cz), size=(od, L, id_mm),
+                                    blank_mm=(0.0, od, L), chamber=c,
+                                    notes=f"cut to {L:.0f} mm, {id_mm:.1f} mm inside diameter, glued "
+                                          "through the back panel and the flange ring"
+                                          + ("; " + tube_note if tube_note else "")))
+                ring_t, ring_id = FLANGE_RING_T_MM, od
+                hole = od
+            else:
+                ring_t, ring_id = L - BACK_MM, id_mm
+                hole = id_mm
+            blanks.append(Blank(f"port_ring{sfx}", 1, birch(BACK_MM), BIRCH_DENSITY, shape="ring",
+                                pos=(cx, fr.D - BACK_MM - ring_t, cz), size=(ring_od, ring_t, ring_id),
+                                blank_mm=(ring_t, ring_od, ring_od), chamber=c,
+                                notes="flange ring cut from 12 mm ply, glued to the inside face of the back"
+                                      + ("" if has_tube else f"; the ring is the port ({ring_t:.0f} mm beyond the panel), no tube")))
+            feats.append({"type": "cutout", "center": (cx, cz), "d": hole})
+            ports.append(RoundPort(c, (cx, cz), id_mm, od, L, ring_od, fr.D - L, fr.D))
+    return ports, blanks, feats, blockers
+
+
+def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
+    """(SlotPorts, blanks, blockers): full-chamber-width slot under the
+    baffle, an 18 mm shelf sets the port length, cheeks fill a narrower slot,
+    a mono 2x12 gets two slots split by an 18 mm center cheek."""
+    port = spec.port
+    if port is None or port.shape != "slot":
+        return [], [], []
+    s_w, s_h, L = port.slot_w_mm, port.slot_h_mm, port.length_mm
+    slots, blanks, blockers = [], [], []
+    free = fr.y_bi - (fr.y_bf + L)
+    if free < max(CLEARANCE_MM, s_h):
+        blockers.append(f"port fit: slot shelf {L:.0f} mm deep leaves {free:.0f} mm behind it, "
+                        f"under the {max(CLEARANCE_MM, s_h):.0f} mm the slot needs to breathe; "
+                        "lower the slot height or use a round port")
+        return slots, blanks, blockers
+    mat18 = birch(BAFFLE_MM)
+    for c, (xa, xb) in enumerate(fr.chambers):
+        n = port.count
+        avail = (xb - xa) - (n - 1) * DIVIDER_MM
+        if n * s_w > avail + 1e-6:
+            blockers.append(f"port fit: chamber {c}: {n} slot{'s' if n > 1 else ''} of {s_w:.0f} mm "
+                            f"do not fit the {xb - xa:.0f} mm chamber"
+                            + (" with the 18 mm center cheek" if n > 1 else "")
+                            + "; narrow the slot or widen the box")
+            continue
+        cheek = (avail - n * s_w) / 2.0
+        sfx = _suffix(spec, c)
+        blanks.append(Blank(f"shelf{sfx}", 1, mat18, BIRCH_DENSITY, pos=(xa, fr.y_bf, fr.z0 + s_h),
+                            size=(xb - xa, L, BAFFLE_MM), blank_mm=(BAFFLE_MM, L, xb - xa),
+                            chamber=c, length_axis="X",
+                            notes="slot port shelf 18 mm birch: front edge flush with the baffle face, "
+                                  f"depth {L:.0f} mm equals the port length, doubles as the bottom "
+                                  "cleat, glued to the sides"))
+        if cheek > 0.5:
+            for side, x_c in (("left", xa), ("right", xb - cheek)):
+                blanks.append(Blank(f"cheek_{side}{sfx}", 1, mat18, BIRCH_DENSITY, pos=(x_c, fr.y_bf, fr.z0),
+                                    size=(cheek, L, s_h), blank_mm=_blank_dims(cheek, L, s_h),
+                                    chamber=c, notes="slot cheek, fills the slot end, glued"))
+        x = xa + cheek
+        for j in range(n):
+            slots.append(SlotPort(c, x, x + s_w, s_h, L, cheek))
+            x += s_w
+            if j < n - 1:
+                blanks.append(Blank(f"cheek_center{sfx}_{j}", 1, mat18, BIRCH_DENSITY,
+                                    pos=(x, fr.y_bf, fr.z0), size=(DIVIDER_MM, L, s_h),
+                                    blank_mm=_blank_dims(DIVIDER_MM, L, s_h), chamber=c,
+                                    notes="center cheek between the two slots, in line with the brace"))
+                x += DIVIDER_MM
+    return slots, blanks, blockers
+
+
+def handle_hardware(spec: CabSpec, fr: Frame, com: tuple) -> tuple:
+    """(hardware, features by panel, warnings). Strap: screw pair on the top
+    at the loaded center of mass. Recessed side handles: one per side at the
+    depth center of mass, upper third, between the cleats."""
+    a = spec.aesthetics
+    xm, ym, zm = com
+    hardware, features, warnings = [], {}, []
+    allow = a.corner_allowance_mm
+    if a.handle == "strap":
+        y_h = min(max(ym, allow), fr.D - allow)
+        half = a.handle_screw_spacing_mm / 2.0
+        if abs(xm) + half > fr.W / 2.0 - allow:
+            warnings.append("strap handle screws fall inside the corner allowance; shorten the spacing")
+        hardware.append(Hardware("strap handle", (xm, y_h, fr.H), None, "top",
+                                 f"screw pair {a.handle_screw_spacing_mm:g} mm apart on the width axis, "
+                                 "centered on the loaded center of mass, T-nuts inside"))
+        return hardware, features, warnings
+    w, h = a.recessed_handle_cutout_mm
+    y_lo = fr.y_bb + CLEAT_MM + CLEARANCE_MM + w / 2.0
+    y_hi = fr.D - BACK_MM - CLEAT_MM - CLEARANCE_MM - w / 2.0
+    z_h = fr.z0 + (fr.z1 - fr.z0) * 2.0 / 3.0
+    z_lo = fr.z0 + CLEAT_MM + CLEARANCE_MM + h / 2.0
+    z_hi = fr.z1 - CLEAT_MM - CLEARANCE_MM - h / 2.0
+    if y_lo > y_hi or z_lo > z_hi:
+        warnings.append("recessed handle does not fit between the baffle and back cleats; use a strap handle")
+        y_h = (y_lo + y_hi) / 2.0
+    else:
+        y_h = min(max(ym, y_lo), y_hi)
+    z_h = min(max(z_h, z_lo), z_hi) if z_lo <= z_hi else z_h
+    for side, x_c, panel in (("left", -fr.W / 2.0, "side_left"), ("right", fr.W / 2.0, "side_right")):
+        hardware.append(Hardware("recessed handle", (x_c, y_h, z_h), (w, h), panel,
+                                 f"recessed side handle, cutout {w:g} x {h:g} mm, at the depth center of mass"))
+        features[panel] = [{"type": "rect_hole", "axis": "x", "center": (y_h, z_h), "w": w, "h": h}]
+    return hardware, features, warnings
+
+
+def trim_hardware(spec: CabSpec, fr: Frame) -> list:
+    a = spec.aesthetics
+    out = []
+    if a.feet == "rubber":
+        inset = a.foot_inset_mm + a.foot_diameter_mm / 2.0
+        for sx in (-1.0, 1.0):
+            for y in (inset, fr.D - inset):
+                out.append(Hardware("foot", (sx * (fr.W / 2.0 - inset), y, 0.0), None, "bottom",
+                                    f"rubber foot {a.foot_diameter_mm:g} mm, one central screw"))
+    else:
+        for sx in (-1.0, 1.0):
+            out.append(Hardware("tilt-back leg", (sx * fr.W / 2.0, 100.0, 100.0), None,
+                                "side_left" if sx < 0 else "side_right",
+                                "tilt-back leg pivot screws 100 mm from the front and bottom edges; "
+                                "legs not modeled"))
+    corners = a.corners if a.corners is not None else ("black" if spec.line == "tolex" else "none")
+    if corners != "none":
+        for sx in (-1.0, 1.0):
+            for y in (0.0, fr.D):
+                for z in (0.0, fr.H):
+                    out.append(Hardware("corner", (sx * fr.W / 2.0, y, z), None, "",
+                                        f"metal corner, {corners}; keep-out {a.corner_allowance_mm:g} mm "
+                                        "for every cutout"))
+    if a.piping:
+        out.append(Hardware("piping", (0.0, 0.0, fr.H / 2.0), None, "",
+                            "piping glued into the corner between grill frame and shell"))
+    out.append(Hardware("grill cloth", (0.0, GRILL_FRONT_MM, fr.H / 2.0), None, "grill frame",
+                        a.grill_cloth or "grill cloth not chosen"))
+    return out

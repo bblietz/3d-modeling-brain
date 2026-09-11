@@ -289,3 +289,151 @@ def test_stiffeners_follow_the_span_rule():
     tall = spec_for(external=(470.0, 520.0, 279.4))
     names = [p.name for p in L.stiffener_blanks(tall, L.frame(tall))[0]]
     assert names == ["stiffener_side_left", "stiffener_side_right"]
+
+
+# === TASK 6 ===
+def test_back_panels_closed_and_open():
+    spec = spec_for()
+    (back,) = L.back_blanks(spec, L.frame(spec))
+    assert back.pos == (-236.0, 267.4, 18.0) and back.size == (472.0, 12.0, 421.2)
+    op = spec_for(enclosure="open", port=None, open_fraction=0.4)
+    upper, lower = L.back_blanks(op, L.frame(op))
+    assert upper.size[2] == pytest.approx(126.36) and lower.pos[2] == 18.0
+    assert upper.pos[2] == pytest.approx(439.2 - 126.36)
+    semi = spec_for(enclosure="semi-open", port=None, open_fraction=0.25)
+    assert L.back_blanks(semi, L.frame(semi))[0].size[2] == pytest.approx(157.95)
+
+
+def test_jack_plates_positions_and_fit():
+    spec = spec_for()
+    hw, feats, warn = L.jack_plates(spec, L.frame(spec))
+    assert len(hw) == 1 and hw[0].position == (0.0, 279.4, 96.0) and hw[0].cutout == (110.0, 70.0)
+    assert feats["back"][0] == {"type": "rect_hole", "axis": "y", "center": (0.0, 96.0), "w": 110.0, "h": 70.0}
+    assert warn == [] and "one 1/4 in jack" in hw[0].notes
+    st = spec_for(external=(800.0, 457.2, 279.4), drivers=2, chambers=2, jack="stereo")
+    hw, feats, _ = L.jack_plates(st, L.frame(st))
+    assert [h.position[0] for h in hw] == [-195.5, 195.5] and len(feats["back"]) == 2
+    short = spec_for(external=(508.0, 300.0, 279.4), enclosure="open", port=None, open_fraction=0.4)
+    _, feats, warn = L.jack_plates(short, L.frame(short))
+    assert "back_lower" in feats and warn and "does not fit" in warn[0]
+
+
+def test_envelopes_two_step():
+    spec = spec_for()
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    (env,) = L.speaker_envelopes(spec, fr, cutouts)
+    assert (env.basket_d, env.basket_len, env.magnet_d, env.magnet_len) == (283, 100.0, 168.0, 35.0)
+    assert env.flange_d == 309 and env.flange_t == 5.0 and env.y0 == 20.0
+    s = sheet()
+    s["speakers"][0].update({"magnet_diameter_mm": None, "magnet_diameter_estimated": True, "depth_mm": 165})
+    spec2 = L.order_from(s, L.Aesthetics())
+    _, cutouts, _ = L.baffle_and_cutouts(spec2, fr)
+    (env2,) = L.speaker_envelopes(spec2, fr, cutouts)
+    assert env2.magnet_d == 185.0 and env2.magnet_len == 65.0
+
+
+def test_round_port_placement_and_blockers():
+    spec = spec_for(port="round")
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    ports, blanks, feats, blockers = L.round_ports(spec, fr, envs, [])
+    assert blockers == [] and len(ports) == 1
+    p = ports[0]
+    assert p.center == pytest.approx((44.45 + 25.0, 228.6)) and p.od_mm == 88.9 and p.ring_od_mm == 148.9
+    assert [b.name for b in blanks] == ["port_tube_0_0", "port_ring_0_0"]
+    assert blanks[0].shape == "tube" and blanks[0].size == (88.9, 40.0, 77.3) and blanks[0].chamber == 0
+    assert blanks[1].size == pytest.approx((148.9, 12.0, 88.9)) and blanks[1].pos == pytest.approx((p.center[0], 255.4, 228.6))
+    assert feats == [{"type": "cutout", "center": p.center, "d": 88.9}]
+    # a tube reaching the magnet must stand off by the magnet radius
+    s = sheet(port="round")
+    s["port"]["length_mm"] = 150.0
+    spec2 = L.order_from(s, L.Aesthetics())
+    ports2, _, _, _ = L.round_ports(spec2, fr, envs, [])
+    assert ports2[0].center[0] == pytest.approx(84.0 + 25.0 + 44.45)
+    # a center obstacle pushes the tube outward along the same direction
+    wall = ((-20.0, 249.4, 156.0), (20.0, 267.4, 421.2))
+    ports3, _, _, _ = L.round_ports(spec, fr, envs, [wall])
+    assert ports3[0].center[0] >= 20.0 + 25.0 + 44.45 - 1e-9 and ports3[0].center[1] == 228.6
+    # too long for the box: blocker names the longest tube that fits
+    s["port"]["length_mm"] = 260.0
+    spec3 = L.order_from(s, L.Aesthetics())
+    _, _, _, blockers = L.round_ports(spec3, fr, envs, [])
+    assert len(blockers) == 1 and blockers[0].startswith("port fit: chamber 0 port 0: tube 77.3 x 260 mm")
+    assert "longest tube that fits at this diameter is" in blockers[0]
+    # smallest box the cutout allows: a 6 in tube fits nowhere, a 3 in tube fits behind the magnet
+    tiny = sheet(external=(371.0 + 36.0, 371.0 + 36.0, 279.4), port="round")
+    tiny["port"]["diameter_mm"] = 153.2
+    big = L.order_from(tiny, L.Aesthetics())
+    frt = L.frame(big)
+    _, cut_t, _ = L.baffle_and_cutouts(big, frt)
+    env_t = L.speaker_envelopes(big, frt, cut_t)
+    _, _, _, blk = L.round_ports(big, frt, env_t, [])
+    assert blk and blk[0].endswith("use a front slot") and "no round port of 153.2 mm" in blk[0]
+    tiny["port"]["diameter_mm"] = 77.3
+    small = L.order_from(tiny, L.Aesthetics())
+    ports_s, _, _, blk = L.round_ports(small, frt, env_t, [])
+    assert blk == [] and ports_s[0].center[0] > 0
+
+
+def test_round_port_short_length_uses_the_ring_alone():
+    s = sheet(port="round")
+    s["port"]["length_mm"] = 20.0
+    spec = L.order_from(s, L.Aesthetics())
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    ports, blanks, feats, blockers = L.round_ports(spec, fr, envs, [])
+    assert [b.name for b in blanks] == ["port_ring_0_0"]
+    assert blanks[0].size == (148.9, 8.0, 77.3) and feats[0]["d"] == 77.3
+    assert "no tube" in blanks[0].notes
+
+
+def test_slot_port_cheeks_center_and_blockers():
+    spec = spec_for(port="slot")
+    fr = L.frame(spec)
+    slots, blanks, blockers = L.slot_ports(spec, fr)
+    assert blockers == [] and len(slots) == 1
+    assert slots[0].x0 == pytest.approx(-150.0) and slots[0].cheek_w_mm == pytest.approx(86.0)
+    assert [b.name for b in blanks] == ["shelf", "cheek_left", "cheek_right"]
+    assert blanks[0].pos == (-236.0, 20.0, 58.0) and blanks[0].size == (472.0, 60.0, 18.0)
+    two = spec_for(drivers=2, port="slot", external=(722.0 + 36.0, 457.2, 279.4))
+    slots, blanks, blockers = L.slot_ports(two, L.frame(two))
+    assert blockers == [] and len(slots) == 2 and "cheek_center_0" in [b.name for b in blanks]
+    assert slots[1].x0 - slots[0].x1 == pytest.approx(18.0)
+    narrow = spec_for(drivers=2, port="slot")     # two 300 mm slots in a 472 mm chamber
+    _, _, blockers = L.slot_ports(narrow, L.frame(narrow))
+    assert blockers and "do not fit" in blockers[0] and "center cheek" in blockers[0]
+    s = sheet(port="slot")
+    s["port"]["length_mm"] = 230.0
+    deep = L.order_from(s, L.Aesthetics())
+    _, _, blockers = L.slot_ports(deep, L.frame(deep))
+    assert blockers and "breathe" in blockers[0]
+
+
+def test_handle_strap_and_recessed():
+    spec = spec_for()
+    fr = L.frame(spec)
+    hw, feats, warn = L.handle_hardware(spec, fr, (0.0, 108.0, 229.0))
+    assert hw[0].item == "strap handle" and hw[0].position == (0.0, 108.0, 457.2) and feats == {} and warn == []
+    hw, _, _ = L.handle_hardware(spec, fr, (0.0, 10.0, 229.0))
+    assert hw[0].position[1] == 50.0
+    rec = spec_for(aesthetics=L.Aesthetics(handle="recessed-side"))
+    hw, feats, warn = L.handle_hardware(rec, fr, (0.0, 108.0, 229.0))
+    assert [h.item for h in hw] == ["recessed handle", "recessed handle"] and warn == []
+    assert hw[0].position == pytest.approx((-254.0, 151.0, 298.8)) and feats["side_left"][0]["axis"] == "x"
+    shallow = spec_for(external=(508.0, 457.2, 200.0), aesthetics=L.Aesthetics(handle="recessed-side"))
+    _, _, warn = L.handle_hardware(shallow, L.frame(shallow), (0.0, 80.0, 229.0))
+    assert warn and "use a strap handle" in warn[0]
+
+
+def test_trim_hardware():
+    spec = spec_for()
+    items = [h.item for h in L.trim_hardware(spec, L.frame(spec))]
+    assert items.count("foot") == 4 and items.count("corner") == 8 and "grill cloth" in items
+    feet = [h for h in L.trim_hardware(spec, L.frame(spec)) if h.item == "foot"]
+    assert feet[0].position == (-202.0, 52.0, 0.0)
+    hw = spec_for(line="hardwood", species="sapele", aesthetics=L.Aesthetics(feet="tilt-back", piping=True))
+    items = [h.item for h in L.trim_hardware(hw, L.frame(hw))]
+    assert "corner" not in items and items.count("tilt-back leg") == 2 and "piping" in items
