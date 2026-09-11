@@ -1003,6 +1003,20 @@ def _circle_box_gap(cx, cz, r, box) -> float:
     return math.hypot(dx, dz) - r
 
 
+def _envelope_segments(env: Envelope) -> list:
+    """[(y_front, y_rear, radius)] steps of the envelope: basket, then magnet
+    when there is one. The rearmost face is pushed back by CLEARANCE_MM (an
+    axial standoff) so a tube ending within that distance behind the driver
+    must also clear it radially."""
+    segs = [(env.y0, env.y0 + env.basket_len, env.basket_d / 2.0)]
+    if env.magnet_len > 0:
+        segs.append((env.y0 + env.basket_len, env.y0 + env.basket_len + env.magnet_len,
+                     env.magnet_d / 2.0))
+    s0, s1, er = segs[-1]
+    segs[-1] = (s0, s1 + CLEARANCE_MM, er)
+    return segs
+
+
 def _tube_clear(center, r, ya, yb, chamber, fr, obstacles, envelopes, tubes) -> bool:
     """True when a tube of radius r along y in [ya, yb] at center (x, z)
     keeps CLEARANCE_MM from every obstacle box, envelope segment, other tube,
@@ -1019,11 +1033,7 @@ def _tube_clear(center, r, ya, yb, chamber, fr, obstacles, envelopes, tubes) -> 
             return False
     for env in envelopes:
         ex, ez = env.center
-        segs = [(env.y0, env.y0 + env.basket_len, env.basket_d / 2.0)]
-        if env.magnet_len > 0:
-            segs.append((env.y0 + env.basket_len, env.y0 + env.basket_len + env.magnet_len,
-                         env.magnet_d / 2.0))
-        for (s0, s1, er) in segs:
+        for (s0, s1, er) in _envelope_segments(env):
             if _overlap(ya, yb, s0, s1) and math.hypot(cx - ex, cz - ez) - r - er < need:
                 return False
     for (tx, tz, tr, ty0, ty1) in tubes:
@@ -1053,11 +1063,7 @@ def _ring_clear(center, rr, yb, chamber, fr, obstacles, tubes) -> bool:
 
 def _radial_requirement(env: Envelope, ya, yb, r) -> float:
     need = 0.0
-    segs = [(env.y0, env.y0 + env.basket_len, env.basket_d / 2.0)]
-    if env.magnet_len > 0:
-        segs.append((env.y0 + env.basket_len, env.y0 + env.basket_len + env.magnet_len,
-                     env.magnet_d / 2.0))
-    for (s0, s1, er) in segs:
+    for (s0, s1, er) in _envelope_segments(env):
         if _overlap(ya, yb, s0, s1):
             need = max(need, er)
     return need + CLEARANCE_MM + r
@@ -1122,23 +1128,26 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
             sign = -1.0 if env.center[0] < 0 else 1.0
             ya, yb = fr.D - L, fr.D - BACK_MM
             rr = ring_od / 2.0
-            spot = _place_tube(env, sign, r, ya, yb, fr, obstacles, envelopes, tubes, rr)
+            reaches = ya < fr.y_bb - 1e-6      # the tube must stay behind the baffle
+            spot = None if reaches else _place_tube(env, sign, r, ya, yb, fr, obstacles, envelopes, tubes, rr)
             if spot is None:
                 fit = None
                 Lf = L - 5.0
                 while Lf >= 2 * BACK_MM:
-                    if _place_tube(env, sign, r, fr.D - Lf, yb, fr, obstacles, envelopes, tubes, rr):
+                    if (fr.D - Lf >= fr.y_bb - 1e-6
+                            and _place_tube(env, sign, r, fr.D - Lf, yb, fr, obstacles, envelopes, tubes, rr)):
                         fit = Lf
                         break
                     Lf -= 5.0
+                why = ("reaches the baffle" if reaches
+                       else f"finds no spot with {CLEARANCE_MM:.0f} mm clearance")
                 if fit is None:
                     blockers.append(f"port fit: chamber {c} port {j}: no round port of "
                                     f"{id_mm:.1f} mm fits with {CLEARANCE_MM:.0f} mm clearance; use a front slot")
                 else:
                     blockers.append(f"port fit: chamber {c} port {j}: tube {id_mm:.1f} x {L:.0f} mm "
-                                    f"finds no spot with {CLEARANCE_MM:.0f} mm clearance; longest tube that "
-                                    f"fits at this diameter is {fit:.0f} mm; lower Fb, use a larger tube, "
-                                    "or a front slot")
+                                    f"{why}; longest tube that fits at this diameter is {fit:.0f} mm; "
+                                    "lower Fb, use a larger tube, or a front slot")
                 continue
             cx, cz = spot
             tubes.append((cx, cz, r, ya, yb))

@@ -2929,8 +2929,8 @@ git commit -m "cablayout: baffle, cutouts and bolts, cleats, grill frame, brace,
 - Modify: `scripts/test_cablayout.py` (append after the Task 5 tests)
 
 **Interfaces:**
-- Consumes: Tasks 4 and 5.
-- Produces: `open_panel_height(spec)`, `back_blanks(spec, fr, ...)` (closed 12 mm flush with the rear edge, or two open-back panels), `jack_plates(spec, fr, ...) -> (hardware, features_by_panel, warnings)`, `speaker_envelopes(spec, fr, cutouts) -> list[Envelope]`, `tube_geometry(id_mm)`, `round_ports(spec, fr, envelopes, obstacles) -> (ports, blanks, back_features, blockers)` (placement scans outward 5 mm per step in the order outboard at driver height, below, lower outboard corner, above; a blocker names the longest tube that fits; ports of 20 to 24 mm are the flange ring alone), `slot_ports(spec, fr) -> (slots, blanks, blockers)` (shelf, cheeks, center cheek for a mono 2x12), `handle_hardware(spec, fr, com)`, `trim_hardware(spec, fr)` (feet or tilt-back legs, corners, piping, grill cloth). Exact signatures are in the code below.
+- Consumes: Tasks 4 and 5, including Task 5's `open_panel_height(spec, fr)` (called by `back_blanks` and `jack_plates`).
+- Produces: `back_blanks(spec, fr, ...)` (closed 12 mm flush with the rear edge, or two open-back panels), `jack_plates(spec, fr, ...) -> (hardware, features_by_panel, warnings)`, `speaker_envelopes(spec, fr, cutouts) -> list[Envelope]`, `tube_geometry(id_mm)`, `round_ports(spec, fr, envelopes, obstacles) -> (ports, blanks, back_features, blockers)` (placement scans outward 5 mm per step in the order outboard at driver height, below, lower outboard corner, above; `_envelope_segments(env)` builds the stepped envelope once and pushes its rearmost face back by 25 mm, an axial standoff, so a tube ending within 25 mm behind the magnet clears it radially; a tube that reaches the baffle, or finds no spot, is a blocker naming the longest tube that fits; ports of 20 to 24 mm are the flange ring alone), `slot_ports(spec, fr) -> (slots, blanks, blockers)` (shelf, cheeks, center cheek for a mono 2x12), `handle_hardware(spec, fr, com)`, `trim_hardware(spec, fr)` (feet or tilt-back legs, corners, piping, grill cloth). Exact signatures are in the code below.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -3035,6 +3035,75 @@ def test_round_port_short_length_uses_the_ring_alone():
     assert [b.name for b in blanks] == ["port_ring_0_0"]
     assert blanks[0].size == (148.9, 8.0, 77.3) and feats[0]["d"] == 77.3
     assert "no tube" in blanks[0].notes
+
+
+def test_round_port_stands_off_behind_the_magnet():
+    # the envelope's rearmost face carries a 25 mm axial standoff: a tube ending
+    # within 25 mm behind the magnet (rear face y 155) must clear it radially
+    spec = spec_for(port="round")
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    s = sheet(port="round")
+    s["port"]["length_mm"] = 124.4                  # tube front at y 155.0, flush with the magnet
+    ports, _, _, blockers = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    assert blockers == [] and ports[0].center == pytest.approx((84.0 + 25.0 + 44.45, 228.6))
+    s["port"]["length_mm"] = 99.0                   # tube front at y 180.4, past the standoff
+    ports, _, _, _ = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    assert ports[0].center == pytest.approx((44.45 + 25.0, 228.6))
+
+
+def test_round_port_longer_than_the_box_reaches_the_baffle():
+    spec = spec_for(port="round")
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    s = sheet(port="round")
+    s["port"]["length_mm"] = 250.0                  # the box is 241.4 mm deep behind the baffle
+    ports, blanks, _, blockers = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    assert ports == [] and blanks == [] and len(blockers) == 1
+    assert blockers[0].startswith("port fit: chamber 0 port 0: tube 77.3 x 250 mm reaches the baffle")
+    assert "longest tube that fits at this diameter is 155 mm" in blockers[0]
+    s["port"]["length_mm"] = 240.0                  # stops 1.4 mm short of the baffle: no spot instead
+    _, _, _, blockers = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    assert "tube 77.3 x 240 mm finds no spot with 25 mm clearance" in blockers[0]
+    assert "longest tube that fits at this diameter is 155 mm" in blockers[0]
+
+
+def test_round_port_takes_the_below_direction_in_a_narrow_box():
+    # 371 mm wide inside: outboard at the magnet standoff hits the wall, so the
+    # tube drops below the driver at the same radial distance
+    s = sheet(external=(407.0, 600.0, 279.4), port="round")
+    s["port"]["length_mm"] = 150.0
+    spec = L.order_from(s, L.Aesthetics())
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    ports, _, _, blockers = L.round_ports(spec, fr, envs, [])
+    assert blockers == [] and envs[0].center == (0.0, 300.0)
+    assert ports[0].center == pytest.approx((0.0, 300.0 - 153.45))
+
+
+def test_round_port_count_two_second_tube_clears_the_first():
+    s = sheet(port="round")
+    s["port"]["count"] = 2
+    spec = L.order_from(s, L.Aesthetics())
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    ports, blanks, feats, blockers = L.round_ports(spec, fr, envs, [])
+    assert blockers == [] and len(ports) == 2 and len(feats) == 2
+    assert [b.name for b in blanks] == ["port_tube_0_0", "port_ring_0_0", "port_tube_0_1", "port_ring_0_1"]
+    (x0, z0), (x1, z1) = ports[0].center, ports[1].center
+    assert (x0, z0) == pytest.approx((69.45, 228.6)) and (x1, z1) == pytest.approx((0.0, 129.15))
+    assert math.hypot(x1 - x0, z1 - z0) >= 88.9 + 25.0 - 1e-9        # tube to tube, 25 mm clear
+    assert math.hypot(x1 - x0, z1 - z0) >= 74.45 + 44.45 - 1e-9      # ring over the other tube
+
+
+def test_tube_geometry_non_stock_fallback():
+    assert L.tube_geometry(77.3) == (88.9, "PVC 3 in sch 40", "")
+    od, mat, note = L.tube_geometry(60.0)
+    assert od == 71.0 and mat == "tube 60.0 mm ID" and "not a stock tube size" in note
 
 
 def test_slot_port_cheeks_center_and_blockers():
@@ -3178,6 +3247,20 @@ def _circle_box_gap(cx, cz, r, box) -> float:
     return math.hypot(dx, dz) - r
 
 
+def _envelope_segments(env: Envelope) -> list:
+    """[(y_front, y_rear, radius)] steps of the envelope: basket, then magnet
+    when there is one. The rearmost face is pushed back by CLEARANCE_MM (an
+    axial standoff) so a tube ending within that distance behind the driver
+    must also clear it radially."""
+    segs = [(env.y0, env.y0 + env.basket_len, env.basket_d / 2.0)]
+    if env.magnet_len > 0:
+        segs.append((env.y0 + env.basket_len, env.y0 + env.basket_len + env.magnet_len,
+                     env.magnet_d / 2.0))
+    s0, s1, er = segs[-1]
+    segs[-1] = (s0, s1 + CLEARANCE_MM, er)
+    return segs
+
+
 def _tube_clear(center, r, ya, yb, chamber, fr, obstacles, envelopes, tubes) -> bool:
     """True when a tube of radius r along y in [ya, yb] at center (x, z)
     keeps CLEARANCE_MM from every obstacle box, envelope segment, other tube,
@@ -3194,11 +3277,7 @@ def _tube_clear(center, r, ya, yb, chamber, fr, obstacles, envelopes, tubes) -> 
             return False
     for env in envelopes:
         ex, ez = env.center
-        segs = [(env.y0, env.y0 + env.basket_len, env.basket_d / 2.0)]
-        if env.magnet_len > 0:
-            segs.append((env.y0 + env.basket_len, env.y0 + env.basket_len + env.magnet_len,
-                         env.magnet_d / 2.0))
-        for (s0, s1, er) in segs:
+        for (s0, s1, er) in _envelope_segments(env):
             if _overlap(ya, yb, s0, s1) and math.hypot(cx - ex, cz - ez) - r - er < need:
                 return False
     for (tx, tz, tr, ty0, ty1) in tubes:
@@ -3228,11 +3307,7 @@ def _ring_clear(center, rr, yb, chamber, fr, obstacles, tubes) -> bool:
 
 def _radial_requirement(env: Envelope, ya, yb, r) -> float:
     need = 0.0
-    segs = [(env.y0, env.y0 + env.basket_len, env.basket_d / 2.0)]
-    if env.magnet_len > 0:
-        segs.append((env.y0 + env.basket_len, env.y0 + env.basket_len + env.magnet_len,
-                     env.magnet_d / 2.0))
-    for (s0, s1, er) in segs:
+    for (s0, s1, er) in _envelope_segments(env):
         if _overlap(ya, yb, s0, s1):
             need = max(need, er)
     return need + CLEARANCE_MM + r
@@ -3297,23 +3372,26 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
             sign = -1.0 if env.center[0] < 0 else 1.0
             ya, yb = fr.D - L, fr.D - BACK_MM
             rr = ring_od / 2.0
-            spot = _place_tube(env, sign, r, ya, yb, fr, obstacles, envelopes, tubes, rr)
+            reaches = ya < fr.y_bb - 1e-6      # the tube must stay behind the baffle
+            spot = None if reaches else _place_tube(env, sign, r, ya, yb, fr, obstacles, envelopes, tubes, rr)
             if spot is None:
                 fit = None
                 Lf = L - 5.0
                 while Lf >= 2 * BACK_MM:
-                    if _place_tube(env, sign, r, fr.D - Lf, yb, fr, obstacles, envelopes, tubes, rr):
+                    if (fr.D - Lf >= fr.y_bb - 1e-6
+                            and _place_tube(env, sign, r, fr.D - Lf, yb, fr, obstacles, envelopes, tubes, rr)):
                         fit = Lf
                         break
                     Lf -= 5.0
+                why = ("reaches the baffle" if reaches
+                       else f"finds no spot with {CLEARANCE_MM:.0f} mm clearance")
                 if fit is None:
                     blockers.append(f"port fit: chamber {c} port {j}: no round port of "
                                     f"{id_mm:.1f} mm fits with {CLEARANCE_MM:.0f} mm clearance; use a front slot")
                 else:
                     blockers.append(f"port fit: chamber {c} port {j}: tube {id_mm:.1f} x {L:.0f} mm "
-                                    f"finds no spot with {CLEARANCE_MM:.0f} mm clearance; longest tube that "
-                                    f"fits at this diameter is {fit:.0f} mm; lower Fb, use a larger tube, "
-                                    "or a front slot")
+                                    f"{why}; longest tube that fits at this diameter is {fit:.0f} mm; "
+                                    "lower Fb, use a larger tube, or a front slot")
                 continue
             cx, cz = spot
             tubes.append((cx, cz, r, ya, yb))
@@ -3463,7 +3541,7 @@ def trim_hardware(spec: CabSpec, fr: Frame) -> list:
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cablayout.py -q`
-Expected: `25 passed`
+Expected: `30 passed`
 
 - [ ] **Step 5: Commit**
 
@@ -4092,7 +4170,7 @@ def layout_report(lay: Layout, checks: list) -> dict:
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest scripts/test_cablayout.py -q`
-Expected: `36 passed` in under 60 seconds.
+Expected: `41 passed` in under 60 seconds.
 
 - [ ] **Step 5: Commit**
 

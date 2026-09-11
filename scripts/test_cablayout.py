@@ -390,6 +390,75 @@ def test_round_port_short_length_uses_the_ring_alone():
     assert "no tube" in blanks[0].notes
 
 
+def test_round_port_stands_off_behind_the_magnet():
+    # the envelope's rearmost face carries a 25 mm axial standoff: a tube ending
+    # within 25 mm behind the magnet (rear face y 155) must clear it radially
+    spec = spec_for(port="round")
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    s = sheet(port="round")
+    s["port"]["length_mm"] = 124.4                  # tube front at y 155.0, flush with the magnet
+    ports, _, _, blockers = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    assert blockers == [] and ports[0].center == pytest.approx((84.0 + 25.0 + 44.45, 228.6))
+    s["port"]["length_mm"] = 99.0                   # tube front at y 180.4, past the standoff
+    ports, _, _, _ = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    assert ports[0].center == pytest.approx((44.45 + 25.0, 228.6))
+
+
+def test_round_port_longer_than_the_box_reaches_the_baffle():
+    spec = spec_for(port="round")
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    s = sheet(port="round")
+    s["port"]["length_mm"] = 250.0                  # the box is 241.4 mm deep behind the baffle
+    ports, blanks, _, blockers = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    assert ports == [] and blanks == [] and len(blockers) == 1
+    assert blockers[0].startswith("port fit: chamber 0 port 0: tube 77.3 x 250 mm reaches the baffle")
+    assert "longest tube that fits at this diameter is 155 mm" in blockers[0]
+    s["port"]["length_mm"] = 240.0                  # stops 1.4 mm short of the baffle: no spot instead
+    _, _, _, blockers = L.round_ports(L.order_from(s, L.Aesthetics()), fr, envs, [])
+    assert "tube 77.3 x 240 mm finds no spot with 25 mm clearance" in blockers[0]
+    assert "longest tube that fits at this diameter is 155 mm" in blockers[0]
+
+
+def test_round_port_takes_the_below_direction_in_a_narrow_box():
+    # 371 mm wide inside: outboard at the magnet standoff hits the wall, so the
+    # tube drops below the driver at the same radial distance
+    s = sheet(external=(407.0, 600.0, 279.4), port="round")
+    s["port"]["length_mm"] = 150.0
+    spec = L.order_from(s, L.Aesthetics())
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    ports, _, _, blockers = L.round_ports(spec, fr, envs, [])
+    assert blockers == [] and envs[0].center == (0.0, 300.0)
+    assert ports[0].center == pytest.approx((0.0, 300.0 - 153.45))
+
+
+def test_round_port_count_two_second_tube_clears_the_first():
+    s = sheet(port="round")
+    s["port"]["count"] = 2
+    spec = L.order_from(s, L.Aesthetics())
+    fr = L.frame(spec)
+    _, cutouts, _ = L.baffle_and_cutouts(spec, fr)
+    envs = L.speaker_envelopes(spec, fr, cutouts)
+    ports, blanks, feats, blockers = L.round_ports(spec, fr, envs, [])
+    assert blockers == [] and len(ports) == 2 and len(feats) == 2
+    assert [b.name for b in blanks] == ["port_tube_0_0", "port_ring_0_0", "port_tube_0_1", "port_ring_0_1"]
+    (x0, z0), (x1, z1) = ports[0].center, ports[1].center
+    assert (x0, z0) == pytest.approx((69.45, 228.6)) and (x1, z1) == pytest.approx((0.0, 129.15))
+    assert math.hypot(x1 - x0, z1 - z0) >= 88.9 + 25.0 - 1e-9        # tube to tube, 25 mm clear
+    assert math.hypot(x1 - x0, z1 - z0) >= 74.45 + 44.45 - 1e-9      # ring over the other tube
+
+
+def test_tube_geometry_non_stock_fallback():
+    assert L.tube_geometry(77.3) == (88.9, "PVC 3 in sch 40", "")
+    od, mat, note = L.tube_geometry(60.0)
+    assert od == 71.0 and mat == "tube 60.0 mm ID" and "not a stock tube size" in note
+
+
 def test_slot_port_cheeks_center_and_blockers():
     spec = spec_for(port="slot")
     fr = L.frame(spec)
