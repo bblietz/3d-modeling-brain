@@ -1,0 +1,215 @@
+{
+  "name": "site-default",
+  "mode": "evaluate",
+  "tone_target": {
+    "low_end": "tight",
+    "mids": "neutral",
+    "top": "smooth",
+    "breakup": "moderate",
+    "dispersion": "focused",
+    "placement": "floor",
+    "min_power_w": 45,
+    "impedance_options_ohm": [
+      8,
+      16
+    ]
+  },
+  "speakers": [
+    {
+      "slug": "celestion-g12h-30-anniversary",
+      "brand": "Celestion",
+      "model": "G12H Anniversary",
+      "impedance_ohm": 16.0,
+      "power_w": 30,
+      "sensitivity_db": 100,
+      "data_status": "analog",
+      "analog_of": "celestion-heritage-g12h55",
+      "cutout_mm": 283,
+      "bolt_circle_mm": 297,
+      "bolt_count": 4,
+      "depth_mm": 135,
+      "weight_kg": 4.7,
+      "displacement_l": 1.5,
+      "displacement_estimated": true,
+      "frame_diameter_mm": 309,
+      "magnet_diameter_mm": 156,
+      "magnet_diameter_estimated": false
+    }
+  ],
+  "enclosure": {
+    "type": "closed-ported",
+    "driver_count": 1,
+    "chambers": 1,
+    "jack_config": "mono",
+    "open_fraction": null
+  },
+  "volumes": {
+    "method": "evaluate",
+    "per_driver_net_l": 42.075314364183036,
+    "per_chamber_net_l": 42.075314364183036,
+    "net_total_l": 42.075314364183036,
+    "displacement_l": 1.5,
+    "brace_l": 0.0,
+    "port_l": 0.22655831040811814,
+    "divider_l": 0.0,
+    "inside_parts_l": 1.8043154854088457,
+    "gross_l": 45.606188159999995
+  },
+  "box": {
+    "internal_mm": [
+      472.0,
+      421.2,
+      229.4
+    ],
+    "external_mm": [
+      508.0,
+      457.2,
+      279.4
+    ],
+    "internal_in": [
+      18.58,
+      16.58,
+      9.03
+    ],
+    "external_in": [
+      20.0,
+      18.0,
+      11.0
+    ],
+    "chamber_internal_width_mm": 472.0
+  },
+  "port": {
+    "shape": "round",
+    "diameter_mm": 101.5,
+    "slot_w_mm": null,
+    "slot_h_mm": null,
+    "area_cm2": 80.91368228861361,
+    "length_mm": 40.0,
+    "volume_l": 0.3236547291544545,
+    "air_speed_ms": 1.9884223380513366,
+    "warnings": [],
+    "location": "rear",
+    "per_chamber": true,
+    "count": 1
+  },
+  "prediction": {
+    "model": "thiele-small vented",
+    "fb_hz": 67.36787698036497,
+    "alpha": 0.7011236979636716,
+    "h": 0.7925632585925291,
+    "f3_hz": 69.22774351260722,
+    "peak_db": 1.2566951183428277,
+    "character": "punchy",
+    "response_db": [
+      [
+        20.0,
+        -45.15457994691853
+      ],
+      [
+        25.2,
+        -36.4821242790575
+      ],
+      [
+        31.75,
+        -27.446840897094326
+      ],
+      [
+        40.0,
+        -18.005526025264903
+      ],
+      [
+        50.4,
+        -9.124654984178282
+      ],
+      [
+        63.5,
+        -3.870159500515183
+      ],
+      [
+        80.0,
+        -1.36347746649983
+      ],
+      [
+        100.79,
+        0.35996594963506495
+      ],
+      [
+        126.99,
+        1.198557452001518
+      ],
+      [
+        160.0,
+        1.2566951183428277
+      ],
+      [
+        201.59,
+        0.9943385711796817
+      ],
+      [
+        253.98,
+        0.7017958729870184
+      ],
+      [
+        320.0,
+        0.4699074699417357
+      ],
+      [
+        400.0,
+        0.3110429814405386
+      ]
+    ]
+  },
+  "wiring": {
+    "jack_config": "mono",
+    "recommended": {
+      "name": "single",
+      "impedance_ohm": 16.0,
+      "matches_tap": true,
+      "jack_text": "Single driver, 16 ohm"
+    },
+    "options": [
+      {
+        "name": "single",
+        "impedance_ohm": 16.0,
+        "matches_tap": true,
+        "jack_text": "Single driver, 16 ohm"
+      }
+    ]
+  },
+  "power": {
+    "amp_power_w": 30.0,
+    "total_handling_w": 30.0,
+    "min_power_w": 45.0,
+    "status": "warning",
+    "message": "handling 30 W is under the 45 W target (1.5 x amp power)",
+    "per_side": [
+      {
+        "total_handling_w": 30.0,
+        "amp_power_w": 30.0,
+        "min_power_w": 45.0,
+        "status": "warning",
+        "message": "handling 30 W is under the 45 W target (1.5 x amp power)"
+      }
+    ]
+  },
+  "construction": {
+    "panel_mm": 18.0,
+    "back_mm": 12.0,
+    "baffle_mm": 18.0,
+    "recess_mm": 20.0,
+    "brace_l": 0.0,
+    "pinned_external_width_mm": null,
+    "max_external_mm": null,
+    "port_count": 1,
+    "line": "tolex",
+    "species": null,
+    "wall_material": "baltic birch plywood"
+  },
+  "warnings": [
+    "width and depth are within 5 percent of 2:1 (2.06); coincident standing waves",
+    "driver displacement assumed 1.5 L per driver",
+    "handling 30 W is under the 45 W target (1.5 x amp power)"
+  ],
+  "blockers": [],
+  "prediction_status": "unverified, ears only"
+}

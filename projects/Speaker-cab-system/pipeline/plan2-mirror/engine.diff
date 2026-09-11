@@ -1,0 +1,452 @@
+--- scripts/cabvoice.py	2026-09-10 14:56:34.955008997 -0700
++++ /home/brian/ClaudeProjects/3d-modeling-brain/projects/Speaker-cab-system/pipeline/plan2-mirror/.vault/scripts/cabvoice.py	2026-09-10 19:23:38.894946495 -0700
+@@ -36,7 +36,7 @@
+     "name", "type", "brand", "model", "diameter_in", "impedance_ohm",
+     "power_w", "sensitivity_db", "magnet", "fs_hz", "re_ohm",
+     "cutout_mm", "bolt_circle_mm", "bolt_count", "depth_mm", "weight_kg",
+-    "data_status", "sources", "status",
++    "frame_diameter_mm", "data_status", "sources", "status",
+ )
+ # May be null only when data_status is "missing".
+ TS_FIELDS = ("qts", "qes", "qms", "vas_l", "xmax_mm", "sd_cm2")
+@@ -44,7 +44,7 @@
+ POSITIVE_FIELDS = (
+     "diameter_in", "power_w", "sensitivity_db", "fs_hz", "re_ohm",
+     "cutout_mm", "bolt_circle_mm", "bolt_count", "depth_mm", "weight_kg", "le_mh",
+-    "displacement_l",
++    "displacement_l", "frame_diameter_mm", "magnet_diameter_mm",
+ ) + TS_FIELDS
+ 
+ 
+@@ -89,6 +89,9 @@
+             errors.append(f"{key} must be a positive number, got {val!r}")
+     if status == "analog" and not meta.get("analog_of"):
+         errors.append("analog_of is required when data_status is 'analog'")
++    est = meta.get("magnet_diameter_estimated")
++    if est is not None and not isinstance(est, bool):
++        errors.append(f"magnet_diameter_estimated must be true or false, got {est!r}")
+     return errors
+ 
+ 
+@@ -118,6 +121,9 @@
+     weight_kg: float
+     displacement_l: float
+     displacement_estimated: bool
++    frame_diameter_mm: float
++    magnet_diameter_mm: float | None
++    magnet_diameter_estimated: bool
+     data_status: str
+     analog_of: str | None
+     sources: list = field(default_factory=list)
+@@ -156,6 +162,9 @@
+         weight_kg=meta["weight_kg"],
+         displacement_l=disp if disp is not None else DEFAULT_DISPLACEMENT_L,
+         displacement_estimated=disp is None,
++        frame_diameter_mm=meta["frame_diameter_mm"],
++        magnet_diameter_mm=meta.get("magnet_diameter_mm"),
++        magnet_diameter_estimated=bool(meta.get("magnet_diameter_estimated", False)),
+         data_status=meta["data_status"], analog_of=meta.get("analog_of"),
+         sources=list(meta["sources"]),
+     )
+@@ -329,7 +338,13 @@
+ # ---------------------------------------------------------------------------
+ 
+ MIN_PORT_LENGTH_MM = 20.0
+-MAX_PORT_DIAMETER_MM = 150.0
++# Purchasable round port tubes: Schedule 40 PVC or ABS inside diameters for
++# 2, 3, 4, and 6 inch nominal pipe, with their outside diameters. Starting
++# values (see speaker-cab-construction); the hard maximum is the largest tube.
++PORT_TUBE_ID_MM = (52.0, 77.3, 101.5, 153.2)
++PORT_TUBE_OD_MM = {52.0: 60.3, 77.3: 88.9, 101.5: 114.3, 153.2: 168.3}
++MAX_PORT_DIAMETER_MM = 153.2
++DEFAULT_PORT_DIAMETER_MM = 77.3
+ 
+ 
+ @dataclass
+@@ -407,12 +422,23 @@
+     return volume_velocity / (area_cm2 / 1e4)
+ 
+ 
++def snap_tube_id(diameter_mm: float) -> float:
++    """Smallest purchasable tube inside diameter not below diameter_mm, else the largest."""
++    for tube in PORT_TUBE_ID_MM:
++        if tube >= diameter_mm - 1e-9:
++            return tube
++    return PORT_TUBE_ID_MM[-1]
++
++
+ def size_port(driver: Driver, vb_l: float, fb_hz: float,
+-              diameter_mm: float = 75.0, slot_mm: tuple | None = None) -> Port:
++              diameter_mm: float = DEFAULT_PORT_DIAMETER_MM,
++              slot_mm: tuple | None = None) -> Port:
+     """Port for (vb, fb), enlarged in 10 percent area steps until the
+     worst-case air speed is under PORT_V_MAX and the physical length is at
+     least MIN_PORT_LENGTH_MM. Stops at the MAX_PORT_DIAMETER_MM equivalent
+-    area and leaves the warnings in place for the caller."""
++    area and leaves the warnings in place for the caller. A round port is
++    then snapped up to the next purchasable tube (PORT_TUBE_ID_MM) and
++    re-solved, so the sheet describes a tube that can be bought."""
+     max_area_cm2 = math.pi * (MAX_PORT_DIAMETER_MM / 20.0) ** 2
+ 
+     def build(dia, slot):
+@@ -431,6 +457,13 @@
+         else:
+             diameter_mm = min(diameter_mm * math.sqrt(1.1), MAX_PORT_DIAMETER_MM)
+         port = build(diameter_mm, slot_mm)
++    if not slot_mm:
++        solved = port.diameter_mm
++        tube = snap_tube_id(solved)
++        port = build(tube, None)
++        if abs(tube - solved) > 0.05:
++            port.warnings.append(f"port diameter snapped to the {tube:g} mm tube "
++                                 f"(from {solved:.1f} mm)")
+     if port.air_speed_ms > PORT_V_MAX:
+         port.warnings.append(f"port air speed {port.air_speed_ms:.1f} m/s still above "
+                              f"{PORT_V_MAX} m/s at the maximum port size")
+@@ -600,8 +633,21 @@
+ BACK_MM = 12.0
+ BAFFLE_MM = 18.0
+ RECESS_MM = 20.0
+-CUTOUT_MARGIN_MM = 25.0
++CUTOUT_MARGIN_MM = 25.0    # cutout edge to brace or divider
++SHELL_MARGIN_MM = 44.0     # cutout edge to shell inner face: grill strip 40 + 2 clearance + 2
++CUTOUT_GAP_MM = 68.0       # between the two cutouts of a 2x12: brace or divider 18 + 2 x 25
++HARDWOOD_FLOOR_EXTRA_MM = 2.0   # the hardwood line's 19 mm panels take 1 mm per side from the 18 mm box
+ BASE_EXTERNAL_IN = (20.0, 18.0, 11.0)
++# Parts the generator builds inside the air box (knowledge/speaker-cab-construction):
++CLEAT_MM = 18.0                 # 18 x 18 cleats along the baffle and the back
++STIFFENER_MM = (18.0, 40.0)     # 18 proud, 40 flat, across any span over SPAN_MAX_MM
++SPAN_MAX_MM = 450.0
++BRACE_MM = (18.0, 60.0)         # center brace on a mono 2x12
++JACK_PLATE_H_MM = 70.0          # jack plate cutout height; the back stiffener stops above it
++JACK_CLEAR_MM = 25.0
++FLANGE_RING_T_MM = 12.0         # plywood flange ring on the inside of the back for a round port
++FLANGE_RING_EXTRA_MM = 60.0     # ring outside diameter = tube outside diameter + 60
++TUBE_WALL_FALLBACK_MM = 5.5     # wall assumed for a tube diameter outside PORT_TUBE_ID_MM
+ 
+ 
+ @dataclass
+@@ -659,18 +705,29 @@
+ 
+ 
+ def min_internal_width_mm(driver_count: int, cutout_mm: float) -> float:
+-    return driver_count * cutout_mm + (driver_count + 1) * CUTOUT_MARGIN_MM
++    """Cutouts side by side, 44 mm to each shell wall and a 68 mm gap between
++    two (the brace or divider plus 25 mm each side); the same floor for a mono
++    and a stereo 2x12 because the divider replaces the brace."""
++    return driver_count * cutout_mm + (driver_count - 1) * CUTOUT_GAP_MM + 2 * SHELL_MARGIN_MM
++
++
++def min_internal_height_mm(cutout_mm: float, slot_h_mm: float | None = None) -> float:
++    """Cutout plus 44 mm top and bottom; a front slot port adds its height and
++    the 18 mm shelf under the baffle."""
++    extra = (slot_h_mm + BAFFLE_MM) if slot_h_mm else 0.0
++    return cutout_mm + 2 * SHELL_MARGIN_MM + extra
+ 
+ 
+ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = None,
+                     min_internal_width_mm: float | None = None,
+-                    max_external_mm: tuple | None = None, strict: bool = True,
++                    max_external_mm: tuple | None = None,
++                    min_internal_height_mm: float | None = None, strict: bool = True,
+                     **panel_kwargs) -> Box:
+     """Internal dimensions for a gross volume, starting from the site box
+-    proportions. Fixed axes come from a pinned width, the two-driver minimum
+-    width, or external limits; free axes scale together to hit the volume.
+-    When the limits cannot hold the volume, strict raises; otherwise the
+-    largest box that fits comes back with a "cannot reach" warning."""
++    proportions. Fixed axes come from a pinned width, the driver minimum
++    width, the minimum height, or external limits; free axes scale together
++    to hit the volume. When the limits cannot hold the volume, strict raises;
++    otherwise the largest box that fits comes back with a "cannot reach" warning."""
+     if gross_l <= 0:
+         raise ValueError("gross_l must be positive")
+     target = gross_l * 1e6
+@@ -696,6 +753,14 @@
+             raise ValueError(
+                 f"width {dims[0]:.1f} mm internal (pinned or the driver-count minimum) "
+                 f"exceeds the size limit {max_internal[0]:.1f} mm internal")
++        if min_internal_width_mm is not None and min_internal_width_mm > max_internal[0] + 1e-9:
++            raise ValueError(
++                f"width {min_internal_width_mm:.1f} mm internal (the driver-count minimum) "
++                f"exceeds the size limit {max_internal[0]:.1f} mm internal")
++        if min_internal_height_mm is not None and min_internal_height_mm > max_internal[1] + 1e-9:
++            raise ValueError(
++                f"height {min_internal_height_mm:.1f} mm internal (the cutout minimum) "
++                f"exceeds the size limit {max_internal[1]:.1f} mm internal")
+ 
+     def rescale():
+         free = [i for i in range(3) if not fixed[i]]
+@@ -712,7 +777,20 @@
+         for i in free:
+             dims[i] *= k
+ 
+-    rescale()
++    def apply_floors() -> bool:
++        """Lift any free axis that fell under its floor; True when one moved."""
++        moved = False
++        for i, floor in ((0, min_internal_width_mm), (1, min_internal_height_mm)):
++            if floor is not None and not fixed[i] and dims[i] < floor - 1e-9:
++                dims[i] = floor
++                fixed[i] = True
++                moved = True
++        return moved
++
++    for _ in range(3):   # a floor on one axis shrinks the others on rescale; settle both
++        rescale()
++        if not apply_floors():
++            break
+     for _ in range(3):
+         if max_internal is None:
+             break
+@@ -737,6 +815,98 @@
+     return box
+ 
+ 
++def _port_inside_l(port: Port) -> float:
++    """Port air inside the internal box, liters: a round tube's length through
++    the back panel and a slot's length through the baffle lie outside the box."""
++    panel = BAFFLE_MM if port.shape == "slot" else BACK_MM
++    return port.area_cm2 / 1e4 * max(port.length_mm - panel, 0.0)
++
++
++def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int,
++                   jack_config: str, port: Port | None, line: str,
++                   port_count: int | None = None) -> float:
++    """Liters taken by the parts the generator builds inside the air box that
++    the brace, divider, and port terms do not carry, estimated the way
++    scripts/cablayout.py builds them: 18 x 18 cleats along the baffle (top,
++    bottom unless a slot port, two outer sides) and the back (closed: a full
++    frame; open: top, bottom, and the panel-height side cleats), the mono 2x12
++    center brace, 18 x 40 stiffeners across any shell or back span over 450 mm
++    between glued members (the back one stops above the jack plate), the slot
++    shelf and cheeks, and a round port's tube wall and flange ring. Every part
++    is birch on both lines; line is accepted for the call signature."""
++    w, h, d = internal_mm
++    per_chamber = driver_count // chambers
++    count = port_count or per_chamber
++    closed = enclosure in ("closed", "closed-ported")
++    slot = port is not None and port.shape == "slot"
++    slot_h = port.slot_h_mm if slot else 0.0
++    shelf = port.length_mm if slot else 0.0
++    w_c = (w - PANEL_MM) / 2.0 if chambers == 2 else w
++    c2 = CLEAT_MM ** 2
++    total = 0.0
++    # baffle cleats (floating baffle, the default)
++    total += chambers * w_c * c2
++    if not slot:
++        total += chambers * w_c * c2
++    side_len = h - CLEAT_MM - ((slot_h + BAFFLE_MM) if slot else CLEAT_MM)
++    total += 2 * side_len * c2
++    # back cleats
++    total += 2 * chambers * w_c * c2
++    if closed:
++        total += 2 * (h - 2 * CLEAT_MM) * c2
++    else:
++        h_p = (1.0 - OPEN_FRACTION[enclosure]) * h / 2.0
++        total += 4 * (h_p - CLEAT_MM) * c2
++    # center brace, bottom end on the shelf with a slot
++    if driver_count == 2 and chambers == 1:
++        total += BRACE_MM[0] * BRACE_MM[1] * (h - ((slot_h + BAFFLE_MM) if slot else 0.0))
++    # stiffeners
++    sw, sd = STIFFENER_MM
++    if chambers == 2:
++        segs = [w_c, w_c]
++    elif driver_count == 2:
++        segs = [(w - BRACE_MM[0]) / 2.0] * 2
++    else:
++        segs = [w]
++    top_len = d - 2 * CLEAT_MM
++    bot_len = (d - max(shelf, 2 * CLEAT_MM)) if slot else top_len
++    for span in segs:
++        if span > SPAN_MAX_MM:
++            if top_len > 50.0:
++                total += sw * sd * top_len
++            if bot_len > 50.0:
++                total += sw * sd * bot_len
++    if closed:
++        back_len = h - CLEAT_MM - (CLEAT_MM + JACK_CLEAR_MM + JACK_PLATE_H_MM + CUTOUT_MARGIN_MM)
++        if w_c > SPAN_MAX_MM and back_len > 50.0:
++            total += chambers * sw * sd * back_len
++    side_span = max(slot_h, h - slot_h - BAFFLE_MM) if slot else h
++    if side_span > SPAN_MAX_MM:
++        total += 2 * sw * sd * top_len
++    # slot shelf, end cheeks, center cheeks
++    if slot:
++        avail = w_c - (count - 1) * PANEL_MM
++        cheek = (avail - count * port.slot_w_mm) / 2.0
++        per_chamber_parts = w_c * shelf * BAFFLE_MM + (count - 1) * PANEL_MM * shelf * slot_h
++        if cheek > 0.5:
++            per_chamber_parts += 2 * cheek * shelf * slot_h
++        total += chambers * per_chamber_parts
++    # round port: tube wall inside the box and the flange ring (the ring is the
++    # whole port when the tube would not reach past the back panel)
++    if port is not None and port.shape == "round":
++        id_mm, length = port.diameter_mm, port.length_mm
++        od = PORT_TUBE_OD_MM.get(id_mm, id_mm + 2 * TUBE_WALL_FALLBACK_MM)
++        ring_od = od + FLANGE_RING_EXTRA_MM
++        if length > 2 * BACK_MM:
++            tube = math.pi / 4.0 * (od ** 2 - id_mm ** 2) * (length - BACK_MM)
++            ring = math.pi / 4.0 * (ring_od ** 2 - od ** 2) * FLANGE_RING_T_MM
++        else:
++            tube = 0.0
++            ring = math.pi / 4.0 * (ring_od ** 2 - id_mm ** 2) * max(length - BACK_MM, 0.0)
++        total += chambers * count * (tube + ring)
++    return total / 1e6
++
++
+ # ---------------------------------------------------------------------------
+ # Tone target, volume targets, propose
+ # ---------------------------------------------------------------------------
+@@ -786,7 +956,7 @@
+     baffle_mm: float = BAFFLE_MM
+     recess_mm: float = RECESS_MM
+     brace_l: float = 0.0
+-    port_diameter_mm: float = 75.0
++    port_diameter_mm: float = DEFAULT_PORT_DIAMETER_MM
+     port_slot_mm: tuple | None = None
+     port_count: int | None = None      # None: one port per driver in the chamber
+     line: str = "tolex"
+@@ -865,7 +1035,10 @@
+             "bolt_circle_mm": driver.bolt_circle_mm, "bolt_count": driver.bolt_count,
+             "depth_mm": driver.depth_mm, "weight_kg": driver.weight_kg,
+             "displacement_l": driver.displacement_l,
+-            "displacement_estimated": driver.displacement_estimated}
++            "displacement_estimated": driver.displacement_estimated,
++            "frame_diameter_mm": driver.frame_diameter_mm,
++            "magnet_diameter_mm": driver.magnet_diameter_mm,
++            "magnet_diameter_estimated": driver.magnet_diameter_estimated}
+ 
+ 
+ def _mm_to_in(dims) -> tuple:
+@@ -1017,12 +1190,14 @@
+ 
+ 
+ def _volumes(method, per_driver_net, per_chamber_drivers, chambers, displacement, brace_l,
+-             port_l_total, divider_l, gross_l) -> dict:
++             port_l_total, divider_l, inside_l, gross_l) -> dict:
++    """gross = net + displacement + brace + port (air inside the box) + divider
++    + inside_parts; port.volume_l on the port dict is the whole port."""
+     chamber_net = per_driver_net * per_chamber_drivers
+     return {"method": method, "per_driver_net_l": per_driver_net,
+             "per_chamber_net_l": chamber_net, "net_total_l": chamber_net * chambers,
+             "displacement_l": displacement, "brace_l": brace_l, "port_l": port_l_total,
+-            "divider_l": divider_l, "gross_l": gross_l}
++            "divider_l": divider_l, "inside_parts_l": inside_l, "gross_l": gross_l}
+ 
+ 
+ def _wall_material(c: Constraints) -> str:
+@@ -1072,16 +1247,21 @@
+     chamber_net = per_driver_net * per_chamber_drivers
+     net_total = chamber_net * chambers
+     displacement = _displacement(drivers, warnings)
+-    min_w = (chambers * min_internal_width_mm(per_chamber_drivers, max(d.cutout_mm for d in drivers))
+-             + (chambers - 1) * c.panel_mm)
++    cutout = max(d.cutout_mm for d in drivers)
++    floor_extra = HARDWOOD_FLOOR_EXTRA_MM if c.line == "hardwood" else 0.0
++    min_w = min_internal_width_mm(count, cutout) + floor_extra
+     pk = c.panel_kwargs()
+     port_count = c.port_count or per_chamber_drivers
+     net_target = net_total
+-    port, port_l, divider_l, box, limited = None, 0.0, 0.0, None, False
++    port, port_l, divider_l, inside_l, box, limited = None, 0.0, 0.0, 0.0, None, False
+     last_gross = None
+-    for _ in range(5):   # until the gross settles: the port and divider depend on the box
+-        gross = net_total + displacement + c.brace_l + port_l * chambers + divider_l
++    for _ in range(10):   # until the gross settles: port, divider, and inside parts depend on the box
++        gross = net_total + displacement + c.brace_l + port_l * chambers + divider_l + inside_l
++        slot_h = None
++        if enclosure == "closed-ported" and c.port_slot_mm:
++            slot_h = port.slot_h_mm if port is not None else c.port_slot_mm[1]
+         box = dims_for_volume(gross, c.pinned_external_width_mm, min_w, c.max_external_mm,
++                              min_internal_height_mm=min_internal_height_mm(cutout, slot_h) + floor_extra,
+                               strict=False, **pk)
+         w_int, h_int, d_int = box.internal_mm
+         divider_l = _divider_l(chambers, h_int, d_int, c)
+@@ -1089,15 +1269,18 @@
+             # The size limit wins: voice the box that fits and present the trade-off.
+             box.warnings = [w for w in box.warnings if not w.startswith("cannot reach")]
+             limited = True
+-            net_total = box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
++            net_total = (box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
++                         - inside_l)
+             chamber_net = net_total / chambers
+             per_driver_net = chamber_net / per_chamber_drivers
+         if enclosure == "closed-ported":
+             port = size_port(_air_speed_driver(lead, per_chamber_drivers / port_count, warnings),
+                              chamber_net / port_count, fb, diameter_mm=c.port_diameter_mm,
+                              slot_mm=c.port_slot_mm)
+-            port_l = port.volume_l * port_count
+-        if last_gross is not None and abs(box.gross_l - last_gross) < 0.01:
++            port_l = _port_inside_l(port) * port_count
++        inside_l = inside_parts_l(box.internal_mm, enclosure, count, chambers, jack_config, port,
++                                  c.line, port_count)
++        if last_gross is not None and abs(box.gross_l - last_gross) < 0.001:
+             break
+         last_gross = box.gross_l
+     warnings.extend(box.warnings)
+@@ -1112,13 +1295,14 @@
+         fb = fb_actual   # the prediction follows the port as built
+     prediction = _predict(lead, enclosure, per_driver_net, fb, chamber_w, h_int, d_int)
+     if limited:
+-        target_gross = net_target + displacement + c.brace_l + port_l * chambers + divider_l
++        target_gross = (net_target + displacement + c.brace_l + port_l * chambers + divider_l
++                        + inside_l)
+         blockers.append(f"target {target_gross:.1f} L cannot fit the size limit; achievable "
+                         f"{box.gross_l:.1f} L gives {_prediction_summary(prediction)}")
+     wiring_dict, power_dict = _electrical(drivers, impedances, tone, jack_config, c,
+                                           warnings, blockers)
+     volumes = _volumes(method, per_driver_net, per_chamber_drivers, chambers, displacement,
+-                       c.brace_l, port_l * chambers, divider_l, box.gross_l)
++                       c.brace_l, port_l * chambers, divider_l, inside_l, box.gross_l)
+     return _assemble(name, "propose", tone, drivers, impedances, enclosure, jack_config, chambers,
+                      count, volumes, box, chamber_w, port_dict, prediction, wiring_dict,
+                      power_dict, warnings, blockers, c)
+@@ -1149,10 +1333,14 @@
+     port_count = c.port_count or per_chamber_drivers
+     port_l = 0.0
+     if port is not None:
+-        port_l = port.area_cm2 / 1e4 * port.length_mm * port_count
+-    net_total = box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
++        port_l = _port_inside_l(port) * port_count
++    inside_l = inside_parts_l(box.internal_mm, enclosure, count, chambers, jack_config, port,
++                              c.line, port_count)
++    net_total = (box.gross_l - displacement - c.brace_l - port_l * chambers - divider_l
++                 - inside_l)
+     if net_total <= 0:
+-        raise ValueError("box has no net volume left after displacement, brace, port, and divider")
++        raise ValueError("box has no net volume left after displacement, brace, port, divider, "
++                         "and inside parts")
+     chamber_net = net_total / chambers
+     per_driver_net = chamber_net / per_chamber_drivers
+     chamber_w = _chamber_w(chambers, w_int, c)
+@@ -1168,7 +1356,7 @@
+     wiring_dict, power_dict = _electrical(drivers, impedances, tone, jack_config, c,
+                                           warnings, blockers)
+     volumes = _volumes("evaluate", per_driver_net, per_chamber_drivers, chambers, displacement,
+-                       c.brace_l, port_l * chambers, divider_l, box.gross_l)
++                       c.brace_l, port_l * chambers, divider_l, inside_l, box.gross_l)
+     return _assemble(name, "evaluate", tone, drivers, impedances, enclosure, jack_config, chambers,
+                      count, volumes, box, chamber_w, port_dict, prediction, wiring_dict,
+                      power_dict, warnings, blockers, c)
+@@ -1235,8 +1423,9 @@
+         f"| Net total | {_liters(vol['net_total_l'])} |",
+         f"| Driver displacement | {vol['displacement_l']:.2f} L |",
+         f"| Brace | {vol['brace_l']:.2f} L |",
+-        f"| Port | {vol['port_l']:.2f} L |",
++        f"| Port air inside the box | {vol['port_l']:.2f} L |",
+         f"| Divider | {vol['divider_l']:.2f} L |",
++        f"| Inside parts (cleats, stiffeners, shelf, ring) | {vol['inside_parts_l']:.2f} L |",
+         f"| Gross internal | {_liters(vol['gross_l'])} |",
+         "",
+         "## Dimensions",
+@@ -1331,7 +1520,8 @@
+     common(pp)
+     pp.add_argument("--pinned-width", type=float, help="external width mm")
+     pp.add_argument("--max-external", type=float, nargs=3, metavar=("W", "H", "D"))
+-    pp.add_argument("--port-diameter", type=float, default=75.0)
++    pp.add_argument("--port-diameter", type=float, default=DEFAULT_PORT_DIAMETER_MM,
++                    help="round port start in mm, snapped up to the tube table")
+     pp.add_argument("--port-slot", type=float, nargs=2, metavar=("W", "H"))
+ 
+     pe = sub.add_parser("evaluate")

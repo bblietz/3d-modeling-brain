@@ -1,0 +1,59 @@
+---
+name: celestion-heritage-g12h55
+type: speaker
+brand: Celestion
+model: Heritage Series G12H(55)
+diameter_in: 12
+impedance_ohm: [8, 15]
+power_w: 30
+sensitivity_db: 100
+magnet: ceramic
+fs_hz: 54.7
+re_ohm: 6.53
+le_mh: null
+qts: 0.37
+qes: 0.39
+qms: 9.48
+vas_l: 71.3
+xmax_mm: 0.7
+sd_cm2: 543
+cutout_mm: 283
+bolt_circle_mm: 297
+bolt_count: 4
+depth_mm: 135
+frame_diameter_mm: 309
+magnet_diameter_mm: 168
+magnet_diameter_estimated: false
+weight_kg: 4.7
+data_status: third-party
+sources: [https://celestion.com/product/heritage-series-g12h55/, https://celestion.com/wp-content/uploads/2019/10/141.pdf]
+status: unverified-starting-values
+---
+
+# Celestion Heritage G12H(55)
+
+The English-made 30 W "Greenback" G12H with the 55 Hz bass cone. Not on the
+MaximoCabs list; it is here because it is the only Celestion guitar speaker
+with a published independent measurement, and the G12H Anniversary and
+Vintage 30 notes scale their estimates from it.
+
+## Character
+
+- low_end: big. mids: forward. top: smooth. breakup: moderate.
+- Celestion: "famous for its thick syrupy tones with a deep growling back end densely complex mid-range and a finely detailed top end."
+
+## Best with
+
+- Amp families: Marshall, Tweed Fender. Genres: Classic rock; Blues. Families and genres per [[speaker-cab-voicing]].
+
+## Data notes
+
+- Celestion publishes Fs 55 Hz, Re 6.53 (8 ohm) and 12.11 (15 ohm), range 55 to 5000 Hz, 168 mm magnet structure, 4 holes, 135 mm deep, 4.7 kg. Cutout, power, sensitivity, and impedance are from the cited product page (or sheet) as well.
+- Thiele-Small values are Voice Coil Test Bench sample 1 (16 ohm), LTD model column: Fs 54.7, Re 12.17, Qms 9.48, Qes 0.39, Qts 0.37, Vas 71.3 L, Sd 543 cm2, Xmax 0.7 mm. Sample 2 read Fs 67.1, Qts 0.46, Vas 53.2 L, so expect that much spread between units. Le not tabulated.
+- Bolt circle 297 mm is Celestion's printed mounting hole PCD (297 mm / 11.7 in) on the cited product page, which also prints the 7.9 mm mounting hole diameter.
+- Frame diameter 309 mm and magnet diameter 168 mm from the maker's drawing. See [[speaker-envelopes-and-port-stock]].
+- The 141.pdf source is Voice Coil magazine (February 2015), not a Celestion spec sheet.
+
+## Field notes
+
+- none yet

@@ -19,3 +19,7 @@ __pycache__/
 # Slicer CLI leftovers
 result.json
 __pycache__/
+
+# Speaker cab plan 2 mirror: renders and marker files are local evidence
+projects/Speaker-cab-system/pipeline/plan2-mirror/renders/
+projects/Speaker-cab-system/pipeline/plan2-mirror/ENGINE-READY*

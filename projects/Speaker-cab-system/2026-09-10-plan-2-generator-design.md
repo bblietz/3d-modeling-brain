@@ -158,3 +158,16 @@ Plan document `projects/Speaker-cab-system/plan-2-generator.md` in the Plan 1 fo
 - Tube table 52.0, 77.3, 101.5, 153.2 mm snapped in the engine; hard maximum 153.2; default start 77.3.
 - Two-step speaker envelope (basket at the cutout diameter, then the magnet from the catalog field); 12 mm cover allowance; 185 mm fallback; flange disc from the frame field.
 - Plan 2 carries the engine, cut list, and catalog touches; Plan 3 keeps the CLI flag and Fb override.
+
+## 13. Amendments during plan writing (2026-09-10, evening)
+
+Found while the plan's code was developed and tested in the mirror; each is a deliberate deviation from the sections above and governs where they differ.
+
+- **Divider without cleats.** Cleats on the divider's faces would sit 7 mm from the basket envelope at the 25 mm cutout margin. The baffle and the back screw into the divider's front and rear edges instead. Stereo cutouts sit 44 mm from the shell and 25 mm from the divider at the minimum width, any surplus split evenly (not centered in the chamber).
+- **Hardwood floors plus 2 mm.** The engine's width and height floors are in 18 mm shell terms; the hardwood shell is 19 mm, so propose adds `HARDWOOD_FLOOR_EXTRA_MM = 2.0` to both floors on the hardwood line.
+- **Floors re-applied after every rescale.** `dims_for_volume` applied the floors once before rescaling the free axes to hold the volume, which let the height fall under its floor on 2x12 slot cases; the floors now re-apply after each rescale, up to three rounds.
+- **Inside parts in the engine's volumes.** `volumes.inside_parts_l` (cleats, stiffeners, shelf, cheeks, brace, tube wall, flange ring, mirrored from the layout's rules) is added to gross like `brace_l`, in propose (inside the grow loop) and evaluate; `volumes.port_l` now means the port air inside the gross box (`port.volume_l` stays the whole port). The site box sheet's net moves from 43.8 to 42.1 L, the layout's measured net agrees within 0.01 L, and every calibration row moves (closed Qtc up 0.006 to 0.010; Heritage G12H(55) reads tight instead of lean at 0.605).
+- **Port placement scans.** The round port search steps outward 5 mm at a time along each candidate direction (a single point per direction failed on the site box, where the back stiffener sits at the center); the flange ring is checked for overlap too; a port of 20 to 24 mm is the flange ring alone.
+- **Check list.** A `jack plate` warning (open-back lower panel too short for the plate) joins the checks; the order is sheet, net volume, stereo balance, cutout, grill opening, port fit, magnet to back, handle, head match, line, jack plate, stock, part count, spans. `Chamber.port_air` entries are dicts of type box or cylinder.
+- **Stiffeners** skip open-back panels; the back stiffener stops 25 mm above the jack plate; mass subtracts every feature exactly, so the shared corner blocks need no separate correction.
+- **Fixture sheet.** The 77.3 mm tube cannot tune the site box above the 20 mm minimum length, so the fixture uses the 101.5 mm tube at 40 mm (Fb 67 Hz); the site's 30 W speaker against the shared 60 W target is a power blocker, so the fixture carries its own tone file with `min_power_w` 45.
