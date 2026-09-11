@@ -5163,8 +5163,10 @@ def _sheet_for(drv, enclosure, slot, n, jack, line, species):
     c = cabvoice.Constraints(line=line, species=species, port_slot_mm=(300.0, 40.0) if slot else None)
     v = cabvoice.propose([drv] * n, [z] * n, enclosure, TONE, jack, c, "cad-matrix").to_dict()
     if slot and n == 2 and jack != "stereo":
-        w_int = v["box"]["internal_mm"][0]
-        c.port_slot_mm = ((w_int - L.DIVIDER_MM) / 2.0 - 1.0, 40.0)
+        # two slots spanning the chamber, split only by the 18 mm center cheek (no end cheek slivers);
+        # the width comes from the layout frame, not the engine's internal width (2 mm wider on hardwood)
+        xa, xb = L.frame(L.order_from(v, L.Aesthetics())).chambers[0]
+        c.port_slot_mm = (((xb - xa) - L.DIVIDER_MM) / 2.0, 40.0)
         v = cabvoice.propose([drv] * n, [z] * n, enclosure, TONE, jack, c, "cad-matrix").to_dict()
     return v
 
