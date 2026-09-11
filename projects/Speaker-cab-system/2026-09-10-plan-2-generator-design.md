@@ -2,8 +2,9 @@
 name: 2026-09-10-plan-2-generator-design
 description: Design addendum for Unit 2, the parametric cabinet generator (cablayout.py plus cabmodel.py), from the 2026-09-10 brainstorm with Brian; supersedes the Unit 2 construction defaults it names
 type: design
-status: draft
+status: approved
 created: 2026-09-10
+approved: 2026-09-10
 tags: [project, speaker-cab, maximocabs, design, generator, cad, woodworking]
 ---
 
