@@ -391,3 +391,19 @@ def test_cad_matrix_solids_agree_with_the_layout(tmp_path):
         M.export_step(cab.assembly, str(step))
         assert step.exists() and step.stat().st_size > 1000
     print(f"\ncad matrix {len(cases)} builds in {time.time() - t0:.0f} s; layout blockers {layout_blockers}")
+
+
+# === TASK 12 ===
+def test_site_default_fixture(tmp_path):
+    fixture = SITE_DEFAULT
+    env = dict(os.environ, EXPORT="1", CAB_OUT=str(tmp_path))
+    if (HERE / "cabvoice.py").exists():          # mirror run: the template's sys.path points at scripts/
+        env["PYTHONPATH"] = str(HERE)
+    proc = subprocess.run([sys.executable, str(fixture / "cab.py")], env=env, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    report = json.loads((tmp_path / "cab.json").read_text())
+    for got, want in zip(report["external_mm"], (508.0, 457.2, 279.4)):
+        assert abs(got - want) <= 1.0
+    assert (tmp_path / "cab.step").exists() and (tmp_path / "images" / "cab-exploded.png").exists()
+    assert all(c["level"] != "blocker" for c in report["checks"])
+    assert "interference" in proc.stdout and "exported" in proc.stdout
