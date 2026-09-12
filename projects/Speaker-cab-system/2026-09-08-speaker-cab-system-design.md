@@ -172,6 +172,8 @@ Body sections: Character (tone descriptors in the tone-target vocabulary), Best 
 
 ## Unit 3: The `/speaker-cab` skill
 
+> Amended 2026-09-11 by [[2026-09-11-plan-3-skill-design]]: a report module (`scripts/cabreport.py`) writes the check table and the proposal's facts, the skill keeps judgment in prose with two stops, standard-size orders are evaluated on the site box first, the port loop pins the longest fitting tube once before the trade-off stop, and there is no FreeCAD path. Where this section and the addendum differ, the addendum governs.
+
 `skills/speaker-cab/SKILL.md`, symlinked to `~/.claude/skills/speaker-cab`. Description names the triggers (guitar speaker cabinet, guitar cab, 1x12, 2x12, extension cab, voicing a cab, MaximoCabs order) and sends other woodworking to `/furniture`. The furniture and 3d-model descriptions each gain one sentence sending guitar speaker cabinets here. Backend rule unchanged: build123d by default, FreeCAD only for the same escalation cases as furniture.
 
 **Phases.**
