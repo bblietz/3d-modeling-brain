@@ -836,6 +836,7 @@ def test_report_carries_the_aesthetics_block():
     rep = L.layout_report(lay, L.check_layout(lay, spec))
     json.dumps(rep)
     block = rep["aesthetics"]
+    assert len(block) == 21
     assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
                                   "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
         "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",

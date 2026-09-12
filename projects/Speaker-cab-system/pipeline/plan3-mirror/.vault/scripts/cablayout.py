@@ -1114,7 +1114,7 @@ def tube_geometry(id_mm: float) -> tuple:
 
 def largest_tube_at_minimum(env: Envelope, sign: float, fr: Frame, obstacles: list, envelopes: list,
                             tubes: list, below_id_mm: float):
-    """The largest table tube inside diameter under below_id_mm that the
+    """The longest table tube inside diameter under below_id_mm that the
     placement scan seats at the engine's minimum port length, or None. A tube
     that does not fit at the minimum cannot fit at any length, so this is the
     necessary-condition hint the port fit blocker names for the skill's loop:

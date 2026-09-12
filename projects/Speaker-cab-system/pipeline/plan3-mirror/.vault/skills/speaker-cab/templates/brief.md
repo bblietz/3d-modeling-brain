@@ -142,4 +142,4 @@ Chosen: <slug> at <ohm> ohm. <one line why; "fixed by the customer" when chosen 
 
 ## Outcome
 
-- <date>: <proposal sent | built | delivered; price line filled by Brian; what changed after stop two>
+- <date>: <proposal sent | cabinet built | delivered; price line filled by Brian; what changed after stop two>

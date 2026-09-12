@@ -448,7 +448,7 @@ predicted frequencies never enter the proposal.
 - **Stop two.** Brian reviews `checks.md`, the renders, and
   `proposal.md`, fills the `Price:` line, and sends the proposal.
   Record his edits in Decisions locked, set the brief's `status` to
-  `proposed`, and commit again.
+  `proposed`, and commit and push again.
 
 ## Phase 8 - After the build
 

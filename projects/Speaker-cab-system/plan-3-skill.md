@@ -232,7 +232,7 @@ def test_propose_height_floor_over_the_limit_is_a_blocker(drv, tone):
     assert v.box["internal_mm"][1] == pytest.approx(429.0)
     assert ("height floor 429.0 mm internal (the cutout minimum) exceeds the size limit "
             "364.0 mm internal") in v.blockers
-    assert v.blockers.count(v.blockers[0]) == 1      # deduped across the settle loop
+    assert v.blockers.count(v.blockers[0]) == 1      # one line: the floor is read from the final box, not every settle pass
 
 def test_cli_port_tube_fb_and_port_count(speakers_dir, tmp_path):
     base = [sys.executable, str(Path(cabvoice.__file__)), "propose",
@@ -281,7 +281,8 @@ def test_cli_evaluate_port_tube_is_a_validated_diameter(speakers_dir, tmp_path):
     assert data["port"]["fb_override_hz"] is None and data["port"]["count"] == 1
     assert "(pinned 101.5 mm tube)" in (out / "voicing.md").read_text()
     for extra, text in ((["--port-tube", "100"], "port tube must be one of"),
-                        (["--port-tube", "101.5", "--port-diameter", "101.5"], "not both")):
+                        (["--port-tube", "101.5", "--port-diameter", "101.5"], "not both"),
+                        (["--port-tube", "101.5", "--port-slot", "400", "40"], "--port-slot, not both")):
         run = subprocess.run(base + extra + ["--out", str(tmp_path / "bad")],
                              capture_output=True, text=True)
         assert run.returncode == 1 and text in run.stderr
@@ -795,7 +796,7 @@ def render_markdown(v: Voicing) -> str:
         lines.append("No port (closed or open back).")
     else:
         p = v.port
-        size = (f"round {p['diameter_mm']:.0f} mm" if p['shape'] == "round"
+        size = (f"round {p['diameter_mm']:g} mm" if p['shape'] == "round"
                 else f"slot {p['slot_w_mm']:.0f} x {p['slot_h_mm']:.0f} mm")
         if p.get("pinned"):
             size += f" (pinned {p['diameter_mm']:g} mm tube)"
@@ -924,6 +925,8 @@ def main(argv=None) -> int:
                     if diameter is not None:
                         raise ValueError("give --port-tube or --port-diameter, not both")
                     diameter = c.port_tube_mm
+                if args.port_tube is not None and args.port_slot:
+                    raise ValueError("give --port-tube or --port-slot, not both")
                 if args.port_length is None or (diameter is None and args.port_slot is None):
                     raise ValueError("evaluate closed-ported needs --port-length and --port-tube, "
                                      "--port-diameter, or --port-slot")
@@ -1145,6 +1148,7 @@ def test_report_carries_the_aesthetics_block():
     rep = L.layout_report(lay, L.check_layout(lay, spec))
     json.dumps(rep)
     block = rep["aesthetics"]
+    assert len(block) == 21
     assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
                                   "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
         "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",
@@ -1383,7 +1387,7 @@ Insert `largest_tube_at_minimum` directly above `round_ports` and replace `round
 ```python
 def largest_tube_at_minimum(env: Envelope, sign: float, fr: Frame, obstacles: list, envelopes: list,
                             tubes: list, below_id_mm: float):
-    """The largest table tube inside diameter under below_id_mm that the
+    """The longest table tube inside diameter under below_id_mm that the
     placement scan seats at the engine's minimum port length, or None. A tube
     that does not fit at the minimum cannot fit at any length, so this is the
     necessary-condition hint the port fit blocker names for the skill's loop:
@@ -1984,7 +1988,7 @@ The customer's own tonal words (the email's `Notes:`) are read before the genre 
 - **semi-open**: between the two: more low end than open, still wide. Open fraction 0.25 versus 0.40.
 - Choice rule: dispersion wide plus low_end not tight leads to open or semi-open; dispersion focused or low_end tight or approach high gain leads to closed-ported. Mic'd cabs prefer closed-ported. Drivers with Qts above 0.9 (the Jensen C12N at 1.02, the WGS ET65 at 0.91, and the WGS Green Beret at 1.18, as printed; the Jensen P12N sits at 0.77) prefer open or semi-open because any practical closed box makes them peaky.
 - Precedence when the rules disagree: a tight low end beats wide dispersion (closed or closed-ported over open-back); a low-end shifter (baritone, 7-string, drop tunings, bass VI) beats wide and takes closed-ported at the lowest tuning in range, applied with the engine's `--fb` flag. The override may take any value in the engine's own tuning range, 45 to 90 Hz (`FB_MIN_HZ` to `FB_MAX_HZ`, the range every proposed Fb is clamped to); the engine does not check the flag, so the skill keeps it in that range. The low-end-shifter rule starts at 45 Hz, the bottom of the range, and raises it in 5 Hz steps while the port does not fit the box (a higher tuning needs a shorter port). Raising Fb does not cure a boomy sheet, and a low-end-shifter sheet needs no cure: the shifter sets `low_end` big, and boomy serves a big target whether the customer asked for big or a shifter set it (the bridge table below), so judge that sheet by its character word, which should read boomy or punchy, not by a warning. For any other target the engine's own remedy grows the box in 10 percent steps to 68 L, then lowers Fb in 5 Hz steps to 45 Hz, and the sheet warns when it still reads boomy; that warning is what step 4 of the ranking reacts to. Starting values; listening notes decide.
-- Evaluate first: a standard-size order (the site's 20 x 18 x 11 in box, one driver, no size limit, no head to match) is evaluated before anything is proposed, with the site port on a ported box: `cabvoice.py evaluate --internal 472 421.2 229.4 --port-diameter 101.5 --port-length 40` (the site port, the 101.5 mm tube at 40 mm the engine's evaluate fixture uses; box and port fix Fb, the speaker sets the character) plus the order's speaker, impedance, enclosure, tone, and line. The site box is accepted when the sheet's character is the bridge word for the target's `low_end` in the table below; otherwise, or when a size limit, a pinned width, or a second driver applies, the skill runs `propose`. Open and semi-open boxes carry no character word (the estimate reports the cancellation frequency, about 370 Hz for any box near the site depth), so an open-back site box is accepted whenever the rules above chose open or semi-open; only a size limit, a pinned width, or a second driver makes it propose.
+- Evaluate first: a standard-size order (the site's 20 x 18 x 11 in box, one driver, no size limit, no head to match) is evaluated before anything is proposed, with the site port on a ported box: `cabvoice.py evaluate --internal 472 421.2 229.4 --port-diameter 101.5 --port-length 40` (the site port of the calibration table; box and port fix Fb, the speaker sets the character) plus the order's speaker, impedance, enclosure, tone, and line. The site box is accepted when the sheet's character is the bridge word for the target's `low_end` in the table below; otherwise, or when a size limit, a pinned width, a second driver, or a low-end shifter applies, the skill runs `propose`. Open and semi-open boxes carry no character word (the estimate reports the cancellation frequency, about 370 Hz for any box near the site depth), so an open-back site box is accepted whenever the rules above chose open or semi-open; only a size limit, a pinned width, or a second driver makes it propose.
 
 | Predicted character | Enclosure | Serves `low_end` |
 |---|---|---|
@@ -2345,7 +2349,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 - **Closed**: 12 mm birch back panel, flush with the rear edge, screwed to 18 x 18 mm cleats every 150 mm, removable. The jack plate sits in the back panel.
 - **Closed-ported, rear round port**: a Schedule 40 PVC or ABS tube through the back panel with a 12 mm plywood flange ring (outside diameter tube plus 60 mm) glued to the inside face; inside diameter snapped by the voicing engine to the tube table above, length from the voicing sheet measured through the back panel and never under 24 mm (the 12 mm back panel plus the 12 mm flange ring, the engine's `MIN_PORT_LENGTH_MM`), one per driver in the chamber (a mono 2x12 gets two identical ports, each sized as a 1x12 port in half the chamber; the sheet's `port.count` and `construction.port_count` say how many). Placement order: outboard of the driver at driver height, below the driver, lower outboard corner, above the driver; the first spot with 25 mm clearance to the speaker envelope, walls, cleats, brace, divider, and jack plate wins. When no spot fits, the layout's `port fit` blocker names the tube to try next (`port fit: chamber 0 port 0: no round port of 153.2 mm fits with 25 mm clearance; the longest table tube that fits at the 24 mm minimum is 101.5 mm; raise Fb, use a smaller tube or a larger box, or a front slot`, or `...; no table tube fits; use a front slot or a larger box`; a tube of the right diameter whose port is too long reads `port fit: chamber 0 port 0: tube 101.5 x 250 mm reaches the baffle; longest tube that fits at this diameter is 155 mm; ...`) and the skill's port loop re-runs the voicing once with the named tube pinned (`--port-tube`; when only a length is named, the next tube down the table, whose smaller area needs a shorter port); when that run warns (a clamped length, an air speed over the limit) or blocks again, the remedies go to Brian in this order: the front slot below, accepting the pinned tube's clamped tuning as the sheet reports it, raising Fb with the larger tube, a larger box.
-- **Closed-ported, front slot port**: the baffle stops short of the bottom panel by the slot height plus an 18 mm shelf; the shelf's front edge is flush with the baffle face, its depth equals the port length, and it doubles as the bottom baffle cleat. A slot narrower than the chamber gets two cheeks; a mono 2x12 gets two slots split by an 18 mm center cheek in line with the brace. The shelf must leave at least max(25 mm, slot height) of free depth behind it. Round rear tubes are a bass-cab convention; the published vented guitar cabs (EV TL806, Mesa Thiele) use the front slot. Default slot for the port loop (starting values): height 40 mm; width the chamber's full internal width, read from the last sheet's `box.chamber_internal_width_mm`, for a 1x12 and for each stereo chamber (no cheeks), and for a mono 2x12 two slots of (chamber width minus 18) / 2 each, split by the center cheek; so `--port-slot <width> 40`, with the external width pinned to the last sheet's (`--pinned-width <box.external_mm[0]>`) so the chamber width holds and the slot fits it exactly. The engine adds the slot's 58 mm to the height floor (40 plus the 18 mm shelf); left free, it would also re-proportion the width to hold the volume, and that never settles, since the slot width sets the port area, the port length, the shelf depth among the inside parts, the gross volume, and so the width again (the Cannabis Rex roots order: a 438.9 mm chamber rescales to 427.2, then 426.5, then 426.4, and the slot blocks every time). The layout trims a slot up to 1 mm wider than its chamber to the full width (`SLOT_TRIM_MM`, no cheeks); wider than that it blocks (`port fit: chamber 0: 1 slot of 439 mm do not fit the 427 mm chamber; narrow the slot or widen the box`; a mono 2x12 reads `port fit: chamber 0: 2 slots of 352 mm do not fit the 704 mm chamber with the 18 mm center cheek; narrow the slot or widen the box`), which with the width pinned happens only when a floor moved the chamber by more than 1 mm, and the skill then re-runs once more with the new chamber width; a narrower slot only gains thin cheeks. A shelf deeper than the box allows blocks with the deepest shelf that fits named (`port fit: slot shelf 220 mm deep leaves 27 mm behind it, under the 40 mm the slot needs to breathe; the deepest shelf that fits is 207 mm; lower the slot height or use a round port`, or `no shelf fits` when even 24 mm does not), so the skill lowers the slot height or takes a round port. A 40 mm slot across a 352 mm chamber is 141 cm2, above the 101.5 mm tube's 81 cm2, so the air speed stays low.
+- **Closed-ported, front slot port**: the baffle stops short of the bottom panel by the slot height plus an 18 mm shelf; the shelf's front edge is flush with the baffle face, its depth equals the port length, and it doubles as the bottom baffle cleat. A slot narrower than the chamber gets two cheeks; a mono 2x12 gets two slots split by an 18 mm center cheek in line with the brace. The shelf must leave at least max(25 mm, slot height) of free depth behind it. Round rear tubes are a bass-cab convention; the published vented guitar cabs (EV TL806, Mesa Thiele) use the front slot. Default slot for the port loop (starting values): height 40 mm; width the chamber's full internal width, read from the last sheet's `box.chamber_internal_width_mm`, for a 1x12 and for each stereo chamber (no cheeks), and for a mono 2x12 two slots of (chamber width minus 18) / 2 each, split by the center cheek; so `--port-slot <width> 40`, with the external width pinned to the last sheet's (`--pinned-width <box.external_mm[0]>`) so the chamber width holds and the slot fits it exactly. The engine adds the slot's 58 mm to the height floor (40 plus the 18 mm shelf); left free, it would also re-proportion the width to hold the volume, and that never settles, since the slot width sets the port area, the port length, the shelf depth among the inside parts, the gross volume, and so the width again (the Cannabis Rex roots order: a 438.9 mm chamber rescales to 427.2, then 426.5, then 426.4, and the slot blocks every time at the layout's former 1e-6 mm tolerance). The layout trims a slot up to 1 mm wider than its chamber to the full width (`SLOT_TRIM_MM`, no cheeks); wider than that it blocks (`port fit: chamber 0: 1 slot of 439 mm do not fit the 427 mm chamber; narrow the slot or widen the box`; a mono 2x12 reads `port fit: chamber 0: 2 slots of 352 mm do not fit the 704 mm chamber with the 18 mm center cheek; narrow the slot or widen the box`), which with the width pinned happens only when a floor moved the chamber by more than 1 mm, and the skill then re-runs once more with the new chamber width; a narrower slot only gains thin cheeks. A shelf deeper than the box allows blocks with the deepest shelf that fits named (`port fit: slot shelf 220 mm deep leaves 27 mm behind it, under the 40 mm the slot needs to breathe; the deepest shelf that fits is 207 mm; lower the slot height or use a round port`, or `no shelf fits` when even 24 mm does not), so the skill lowers the slot height or takes a round port. A 40 mm slot across a 352 mm chamber is 141 cm2, above the 101.5 mm tube's 81 cm2, so the air speed stays low.
 - **Port mouth**: one effective port diameter of free air in front of the inner mouth, along the port axis, to the first part that faces it (basket or magnet envelope, brace, divider, stiffener, cleat, shelf, cheek; the baffle's back face for a rear tube, the back panel's inner face for a slot); a slot's effective diameter is that of a circle with its area. The layout's `port mouth` check warns under one diameter and never blocks (`chamber 0 port 0: mouth 84 mm from the speaker 0 magnet (18 percent of the mouth), under one diameter (101.5 mm)`; the percentage is how much of the mouth the part faces, information only). Three warns are expected today, and the builder accepts or resolves each per order: the site box's own rear tube (its 101.5 mm mouth sits 84 mm behind the magnet with 18 percent of the mouth facing it: accept, or a smaller tube); every 1x12 front slot whose bottom panel needs a stiffener (the generator starts that stiffener at the shelf's rear edge flat on the floor, so it reads as a 0 mm obstruction covering about 8 percent of the mouth: move the stiffener back, or accept); and the floor-level back cleat behind a slot shelf sitting under one effective diameter of the mouth, which fires on most 2x12 slot boxes at their default depth and on shallow 1x12 ones (a deeper box, or accept). The coverage percentage is information only and never gates the warn. The choice goes into Decisions locked. The 25 mm standoff from the magnet's rear face stays the hard rule.
 - **Open-back**: two horizontal 12 mm panels, top and bottom, each (1 - open fraction) x internal height / 2 tall, screwed to cleats. Open fraction 0.40 for open, 0.25 for semi-open (from [[speaker-cab-voicing]]). The jack plate sits in the lower panel. Stereo keeps the divider and one plate per chamber.
 
@@ -2940,7 +2944,6 @@ NO_SWATCH = "no swatch on file"
 
 OPERATOR_ROWS = ("stock thickness", "grain and show face", "joinery fit", "stock yield",
                  "wood movement", "transport", "weight vs limit", "size vs limit")
-ENGINE_ROWS = ("power", "wiring", "port air speed", "alignment", "engine warning")
 OPERATOR = "operator"
 POWER_VERDICT = {"ok": "pass", "warning": "warn", "stop": "blocker"}
 BACK_TYPE = {"closed-ported": "closed-back, ported", "closed": "closed-back",
@@ -3212,16 +3215,20 @@ def main(argv) -> int:
     except (ValueError, TypeError, OSError) as e:
         print(f"input error: {e}")
         return 1
-    pending = write_checks(rows, order / "checks.md", cab["name"])
-    print(f"{order / 'checks.md'}: {len(rows)} rows, {pending} still read {OPERATOR}")
-    if due:
-        proposal.write_text(text)
-        for label, key in (("finish", "swatch_finish"), ("grill cloth", "swatch_cloth")):
-            if f[key] == NO_SWATCH:
-                print(f"warning: {NO_SWATCH} for the {label}", file=sys.stderr)
-        print(f"{proposal}: written")
-    else:
-        print(f"{proposal}: left alone (delete it to regenerate)")
+    try:
+        pending = write_checks(rows, order / "checks.md", cab["name"])
+        print(f"{order / 'checks.md'}: {len(rows)} rows, {pending} still read {OPERATOR}")
+        if due:
+            proposal.write_text(text)
+            for label, key in (("finish", "swatch_finish"), ("grill cloth", "swatch_cloth")):
+                if f[key] == NO_SWATCH:
+                    print(f"warning: {NO_SWATCH} for the {label}", file=sys.stderr)
+            print(f"{proposal}: written")
+        else:
+            print(f"{proposal}: left alone (delete it to regenerate)")
+    except OSError as e:
+        print(f"input error: {e}")
+        return 1
     return 0
 
 
@@ -3731,7 +3738,7 @@ predicted frequencies never enter the proposal.
 - **Stop two.** Brian reviews `checks.md`, the renders, and
   `proposal.md`, fills the `Price:` line, and sends the proposal.
   Record his edits in Decisions locked, set the brief's `status` to
-  `proposed`, and commit again.
+  `proposed`, and commit and push again.
 
 ## Phase 8 - After the build
 
@@ -3933,7 +3940,7 @@ Chosen: <slug> at <ohm> ohm. <one line why; "fixed by the customer" when chosen 
 
 ## Outcome
 
-- <date>: <proposal sent | built | delivered; price line filled by Brian; what changed after stop two>
+- <date>: <proposal sent | cabinet built | delivered; price line filled by Brian; what changed after stop two>
 ````
 <!-- /code -->
 

@@ -66,7 +66,6 @@ NO_SWATCH = "no swatch on file"
 
 OPERATOR_ROWS = ("stock thickness", "grain and show face", "joinery fit", "stock yield",
                  "wood movement", "transport", "weight vs limit", "size vs limit")
-ENGINE_ROWS = ("power", "wiring", "port air speed", "alignment", "engine warning")
 OPERATOR = "operator"
 POWER_VERDICT = {"ok": "pass", "warning": "warn", "stop": "blocker"}
 BACK_TYPE = {"closed-ported": "closed-back, ported", "closed": "closed-back",
@@ -338,16 +337,20 @@ def main(argv) -> int:
     except (ValueError, TypeError, OSError) as e:
         print(f"input error: {e}")
         return 1
-    pending = write_checks(rows, order / "checks.md", cab["name"])
-    print(f"{order / 'checks.md'}: {len(rows)} rows, {pending} still read {OPERATOR}")
-    if due:
-        proposal.write_text(text)
-        for label, key in (("finish", "swatch_finish"), ("grill cloth", "swatch_cloth")):
-            if f[key] == NO_SWATCH:
-                print(f"warning: {NO_SWATCH} for the {label}", file=sys.stderr)
-        print(f"{proposal}: written")
-    else:
-        print(f"{proposal}: left alone (delete it to regenerate)")
+    try:
+        pending = write_checks(rows, order / "checks.md", cab["name"])
+        print(f"{order / 'checks.md'}: {len(rows)} rows, {pending} still read {OPERATOR}")
+        if due:
+            proposal.write_text(text)
+            for label, key in (("finish", "swatch_finish"), ("grill cloth", "swatch_cloth")):
+                if f[key] == NO_SWATCH:
+                    print(f"warning: {NO_SWATCH} for the {label}", file=sys.stderr)
+            print(f"{proposal}: written")
+        else:
+            print(f"{proposal}: left alone (delete it to regenerate)")
+    except OSError as e:
+        print(f"input error: {e}")
+        return 1
     return 0
 
 

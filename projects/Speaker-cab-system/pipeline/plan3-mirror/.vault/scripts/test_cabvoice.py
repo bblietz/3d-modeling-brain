@@ -1405,7 +1405,7 @@ def test_propose_height_floor_over_the_limit_is_a_blocker(drv, tone):
     assert v.box["internal_mm"][1] == pytest.approx(429.0)
     assert ("height floor 429.0 mm internal (the cutout minimum) exceeds the size limit "
             "364.0 mm internal") in v.blockers
-    assert v.blockers.count(v.blockers[0]) == 1      # deduped across the settle loop
+    assert v.blockers.count(v.blockers[0]) == 1      # one line: the floor is read from the final box, not every settle pass
 
 
 def test_cli_port_tube_fb_and_port_count(speakers_dir, tmp_path):
@@ -1456,7 +1456,8 @@ def test_cli_evaluate_port_tube_is_a_validated_diameter(speakers_dir, tmp_path):
     assert data["port"]["fb_override_hz"] is None and data["port"]["count"] == 1
     assert "(pinned 101.5 mm tube)" in (out / "voicing.md").read_text()
     for extra, text in ((["--port-tube", "100"], "port tube must be one of"),
-                        (["--port-tube", "101.5", "--port-diameter", "101.5"], "not both")):
+                        (["--port-tube", "101.5", "--port-diameter", "101.5"], "not both"),
+                        (["--port-tube", "101.5", "--port-slot", "400", "40"], "--port-slot, not both")):
         run = subprocess.run(base + extra + ["--out", str(tmp_path / "bad")],
                              capture_output=True, text=True)
         assert run.returncode == 1 and text in run.stderr

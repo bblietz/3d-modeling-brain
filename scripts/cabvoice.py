@@ -1519,7 +1519,7 @@ def render_markdown(v: Voicing) -> str:
         lines.append("No port (closed or open back).")
     else:
         p = v.port
-        size = (f"round {p['diameter_mm']:.0f} mm" if p['shape'] == "round"
+        size = (f"round {p['diameter_mm']:g} mm" if p['shape'] == "round"
                 else f"slot {p['slot_w_mm']:.0f} x {p['slot_h_mm']:.0f} mm")
         if p.get("pinned"):
             size += f" (pinned {p['diameter_mm']:g} mm tube)"
@@ -1658,6 +1658,8 @@ def main(argv=None) -> int:
                     if diameter is not None:
                         raise ValueError("give --port-tube or --port-diameter, not both")
                     diameter = c.port_tube_mm
+                if args.port_tube is not None and args.port_slot:
+                    raise ValueError("give --port-tube or --port-slot, not both")
                 if args.port_length is None or (diameter is None and args.port_slot is None):
                     raise ValueError("evaluate closed-ported needs --port-length and --port-tube, "
                                      "--port-diameter, or --port-slot")
