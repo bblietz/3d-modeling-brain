@@ -322,6 +322,8 @@ def test_cannabis_rex_roots_port_loop_cases(tone):
 ```
 <!-- /code -->
 
+Two comment lines inside existing tests still state the old minimum; change `# even a 150 mm port needs less than 20 mm and is clamped, so the port tunes lower.` to read `24 mm`, and `# drivers, so it is clamped at 20 mm, tunes low, and moves more air per area` to read `24 mm` (comments only; the tests around them are unchanged).
+
 - [ ] **Step 2: Run the tests to verify they fail**
 
 Run: `cd /home/brian/ClaudeProjects/3d-modeling-brain && .venv/bin/python -m pytest scripts/test_cabvoice.py -q -k "port_tube or pinned or fb_override or floor_over or tube_from_table or min_port_length or port_loop_cases or port_count or too_short"`
