@@ -57,7 +57,7 @@ tags: [project, speaker-cab, plan, skill, workflow]
 
 **Files:**
 - Modify: `scripts/cabvoice.py` (`MIN_PORT_LENGTH_MM`, `Port`, new `tube_from_table`, `port_dims`, `size_port`, `dims_for_volume`, `Constraints`, `propose`, `render_markdown`, `_build_parser`, `main`)
-- Modify: `scripts/test_cabvoice.py` (`test_size_port_grows_when_too_short`, `_matrix_params`, `test_evaluate_reproduces_propose` replaced; fourteen new tests appended)
+- Modify: `scripts/test_cabvoice.py` (`test_size_port_grows_when_too_short`, `_matrix_params`, `test_evaluate_reproduces_propose` replaced; fifteen new tests appended)
 - Modify: `knowledge/speaker-cab-voicing.md` (calibration table regenerated: the header date and one row)
 - Mirror source (byte-identical, for transcription): `projects/Speaker-cab-system/pipeline/plan3-mirror/.vault/scripts/cabvoice.py`, `.vault/scripts/test_cabvoice.py`, `.vault/knowledge/speaker-cab-voicing.md` (calibration block)
 
@@ -65,7 +65,7 @@ tags: [project, speaker-cab, plan, skill, workflow]
 - Consumes: the Plan 2 engine as landed (`PORT_TUBE_ID_MM`, `snap_tube_id`, `size_port`, `dims_for_volume(..., strict=True)`, `Constraints`, `propose`, `evaluate`, `_build_parser`, `main`).
 - Produces: `MIN_PORT_LENGTH_MM = 24.0`; `tube_from_table(diameter_mm) -> float` (raises `ValueError` naming the table); `Port.pinned: bool = False` and `Port.fb_override_hz: float | None = None`; `size_port(..., pinned_mm=None)` (a pinned tube is built once, no growth, no snap); `Constraints.port_tube_mm` and `Constraints.fb_hz` (validated in `__post_init__`); `dims_for_volume` non-strict mode that records "width floor" and "height floor" conflicts and fixes the axis at the floor; sheet keys `port.pinned` and `port.fb_override_hz`; CLI flags `--port-tube MM` (both modes), `--fb HZ` (propose), `--port-count {1,2}` (both modes); the warning and blocker texts listed in Global Constraints. Task 2 reads sheets carrying the two new keys; Task 5 reads `warnings`; Tasks 6 to 8 quote the messages.
 
-Behavior in one paragraph. A pinned tube goes through `size_port` untouched: the length is solved for its area at the target Fb; under 24 mm it is clamped and the sheet warns `port clamped at the 24 mm minimum with the pinned {tube} mm tube: tuned {fb_actual} Hz, target {fb} Hz; a larger tube, a lower Fb, or a smaller box lengthens it` (the free clamp keeps its `port clamped at the size cap` line, and both cases also carry `port_dims`'s `port too short ... clamped to 24 mm` line); over the air-speed limit the sheet warns `port air speed {v} m/s above 17.0 m/s` instead of growing. `--fb` replaces the engine's target after `ported_targets` and is recorded as `port.fb_override_hz`. A width floor (driver-count minimum or pinned width) or a height floor above the `--max-external` limit no longer raises: propose finishes the sheet at the floor and adds a blocker of the form `width floor {w} mm internal (the driver-count minimum) exceeds the size limit {max} mm internal`, so the CLI exits 2 with the sheet written and the skill presents the trade-off. Input errors (exit 1, nothing written): `port tube must be one of 52, 77.3, 101.5, 153.2 mm, not {x}`; `give a slot or a pinned tube, not both`; `give --port-tube or --port-diameter, not both`; `evaluate closed-ported needs --port-length and --port-tube, --port-diameter, or --port-slot`; `fb_hz must be positive`. One Plan 2 remedy sentence was wrong and is corrected here: `port_dims` said "reduce port area or lower Fb" for a too-short port, but length is proportional to area, so the line now reads "a larger port, a lower Fb, or a smaller box lengthens it".
+Behavior in one paragraph. A pinned tube goes through `size_port` untouched: the length is solved for its area at the target Fb; under 24 mm it is clamped and the sheet warns `port clamped at the 24 mm minimum with the pinned {tube} mm tube: tuned {fb_actual} Hz, target {fb} Hz; a larger tube, a lower Fb, or a smaller box lengthens it` (the free clamp keeps its `port clamped at the size cap` line, and both cases also carry `port_dims`'s `port too short ... clamped to 24 mm` line); over the air-speed limit the sheet warns `port air speed {v} m/s above 17.0 m/s` instead of growing. `--fb` replaces the engine's target after `ported_targets` and is recorded as `port.fb_override_hz`. A width floor (driver-count minimum or pinned width) or a height floor above the `--max-external` limit no longer raises: propose finishes the sheet at the floor and adds a blocker of the form `width floor {w} mm internal (the driver-count minimum) exceeds the size limit {max} mm internal`, so the CLI exits 2 with the sheet written and the skill presents the trade-off; the floor lines are taken from the final box after the settle loop, since a slot that grows inside the loop moves the height floor and an earlier pass's line would contradict the final one. Input errors (exit 1, nothing written): `port tube must be one of 52, 77.3, 101.5, 153.2 mm, not {x}`; `give a slot or a pinned tube, not both`; `give --port-tube or --port-diameter, not both`; `evaluate closed-ported needs --port-length and --port-tube, --port-diameter, or --port-slot`; `fb_hz must be positive`. One Plan 2 remedy sentence was wrong and is corrected here: `port_dims` said "reduce port area or lower Fb" for a too-short port, but length is proportional to area, so the line now reads "a larger port, a lower Fb, or a smaller box lengthens it".
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -119,7 +119,7 @@ def test_evaluate_reproduces_propose(tone, slug, enclosure, jack, n, slot, tube)
 
 Append at the end of the file, after one comment line `# ---- Plan 3 Task 1: engine flags, port minimum, size-limit blockers ----`:
 
-<!-- code: .vault/scripts/test_cabvoice.py symbols test_min_port_length_is_the_back_panel_plus_the_flange_ring,test_tube_from_table,test_constraints_validate_the_pinned_tube_and_fb,test_size_port_pinned_tube_neither_grows_nor_snaps,test_size_port_pinned_tube_clamps_a_short_port,test_propose_pinned_tube_sheet_and_clamp_warning,test_propose_pinned_tube_air_speed_warns_instead_of_growing,test_propose_fb_override_is_applied_and_recorded,test_propose_width_floor_over_the_limit_is_a_blocker,test_propose_height_floor_over_the_limit_is_a_blocker,test_cli_port_tube_fb_and_port_count,test_cli_evaluate_port_tube_is_a_validated_diameter,test_cli_width_floor_blocker_exits_2_with_the_sheet,test_cannabis_rex_roots_port_loop_cases -->
+<!-- code: .vault/scripts/test_cabvoice.py symbols test_min_port_length_is_the_back_panel_plus_the_flange_ring,test_tube_from_table,test_constraints_validate_the_pinned_tube_and_fb,test_size_port_pinned_tube_neither_grows_nor_snaps,test_size_port_pinned_tube_clamps_a_short_port,test_propose_pinned_tube_sheet_and_clamp_warning,test_propose_pinned_tube_air_speed_warns_instead_of_growing,test_propose_fb_override_is_applied_and_recorded,test_propose_width_floor_over_the_limit_is_a_blocker,test_propose_height_floor_over_the_limit_is_a_blocker,test_cli_port_tube_fb_and_port_count,test_cli_evaluate_port_tube_is_a_validated_diameter,test_cli_width_floor_blocker_exits_2_with_the_sheet,test_cannabis_rex_roots_port_loop_cases,test_propose_height_floor_blocker_reports_the_final_height_once -->
 ```python
 def test_min_port_length_is_the_back_panel_plus_the_flange_ring():
     assert cabvoice.MIN_PORT_LENGTH_MM == 24.0
@@ -319,6 +319,18 @@ def test_cannabis_rex_roots_port_loop_cases(tone):
     assert slot.port["shape"] == "slot" and slot.blockers == []
     assert not any("clamped" in w or "too short" in w for w in slot.warnings)
     assert slot.prediction["fb_hz"] == pytest.approx(free.prediction["fb_hz"], abs=0.05)
+
+def test_propose_height_floor_blocker_reports_the_final_height_once(drv, tone):
+    # A 20 mm slot that must grow under the air-speed rule moves the height floor between
+    # settle passes; the sheet reports the final box's floor once, not each pass's.
+    drv.xmax_mm = 10.0
+    c = cabvoice.Constraints(port_slot_mm=(200.0, 20.0), max_external_mm=(600.0, 400.0, 400.0))
+    v = cabvoice.propose([drv], [16], "closed-ported", tone, constraints=c)
+    assert v.port["shape"] == "slot" and v.port["slot_h_mm"] > 20.0
+    assert v.box["internal_mm"][1] == pytest.approx(458.0, abs=0.1)
+    floors = [b for b in v.blockers if b.startswith("height floor")]
+    assert floors == [f"height floor {v.box['internal_mm'][1]:.1f} mm internal (the cutout minimum) "
+                      "exceeds the size limit 364.0 mm internal"]
 ```
 <!-- /code -->
 
@@ -651,8 +663,10 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
             # The size limit wins: voice the box that fits and present the trade-off.
             limited = True
         # A floor over the size limit is a blocker on the sheet, not an exception: the box
-        # is voiced at the floor and the skill presents the trade-off.
-        blockers.extend(w for w in box.warnings if w.startswith(("width floor", "height floor")))
+        # is voiced at the floor and the skill presents the trade-off. Each pass overwrites
+        # the list: the height floor follows a slot port that grows, so the sheet reports
+        # the final box's floors only, once, after the loop.
+        floor_blockers = [w for w in box.warnings if w.startswith(("width floor", "height floor"))]
         box.warnings = [w for w in box.warnings
                         if not w.startswith(("cannot reach", "width floor", "height floor"))]
         if abs(box.gross_l - gross) > 0.001:
@@ -677,6 +691,7 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
             break
         last = (box.gross_l, parts)
     warnings.extend(box.warnings)
+    blockers.extend(floor_blockers)
     chamber_w = _chamber_w(chambers, w_int, c)
     port_dict = None
     if port is not None:
@@ -932,7 +947,7 @@ if __name__ == "__main__":
 - [ ] **Step 4: Run the tests (the calibration test still fails)**
 
 Run: `cd /home/brian/ClaudeProjects/3d-modeling-brain && .venv/bin/python -m pytest scripts/test_cabvoice.py -q`
-Expected: 430 passed, 1 failed (`test_calibration_table_matches_engine`: the note still holds the 20 mm row).
+Expected: 431 passed, 1 failed (`test_calibration_table_matches_engine`: the note still holds the 20 mm row).
 
 - [ ] **Step 5: Regenerate the calibration table**
 
@@ -942,7 +957,7 @@ Expected: `wrote 20 rows to .../knowledge/speaker-cab-voicing.md`. Only two line
 - [ ] **Step 6: Run the tests to verify they pass**
 
 Run: `cd /home/brian/ClaudeProjects/3d-modeling-brain && .venv/bin/python -m pytest scripts/test_cabvoice.py -q`
-Expected: 431 passed (397 from Plan 2 plus 14 functions plus 20 matrix cases).
+Expected: 432 passed (397 from Plan 2 plus 15 functions plus 20 matrix cases).
 
 - [ ] **Step 7: Commit**
 
@@ -2178,7 +2193,7 @@ Expected: the first run lists every note as `patched, genres ...` and ends `20 n
 - [ ] **Step 6: Run the tests to verify they pass**
 
 Run: `cd /home/brian/ClaudeProjects/3d-modeling-brain && .venv/bin/python -m pytest scripts/test_cabvoice.py -q`
-Expected: 432 passed (431 from Task 1 plus 1).
+Expected: 433 passed (432 from Task 1 plus 1).
 
 - [ ] **Step 7: Commit**
 
@@ -4173,7 +4188,7 @@ Expected: push accepted; `git status --short` shows only the other session's fil
 ## Self-review notes (written with the plan)
 
 - **Spec coverage.** Design section 3.1 (`SKILL.md`) is Task 6; 3.2 (templates) Tasks 5 and 6; 3.3 (`cabreport.py`) Task 5; 3.4 (the per-order directory) `SKILL.md` Phases 1 and 7; 4 (phases and stops) `SKILL.md`; 5 (the port loop) `SKILL.md` Phase 4 reading the blocker forms Task 2 builds; 6 (engine and layout touches) Tasks 1 and 2; 7 (voicing note, catalog, construction note) Tasks 3 and 4; 8 (fixtures and dry runs) Tasks 7 and 8; 9 (tests) the per-task tests; 10 (files) the File Structure table; 11 (vault updates) Tasks 4, 6, and 9; 12 (process) the Global Constraints; 13 and 14 stand. Section 15 of the design addendum records the amendments found while this plan was written.
-- **Pre-flight, done by construction.** Every code block and note text was embedded by `projects/Speaker-cab-system/pipeline/embed_plan_code.py --mirror plan3-mirror` from the mirror, where the suites run green: engine 432, cut list 3, layout 50 (the 1200-case matrix: 150 engine power stops, 1026 clean, 24 port-fit blockers, every one naming the 101.5 mm tube, 194 cases with a port mouth warn), CAD 24 (12 builds in 23 s; all 60 in 97 s with `CAB_FULL_MATRIX=1`), report 10; 519 in about 70 s. `--check` reports the plan in sync. Before embedding, a Fable 5.1 reviewer read the whole mirror against the design (`plan3-mirror/REVIEW.md`): its prose fixes are in the mirror (the loop now names what to do for each of the five `port fit` texts the layout emits; Phases 5 and 6 say when the operator rows are judged), and three of its minor code items were fixed in the mirror before embedding (a null finish or cloth renders "to be confirmed", a missing key and an unreadable template are named input errors, the site-default port mouth test asserts the fixture exists instead of skipping). The expected counts per task come from those runs and from two temp-copy experiments (the landed voicing note against the mirror tests: 430 passed, 1 failed on the calibration row plus the not-yet-added genre test; the landed notes against the catalog tests: 1 failed, 5 passed).
+- **Pre-flight, done by construction.** Every code block and note text was embedded by `projects/Speaker-cab-system/pipeline/embed_plan_code.py --mirror plan3-mirror` from the mirror, where the suites run green: engine 433, cut list 3, layout 50 (the 1200-case matrix: 150 engine power stops, 1026 clean, 24 port-fit blockers, every one naming the 101.5 mm tube, 194 cases with a port mouth warn), CAD 24 (12 builds in 23 s; all 60 in 97 s with `CAB_FULL_MATRIX=1`), report 10; 520 in about 70 s. `--check` reports the plan in sync. Before embedding, a Fable 5.1 reviewer read the whole mirror against the design (`plan3-mirror/REVIEW.md`): its prose fixes are in the mirror (the loop now names what to do for each of the five `port fit` texts the layout emits; Phases 5 and 6 say when the operator rows are judged), and three of its minor code items were fixed in the mirror before embedding (a null finish or cloth renders "to be confirmed", a missing key and an unreadable template are named input errors, the site-default port mouth test asserts the fixture exists instead of skipping). The expected counts per task come from those runs and from two temp-copy experiments (the landed voicing note against the mirror tests: every test passing except the calibration row and the not-yet-added genre test; the landed notes against the catalog tests: 1 failed, 5 passed).
 - **Placeholder scan.** No TBD, TODO, "similar to Task", or unfilled token remains; every code and note step shows its content; the two retrospective and memory skeletons in Task 9 carry bracketed fields for the controller to fill from the ledger, as Plan 2's did.
 - **Type consistency.** Every symbol named in an Interfaces block was resolved by the embed tool from the mirror (a missing name stops the tool); the five test files and the module import and test as a whole, so names agree across tasks by construction.
 - **Deviations from the design, recorded in the addendum's section 15.** A `--verify` run writes nothing and needs `--customer`; every non-verify run rewrites `checks.md`; `alignment` shows Fb and F3 on a ported box; the proposal template puts the configuration on its own line; the port loop handles five blocker forms and gives the too-long-port form one automatic re-run with the next tube down the table; the height floor over the limit is a blocker like the width floor; `port_dims`'s remedy sentence corrected; the site default and every 1x12 front slot carry a `port mouth` warn under the rule as approved; the catalog's Best with section is three bullets, not two; one calibration row moves with the 24 mm minimum (Eminence Red White and Blues, Fb 74 to 73 Hz); `SKILL.md` is 381 lines.
