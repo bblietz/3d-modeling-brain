@@ -859,8 +859,7 @@ def test_catalog_best_with_uses_table_labels():
         best_with = text.split("## Best with", 1)[1].split("\n## ", 1)[0]
         line = next(l for l in best_with.splitlines() if l.startswith("- Amp families:"))
         assert any(f in line for f in AMP_FAMILIES), slug
-        assert any(g in line for g in GENRES), slug
-        assert "[[speaker-cab-voicing]]" in line, slug
+        assert "[[speaker-cab-voicing]]" in best_with, slug
 
 
 def test_every_catalog_speaker_proposes_without_exception(tone):
@@ -1510,3 +1509,27 @@ def test_propose_height_floor_blocker_reports_the_final_height_once(drv, tone):
     floors = [b for b in v.blockers if b.startswith("height floor")]
     assert floors == [f"height floor {v.box['internal_mm'][1]:.1f} mm internal (the cutout minimum) "
                       "exceeds the size limit 364.0 mm internal"]
+
+
+# ---- Plan 3 Task 3: canonical genre keys ----
+
+# Mirrors the Key column of the genre table in knowledge/speaker-cab-voicing.md and
+# projects/Speaker-cab-system/pipeline/catalog_genres.py.
+GENRE_KEYS = ("roots-country", "blues", "classic-rock", "indie-alternative", "jazz",
+              "metal-high-gain", "worship-pop", "funk-rnb")
+
+
+def test_catalog_genres_lines_use_canonical_keys():
+    voicing = (Path(__file__).parent.parent / "knowledge/speaker-cab-voicing.md").read_text()
+    for key in GENRE_KEYS:
+        assert f"| `{key}` |" in voicing, key
+    for slug in cabvoice.list_speakers(CATALOG):
+        text = (CATALOG / f"{slug}.md").read_text()
+        best_with = text.split("## Best with", 1)[1].split("\n## ", 1)[0]
+        lines = best_with.splitlines()
+        assert sum(l.startswith("- Amp families: ") for l in lines) == 1, slug
+        genres = [l for l in lines if l.startswith("- Genres: ")]
+        assert len(genres) == 1, slug
+        tokens = genres[0][len("- Genres: "):].split(", ")
+        assert tokens and all(t in GENRE_KEYS for t in tokens), (slug, tokens)
+        assert len(set(tokens)) == len(tokens), slug

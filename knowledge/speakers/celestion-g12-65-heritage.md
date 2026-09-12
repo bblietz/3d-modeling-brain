@@ -39,7 +39,9 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Marshall, Modern high gain at moderate gain. Genres: Classic rock; Blues. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Marshall, Modern high gain at moderate gain.
+- Genres: classic-rock, blues
+- Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

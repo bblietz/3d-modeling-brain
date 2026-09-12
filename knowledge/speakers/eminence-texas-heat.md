@@ -42,7 +42,9 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Tweed Fender, Marshall, Blackface Fender. Genres: Blues; Classic rock; Roots, country, alt-country. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Tweed Fender, Marshall, Blackface Fender.
+- Genres: blues, classic-rock, roots-country
+- Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

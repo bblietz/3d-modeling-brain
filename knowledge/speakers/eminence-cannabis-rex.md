@@ -42,7 +42,9 @@ Hemp cone, 38 oz ceramic magnet, 1.75 in coil. On the MaximoCabs tolex line list
 
 ## Best with
 
-- Amp families: Blackface Fender, Boutique clean, Tweed Fender. Genres: Roots, country, alt-country; Jazz; Indie and alternative; Blues. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Blackface Fender, Boutique clean, Tweed Fender.
+- Genres: roots-country, jazz, indie-alternative, blues
+- Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

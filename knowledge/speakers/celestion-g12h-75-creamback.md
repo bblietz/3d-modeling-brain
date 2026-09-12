@@ -39,7 +39,9 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Modern high gain, Blackface Fender, Modeling and solid state. Genres: Metal and modern high gain; Classic rock; Funk and R&B. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Modern high gain, Blackface Fender, Modeling and solid state.
+- Genres: metal-high-gain, classic-rock, funk-rnb
+- Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

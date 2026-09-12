@@ -41,7 +41,9 @@ WGS's G12-65 style speaker.
 
 ## Best with
 
-- Amp families: Marshall, Blackface Fender, Boutique clean. Genres: Classic rock; Blues; Indie and alternative. Qts above 0.9: prefers open or semi-open backs. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Marshall, Blackface Fender, Boutique clean.
+- Genres: classic-rock, blues, indie-alternative
+- Qts above 0.9: prefers open or semi-open backs. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

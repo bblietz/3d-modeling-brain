@@ -39,7 +39,9 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Boutique clean, Blackface Fender, Vox at any power. Genres: Worship and pop; Jazz; Indie and alternative. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Boutique clean, Blackface Fender, Vox at any power.
+- Genres: worship-pop, jazz, indie-alternative
+- Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

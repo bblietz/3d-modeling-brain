@@ -42,7 +42,9 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Modern high gain, Modeling and solid state, Marshall. Genres: Metal and modern high gain; Classic rock. Suits baritone and drop tunings. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Modern high gain, Modeling and solid state, Marshall.
+- Genres: metal-high-gain, classic-rock
+- Suits baritone and drop tunings. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

@@ -41,7 +41,9 @@ WGS's 25 W Greenback style speaker.
 
 ## Best with
 
-- Amp families: Marshall, Vox, Tweed Fender. Genres: Classic rock; Blues. Qts 1.18 as printed: prefers open or semi-open backs; two per cabinet for amps over 20 W. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Marshall, Vox, Tweed Fender.
+- Genres: classic-rock, blues
+- Qts 1.18 as printed: prefers open or semi-open backs; two per cabinet for amps over 20 W. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

@@ -44,7 +44,9 @@ Vintage 30 notes scale their estimates from it.
 
 ## Best with
 
-- Amp families: Marshall, Tweed Fender. Genres: Classic rock; Blues. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Marshall, Tweed Fender.
+- Genres: classic-rock, blues
+- Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

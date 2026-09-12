@@ -41,7 +41,9 @@ Warehouse Guitar Speakers' take on the Vintage 30. On both MaximoCabs lists.
 
 ## Best with
 
-- Amp families: Modern high gain, Marshall, Boutique clean. Genres: Classic rock; Metal and modern high gain; Worship and pop. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Modern high gain, Marshall, Boutique clean.
+- Genres: classic-rock, metal-high-gain, worship-pop
+- Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

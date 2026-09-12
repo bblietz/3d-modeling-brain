@@ -39,7 +39,9 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Marshall, Boutique clean, Modern high gain at moderate gain. Genres: Classic rock; Blues; Worship and pop. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Marshall, Boutique clean, Modern high gain at moderate gain.
+- Genres: classic-rock, blues, worship-pop
+- Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

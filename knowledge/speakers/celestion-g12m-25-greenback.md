@@ -39,7 +39,9 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Marshall, Vox, Tweed Fender. Genres: Classic rock; Blues; Indie and alternative. Two per cabinet under amps over 20 W. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Marshall, Vox, Tweed Fender.
+- Genres: classic-rock, blues, indie-alternative
+- Two per cabinet under amps over 20 W. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

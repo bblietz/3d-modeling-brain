@@ -44,7 +44,9 @@ the Heritage G12H(55), is what he stocks; the mounting is identical either way.
 
 ## Best with
 
-- Amp families: Marshall, Tweed Fender, Vox. Genres: Classic rock; Blues; Indie and alternative. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Marshall, Tweed Fender, Vox.
+- Genres: classic-rock, blues, indie-alternative
+- Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

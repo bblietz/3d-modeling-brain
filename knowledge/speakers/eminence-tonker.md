@@ -42,7 +42,9 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Modeling and solid state, Boutique clean, Blackface Fender at high volume. Genres: Jazz; Worship and pop; Funk and R&B. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Modeling and solid state, Boutique clean, Blackface Fender at high volume.
+- Genres: jazz, worship-pop, funk-rnb
+- Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 

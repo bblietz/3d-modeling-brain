@@ -39,7 +39,9 @@ status: unverified-starting-values
 
 ## Best with
 
-- Amp families: Vox, Boutique clean up to 15 W, or two Blues under a 30 W amp (the accepted early-breakup case). Genres: Indie and alternative; Blues; Worship and pop at low volume. Families and genres per [[speaker-cab-voicing]].
+- Amp families: Vox, Boutique clean up to 15 W, or two Blues under a 30 W amp (the accepted early-breakup case).
+- Genres: indie-alternative, blues, worship-pop
+- worship-pop at low volume. Families and genres per [[speaker-cab-voicing]].
 
 ## Data notes
 
