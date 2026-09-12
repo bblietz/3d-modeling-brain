@@ -1859,7 +1859,12 @@ def test_catalog_best_with_uses_table_labels():
 ```
 <!-- /code -->
 
-Append at the end of the file, after one comment line `# ---- Plan 3 Task 3: canonical genre keys ----`:
+Append at the end of the file, after one comment line `# ---- Plan 3 Task 3: canonical genre keys ----`, a blank line, and these two comment lines directly above `GENRE_KEYS`:
+
+```python
+# Mirrors the Key column of the genre table in knowledge/speaker-cab-voicing.md and
+# projects/Speaker-cab-system/pipeline/catalog_genres.py.
+```
 
 <!-- code: .vault/scripts/test_cabvoice.py symbols GENRE_KEYS,test_catalog_genres_lines_use_canonical_keys -->
 ```python
