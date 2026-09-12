@@ -1139,7 +1139,7 @@ def _electrical(drivers, impedances, tone, jack_config, c, warnings, blockers):
     warnings.extend(wr.warnings)
     mismatch_accepted = wr.recommended is None and c.accept_impedance_mismatch
     if mismatch_accepted:
-        cabinet_ohm = " or ".join(f"{o.impedance_ohm:g}" for o in wr.options)
+        cabinet_ohm = " or ".join(dict.fromkeys(f"{o.impedance_ohm:g}" for o in wr.options))
         warnings.append(f"impedance mismatch accepted: {cabinet_ohm} ohm cabinet on amp taps "
                         f"{list(tone['impedance_options_ohm'])}")
     elif wr.recommended is None:

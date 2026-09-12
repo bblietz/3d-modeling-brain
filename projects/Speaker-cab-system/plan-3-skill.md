@@ -2010,7 +2010,7 @@ The customer's own tonal words (the email's `Notes:`) are read before the genre 
 | Boutique clean | Dr Z, Two-Rock, Carr | full range, dynamic | Celestion Gold, Cream, Cannabis Rex, Vintage 30 |
 | Modeling and solid state | Kemper, Helix, Quilter, Tone Master | flat power section, high headroom | Tonker, Swamp Thang, Red White and Blues, G12H-75 Creamback |
 
-Speaker names in the table are the canonical short forms used by the ranking and by every note's Amp families line; each maps to one catalog note by slug (Celestion Blue, Gold, and Cream are celestion-blue, celestion-gold, celestion-cream; G12M-25 Greenback is celestion-g12m-25-greenback; G12H Anniversary is celestion-g12h-30-anniversary; the rest match their note's `model` field). Amp type (tube, solid state, modeling) is derived from the model; ask only when the model is unknown. A combo used with an extension cab has its own speaker in parallel with the cabinet, so the combined impedance is what the amp sees.
+Speaker names in the table are the canonical short forms used by the ranking and by every note's Amp families line; each maps to one catalog note by slug (Celestion Blue, Gold, and Cream are celestion-blue, celestion-gold, celestion-cream; G12M-25 Greenback is celestion-g12m-25-greenback; G12H Anniversary is celestion-g12h-30-anniversary; the rest match their note's `model` field). Amp type (tube, solid state, modeling) is derived from the model; ask only when the model is unknown. A combo used with an extension cab has its own speaker in parallel with the cabinet, so the combined impedance is what the amp sees; the Impedance bullet under Power and impedance carries the load rule and the taps.
 
 ## Genre and approach
 
@@ -2761,7 +2761,7 @@ def test_hardware_corners_come_from_the_hardware_list(tmp_path):
         "No metal corners, strap handle, recessed metal jack plate, no piping, rubber feet.")
 
 
-def test_accepted_impedance_mismatch_is_a_warn_wiring_row(tmp_path, capsys):
+def test_accepted_impedance_mismatch_is_a_warn_wiring_row(tmp_path):
     order = _order("site-default", tmp_path)
     voicing, cab = _load(order)
     voicing["wiring"]["recommended"] = None
@@ -3425,15 +3425,29 @@ No CAD before Brian approves this phase.
    /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/cabvoice.py evaluate --speaker <slug> --impedance <ohm> \
      --enclosure closed-ported --tone projects/Cab-<...>/tone.json --line <line> [--species <species>] \
      --internal 472 421.2 229.4 --port-diameter 101.5 --port-length 40 \
-     --name Cab-<...> --out projects/Cab-<...>/
+     --name Cab-<...> --out projects/Cab-<...>/ [--accept-impedance-mismatch]
    ```
 
    The evaluate command carries no `--jack` and runs mono (the flag's
    default; a 2x12 adds `--jack` as in propose). `--name` is the order
-   directory's basename. Accept the site box when the sheet's character
-   is the bridge word for the target's `low_end` in the note's Enclosure
-   type rules. Otherwise, or when a size limit, a head to match, or a
-   2x12 applies, propose:
+   directory's basename. Exit 2 here means blockers, handled as under
+   propose below; the impedance blocker (`no wiring option matches the
+   amp's impedance taps`, a 16 ohm driver against taps `[8]`) fires on
+   this first run and presents three options: accept the mismatch with
+   `--accept-impedance-mismatch` when it is 2:1 on a tube amp (the sheet
+   then warns and records `wiring.mismatch_accepted`), the
+   matching-impedance variant of the same speaker, or a different
+   speaker; record the choice in Decisions locked and re-run the same
+   command with the flag. Never edit the taps in `tone.json` to make a
+   sheet pass.
+
+   Write the evaluate result (character, Fb, F3, peak, warnings) into
+   the brief's evaluate-first paragraph under Voicing decision before
+   propose runs, because propose overwrites `voicing.json` and
+   `voicing.md`. Accept the site box when the sheet's character is the
+   bridge word for the target's `low_end` in the note's Enclosure type
+   rules. Otherwise, or when a size limit, a head to match, or a 2x12
+   applies, propose:
 
    ```bash
    cd /home/brian/ClaudeProjects/3d-modeling-brain
@@ -3453,21 +3467,18 @@ No CAD before Brian approves this phase.
    Exit 2 means blockers: present the trade-off the sheet names (a
    smaller box raises Qtc toward big or peaky, a different speaker,
    different wiring, a relaxed limit) and record Brian's choice before
-   re-running. The impedance blocker (`no wiring option matches the
-   amp's impedance taps`, a 16 ohm driver against taps `[8]`) presents
-   three options: accept the mismatch with `--accept-impedance-mismatch`
-   when it is 2:1 on a tube amp (the sheet then warns and records
-   `wiring.mismatch_accepted`), the matching-impedance variant of the
-   same speaker, or a different speaker; record the choice in Decisions
-   locked and re-run the same command with the flag. Never edit the
-   taps in `tone.json` to make a sheet pass. Record the final command
-   verbatim in the brief.
+   re-running; the impedance blocker takes the three options given under
+   the evaluate command. Record the final command verbatim in the brief.
 
    When the proposal's character also misses the bridge word and the
    sheet's warnings say why (the 30 L floor clamped the volume, or the
    driver's Qts), present it at stop one as the closest this driver
-   reaches inside the floor, with the reading, beside the alternatives
-   (the closed box; the next-ranked speaker); Brian chooses at stop one.
+   reaches inside the floor, with the reading, beside the alternatives:
+   the closed box, run as the same propose command with `--enclosure
+   closed` and a scratch `--out` outside the order directory so its
+   character reads from its own sheet and the proposal's sheet stays,
+   and, only when the customer has not fixed the speaker (step 2's rule
+   governs), the next-ranked speaker; Brian chooses at stop one.
 5. **Reading.** Write the plain-language reading of `voicing.md` into
    the brief: what the alignment character, F3 or cancellation
    frequency, wiring, power result, and each warning mean for this
@@ -3498,10 +3509,11 @@ No CAD before Brian approves this phase.
   order directory as `cab.py` and edit its `AESTHETICS` constants
   (`corner_joint`, `baffle_mount`, `handle`, `corners`, `piping`,
   `feet`, `tolex_roll_in`, `tolex_color`, `grill_cloth`,
-  `head_width_mm`) and rewrite the first line of its module docstring
-  to name the order. Nothing else in `cab.py` changes; a hardware
-  qualifier the constants cannot hold (the form's "Leather strap
-  handle" is `handle="strap"`) survives in the brief only.
+  `head_width_mm`) and reduce its module docstring to one line naming
+  the order (the template's copy instructions are dropped). Everything
+  below the docstring stays unchanged; a hardware qualifier the
+  constants cannot hold (the form's "Leather strap handle" is
+  `handle="strap"`) survives in the brief only.
 
 Write the plan into the brief and present it briefly; no stop.
 
@@ -3523,14 +3535,15 @@ redirects); when it exits 0 with that package on disk, set the brief's
 continuing; a subagent may inspect them and report. `TMP_STL=<path>`
 writes an STL for `scripts/render_stl.py <stl> <png> [elev,azim ...]`
 when another angle is needed. On a rear-ported cabinet none of the five
-renders shows the back face, so add the STL to the export run and render
-a rear view (`0,90`; the front is `0,-90`), then view it with the other
-five:
+renders shows the back face, so add the STL to the export run (written
+into the order directory; the vault ignores `projects/Cab-*/*.stl` as it
+does the STEP) and render a rear view (`0,90`; the front is `0,-90`),
+then view it with the other five:
 
 ```bash
 cd /home/brian/ClaudeProjects/3d-modeling-brain
-TMP_STL=/tmp/cab.stl EXPORT=1 /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python projects/Cab-<...>/cab.py
-/home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/render_stl.py /tmp/cab.stl projects/Cab-<...>/images/cab-rear.png 0,90
+TMP_STL=projects/Cab-<...>/cab.stl EXPORT=1 /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python projects/Cab-<...>/cab.py
+/home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/render_stl.py projects/Cab-<...>/cab.stl projects/Cab-<...>/images/cab-rear.png 0,90
 ```
 
 The port loop, on a `port fit` blocker from the plain `cab.py` run. The
@@ -3634,7 +3647,10 @@ on a 1x12 front slot, and on the floor-level back cleat behind a slot
 shelf, which fires on most 2x12 slot boxes at their default depth and on
 shallow 1x12 ones, see [[speaker-cab-construction]]; `spans`, `power`,
 and engine warnings likewise) gets a dated acceptance line in Decisions
-locked, or a re-run that removes it.
+locked, or a re-run that removes it. One accepted event may produce
+several warn rows (an accepted impedance mismatch gives the `wiring` row
+plus two `engine warning` rows); one dated acceptance line in Decisions
+locked covers all of them.
 
 ## Phase 6 - Export and proposal
 
@@ -3650,7 +3666,9 @@ predicted frequencies never enter the proposal.
 
 1. Fill the four prose slots between their `<!-- slot: name -->` and
    `<!-- /slot -->` markers, nothing outside them: `rig_and_goals` (the
-   rig and goals in the customer's words), `why_this_cabinet` (speaker
+   rig and goals in the customer's words; for a combo's extension jack
+   it names the combined parallel load the amp sees, as the brief's Rig
+   block states it), `why_this_cabinet` (speaker
    and back type, one reason each), `designed_to_do` (plain language,
    "designed for" wording only, never a measured claim), `alternatives`
    (one line each, from the ranking). Use the site's voice; the

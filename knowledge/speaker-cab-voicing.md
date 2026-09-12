@@ -66,7 +66,7 @@ The customer's own tonal words (the email's `Notes:`) are read before the genre 
 | Boutique clean | Dr Z, Two-Rock, Carr | full range, dynamic | Celestion Gold, Cream, Cannabis Rex, Vintage 30 |
 | Modeling and solid state | Kemper, Helix, Quilter, Tone Master | flat power section, high headroom | Tonker, Swamp Thang, Red White and Blues, G12H-75 Creamback |
 
-Speaker names in the table are the canonical short forms used by the ranking and by every note's Amp families line; each maps to one catalog note by slug (Celestion Blue, Gold, and Cream are celestion-blue, celestion-gold, celestion-cream; G12M-25 Greenback is celestion-g12m-25-greenback; G12H Anniversary is celestion-g12h-30-anniversary; the rest match their note's `model` field). Amp type (tube, solid state, modeling) is derived from the model; ask only when the model is unknown. A combo used with an extension cab has its own speaker in parallel with the cabinet, so the combined impedance is what the amp sees.
+Speaker names in the table are the canonical short forms used by the ranking and by every note's Amp families line; each maps to one catalog note by slug (Celestion Blue, Gold, and Cream are celestion-blue, celestion-gold, celestion-cream; G12M-25 Greenback is celestion-g12m-25-greenback; G12H Anniversary is celestion-g12h-30-anniversary; the rest match their note's `model` field). Amp type (tube, solid state, modeling) is derived from the model; ask only when the model is unknown. A combo used with an extension cab has its own speaker in parallel with the cabinet, so the combined impedance is what the amp sees; the Impedance bullet under Power and impedance carries the load rule and the taps.
 
 ## Genre and approach
 

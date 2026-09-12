@@ -282,7 +282,7 @@ def test_hardware_corners_come_from_the_hardware_list(tmp_path):
         "No metal corners, strap handle, recessed metal jack plate, no piping, rubber feet.")
 
 
-def test_accepted_impedance_mismatch_is_a_warn_wiring_row(tmp_path, capsys):
+def test_accepted_impedance_mismatch_is_a_warn_wiring_row(tmp_path):
     order = _order("site-default", tmp_path)
     voicing, cab = _load(order)
     voicing["wiring"]["recommended"] = None
