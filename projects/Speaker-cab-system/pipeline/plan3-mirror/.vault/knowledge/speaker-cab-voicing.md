@@ -30,6 +30,8 @@ listening notes from real builds say otherwise. Construction rules live in
 
 Plus `min_power_w` (1.5 x the highest rated amp power in the rig) and `impedance_options_ohm` (the amp's taps).
 
+The customer's own tonal words (the email's `Notes:`) are read before the genre row. A word that names a vocabulary value (tight, big, dark, chimey, scooped, forward, early, clean, focused, wide) sets that field outright; a word that only leans (for example "rolled highs" against `top`) keeps the genre row's value and is recorded as the reason in the brief's tone-target table.
+
 ## Enclosure type rules
 
 - **closed-ported** (the product default): focused dispersion, tight to balanced low end with a low-mid lift from the port, best for mic'd stages and high gain. The port tuning sits below the speaker's Fs so it adds weight rather than a boom.
@@ -98,6 +100,7 @@ The Key column holds the canonical genre keys: every catalog note's Genres line 
 - `min_power_w` = 1.5 x the highest rated amp power among the customer's amps (`POWER_SAFETY_FACTOR`), computed by the skill and written into `tone.json`; the voicing serves the primary amp, the power rule guards against the strongest amp. The engine reads that amp's rating back as `min_power_w` / 1.5 and stops hard when total handling is below it. Warning below the target; an early-breakup target may accept it explicitly (`--accept-low-headroom`) and the acceptance goes into "Decisions locked".
 - Stereo: check each side against the amp's per-channel power. For a stereo amp the intake records the per-channel rating as its rated power, so `min_power_w` / 1.5 is already the per-channel figure the engine checks each side against.
 - Two drivers: parallel first, then series, whichever matches a tap. Unequal impedances get a warning (the spec's rule; the engine still lists any option that matches a tap). Sensitivity more than 2 dB apart gets a warning.
+- Impedance: `impedance_options_ohm` is the amp's taps (the winding). A single driver whose impedance matches no tap is a sheet blocker; a 2:1 mismatch on a tube amp is within tolerance and is accepted with `--accept-impedance-mismatch`, recorded on the sheet as `wiring.mismatch_accepted` and in "Decisions locked"; the taps in `tone.json` are never edited to make a sheet pass. A combo used with an extension cab has its own speaker in parallel with the cabinet, so the combined parallel load (8 || 16 = 5.3 ohm) is what the amp sees; the brief's Rig block and the proposal's rig and goals state that load.
 - Vintage-style 15 W to 30 W speakers are for amps up to 20 W or for two-speaker cabs; the classic AC30 into two Blues is exactly the accepted early-breakup case.
 
 ## Box alignment (Layer 2 values)

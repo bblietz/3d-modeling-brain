@@ -1005,6 +1005,7 @@ class Constraints:
     line: str = "tolex"
     species: str | None = None
     accept_low_headroom: bool = False
+    accept_impedance_mismatch: bool = False   # no tap matches: warn instead of block
 
     def __post_init__(self):
         if self.line not in LINES:
@@ -1136,7 +1137,12 @@ def _electrical(drivers, impedances, tone, jack_config, c, warnings, blockers):
     wr = wiring(impedances, tone["impedance_options_ohm"], jack_config,
                 [d.sensitivity_db for d in drivers])
     warnings.extend(wr.warnings)
-    if wr.recommended is None:
+    mismatch_accepted = wr.recommended is None and c.accept_impedance_mismatch
+    if mismatch_accepted:
+        cabinet_ohm = " or ".join(f"{o.impedance_ohm:g}" for o in wr.options)
+        warnings.append(f"impedance mismatch accepted: {cabinet_ohm} ohm cabinet on amp taps "
+                        f"{list(tone['impedance_options_ohm'])}")
+    elif wr.recommended is None:
         blockers.append("no wiring option matches the amp's impedance taps")
     amp_power = tone["min_power_w"] / POWER_SAFETY_FACTOR
     if jack_config == "stereo":
@@ -1153,7 +1159,8 @@ def _electrical(drivers, impedances, tone, jack_config, c, warnings, blockers):
         warnings.append(worst.message)
     wiring_dict = {"jack_config": jack_config,
                    "recommended": None if wr.recommended is None else asdict(wr.recommended),
-                   "options": [asdict(o) for o in wr.options]}
+                   "options": [asdict(o) for o in wr.options],
+                   "mismatch_accepted": mismatch_accepted}
     power_dict = {"amp_power_w": amp_power, **asdict(worst),
                   "per_side": [asdict(p) for p in checks]}
     return wiring_dict, power_dict
@@ -1538,8 +1545,10 @@ def render_markdown(v: Voicing) -> str:
         lines += [f"| {f:.0f} | {db:+.1f} |" for f, db in table if f >= 50.0]
     lines += ["", "## Wiring", ""]
     rec = v.wiring["recommended"]
+    none_text = "none matches the amp taps" + (" (mismatch accepted)"
+                                               if v.wiring.get("mismatch_accepted") else "")
     lines.append("- Recommended: " + (f"{rec['name']}, {rec['impedance_ohm']:g} ohm. {rec['jack_text']}"
-                                       if rec else "none matches the amp taps"))
+                                       if rec else none_text))
     for o in v.wiring["options"]:
         lines.append(f"- Option {o['name']}: {o['impedance_ohm']:g} ohm, "
                      f"{'matches' if o['matches_tap'] else 'no'} tap")
@@ -1589,6 +1598,8 @@ def _build_parser():
         p.add_argument("--line", choices=LINES, default="tolex")
         p.add_argument("--species", default=None)
         p.add_argument("--accept-low-headroom", action="store_true")
+        p.add_argument("--accept-impedance-mismatch", action="store_true",
+                       help="warn instead of block when no wiring option matches the amp's taps")
         p.add_argument("--name", default="cab")
         p.add_argument("--out", required=True, help="directory for voicing.json and voicing.md")
 
@@ -1630,6 +1641,7 @@ def main(argv=None) -> int:
         drivers = [load_speaker(s, Path(args.speakers_dir)) for s in args.speaker]
         tone = json.loads(Path(args.tone).read_text())
         c = Constraints(brace_l=args.brace_l, accept_low_headroom=args.accept_low_headroom,
+                        accept_impedance_mismatch=args.accept_impedance_mismatch,
                         line=args.line, species=args.species, port_count=args.port_count,
                         port_tube_mm=args.port_tube, fb_hz=getattr(args, "fb", None))
         if args.command == "propose":

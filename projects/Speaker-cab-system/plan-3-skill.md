@@ -23,7 +23,7 @@ tags: [project, speaker-cab, plan, skill, workflow]
 
 - Millimetres everywhere; inches where the customer or the builder reads them. Sheet tuples are (width, height, depth) as in `voicing.json`; `cab.json` lists are the same order.
 - Exit codes shared by every tool the skill runs: 0 written or pass; 1 input error, nothing written; 2 blockers or a failed verify, files still written (argparse usage errors also 2).
-- Engine flags this plan adds (Task 1): `--port-tube MM` (one of `PORT_TUBE_ID_MM` 52.0, 77.3, 101.5, 153.2; propose pins the tube with no growth and no snap; evaluate treats it as a validated `--port-diameter`), `--fb HZ` (propose only; recorded as `port.fb_override_hz`), `--port-count {1,2}` (both modes). `MIN_PORT_LENGTH_MM` is 24.0. Sheet keys added: `port.pinned` (bool) and `port.fb_override_hz` (float or null). A pinned port that clamps warns `port clamped at the 24 mm minimum with the pinned {tube} mm tube: tuned {fb_actual} Hz, target {fb} Hz; a larger tube, a lower Fb, or a smaller box lengthens it`; a pinned port over the air-speed limit warns with the existing `port air speed {v} m/s above 17.0 m/s` line instead of growing. A width or height floor over the size limit is a blocker on the written sheet (exit 2) of the form `width floor {w} mm internal (the driver-count minimum) exceeds the size limit {max} mm internal` (also `(pinned width {p} mm external)` and `height floor {h} mm internal (the cutout minimum)`).
+- Engine flags this plan adds (Task 1): `--port-tube MM` (one of `PORT_TUBE_ID_MM` 52.0, 77.3, 101.5, 153.2; propose pins the tube with no growth and no snap; evaluate treats it as a validated `--port-diameter`), `--fb HZ` (propose only; recorded as `port.fb_override_hz`), `--port-count {1,2}` (both modes). `MIN_PORT_LENGTH_MM` is 24.0. Sheet keys added: `port.pinned` (bool) and `port.fb_override_hz` (float or null). A pinned port that clamps warns `port clamped at the 24 mm minimum with the pinned {tube} mm tube: tuned {fb_actual} Hz, target {fb} Hz; a larger tube, a lower Fb, or a smaller box lengthens it`; a pinned port over the air-speed limit warns with the existing `port air speed {v} m/s above 17.0 m/s` line instead of growing. A width or height floor over the size limit is a blocker on the written sheet (exit 2) of the form `width floor {w} mm internal (the driver-count minimum) exceeds the size limit {max} mm internal` (also `(pinned width {p} mm external)` and `height floor {h} mm internal (the cutout minimum)`). The Task 7 fix wave adds `--accept-impedance-mismatch` (both modes, the `--accept-low-headroom` pattern): when no wiring option matches the taps it replaces the blocker with the warning `impedance mismatch accepted: {ohm} ohm cabinet on amp taps {taps}` beside the existing `no wiring option matches amp taps {taps}` line, and the sheet key `wiring.mismatch_accepted` (bool, always present) records it; `wiring.recommended` stays null and `voicing.md` reads `Recommended: none matches the amp taps (mismatch accepted)`.
 - Layout checks after Task 2, in this order (19): sheet, net volume, stereo balance, cutout, grill opening, port fit, port mouth, magnet to back, handle, head match, line, jack plate, stock, part count, spans, then the CAD layer's interference, air volume, solid count, rectangularity. Plain `cab.py` prints the first 15. `port mouth` warns under one effective diameter and never blocks; its warn reads `chamber 0 port 0: mouth {d} mm from the {obstruction} ({c} percent of the mouth), under one diameter ({D} mm)`. `port fit` names the longest table tube that fits at the 24 mm minimum, or says no table tube fits. A slot up to `SLOT_TRIM_MM` (1.0 mm) wider than its chamber is trimmed to the chamber, not blocked; on the slot re-run the skill pins the external width to the last sheet's so the chamber does not move. `cab.json` carries an `aesthetics` block (the `Aesthetics` dataclass as a dict, 21 keys) beside the existing top-level `corner_joint` and `baffle_mount`.
 - Report module (Task 5): `.venv/bin/python scripts/cabreport.py <order-dir> [--customer NAME] [--proposal-template PATH] [--verify]`; `checks.md` written every run with columns Check, Value, Verdict; verdict words pass, warn, blocker, info, operator; operator rows named `stock thickness`, `grain and show face`, `joinery fit`, `stock yield`, `wood movement`, `transport`, `weight vs limit`, `size vs limit`; engine rows named `power`, `wiring`, `port air speed`, `alignment`, `engine warning`; `proposal.md` written only when absent, slots `<!-- slot: name -->` to `<!-- /slot -->` named `rig_and_goals`, `why_this_cabinet`, `designed_to_do`, `alternatives`; the literal `Price:` line; the text `no swatch on file` for an unknown finish or cloth.
 - Canonical genre keys (Task 3): `roots-country`, `blues`, `classic-rock`, `indie-alternative`, `jazz`, `metal-high-gain`, `worship-pop`, `funk-rnb`. Every catalog note's Best with section is two lines, `Amp families: ...` and `Genres: key, key`.
@@ -600,6 +600,7 @@ class Constraints:
     line: str = "tolex"
     species: str | None = None
     accept_low_headroom: bool = False
+    accept_impedance_mismatch: bool = False   # no tap matches: warn instead of block
 
     def __post_init__(self):
         if self.line not in LINES:
@@ -820,8 +821,10 @@ def render_markdown(v: Voicing) -> str:
         lines += [f"| {f:.0f} | {db:+.1f} |" for f, db in table if f >= 50.0]
     lines += ["", "## Wiring", ""]
     rec = v.wiring["recommended"]
+    none_text = "none matches the amp taps" + (" (mismatch accepted)"
+                                               if v.wiring.get("mismatch_accepted") else "")
     lines.append("- Recommended: " + (f"{rec['name']}, {rec['impedance_ohm']:g} ohm. {rec['jack_text']}"
-                                       if rec else "none matches the amp taps"))
+                                       if rec else none_text))
     for o in v.wiring["options"]:
         lines.append(f"- Option {o['name']}: {o['impedance_ohm']:g} ohm, "
                      f"{'matches' if o['matches_tap'] else 'no'} tap")
@@ -862,6 +865,8 @@ def _build_parser():
         p.add_argument("--line", choices=LINES, default="tolex")
         p.add_argument("--species", default=None)
         p.add_argument("--accept-low-headroom", action="store_true")
+        p.add_argument("--accept-impedance-mismatch", action="store_true",
+                       help="warn instead of block when no wiring option matches the amp's taps")
         p.add_argument("--name", default="cab")
         p.add_argument("--out", required=True, help="directory for voicing.json and voicing.md")
 
@@ -902,6 +907,7 @@ def main(argv=None) -> int:
         drivers = [load_speaker(s, Path(args.speakers_dir)) for s in args.speaker]
         tone = json.loads(Path(args.tone).read_text())
         c = Constraints(brace_l=args.brace_l, accept_low_headroom=args.accept_low_headroom,
+                        accept_impedance_mismatch=args.accept_impedance_mismatch,
                         line=args.line, species=args.species, port_count=args.port_count,
                         port_tube_mm=args.port_tube, fb_hz=getattr(args, "fb", None))
         if args.command == "propose":
@@ -1968,6 +1974,8 @@ listening notes from real builds say otherwise. Construction rules live in
 
 Plus `min_power_w` (1.5 x the highest rated amp power in the rig) and `impedance_options_ohm` (the amp's taps).
 
+The customer's own tonal words (the email's `Notes:`) are read before the genre row. A word that names a vocabulary value (tight, big, dark, chimey, scooped, forward, early, clean, focused, wide) sets that field outright; a word that only leans (for example "rolled highs" against `top`) keeps the genre row's value and is recorded as the reason in the brief's tone-target table.
+
 ## Enclosure type rules
 
 - **closed-ported** (the product default): focused dispersion, tight to balanced low end with a low-mid lift from the port, best for mic'd stages and high gain. The port tuning sits below the speaker's Fs so it adds weight rather than a boom.
@@ -2036,6 +2044,7 @@ The Key column holds the canonical genre keys: every catalog note's Genres line 
 - `min_power_w` = 1.5 x the highest rated amp power among the customer's amps (`POWER_SAFETY_FACTOR`), computed by the skill and written into `tone.json`; the voicing serves the primary amp, the power rule guards against the strongest amp. The engine reads that amp's rating back as `min_power_w` / 1.5 and stops hard when total handling is below it. Warning below the target; an early-breakup target may accept it explicitly (`--accept-low-headroom`) and the acceptance goes into "Decisions locked".
 - Stereo: check each side against the amp's per-channel power. For a stereo amp the intake records the per-channel rating as its rated power, so `min_power_w` / 1.5 is already the per-channel figure the engine checks each side against.
 - Two drivers: parallel first, then series, whichever matches a tap. Unequal impedances get a warning (the spec's rule; the engine still lists any option that matches a tap). Sensitivity more than 2 dB apart gets a warning.
+- Impedance: `impedance_options_ohm` is the amp's taps (the winding). A single driver whose impedance matches no tap is a sheet blocker; a 2:1 mismatch on a tube amp is within tolerance and is accepted with `--accept-impedance-mismatch`, recorded on the sheet as `wiring.mismatch_accepted` and in "Decisions locked"; the taps in `tone.json` are never edited to make a sheet pass. A combo used with an extension cab has its own speaker in parallel with the cabinet, so the combined parallel load (8 || 16 = 5.3 ohm) is what the amp sees; the brief's Rig block and the proposal's rig and goals state that load.
 - Vintage-style 15 W to 30 W speakers are for amps up to 20 W or for two-speaker cabs; the classic AC30 into two Blues is exactly the accepted early-breakup case.
 
 ## Box alignment (Layer 2 values)
@@ -2750,6 +2759,31 @@ def test_hardware_corners_come_from_the_hardware_list(tmp_path):
     cab["hardware"] = [h for h in cab["hardware"] if h["item"] != "corner"]
     assert cabreport.facts(voicing, cab, CUSTOMER)["hardware"] == (
         "No metal corners, strap handle, recessed metal jack plate, no piping, rubber feet.")
+
+
+def test_accepted_impedance_mismatch_is_a_warn_wiring_row(tmp_path, capsys):
+    order = _order("site-default", tmp_path)
+    voicing, cab = _load(order)
+    voicing["wiring"]["recommended"] = None
+    voicing["wiring"]["mismatch_accepted"] = True
+    voicing["wiring"]["options"][0]["matches_tap"] = False
+    voicing["warnings"] += ["no wiring option matches amp taps [8]",
+                            "impedance mismatch accepted: 16 ohm cabinet on amp taps [8]"]
+    rows = {r.name: r for r in cabreport.check_rows(voicing, cab)}
+    assert rows["wiring"].verdict == "warn"
+    assert rows["wiring"].value == "single 16 ohm: no tap matches, impedance mismatch accepted"
+    assert cabreport.facts(voicing, cab, CUSTOMER)["wiring"] == "Single driver, 16 ohm"
+    (order / "voicing.json").write_text(json.dumps(voicing))
+    assert cabreport.main([str(order), "--customer", CUSTOMER]) == 0
+    assert "| wiring | single 16 ohm: no tap matches, impedance mismatch accepted | warn |" in (order / "checks.md").read_text()
+    proposal = order / "proposal.md"
+    assert "Single driver, 16 ohm" in proposal.read_text()
+    proposal.write_text(_fill_slots(proposal.read_text()))
+    assert cabreport.main([str(order), "--customer", CUSTOMER, "--verify"]) == 0
+    voicing["wiring"]["mismatch_accepted"] = False
+    rows = {r.name: r for r in cabreport.check_rows(voicing, cab)}
+    assert (rows["wiring"].value, rows["wiring"].verdict) == ("no recommended wiring on the sheet", "warn")
+    assert cabreport.facts(voicing, cab, CUSTOMER)["wiring"] == "wiring to be confirmed"
 ```
 <!-- /code -->
 
@@ -2992,6 +3026,9 @@ def check_rows(voicing: dict, cab: dict) -> list:
     if rec:
         rows.append(Row("wiring", f"{rec['name']}, {rec['impedance_ohm']:g} ohm: {rec['jack_text']}",
                         "pass" if rec.get("matches_tap") else "warn"))
+    elif voicing["wiring"].get("mismatch_accepted"):
+        options = ", ".join(f"{o['name']} {o['impedance_ohm']:g} ohm" for o in voicing["wiring"]["options"])
+        rows.append(Row("wiring", f"{options}: no tap matches, impedance mismatch accepted", "warn"))
     else:
         rows.append(Row("wiring", "no recommended wiring on the sheet", "warn"))
     port = voicing.get("port") or {}
@@ -3090,6 +3127,9 @@ def facts(voicing: dict, cab: dict, customer: str) -> dict:
               else (cab.get("species") or "").title()) or "finish to be confirmed"
     cloth = cab["aesthetics"]["grill_cloth"] or "grill cloth to be confirmed"
     rec = voicing["wiring"].get("recommended")
+    options = voicing["wiring"]["options"]
+    if not rec and voicing["wiring"].get("mismatch_accepted") and len(options) == 1:
+        rec = options[0]        # an accepted mismatch on a single driver: the one way to wire it
     return {
         "customer": customer,
         "order": cab["name"],
@@ -3335,11 +3375,15 @@ brief.
 No CAD before Brian approves this phase.
 
 1. **Tone target.** Derive the eight fields from the Rig block with the
-   rules in [[speaker-cab-voicing]] (amp family, genre and approach,
-   pickups, dirt pedals, venue and mic'd or not, placement: on the floor
-   shifts `low_end` one step toward tight, tilted counts as raised).
-   Write the table in the brief with one reason line per field, then
-   `tone.json` in the order directory:
+   rules in [[speaker-cab-voicing]] (the customer's own tonal words
+   first, then amp family, genre and approach, pickups, dirt pedals,
+   venue and mic'd or not, placement: on the floor shifts `low_end` one
+   step toward tight, tilted counts as raised). A customer word that
+   names a vocabulary value sets that field outright; a word that only
+   leans keeps the genre row's value and becomes the field's reason line
+   (the note's Tone target vocabulary section). Write the table in the
+   brief with one reason line per field, then `tone.json` in the order
+   directory:
 
    ```json
    {"low_end": "tight", "mids": "neutral", "top": "smooth",
@@ -3351,7 +3395,11 @@ No CAD before Brian approves this phase.
    here; the engine stops hard when speaker handling is under that
    amp's rated power and warns under `min_power_w`. A `breakup: early`
    target may accept the warning with `--accept-low-headroom`; write
-   the acceptance into Decisions locked.
+   the acceptance into Decisions locked. `impedance_options_ohm` stays
+   the amp's taps (the winding); for a combo's extension jack the brief's
+   Rig block states the combined load the amp sees (its own speaker in
+   parallel with the cabinet, 8 || 16 = 5.3 ohm) and the proposal's
+   `rig_and_goals` slot repeats it.
 2. **Ranking.** Score the catalog by the note's Speaker ranking
    procedure: Character words against the target, the amp-family row
    (the table wins over a note's own Amp families line), the genre key
@@ -3380,10 +3428,12 @@ No CAD before Brian approves this phase.
      --name Cab-<...> --out projects/Cab-<...>/
    ```
 
-   Accept the site box when the sheet's character is the bridge word
-   for the target's `low_end` in the note's Enclosure type rules.
-   Otherwise, or when a size limit, a head to match, or a 2x12 applies,
-   propose:
+   The evaluate command carries no `--jack` and runs mono (the flag's
+   default; a 2x12 adds `--jack` as in propose). `--name` is the order
+   directory's basename. Accept the site box when the sheet's character
+   is the bridge word for the target's `low_end` in the note's Enclosure
+   type rules. Otherwise, or when a size limit, a head to match, or a
+   2x12 applies, propose:
 
    ```bash
    cd /home/brian/ClaudeProjects/3d-modeling-brain
@@ -3392,7 +3442,7 @@ No CAD before Brian approves this phase.
      --jack mono --line <line> --name Cab-<...> --out projects/Cab-<...>/ \
      [--species <species>] [--pinned-width <mm>] [--max-external W H D] \
      [--port-diameter <mm>] [--port-slot W H] [--port-tube <mm>] [--fb <hz>] \
-     [--port-count <n>] [--accept-low-headroom]
+     [--port-count <n>] [--accept-low-headroom] [--accept-impedance-mismatch]
    ```
 
    `--speaker` repeats for two drivers; `--jack stereo` splits the box
@@ -3403,7 +3453,21 @@ No CAD before Brian approves this phase.
    Exit 2 means blockers: present the trade-off the sheet names (a
    smaller box raises Qtc toward big or peaky, a different speaker,
    different wiring, a relaxed limit) and record Brian's choice before
-   re-running. Record the final command verbatim in the brief.
+   re-running. The impedance blocker (`no wiring option matches the
+   amp's impedance taps`, a 16 ohm driver against taps `[8]`) presents
+   three options: accept the mismatch with `--accept-impedance-mismatch`
+   when it is 2:1 on a tube amp (the sheet then warns and records
+   `wiring.mismatch_accepted`), the matching-impedance variant of the
+   same speaker, or a different speaker; record the choice in Decisions
+   locked and re-run the same command with the flag. Never edit the
+   taps in `tone.json` to make a sheet pass. Record the final command
+   verbatim in the brief.
+
+   When the proposal's character also misses the bridge word and the
+   sheet's warnings say why (the 30 L floor clamped the volume, or the
+   driver's Qts), present it at stop one as the closest this driver
+   reaches inside the floor, with the reading, beside the alternatives
+   (the closed box; the next-ranked speaker); Brian chooses at stop one.
 5. **Reading.** Write the plain-language reading of `voicing.md` into
    the brief: what the alignment character, F3 or cancellation
    frequency, wiring, power result, and each warning mean for this
@@ -3434,7 +3498,10 @@ No CAD before Brian approves this phase.
   order directory as `cab.py` and edit its `AESTHETICS` constants
   (`corner_joint`, `baffle_mount`, `handle`, `corners`, `piping`,
   `feet`, `tolex_roll_in`, `tolex_color`, `grill_cloth`,
-  `head_width_mm`). Nothing else in `cab.py` changes.
+  `head_width_mm`) and rewrite the first line of its module docstring
+  to name the order. Nothing else in `cab.py` changes; a hardware
+  qualifier the constants cannot hold (the form's "Leather strap
+  handle" is `handle="strap"`) survives in the brief only.
 
 Write the plan into the brief and present it briefly; no stop.
 
@@ -3455,7 +3522,16 @@ redirects); when it exits 0 with that package on disk, set the brief's
 `status` to `built`. View each render with the Read tool before
 continuing; a subagent may inspect them and report. `TMP_STL=<path>`
 writes an STL for `scripts/render_stl.py <stl> <png> [elev,azim ...]`
-when another angle is needed.
+when another angle is needed. On a rear-ported cabinet none of the five
+renders shows the back face, so add the STL to the export run and render
+a rear view (`0,90`; the front is `0,-90`), then view it with the other
+five:
+
+```bash
+cd /home/brian/ClaudeProjects/3d-modeling-brain
+TMP_STL=/tmp/cab.stl EXPORT=1 /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python projects/Cab-<...>/cab.py
+/home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/render_stl.py /tmp/cab.stl projects/Cab-<...>/images/cab-rear.png 0,90
+```
 
 The port loop, on a `port fit` blocker from the plain `cab.py` run. The
 blocker's message takes one of five forms, and each names the next step:
@@ -3534,7 +3610,7 @@ with a verdict line judged against the brief:
 | Row | Judge against |
 |---|---|
 | stock thickness | [[speaker-cab-construction]]; nominal is not actual, Brian measures the stock before cutting joinery sized to it |
-| grain and show face | the Phase 3 plan (hardwood line only) |
+| grain and show face | the Phase 3 plan; hardwood line only (on tolex the tool writes `pass`, n/a, so a tolex order has 7 operator rows and a hardwood order 8) |
 | joinery fit | fingers and dovetails cut to measured thickness, test cut first |
 | stock yield | the blank count and area against the sheets Brian has, 3 mm kerf, no nesting assumed |
 | wood movement | hardwood plus the brief's "where it lives" answer: cleats slotted, a fixed baffle glued at the front only |
@@ -3542,7 +3618,10 @@ with a verdict line judged against the brief:
 | weight vs limit | the brief's weight limit against the mass in kg and lb |
 | size vs limit | the brief's size limits and the head to match against the external size |
 
-The file is final when no `operator` remains. Report anything unfixable
+The file is final when no `operator` remains; rewrite the tool's footer
+line to say so: ``0 row(s) still read `operator`: every operator row
+judged against the brief on <date>; the file is final.`` (`--verify` reads
+`proposal.md` only, never that line). Report anything unfixable
 without changing the customer's requirements; never silently alter a
 limit or a dimension Brian or the customer set.
 
@@ -3577,7 +3656,8 @@ predicted frequencies never enter the proposal.
    (one line each, from the ranking). Use the site's voice; the
    template's header comment carries the samples. Leave the `Price:`
    line for Brian.
-2. Copy the swatches the proposal names from
+2. Copy the swatches the proposal names from the `tolex/`,
+   `grill-cloth/`, or `wood/` subfolder of
    `~/ClaudeProjects/MaximoCabs/public/materials/` into
    `projects/Cab-<...>/images/`.
 3. Verify; exit 2 lists every missing fact string and every empty slot,
@@ -4012,7 +4092,7 @@ The answer sheet:
 
 - Follow-ups: none. Every assumption stands: the 1965 Fender Deluxe Reverb reissue is a 22 W tube combo whose extension jack puts this cabinet in parallel with its own 8 ohm speaker; no weight or size limit; no head to match; mono jack; on the floor; lives in a house; "Black tolex" is the site's Fender Style Black on the 54 in roll; "Salt-and-pepper" is not a site cloth (no swatch on file); "Celestion G12H Greenback (16 ohm)" is the catalog note celestion-g12h-30-anniversary at 16 ohm.
 - Stop one (voicing): approve as presented. The site box reads punchy against a tight target, so expect the skill to propose a tone-driven box rather than keep the site box.
-- A tap or impedance warning on the wiring row: accept (a 2:1 mismatch on a tube amp is within tolerance) and record it in Decisions locked.
+- The impedance blocker on the sheet (the 16 ohm driver against taps `[8]`, exit 2): accept it with `--accept-impedance-mismatch` (a 2:1 mismatch on a tube amp is within tolerance), re-run the same command with the flag, and record it in Decisions locked; the taps in `tone.json` stay `[8]`.
 - A `port mouth` warn: accept and record it in Decisions locked.
 - Operator rows: judge from the brief. No limit stated makes `weight vs limit` and `size vs limit` pass with "no limit stated"; `transport` passes with "no vehicle stated, a one-hand carry"; `wood movement` is n/a on tolex; `joinery fit` and `stock thickness` pass on the construction note's defaults; `stock yield` passes with the sheet count.
 - Stop two (package review): approved; leave the `Price:` line empty.

@@ -1533,3 +1533,64 @@ def test_catalog_genres_lines_use_canonical_keys():
         tokens = genres[0][len("- Genres: "):].split(", ")
         assert tokens and all(t in GENRE_KEYS for t in tokens), (slug, tokens)
         assert len(set(tokens)) == len(tokens), slug
+
+
+# ---- Plan 3 Task 7 fix: --accept-impedance-mismatch ----
+
+def _mismatch_tone(tone: dict) -> dict:
+    return dict(tone, impedance_options_ohm=[8])      # a 16 ohm driver matches no tap
+
+
+def test_propose_impedance_mismatch_blocks_unless_accepted(drv, tone, speakers_dir, tmp_path):
+    mismatch = _mismatch_tone(tone)
+    blocked = cabvoice.propose([drv], [16], "closed", mismatch)
+    assert "no wiring option matches the amp's impedance taps" in blocked.blockers
+    assert blocked.wiring["recommended"] is None and blocked.wiring["mismatch_accepted"] is False
+    assert not any("mismatch accepted" in w for w in blocked.warnings)
+    c = cabvoice.Constraints(accept_impedance_mismatch=True)
+    accepted = cabvoice.propose([drv], [16], "closed", mismatch, constraints=c)
+    assert accepted.blockers == []
+    assert accepted.wiring["recommended"] is None and accepted.wiring["mismatch_accepted"] is True
+    assert "no wiring option matches amp taps [8]" in accepted.warnings
+    assert "impedance mismatch accepted: 16 ohm cabinet on amp taps [8]" in accepted.warnings
+    matched = cabvoice.propose([drv], [16], "closed", tone, constraints=c)
+    assert matched.wiring["recommended"] is not None and matched.wiring["mismatch_accepted"] is False
+    tone_path = tmp_path / "tone.json"
+    tone_path.write_text(json.dumps(mismatch))
+    base = [sys.executable, str(Path(cabvoice.__file__)), "propose", "--speakers-dir", str(speakers_dir),
+            "--speaker", "test-driver", "--impedance", "16", "--enclosure", "closed",
+            "--tone", str(tone_path)]
+    run = subprocess.run(base + ["--out", str(tmp_path / "blocked")], capture_output=True, text=True)
+    assert run.returncode == 2 and "no wiring option matches" in run.stderr
+    run = subprocess.run(base + ["--accept-impedance-mismatch", "--out", str(tmp_path / "accepted")],
+                         capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    data = json.loads((tmp_path / "accepted" / "voicing.json").read_text())
+    assert data["blockers"] == [] and data["wiring"]["mismatch_accepted"] is True
+    md = (tmp_path / "accepted" / "voicing.md").read_text()
+    assert "- Recommended: none matches the amp taps (mismatch accepted)" in md
+
+
+def test_evaluate_impedance_mismatch_blocks_unless_accepted(drv, tone, speakers_dir, tmp_path):
+    mismatch = _mismatch_tone(tone)
+    blocked = cabvoice.evaluate([drv], [16], "closed", mismatch, SITE_INTERNAL)
+    assert "no wiring option matches the amp's impedance taps" in blocked.blockers
+    assert blocked.wiring["mismatch_accepted"] is False
+    c = cabvoice.Constraints(accept_impedance_mismatch=True)
+    accepted = cabvoice.evaluate([drv], [16], "closed", mismatch, SITE_INTERNAL, constraints=c)
+    assert accepted.blockers == [] and accepted.wiring["recommended"] is None
+    assert accepted.wiring["mismatch_accepted"] is True
+    assert "no wiring option matches amp taps [8]" in accepted.warnings
+    assert "impedance mismatch accepted: 16 ohm cabinet on amp taps [8]" in accepted.warnings
+    tone_path = tmp_path / "tone.json"
+    tone_path.write_text(json.dumps(mismatch))
+    base = [sys.executable, str(Path(cabvoice.__file__)), "evaluate", "--speakers-dir", str(speakers_dir),
+            "--speaker", "test-driver", "--impedance", "16", "--enclosure", "closed",
+            "--tone", str(tone_path), "--internal", "472", "421.2", "229.4"]
+    run = subprocess.run(base + ["--out", str(tmp_path / "blocked")], capture_output=True, text=True)
+    assert run.returncode == 2
+    run = subprocess.run(base + ["--accept-impedance-mismatch", "--out", str(tmp_path / "accepted")],
+                         capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    data = json.loads((tmp_path / "accepted" / "voicing.json").read_text())
+    assert data["blockers"] == [] and data["wiring"]["mismatch_accepted"] is True

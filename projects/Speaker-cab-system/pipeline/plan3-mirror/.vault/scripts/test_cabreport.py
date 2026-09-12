@@ -280,3 +280,28 @@ def test_hardware_corners_come_from_the_hardware_list(tmp_path):
     cab["hardware"] = [h for h in cab["hardware"] if h["item"] != "corner"]
     assert cabreport.facts(voicing, cab, CUSTOMER)["hardware"] == (
         "No metal corners, strap handle, recessed metal jack plate, no piping, rubber feet.")
+
+
+def test_accepted_impedance_mismatch_is_a_warn_wiring_row(tmp_path, capsys):
+    order = _order("site-default", tmp_path)
+    voicing, cab = _load(order)
+    voicing["wiring"]["recommended"] = None
+    voicing["wiring"]["mismatch_accepted"] = True
+    voicing["wiring"]["options"][0]["matches_tap"] = False
+    voicing["warnings"] += ["no wiring option matches amp taps [8]",
+                            "impedance mismatch accepted: 16 ohm cabinet on amp taps [8]"]
+    rows = {r.name: r for r in cabreport.check_rows(voicing, cab)}
+    assert rows["wiring"].verdict == "warn"
+    assert rows["wiring"].value == "single 16 ohm: no tap matches, impedance mismatch accepted"
+    assert cabreport.facts(voicing, cab, CUSTOMER)["wiring"] == "Single driver, 16 ohm"
+    (order / "voicing.json").write_text(json.dumps(voicing))
+    assert cabreport.main([str(order), "--customer", CUSTOMER]) == 0
+    assert "| wiring | single 16 ohm: no tap matches, impedance mismatch accepted | warn |" in (order / "checks.md").read_text()
+    proposal = order / "proposal.md"
+    assert "Single driver, 16 ohm" in proposal.read_text()
+    proposal.write_text(_fill_slots(proposal.read_text()))
+    assert cabreport.main([str(order), "--customer", CUSTOMER, "--verify"]) == 0
+    voicing["wiring"]["mismatch_accepted"] = False
+    rows = {r.name: r for r in cabreport.check_rows(voicing, cab)}
+    assert (rows["wiring"].value, rows["wiring"].verdict) == ("no recommended wiring on the sheet", "warn")
+    assert cabreport.facts(voicing, cab, CUSTOMER)["wiring"] == "wiring to be confirmed"

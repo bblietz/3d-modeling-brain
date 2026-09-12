@@ -152,6 +152,9 @@ def check_rows(voicing: dict, cab: dict) -> list:
     if rec:
         rows.append(Row("wiring", f"{rec['name']}, {rec['impedance_ohm']:g} ohm: {rec['jack_text']}",
                         "pass" if rec.get("matches_tap") else "warn"))
+    elif voicing["wiring"].get("mismatch_accepted"):
+        options = ", ".join(f"{o['name']} {o['impedance_ohm']:g} ohm" for o in voicing["wiring"]["options"])
+        rows.append(Row("wiring", f"{options}: no tap matches, impedance mismatch accepted", "warn"))
     else:
         rows.append(Row("wiring", "no recommended wiring on the sheet", "warn"))
     port = voicing.get("port") or {}
@@ -250,6 +253,9 @@ def facts(voicing: dict, cab: dict, customer: str) -> dict:
               else (cab.get("species") or "").title()) or "finish to be confirmed"
     cloth = cab["aesthetics"]["grill_cloth"] or "grill cloth to be confirmed"
     rec = voicing["wiring"].get("recommended")
+    options = voicing["wiring"]["options"]
+    if not rec and voicing["wiring"].get("mismatch_accepted") and len(options) == 1:
+        rec = options[0]        # an accepted mismatch on a single driver: the one way to wire it
     return {
         "customer": customer,
         "order": cab["name"],

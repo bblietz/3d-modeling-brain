@@ -92,11 +92,15 @@ brief.
 No CAD before Brian approves this phase.
 
 1. **Tone target.** Derive the eight fields from the Rig block with the
-   rules in [[speaker-cab-voicing]] (amp family, genre and approach,
-   pickups, dirt pedals, venue and mic'd or not, placement: on the floor
-   shifts `low_end` one step toward tight, tilted counts as raised).
-   Write the table in the brief with one reason line per field, then
-   `tone.json` in the order directory:
+   rules in [[speaker-cab-voicing]] (the customer's own tonal words
+   first, then amp family, genre and approach, pickups, dirt pedals,
+   venue and mic'd or not, placement: on the floor shifts `low_end` one
+   step toward tight, tilted counts as raised). A customer word that
+   names a vocabulary value sets that field outright; a word that only
+   leans keeps the genre row's value and becomes the field's reason line
+   (the note's Tone target vocabulary section). Write the table in the
+   brief with one reason line per field, then `tone.json` in the order
+   directory:
 
    ```json
    {"low_end": "tight", "mids": "neutral", "top": "smooth",
@@ -108,7 +112,11 @@ No CAD before Brian approves this phase.
    here; the engine stops hard when speaker handling is under that
    amp's rated power and warns under `min_power_w`. A `breakup: early`
    target may accept the warning with `--accept-low-headroom`; write
-   the acceptance into Decisions locked.
+   the acceptance into Decisions locked. `impedance_options_ohm` stays
+   the amp's taps (the winding); for a combo's extension jack the brief's
+   Rig block states the combined load the amp sees (its own speaker in
+   parallel with the cabinet, 8 || 16 = 5.3 ohm) and the proposal's
+   `rig_and_goals` slot repeats it.
 2. **Ranking.** Score the catalog by the note's Speaker ranking
    procedure: Character words against the target, the amp-family row
    (the table wins over a note's own Amp families line), the genre key
@@ -137,10 +145,12 @@ No CAD before Brian approves this phase.
      --name Cab-<...> --out projects/Cab-<...>/
    ```
 
-   Accept the site box when the sheet's character is the bridge word
-   for the target's `low_end` in the note's Enclosure type rules.
-   Otherwise, or when a size limit, a head to match, or a 2x12 applies,
-   propose:
+   The evaluate command carries no `--jack` and runs mono (the flag's
+   default; a 2x12 adds `--jack` as in propose). `--name` is the order
+   directory's basename. Accept the site box when the sheet's character
+   is the bridge word for the target's `low_end` in the note's Enclosure
+   type rules. Otherwise, or when a size limit, a head to match, or a
+   2x12 applies, propose:
 
    ```bash
    cd /home/brian/ClaudeProjects/3d-modeling-brain
@@ -149,7 +159,7 @@ No CAD before Brian approves this phase.
      --jack mono --line <line> --name Cab-<...> --out projects/Cab-<...>/ \
      [--species <species>] [--pinned-width <mm>] [--max-external W H D] \
      [--port-diameter <mm>] [--port-slot W H] [--port-tube <mm>] [--fb <hz>] \
-     [--port-count <n>] [--accept-low-headroom]
+     [--port-count <n>] [--accept-low-headroom] [--accept-impedance-mismatch]
    ```
 
    `--speaker` repeats for two drivers; `--jack stereo` splits the box
@@ -160,7 +170,21 @@ No CAD before Brian approves this phase.
    Exit 2 means blockers: present the trade-off the sheet names (a
    smaller box raises Qtc toward big or peaky, a different speaker,
    different wiring, a relaxed limit) and record Brian's choice before
-   re-running. Record the final command verbatim in the brief.
+   re-running. The impedance blocker (`no wiring option matches the
+   amp's impedance taps`, a 16 ohm driver against taps `[8]`) presents
+   three options: accept the mismatch with `--accept-impedance-mismatch`
+   when it is 2:1 on a tube amp (the sheet then warns and records
+   `wiring.mismatch_accepted`), the matching-impedance variant of the
+   same speaker, or a different speaker; record the choice in Decisions
+   locked and re-run the same command with the flag. Never edit the
+   taps in `tone.json` to make a sheet pass. Record the final command
+   verbatim in the brief.
+
+   When the proposal's character also misses the bridge word and the
+   sheet's warnings say why (the 30 L floor clamped the volume, or the
+   driver's Qts), present it at stop one as the closest this driver
+   reaches inside the floor, with the reading, beside the alternatives
+   (the closed box; the next-ranked speaker); Brian chooses at stop one.
 5. **Reading.** Write the plain-language reading of `voicing.md` into
    the brief: what the alignment character, F3 or cancellation
    frequency, wiring, power result, and each warning mean for this
@@ -191,7 +215,10 @@ No CAD before Brian approves this phase.
   order directory as `cab.py` and edit its `AESTHETICS` constants
   (`corner_joint`, `baffle_mount`, `handle`, `corners`, `piping`,
   `feet`, `tolex_roll_in`, `tolex_color`, `grill_cloth`,
-  `head_width_mm`). Nothing else in `cab.py` changes.
+  `head_width_mm`) and rewrite the first line of its module docstring
+  to name the order. Nothing else in `cab.py` changes; a hardware
+  qualifier the constants cannot hold (the form's "Leather strap
+  handle" is `handle="strap"`) survives in the brief only.
 
 Write the plan into the brief and present it briefly; no stop.
 
@@ -212,7 +239,16 @@ redirects); when it exits 0 with that package on disk, set the brief's
 `status` to `built`. View each render with the Read tool before
 continuing; a subagent may inspect them and report. `TMP_STL=<path>`
 writes an STL for `scripts/render_stl.py <stl> <png> [elev,azim ...]`
-when another angle is needed.
+when another angle is needed. On a rear-ported cabinet none of the five
+renders shows the back face, so add the STL to the export run and render
+a rear view (`0,90`; the front is `0,-90`), then view it with the other
+five:
+
+```bash
+cd /home/brian/ClaudeProjects/3d-modeling-brain
+TMP_STL=/tmp/cab.stl EXPORT=1 /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python projects/Cab-<...>/cab.py
+/home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/render_stl.py /tmp/cab.stl projects/Cab-<...>/images/cab-rear.png 0,90
+```
 
 The port loop, on a `port fit` blocker from the plain `cab.py` run. The
 blocker's message takes one of five forms, and each names the next step:
@@ -291,7 +327,7 @@ with a verdict line judged against the brief:
 | Row | Judge against |
 |---|---|
 | stock thickness | [[speaker-cab-construction]]; nominal is not actual, Brian measures the stock before cutting joinery sized to it |
-| grain and show face | the Phase 3 plan (hardwood line only) |
+| grain and show face | the Phase 3 plan; hardwood line only (on tolex the tool writes `pass`, n/a, so a tolex order has 7 operator rows and a hardwood order 8) |
 | joinery fit | fingers and dovetails cut to measured thickness, test cut first |
 | stock yield | the blank count and area against the sheets Brian has, 3 mm kerf, no nesting assumed |
 | wood movement | hardwood plus the brief's "where it lives" answer: cleats slotted, a fixed baffle glued at the front only |
@@ -299,7 +335,10 @@ with a verdict line judged against the brief:
 | weight vs limit | the brief's weight limit against the mass in kg and lb |
 | size vs limit | the brief's size limits and the head to match against the external size |
 
-The file is final when no `operator` remains. Report anything unfixable
+The file is final when no `operator` remains; rewrite the tool's footer
+line to say so: ``0 row(s) still read `operator`: every operator row
+judged against the brief on <date>; the file is final.`` (`--verify` reads
+`proposal.md` only, never that line). Report anything unfixable
 without changing the customer's requirements; never silently alter a
 limit or a dimension Brian or the customer set.
 
@@ -334,7 +373,8 @@ predicted frequencies never enter the proposal.
    (one line each, from the ranking). Use the site's voice; the
    template's header comment carries the samples. Leave the `Price:`
    line for Brian.
-2. Copy the swatches the proposal names from
+2. Copy the swatches the proposal names from the `tolex/`,
+   `grill-cloth/`, or `wood/` subfolder of
    `~/ClaudeProjects/MaximoCabs/public/materials/` into
    `projects/Cab-<...>/images/`.
 3. Verify; exit 2 lists every missing fact string and every empty slot,
