@@ -227,8 +227,9 @@ def _speaker_label(voicing: dict) -> str:
 
 def _hardware(cab: dict) -> str:
     aes = cab["aesthetics"]
-    corners = aes.get("corners")
-    items = [f"{corners} corners" if corners and corners != "none" else "no metal corners",
+    corner = next((h for h in cab["hardware"] if h["item"] == "corner"), None)
+    finish = corner["notes"].split(";")[0].split(", ")[1] if corner else None    # "metal corner, black; keep-out ..."
+    items = [f"{finish} corners" if finish else "no metal corners",
              "strap handle" if aes["handle"] == "strap" else "recessed side handles"]
     plate = next((h for h in cab["hardware"] if h["item"] == "jack plate"), None)
     if plate:

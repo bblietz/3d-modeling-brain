@@ -124,6 +124,7 @@ def test_hardwood_two_driver_open_back_labels(tmp_path):
     voicing.pop("port")
     voicing["warnings"] = []
     cab["aesthetics"].update(corners=None, handle="recessed-side", piping=True, feet="tilt-back")
+    cab["hardware"] = [h for h in cab["hardware"] if h["item"] != "corner"]   # hardwood default: the layout emits none
     f = cabreport.facts(voicing, cab, "Pat Player")
     assert f["line_label"] == "Hardwood 2x12"
     assert f["configuration"] == "2x12 stereo"
@@ -266,3 +267,16 @@ def test_template_tokens_all_have_facts(tmp_path):
         cabreport.render_proposal("{{customer}} {{nope}}", f)
     tokens = set(cabreport.TOKEN_RE.findall(TEMPLATE.read_text()))
     assert tokens == set(cabreport.FACT_KEYS) | {"order", "generated"}
+
+
+def test_hardware_corners_come_from_the_hardware_list(tmp_path):
+    voicing, cab = _load(_order("site-default", tmp_path))
+    cab["aesthetics"]["corners"] = None       # cab.py omitted corners; the layout still built black ones
+    assert cabreport.facts(voicing, cab, CUSTOMER)["hardware"].startswith("Black corners, ")
+    for h in cab["hardware"]:
+        if h["item"] == "corner":
+            h["notes"] = h["notes"].replace("black", "chrome")
+    assert cabreport.facts(voicing, cab, CUSTOMER)["hardware"].startswith("Chrome corners, ")
+    cab["hardware"] = [h for h in cab["hardware"] if h["item"] != "corner"]
+    assert cabreport.facts(voicing, cab, CUSTOMER)["hardware"] == (
+        "No metal corners, strap handle, recessed metal jack plate, no piping, rubber feet.")
