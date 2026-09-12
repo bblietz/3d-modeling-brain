@@ -920,7 +920,7 @@ def test_evaluate_reproduces_propose(tone, slug, enclosure, jack, n, slot, tube)
 
 def test_propose_prediction_follows_clamped_port(tone):
     # Fs 111 Hz puts the tight Fb at the 90 Hz cap; Vas 90 L gives a 60 L box, where
-    # even a 150 mm port needs less than 20 mm and is clamped, so the port tunes lower.
+    # even a 150 mm port needs less than 24 mm and is clamped, so the port tunes lower.
     d = _driver(fs_hz=111.0, vas_l=90.0)
     v = cabvoice.propose([d], [16], "closed-ported", tone)
     assert v.port["diameter_mm"] == cabvoice.MAX_PORT_DIAMETER_MM
@@ -952,7 +952,7 @@ def test_propose_mono_2x12_uses_one_port_per_driver(tone):
     single = cabvoice.propose([d, d], [16, 16], "closed-ported", tone, jack_config="mono",
                               constraints=cabvoice.Constraints(port_count=1))
     # one shared port: the same largest tube cannot be long enough for twice the
-    # drivers, so it is clamped at 20 mm, tunes low, and moves more air per area
+    # drivers, so it is clamped at 24 mm, tunes low, and moves more air per area
     assert single.port["count"] == 1
     assert single.port["diameter_mm"] >= two.port["diameter_mm"]
     assert single.port["air_speed_ms"] > two.port["air_speed_ms"]
