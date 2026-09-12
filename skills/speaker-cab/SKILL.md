@@ -116,7 +116,11 @@ No CAD before Brian approves this phase.
    the amp's taps (the winding); for a combo's extension jack the brief's
    Rig block states the combined load the amp sees (its own speaker in
    parallel with the cabinet, 8 || 16 = 5.3 ohm) and the proposal's
-   `rig_and_goals` slot repeats it.
+   `rig_and_goals` slot repeats it. The engine's mismatch check reads
+   the cabinet alone, so the combined load (8 || 8 = 4 ohm on an 8 ohm
+   winding) is not an engine event: record it in the Rig block and in
+   Decisions locked, and raise a combined load beyond 2:1 on a tube amp
+   at stop one.
 2. **Ranking.** Score the catalog by the note's Speaker ranking
    procedure: Character words against the target, the amp-family row
    (the table wins over a note's own Amp families line), the genre key
@@ -187,10 +191,10 @@ No CAD before Brian approves this phase.
    re-running; the impedance blocker takes the three options given under
    the evaluate command. Record the final command verbatim in the brief.
 
-   When the proposal's character also misses the bridge word and the
-   sheet's warnings say why (the 30 L floor clamped the volume, or the
-   driver's Qts), present it at stop one as the closest this driver
-   reaches inside the floor, with the reading, beside the alternatives:
+   When the proposal's character also misses the bridge word, whether
+   or not a warning says why, present it at stop one as the closest this
+   driver reaches, with the reading and the warning when there is one
+   (the 30 L floor clamped the volume), beside the alternatives:
    the closed box, run as the same propose command with `--enclosure
    closed` and a scratch `--out` outside the order directory so its
    character reads from its own sheet and the proposal's sheet stays,
@@ -220,7 +224,8 @@ No CAD before Brian approves this phase.
   front to back on all four shell panels, the species.
 - Hardware positions: one jack plate per chamber, the strap handle over
   the center of mass (or recessed side handles), corners, feet or
-  tilt-back legs, piping. Port location from the sheet.
+  tilt-back legs, piping. Port location from the sheet; the port lines
+  and the box size are provisional until the Phase 4 port loop closes.
 - Aesthetics block: copy
   `projects/Speaker-cab-system/fixtures/site-default/cab.py` into the
   order directory as `cab.py` and edit its `AESTHETICS` constants
@@ -251,11 +256,12 @@ redirects); when it exits 0 with that package on disk, set the brief's
 `status` to `built`. View each render with the Read tool before
 continuing; a subagent may inspect them and report. `TMP_STL=<path>`
 writes an STL for `scripts/render_stl.py <stl> <png> [elev,azim ...]`
-when another angle is needed. On a rear-ported cabinet none of the five
-renders shows the back face, so add the STL to the export run (written
-into the order directory; the vault ignores `projects/Cab-*/*.stl` as it
-does the STEP) and render a rear view (`0,90`; the front is `0,-90`),
-then view it with the other five:
+when another angle is needed. None of the five renders shows the back
+face, which carries the jack plate and, on a rear-ported cabinet, the
+port, so on every closed-back cabinet add the STL to the export run
+(written into the order directory; the vault ignores
+`projects/Cab-*/*.stl` as it does the STEP) and render a rear view
+(`0,90`; the front is `0,-90`), then view it with the other five:
 
 ```bash
 cd /home/brian/ClaudeProjects/3d-modeling-brain
@@ -296,31 +302,47 @@ blocker's message takes one of five forms, and each names the next step:
    minus 18) / 2 each for two), then `cab.py` again.
 
 After an automatic re-run (forms 1, 2, and 5): when the new plain `cab.py`
-run has no blocker and the sheet carries no port warning (a clamped
-length, an air speed over the limit), continue to the CAD run. Otherwise
+run has no blocker and the sheet carries no port warning (one or two
+lines for a clamped length, `port too short ... clamped to 24 mm` and
+`port clamped at the 24 mm minimum with the pinned ... tube` for the one
+event; an air speed over the limit), continue to the CAD run. Otherwise
 stop and present these remedies, in this order:
 
 1. The front slot, `--port-slot <width> 40 --pinned-width <external width>`:
    the width the sheet's `box.chamber_internal_width_mm`, or two slots
    of (width minus 18) / 2 on a mono 2x12, and the external width the
-   sheet's `box.external_mm[0]`, the construction note's default. The
-   pin holds the chamber so the slot fits it exactly, since a free width
-   re-proportions under the slot's shelf and never settles; a slot up to
-   1 mm over the chamber is trimmed to the full width by the layout.
+   sheet's `box.external_mm[0]`, the construction note's default, each
+   rounded to 0.1 mm (the JSON holds unrounded floats; the layout's 1 mm
+   trim means the rounding never blocks). The pin holds the chamber so
+   the slot fits it exactly, since a free width re-proportions under the
+   slot's shelf and never settles; a slot up to 1 mm over the chamber is
+   trimmed to the full width by the layout.
 2. The pinned tube's clamped tuning, accepted as the sheet reports it.
 3. Fb raised with the larger tube (`--port-tube` and `--fb`, within the
-   engine's 45 to 90 Hz).
-4. A larger box (relax `--max-external` or the pinned width).
+   engine's 45 to 90 Hz), listed only when the port-fit line was form 2
+   (the larger tube seats at some length) and the target Fb has headroom
+   under 90 Hz; otherwise the stop lists three remedies.
+4. A larger box: where `--max-external` or a pinned width limited it,
+   relax that flag. On an unconstrained order no propose flag grows the
+   box (the engine sizes it from Vas and the alignment), so it grows only
+   with `low_end` one step toward big in `tone.json` and a propose
+   re-run, which changes the voicing and goes back through stop one.
 
 Brian picks; run that command, record the trade-off and the choice in
 the brief, and continue. Each form gets one automatic re-run per order;
-a blocker after it is a stop.
+a blocker after it is a stop. When the loop changes the port type or the
+box after stop one, record it in Trade-offs presented and Decisions
+locked, rewrite the plan's port line, and re-present the changed box at
+stop two, the package review, not at a third stop.
 
 Any other blocker (net volume off the sheet, an impossible box, a power
 stop, a width floor over a limit, magnet to back, interference) stops
 with the trade-off its message names; Brian's choice goes into
 Trade-offs presented and Decisions locked, then the engine and `cab.py`
-run again. Exit 1 is an input error: fix the input, never the tool. A
+run again. The exception is a `net volume` blocker beside a `port fit`
+blocker whose message says the port was not built: it is consequential,
+clears with the port, and the port loop runs alone on that pair. Exit 1
+is an input error: fix the input, never the tool. A
 build123d exception that repeats identically is a library defect (see
 Backend choice), not something to route around.
 
@@ -388,7 +410,9 @@ predicted frequencies never enter the proposal.
    block states it), `why_this_cabinet` (speaker
    and back type, one reason each), `designed_to_do` (plain language,
    "designed for" wording only, never a measured claim), `alternatives`
-   (one line each, from the ranking). Use the site's voice; the
+   (the speaker lines from the ranking, one each, plus one line for a
+   construction alternative the port loop presented, when there was
+   one). Use the site's voice; the
    template's header comment carries the samples. Leave the `Price:`
    line for Brian.
 2. Copy the swatches the proposal names from the `tolex/`,
