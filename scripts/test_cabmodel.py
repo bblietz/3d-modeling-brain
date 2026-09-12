@@ -395,14 +395,29 @@ def test_cad_matrix_solids_agree_with_the_layout(tmp_path):
 
 
 # === TASK 12 ===
-def test_site_default_fixture(tmp_path):
-    fixture = SITE_DEFAULT
-    env = dict(os.environ, EXPORT="1", CAB_OUT=str(tmp_path))
+FIXTURE_ORDERS = ["site-default"]        # Plan 3's dry runs add "sample-roots-1x12" and "rex-roots-1x12"
+DELIVERABLES = ["cab.json", "cab.step", "cutlist.md", "cutlist.csv", "images/cab-iso.png", "images/cab-front.png",
+                "images/cab-top.png", "images/cab-right.png", "images/cab-exploded.png"]
+
+
+def _fixture_dir(name: str) -> Path:
+    return SITE_DEFAULT if name == "site-default" else FIXTURES / name
+
+
+def _run_fixture(name: str, out: Path) -> tuple:
+    """Run a fixture order's cab.py with EXPORT=1 into out; (process, cab.json dict or None)."""
+    env = dict(os.environ, EXPORT="1", CAB_OUT=str(out))
     if (HERE / "cabvoice.py").exists():          # mirror run: the template's sys.path points at scripts/
         env["PYTHONPATH"] = str(HERE)
-    proc = subprocess.run([sys.executable, str(fixture / "cab.py")], env=env, capture_output=True, text=True)
+    proc = subprocess.run([sys.executable, str(_fixture_dir(name) / "cab.py")], env=env,
+                          capture_output=True, text=True)
+    report = json.loads((out / "cab.json").read_text()) if (out / "cab.json").exists() else None
+    return proc, report
+
+
+def test_site_default_fixture(tmp_path):
+    proc, report = _run_fixture("site-default", tmp_path)
     assert proc.returncode == 0, proc.stdout + proc.stderr
-    report = json.loads((tmp_path / "cab.json").read_text())
     for got, want in zip(report["external_mm"], (508.0, 457.2, 279.4)):
         assert abs(got - want) <= 1.0
     assert (tmp_path / "cab.step").exists() and (tmp_path / "images" / "cab-exploded.png").exists()
@@ -410,8 +425,8 @@ def test_site_default_fixture(tmp_path):
     assert "interference" in proc.stdout and "exported" in proc.stdout
 
 
-CHECK_LINES = ["sheet", "net volume", "stereo balance", "cutout", "grill opening", "port fit", "magnet to back",
-               "handle", "head match", "line", "jack plate", "stock", "part count", "spans",
+CHECK_LINES = ["sheet", "net volume", "stereo balance", "cutout", "grill opening", "port fit", "port mouth",
+               "magnet to back", "handle", "head match", "line", "jack plate", "stock", "part count", "spans",
                "interference", "air volume", "solid count", "rectangularity"]
 
 
@@ -433,7 +448,7 @@ def test_cab_py_finds_the_vault_from_an_order_directory(tmp_path):
     proc = subprocess.run([sys.executable, "cab.py"], cwd=order, env=env, capture_output=True, text=True)
     assert proc.returncode == 0, proc.stdout + proc.stderr
     printed = [line[:16].strip() for line in proc.stdout.splitlines()]
-    assert printed == CHECK_LINES[:14] and not (order / "cab.json").exists()
+    assert printed == CHECK_LINES[:15] and not (order / "cab.json").exists()
     proc = subprocess.run([sys.executable, str(order / "cab.py")], cwd=tmp_path, env=env, capture_output=True, text=True)
     assert proc.returncode == 0, proc.stdout + proc.stderr
 
@@ -455,3 +470,17 @@ def test_cab_py_exits_2_on_a_blocker_and_still_exports(tmp_path):
     report = json.loads((out / "cab.json").read_text())
     assert report["files"]["cab_json"] == "cab.json" and (out / "cab.step").exists()
     assert [c["level"] for c in report["checks"] if c["name"] == "net volume"] == ["blocker"]
+
+
+# ---- Plan 3 Task 2: port mouth check, aesthetics block, fixture list ----
+@pytest.mark.parametrize("name", FIXTURE_ORDERS)
+def test_fixture_order_runs_clean_with_every_deliverable(name, tmp_path):
+    proc, report = _run_fixture(name, tmp_path)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    blockers = [c for c in report["checks"] if c["level"] == "blocker"]
+    assert blockers == [], blockers
+    assert [c["name"] for c in report["checks"]] == CHECK_LINES
+    assert set(report["aesthetics"]) >= {"corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
+                                         "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm"}
+    missing = [d for d in DELIVERABLES if not (tmp_path / d).exists()]
+    assert missing == [], missing

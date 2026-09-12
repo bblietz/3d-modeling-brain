@@ -601,7 +601,7 @@ def test_tolex_yardage():
 
 
 CHECK_NAMES = ["sheet", "net volume", "stereo balance", "cutout", "grill opening", "port fit",
-               "magnet to back", "handle", "head match", "line", "jack plate", "stock",
+               "port mouth", "magnet to back", "handle", "head match", "line", "jack plate", "stock",
                "part count", "spans"]
 
 
@@ -698,7 +698,7 @@ def test_matrix_every_configuration_lays_out_or_names_its_blocker():
     t0 = time.time()
     slugs = cabvoice.list_speakers()
     assert len(slugs) == 20
-    stats = {"cases": 0, "engine_blocked": 0, "clean": 0, "blocked": 0}
+    stats = {"cases": 0, "engine_blocked": 0, "clean": 0, "blocked": 0, "port_mouth_warn": 0}
     reasons = {}
     worst = (0.0, None)
     for slug in slugs:
@@ -729,6 +729,8 @@ def test_matrix_every_configuration_lays_out_or_names_its_blocker():
                     checks = L.check_layout(lay, spec)
                     blockers = [ch for ch in checks if ch.level == "blocker"]
                     by = {ch.name: ch for ch in checks}
+                    if by["port mouth"].level == "warn":
+                        stats["port_mouth_warn"] += 1
                     # the engine's floors and the layout's margins agree everywhere, both lines
                     assert by["cutout"].level == "pass", (slug, enclosure, n, jack, line, by["cutout"].message)
                     assert by["grill opening"].level == "pass", (slug, enclosure, n, jack, line)
@@ -750,3 +752,160 @@ def test_matrix_every_configuration_lays_out_or_names_its_blocker():
     print(f"\nmatrix {stats} reasons {reasons} worst net delta {worst[0]:+.2f} percent at {worst[1]} in {time.time() - t0:.1f} s")
     assert stats["cases"] == 1200
     assert stats["clean"] > 0
+
+
+# ---- Plan 3 Task 2: port mouth check, aesthetics block, fixture list ----
+def test_port_mouth_round_pass_and_warn():
+    # 77.3 tube, 40 mm long: the mouth sits 84.4 mm behind the magnet's rear face (y 155)
+    # with a 29 percent slice of it facing the magnet: over one diameter, pass
+    spec = spec_for(port="round", net=42.5)
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["port mouth"].level == "pass"
+    assert by["port mouth"].message == ("port mouth(s) clear: chamber 0 port 0: mouth 84 mm from the "
+                                        "speaker 0 magnet (29 percent of the mouth), one diameter is 77.3 mm")
+    # the 101.5 tube at the same length: 84 mm is under one diameter
+    s = sheet(port="round", net=42.5)
+    s["port"]["diameter_mm"] = 101.5
+    spec = L.order_from(s, L.Aesthetics())
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["port mouth"].level == "warn"
+    assert by["port mouth"].message == ("chamber 0 port 0: mouth 84 mm from the speaker 0 magnet "
+                                        "(18 percent of the mouth), under one diameter (101.5 mm)")
+    # a tube ending at the 25 mm axial standoff, inside the magnet footprint: warns and names the magnet
+    s = sheet(port="round", net=42.5)
+    s["port"]["length_mm"] = 99.0
+    spec = L.order_from(s, L.Aesthetics())
+    lay = L.layout(spec)
+    (c, j, free, what, cover, d_eff), = L.port_mouth_clearances(lay)
+    assert (c, j, what, d_eff) == (0, 0, "speaker 0 magnet", 77.3)
+    assert free == pytest.approx(25.4) and 0.25 < cover < 0.33
+    by = {ch.name: ch for ch in L.check_layout(lay, spec)}
+    assert by["port mouth"].level == "warn"
+    assert by["port mouth"].message.startswith("chamber 0 port 0: mouth 25 mm from the speaker 0 magnet")
+
+
+def test_port_mouth_slot_no_port_and_unbuilt():
+    # 1x12 slot: the bottom stiffener starts at the shelf's rear edge, so it faces the mouth at 0 mm
+    spec = spec_for(port="slot", net=42.5)
+    lay = L.layout(spec)
+    (c, j, free, what, cover, d_eff), = L.port_mouth_clearances(lay)
+    assert (c, j, free, what) == (0, 0, 0.0, "stiffener bottom")
+    assert d_eff == pytest.approx(math.sqrt(4 * 300 * 40 / math.pi)) and 0.05 < cover < 0.1
+    by = {ch.name: ch for ch in L.check_layout(lay, spec)}
+    assert by["port mouth"].level == "warn"
+    assert by["port mouth"].message == ("chamber 0 port 0: mouth 0 mm from the stiffener bottom "
+                                        "(8 percent of the mouth), under one diameter (123.6 mm)")
+    # a mono 2x12 with two slots: the brace splits the bottom span so there is no stiffener; the back
+    # cleat is the first solid behind the mouth, 169 mm away (shelf rear edge y 80, cleat at y 249.4)
+    s = sheet(external=(760.0, 457.2, 279.4), drivers=2, port="slot", net=80.0)
+    s["port"]["slot_w_mm"] = 340.0
+    spec = L.order_from(s, L.Aesthetics())
+    by = {ch.name: ch for ch in L.check_layout(L.layout(spec), spec)}
+    assert by["port mouth"].level == "pass"
+    assert by["port mouth"].message.startswith(
+        "port mouth(s) clear: chamber 0 port 0: mouth 169 mm from the cleat back bottom "
+        "(46 percent of the mouth), one diameter is 131.6 mm; chamber 0 port 1: mouth 169 mm")
+    # no port at all, and a port the layout could not place
+    closed = spec_for(enclosure="closed", net=42.5)
+    assert {c.name: c for c in L.check_layout(L.layout(closed), closed)}["port mouth"].message == "no port"
+    s = sheet(port="round", net=42.5)
+    s["port"]["length_mm"] = 250.0
+    spec = L.order_from(s, L.Aesthetics())
+    by = {ch.name: ch for ch in L.check_layout(L.layout(spec), spec)}
+    assert by["port fit"].level == "blocker"
+    assert by["port mouth"].level == "pass" and by["port mouth"].message == "no port placed (see port fit)"
+
+
+def test_port_mouth_site_default_fixture_warns_behind_the_magnet():
+    path = SITE_DEFAULT / "voicing.json"
+    assert path.exists(), f"fixture sheet missing: {path}"
+    spec = L.order_from(L.load_voicing(path), L.Aesthetics())
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["port fit"].level == "pass"
+    assert by["port mouth"].level == "warn"
+    assert by["port mouth"].message == ("chamber 0 port 0: mouth 84 mm from the speaker 0 magnet "
+                                        "(18 percent of the mouth), under one diameter (101.5 mm)")
+
+
+def test_report_carries_the_aesthetics_block():
+    aest = L.Aesthetics(corner_joint="dovetail", baffle_mount="fixed", handle="recessed-side", corners="none",
+                        piping=True, feet="tilt-back", tolex_roll_in=32, tolex_color="Fender Style Tweed",
+                        grill_cloth="Fender Style Oxblood", head_width_mm=500.0)
+    spec = spec_for(line="hardwood", species="black walnut", port="round", net=42.5, aesthetics=aest)
+    lay = L.layout(spec)
+    rep = L.layout_report(lay, L.check_layout(lay, spec))
+    json.dumps(rep)
+    block = rep["aesthetics"]
+    assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
+                                  "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
+        "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",
+        "piping": True, "feet": "tilt-back", "tolex_roll_in": 32, "tolex_color": "Fender Style Tweed",
+        "grill_cloth": "Fender Style Oxblood", "head_width_mm": 500.0}
+    assert block["jack_plate_cutout_mm"] == [110.0, 70.0]      # every Aesthetics field travels, tuples as lists
+    assert rep["corner_joint"] == "dovetail" and rep["baffle_mount"] == "fixed"
+
+
+def test_order_from_ignores_unknown_port_keys():
+    plain = sheet(port="round", net=42.5)
+    extra = copy.deepcopy(plain)
+    extra["port"]["pinned"] = True
+    extra["port"]["fb_override_hz"] = 70.0
+    a, b = L.order_from(plain, L.Aesthetics()), L.order_from(extra, L.Aesthetics())
+    assert a == b
+    ra = L.layout_report(L.layout(a), L.check_layout(L.layout(a), a))
+    rb = L.layout_report(L.layout(b), L.check_layout(L.layout(b), b))
+    assert ra == rb
+
+
+def test_port_fit_blocker_names_the_largest_table_tube_at_the_minimum():
+    # the Cannabis Rex under the roots tone: the default proposal snaps to the 153.2 mm tube, which
+    # seats nowhere in its box; the blocker names the largest table tube that fits at 24 mm
+    drv = cabvoice.load_speaker("eminence-cannabis-rex")
+    z = drv.impedance_ohm[0]
+    v = cabvoice.propose([drv], [z], "closed-ported", TONE, "mono", cabvoice.Constraints(line="tolex"), "rex").to_dict()
+    assert v["blockers"] == [] and v["port"]["diameter_mm"] == 153.2
+    spec = L.order_from(v, L.Aesthetics())
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["port fit"].level == "blocker"
+    assert by["port fit"].message == (
+        "port fit: chamber 0 port 0: no round port of 153.2 mm fits with 25 mm clearance; "
+        "the longest table tube that fits at the 24 mm minimum is 101.5 mm; "
+        "raise Fb, use a smaller tube or a larger box, or a front slot")
+    assert by["port mouth"].message == "no port placed (see port fit)"
+    # the skill's next step: pin the named tube and read the next run's verdicts
+    pinned = cabvoice.propose([drv], [z], "closed-ported", TONE, "mono",
+                              cabvoice.Constraints(line="tolex", port_tube_mm=101.5), "rex").to_dict()
+    assert pinned["port"]["pinned"] is True and pinned["port"]["length_mm"] == 24.0
+    spec = L.order_from(pinned, L.Aesthetics())
+    lay = L.layout(spec)
+    by = {c.name: c for c in L.check_layout(lay, spec)}
+    assert by["port fit"].level == "pass" and lay.round_ports[0].id_mm == 101.5
+    assert by["port mouth"].level == "warn" and "under one diameter (101.5 mm)" in by["port mouth"].message
+
+
+def test_port_fit_blocker_says_no_table_tube_fits():
+    # a narrow, shallow box: the 24 mm tube's span overlaps the magnet's axial standoff, so every
+    # direction of the scan runs into a wall or a cleat before the radial requirement is met
+    s = sheet(external=(360.0, 457.2, 192.0), port="round", net=15.0)
+    s["port"]["diameter_mm"] = 101.5
+    spec = L.order_from(s, L.Aesthetics())
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["magnet to back"].level == "pass"
+    assert by["port fit"].message == (
+        "port fit: chamber 0 port 0: no round port of 101.5 mm fits with 25 mm clearance; "
+        "no table tube fits; use a front slot or a larger box")
+
+
+def test_slot_shelf_blocker_names_the_deepest_shelf():
+    s = sheet(port="slot", net=42.5)
+    s["port"]["length_mm"] = 220.0            # the site box: 267.4 - 20 - 40 leaves a 207 mm shelf at most
+    spec = L.order_from(s, L.Aesthetics())
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["port fit"].message == (
+        "port fit: slot shelf 220 mm deep leaves 27 mm behind it, under the 40 mm the slot needs to "
+        "breathe; the deepest shelf that fits is 207 mm; lower the slot height or use a round port")
+    shallow = sheet(external=(508.0, 457.2, 90.0), port="slot", net=10.0)     # 40 mm of internal depth
+    spec = L.order_from(shallow, L.Aesthetics())
+    _, _, blockers = L.slot_ports(spec, L.frame(spec))
+    assert blockers == ["port fit: slot shelf 60 mm deep leaves -2 mm behind it, under the 40 mm the slot "
+                        "needs to breathe; no shelf fits; lower the slot height or use a round port"]

@@ -1111,6 +1111,24 @@ def tube_geometry(id_mm: float) -> tuple:
     return od, f"tube {id_mm:.1f} mm ID", "not a stock tube size; wall assumed 5.5 mm"
 
 
+def largest_tube_at_minimum(env: Envelope, sign: float, fr: Frame, obstacles: list, envelopes: list,
+                            tubes: list, below_id_mm: float):
+    """The largest table tube inside diameter under below_id_mm that the
+    placement scan seats at the engine's minimum port length, or None. A tube
+    that does not fit at the minimum cannot fit at any length, so this is the
+    necessary-condition hint the port fit blocker names for the skill's loop:
+    pin that tube once and read the next run's verdicts."""
+    ya, yb = fr.D - cabvoice.MIN_PORT_LENGTH_MM, fr.D - BACK_MM
+    for tid in sorted(cabvoice.PORT_TUBE_ID_MM, reverse=True):
+        if tid >= below_id_mm - 1e-6:
+            continue
+        od, _, _ = tube_geometry(tid)
+        rr = (od + FLANGE_RING_EXTRA_MM) / 2.0
+        if _place_tube(env, sign, od / 2.0, ya, yb, fr, obstacles, envelopes, tubes, rr) is not None:
+            return tid
+    return None
+
+
 def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> tuple:
     """(RoundPorts, blanks, back features, blockers). One port per driver in
     the chamber (spec.port.count per chamber), each beside its driver."""
@@ -1141,19 +1159,25 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
             spot = None if reaches else _place_tube(env, sign, r, ya, yb, fr, obstacles, envelopes, tubes, rr)
             if spot is None:
                 fit = None
-                Lf = L - 5.0
-                while Lf >= 2 * BACK_MM:
+                lengths, Lf = [], L - 5.0
+                while Lf > cabvoice.MIN_PORT_LENGTH_MM:
+                    lengths.append(Lf)
+                    Lf -= 5.0
+                lengths.append(cabvoice.MIN_PORT_LENGTH_MM)   # the shortest port that can be built
+                for Lf in lengths:
                     if (fr.D - Lf >= fr.y_bb - 1e-6
                             and _place_tube(env, sign, r, fr.D - Lf, yb, fr, obstacles, envelopes, tubes, rr)):
                         fit = Lf
                         break
-                    Lf -= 5.0
                 why = ("reaches the baffle" if reaches
                        else f"finds no spot with {CLEARANCE_MM:.0f} mm clearance")
                 if fit is None:
+                    smaller = largest_tube_at_minimum(env, sign, fr, obstacles, envelopes, tubes, id_mm)
+                    hint = (f"the longest table tube that fits at the {cabvoice.MIN_PORT_LENGTH_MM:.0f} mm "
+                            f"minimum is {smaller:g} mm; raise Fb, use a smaller tube or a larger box, or a front slot"
+                            if smaller is not None else "no table tube fits; use a front slot or a larger box")
                     blockers.append(f"port fit: chamber {c} port {j}: no round port of "
-                                    f"{id_mm:.1f} mm fits with {CLEARANCE_MM:.0f} mm clearance; "
-                                    "raise Fb, use a smaller tube or a larger box, or a front slot")
+                                    f"{id_mm:.1f} mm fits with {CLEARANCE_MM:.0f} mm clearance; {hint}")
                 else:
                     blockers.append(f"port fit: chamber {c} port {j}: tube {id_mm:.1f} x {L:.0f} mm "
                                     f"{why}; longest tube that fits at this diameter is {fit:.0f} mm; "
@@ -1202,8 +1226,11 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
     slots, blanks, blockers = [], [], []
     free = fr.y_bi - (fr.y_bf + L)
     if free < max(CLEARANCE_MM, s_h):
+        deepest = math.floor(fr.y_bi - fr.y_bf - max(CLEARANCE_MM, s_h))
+        hint = (f"the deepest shelf that fits is {deepest:.0f} mm" if deepest >= cabvoice.MIN_PORT_LENGTH_MM
+                else "no shelf fits")
         blockers.append(f"port fit: slot shelf {L:.0f} mm deep leaves {free:.0f} mm behind it, "
-                        f"under the {max(CLEARANCE_MM, s_h):.0f} mm the slot needs to breathe; "
+                        f"under the {max(CLEARANCE_MM, s_h):.0f} mm the slot needs to breathe; {hint}; "
                         "lower the slot height or use a round port")
         return slots, blanks, blockers
     mat18 = birch(BAFFLE_MM)
@@ -1523,6 +1550,113 @@ def _stock_fits(blank: Blank, spec: CabSpec) -> bool:
     return a <= long_ + 1e-6 and b <= short + 1e-6
 
 
+def _mouth_rect_overlaps(box, x0, x1, z0, z1) -> bool:
+    (bx0, _, bz0), (bx1, _, bz1) = box
+    return _overlap(x0, x1, bx0, bx1) and _overlap(z0, z1, bz0, bz1)
+
+
+MOUTH_GRID = 24
+
+
+def _mouth_coverage(points: list, inside) -> float:
+    """Fraction (0 to 1) of the mouth's sample points inside an obstruction's projection."""
+    return sum(1 for (x, z) in points if inside(x, z)) / float(len(points))
+
+
+def _box_inside(box):
+    (bx0, _, bz0), (bx1, _, bz1) = box
+    return lambda x, z: bx0 <= x <= bx1 and bz0 <= z <= bz1
+
+
+def _circle_inside(cx, cz, r):
+    return lambda x, z: math.hypot(x - cx, z - cz) <= r
+
+
+def port_mouth_clearances(lay: Layout) -> list:
+    """(chamber, index, free_mm, obstruction, coverage, effective_diameter_mm)
+    per built port: the free air along the port axis from the inner mouth to
+    the first solid whose projection overlaps the mouth's cross-section
+    (basket and magnet envelopes, cleats, brace, divider, stiffeners), else the
+    baffle's back face for a rear round port or the back panel's inner face
+    for a front slot (coverage None). Coverage is the fraction of the mouth
+    the obstruction faces, sampled on a MOUTH_GRID x MOUTH_GRID grid. The
+    effective diameter is the tube inside diameter, or the diameter of a
+    circle with the slot's area. Common practice keeps one diameter clear; the
+    check warns below it and never blocks."""
+    fr = frame(lay.spec)
+    out, per_chamber = [], {}
+    grid = [(i + 0.5) / MOUTH_GRID for i in range(MOUTH_GRID)]
+
+    def nearest(candidates, terminal, points):
+        best = (terminal[0], terminal[1], None)
+        for (d, name, inside) in candidates:
+            if d < best[0] - 1e-9:
+                best = (d, name, inside)
+        d, name, inside = best
+        return d, name, (None if inside is None else _mouth_coverage(points, inside))
+
+    def envelope_faces(env):
+        faces = [(env.y0, env.y0 + env.basket_len, env.basket_d / 2.0, "basket")]
+        if env.magnet_len > 0:
+            faces.append((env.y0 + env.basket_len, env.y0 + env.basket_len + env.magnet_len,
+                          env.magnet_d / 2.0, "magnet"))
+        return faces
+
+    for rp in lay.round_ports:                      # mouth faces the front
+        c = rp.chamber
+        j = per_chamber.get(c, 0)
+        per_chamber[c] = j + 1
+        cx, cz = rp.center
+        r, y_m = rp.id_mm / 2.0, rp.y0
+        points = [(cx - r + 2 * r * u, cz - r + 2 * r * v) for u in grid for v in grid
+                  if math.hypot(2 * r * u - r, 2 * r * v - r) <= r]
+        cands = []
+        for p in lay.parts:
+            if p.shape != "box" or not (p.chamber == c or p.name == "divider"):
+                continue
+            (_, by0, _), (_, by1, _) = p.box
+            if by0 >= y_m - 1e-6 or _circle_box_gap(cx, cz, r, p.box) >= -1e-6:
+                continue                            # behind the mouth, or beside it
+            cands.append((max(0.0, y_m - by1), p.name.replace("_", " "), _box_inside(p.box)))
+        for env in lay.envelopes:
+            if env.chamber != c:
+                continue
+            ex, ez = env.center
+            for (y_front, y_rear, er, part) in envelope_faces(env):
+                if y_front < y_m - 1e-6 and math.hypot(cx - ex, cz - ez) < r + er - 1e-6:
+                    cands.append((max(0.0, y_m - y_rear), f"speaker {env.speaker} {part}",
+                                  _circle_inside(ex, ez, er)))
+        d, what, cover = nearest(cands, (y_m - fr.y_bb, "baffle"), points)
+        out.append((c, j, d, what, cover, rp.id_mm))
+    for sp in lay.slot_ports:                       # mouth faces the back
+        c = sp.chamber
+        j = per_chamber.get(c, 0)
+        per_chamber[c] = j + 1
+        x0, x1, z0, z1 = sp.x0, sp.x1, fr.z0, fr.z0 + sp.slot_h_mm
+        y_m = fr.y_bf + sp.shelf_depth_mm
+        d_eff = math.sqrt(4.0 * (x1 - x0) * sp.slot_h_mm / math.pi)
+        points = [(x0 + (x1 - x0) * u, z0 + (z1 - z0) * v) for u in grid for v in grid]
+        cands = []
+        for p in lay.parts:
+            if p.shape != "box" or not (p.chamber == c or p.name == "divider"):
+                continue
+            (_, by0, _), (_, by1, _) = p.box
+            if by1 <= y_m + 1e-6 or not _mouth_rect_overlaps(p.box, x0, x1, z0, z1):
+                continue                            # in front of the mouth, or beside it
+            cands.append((max(0.0, by0 - y_m), p.name.replace("_", " "), _box_inside(p.box)))
+        for env in lay.envelopes:
+            if env.chamber != c:
+                continue
+            ex, ez = env.center
+            for (y_front, y_rear, er, part) in envelope_faces(env):
+                if y_rear > y_m + 1e-6 and _circle_box_gap(ex, ez, er, ((x0, 0.0, z0), (x1, 0.0, z1))) < -1e-6:
+                    cands.append((max(0.0, y_front - y_m), f"speaker {env.speaker} {part}",
+                                  _circle_inside(ex, ez, er)))
+        d, what, cover = nearest(cands, (fr.y_bi - y_m, "back panel"), points)
+        out.append((c, j, d, what, cover, d_eff))
+    return out
+
+
 def check_layout(lay: Layout, spec: CabSpec) -> list:
     fr = frame(spec)
     checks = []
@@ -1611,6 +1745,22 @@ def check_layout(lay: Layout, spec: CabSpec) -> list:
         pos = ", ".join(f"chamber {s.chamber} slot {s.x1 - s.x0:.0f} x {s.slot_h_mm:g} mm, shelf {s.shelf_depth_mm:.0f} mm"
                         for s in lay.slot_ports)
         checks.append(Check("port fit", "pass", f"slot port(s) built: {pos}"))
+    # port mouth
+    if spec.port is None:
+        checks.append(Check("port mouth", "pass", "no port"))
+    elif not lay.round_ports and not lay.slot_ports:
+        checks.append(Check("port mouth", "pass", "no port placed (see port fit)"))
+    else:
+        entries, short = [], False
+        for (c, j, free, what, cover, d_eff) in port_mouth_clearances(lay):
+            under = free < d_eff - 1e-6
+            short = short or under
+            entries.append(f"chamber {c} port {j}: mouth {free:.0f} mm from the {what}"
+                           + ("" if cover is None else f" ({cover * 100:.0f} percent of the mouth)")
+                           + (f", under one diameter ({d_eff:.1f} mm)" if under
+                              else f", one diameter is {d_eff:.1f} mm"))
+        checks.append(Check("port mouth", "warn" if short else "pass",
+                            ("" if short else "port mouth(s) clear: ") + "; ".join(entries)))
     # magnet to back
     if spec.closed:
         problems, best = [], None
@@ -1675,6 +1825,7 @@ def _round3(obj):
 
 
 def layout_report(lay: Layout, checks: list) -> dict:
+    from dataclasses import asdict
     spec = lay.spec
     fr = frame(spec)
     W, H, D = spec.external_mm
@@ -1684,6 +1835,7 @@ def layout_report(lay: Layout, checks: list) -> dict:
         "line": spec.line, "species": spec.species,
         "corner_joint": spec.aesthetics.corner_joint,
         "baffle_mount": spec.aesthetics.baffle_mount,
+        "aesthetics": asdict(spec.aesthetics),
         "external_mm": [W, H, D],
         "external_in": [round(v / MM_PER_INCH, 2) for v in (W, H, D)],
         "internal_mm": [fr.x1 - fr.x0, fr.z1 - fr.z0, fr.y_bi - fr.y_bb],

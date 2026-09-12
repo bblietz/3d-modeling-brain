@@ -5,6 +5,35 @@
   "species": null,
   "corner_joint": "finger",
   "baffle_mount": "floating",
+  "aesthetics": {
+    "corner_joint": "finger",
+    "finger_width_mm": null,
+    "dovetail_slope": 8.0,
+    "dovetail_pin_mm": null,
+    "dovetail_tail_mm": 30.0,
+    "baffle_mount": "floating",
+    "handle": "strap",
+    "handle_screw_spacing_mm": 228.6,
+    "recessed_handle_cutout_mm": [
+      140.0,
+      90.0
+    ],
+    "jack_plate_cutout_mm": [
+      110.0,
+      70.0
+    ],
+    "corners": "black",
+    "corner_allowance_mm": 50.0,
+    "piping": false,
+    "feet": "rubber",
+    "foot_diameter_mm": 40.0,
+    "foot_inset_mm": 32.0,
+    "tolex_roll_in": 54,
+    "head_width_mm": null,
+    "tolex_color": "Fender Style Black",
+    "grill_cloth": "British Small Weave Cane",
+    "finish": ""
+  },
   "external_mm": [
     508.0,
     457.2,
@@ -529,6 +558,11 @@
       "name": "port fit",
       "level": "pass",
       "message": "round port(s) placed with 25 mm clearance: chamber 0 at x 107 z 229 (101.5 x 40 mm)"
+    },
+    {
+      "name": "port mouth",
+      "level": "warn",
+      "message": "chamber 0 port 0: mouth 84 mm from the speaker 0 magnet (18 percent of the mouth), under one diameter (101.5 mm)"
     },
     {
       "name": "magnet to back",
