@@ -24,7 +24,7 @@ tags: [project, speaker-cab, plan, skill, workflow]
 - Millimetres everywhere; inches where the customer or the builder reads them. Sheet tuples are (width, height, depth) as in `voicing.json`; `cab.json` lists are the same order.
 - Exit codes shared by every tool the skill runs: 0 written or pass; 1 input error, nothing written; 2 blockers or a failed verify, files still written (argparse usage errors also 2).
 - Engine flags this plan adds (Task 1): `--port-tube MM` (one of `PORT_TUBE_ID_MM` 52.0, 77.3, 101.5, 153.2; propose pins the tube with no growth and no snap; evaluate treats it as a validated `--port-diameter`), `--fb HZ` (propose only; recorded as `port.fb_override_hz`), `--port-count {1,2}` (both modes). `MIN_PORT_LENGTH_MM` is 24.0. Sheet keys added: `port.pinned` (bool) and `port.fb_override_hz` (float or null). A pinned port that clamps warns `port clamped at the 24 mm minimum with the pinned {tube} mm tube: tuned {fb_actual} Hz, target {fb} Hz; a larger tube, a lower Fb, or a smaller box lengthens it`; a pinned port over the air-speed limit warns with the existing `port air speed {v} m/s above 17.0 m/s` line instead of growing. A width or height floor over the size limit is a blocker on the written sheet (exit 2) of the form `width floor {w} mm internal (the driver-count minimum) exceeds the size limit {max} mm internal` (also `(pinned width {p} mm external)` and `height floor {h} mm internal (the cutout minimum)`).
-- Layout checks after Task 2, in this order (19): sheet, net volume, stereo balance, cutout, grill opening, port fit, port mouth, magnet to back, handle, head match, line, jack plate, stock, part count, spans, then the CAD layer's interference, air volume, solid count, rectangularity. Plain `cab.py` prints the first 15. `port mouth` warns under one effective diameter and never blocks; its warn reads `chamber 0 port 0: mouth {d} mm from the {obstruction} ({c} percent of the mouth), under one diameter ({D} mm)`. `port fit` names the longest table tube that fits at the 24 mm minimum, or says no table tube fits. `cab.json` carries an `aesthetics` block (the `Aesthetics` dataclass as a dict, 21 keys) beside the existing top-level `corner_joint` and `baffle_mount`.
+- Layout checks after Task 2, in this order (19): sheet, net volume, stereo balance, cutout, grill opening, port fit, port mouth, magnet to back, handle, head match, line, jack plate, stock, part count, spans, then the CAD layer's interference, air volume, solid count, rectangularity. Plain `cab.py` prints the first 15. `port mouth` warns under one effective diameter and never blocks; its warn reads `chamber 0 port 0: mouth {d} mm from the {obstruction} ({c} percent of the mouth), under one diameter ({D} mm)`. `port fit` names the longest table tube that fits at the 24 mm minimum, or says no table tube fits. A slot up to `SLOT_TRIM_MM` (1.0 mm) wider than its chamber is trimmed to the chamber, not blocked; on the slot re-run the skill pins the external width to the last sheet's so the chamber does not move. `cab.json` carries an `aesthetics` block (the `Aesthetics` dataclass as a dict, 21 keys) beside the existing top-level `corner_joint` and `baffle_mount`.
 - Report module (Task 5): `.venv/bin/python scripts/cabreport.py <order-dir> [--customer NAME] [--proposal-template PATH] [--verify]`; `checks.md` written every run with columns Check, Value, Verdict; verdict words pass, warn, blocker, info, operator; operator rows named `stock thickness`, `grain and show face`, `joinery fit`, `stock yield`, `wood movement`, `transport`, `weight vs limit`, `size vs limit`; engine rows named `power`, `wiring`, `port air speed`, `alignment`, `engine warning`; `proposal.md` written only when absent, slots `<!-- slot: name -->` to `<!-- /slot -->` named `rig_and_goals`, `why_this_cabinet`, `designed_to_do`, `alternatives`; the literal `Price:` line; the text `no swatch on file` for an unknown finish or cloth.
 - Canonical genre keys (Task 3): `roots-country`, `blues`, `classic-rock`, `indie-alternative`, `jazz`, `metal-high-gain`, `worship-pop`, `funk-rnb`. Every catalog note's Best with section is two lines, `Amp families: ...` and `Genres: key, key`.
 - Skill files: `skills/speaker-cab/SKILL.md` with only `name` and `description` in its frontmatter and plain-hyphen headings; templates under `skills/speaker-cab/templates/`; the per-order `cab.py` template is `projects/Speaker-cab-system/fixtures/site-default/cab.py`; orders live at `projects/Cab-<Customer>-<NxS>-<line>/`; the skill is installed by the symlink `~/.claude/skills/speaker-cab -> /home/brian/ClaudeProjects/3d-modeling-brain/skills/speaker-cab`.
@@ -972,15 +972,15 @@ git commit -m "Speaker cab plan 3 task 1: port tube pin, Fb override, port count
 ### Task 2: Layout: port mouth check, port fit naming the tube that fits, aesthetics block, fixture list
 
 **Files:**
-- Modify: `scripts/cablayout.py` (new `largest_tube_at_minimum` above `round_ports`; `round_ports` and `slot_ports` replaced; new `_mouth_rect_overlaps`, `MOUTH_GRID`, `_mouth_coverage`, `_box_inside`, `_circle_inside`, `port_mouth_clearances` above `check_layout`; `check_layout` and `layout_report` replaced)
-- Modify: `scripts/test_cablayout.py` (`CHECK_NAMES` and `test_matrix_every_configuration_lays_out_or_names_its_blocker` replaced; eight new tests appended)
+- Modify: `scripts/cablayout.py` (new `SLOT_TRIM_MM` after `GRILL_FRONT_MM`; new `largest_tube_at_minimum` above `round_ports`; `round_ports` and `slot_ports` replaced; new `_mouth_rect_overlaps`, `MOUTH_GRID`, `_mouth_coverage`, `_box_inside`, `_circle_inside`, `port_mouth_clearances` above `check_layout`; `check_layout` and `layout_report` replaced)
+- Modify: `scripts/test_cablayout.py` (`CHECK_NAMES` and `test_matrix_every_configuration_lays_out_or_names_its_blocker` replaced; ten new tests appended)
 - Modify: `scripts/test_cabmodel.py` (`CHECK_LINES` and `test_cab_py_finds_the_vault_from_an_order_directory` replaced; the `# === TASK 12 ===` unit replaced through the end of the file)
 - Modify: `projects/Speaker-cab-system/fixtures/site-default/cab.json`, `cutlist.md`, `cutlist.csv`, `images/*.png` (regenerated)
 - Mirror source (byte-identical): `projects/Speaker-cab-system/pipeline/plan3-mirror/.vault/scripts/cablayout.py`, `.vault/scripts/test_cablayout.py`, `.vault/scripts/test_cabmodel.py`, `.vault/projects/Speaker-cab-system/fixtures/site-default/`
 
 **Interfaces:**
 - Consumes: Task 1's engine (`PORT_TUBE_ID_MM`, `MIN_PORT_LENGTH_MM` 24, sheets with `port.pinned` and `port.fb_override_hz`, which the layout ignores); the Plan 2 layout (`_place_tube`, `round_ports`, `slot_ports`, `check_layout`, `layout_report`, the `Aesthetics` dataclass) and CAD tests (`CHECK_LINES`, the Task 12 fixture test).
-- Produces: `largest_tube_at_minimum(env, sign, fr, obstacles, envelopes, tubes, below_id_mm) -> float | None`; `port_mouth_clearances(lay) -> list[tuple]` of `(chamber, index, free_mm, obstruction, coverage, effective_diameter_mm)`; the `port mouth` check between `port fit` and `magnet to back` (19 checks in the order given in Global Constraints); `port fit` blocker texts that name the largest table tube that fits at the 24 mm minimum or the deepest shelf that fits; `cab.json["aesthetics"]` (`asdict(Aesthetics)`, 21 keys, tuples as lists); in `test_cabmodel.py` the list `FIXTURE_ORDERS`, `DELIVERABLES`, `_fixture_dir(name)`, `_run_fixture(name, out) -> (proc, report)`, and `test_fixture_order_runs_clean_with_every_deliverable` parametrized over the list. Tasks 7 and 8 append their fixture names to `FIXTURE_ORDERS`; Task 5 reads the aesthetics block and the 19 verdicts; Task 6 quotes the messages.
+- Produces: `SLOT_TRIM_MM = 1.0` (a slot up to that much wider than its chamber is trimmed to the chamber, not blocked, so a slot re-run converges); `largest_tube_at_minimum(env, sign, fr, obstacles, envelopes, tubes, below_id_mm) -> float | None`; `port_mouth_clearances(lay) -> list[tuple]` of `(chamber, index, free_mm, obstruction, coverage, effective_diameter_mm)`; the `port mouth` check between `port fit` and `magnet to back` (19 checks in the order given in Global Constraints); `port fit` blocker texts that name the largest table tube that fits at the 24 mm minimum or the deepest shelf that fits; `cab.json["aesthetics"]` (`asdict(Aesthetics)`, 21 keys, tuples as lists); in `test_cabmodel.py` the list `FIXTURE_ORDERS`, `DELIVERABLES`, `_fixture_dir(name)`, `_run_fixture(name, out) -> (proc, report)`, and `test_fixture_order_runs_clean_with_every_deliverable` parametrized over the list. Tasks 7 and 8 append their fixture names to `FIXTURE_ORDERS`; Task 5 reads the aesthetics block and the 19 verdicts; Task 6 quotes the messages.
 
 The `port mouth` rule as built: the free air along the port axis from the inner mouth to the first solid whose projection overlaps the mouth's cross-section, among the chamber's parts plus the divider and the basket and magnet envelope steps, else the baffle's back face (rear round port) or the back panel's inner face (front slot). Effective diameter: the tube inside diameter, or the diameter of a circle with the slot's area. Warn under one diameter, never a blocker; the coverage fraction (a 24 x 24 grid sample of the mouth) is reported for information and does not gate the warn. Messages: `no port`; `no port placed (see port fit)`; pass `port mouth(s) clear: chamber 0 port 0: mouth 84 mm from the speaker 0 magnet (29 percent of the mouth), one diameter is 77.3 mm` (entries joined by `; `; the terminal faces `baffle` and `back panel` carry no coverage); warn `chamber 0 port 0: mouth 84 mm from the speaker 0 magnet (18 percent of the mouth), under one diameter (101.5 mm)`. Obstruction names are blank names with spaces (`stiffener bottom`, `cleat back bottom`, `cleat back bottom 0` in a stereo chamber), `speaker N magnet` or `speaker N basket`, `baffle`, `back panel`. Three consequences the reviewer should expect: the site default now warns (its 101.5 mm tube's mouth sits 84.4 mm behind the magnet with 18 percent of the mouth facing it), a 1x12 front slot warns on the bottom stiffener at 0 mm because Plan 2 starts that stiffener at the shelf's rear edge (about 8 percent coverage), and slots in shallow boxes warn on the floor-level back cleat. All three are the rule as approved; Task 4 records them in the construction note.
 
@@ -1059,7 +1059,7 @@ def test_matrix_every_configuration_lays_out_or_names_its_blocker():
 
 Append at the end of the file, after one comment line `# ---- Plan 3 Task 2: port mouth check, aesthetics block, fixture list ----`:
 
-<!-- code: .vault/scripts/test_cablayout.py symbols test_port_mouth_round_pass_and_warn,test_port_mouth_slot_no_port_and_unbuilt,test_port_mouth_site_default_fixture_warns_behind_the_magnet,test_report_carries_the_aesthetics_block,test_order_from_ignores_unknown_port_keys,test_port_fit_blocker_names_the_largest_table_tube_at_the_minimum,test_port_fit_blocker_says_no_table_tube_fits,test_slot_shelf_blocker_names_the_deepest_shelf -->
+<!-- code: .vault/scripts/test_cablayout.py symbols test_port_mouth_round_pass_and_warn,test_port_mouth_slot_no_port_and_unbuilt,test_port_mouth_site_default_fixture_warns_behind_the_magnet,test_report_carries_the_aesthetics_block,test_order_from_ignores_unknown_port_keys,test_port_fit_blocker_names_the_largest_table_tube_at_the_minimum,test_port_fit_blocker_says_no_table_tube_fits,test_slot_shelf_blocker_names_the_deepest_shelf,test_slot_a_hair_wider_than_the_chamber_is_trimmed_to_full_width,test_slot_over_the_trim_tolerance_still_blocks -->
 ```python
 def test_port_mouth_round_pass_and_warn():
     # 77.3 tube, 40 mm long: the mouth sits 84.4 mm behind the magnet's rear face (y 155)
@@ -1208,6 +1208,34 @@ def test_slot_shelf_blocker_names_the_deepest_shelf():
     _, _, blockers = L.slot_ports(spec, L.frame(spec))
     assert blockers == ["port fit: slot shelf 60 mm deep leaves -2 mm behind it, under the 40 mm the slot "
                         "needs to breathe; no shelf fits; lower the slot height or use a round port"]
+
+def test_slot_a_hair_wider_than_the_chamber_is_trimmed_to_full_width():
+    # the skill's slot re-run pins the width, so a slot can land a hair over its chamber from
+    # rounding; up to SLOT_TRIM_MM over, the layout trims it to the full width instead of blocking
+    s = sheet(port="slot", net=42.5)                       # 472 mm chamber, one slot: avail is the chamber
+    s["port"]["slot_w_mm"] = 472.0 + 0.5
+    spec = L.order_from(s, L.Aesthetics())
+    fr = L.frame(spec)
+    slots, blanks, blockers = L.slot_ports(spec, fr)
+    assert blockers == [] and len(slots) == 1
+    assert (slots[0].x0, slots[0].x1) == pytest.approx((-236.0, 236.0))
+    assert slots[0].cheek_w_mm == pytest.approx(0.0)
+    assert [b.name for b in blanks] == ["shelf"]                    # no side cheek parts
+    assert blanks[0].size == (472.0, 60.0, 18.0)                    # the shelf spans the full chamber
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["port fit"].level == "pass"
+    assert by["port fit"].message == "slot port(s) built: chamber 0 slot 472 x 40 mm, shelf 60 mm"
+
+def test_slot_over_the_trim_tolerance_still_blocks():
+    s = sheet(port="slot", net=42.5)
+    s["port"]["slot_w_mm"] = 472.0 + 1.5
+    spec = L.order_from(s, L.Aesthetics())
+    _, blanks, blockers = L.slot_ports(spec, L.frame(spec))
+    assert blockers == ["port fit: chamber 0: 1 slot of 474 mm do not fit the 472 mm chamber; "
+                        "narrow the slot or widen the box"]
+    assert blanks == []
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["port fit"].level == "blocker"
 ```
 <!-- /code -->
 
@@ -1335,7 +1363,15 @@ Expected: FAIL (`port_mouth_clearances` undefined, 14 names in `CHECK_NAMES` aga
 
 - [ ] **Step 3: Layout changes**
 
-In `scripts/cablayout.py` insert `largest_tube_at_minimum` directly above `round_ports` and replace `round_ports` and `slot_ports`:
+In `scripts/cablayout.py` insert `SLOT_TRIM_MM` directly after the `GRILL_FRONT_MM` line among the layout constants:
+
+<!-- code: .vault/scripts/cablayout.py symbols SLOT_TRIM_MM -->
+```python
+SLOT_TRIM_MM = 1.0            # a slot up to this much wider than its chamber is trimmed to it, not blocked
+```
+<!-- /code -->
+
+Insert `largest_tube_at_minimum` directly above `round_ports` and replace `round_ports` and `slot_ports`:
 
 <!-- code: .vault/scripts/cablayout.py symbols largest_tube_at_minimum,round_ports,slot_ports -->
 ```python
@@ -1458,13 +1494,14 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
     for c, (xa, xb) in enumerate(fr.chambers):
         n = port.count
         avail = (xb - xa) - (n - 1) * DIVIDER_MM
-        if n * s_w > avail + 1e-6:
+        if n * s_w > avail + SLOT_TRIM_MM + 1e-6:
             blockers.append(f"port fit: chamber {c}: {n} slot{'s' if n > 1 else ''} of {s_w:.0f} mm "
                             f"do not fit the {xb - xa:.0f} mm chamber"
                             + (" with the 18 mm center cheek" if n > 1 else "")
                             + "; narrow the slot or widen the box")
             continue
-        cheek = (avail - n * s_w) / 2.0
+        w = min(s_w, avail / n)      # up to SLOT_TRIM_MM over the chamber: the full width, no side cheeks
+        cheek = max((avail - n * w) / 2.0, 0.0)
         sfx = _suffix(spec, c)
         blanks.append(Blank(f"shelf{sfx}", 1, mat18, BIRCH_DENSITY, pos=(xa, fr.y_bf, fr.z0 + s_h),
                             size=(xb - xa, L, BAFFLE_MM), blank_mm=(BAFFLE_MM, L, xb - xa),
@@ -1479,8 +1516,8 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
                                     chamber=c, notes="slot cheek, fills the slot end, glued" + _glue_up(cheek)))
         x = xa + cheek
         for j in range(n):
-            slots.append(SlotPort(c, x, x + s_w, s_h, L, cheek))
-            x += s_w
+            slots.append(SlotPort(c, x, x + w, s_h, L, cheek))
+            x += w
             if j < n - 1:
                 blanks.append(Blank(f"cheek_center{sfx}_{j}", 1, mat18, BIRCH_DENSITY,
                                     pos=(x, fr.y_bf, fr.z0), size=(DIVIDER_MM, L, s_h),
@@ -1803,7 +1840,7 @@ def layout_report(lay: Layout, checks: list) -> dict:
 - [ ] **Step 4: Run the layout tests to verify they pass**
 
 Run: `cd /home/brian/ClaudeProjects/3d-modeling-brain && .venv/bin/python -m pytest scripts/test_cablayout.py -q -s`
-Expected: 50 passed. The matrix line prints 1200 cases: 150 engine power stops, 1026 clean, 24 blocked (port fit 24, net volume 22; every port-fit blocker is a Cannabis Rex or Swamp Thang round proposal and every one names the 101.5 mm tube), worst clean net delta -1.10 percent, and 194 cases carrying a port mouth warn.
+Expected: 52 passed. The matrix line prints 1200 cases: 150 engine power stops, 1026 clean, 24 blocked (port fit 24, net volume 22; every port-fit blocker is a Cannabis Rex or Swamp Thang round proposal and every one names the 101.5 mm tube), worst clean net delta -1.10 percent, and 194 cases carrying a port mouth warn.
 
 - [ ] **Step 5: Regenerate the site-default fixture**
 
@@ -2299,8 +2336,8 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 - **Closed**: 12 mm birch back panel, flush with the rear edge, screwed to 18 x 18 mm cleats every 150 mm, removable. The jack plate sits in the back panel.
 - **Closed-ported, rear round port**: a Schedule 40 PVC or ABS tube through the back panel with a 12 mm plywood flange ring (outside diameter tube plus 60 mm) glued to the inside face; inside diameter snapped by the voicing engine to the tube table above, length from the voicing sheet measured through the back panel and never under 24 mm (the 12 mm back panel plus the 12 mm flange ring, the engine's `MIN_PORT_LENGTH_MM`), one per driver in the chamber (a mono 2x12 gets two identical ports, each sized as a 1x12 port in half the chamber; the sheet's `port.count` and `construction.port_count` say how many). Placement order: outboard of the driver at driver height, below the driver, lower outboard corner, above the driver; the first spot with 25 mm clearance to the speaker envelope, walls, cleats, brace, divider, and jack plate wins. When no spot fits, the layout's `port fit` blocker names the tube to try next (`port fit: chamber 0 port 0: no round port of 153.2 mm fits with 25 mm clearance; the longest table tube that fits at the 24 mm minimum is 101.5 mm; raise Fb, use a smaller tube or a larger box, or a front slot`, or `...; no table tube fits; use a front slot or a larger box`; a tube of the right diameter whose port is too long reads `port fit: chamber 0 port 0: tube 101.5 x 250 mm reaches the baffle; longest tube that fits at this diameter is 155 mm; ...`) and the skill's port loop re-runs the voicing once with the named tube pinned (`--port-tube`; when only a length is named, the next tube down the table, whose smaller area needs a shorter port); when that run warns (a clamped length, an air speed over the limit) or blocks again, the remedies go to Brian in this order: the front slot below, accepting the pinned tube's clamped tuning as the sheet reports it, raising Fb with the larger tube, a larger box.
-- **Closed-ported, front slot port**: the baffle stops short of the bottom panel by the slot height plus an 18 mm shelf; the shelf's front edge is flush with the baffle face, its depth equals the port length, and it doubles as the bottom baffle cleat. A slot narrower than the chamber gets two cheeks; a mono 2x12 gets two slots split by an 18 mm center cheek in line with the brace. The shelf must leave at least max(25 mm, slot height) of free depth behind it. Round rear tubes are a bass-cab convention; the published vented guitar cabs (EV TL806, Mesa Thiele) use the front slot. Default slot for the port loop (starting values): height 40 mm; width the chamber's full internal width, read from the last sheet's `box.chamber_internal_width_mm`, for a 1x12 and for each stereo chamber (no cheeks), and for a mono 2x12 two slots of (chamber width minus 18) / 2 each, split by the center cheek; so `--port-slot <width> 40`. The engine then adds the slot's 58 mm to the height floor (40 plus the 18 mm shelf) and may rescale the width to hold the volume: a slot wider than the new chamber blocks (`slots ... do not fit the chamber`) and the skill re-runs once with the new width; a narrower slot only gains thin cheeks. A shelf deeper than the box allows blocks with the deepest shelf that fits named (`port fit: slot shelf 220 mm deep leaves 27 mm behind it, under the 40 mm the slot needs to breathe; the deepest shelf that fits is 207 mm; lower the slot height or use a round port`, or `no shelf fits` when even 24 mm does not), so the skill lowers the slot height or takes a round port. A 40 mm slot across a 352 mm chamber is 141 cm2, above the 101.5 mm tube's 81 cm2, so the air speed stays low.
-- **Port mouth**: one effective port diameter of free air in front of the inner mouth, along the port axis, to the first part that faces it (basket or magnet envelope, brace, divider, stiffener, cleat, shelf, cheek; the baffle's back face for a rear tube, the back panel's inner face for a slot); a slot's effective diameter is that of a circle with its area. The layout's `port mouth` check warns under one diameter and never blocks (`chamber 0 port 0: mouth 84 mm from the speaker 0 magnet (18 percent of the mouth), under one diameter (101.5 mm)`; the percentage is how much of the mouth the part faces, information only). Three warns are expected today, and the builder accepts or resolves each per order: the site box's own rear tube (its 101.5 mm mouth sits 84 mm behind the magnet with 18 percent of the mouth facing it: accept, or a smaller tube); every 1x12 front slot whose bottom panel needs a stiffener (the generator starts that stiffener at the shelf's rear edge flat on the floor, so it reads as a 0 mm obstruction covering about 8 percent of the mouth: move the stiffener back, or accept); and a slot in a shallow box whose floor-level back cleat sits under one effective diameter behind the shelf (a deeper box, or accept). The coverage percentage is information only and never gates the warn. The choice goes into Decisions locked. The 25 mm standoff from the magnet's rear face stays the hard rule.
+- **Closed-ported, front slot port**: the baffle stops short of the bottom panel by the slot height plus an 18 mm shelf; the shelf's front edge is flush with the baffle face, its depth equals the port length, and it doubles as the bottom baffle cleat. A slot narrower than the chamber gets two cheeks; a mono 2x12 gets two slots split by an 18 mm center cheek in line with the brace. The shelf must leave at least max(25 mm, slot height) of free depth behind it. Round rear tubes are a bass-cab convention; the published vented guitar cabs (EV TL806, Mesa Thiele) use the front slot. Default slot for the port loop (starting values): height 40 mm; width the chamber's full internal width, read from the last sheet's `box.chamber_internal_width_mm`, for a 1x12 and for each stereo chamber (no cheeks), and for a mono 2x12 two slots of (chamber width minus 18) / 2 each, split by the center cheek; so `--port-slot <width> 40`, with the external width pinned to the last sheet's (`--pinned-width <box.external_mm[0]>`) so the chamber width holds and the slot fits it exactly. The engine adds the slot's 58 mm to the height floor (40 plus the 18 mm shelf); left free, it would also re-proportion the width to hold the volume, and that never settles, since the slot width sets the port area, the port length, the shelf depth among the inside parts, the gross volume, and so the width again (the Cannabis Rex roots order: a 438.9 mm chamber rescales to 427.2, then 426.5, then 426.4, and the slot blocks every time). The layout trims a slot up to 1 mm wider than its chamber to the full width (`SLOT_TRIM_MM`, no cheeks); wider than that it blocks (`port fit: chamber 0: 1 slot of 439 mm do not fit the 427 mm chamber; narrow the slot or widen the box`; a mono 2x12 reads `port fit: chamber 0: 2 slots of 352 mm do not fit the 704 mm chamber with the 18 mm center cheek; narrow the slot or widen the box`), which with the width pinned happens only when a floor moved the chamber by more than 1 mm, and the skill then re-runs once more with the new chamber width; a narrower slot only gains thin cheeks. A shelf deeper than the box allows blocks with the deepest shelf that fits named (`port fit: slot shelf 220 mm deep leaves 27 mm behind it, under the 40 mm the slot needs to breathe; the deepest shelf that fits is 207 mm; lower the slot height or use a round port`, or `no shelf fits` when even 24 mm does not), so the skill lowers the slot height or takes a round port. A 40 mm slot across a 352 mm chamber is 141 cm2, above the 101.5 mm tube's 81 cm2, so the air speed stays low.
+- **Port mouth**: one effective port diameter of free air in front of the inner mouth, along the port axis, to the first part that faces it (basket or magnet envelope, brace, divider, stiffener, cleat, shelf, cheek; the baffle's back face for a rear tube, the back panel's inner face for a slot); a slot's effective diameter is that of a circle with its area. The layout's `port mouth` check warns under one diameter and never blocks (`chamber 0 port 0: mouth 84 mm from the speaker 0 magnet (18 percent of the mouth), under one diameter (101.5 mm)`; the percentage is how much of the mouth the part faces, information only). Three warns are expected today, and the builder accepts or resolves each per order: the site box's own rear tube (its 101.5 mm mouth sits 84 mm behind the magnet with 18 percent of the mouth facing it: accept, or a smaller tube); every 1x12 front slot whose bottom panel needs a stiffener (the generator starts that stiffener at the shelf's rear edge flat on the floor, so it reads as a 0 mm obstruction covering about 8 percent of the mouth: move the stiffener back, or accept); and the floor-level back cleat behind a slot shelf sitting under one effective diameter of the mouth, which fires on most 2x12 slot boxes at their default depth and on shallow 1x12 ones (a deeper box, or accept). The coverage percentage is information only and never gates the warn. The choice goes into Decisions locked. The 25 mm standoff from the magnet's rear face stays the hard rule.
 - **Open-back**: two horizontal 12 mm panels, top and bottom, each (1 - open fraction) x internal height / 2 tall, screwed to cleats. Open fraction 0.40 for open, 0.25 for semi-open (from [[speaker-cab-voicing]]). The jack plate sits in the lower panel. Stereo keeps the divider and one plate per chamber.
 
 ## Grill
@@ -2377,7 +2414,7 @@ The system voices closed-ported, closed, open, and semi-open boxes and 2x12 cabi
 
 `tolex-1x12.md`, line 37: `weightApprox: "~32 lb loaded"`. `hardwood-1x12.md`, line 37: `weightApprox: "~38 lb loaded (varies by species)"`.
 
-The site-default fixture (`projects/Speaker-cab-system/fixtures/site-default/`, the 20 x 18 x 11 in tolex box with a G12H Anniversary at 4.7 kg) computes 17.0 kg, 37.5 lb, loaded: 11.3 kg of birch parts, the 4.7 kg speaker, and a 1 kg hardware allowance. That is a starting-value calculation ([[speaker-cab-construction]], Weight and center of mass), not a measurement: weigh a built tolex cab before touching the page. If the model holds, the tolex figure reads about 6 lb light and the hardwood figure needs its own check against the species densities.
+The site-default fixture (`projects/Speaker-cab-system/fixtures/site-default/`, the 20 x 18 x 11 in tolex box with a G12H Anniversary at 4.7 kg) computes 17.0 kg, 37.5 lb, loaded: 11.3 kg of birch parts, the 4.7 kg speaker, and a 1 kg hardware allowance. That is a starting-value calculation ([[speaker-cab-construction]], Weight and center of mass), not a measurement: weigh a built tolex cab before touching the page. If the model holds, the tolex figure reads about 5.5 lb light and the hardwood figure needs its own check against the species densities.
 ````
 <!-- /code -->
 
@@ -3422,18 +3459,26 @@ blocker's message takes one of five forms, and each names the next step:
    automatic re-run; the stop offers a lower slot height (`--port-slot W
    <h>`), a round port, or a deeper box.
 5. `port fit: chamber 0: 1 slot of 472 mm do not fit the 352 mm chamber;
-   narrow the slot or widen the box`: the engine rescaled the width under
-   the slot's height floor; re-run once with the slot width recomputed
-   from the new sheet's `box.chamber_internal_width_mm` (the full width
-   for one slot, (width minus 18) / 2 each for two), then `cab.py` again.
+   narrow the slot or widen the box` (a mono 2x12 reads `2 slots of ...
+   with the 18 mm center cheek`): the chamber moved by more than the 1 mm
+   the layout trims (a floor lifted it; the slot run's `--pinned-width`
+   holds the width itself); re-run once with `--pinned-width` kept and
+   the slot width recomputed from the new sheet's
+   `box.chamber_internal_width_mm` (the full width for one slot, (width
+   minus 18) / 2 each for two), then `cab.py` again.
 
 After an automatic re-run (forms 1, 2, and 5): when the new plain `cab.py`
 run has no blocker and the sheet carries no port warning (a clamped
 length, an air speed over the limit), continue to the CAD run. Otherwise
-stop and present, in this order: the front slot (`--port-slot <width> 40`
-with the width the sheet's `box.chamber_internal_width_mm`, or two slots
-of (width minus 18) / 2 on a mono 2x12, the construction note's default),
-accepting the pinned tube's clamped tuning as the sheet reports it,
+stop and present, in this order: the front slot (`--port-slot <width> 40
+--pinned-width <external width>`, the width the sheet's
+`box.chamber_internal_width_mm`, or two slots of (width minus 18) / 2 on
+a mono 2x12, and the external width the sheet's `box.external_mm[0]`,
+the construction note's default; the pin holds the chamber so the slot
+fits it exactly, since a free width re-proportions under the slot's
+shelf and never settles; a slot up to 1 mm over the chamber is trimmed
+to the full width by the layout), accepting the pinned tube's clamped
+tuning as the sheet reports it,
 raising Fb with the larger tube (`--port-tube` and `--fb`, within the
 engine's 45 to 90 Hz), and a larger box (relax `--max-external` or the
 pinned width). Brian picks; run that command, record the trade-off and
@@ -4193,10 +4238,10 @@ Expected: push accepted; `git status --short` shows only the other session's fil
 ## Self-review notes (written with the plan)
 
 - **Spec coverage.** Design section 3.1 (`SKILL.md`) is Task 6; 3.2 (templates) Tasks 5 and 6; 3.3 (`cabreport.py`) Task 5; 3.4 (the per-order directory) `SKILL.md` Phases 1 and 7; 4 (phases and stops) `SKILL.md`; 5 (the port loop) `SKILL.md` Phase 4 reading the blocker forms Task 2 builds; 6 (engine and layout touches) Tasks 1 and 2; 7 (voicing note, catalog, construction note) Tasks 3 and 4; 8 (fixtures and dry runs) Tasks 7 and 8; 9 (tests) the per-task tests; 10 (files) the File Structure table; 11 (vault updates) Tasks 4, 6, and 9; 12 (process) the Global Constraints; 13 and 14 stand. Section 15 of the design addendum records the amendments found while this plan was written.
-- **Pre-flight, done by construction.** Every code block and note text was embedded by `projects/Speaker-cab-system/pipeline/embed_plan_code.py --mirror plan3-mirror` from the mirror, where the suites run green: engine 433, cut list 3, layout 50 (the 1200-case matrix: 150 engine power stops, 1026 clean, 24 port-fit blockers, every one naming the 101.5 mm tube, 194 cases with a port mouth warn), CAD 24 (12 builds in 23 s; all 60 in 97 s with `CAB_FULL_MATRIX=1`), report 10; 520 in about 70 s. `--check` reports the plan in sync. Before embedding, a Fable 5.1 reviewer read the whole mirror against the design (`plan3-mirror/REVIEW.md`): its prose fixes are in the mirror (the loop now names what to do for each of the five `port fit` texts the layout emits; Phases 5 and 6 say when the operator rows are judged), and three of its minor code items were fixed in the mirror before embedding (a null finish or cloth renders "to be confirmed", a missing key and an unreadable template are named input errors, the site-default port mouth test asserts the fixture exists instead of skipping). The expected counts per task come from those runs and from two temp-copy experiments (the landed voicing note against the mirror tests: every test passing except the calibration row and the not-yet-added genre test; the landed notes against the catalog tests: 1 failed, 5 passed).
+- **Pre-flight, done by construction.** Every code block and note text was embedded by `projects/Speaker-cab-system/pipeline/embed_plan_code.py --mirror plan3-mirror` from the mirror, where the suites run green: engine 433, cut list 3, layout 52 (the 1200-case matrix: 150 engine power stops, 1026 clean, 24 port-fit blockers, every one naming the 101.5 mm tube, 194 cases with a port mouth warn), CAD 24 (12 builds in 23 s; all 60 in 97 s with `CAB_FULL_MATRIX=1`), report 10; 522 in about 70 s. `--check` reports the plan in sync. Before embedding, a Fable 5.1 reviewer read the whole mirror against the design (`plan3-mirror/REVIEW.md`): its prose fixes are in the mirror (the loop now names what to do for each of the five `port fit` texts the layout emits; Phases 5 and 6 say when the operator rows are judged), and three of its minor code items were fixed in the mirror before embedding (a null finish or cloth renders "to be confirmed", a missing key and an unreadable template are named input errors, the site-default port mouth test asserts the fixture exists instead of skipping). The expected counts per task come from those runs and from two temp-copy experiments (the landed voicing note against the mirror tests: every test passing except the calibration row and the not-yet-added genre test; the landed notes against the catalog tests: 1 failed, 5 passed).
 - **Placeholder scan.** No TBD, TODO, "similar to Task", or unfilled token remains; every code and note step shows its content; the two retrospective and memory skeletons in Task 9 carry bracketed fields for the controller to fill from the ledger, as Plan 2's did.
 - **Type consistency.** Every symbol named in an Interfaces block was resolved by the embed tool from the mirror (a missing name stops the tool); the five test files and the module import and test as a whole, so names agree across tasks by construction.
-- **Deviations from the design, recorded in the addendum's section 15.** A `--verify` run writes nothing and needs `--customer`; every non-verify run rewrites `checks.md`; `alignment` shows Fb and F3 on a ported box; the proposal template puts the configuration on its own line; the port loop handles five blocker forms and gives the too-long-port form one automatic re-run with the next tube down the table; the height floor over the limit is a blocker like the width floor; `port_dims`'s remedy sentence corrected; the site default and every 1x12 front slot carry a `port mouth` warn under the rule as approved; the catalog's Best with section is three bullets, not two; one calibration row moves with the 24 mm minimum (Eminence Red White and Blues, Fb 74 to 73 Hz); `SKILL.md` is 381 lines.
+- **Deviations from the design, recorded in the addendum's section 15.** A `--verify` run writes nothing and needs `--customer`; every non-verify run rewrites `checks.md`; `alignment` shows Fb and F3 on a ported box; the proposal template puts the configuration on its own line; the port loop handles five blocker forms and gives the too-long-port form one automatic re-run with the next tube down the table; the height floor over the limit is a blocker like the width floor; `port_dims`'s remedy sentence corrected; the site default and every 1x12 front slot carry a `port mouth` warn under the rule as approved; the catalog's Best with section is three bullets, not two; one calibration row moves with the 24 mm minimum (Eminence Red White and Blues, Fb 74 to 73 Hz); a slot up to 1 mm wider than its chamber is trimmed and the slot re-run pins the external width (found by the Task 4 review, which traced the Rex loop and showed a floating-width slot re-run never converges); `SKILL.md` is 389 lines.
 - **Design-level findings for Brian, not encoded.** The bridge is strict on ported boxes (punchy serves balanced, not tight) and the site box reads punchy with every catalog speaker, so a tight target always proposes a tone-driven box; both dry-run fixtures will be smaller than the site box. The `port mouth` warn fires on the site box's own rear tube (84 mm behind the magnet), on every 1x12 front slot whose floor needs a stiffener, and on slots in shallow boxes; coverage is reported for information and no threshold gates the warn. `--fb` is unbounded in code; the voicing note binds the skill to the engine's 45 to 90 Hz range.
 - **Warnings for implementers.** Task 1's warning texts are quoted in Tasks 2, 4, 6, and 8 and in both notes, so a wording change ripples. The CAD suite takes about 70 s and each dry-run fixture adds about 20 s. The two dry runs are long subagent sessions that follow `SKILL.md` end to end; their stops are answered from the answer sheets, and anything they needed beyond the sheets is a skill-text finding to fix before the fixture is committed. `checks.md` is rewritten by every non-verify `cabreport.py` run, so the operator rows are judged last. The site-default fixture ships without `checks.md` and `proposal.md`; the dry-run fixtures ship with both. Never stage the other session's file.
 - **Open minor items from the mirror review, left as recorded for the retrospective.** `verify_proposal` is a presence check (a deleted Configuration line still verifies because "1x12" appears in the line label); `slot_ports` says "1 slot of W mm do not fit"; `--fb` has no cap in code; `wood movement` stays an operator row on the tolex line.
