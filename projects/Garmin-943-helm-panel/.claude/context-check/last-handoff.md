@@ -1,6 +1,8 @@
 # Handoff: Garmin 943xsv helm panel, 2026-09-09 (revision C: Starboard chosen)
 
 ## State
+TEMPLATE PRINTED AND FITS (2026-09-11, Brian confirmed). Retrospective at knowledge/learnings/garmin-943-helm-panel.md.
+
 Router template designed, verified, and exported. Nothing printed yet. The full panel is now modeled too, at Brian's provisional 18.5 x 11.5 in; he will send exact measurements and photos later.
 
 Files in `projects/Garmin-943-helm-panel/`: `brief.md` (spec, Garmin numbers, build results, print settings), `router-template.py` (build123d source with self-checks), `router-template.stl`, `router-template.3mf`, `images/router-template-4view.png`.

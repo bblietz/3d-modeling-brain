@@ -1,7 +1,7 @@
 ---
 title: Garmin 943xsv helm panel
 type: project-brief
-status: DECIDED 1/2 in Starboard, routed one piece. Template printed-ready. Awaiting Brian's measurements and photos
+status: template PRINTED and fits (2026-09-11). 1/2 in Starboard decided. Awaiting Brian's opening measurements, then the rout
 created: 2026-09-08
 tags: [boat, helm, garmin, starboard, router-template]
 ---
@@ -390,3 +390,17 @@ finishing washers for the perimeter.
 ever wanted: a recessed pocket, a cable channel, integrated ribs. Note it is
 self-consistent at 3/8 in ASA and is NOT derived from the 1/2 in Starboard
 panel.
+
+## Template printed and fitted, 2026-09-11
+
+Brian printed the router template and reports it fit perfect. That validates the
+whole cutout chain before any Starboard is cut: the 222.4 x 139.0 mm window, the
+offset pilot guides, and the TOP orientation mark.
+
+Retrospective written to [[garmin-943-helm-panel]] in knowledge/learnings.
+
+Not captured: a caliper reading of the printed window, and which of the two
+print presets was actually used. Worth recording if the template is ever
+reprinted.
+
+Next: opening measurements and photos, then rout the panel.
