@@ -39,7 +39,8 @@ around inside an order.
   procedure, calibration table), [[speaker-cab-construction]]
   (materials, joinery, margins, ports, the default front slot, the port
   remedy order, hardware), `knowledge/speakers/<slug>.md` (the catalog;
-  `.venv/bin/python scripts/cabvoice.py list` prints the slugs).
+  `/home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/cabvoice.py list`
+  prints the slugs).
 - Templates: `skills/speaker-cab/templates/brief.md`, `proposal.md`,
   `listening-notes.md`; the per-order `cab.py` template is
   `projects/Speaker-cab-system/fixtures/site-default/cab.py`.
@@ -66,7 +67,8 @@ name and email. `Notes:` usually holds the tonal goals.
 
 1. Create `projects/Cab-<Customer>-<NxS>-<line>/` (example
    `Cab-Smith-1x12-tolex`; Brian may substitute a code for the surname)
-   and copy `skills/speaker-cab/templates/brief.md` there as `brief.md`.
+   and copy `skills/speaker-cab/templates/brief.md` there as `brief.md`,
+   its frontmatter `status` set to `intake`.
 2. Fill the Rig block. Every field stays present even when empty, so a
    missing answer is visible. Amp type (tube, solid state, modeling) is
    derived from the model; ask only when the model is unknown. The
@@ -128,8 +130,9 @@ No CAD before Brian approves this phase.
    (the 101.5 mm tube at 40 mm, the calibration port) goes with it:
 
    ```bash
-   .venv/bin/python scripts/cabvoice.py evaluate --speaker <slug> --impedance <ohm> \
-     --enclosure closed-ported --tone projects/Cab-<...>/tone.json --line tolex \
+   cd /home/brian/ClaudeProjects/3d-modeling-brain
+   /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/cabvoice.py evaluate --speaker <slug> --impedance <ohm> \
+     --enclosure closed-ported --tone projects/Cab-<...>/tone.json --line <line> [--species <species>] \
      --internal 472 421.2 229.4 --port-diameter 101.5 --port-length 40 \
      --name Cab-<...> --out projects/Cab-<...>/
    ```
@@ -140,9 +143,10 @@ No CAD before Brian approves this phase.
    propose:
 
    ```bash
-   .venv/bin/python scripts/cabvoice.py propose --speaker <slug> --impedance <ohm> \
+   cd /home/brian/ClaudeProjects/3d-modeling-brain
+   /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/cabvoice.py propose --speaker <slug> --impedance <ohm> \
      --enclosure closed-ported --tone projects/Cab-<...>/tone.json \
-     --jack mono --line tolex --name Cab-<...> --out projects/Cab-<...>/ \
+     --jack mono --line <line> --name Cab-<...> --out projects/Cab-<...>/ \
      [--species <species>] [--pinned-width <mm>] [--max-external W H D] \
      [--port-diameter <mm>] [--port-slot W H] [--port-tube <mm>] [--fb <hz>] \
      [--port-count <n>] [--accept-low-headroom]
@@ -164,7 +168,8 @@ No CAD before Brian approves this phase.
    it. Every predicted number is unverified, ears only; say so.
 6. **Stop one.** Present the tone target, the ranking, the back type,
    and the reading. Brian approves or redirects; write the approval as
-   a dated line in Decisions locked.
+   a dated line in Decisions locked and set the brief's `status` to
+   `voicing-approved`.
 
 ## Phase 3 - Plan
 
@@ -195,17 +200,19 @@ Write the plan into the brief and present it briefly; no stop.
 Run the layout first, then the CAD; read every verdict line.
 
 ```bash
-.venv/bin/python projects/Cab-<...>/cab.py            # layout verdicts only, nothing written
-EXPORT=1 .venv/bin/python projects/Cab-<...>/cab.py   # CAD verdicts, cab.step, images/, cutlist, cab.json
+cd /home/brian/ClaudeProjects/3d-modeling-brain
+/home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python projects/Cab-<...>/cab.py            # layout verdicts only, nothing written
+EXPORT=1 /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python projects/Cab-<...>/cab.py   # CAD verdicts, cab.step, images/, cutlist, cab.json
 ```
 
 `EXPORT=1` writes `cab.json`, `cab.step`, `cutlist.md`, `cutlist.csv`,
 and `images/cab-iso.png`, `cab-front.png`, `cab-top.png`,
 `cab-right.png`, `cab-exploded.png` next to `cab.py` (`CAB_OUT=<dir>`
-redirects). View each render with the Read tool before continuing; a
-subagent may inspect them and report. `TMP_STL=<path>` writes an STL
-for `scripts/render_stl.py <stl> <png> [elev,azim ...]` when another
-angle is needed.
+redirects); when it exits 0 with that package on disk, set the brief's
+`status` to `built`. View each render with the Read tool before
+continuing; a subagent may inspect them and report. `TMP_STL=<path>`
+writes an STL for `scripts/render_stl.py <stl> <png> [elev,azim ...]`
+when another angle is needed.
 
 The port loop, on a `port fit` blocker from the plain `cab.py` run. The
 blocker's message takes one of five forms, and each names the next step:
@@ -242,20 +249,23 @@ blocker's message takes one of five forms, and each names the next step:
 After an automatic re-run (forms 1, 2, and 5): when the new plain `cab.py`
 run has no blocker and the sheet carries no port warning (a clamped
 length, an air speed over the limit), continue to the CAD run. Otherwise
-stop and present, in this order: the front slot (`--port-slot <width> 40
---pinned-width <external width>`, the width the sheet's
-`box.chamber_internal_width_mm`, or two slots of (width minus 18) / 2 on
-a mono 2x12, and the external width the sheet's `box.external_mm[0]`,
-the construction note's default; the pin holds the chamber so the slot
-fits it exactly, since a free width re-proportions under the slot's
-shelf and never settles; a slot up to 1 mm over the chamber is trimmed
-to the full width by the layout), accepting the pinned tube's clamped
-tuning as the sheet reports it,
-raising Fb with the larger tube (`--port-tube` and `--fb`, within the
-engine's 45 to 90 Hz), and a larger box (relax `--max-external` or the
-pinned width). Brian picks; run that command, record the trade-off and
-the choice in the brief, and continue. Each form gets one automatic
-re-run per order; a blocker after it is a stop.
+stop and present these remedies, in this order:
+
+1. The front slot, `--port-slot <width> 40 --pinned-width <external width>`:
+   the width the sheet's `box.chamber_internal_width_mm`, or two slots
+   of (width minus 18) / 2 on a mono 2x12, and the external width the
+   sheet's `box.external_mm[0]`, the construction note's default. The
+   pin holds the chamber so the slot fits it exactly, since a free width
+   re-proportions under the slot's shelf and never settles; a slot up to
+   1 mm over the chamber is trimmed to the full width by the layout.
+2. The pinned tube's clamped tuning, accepted as the sheet reports it.
+3. Fb raised with the larger tube (`--port-tube` and `--fb`, within the
+   engine's 45 to 90 Hz).
+4. A larger box (relax `--max-external` or the pinned width).
+
+Brian picks; run that command, record the trade-off and the choice in
+the brief, and continue. Each form gets one automatic re-run per order;
+a blocker after it is a stop.
 
 Any other blocker (net volume off the sheet, an impossible box, a power
 stop, a width floor over a limit, magnet to back, interference) stops
@@ -268,7 +278,8 @@ Backend choice), not something to route around.
 ## Phase 5 - Check table
 
 ```bash
-.venv/bin/python scripts/cabreport.py projects/Cab-<...>/ --customer "<Customer>"
+cd /home/brian/ClaudeProjects/3d-modeling-brain
+/home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/cabreport.py projects/Cab-<...>/ --customer "<Customer>"
 ```
 
 writes `checks.md` on every run from `voicing.json` and `cab.json`: the
@@ -296,10 +307,12 @@ Every `cabreport.py` run without `--verify` rewrites `checks.md` from the
 two JSON files (a `--verify` run writes nothing), so judge the operator
 rows only after the last engine and `cab.py` run, and judge them again
 after any regeneration. Warn rows are not operator rows: each warn the
-order keeps (a `port mouth` warn is expected on the site box's rear tube
-and on a 1x12 front slot, see [[speaker-cab-construction]]; `spans`,
-`power`, and engine warnings likewise) gets a dated acceptance line in
-Decisions locked, or a re-run that removes it.
+order keeps (a `port mouth` warn is expected on the site box's rear tube,
+on a 1x12 front slot, and on the floor-level back cleat behind a slot
+shelf, which fires on most 2x12 slot boxes at their default depth and on
+shallow 1x12 ones, see [[speaker-cab-construction]]; `spans`, `power`,
+and engine warnings likewise) gets a dated acceptance line in Decisions
+locked, or a re-run that removes it.
 
 ## Phase 6 - Export and proposal
 
@@ -328,7 +341,8 @@ predicted frequencies never enter the proposal.
    fixed inside the slots, never in the facts:
 
    ```bash
-   .venv/bin/python scripts/cabreport.py projects/Cab-<...>/ --customer "<Customer>" --verify
+   cd /home/brian/ClaudeProjects/3d-modeling-brain
+   /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/cabreport.py projects/Cab-<...>/ --customer "<Customer>" --verify
    ```
 
 ## Phase 7 - Handoff
@@ -343,14 +357,16 @@ predicted frequencies never enter the proposal.
   stays out of git (the vault ignores `projects/Cab-*/*.step`).
 
   ```bash
-  git add projects/Cab-<...>/brief.md projects/Cab-<...>/tone.json projects/Cab-<...>/voicing.json projects/Cab-<...>/voicing.md projects/Cab-<...>/cab.py projects/Cab-<...>/cab.json projects/Cab-<...>/checks.md projects/Cab-<...>/cutlist.md projects/Cab-<...>/cutlist.csv projects/Cab-<...>/proposal.md projects/Cab-<...>/images
+  cd /home/brian/ClaudeProjects/3d-modeling-brain
+  git add projects/Cab-<...>/brief.md projects/Cab-<...>/tone.json projects/Cab-<...>/voicing.json projects/Cab-<...>/voicing.md projects/Cab-<...>/cab.py projects/Cab-<...>/cab.json projects/Cab-<...>/checks.md projects/Cab-<...>/cutlist.md projects/Cab-<...>/cutlist.csv projects/Cab-<...>/proposal.md projects/Cab-<...>/images projects/Cab-<...>/.claude/context-check/last-handoff.md
   git commit -m "Cab <Customer> <NxS> <line>: order package"
   git push origin main
   ```
 
 - **Stop two.** Brian reviews `checks.md`, the renders, and
   `proposal.md`, fills the `Price:` line, and sends the proposal.
-  Record his edits in Decisions locked and commit again.
+  Record his edits in Decisions locked, set the brief's `status` to
+  `proposed`, and commit again.
 
 ## Phase 8 - After the build
 
@@ -365,7 +381,19 @@ predicted frequencies never enter the proposal.
 - Promote any corrected construction default into
   [[speaker-cab-construction]] and any voicing rule that moved into
   [[speaker-cab-voicing]]; update memory when a rule changes.
-- Fill the brief's Outcome and the retrospective's site-form gaps.
+- Fill the brief's Outcome and the retrospective's site-form gaps; once
+  the cabinet has shipped and the listening notes are written, set the
+  brief's `status` to `delivered`.
+- Commit the retrospective, the speaker note, any promoted rule, the
+  memory file, and the brief with explicit paths, the message ending
+  with the session's attribution trailers, and push:
+
+  ```bash
+  cd /home/brian/ClaudeProjects/3d-modeling-brain
+  git add knowledge/learnings/cab-<customer>-<config>.md knowledge/speakers/<slug>.md knowledge/speaker-cab-construction.md knowledge/speaker-cab-voicing.md memory/project-speaker-cab-system.md projects/Cab-<...>/brief.md
+  git commit -m "Cab <Customer> <NxS> <line>: listening notes and retrospective" -m "<the session's attribution trailers>"
+  git push origin main
+  ```
 
 ## Error handling
 
