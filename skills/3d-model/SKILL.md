@@ -1,6 +1,6 @@
 ---
 name: 3d-model
-description: Use when the user asks to design, generate, create, or modify a 3D model or 3D-printable part, including recreating a part from photos, drawings, or sketches, for the Bambu Lab X2D printer.
+description: Use when the user asks to design, generate, create, or modify a 3D model or 3D-printable part, including recreating a part from photos, drawings, or sketches, for the Bambu Lab X2D printer. For guitar speaker cabinets, use the speaker-cab skill.
 ---
 
 # Generate 3D Models (Bambu Lab X2D)

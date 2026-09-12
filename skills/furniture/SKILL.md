@@ -1,6 +1,6 @@
 ---
 name: furniture
-description: Use when the user asks to design furniture or a woodworking project (shelf, bookcase, table, cabinet, bench, desk, workbench), modify such a design, or produce a cut list, lumber list, or shop drawings from one. For 3D-printable parts, use the 3d-model skill instead.
+description: Use when the user asks to design furniture or a woodworking project (shelf, bookcase, table, cabinet, bench, desk, workbench), modify such a design, or produce a cut list, lumber list, or shop drawings from one. For 3D-printable parts, use the 3d-model skill instead. For guitar speaker cabinets, use the speaker-cab skill.
 ---
 
 # Design Furniture (cut list workflow)

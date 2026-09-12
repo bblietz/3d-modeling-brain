@@ -6,14 +6,14 @@ Agentic OS and second brain for designing and printing 3D models on a Bambu Lab 
 
 - `projects/<Name>/` - one directory per model project: brief, reference images, decisions, and the CAD artifacts (FCStd, STL, 3MF).
 - `scripts/` - ops scripts: FreeCAD launcher (`start-freecad-mcp.sh`), health check (`smoke-test.py`), Bambu preset/3MF helpers.
-- `skills/` - the `/3d-model` and `/furniture` skill sources, symlinked from `~/.claude/skills/`.
+- `skills/` - the `/3d-model`, `/furniture`, and `/speaker-cab` skill sources, symlinked from `~/.claude/skills/`.
 - `knowledge/` - distilled, reusable notes (printer profile, materials, techniques). `knowledge/learnings/` holds per-project retrospectives.
 - `memory/` - Claude persistent memory. This is the canonical location; `~/.claude/projects/-home-brian-ClaudeProjects-3d-modeling-brain/memory` is a symlink pointing here so Obsidian indexes every memory file. Do not break this symlink.
 - This folder is an Obsidian vault (`.obsidian/`). Write all notes as Obsidian markdown: YAML frontmatter plus `[[wikilinks]]`.
 
 ## Modeling workflow
 
-- Always use the `/3d-model` skill for 3D-printing work (visual verification per feature, printability check, STL + 3MF export) and the `/furniture` skill for furniture/woodworking work (same build discipline; buildability check and cut list via `scripts/cutlist.py` instead of printability and 3MF).
+- Always use the `/3d-model` skill for 3D-printing work (visual verification per feature, printability check, STL + 3MF export), the `/furniture` skill for furniture/woodworking work (same build discipline; buildability check and cut list via `scripts/cutlist.py` instead of printability and 3MF), and the `/speaker-cab` skill for guitar speaker cabinet orders (voicing engine, generator, check table, and customer proposal, with two stops for Brian).
 - Per that skill, CAD artifacts (FCStd, STL, 3MF) live in `projects/<Name>/` alongside the notes (migrated from the retired `~/ClaudeProjects/FreeCAD` repo on 2026-07-30). Record paths and outcomes in `projects/<Name>/` notes.
 - After each completed model or print, write a retrospective in `knowledge/learnings/<name>.md`: what worked, what failed, measured fits, settings used.
 - At milestones and before any `/clear`, persist a handoff to `.claude/context-check/last-handoff.md` in the active project directory, including a "Decisions already locked" block; promote locked decisions into the retrospective so they outlive the handoff.
