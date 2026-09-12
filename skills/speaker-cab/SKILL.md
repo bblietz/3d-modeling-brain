@@ -359,7 +359,7 @@ predicted frequencies never enter the proposal.
   ```bash
   cd /home/brian/ClaudeProjects/3d-modeling-brain
   git add projects/Cab-<...>/brief.md projects/Cab-<...>/tone.json projects/Cab-<...>/voicing.json projects/Cab-<...>/voicing.md projects/Cab-<...>/cab.py projects/Cab-<...>/cab.json projects/Cab-<...>/checks.md projects/Cab-<...>/cutlist.md projects/Cab-<...>/cutlist.csv projects/Cab-<...>/proposal.md projects/Cab-<...>/images projects/Cab-<...>/.claude/context-check/last-handoff.md
-  git commit -m "Cab <Customer> <NxS> <line>: order package"
+  git commit -m "Cab <Customer> <NxS> <line>: order package" -m "<the session's attribution trailers>"
   git push origin main
   ```
 
