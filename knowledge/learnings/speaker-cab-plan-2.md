@@ -60,7 +60,7 @@ Design-level items the review raised for Brian, not encoded:
 
 ## Open items
 
-- **Plan 3 (skill):** `--port-count` CLI flag; Fb override; the build loop that re-runs voicing on a port blocker with the longest tube that fits; proposal template from `cab.json`; the check table rows from the design's section 5; the site copy fix (corner posts, closed-back wording) as a note to Brian.
+- **Plan 3 (skill):** done, see [[speaker-cab-plan-3]].
 - **Later:** per-impedance catalog sets; measured finger width, flange thickness, corner leg length, and jack plate cutout from purchased parts; a vertical 2x12; a tolex-line dovetail if asked; a port mouth clearance rule; the magnet-to-back check to include the back stiffener's 18 mm and the open and semi-open panels; the strap handle check to report the center-of-mass offset from the panel center (today the handle is placed at the center of mass, so the check cannot fail).
 
 ## Decisions already locked
