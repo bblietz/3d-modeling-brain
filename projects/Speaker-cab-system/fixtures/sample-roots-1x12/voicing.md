@@ -53,7 +53,7 @@ Mode: propose. Every number here is a prediction: unverified, ears only.
 
 ## Port
 
-- round 102 mm, area 81 cm2, length 51 mm, rear, 1 per chamber
+- round 101.5 mm, area 81 cm2, length 51 mm, rear, 1 per chamber
 - Worst-case air speed 2.3 m/s (limit 17 m/s)
 
 ## Prediction
