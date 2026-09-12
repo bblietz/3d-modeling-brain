@@ -113,7 +113,7 @@ Approach overrides genre: clean sets breakup clean; edge of breakup sets moderat
 
 ## Calibration table
 
-Calibration table, every number prediction_status "unverified, ears only". Generated 2026-09-10 with `evaluate` (closed, site box 472 x 421.2 x 229.4 mm internal) and `propose` (closed-ported, low_end balanced), 16 ohm where the note lists it (voiced with the note's 8 ohm T/S set, see Model limits), amp 40 W.
+Calibration table, every number prediction_status "unverified, ears only". Generated 2026-09-11 with `evaluate` (closed, site box 472 x 421.2 x 229.4 mm internal) and `propose` (closed-ported, low_end balanced), 16 ohm where the note lists it (voiced with the note's 8 ohm T/S set, see Model limits), amp 40 W.
 
 | Speaker | Data | Net L in site box | Closed Qtc | Closed character | Closed F3 Hz | Proposed ported net L | Fb Hz | Ported character | Notes |
 |---|---|---|---|---|---|---|---|---|---|
@@ -128,7 +128,7 @@ Calibration table, every number prediction_status "unverified, ears only". Gener
 | [[celestion-heritage-g12h55]] | third-party | 42.5 | 0.605 | tight | 109 | 68.0 | 45 | flat | speaker handling 30 W is below the amp's 40 W; celestion-heritage-g12h55: Thiele-Small volume 71.3 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 68.0 L |
 | [[celestion-vintage-30]] | analog | 42.5 | 0.701 | tight | 105 | 37.9 | 60 | flat |  |
 | [[eminence-cannabis-rex]] | datasheet | 42.0 | 0.924 | balanced | 115 | 45.5 | 77 | punchy |  |
-| [[eminence-red-white-and-blues]] | datasheet | 42.0 | 1.040 | big | 114 | 66.0 | 74 | punchy | port too short (6.5 mm) for Fb 78 Hz in 66.0 L; clamped to 20 mm, reduce port area or lower Fb; port clamped at the size cap: tuned 74.4 Hz, target 78.0 Hz; lower Fb or use a smaller box |
+| [[eminence-red-white-and-blues]] | datasheet | 42.0 | 1.040 | big | 114 | 66.0 | 73 | punchy | port too short (6.5 mm) for Fb 78 Hz in 66.0 L; clamped to 24 mm; a larger port, a lower Fb, or a smaller box lengthens it; port clamped at the size cap: tuned 73.5 Hz, target 78.0 Hz; lower Fb or use a smaller box |
 | [[eminence-swamp-thang]] | datasheet | 41.8 | 0.747 | tight | 131 | 41.3 | 78 | flat |  |
 | [[eminence-texas-heat]] | datasheet | 42.0 | 0.967 | balanced | 95 | 50.9 | 63 | punchy |  |
 | [[eminence-tonker]] | datasheet | 41.8 | 0.633 | tight | 138 | 34.1 | 71 | flat |  |

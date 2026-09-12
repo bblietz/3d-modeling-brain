@@ -289,13 +289,14 @@ def test_size_port_grows_until_under_limit(drv):
 
 
 def test_size_port_grows_when_too_short(drv):
-    # 60 L at 60 Hz: a 75 mm port needs a negative length, about 100 mm works,
-    # which snaps up to the 101.5 mm (4 inch) tube
+    # 60 L at 60 Hz: a 75 mm port needs a negative length; the port grows until its
+    # length reaches the 24 mm minimum (104.7 mm across), which snaps up to the
+    # 153.2 mm (6 inch) tube (the 20 mm minimum stopped at 100 mm and the 101.5 tube)
     p = cabvoice.size_port(drv, 60.0, 60.0, diameter_mm=75.0)
-    assert p.diameter_mm == 101.5
+    assert p.diameter_mm == 153.2
     assert p.length_mm >= cabvoice.MIN_PORT_LENGTH_MM
     assert not any("too short" in w for w in p.warnings)
-    assert any(w.startswith("port diameter snapped to the 101.5 mm tube") for w in p.warnings)
+    assert any(w.startswith("port diameter snapped to the 153.2 mm tube (from 104.7 mm)") for w in p.warnings)
 
 
 def test_size_port_keeps_warning_at_max_size(drv):
@@ -874,13 +875,15 @@ def test_every_catalog_speaker_proposes_without_exception(tone):
 # ---- Final review: propose versus evaluate, calibration table -----------
 
 def _matrix_params():
-    rows = [(enclosure, jack, n, None) for enclosure in cabvoice.ENCLOSURE_TYPES
+    rows = [(enclosure, jack, n, None, None) for enclosure in cabvoice.ENCLOSURE_TYPES
             for jack, n in (("mono", 1), ("mono", 2), ("stereo", 2))]
-    rows.append(("closed-ported", "mono", 1, (352.0, 40.0)))    # a slot port, evaluated as built
-    return [pytest.param(slug, enclosure, jack, n, slot,
-                         id=f"{slug}-{enclosure}-{jack}-{n}" + ("-slot" if slot else ""))
+    rows.append(("closed-ported", "mono", 1, (352.0, 40.0), None))   # a slot port, evaluated as built
+    rows.append(("closed-ported", "mono", 1, None, 101.5))           # a pinned tube, clamped or not
+    return [pytest.param(slug, enclosure, jack, n, slot, tube,
+                         id=f"{slug}-{enclosure}-{jack}-{n}" + ("-slot" if slot else "")
+                         + ("-pinned" if tube else ""))
             for slug in cabvoice.list_speakers(CATALOG)
-            for enclosure, jack, n, slot in rows]
+            for enclosure, jack, n, slot, tube in rows]
 
 
 def _port_from_json(port_dict):
@@ -893,11 +896,11 @@ def _port_from_json(port_dict):
     return port
 
 
-@pytest.mark.parametrize("slug,enclosure,jack,n,slot", _matrix_params())
-def test_evaluate_reproduces_propose(tone, slug, enclosure, jack, n, slot):
+@pytest.mark.parametrize("slug,enclosure,jack,n,slot,tube", _matrix_params())
+def test_evaluate_reproduces_propose(tone, slug, enclosure, jack, n, slot, tube):
     d = cabvoice.load_speaker(slug, CATALOG)
     z = 16 if 16 in d.impedance_ohm else d.impedance_ohm[0]
-    c = cabvoice.Constraints(port_slot_mm=slot)
+    c = cabvoice.Constraints(port_slot_mm=slot, port_tube_mm=tube)
     p = cabvoice.propose([d] * n, [z] * n, enclosure, tone, jack_config=jack, constraints=c,
                          name=slug)
     e = cabvoice.evaluate([d] * n, [z] * n, enclosure, tone, p.box["internal_mm"],
@@ -1279,3 +1282,218 @@ def test_inside_parts_uses_the_divider_thickness(drv, tone):
     v = cabvoice.evaluate([drv, drv], [16, 16], "closed", tone, wide, jack_config="stereo",
                           constraints=cabvoice.Constraints(panel_mm=19.0))
     assert v.volumes["inside_parts_l"] == pytest.approx(thick, abs=1e-9)
+
+
+# ---- Plan 3 Task 1: engine flags, port minimum, size-limit blockers ----
+
+def test_min_port_length_is_the_back_panel_plus_the_flange_ring():
+    assert cabvoice.MIN_PORT_LENGTH_MM == 24.0
+    p = cabvoice.port_dims(40.0, 68.0, diameter_mm=77.3)
+    assert p.length_mm == 24.0
+    assert any("clamped to 24 mm; a larger port, a lower Fb, or a smaller box lengthens it" in w
+               for w in p.warnings)
+
+
+def test_tube_from_table():
+    assert cabvoice.tube_from_table(101.5) == 101.5
+    assert cabvoice.tube_from_table(101.5 + 1e-9) == 101.5
+    with pytest.raises(ValueError, match="port tube must be one of 52, 77.3, 101.5, 153.2 mm, not 100"):
+        cabvoice.tube_from_table(100.0)
+
+
+def test_constraints_validate_the_pinned_tube_and_fb():
+    assert cabvoice.Constraints(port_tube_mm=77.3).port_tube_mm == 77.3
+    with pytest.raises(ValueError, match="port tube"):
+        cabvoice.Constraints(port_tube_mm=100.0)
+    with pytest.raises(ValueError, match="fb_hz"):
+        cabvoice.Constraints(fb_hz=0.0)
+    assert cabvoice.Constraints().port_tube_mm is None and cabvoice.Constraints().fb_hz is None
+
+
+def test_size_port_pinned_tube_neither_grows_nor_snaps(drv):
+    drv.xmax_mm = 10.0                      # fast enough that the free port grows past 77.3
+    free = cabvoice.size_port(drv, 40.0, 60.0, diameter_mm=77.3)
+    assert free.diameter_mm > 77.3 and not free.pinned
+    p = cabvoice.size_port(drv, 40.0, 60.0, pinned_mm=77.3)
+    assert p.pinned and p.diameter_mm == 77.3
+    assert p.air_speed_ms > cabvoice.PORT_V_MAX
+    assert not any("snapped" in w or "still above" in w for w in p.warnings)
+    with pytest.raises(ValueError, match="not both"):
+        cabvoice.size_port(drv, 40.0, 60.0, slot_mm=(200.0, 40.0), pinned_mm=77.3)
+    with pytest.raises(ValueError, match="port tube"):
+        cabvoice.size_port(drv, 40.0, 60.0, pinned_mm=100.0)
+
+
+def test_size_port_pinned_tube_clamps_a_short_port(drv):
+    p = cabvoice.size_port(drv, 60.0, 60.0, pinned_mm=77.3)   # the free port grows to 153.2 here
+    assert p.pinned and p.diameter_mm == 77.3
+    assert p.length_mm == cabvoice.MIN_PORT_LENGTH_MM
+    assert any("too short" in w for w in p.warnings)
+
+
+def test_propose_pinned_tube_sheet_and_clamp_warning(drv, tone):
+    free = cabvoice.propose([drv], [16], "closed-ported", tone)
+    assert free.port["diameter_mm"] == 101.5 and free.port["pinned"] is False
+    assert free.port["fb_override_hz"] is None
+    v = cabvoice.propose([drv], [16], "closed-ported", tone,
+                         constraints=cabvoice.Constraints(port_tube_mm=77.3))
+    assert v.port["pinned"] is True and v.port["diameter_mm"] == 77.3
+    assert v.port["length_mm"] == cabvoice.MIN_PORT_LENGTH_MM
+    tuned = cabvoice.port_tuning_hz(v.volumes["per_chamber_net_l"] / 1e3,
+                                    v.port["area_cm2"] / 1e4, v.port["length_mm"] / 1e3)
+    assert v.prediction["fb_hz"] == pytest.approx(tuned, abs=1e-9)
+    assert tuned == pytest.approx(62.4, abs=0.1)
+    clamp = next(w for w in v.warnings if w.startswith("port clamped at the 24 mm minimum"))
+    assert clamp == ("port clamped at the 24 mm minimum with the pinned 77.3 mm tube: tuned 62.4 Hz, "
+                     "target 67.5 Hz; a larger tube, a lower Fb, or a smaller box lengthens it")
+    assert not any("snapped" in w or "size cap" in w for w in v.warnings)
+    assert "(pinned 77.3 mm tube)" in cabvoice.render_markdown(v)
+    same = cabvoice.propose([drv], [16], "closed-ported", tone,
+                            constraints=cabvoice.Constraints(port_tube_mm=101.5))
+    assert same.port["pinned"] is True
+    assert same.port["length_mm"] == pytest.approx(free.port["length_mm"])
+    assert not any("clamped" in w for w in same.warnings)
+
+
+def test_propose_pinned_tube_air_speed_warns_instead_of_growing(drv, tone):
+    drv.xmax_mm = 10.0
+    free = cabvoice.propose([drv], [16], "closed-ported", tone)
+    assert free.port["diameter_mm"] == 153.2                  # grown and snapped
+    v = cabvoice.propose([drv], [16], "closed-ported", tone,
+                         constraints=cabvoice.Constraints(port_tube_mm=52.0))
+    assert v.port["diameter_mm"] == 52.0 and v.port["pinned"] is True
+    assert v.port["air_speed_ms"] > cabvoice.PORT_V_MAX
+    speed = next(w for w in v.warnings if w.startswith("port air speed"))
+    assert speed == f"port air speed {v.port['air_speed_ms']:.1f} m/s above 17.0 m/s"
+    assert not any("still above" in w for w in v.warnings)
+    assert v.blockers == []
+
+
+def test_propose_fb_override_is_applied_and_recorded(drv, tone):
+    v = cabvoice.propose([drv], [16], "closed-ported", tone,
+                         constraints=cabvoice.Constraints(fb_hz=55.0))
+    assert v.port["fb_override_hz"] == 55.0
+    assert v.prediction["fb_hz"] == pytest.approx(55.0, abs=1e-6)
+    assert v.port["diameter_mm"] == 77.3 and v.port["length_mm"] > cabvoice.MIN_PORT_LENGTH_MM
+    assert not any("clamped" in w for w in v.warnings)
+    assert "- Fb override: 55.0 Hz in place of the engine's target" in cabvoice.render_markdown(v)
+    # the box volume is the alignment's, not re-solved for the override
+    free = cabvoice.propose([drv], [16], "closed-ported", tone)
+    assert v.volumes["per_driver_net_l"] == pytest.approx(free.volumes["per_driver_net_l"], abs=1e-6)
+    closed = cabvoice.propose([drv], [16], "closed", tone, constraints=cabvoice.Constraints(fb_hz=55.0))
+    assert closed.port is None   # no port, nothing to record
+
+
+def test_propose_width_floor_over_the_limit_is_a_blocker(drv, tone):
+    limit = cabvoice.Constraints(max_external_mm=(600.0, 457.2, 400.0))
+    two = cabvoice.propose([drv, drv], [16, 16], "closed", tone, jack_config="mono", constraints=limit)
+    assert two.box["internal_mm"][0] == pytest.approx(722.0)
+    assert ("width floor 722.0 mm internal (the driver-count minimum) exceeds the size limit "
+            "564.0 mm internal") in two.blockers
+    pinned = cabvoice.Constraints(pinned_external_width_mm=700.0, max_external_mm=(600.0, 457.2, 400.0))
+    one = cabvoice.propose([drv], [16], "closed", tone, constraints=pinned)
+    assert one.box["external_mm"][0] == pytest.approx(700.0)
+    assert ("width floor 664.0 mm internal (pinned width 700 mm external) exceeds the size limit "
+            "564.0 mm internal") in one.blockers
+    assert not any("floor" in w for w in one.warnings + two.warnings)
+    with pytest.raises(ValueError, match="width floor"):     # the direct call stays strict
+        cabvoice.dims_for_volume(90.0, min_internal_width_mm=722.0, max_external_mm=(600.0, 457.2, 400.0))
+
+
+def test_propose_height_floor_over_the_limit_is_a_blocker(drv, tone):
+    c = cabvoice.Constraints(port_slot_mm=(352.0, 40.0), max_external_mm=(600.0, 400.0, 400.0))
+    v = cabvoice.propose([drv], [16], "closed-ported", tone, constraints=c)
+    assert v.box["internal_mm"][1] == pytest.approx(429.0)
+    assert ("height floor 429.0 mm internal (the cutout minimum) exceeds the size limit "
+            "364.0 mm internal") in v.blockers
+    assert v.blockers.count(v.blockers[0]) == 1      # deduped across the settle loop
+
+
+def test_cli_port_tube_fb_and_port_count(speakers_dir, tmp_path):
+    base = [sys.executable, str(Path(cabvoice.__file__)), "propose",
+            "--speakers-dir", str(speakers_dir), "--impedance", "16",
+            "--enclosure", "closed-ported", "--tone", str(TONE_FIXTURE)]
+    out = tmp_path / "pinned"
+    run = subprocess.run(base + ["--speaker", "test-driver", "--port-tube", "101.5", "--fb", "60",
+                                 "--out", str(out)], capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    data = json.loads((out / "voicing.json").read_text())
+    assert data["port"]["pinned"] is True and data["port"]["diameter_mm"] == 101.5
+    assert data["port"]["fb_override_hz"] == 60.0
+    assert data["prediction"]["fb_hz"] == pytest.approx(60.0, abs=1e-6)
+    bad = tmp_path / "bad"
+    run = subprocess.run(base + ["--speaker", "test-driver", "--port-tube", "100",
+                                 "--out", str(bad)], capture_output=True, text=True)
+    assert run.returncode == 1 and "port tube must be one of" in run.stderr
+    assert not bad.exists()
+    run = subprocess.run(base + ["--speaker", "test-driver", "--port-tube", "77.3",
+                                 "--port-slot", "352", "40", "--out", str(bad)],
+                         capture_output=True, text=True)
+    assert run.returncode == 1 and "not both" in run.stderr
+    assert not bad.exists()
+    two = tmp_path / "two"
+    run = subprocess.run(base + ["--speaker", "test-driver", "--speaker", "test-driver",
+                                 "--impedance", "16", "--port-count", "1", "--out", str(two)],
+                         capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    data = json.loads((two / "voicing.json").read_text())
+    assert data["port"]["count"] == 1 and data["construction"]["port_count"] == 1
+    run = subprocess.run(base + ["--speaker", "test-driver", "--port-count", "3",
+                                 "--out", str(tmp_path / "three")], capture_output=True, text=True)
+    assert run.returncode == 2 and "invalid choice" in run.stderr      # argparse usage error
+
+
+def test_cli_evaluate_port_tube_is_a_validated_diameter(speakers_dir, tmp_path):
+    base = [sys.executable, str(Path(cabvoice.__file__)), "evaluate",
+            "--speakers-dir", str(speakers_dir), "--speaker", "test-driver",
+            "--impedance", "16", "--enclosure", "closed-ported", "--tone", str(TONE_FIXTURE),
+            "--internal", "472", "421.2", "229.4", "--port-length", "40"]
+    out = tmp_path / "out"
+    run = subprocess.run(base + ["--port-tube", "101.5", "--port-count", "1", "--out", str(out)],
+                         capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    data = json.loads((out / "voicing.json").read_text())
+    assert data["port"]["diameter_mm"] == 101.5 and data["port"]["pinned"] is True
+    assert data["port"]["fb_override_hz"] is None and data["port"]["count"] == 1
+    assert "(pinned 101.5 mm tube)" in (out / "voicing.md").read_text()
+    for extra, text in ((["--port-tube", "100"], "port tube must be one of"),
+                        (["--port-tube", "101.5", "--port-diameter", "101.5"], "not both")):
+        run = subprocess.run(base + extra + ["--out", str(tmp_path / "bad")],
+                             capture_output=True, text=True)
+        assert run.returncode == 1 and text in run.stderr
+    assert not (tmp_path / "bad").exists()
+
+
+def test_cli_width_floor_blocker_exits_2_with_the_sheet(speakers_dir, tmp_path):
+    out = tmp_path / "out"
+    cmd = [sys.executable, str(Path(cabvoice.__file__)), "propose",
+           "--speakers-dir", str(speakers_dir), "--speaker", "test-driver", "--speaker", "test-driver",
+           "--impedance", "16", "--impedance", "16", "--enclosure", "closed", "--tone", str(TONE_FIXTURE),
+           "--max-external", "600", "457.2", "400", "--out", str(out)]
+    run = subprocess.run(cmd, capture_output=True, text=True)
+    assert run.returncode == 2
+    data = json.loads((out / "voicing.json").read_text())
+    assert data["blockers"][0].startswith("width floor 722.0 mm internal (the driver-count minimum)")
+    assert data["box"]["internal_mm"][0] == pytest.approx(722.0)
+
+
+def test_cannabis_rex_roots_port_loop_cases(tone):
+    # The Plan 2 review's case: under the roots tone the Cannabis Rex solves a 113 mm port that
+    # snaps to the 153.2 mm tube; the next tube down clamps at 24 mm and detunes; the slot is clean.
+    rex = cabvoice.load_speaker("eminence-cannabis-rex", CATALOG)
+    roots = dict(tone, min_power_w=30)
+    free = cabvoice.propose([rex], [8], "closed-ported", roots, name="rex")
+    assert free.port["diameter_mm"] == 153.2 and free.blockers == []
+    assert any(w.startswith("port diameter snapped to the 153.2 mm tube (from 113.2 mm)")
+               for w in free.warnings)
+    pinned = cabvoice.propose([rex], [8], "closed-ported", roots, name="rex",
+                              constraints=cabvoice.Constraints(port_tube_mm=101.5))
+    assert pinned.port["length_mm"] == cabvoice.MIN_PORT_LENGTH_MM
+    assert any(w.startswith("port clamped at the 24 mm minimum with the pinned 101.5 mm tube: "
+                            "tuned 81.0 Hz, target 86.4 Hz") for w in pinned.warnings)
+    assert pinned.prediction["fb_hz"] == pytest.approx(81.0, abs=0.05)
+    slot = cabvoice.propose([rex], [8], "closed-ported", roots, name="rex",
+                            constraints=cabvoice.Constraints(port_slot_mm=(352.0, 40.0)))
+    assert slot.port["shape"] == "slot" and slot.blockers == []
+    assert not any("clamped" in w or "too short" in w for w in slot.warnings)
+    assert slot.prediction["fb_hz"] == pytest.approx(free.prediction["fb_hz"], abs=0.05)

@@ -337,7 +337,7 @@ def ported_box(driver: Driver, vb_l: float, fb_hz: float) -> PortedResult:
 # Ports (Helmholtz resonator, one flanged end)
 # ---------------------------------------------------------------------------
 
-MIN_PORT_LENGTH_MM = 20.0
+MIN_PORT_LENGTH_MM = 24.0   # the 12 mm back panel plus the 12 mm flange ring; nothing shorter can be built
 # Purchasable round port tubes: Schedule 40 PVC or ABS inside diameters for
 # 2, 3, 4, and 6 inch nominal pipe, with their outside diameters. Starting
 # values (see speaker-cab-construction); the hard maximum is the largest tube.
@@ -358,6 +358,8 @@ class Port:
     volume_l: float
     air_speed_ms: float | None = None
     warnings: list = field(default_factory=list)
+    pinned: bool = False                  # a purchasable tube pinned by the caller: no growth, no snap
+    fb_override_hz: float | None = None   # propose: the caller's tuning in place of the engine's target
 
 
 def effective_diameter_m(area_m2: float) -> float:
@@ -399,7 +401,8 @@ def port_dims(vb_l: float, fb_hz: float, diameter_mm: float | None = None,
     if length_m * 1e3 < MIN_PORT_LENGTH_MM:
         warnings.append(
             f"port too short ({length_m * 1e3:.1f} mm) for Fb {fb_hz:.0f} Hz in {vb_l:.1f} L; "
-            f"clamped to {MIN_PORT_LENGTH_MM:.0f} mm, reduce port area or lower Fb")
+            f"clamped to {MIN_PORT_LENGTH_MM:.0f} mm; a larger port, a lower Fb, or a smaller box "
+            f"lengthens it")
         length_m = MIN_PORT_LENGTH_MM / 1e3
     return Port(
         shape="round" if diameter_mm is not None else "slot",
@@ -422,6 +425,15 @@ def port_air_speed(driver: Driver, fb_hz: float, area_cm2: float) -> float:
     return volume_velocity / (area_cm2 / 1e4)
 
 
+def tube_from_table(diameter_mm: float) -> float:
+    """The PORT_TUBE_ID_MM entry equal to diameter_mm (float noise tolerated), else ValueError."""
+    for tube in PORT_TUBE_ID_MM:
+        if abs(diameter_mm - tube) < 1e-6:
+            return tube
+    raise ValueError(f"port tube must be one of {', '.join(f'{t:g}' for t in PORT_TUBE_ID_MM)} mm, "
+                     f"not {diameter_mm:g}")
+
+
 def snap_tube_id(diameter_mm: float) -> float:
     """Smallest purchasable tube inside diameter not below diameter_mm, else the largest."""
     for tube in PORT_TUBE_ID_MM:
@@ -432,14 +444,17 @@ def snap_tube_id(diameter_mm: float) -> float:
 
 def size_port(driver: Driver, vb_l: float, fb_hz: float,
               diameter_mm: float = DEFAULT_PORT_DIAMETER_MM,
-              slot_mm: tuple | None = None) -> Port:
+              slot_mm: tuple | None = None, pinned_mm: float | None = None) -> Port:
     """Port for (vb, fb), enlarged in 10 percent area steps until the
     worst-case air speed is under PORT_V_MAX and the physical length is at
     least MIN_PORT_LENGTH_MM. A round start above MAX_PORT_DIAMETER_MM is
     clamped to it first. Stops at the MAX_PORT_DIAMETER_MM equivalent area
     and leaves the warnings in place for the caller. A round port is then
     snapped up to the next purchasable tube (PORT_TUBE_ID_MM) and re-solved,
-    so the sheet describes a tube that can be bought."""
+    so the sheet describes a tube that can be bought. A pinned tube
+    (pinned_mm, one of PORT_TUBE_ID_MM) is built once at that size instead:
+    no growth, no snap; a clamped length keeps its warning and the caller
+    reports the air speed against the limit."""
     max_area_cm2 = math.pi * (MAX_PORT_DIAMETER_MM / 20.0) ** 2
     if not slot_mm:
         diameter_mm = min(diameter_mm, MAX_PORT_DIAMETER_MM)
@@ -449,6 +464,12 @@ def size_port(driver: Driver, vb_l: float, fb_hz: float,
         p.air_speed_ms = port_air_speed(driver, fb_hz, p.area_cm2)
         return p
 
+    if pinned_mm is not None:
+        if slot_mm:
+            raise ValueError("give a slot or a pinned tube, not both")
+        port = build(tube_from_table(pinned_mm), None)
+        port.pinned = True
+        return port
     port = build(diameter_mm, slot_mm)
     for _ in range(60):
         too_fast = port.air_speed_ms > PORT_V_MAX
@@ -752,18 +773,29 @@ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = Non
     max_internal = None
     if max_external_mm is not None:
         max_internal = internal_from_external(max_external_mm, **panel_kwargs)
-        if fixed[0] and dims[0] > max_internal[0]:
-            raise ValueError(
-                f"width {dims[0]:.1f} mm internal (pinned or the driver-count minimum) "
-                f"exceeds the size limit {max_internal[0]:.1f} mm internal")
-        if min_internal_width_mm is not None and min_internal_width_mm > max_internal[0] + 1e-9:
-            raise ValueError(
-                f"width {min_internal_width_mm:.1f} mm internal (the driver-count minimum) "
-                f"exceeds the size limit {max_internal[0]:.1f} mm internal")
+        # A floor over the limit: strict raises; otherwise the floor holds, the axis is
+        # fixed over the limit, and the message comes back as a "width floor" or
+        # "height floor" warning for the caller to present as a blocker.
+        over = []
+        if fixed[0] and dims[0] > max_internal[0] + 1e-9:
+            cause = ("the driver-count minimum"
+                     if min_internal_width_mm is not None and dims[0] == min_internal_width_mm
+                     else f"pinned width {pinned_external_width_mm:g} mm external")
+            over.append(f"width floor {dims[0]:.1f} mm internal ({cause}) exceeds the size limit "
+                        f"{max_internal[0]:.1f} mm internal")
+        elif min_internal_width_mm is not None and min_internal_width_mm > max_internal[0] + 1e-9:
+            over.append(f"width floor {min_internal_width_mm:.1f} mm internal (the driver-count "
+                        f"minimum) exceeds the size limit {max_internal[0]:.1f} mm internal")
+            dims[0] = min_internal_width_mm
+            fixed[0] = True
         if min_internal_height_mm is not None and min_internal_height_mm > max_internal[1] + 1e-9:
-            raise ValueError(
-                f"height {min_internal_height_mm:.1f} mm internal (the cutout minimum) "
-                f"exceeds the size limit {max_internal[1]:.1f} mm internal")
+            over.append(f"height floor {min_internal_height_mm:.1f} mm internal (the cutout minimum) "
+                        f"exceeds the size limit {max_internal[1]:.1f} mm internal")
+            dims[1] = min_internal_height_mm
+            fixed[1] = True
+        if over and strict:
+            raise ValueError("; ".join(over))
+        conflicts.extend(over)
 
     def rescale():
         free = [i for i in range(3) if not fixed[i]]
@@ -968,6 +1000,8 @@ class Constraints:
     port_diameter_mm: float = DEFAULT_PORT_DIAMETER_MM
     port_slot_mm: tuple | None = None
     port_count: int | None = None      # None: one port per driver in the chamber
+    port_tube_mm: float | None = None  # pin one tube of PORT_TUBE_ID_MM: no growth, no snap
+    fb_hz: float | None = None         # propose: tuning override in place of the engine's target
     line: str = "tolex"
     species: str | None = None
     accept_low_headroom: bool = False
@@ -977,6 +1011,10 @@ class Constraints:
             raise ValueError(f"line must be one of {', '.join(LINES)}")
         if self.species is not None:
             self.species = self.species.strip() or None
+        if self.port_tube_mm is not None:
+            self.port_tube_mm = tube_from_table(self.port_tube_mm)
+        if self.fb_hz is not None and self.fb_hz <= 0:
+            raise ValueError("fb_hz must be positive")
 
     def panel_kwargs(self) -> dict:
         return dict(panel_mm=self.panel_mm, back_mm=self.back_mm,
@@ -1253,6 +1291,8 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
     if enclosure == "closed-ported":
         per_driver_net, fb, _, w = ported_targets(lead, per_driver_net, low_end)
         warnings.extend(w)
+        if c.fb_hz is not None:
+            fb = c.fb_hz   # the caller's tuning; the box volume stays the alignment's
     chamber_net = per_driver_net * per_chamber_drivers
     net_total = chamber_net * chambers
     displacement = _displacement(drivers, warnings)
@@ -1277,8 +1317,12 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
         divider_l = _divider_l(chambers, h_int, d_int, c)
         if any(w.startswith("cannot reach") for w in box.warnings):
             # The size limit wins: voice the box that fits and present the trade-off.
-            box.warnings = [w for w in box.warnings if not w.startswith("cannot reach")]
             limited = True
+        # A floor over the size limit is a blocker on the sheet, not an exception: the box
+        # is voiced at the floor and the skill presents the trade-off.
+        blockers.extend(w for w in box.warnings if w.startswith(("width floor", "height floor")))
+        box.warnings = [w for w in box.warnings
+                        if not w.startswith(("cannot reach", "width floor", "height floor"))]
         if abs(box.gross_l - gross) > 0.001:
             # The net is what the box holds when the limit pins it under the request
             # (dims_for_volume passes a shortfall under 0.1 percent without the warning).
@@ -1289,7 +1333,8 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
         if enclosure == "closed-ported":
             port = size_port(_air_speed_driver(lead, per_chamber_drivers / port_count, warnings),
                              chamber_net / port_count, fb, diameter_mm=c.port_diameter_mm,
-                             slot_mm=c.port_slot_mm)
+                             slot_mm=c.port_slot_mm, pinned_mm=c.port_tube_mm)
+            port.fb_override_hz = c.fb_hz
             port_l = _port_inside_l(port) * port_count
         inside_l = inside_parts_l(box.internal_mm, enclosure, count, chambers, jack_config, port,
                                   c.line, port_count, panel_mm=c.panel_mm)
@@ -1305,7 +1350,11 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
     if port is not None:
         fb_actual, port_dict = _port_report(lead, per_chamber_drivers, chamber_net, port,
                                             port_count, warnings)
-        if abs(fb_actual - fb) > 0.5:
+        if abs(fb_actual - fb) > 0.5 and port.pinned:
+            warnings.append(f"port clamped at the {MIN_PORT_LENGTH_MM:.0f} mm minimum with the pinned "
+                            f"{port.diameter_mm:g} mm tube: tuned {fb_actual:.1f} Hz, target "
+                            f"{fb:.1f} Hz; a larger tube, a lower Fb, or a smaller box lengthens it")
+        elif abs(fb_actual - fb) > 0.5:
             warnings.append(f"port clamped at the size cap: tuned {fb_actual:.1f} Hz, target "
                             f"{fb:.1f} Hz; lower Fb or use a smaller box")
         fb = fb_actual   # the prediction follows the port as built
@@ -1462,11 +1511,15 @@ def render_markdown(v: Voicing) -> str:
         p = v.port
         size = (f"round {p['diameter_mm']:.0f} mm" if p['shape'] == "round"
                 else f"slot {p['slot_w_mm']:.0f} x {p['slot_h_mm']:.0f} mm")
+        if p.get("pinned"):
+            size += f" (pinned {p['diameter_mm']:g} mm tube)"
         lines += [
             f"- {size}, area {p['area_cm2']:.0f} cm2, length {p['length_mm']:.0f} mm, "
             f"{p['location']}, {p['count']} per chamber",
             f"- Worst-case air speed {p['air_speed_ms']:.1f} m/s (limit {PORT_V_MAX:.0f} m/s)",
         ]
+        if p.get("fb_override_hz") is not None:
+            lines.append(f"- Fb override: {p['fb_override_hz']:.1f} Hz in place of the engine's target")
     pr = v.prediction
     lines += ["", "## Prediction", "", f"- Model: {pr['model']}", f"- Character: {pr['character']}"]
     for key, label in (("qtc", "Qtc"), ("fc_hz", "Fc"), ("fb_hz", "Fb"), ("f3_hz", "F3"),
@@ -1528,6 +1581,8 @@ def _build_parser():
         p.add_argument("--brace-l", type=float, default=0.0,
                        help="liters of extra bracing beyond the modeled mono 2x12 center brace, "
                             "which the inside parts already carry")
+        p.add_argument("--port-count", type=int, choices=(1, 2), default=None,
+                       help="ports per chamber (default one per driver in the chamber)")
         p.add_argument("--line", choices=LINES, default="tolex")
         p.add_argument("--species", default=None)
         p.add_argument("--accept-low-headroom", action="store_true")
@@ -1541,6 +1596,11 @@ def _build_parser():
     pp.add_argument("--port-diameter", type=float, default=DEFAULT_PORT_DIAMETER_MM,
                     help="round port start in mm, snapped up to the tube table")
     pp.add_argument("--port-slot", type=float, nargs=2, metavar=("W", "H"))
+    pp.add_argument("--port-tube", type=float, default=None, metavar="MM",
+                    help="pin one purchasable tube inside diameter (52, 77.3, 101.5, or 153.2 mm): "
+                         "no growth, no snap; a clamped length or a high air speed becomes a warning")
+    pp.add_argument("--fb", type=float, default=None, metavar="HZ",
+                    help="tuning override in Hz in place of the engine's target (recorded on the sheet)")
 
     pe = sub.add_parser("evaluate")
     common(pe)
@@ -1548,6 +1608,9 @@ def _build_parser():
     pe.add_argument("--port-diameter", type=float)
     pe.add_argument("--port-slot", type=float, nargs=2, metavar=("W", "H"))
     pe.add_argument("--port-length", type=float)
+    pe.add_argument("--port-tube", type=float, default=None, metavar="MM",
+                    help="the port's tube inside diameter from the table (52, 77.3, 101.5, or 153.2 mm), "
+                         "a validated --port-diameter")
 
     pl = sub.add_parser("list")
     pl.add_argument("--speakers-dir", default=str(SPEAKERS_DIR))
@@ -1564,7 +1627,8 @@ def main(argv=None) -> int:
         drivers = [load_speaker(s, Path(args.speakers_dir)) for s in args.speaker]
         tone = json.loads(Path(args.tone).read_text())
         c = Constraints(brace_l=args.brace_l, accept_low_headroom=args.accept_low_headroom,
-                        line=args.line, species=args.species)
+                        line=args.line, species=args.species, port_count=args.port_count,
+                        port_tube_mm=args.port_tube, fb_hz=getattr(args, "fb", None))
         if args.command == "propose":
             c.pinned_external_width_mm = args.pinned_width
             c.max_external_mm = tuple(args.max_external) if args.max_external else None
@@ -1574,12 +1638,19 @@ def main(argv=None) -> int:
         else:
             port = None
             if args.enclosure == "closed-ported":
-                if args.port_length is None or (args.port_diameter is None and args.port_slot is None):
-                    raise ValueError("evaluate closed-ported needs --port-length and --port-diameter or --port-slot")
-                port = port_dims(1.0, 1.0, diameter_mm=args.port_diameter,
+                diameter = args.port_diameter
+                if args.port_tube is not None:
+                    if diameter is not None:
+                        raise ValueError("give --port-tube or --port-diameter, not both")
+                    diameter = c.port_tube_mm
+                if args.port_length is None or (diameter is None and args.port_slot is None):
+                    raise ValueError("evaluate closed-ported needs --port-length and --port-tube, "
+                                     "--port-diameter, or --port-slot")
+                port = port_dims(1.0, 1.0, diameter_mm=diameter,
                                  slot_mm=tuple(args.port_slot) if args.port_slot else None)
                 port.length_mm = args.port_length
                 port.warnings = []
+                port.pinned = args.port_tube is not None
             v = evaluate(drivers, args.impedance, args.enclosure, tone, tuple(args.internal),
                          args.jack, port, c, args.name)
     except (ValueError, FileNotFoundError) as exc:
