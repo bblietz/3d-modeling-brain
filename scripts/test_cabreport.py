@@ -16,7 +16,7 @@ HERE = Path(__file__).resolve().parent
 VAULT = HERE.parent
 FIXTURES = VAULT / "projects" / "Speaker-cab-system" / "fixtures"
 TEMPLATE = VAULT / "skills" / "speaker-cab" / "templates" / "proposal.md"
-FIXTURE_ORDERS = ["site-default", "sample-roots-1x12"]
+FIXTURE_ORDERS = ["site-default", "sample-roots-1x12", "rex-roots-1x12"]
 CUSTOMER = "Site Default"
 
 

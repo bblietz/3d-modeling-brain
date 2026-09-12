@@ -395,7 +395,7 @@ def test_cad_matrix_solids_agree_with_the_layout(tmp_path):
 
 
 # === TASK 12 ===
-FIXTURE_ORDERS = ["site-default", "sample-roots-1x12"]
+FIXTURE_ORDERS = ["site-default", "sample-roots-1x12", "rex-roots-1x12"]
 DELIVERABLES = ["cab.json", "cab.step", "cutlist.md", "cutlist.csv", "images/cab-iso.png", "images/cab-front.png",
                 "images/cab-top.png", "images/cab-right.png", "images/cab-exploded.png"]
 

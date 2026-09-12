@@ -1270,7 +1270,7 @@ Then replace everything from the line `# === TASK 12 ===` to the end of the file
 <!-- code: .vault/scripts/test_cabmodel.py unit 12 -->
 ```python
 # === TASK 12 ===
-FIXTURE_ORDERS = ["site-default", "sample-roots-1x12"]
+FIXTURE_ORDERS = ["site-default", "sample-roots-1x12", "rex-roots-1x12"]
 DELIVERABLES = ["cab.json", "cab.step", "cutlist.md", "cutlist.csv", "images/cab-iso.png", "images/cab-front.png",
                 "images/cab-top.png", "images/cab-right.png", "images/cab-exploded.png"]
 
@@ -2495,7 +2495,7 @@ HERE = Path(__file__).resolve().parent
 VAULT = HERE.parent
 FIXTURES = VAULT / "projects" / "Speaker-cab-system" / "fixtures"
 TEMPLATE = VAULT / "skills" / "speaker-cab" / "templates" / "proposal.md"
-FIXTURE_ORDERS = ["site-default", "sample-roots-1x12"]
+FIXTURE_ORDERS = ["site-default", "sample-roots-1x12", "rex-roots-1x12"]
 CUSTOMER = "Site Default"
 
 

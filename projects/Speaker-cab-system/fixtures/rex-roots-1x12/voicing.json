@@ -1,0 +1,215 @@
+{
+  "name": "rex-roots-1x12",
+  "mode": "propose",
+  "tone_target": {
+    "low_end": "tight",
+    "mids": "neutral",
+    "top": "smooth",
+    "breakup": "moderate",
+    "dispersion": "focused",
+    "placement": "floor",
+    "min_power_w": 33,
+    "impedance_options_ohm": [
+      8
+    ]
+  },
+  "speakers": [
+    {
+      "slug": "eminence-cannabis-rex",
+      "brand": "Eminence",
+      "model": "Cannabis Rex 12",
+      "impedance_ohm": 8.0,
+      "power_w": 50,
+      "sensitivity_db": 101.8,
+      "data_status": "datasheet",
+      "analog_of": null,
+      "cutout_mm": 281.2,
+      "bolt_circle_mm": 294.4,
+      "bolt_count": 8,
+      "depth_mm": 129.5,
+      "weight_kg": 3.72,
+      "displacement_l": 2.0,
+      "displacement_estimated": false,
+      "frame_diameter_mm": 305.6,
+      "magnet_diameter_mm": 150,
+      "magnet_diameter_estimated": true
+    }
+  ],
+  "enclosure": {
+    "type": "closed-ported",
+    "driver_count": 1,
+    "chambers": 1,
+    "jack_config": "mono",
+    "open_fraction": null
+  },
+  "volumes": {
+    "method": "thiele-small",
+    "per_driver_net_l": 33.352,
+    "per_chamber_net_l": 33.352,
+    "net_total_l": 33.352,
+    "displacement_l": 2.0,
+    "brace_l": 0.0,
+    "port_l": 1.1421100791775265,
+    "divider_l": 0.0,
+    "inside_parts_l": 1.4216355356298869,
+    "gross_l": 37.91574561480741
+  },
+  "box": {
+    "internal_mm": [
+      438.9,
+      427.2,
+      202.21938067209763
+    ],
+    "external_mm": [
+      474.9,
+      463.2,
+      252.21938067209763
+    ],
+    "internal_in": [
+      17.28,
+      16.82,
+      7.96
+    ],
+    "external_in": [
+      18.7,
+      18.24,
+      9.93
+    ],
+    "chamber_internal_width_mm": 438.9
+  },
+  "port": {
+    "shape": "slot",
+    "diameter_mm": null,
+    "slot_w_mm": 438.9,
+    "slot_h_mm": 40.0,
+    "area_cm2": 175.55999999999997,
+    "length_mm": 83.05525627577617,
+    "volume_l": 1.4581180791775263,
+    "air_speed_ms": 1.3170312275765068,
+    "warnings": [],
+    "pinned": false,
+    "fb_override_hz": null,
+    "location": "front",
+    "per_chamber": true,
+    "count": 1
+  },
+  "prediction": {
+    "model": "thiele-small vented",
+    "fb_hz": 86.4,
+    "alpha": 1.3636363636363638,
+    "h": 0.9,
+    "f3_hz": 102.50667896755525,
+    "peak_db": 2.9664168353906972,
+    "character": "punchy",
+    "response_db": [
+      [
+        20.0,
+        -51.646788233720955
+      ],
+      [
+        25.2,
+        -43.015924203279994
+      ],
+      [
+        31.75,
+        -34.06531672180891
+      ],
+      [
+        40.0,
+        -24.80963369451996
+      ],
+      [
+        50.4,
+        -16.177777157485448
+      ],
+      [
+        63.5,
+        -10.51882956303222
+      ],
+      [
+        80.0,
+        -6.897909994937926
+      ],
+      [
+        100.79,
+        -3.2431459494527686
+      ],
+      [
+        126.99,
+        0.46775398936037493
+      ],
+      [
+        160.0,
+        2.830412837469045
+      ],
+      [
+        201.59,
+        2.9664168353906972
+      ],
+      [
+        253.98,
+        2.192613339917006
+      ],
+      [
+        320.0,
+        1.459367444240467
+      ],
+      [
+        400.0,
+        0.9538216993458046
+      ]
+    ]
+  },
+  "wiring": {
+    "jack_config": "mono",
+    "recommended": {
+      "name": "single",
+      "impedance_ohm": 8.0,
+      "matches_tap": true,
+      "jack_text": "Single driver, 8 ohm"
+    },
+    "options": [
+      {
+        "name": "single",
+        "impedance_ohm": 8.0,
+        "matches_tap": true,
+        "jack_text": "Single driver, 8 ohm"
+      }
+    ],
+    "mismatch_accepted": false
+  },
+  "power": {
+    "amp_power_w": 22.0,
+    "total_handling_w": 50.0,
+    "min_power_w": 33.0,
+    "status": "ok",
+    "message": "handling 50 W clears the 33 W target",
+    "per_side": [
+      {
+        "total_handling_w": 50.0,
+        "amp_power_w": 22.0,
+        "min_power_w": 33.0,
+        "status": "ok",
+        "message": "handling 50 W clears the 33 W target"
+      }
+    ]
+  },
+  "construction": {
+    "panel_mm": 18.0,
+    "back_mm": 12.0,
+    "baffle_mm": 18.0,
+    "recess_mm": 20.0,
+    "brace_l": 0.0,
+    "pinned_external_width_mm": 474.9,
+    "max_external_mm": null,
+    "port_count": 1,
+    "line": "tolex",
+    "species": null,
+    "wall_material": "baltic birch plywood"
+  },
+  "warnings": [
+    "width and height are within 5 percent of 1:1 (1.03); coincident standing waves"
+  ],
+  "blockers": [],
+  "prediction_status": "unverified, ears only"
+}
