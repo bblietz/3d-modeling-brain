@@ -1319,8 +1319,10 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
             # The size limit wins: voice the box that fits and present the trade-off.
             limited = True
         # A floor over the size limit is a blocker on the sheet, not an exception: the box
-        # is voiced at the floor and the skill presents the trade-off.
-        blockers.extend(w for w in box.warnings if w.startswith(("width floor", "height floor")))
+        # is voiced at the floor and the skill presents the trade-off. Each pass overwrites
+        # the list: the height floor follows a slot port that grows, so the sheet reports
+        # the final box's floors only, once, after the loop.
+        floor_blockers = [w for w in box.warnings if w.startswith(("width floor", "height floor"))]
         box.warnings = [w for w in box.warnings
                         if not w.startswith(("cannot reach", "width floor", "height floor"))]
         if abs(box.gross_l - gross) > 0.001:
@@ -1345,6 +1347,7 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
             break
         last = (box.gross_l, parts)
     warnings.extend(box.warnings)
+    blockers.extend(floor_blockers)
     chamber_w = _chamber_w(chambers, w_int, c)
     port_dict = None
     if port is not None:

@@ -1497,3 +1497,16 @@ def test_cannabis_rex_roots_port_loop_cases(tone):
     assert slot.port["shape"] == "slot" and slot.blockers == []
     assert not any("clamped" in w or "too short" in w for w in slot.warnings)
     assert slot.prediction["fb_hz"] == pytest.approx(free.prediction["fb_hz"], abs=0.05)
+
+
+def test_propose_height_floor_blocker_reports_the_final_height_once(drv, tone):
+    # A 20 mm slot that must grow under the air-speed rule moves the height floor between
+    # settle passes; the sheet reports the final box's floor once, not each pass's.
+    drv.xmax_mm = 10.0
+    c = cabvoice.Constraints(port_slot_mm=(200.0, 20.0), max_external_mm=(600.0, 400.0, 400.0))
+    v = cabvoice.propose([drv], [16], "closed-ported", tone, constraints=c)
+    assert v.port["shape"] == "slot" and v.port["slot_h_mm"] > 20.0
+    assert v.box["internal_mm"][1] == pytest.approx(458.0, abs=0.1)
+    floors = [b for b in v.blockers if b.startswith("height floor")]
+    assert floors == [f"height floor {v.box['internal_mm'][1]:.1f} mm internal (the cutout minimum) "
+                      "exceeds the size limit 364.0 mm internal"]
