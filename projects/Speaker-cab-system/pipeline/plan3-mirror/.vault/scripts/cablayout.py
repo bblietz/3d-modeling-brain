@@ -71,6 +71,7 @@ JACK_CLEAR_MM = 25.0
 BAFFLE_CLEARANCE_MM = 1.0     # floating baffle side clearance
 BRACE_SETBACK_MM = 2.0        # brace front face behind the baffle back face
 GRILL_FRONT_MM = 3.0          # grill frame face behind the front edge
+SLOT_TRIM_MM = 1.0            # a slot up to this much wider than its chamber is trimmed to it, not blocked
 YARD_M = 0.9144
 
 assert RECESS_MM == cabvoice.RECESS_MM
@@ -1237,13 +1238,14 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
     for c, (xa, xb) in enumerate(fr.chambers):
         n = port.count
         avail = (xb - xa) - (n - 1) * DIVIDER_MM
-        if n * s_w > avail + 1e-6:
+        if n * s_w > avail + SLOT_TRIM_MM + 1e-6:
             blockers.append(f"port fit: chamber {c}: {n} slot{'s' if n > 1 else ''} of {s_w:.0f} mm "
                             f"do not fit the {xb - xa:.0f} mm chamber"
                             + (" with the 18 mm center cheek" if n > 1 else "")
                             + "; narrow the slot or widen the box")
             continue
-        cheek = (avail - n * s_w) / 2.0
+        w = min(s_w, avail / n)      # up to SLOT_TRIM_MM over the chamber: the full width, no side cheeks
+        cheek = max((avail - n * w) / 2.0, 0.0)
         sfx = _suffix(spec, c)
         blanks.append(Blank(f"shelf{sfx}", 1, mat18, BIRCH_DENSITY, pos=(xa, fr.y_bf, fr.z0 + s_h),
                             size=(xb - xa, L, BAFFLE_MM), blank_mm=(BAFFLE_MM, L, xb - xa),
@@ -1258,8 +1260,8 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
                                     chamber=c, notes="slot cheek, fills the slot end, glued" + _glue_up(cheek)))
         x = xa + cheek
         for j in range(n):
-            slots.append(SlotPort(c, x, x + s_w, s_h, L, cheek))
-            x += s_w
+            slots.append(SlotPort(c, x, x + w, s_h, L, cheek))
+            x += w
             if j < n - 1:
                 blanks.append(Blank(f"cheek_center{sfx}_{j}", 1, mat18, BIRCH_DENSITY,
                                     pos=(x, fr.y_bf, fr.z0), size=(DIVIDER_MM, L, s_h),

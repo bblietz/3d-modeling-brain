@@ -909,3 +909,33 @@ def test_slot_shelf_blocker_names_the_deepest_shelf():
     _, _, blockers = L.slot_ports(spec, L.frame(spec))
     assert blockers == ["port fit: slot shelf 60 mm deep leaves -2 mm behind it, under the 40 mm the slot "
                         "needs to breathe; no shelf fits; lower the slot height or use a round port"]
+
+
+def test_slot_a_hair_wider_than_the_chamber_is_trimmed_to_full_width():
+    # the skill's slot re-run pins the width, so a slot can land a hair over its chamber from
+    # rounding; up to SLOT_TRIM_MM over, the layout trims it to the full width instead of blocking
+    s = sheet(port="slot", net=42.5)                       # 472 mm chamber, one slot: avail is the chamber
+    s["port"]["slot_w_mm"] = 472.0 + 0.5
+    spec = L.order_from(s, L.Aesthetics())
+    fr = L.frame(spec)
+    slots, blanks, blockers = L.slot_ports(spec, fr)
+    assert blockers == [] and len(slots) == 1
+    assert (slots[0].x0, slots[0].x1) == pytest.approx((-236.0, 236.0))
+    assert slots[0].cheek_w_mm == pytest.approx(0.0)
+    assert [b.name for b in blanks] == ["shelf"]                    # no side cheek parts
+    assert blanks[0].size == (472.0, 60.0, 18.0)                    # the shelf spans the full chamber
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["port fit"].level == "pass"
+    assert by["port fit"].message == "slot port(s) built: chamber 0 slot 472 x 40 mm, shelf 60 mm"
+
+
+def test_slot_over_the_trim_tolerance_still_blocks():
+    s = sheet(port="slot", net=42.5)
+    s["port"]["slot_w_mm"] = 472.0 + 1.5
+    spec = L.order_from(s, L.Aesthetics())
+    _, blanks, blockers = L.slot_ports(spec, L.frame(spec))
+    assert blockers == ["port fit: chamber 0: 1 slot of 474 mm do not fit the 472 mm chamber; "
+                        "narrow the slot or widen the box"]
+    assert blanks == []
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    assert by["port fit"].level == "blocker"

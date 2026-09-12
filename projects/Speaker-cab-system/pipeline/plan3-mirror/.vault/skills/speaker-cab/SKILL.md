@@ -231,18 +231,26 @@ blocker's message takes one of five forms, and each names the next step:
    automatic re-run; the stop offers a lower slot height (`--port-slot W
    <h>`), a round port, or a deeper box.
 5. `port fit: chamber 0: 1 slot of 472 mm do not fit the 352 mm chamber;
-   narrow the slot or widen the box`: the engine rescaled the width under
-   the slot's height floor; re-run once with the slot width recomputed
-   from the new sheet's `box.chamber_internal_width_mm` (the full width
-   for one slot, (width minus 18) / 2 each for two), then `cab.py` again.
+   narrow the slot or widen the box` (a mono 2x12 reads `2 slots of ...
+   with the 18 mm center cheek`): the chamber moved by more than the 1 mm
+   the layout trims (a floor lifted it; the slot run's `--pinned-width`
+   holds the width itself); re-run once with `--pinned-width` kept and
+   the slot width recomputed from the new sheet's
+   `box.chamber_internal_width_mm` (the full width for one slot, (width
+   minus 18) / 2 each for two), then `cab.py` again.
 
 After an automatic re-run (forms 1, 2, and 5): when the new plain `cab.py`
 run has no blocker and the sheet carries no port warning (a clamped
 length, an air speed over the limit), continue to the CAD run. Otherwise
-stop and present, in this order: the front slot (`--port-slot <width> 40`
-with the width the sheet's `box.chamber_internal_width_mm`, or two slots
-of (width minus 18) / 2 on a mono 2x12, the construction note's default),
-accepting the pinned tube's clamped tuning as the sheet reports it,
+stop and present, in this order: the front slot (`--port-slot <width> 40
+--pinned-width <external width>`, the width the sheet's
+`box.chamber_internal_width_mm`, or two slots of (width minus 18) / 2 on
+a mono 2x12, and the external width the sheet's `box.external_mm[0]`,
+the construction note's default; the pin holds the chamber so the slot
+fits it exactly, since a free width re-proportions under the slot's
+shelf and never settles; a slot up to 1 mm over the chamber is trimmed
+to the full width by the layout), accepting the pinned tube's clamped
+tuning as the sheet reports it,
 raising Fb with the larger tube (`--port-tube` and `--fb`, within the
 engine's 45 to 90 Hz), and a larger box (relax `--max-external` or the
 pinned width). Brian picks; run that command, record the trade-off and
