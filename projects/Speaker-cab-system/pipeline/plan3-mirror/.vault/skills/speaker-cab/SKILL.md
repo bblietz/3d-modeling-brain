@@ -167,8 +167,8 @@ No CAD before Brian approves this phase.
    propose runs, because propose overwrites `voicing.json` and
    `voicing.md`. Accept the site box when the sheet's character is the
    bridge word for the target's `low_end` in the note's Enclosure type
-   rules. Otherwise, or when a size limit, a head to match, or a 2x12
-   applies, propose:
+   rules. Otherwise, or when a size limit, a head to match, a 2x12, or a
+   low-end shifter applies, propose:
 
    ```bash
    cd /home/brian/ClaudeProjects/3d-modeling-brain
