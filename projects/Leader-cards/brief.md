@@ -1,7 +1,7 @@
 ---
 title: Leader cards
 type: project-brief
-status: card built and sliced 2026-09-12 (LC1: variant 5 reversed, slot 3x longer, version label, 16 min, 8.7 g). Waiting on Brian to print, check tackle box fit, and wrap a real 36 in rig
+status: LC2 built and sliced 2026-09-12 (3 x 1.5 in, comb wrap edges, 3 side slots, 15 min, 6.9 g). Waiting on Brian to print, check tackle box fit, and wrap a real rig
 created: 2026-09-12
 tags: [fishing, tackle, petg, leader, x2d]
 ---
@@ -30,6 +30,18 @@ Printed replacement for the cardboard cards Brian wraps long fishing leaders on 
 - Version label (Brian, 2026-09-12): every printed version carries a label, same material, recessed into the face (not raised, so it cannot catch line). Text is `VERSION` in `leader_card.py`, DejaVu Sans Bold about 3.6 mm tall, 0.6 mm deep, in the top-face strip along the -Y long edge that the wraps never cover. Bump `VERSION` on every design change and add a row to the version log.
 - Corner lugs (Brian, 2026-09-12): the four corners stand 1.5 mm proud of the wavy wrap edge so slack wraps cannot slide off its ends. Overall size stays 3 x 2 in.
 - Visual options are shown on an HTML page, never ASCII art ([[feedback-html-visual-companion]]). Slot variants page: https://claude.ai/code/artifact/18ae8924-111d-4f77-ab7c-6c4948e84995
+
+## LC2 decisions (Brian, 2026-09-12)
+
+These supersede the hook slot, entry channel, funnel, exit ramp, wave, corner lug, 3 x 2 in size and label strip items above; everything else still holds. Page: https://claude.ai/code/artifact/8d43738c-84e6-45d4-b31c-25e05321d7f0
+
+- Card 3 x 1.5 in (76.2 x 38.1 mm), 3 mm thick, white PETG.
+- One slot shape everywhere: straight taper 3/8 in (9.5 mm) deep, 1.2 mm mouth closing to a 0.2 mm end (7.2 degree taper), gradual enough that 10 lb line wedges. Typical stops: 10 lb (0.28 mm) 7.3 mm deep, 25 lb 5.6 mm, 40 lb 4.0 mm.
+- Side slots (Brian, third pass the same day): the two corner long-edge slots were dropped, then three of the same tapered slots were added on the +Y long edge, opposite the label, at 25, 50 and 75 percent of the length (x = -19.05, 0, +19.05 mm), for starting and finishing the leader.
+- Wrap edges: a comb of the same slots, 9 per edge, 3 mm apart; teeth 1.8 mm at the tip, 3 mm at the root. Each wrap sits in its own comb slot.
+- Removed: corner long-edge slots, hook, 18 mm entry channel, funnel, exit ramps ("lead-in", not helping), wave, raised corners (the comb stops the line sliding off).
+- Kept: 0.6 mm top round and bottom chamfer on every edge including slot walls; slot mouths and tooth tips rounded 0.8 mm in plan; recessed version label (LC2) centred in the -Y long-edge strip outside the comb span.
+- Files are versioned: `leader-card-LC2.*`; LC1 files renamed `leader-card-LC1.*`.
 
 ## Card geometry
 
@@ -98,7 +110,8 @@ All in `projects/Leader-cards/`: this brief, the CAD source, and STL and 3MF for
 
 | Label | Date | Design |
 |---|---|---|
-| LC1 | 2026-09-12 | 3 x 2 in PETG; variant 5 reversed with the slot 3x longer (18 mm lead-in, 18 mm pocket, 30 degree hook); 15 degree exit ramps both faces; 1.5 mm corner lugs; 3 mm wave, 13 exposed valleys; first print |
+| LC1 | 2026-09-12 | 3 x 2 in PETG; variant 5 reversed with the slot 3x longer (18 mm lead-in, 18 mm pocket, 30 degree hook); 15 degree exit ramps both faces; 1.5 mm corner lugs; 3 mm wave, 13 exposed valleys. Not printed; files `leader-card-LC1.*` |
+| LC2 | 2026-09-12 | 3 x 1.5 in PETG; comb of 9 straight tapered 3/8 in slots (1.2 mm to closed) per wrap edge at 3 mm; 3 same slots on the +Y long edge at 25/50/75 percent; no hook, ramps, wave or corner lugs; files `leader-card-LC2.*` |
 
 ## Outcomes
 
@@ -110,3 +123,11 @@ All in `projects/Leader-cards/`: this brief, the CAD source, and STL and 3MF for
 - Printability: thinnest wall 9.0 mm under the pocket; lugs 5.9 mm wide; bed-side ramps are shallow bridges under 3 mm; only sloped underside is the 45 degree chamfer. The pocket's last 0.3 mm of taper is under one 0.4 mm line width and may print closed, which is fine because both lines stop where the gap is 0.5 mm or wider.
 - Printer at build time (`scripts/x2d-status.py`): main nozzle 0.4 mm hardened steel HIGH FLOW (HH01); white PETG Basic in AMS slot 3 at 68 percent. The file was sliced with the standard 0.4 profile, so set Studio's nozzle to the installed high-flow 0.4 before printing ([[printer-x2d]]).
 - Variants page: https://claude.ai/code/artifact/18ae8924-111d-4f77-ab7c-6c4948e84995. The coupon files were not exported to the project; `COUPON_SLOTS` still lists variants 1 to 4 if a coupon is ever wanted.
+
+### LC2 card (2026-09-12)
+
+- Source: `leader_card.py` (`VERSION = "LC2"`), run `.venv/bin/python projects/Leader-cards/leader_card.py`. All checks pass: 76.2 x 38.1 x 3 mm, one solid, 21 slots (9 comb per wrap edge, 3 side slots), every slot open at the mouth and at the 10 lb stop, solid past 3/8 in, face edges rounded; every comb tooth present; label LC2 recessed, floor intact, clear of the combs.
+- Files: `leader-card-LC2.stl`, `leader-card-LC2.3mf`, `leader-card-LC2-print.3mf` (open this one). Renders `images/final-card-LC2.png`. Page: https://claude.ai/code/artifact/8d43738c-84e6-45d4-b31c-25e05321d7f0
+- Real slice: 15 min, 6.9 g. Same settings as LC1 (0.4 nozzle, 0.20mm Standard, PETG Basic, Textured PEI). Set Studio's nozzle to the installed high-flow 0.4.
+- Printability: comb teeth 1.8 mm at the tip, 3 mm at the root, 9.5 mm long; the last 0.2 to 0.4 mm of each taper is under one line width and may print closed, which is below where 10 lb line stops.
+

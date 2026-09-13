@@ -6,8 +6,8 @@ changed in a project 3MF must be listed in different_settings_to_system or
 Studio's GUI resets it on open.
 X2D 0.4 nozzle, 0.20mm Standard, Bambu PETG Basic, Textured PEI Plate.
 
-Usage:  .venv/bin/python projects/Leader-cards/make_plate.py coupon|card
-Writes: projects/Leader-cards/<name>-print.3mf and prints real minutes and grams.
+Usage:  .venv/bin/python projects/Leader-cards/make_plate.py leader-card-LC2   (any STL stem in this folder)
+Writes: projects/Leader-cards/<stem>-print.3mf and prints real minutes and grams.
 """
 import json
 import os
@@ -108,7 +108,7 @@ def verify(path, tmp):
 
 
 def main(which):
-    name = NAMES[which]
+    name = NAMES.get(which, which)  # a file stem, or a legacy coupon/card key
     with tempfile.TemporaryDirectory() as tmp:
         write_presets(tmp)
         shutil.copy(f"{HERE}/{name}.stl", f"{tmp}/{name}.stl")
