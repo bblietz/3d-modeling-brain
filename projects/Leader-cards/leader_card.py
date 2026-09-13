@@ -45,7 +45,7 @@ LUG_ROUND = 0.8  # plan round where a lug flank meets the wave
 # hook-bend slot, local frame: mouth on the long edge at the origin, lead-in runs +Y,
 # pocket turns toward +X (the nearest short edge) and angles back toward the mouth
 SLOT_INSET = 8.0  # lead-in centreline to the nearest short edge (card)
-LEAD_DEPTH = 6.0
+LEAD_DEPTH = 6.0  # lead-in depth for variants 1 to 4; each variant carries its own as lead_d
 MOUTH_W = 2.4
 FUNNEL = 1.0
 MIN_WALL = 2.0  # pocket to long edge
@@ -71,11 +71,11 @@ COUPON_PITCH = 12.0
 # exit +1: pocket and ramp point toward the nearest wrap edge; -1: mirrored, they point toward
 # the card centre, the lead-in sits on the wrap-edge side, and wrap tension runs to the far edge
 VARIANTS = [
-    dict(lead_w=1.2, angle=30, pocket_w=1.0, pocket_l=4.5, exit=1),  # 1 brief baseline
-    dict(lead_w=1.2, angle=30, pocket_w=0.8, pocket_l=4.5, exit=1),  # 2 tighter pocket
-    dict(lead_w=1.2, angle=50, pocket_w=1.0, pocket_l=4.5, exit=1),  # 3 steeper hook
-    dict(lead_w=1.6, angle=30, pocket_w=1.0, pocket_l=4.5, exit=1),  # 4 wider lead-in
-    dict(lead_w=1.2, angle=30, pocket_w=1.0, pocket_l=6.0, exit=-1),  # 5 longer pocket, mirrored (Brian's pick 2026-09-12)
+    dict(lead_w=1.2, angle=30, pocket_w=1.0, lead_d=LEAD_DEPTH, pocket_l=4.5, exit=1),  # 1 brief baseline
+    dict(lead_w=1.2, angle=30, pocket_w=0.8, lead_d=LEAD_DEPTH, pocket_l=4.5, exit=1),  # 2 tighter pocket
+    dict(lead_w=1.2, angle=50, pocket_w=1.0, lead_d=LEAD_DEPTH, pocket_l=4.5, exit=1),  # 3 steeper hook
+    dict(lead_w=1.6, angle=30, pocket_w=1.0, lead_d=LEAD_DEPTH, pocket_l=4.5, exit=1),  # 4 wider lead-in
+    dict(lead_w=1.2, angle=30, pocket_w=1.0, lead_d=18.0, pocket_l=18.0, exit=-1),  # 5 mirrored, slot 3x longer (Brian 2026-09-12)
 ]
 COUPON_SLOTS = (1, 2, 3, 4)  # variant numbers on the coupon, from its -X end
 WINNER = 5  # variant 5 reversed, Brian 2026-09-12; printed directly, no coupon
@@ -119,23 +119,23 @@ def pocket_points(v):
     n = (-u[1], u[0])
     pw = v["pocket_w"] / 2
     return (
-        (-n[0] * pw, LEAD_DEPTH - n[1] * pw),
-        (u[0] * v["pocket_l"], LEAD_DEPTH + u[1] * v["pocket_l"]),
-        (n[0] * pw, LEAD_DEPTH + n[1] * pw),
+        (-n[0] * pw, v["lead_d"] - n[1] * pw),
+        (u[0] * v["pocket_l"], v["lead_d"] + u[1] * v["pocket_l"]),
+        (n[0] * pw, v["lead_d"] + n[1] * pw),
     )
 
 
 def slot_profile(v):
     hw, m = v["lead_w"] / 2, MOUTH_W / 2
-    lead = Polygon((-m, -1), (m, -1), (m, 0), (hw, FUNNEL), (hw, LEAD_DEPTH),
-                   (-hw, LEAD_DEPTH), (-hw, FUNNEL), (-m, 0), align=None)
-    return lead + Pos(0, LEAD_DEPTH) * Circle(hw) + Polygon(*pocket_points(v), align=None)
+    lead = Polygon((-m, -1), (m, -1), (m, 0), (hw, FUNNEL), (hw, v["lead_d"]),
+                   (-hw, v["lead_d"]), (-hw, FUNNEL), (-m, 0), align=None)
+    return lead + Pos(0, v["lead_d"]) * Circle(hw) + Polygon(*pocket_points(v), align=None)
 
 
 def line_stops(v):
     """Local (x, y) where each line diameter wedges in the pocket taper."""
     a = math.radians(v["angle"])
-    return [(math.cos(a) * s, LEAD_DEPTH - math.sin(a) * s)
+    return [(math.cos(a) * s, v["lead_d"] - math.sin(a) * s)
             for s in (v["pocket_l"] * (1 - d / v["pocket_w"]) for d in LINE_DIAS)]
 
 
@@ -280,13 +280,13 @@ def check(part, which):
         assert min(p[1] for p in pts) >= MIN_WALL, ("pocket wall", v)
         assert abs(x0 + d * pts[1][0]) <= length / 2 - LUG_H - WAVE_DEPTH - 2.0, ("pocket tip too near the wrap edge", v)
         a = math.radians(v["angle"])
-        assert not part.is_inside(world(0, LEAD_DEPTH / 2)), ("lead-in closed", v)
-        assert not part.is_inside(world(POCKET_PROBE * math.cos(a), LEAD_DEPTH - POCKET_PROBE * math.sin(a))), ("pocket closed", v)
+        assert not part.is_inside(world(0, v["lead_d"] / 2)), ("lead-in closed", v)
+        assert not part.is_inside(world(POCKET_PROBE * math.cos(a), v["lead_d"] - POCKET_PROBE * math.sin(a))), ("pocket closed", v)
         assert part.is_inside(world(2.0, 1.5)), ("no tongue between pocket and mouth", v)
         # the slot wall is square at mid-thickness but rounded away at both faces
-        assert part.is_inside(world(hw + 0.1, LEAD_DEPTH / 2)), ("slot wall missing", v)
+        assert part.is_inside(world(hw + 0.1, v["lead_d"] / 2)), ("slot wall missing", v)
         for z in (THICK - 0.1, 0.1):
-            assert not part.is_inside(world(hw + 0.1, LEAD_DEPTH / 2, z)), ("slot edge not rounded", v, z)
+            assert not part.is_inside(world(hw + 0.1, v["lead_d"] / 2, z)), ("slot edge not rounded", v, z)
 
         # exit ramp: cut on both faces beside the exit wall, pinch band intact, face intact past the run
         wall_x, y_lo, y_hi, run, _ = ramp_geometry(v)

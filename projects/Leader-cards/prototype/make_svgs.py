@@ -57,19 +57,22 @@ def path(shape):
     return " ".join(d)
 
 
-crop = Pos(VIEW[0] - PAD, VIEW[1] - PAD) * Rectangle(VIEW[2] - VIEW[0] + 2 * PAD, VIEW[3] - VIEW[1] + 2 * PAD,
-                                                     align=(Align.MIN, Align.MIN))
-vb = f"{VIEW[0]:.3f} {-VIEW[3]:.3f} {VIEW[2] - VIEW[0]:.3f} {VIEW[3] - VIEW[1]:.3f}"
 tpl = open(f"{HERE}/slot-variants-template.html").read()
 
 for i, v in enumerate(lc.VARIANTS, 1):
     m = v["exit"]
+    wall_x, y_lo, y_hi, run, _ = lc.ramp_geometry(v)
+    # the default view fits a 6 mm slot; a longer slot widens its own view, and its scale bar stays true
+    reach = max(lc.pocket_points(v)[1][0], wall_x(y_lo) + run) + 1.5
+    view = (min(VIEW[0], X0 - reach) if m < 0 else VIEW[0], VIEW[1], VIEW[2], max(VIEW[3], EDGE + v["lead_d"] + 2.4))
+    crop = Pos(view[0] - PAD, view[1] - PAD) * Rectangle(view[2] - view[0] + 2 * PAD, view[3] - view[1] + 2 * PAD,
+                                                         align=(Align.MIN, Align.MIN))
+    vb = f"{view[0]:.3f} {-view[3]:.3f} {view[2] - view[0]:.3f} {view[3] - view[1]:.3f}"
     face = lc.plan_face(lc.CARD_L, lc.CARD_W, [(X0, 1, v)])
     card = face & crop
     top = offset(face, -lc.TOP_ROUND, kind=Kind.ARC) & crop
 
     # ramp on the top face: from the exit wall to where it meets the face, flipped for mirrored slots
-    wall_x, y_lo, y_hi, run, _ = lc.ramp_geometry(v)
     corners = [(wall_x(y_lo), y_lo), (wall_x(y_lo) + run, y_lo), (wall_x(y_hi) + run, y_hi), (wall_x(y_hi), y_hi)]
     if m < 0:
         corners.reverse()  # keep the polygon counterclockwise after the flip
@@ -82,7 +85,7 @@ for i, v in enumerate(lc.VARIANTS, 1):
 
     # annotations in drawing units (mm); SVG y is -world y
     ey = -EDGE
-    ay = ey - 8.9
+    ay = ey - max(8.9, v["lead_d"] + 1.2)
     if m > 0:
         arrow = (f'<line class="annline" x1="{X0 - 1.0:.2f}" y1="{ay:.2f}" x2="{X0 + 5.2:.2f}" y2="{ay:.2f}"/>'
                  f'<path class="arrowhead" d="M{X0 + 5.6:.2f},{ay:.2f} L{X0 + 5.0:.2f},{ay - 0.3:.2f} L{X0 + 5.0:.2f},{ay + 0.3:.2f} Z"/>'
@@ -92,13 +95,13 @@ for i, v in enumerate(lc.VARIANTS, 1):
                  f'<path class="arrowhead" d="M{X0 - 7.8:.2f},{ay:.2f} L{X0 - 7.2:.2f},{ay - 0.3:.2f} L{X0 - 7.2:.2f},{ay + 0.3:.2f} Z"/>'
                  f'<text class="ann" x="{X0 - 7.6:.2f}" y="{ay - 0.4:.2f}">wrap tension, to the far wrap edge</text>')
     ann = (
-        f'<text class="ann" x="{VIEW[0] + 0.3:.2f}" y="{ey + 0.95:.2f}">LONG EDGE</text>'
+        f'<text class="ann" x="{view[0] +0.3:.2f}" y="{ey + 0.95:.2f}">LONG EDGE</text>'
         f'<text class="ann" x="{lc.CARD_L / 2 + 0.9:.2f}" y="{ey - 6.5:.2f}" transform="rotate(-90 {lc.CARD_L / 2 + 0.9:.2f} {ey - 6.5:.2f})">WRAP EDGE</text>'
         f'{arrow}'
-        f'<line class="scale" x1="{VIEW[0] + 0.4:.2f}" y1="{ey - 2.2:.2f}" x2="{VIEW[0] + 2.4:.2f}" y2="{ey - 2.2:.2f}"/>'
-        f'<line class="scale" x1="{VIEW[0] + 0.4:.2f}" y1="{ey - 2.45:.2f}" x2="{VIEW[0] + 0.4:.2f}" y2="{ey - 1.95:.2f}"/>'
-        f'<line class="scale" x1="{VIEW[0] + 2.4:.2f}" y1="{ey - 2.45:.2f}" x2="{VIEW[0] + 2.4:.2f}" y2="{ey - 1.95:.2f}"/>'
-        f'<text class="scaletext" x="{VIEW[0] + 0.4:.2f}" y="{ey - 2.7:.2f}">2 mm</text>'
+        f'<line class="scale" x1="{view[0] +0.4:.2f}" y1="{ey - 2.2:.2f}" x2="{view[0] +2.4:.2f}" y2="{ey - 2.2:.2f}"/>'
+        f'<line class="scale" x1="{view[0] +0.4:.2f}" y1="{ey - 2.45:.2f}" x2="{view[0] +0.4:.2f}" y2="{ey - 1.95:.2f}"/>'
+        f'<line class="scale" x1="{view[0] +2.4:.2f}" y1="{ey - 2.45:.2f}" x2="{view[0] +2.4:.2f}" y2="{ey - 1.95:.2f}"/>'
+        f'<text class="scaletext" x="{view[0] +0.4:.2f}" y="{ey - 2.7:.2f}">2 mm</text>'
     )
     defs = (f'<defs><linearGradient id="ramp{i}" gradientUnits="userSpaceOnUse" x1="{gx1:.3f}" y1="0" x2="{gx2:.3f}" y2="0">'
             f'<stop offset="0" style="stop-color: var(--ramp)"/><stop offset="1" style="stop-color: var(--part)"/>'
