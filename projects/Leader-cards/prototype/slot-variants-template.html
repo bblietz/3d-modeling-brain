@@ -1,0 +1,306 @@
+<title>Leader Card Slots</title>
+<meta name="description" content="Five hook-bend slot shapes for the 3 x 2 in PETG leader card, drawn to scale from the CAD model.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ground: #edf1f0;
+    --surface: #f8faf9;
+    --ink: #16252b;
+    --muted: #5b6b70;
+    --rule: #cdd6d5;
+    --part: #ffffff;
+    --part-edge: #16252b;
+    --round-edge: #7f9196;
+    --ramp: #aebfc2;
+    --line25: #d9602a;
+    --line40: #2a78a0;
+    --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0f181b;
+      --surface: #152226;
+      --ink: #e3ecec;
+      --muted: #93a5a9;
+      --rule: #2a3a3f;
+      --part: #dfe6e5;
+      --part-edge: #0f181b;
+      --round-edge: #6f8388;
+      --ramp: #93a8ab;
+      --line25: #f07a41;
+      --line40: #3f93bf;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0f181b;
+    --surface: #152226;
+    --ink: #e3ecec;
+    --muted: #93a5a9;
+    --rule: #2a3a3f;
+    --part: #dfe6e5;
+    --part-edge: #0f181b;
+    --round-edge: #6f8388;
+    --ramp: #93a8ab;
+    --line25: #f07a41;
+    --line40: #3f93bf;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font: 400 15px/1.55 var(--body);
+    padding-inline: 20px;
+    padding-block: 36px 64px;
+  }
+  .page { max-width: 1040px; margin-inline: auto; display: grid; gap: 40px; }
+
+  header { display: grid; gap: 14px; max-width: 68ch; }
+  .eyebrow {
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    font: 700 clamp(40px, 7vw, 64px)/0.95 var(--display);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h2 {
+    font: 600 26px/1.05 var(--display);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  p { margin: 0; }
+  .lede { font-size: 17px; }
+
+  .explain {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 32px;
+    align-items: start;
+    padding-block: 26px;
+    border-block: 1px solid var(--rule);
+  }
+  .explain-text { display: grid; gap: 14px; }
+  .legend { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .legend li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: center; }
+  .legend svg { width: 34px; height: 16px; }
+  figure { margin: 0; display: grid; gap: 8px; }
+  .section-fig { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px; }
+  .section-fig svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: 13px; color: var(--muted); }
+
+  .variants { display: grid; }
+  .variant {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 32px;
+    padding-block: 32px;
+    border-bottom: 1px solid var(--rule);
+    align-items: center;
+  }
+  .variant:first-child { padding-top: 8px; }
+  .drawing {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 10px;
+  }
+  .drawing svg { width: 100%; height: auto; display: block; }
+  .spec { display: grid; gap: 14px; }
+  .tag { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .num {
+    font: 700 52px/0.8 var(--display);
+    font-variant-numeric: tabular-nums;
+  }
+  .status {
+    font: 500 11px/1 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 5px 9px;
+  }
+  .status.new { color: var(--line25); border-color: var(--line25); }
+  dl.dims {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 5px 18px;
+    margin: 0;
+    font: 400 13.5px/1.35 var(--mono);
+    font-variant-numeric: tabular-nums;
+  }
+  dl.dims dt { color: var(--muted); }
+  dl.dims dd { margin: 0; }
+  dl.dims dd.diff { font-weight: 500; }
+  dl.dims dd.diff::after { content: "  changed"; color: var(--line25); font-size: 11px; letter-spacing: 0.06em; }
+  dl.dims .stop25 { color: var(--line25); }
+  dl.dims .stop40 { color: var(--line40); }
+
+  svg .card { fill: var(--part); stroke: var(--part-edge); stroke-width: 0.06; stroke-linejoin: round; }
+  svg .roundline { fill: none; stroke: var(--round-edge); stroke-width: 0.045; stroke-dasharray: 0.22 0.16; }
+  svg .rampedge { fill: none; stroke: var(--round-edge); stroke-width: 0.045; }
+  svg .l0 { fill: var(--line25); }
+  svg .l1 { fill: var(--line40); }
+  svg .ann { fill: var(--muted); font-family: var(--mono); font-size: 0.5px; letter-spacing: 0.03em; }
+  svg .annline { stroke: var(--muted); stroke-width: 0.05; fill: none; }
+  svg .arrowhead { fill: var(--muted); }
+  svg .scale { stroke: var(--ink); stroke-width: 0.08; fill: none; }
+  svg .scaletext { fill: var(--ink); font-family: var(--mono); font-size: 0.5px; }
+  svg .wall { fill: var(--part); stroke: var(--part-edge); stroke-width: 0.05; stroke-linejoin: round; }
+  svg .sect { fill: var(--muted); font-family: var(--mono); font-size: 0.3px; }
+  svg .band { fill: var(--line40); fill-opacity: 0.13; }
+  svg .linestroke { fill: none; stroke: var(--line40); stroke-width: 0.7; stroke-linecap: round; stroke-linejoin: round; stroke-opacity: 0.9; }
+  svg .dim { stroke: var(--muted); stroke-width: 0.03; fill: none; }
+
+  footer { display: grid; gap: 10px; max-width: 68ch; }
+
+  @media (max-width: 760px) {
+    .explain, .variant { grid-template-columns: 1fr; gap: 18px; }
+    .num { font-size: 44px; }
+  }
+</style>
+
+<div class="page">
+  <header>
+    <span class="eyebrow">Leader card &middot; 3 x 2 in PETG &middot; hook-bend slot</span>
+    <h1>Leader card slots</h1>
+    <p class="lede">You have not picked a slot yet. The card in the 3D viewer shows variant 1 only as a stand-in. Variants 1 to 4 are the ones on the test coupon, in order from its left end; variant 5 is a new option. The winner goes on the card after you test the coupon with real 25 lb and 40 lb line.</p>
+  </header>
+
+  <section class="explain" aria-label="How to read the drawings">
+    <div class="explain-text">
+      <h2>Reading a drawing</h2>
+      <p>Each drawing is the corner of the card around one slot, seen from above and drawn to scale from the CAD model. The line presses in from the long edge, slides around the hook, and wedges in the pocket. Wrap tension pulls it toward the wavy wrap edge on the right, up and out along the exit ramp.</p>
+      <ul class="legend">
+        <li><svg viewBox="0 0 34 16" aria-hidden="true"><rect x="1" y="2" width="32" height="12" rx="1" fill="var(--part)" stroke="var(--part-edge)" stroke-width="1.2"/></svg><span>The card at mid-thickness, where the slot pinches the line</span></li>
+        <li><svg viewBox="0 0 34 16" aria-hidden="true"><defs><linearGradient id="legendramp" x1="0" x2="1" y1="0" y2="0"><stop offset="0" style="stop-color: var(--ramp)"/><stop offset="1" style="stop-color: var(--part)"/></linearGradient></defs><rect x="1" y="2" width="32" height="12" fill="url(#legendramp)" stroke="var(--round-edge)" stroke-width="1"/></svg><span>Exit ramp, 0.7 mm deep at the pocket and fading out at 15&deg;, on both faces</span></li>
+        <li><svg viewBox="0 0 34 16" aria-hidden="true"><line x1="1" y1="8" x2="33" y2="8" stroke="var(--round-edge)" stroke-width="1.2" stroke-dasharray="4 3"/></svg><span>Where the 0.6 mm top round starts on every other edge</span></li>
+        <li><svg viewBox="0 0 34 16" aria-hidden="true"><circle cx="17" cy="8" r="5" fill="var(--line25)"/></svg><span>Where 25 lb line (0.5 mm) stops in the pocket</span></li>
+        <li><svg viewBox="0 0 34 16" aria-hidden="true"><circle cx="17" cy="8" r="7" fill="var(--line40)"/></svg><span>Where 40 lb line (0.7 mm) stops in the pocket</span></li>
+      </ul>
+    </div>
+    <figure>
+      <div class="section-fig">
+        <svg viewBox="-4.3 -1.35 11.1 6.0" role="img" aria-label="Cross-section along the line's exit: the line wedges in the pinch band and leaves along a 15 degree ramp on the top face">
+          <rect class="band" x="-4.1" y="0.9" width="10.7" height="1.2"/>
+          <path class="wall" d="M-4.1,0 L-0.95,0 A0.6,0.6 0 0 1 -0.35,0.6 L-0.35,2.4 L-0.95,3 L-4.1,3 Z"/>
+          <path class="wall" d="M6.6,0 L2.96,0 L0.64,0.62 Q0.35,0.7 0.35,1.0 L0.35,2.0 Q0.35,2.3 0.64,2.38 L2.96,3 L6.6,3 Z"/>
+          <path class="linestroke" d="M6.6,-0.36 L2.9,-0.36 L0.7,0.24 Q0.05,0.5 0.0,1.5 L-0.25,3.35 L-1.6,4.3"/>
+          <text class="sect" x="-4.1" y="-0.45">top face</text>
+          <text class="sect" x="-4.1" y="3.5">bed side</text>
+          <text class="sect" x="-4.1" y="1.6">pinch band 1.2 mm</text>
+          <text class="sect" x="-3.9" y="0.45">tongue</text>
+          <text class="sect" x="3.0" y="-0.95">to the wrap edge</text>
+          <path class="dim" d="M3.0,-0.68 L6.3,-0.68"/>
+          <path class="arrowhead" d="M6.55,-0.68 L6.2,-0.84 L6.2,-0.52 Z"/>
+          <text class="sect" x="1.55" y="1.55">15&deg; exit ramp,</text>
+          <text class="sect" x="1.55" y="1.9">0.7 mm deep at the wall</text>
+          <text class="sect" x="2.6" y="3.5">same ramp underneath</text>
+          <text class="sect" x="-0.9" y="4.45">to the hanging swivel or lure</text>
+        </svg>
+      </div>
+      <figcaption>Section through the pocket along the direction the line leaves. The line wedges in the square pinch band, about 1.2 mm tall, then comes out along the ramp at 15&deg; instead of bending 90&deg; over the face edge. Every edge it touches is rounded: 0.3 mm where the ramp meets the pocket wall, 0.6 mm on the slot's other face edges, and 0.8 mm on the hook tongue, funnel and mouth corners in plan view. The pocket ends in a 0.3 mm rounded tip, narrower than either line.</figcaption>
+    </figure>
+  </section>
+
+  <section class="variants" aria-label="Slot variants">
+
+    <article class="variant">
+      <div class="drawing"><!--SVG1--></div>
+      <div class="spec">
+        <div class="tag"><span class="num">1</span><h2>Baseline</h2><span class="status">Coupon, slot 1</span></div>
+        <p>The starting point from the brief. Both line sizes seat partway down the pocket, leaving room for the line to wedge tighter under load.</p>
+        <dl class="dims">
+          <dt>Lead-in width</dt><dd>1.2 mm</dd>
+          <dt>Hook angle</dt><dd>30&deg; back toward the mouth</dd>
+          <dt>Pocket</dt><dd>1.0 mm wide, 4.5 mm long</dd>
+          <dt>25 lb stops</dt><dd class="stop25">2.25 mm into the pocket</dd>
+          <dt>40 lb stops</dt><dd class="stop40">1.35 mm into the pocket</dd>
+          <dt>Wall under pocket</dt><dd>3.75 mm</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="variant">
+      <div class="drawing"><!--SVG2--></div>
+      <div class="spec">
+        <div class="tag"><span class="num">2</span><h2>Tighter pocket</h2><span class="status">Coupon, slot 2</span></div>
+        <p>The pocket starts narrower, so 40 lb line wedges almost at the corner and 25 lb bites sooner. More grip on heavy line, with less taper left to pull it tighter.</p>
+        <dl class="dims">
+          <dt>Lead-in width</dt><dd>1.2 mm</dd>
+          <dt>Hook angle</dt><dd>30&deg; back toward the mouth</dd>
+          <dt>Pocket</dt><dd class="diff">0.8 mm wide, 4.5 mm long</dd>
+          <dt>25 lb stops</dt><dd class="stop25">1.69 mm into the pocket</dd>
+          <dt>40 lb stops</dt><dd class="stop40">0.56 mm into the pocket</dd>
+          <dt>Wall under pocket</dt><dd>3.75 mm</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="variant">
+      <div class="drawing"><!--SVG3--></div>
+      <div class="spec">
+        <div class="tag"><span class="num">3</span><h2>Steeper hook</h2><span class="status">Coupon, slot 3</span></div>
+        <p>The pocket angles back 50&deg; instead of 30&deg;. Slack line has further to climb before it can slip out, so this is the strongest hitch. The wall under the pocket is the thinnest of the five.</p>
+        <dl class="dims">
+          <dt>Lead-in width</dt><dd>1.2 mm</dd>
+          <dt>Hook angle</dt><dd class="diff">50&deg; back toward the mouth</dd>
+          <dt>Pocket</dt><dd>1.0 mm wide, 4.5 mm long</dd>
+          <dt>25 lb stops</dt><dd class="stop25">2.25 mm into the pocket</dd>
+          <dt>40 lb stops</dt><dd class="stop40">1.35 mm into the pocket</dd>
+          <dt>Wall under pocket</dt><dd>2.55 mm</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="variant">
+      <div class="drawing"><!--SVG4--></div>
+      <div class="spec">
+        <div class="tag"><span class="num">4</span><h2>Wider lead-in</h2><span class="status">Coupon, slot 4</span></div>
+        <p>A 1.6 mm entry instead of 1.2 mm. The easiest to find and press line into by feel with wet hands. The pocket, where the line actually locks, is the same as the baseline.</p>
+        <dl class="dims">
+          <dt>Lead-in width</dt><dd class="diff">1.6 mm</dd>
+          <dt>Hook angle</dt><dd>30&deg; back toward the mouth</dd>
+          <dt>Pocket</dt><dd>1.0 mm wide, 4.5 mm long</dd>
+          <dt>25 lb stops</dt><dd class="stop25">2.25 mm into the pocket</dd>
+          <dt>40 lb stops</dt><dd class="stop40">1.35 mm into the pocket</dd>
+          <dt>Wall under pocket</dt><dd>3.75 mm</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="variant">
+      <div class="drawing"><!--SVG5--></div>
+      <div class="spec">
+        <div class="tag"><span class="num">5</span><h2>Longer pocket</h2><span class="status new">New, not on coupon</span></div>
+        <p>A 6 mm pocket instead of 4.5 mm, so the taper is gentler. Each line size seats deeper and grips along a longer run. Adding it to the coupon makes the strip 12 mm longer.</p>
+        <dl class="dims">
+          <dt>Lead-in width</dt><dd>1.2 mm</dd>
+          <dt>Hook angle</dt><dd>30&deg; back toward the mouth</dd>
+          <dt>Pocket</dt><dd class="diff">1.0 mm wide, 6.0 mm long</dd>
+          <dt>25 lb stops</dt><dd class="stop25">3.00 mm into the pocket</dd>
+          <dt>40 lb stops</dt><dd class="stop40">1.80 mm into the pocket</dd>
+          <dt>Wall under pocket</dt><dd>3.00 mm</dd>
+        </dl>
+      </div>
+    </article>
+
+  </section>
+
+  <footer>
+    <h2>What to decide</h2>
+    <p>Pick which variants go on the test coupon: keep the four, swap one for variant 5, or add variant 5 as a fifth slot. Every variant gets the same rounded edges and exit ramps. Line stop positions assume the pocket prints to its drawn width; if the printed pocket comes out a little narrower, each line simply stops a little closer to the corner.</p>
+  </footer>
+</div>

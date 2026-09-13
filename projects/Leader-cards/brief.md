@@ -23,6 +23,9 @@ Printed replacement for the cardboard cards Brian wraps long fishing leaders on 
 - Approach: flat card with slots (option 1 of 3). Rejected: railed spool card (thicker, traps water) and TPU slot inserts (two materials, TPU feeds poorly in the AMS; held in reserve if PETG slots fail).
 - First batch: 1 card.
 - Card size 3 x 2 in (Brian, 2026-09-12), replacing the 70 x 45 mm estimate from the photo.
+- Nothing sharp touches the line (Brian, 2026-09-12): the slot walls get the same 0.6 mm top round and 0.6 mm bottom chamfer as the card edge, and the slot's outside corners (hook tongue, funnel, mouth) are rounded to 0.8 mm in plan view.
+- Gradual exit (Brian, 2026-09-12): a 15 degree exit ramp on both faces, from the pocket wall toward the wrap edge, so line under wrap tension does not bend 90 degrees over the face edge and take a permanent kink. Chosen over an angled entry from the long edge.
+- Visual options are shown on an HTML page, never ASCII art ([[feedback-html-visual-companion]]). Slot variants page: https://claude.ai/code/artifact/18ae8924-111d-4f77-ab7c-6c4948e84995
 
 ## Card geometry
 
@@ -47,7 +50,14 @@ Why it holds: the line leaves the slot heading for the nearest short edge, so wr
 
 In use: press the line into the lead-in, slide it around the corner into the pocket, then run it to the nearest short edge. Start slot just past the swivel, wrap toward the lure, laying each wrap in a valley, and finish in the other slot; the lure hangs off that end. To unwind, slide the line back around the corner and out.
 
-Final lead-in width, pocket angle, and pocket taper come from the test coupon, not from this brief.
+Edge treatment, verified in the prototype build (`prototype/leader_card.py`, 2026-09-12):
+
+- **Pocket tip:** ends in a 0.15 mm radius, a 0.3 mm gap, still narrower than 25 lb line. A truly sharp tip makes the rounds on the two pocket walls collide and the top round cannot be built.
+- **Slot walls:** 0.6 mm round on top, 0.6 mm chamfer underneath. Outside corners 0.8 mm in plan view.
+- **Exit ramp:** on both faces, over the band where the line sits, 0.7 mm deep at the pocket wall, rising at 15 degrees along the card (about 2.6 mm run), with a 0.3 mm round where it meets the wall. The square pinch band left at mid-thickness is about 1.2 mm (1.16 mm on the 50 degree hook, the thinnest); the build fails below 1.0 mm.
+- **Printing:** the ramp on the bed side is a shallow groove roof bridged across under 3 mm.
+
+Final lead-in width, pocket angle, and pocket taper come from the test coupon, not from this brief. A fifth option (6 mm long pocket) is on the variants page; Brian decides which variants go on the coupon.
 
 ## Test coupon (before any card)
 
