@@ -10,7 +10,8 @@ under wrap tension leaves the slot at a low angle instead of bending 90 degrees.
 
 Run:  PART=coupon .venv/bin/python projects/Leader-cards/leader_card.py
       PART=card   .venv/bin/python projects/Leader-cards/leader_card.py
-Env:  STAGE=1 builds only the blank with its wavy edges, STAGE=2 adds the slots;
+Env:  STAGE=1 builds only the blank with its wavy edges, STAGE=2 adds the slots, STAGE=3 (default)
+      adds the card's recessed version label;
       a STAGE run exports a scratch STL (argv[1]) for the per-feature render.
       SHOW=1|reset pushes to the OCP viewer.
 """
@@ -20,7 +21,7 @@ import sys
 import zipfile
 
 from build123d import (Axis, Circle, Edge, Face, Kind, Mesher, Plane, Polygon, Pos, Rectangle, RectangleRounded, Rot,
-                       Vector, Wire, chamfer, export_stl, extrude, fillet, mirror, offset)
+                       Text, Vector, Wire, chamfer, export_stl, extrude, fillet, mirror, offset)
 
 PROJECT = os.path.dirname(os.path.abspath(__file__))
 
@@ -81,6 +82,14 @@ COUPON_SLOTS = (1, 2, 3, 4)  # variant numbers on the coupon, from its -X end
 WINNER = 5  # variant 5 reversed, Brian 2026-09-12; printed directly, no coupon
 
 NAMES = {"coupon": "leader-card-coupon", "card": "leader-card"}
+
+# version label, recessed into the top face in the strip along the -Y long edge that the wraps never
+# cover (they stay between the corner lugs); same material, so it reads by shadow
+VERSION = "LC1"  # bump on every design change; the brief keeps the version log
+LABEL_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+LABEL_SIZE = 4.8  # font size (mm); the build fails if the text does not fit the strip
+LABEL_DEPTH = 0.6  # three 0.2 mm layers
+LABEL_X = -12.0  # label centre along the card, clear of the slot mouth near +X
 
 
 def outline(length, width):
@@ -257,9 +266,24 @@ def blank(length, width, places=()):
     return part
 
 
-def build(which, stage=2):
+def label_sketch():
+    """VERSION centred in the -Y edge strip: inside the edge round, outside the wrap zone."""
+    y_lo = -CARD_W / 2 + TOP_ROUND + 0.5
+    y_hi = -CARD_W / 2 + LUG_W - 0.5
+    text = Text(VERSION, LABEL_SIZE, font_path=LABEL_FONT)
+    c = text.bounding_box().center()
+    text = Pos(LABEL_X - c.X, (y_lo + y_hi) / 2 - c.Y) * text
+    bb = text.bounding_box()
+    assert y_lo <= bb.min.Y and bb.max.Y <= y_hi, ("label does not fit the edge strip", bb.min, bb.max)
+    return text
+
+
+def build(which, stage=3):
     length, width = size(which)
-    return blank(length, width, slot_places(which) if stage >= 2 else ())
+    part = blank(length, width, slot_places(which) if stage >= 2 else ())
+    if which == "card" and stage >= 3:
+        part -= Pos(0, 0, THICK - LABEL_DEPTH) * extrude(label_sketch(), amount=LABEL_DEPTH + 1)
+    return part
 
 
 def check(part, which):
@@ -320,6 +344,16 @@ def check(part, which):
             assert part.is_inside(Vector(s * (length / 2 - 0.3), sy * (width / 2 - LUG_W / 2), THICK / 2)), "corner lug missing"
         assert not part.is_inside(Vector(s * (length / 2 - 0.3), 0, THICK / 2)), "wrap edge not set back behind the lugs"
 
+    if which == "card":  # label: nothing left inside the letters, the floor under them intact, clear of the slot mouth
+        text = label_sketch()
+        letters = Pos(0, 0, THICK - LABEL_DEPTH) * extrude(text, amount=LABEL_DEPTH)
+        floor = Pos(0, 0, THICK - LABEL_DEPTH - 0.3) * extrude(text, amount=0.3)
+        assert letters.volume > 5 * LABEL_DEPTH, "label text is empty"
+        assert (part & letters).volume < 1e-3, "label not recessed"
+        assert abs((part & floor).volume - floor.volume) < 1e-3, "label floor not intact"
+        mouth = min(abs(x0) for x0, _, _ in places) - MOUTH_W / 2 - R_PLAN
+        assert text.bounding_box().max.X <= mouth - 2.0, "label too close to the slot mouth"
+
     # volume sanity: the slots remove at least their profile area times the thickness,
     # plus the ramps and the rounded corners and edges
     removed = blank(length, width).volume - part.volume
@@ -328,7 +362,7 @@ def check(part, which):
     assert 0.95 < ratio < 1.8, (removed, expected)
     return {"size": (round(bb.size.X, 3), round(bb.size.Y, 3), round(bb.size.Z, 3)), "volume_mm3": round(part.volume, 1),
             "valleys_per_edge": valleys, "slots": len(places), "slot_removal_ratio": round(ratio, 3),
-            "pinch_band_mm": round(min(bands), 3)}
+            "pinch_band_mm": round(min(bands), 3), "label": VERSION if which == "card" else None}
 
 
 def export(part, which):
@@ -355,7 +389,7 @@ def export(part, which):
 if __name__ == "__main__":
     which = os.environ.get("PART")
     assert which in NAMES, "set PART=coupon or PART=card"
-    stage = int(os.environ.get("STAGE", "2"))
+    stage = int(os.environ.get("STAGE", "3"))
     part = build(which, stage)
     if "STAGE" in os.environ:
         out = sys.argv[1] if len(sys.argv) > 1 else f"/tmp/{NAMES[which]}-stage{stage}.stl"
