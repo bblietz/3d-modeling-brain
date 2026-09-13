@@ -121,13 +121,13 @@ All in `projects/Leader-cards/`: this brief, the CAD source, and STL and 3MF for
 - Files: `leader-card.stl`, `leader-card.3mf`, `leader-card-print.3mf` (open this one in Bambu Studio). Renders `images/final-card.png`, `images/final-card-corner.png`.
 - Real slice: 16 min, 8.7 g. Bambu Lab X2D 0.4 nozzle, 0.20mm Standard, Bambu PETG Basic, Textured PEI Plate. Print flat as loaded, chamfered edge on the bed, no supports.
 - Printability: thinnest wall 9.0 mm under the pocket; lugs 5.9 mm wide; bed-side ramps are shallow bridges under 3 mm; only sloped underside is the 45 degree chamfer. The pocket's last 0.3 mm of taper is under one 0.4 mm line width and may print closed, which is fine because both lines stop where the gap is 0.5 mm or wider.
-- Printer at build time (`scripts/x2d-status.py`): main nozzle 0.4 mm hardened steel HIGH FLOW (HH01); white PETG Basic in AMS slot 3 at 68 percent. The file was sliced with the standard 0.4 profile, so set Studio's nozzle to the installed high-flow 0.4 before printing ([[printer-x2d]]).
+- Printer at build time (`scripts/x2d-status.py`): white PETG Basic in AMS slot 3 at 68 percent. The first read that day reported the main nozzle as 0.4 mm HH01 (high flow); a later read reported 0.4 mm HS01 (standard flow) in both positions, and Brian confirmed he has no high-flow 0.4. The standard 0.4 profile the file was sliced with is correct ([[x2d-printer-control]]).
 - Variants page: https://claude.ai/code/artifact/18ae8924-111d-4f77-ab7c-6c4948e84995. The coupon files were not exported to the project; `COUPON_SLOTS` still lists variants 1 to 4 if a coupon is ever wanted.
 
 ### LC2 card (2026-09-12)
 
 - Source: `leader_card.py` (`VERSION = "LC2"`), run `.venv/bin/python projects/Leader-cards/leader_card.py`. All checks pass: 76.2 x 38.1 x 3 mm, one solid, 21 slots (9 comb per wrap edge, 3 side slots), every slot open at the mouth and at the 10 lb stop, solid past 3/8 in, face edges rounded; every comb tooth present; label LC2 recessed, floor intact, clear of the combs.
 - Files: `leader-card-LC2.stl`, `leader-card-LC2.3mf`, `leader-card-LC2-print.3mf` (open this one). Renders `images/final-card-LC2.png`. Page: https://claude.ai/code/artifact/8d43738c-84e6-45d4-b31c-25e05321d7f0
-- Real slice: 15 min, 6.9 g. Same settings as LC1 (0.4 nozzle, 0.20mm Standard, PETG Basic, Textured PEI). Set Studio's nozzle to the installed high-flow 0.4.
+- Real slice: 15 min, 6.9 g. Same settings as LC1 (0.4 standard-flow nozzle, 0.20mm Standard, PETG Basic, Textured PEI).
 - Printability: comb teeth 1.8 mm at the tip, 3 mm at the root, 9.5 mm long; the last 0.2 to 0.4 mm of each taper is under one line width and may print closed, which is below where 10 lb line stops.
 
