@@ -22,14 +22,15 @@ Printed replacement for the cardboard cards Brian wraps long fishing leaders on 
 - Material: white PETG. PLA (heat) and nylon (water) are out; ASA is out on sunscreen ([[marine-materials]]).
 - Approach: flat card with slots (option 1 of 3). Rejected: railed spool card (thicker, traps water) and TPU slot inserts (two materials, TPU feeds poorly in the AMS; held in reserve if PETG slots fail).
 - First batch: 1 card.
+- Card size 3 x 2 in (Brian, 2026-09-12), replacing the 70 x 45 mm estimate from the photo.
 
 ## Card geometry
 
-- Footprint 70 x 45 mm, matching the cardboard card (smaller than a credit card). If Brian measures the cardboard card before CAD, his measurement replaces 70 x 45. Hard ceiling: 86 x 54 mm (credit card).
+- Footprint 3 x 2 in (76.2 x 50.8 mm), set by Brian. Under the 86 x 54 mm credit card ceiling.
 - Thickness 3 mm.
-- Line wraps end to end around the long axis, bending over the two 45 mm short edges. About 140 mm per wrap, about 6.5 wraps for 36 in.
-- Plan-view corners: 3 mm radius.
-- Short (wrap) edges: the straight 39 mm between the corners is a wave of alternating tangent arcs, 3 mm peak to peak, 0.6 mm deep, arc radius about 1.09 mm, giving 13 valleys per edge.
+- Line wraps end to end around the long axis, bending over the two 50.8 mm short edges. About 152 mm per wrap, about 6 wraps for 36 in.
+- Plan-view corners: 2.9 mm radius, chosen so the straight part of each short edge is exactly 45.0 mm, a whole number of wave pitches.
+- Short (wrap) edges: the straight 45 mm between the corners is a wave of alternating tangent arcs, 3 mm peak to peak, 0.6 mm deep, arc radius about 1.09 mm, giving 15 valleys per edge.
 - Whole perimeter: 0.6 mm round on the top face, 0.6 mm 45 degree chamfer on the bottom face so the edge prints without a feather lip at the bed. Both are capped at 0.6 mm because a larger round or chamfer cannot follow the 1.09 mm wave peaks.
 - Both faces plain and flat. No pockets, ribs, or text. The slots are through cuts, so they drain.
 
@@ -50,7 +51,7 @@ Final lead-in width, pocket angle, and pocket taper come from the test coupon, n
 
 ## Test coupon (before any card)
 
-Minimal per [[feedback-minimal-test-coupons]]: a 52 x 12 x 3 mm strip carrying four hook-bend slot variants (varying lead-in width, pocket angle, and pocket taper) along one long edge. Its two short ends carry the same wave as the card (2 valleys each), so the wave is tested too. Nothing else. Quote print time from a real slice.
+Minimal per [[feedback-minimal-test-coupons]]: a 52 x 11.8 x 3 mm strip carrying four hook-bend slot variants (varying lead-in width, pocket angle, and pocket taper) along one long edge. Its two short ends carry the same wave as the card (2 valleys each), so the wave is tested too. Nothing else. Quote print time from a real slice.
 
 Brian tests each variant with real 25 lb and 40 lb line. Pass criteria:
 

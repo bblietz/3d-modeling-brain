@@ -9,7 +9,7 @@ tags: [fishing, tackle, petg, leader, x2d, plan]
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Modeling work also follows the `/3d-model` skill (build123d backend, per-feature render, printability check, STL plus 3MF export).
 
-**Goal:** Build and print a slot test coupon, then one 70 x 45 x 3 mm white PETG leader card with wavy wrap edges and hook-bend line slots, per [[brief]].
+**Goal:** Build and print a slot test coupon, then one 3 x 2 in (76.2 x 50.8 mm), 3 mm thick white PETG leader card with wavy wrap edges and hook-bend line slots, per [[brief]].
 
 **Architecture:** One parametric build123d source, `leader_card.py`, builds either part (`PART=coupon` or `PART=card`) from shared geometry: a rounded outline whose short edges are a wave of tangent arcs, a top round and bottom chamfer, and hook-bend slot tools cut through the thickness. Inline asserts verify every feature. A second script, `make_plate.py`, turns the exported STL into a Bambu Studio print 3MF (0.4 nozzle, PETG Basic, Textured PEI) and proves it by a real slice. Every piece of code below was run end to end in the scratchpad on 2026-09-12 and produced the outputs quoted.
 
@@ -85,10 +85,10 @@ from build123d import Axis, Circle, Edge, Face, Mesher, Polygon, Pos, Rot, Vecto
 PROJECT = os.path.dirname(os.path.abspath(__file__))
 
 # card
-CARD_L = 70.0  # along X; the line wraps over the short edges at x = +/- CARD_L / 2
-CARD_W = 45.0
+CARD_L = 76.2  # 3 in, along X; the line wraps over the short edges at x = +/- CARD_L / 2
+CARD_W = 50.8  # 2 in
 THICK = 3.0
-CORNER_R = 3.0  # plan-view corner radius
+CORNER_R = 2.9  # plan-view corner radius; leaves a 45.0 mm straight short edge, exactly 15 wave pitches
 TOP_ROUND = 0.6  # capped by the 1.09 mm wave peaks
 BOT_CHAMFER = 0.6  # 45 degrees, no feather lip at the bed
 
@@ -108,7 +108,7 @@ POCKET_PROBE = 1.5  # distance along the pocket where the open-slot probe sits
 
 # coupon
 COUPON_L = 52.0
-COUPON_W = 12.0
+COUPON_W = 11.8  # 6.0 mm straight short edge, exactly 2 wave pitches
 COUPON_FIRST = 6.0  # first lead-in from the coupon's -X end
 COUPON_PITCH = 12.0
 
@@ -304,7 +304,7 @@ PART=coupon STAGE=1 .venv/bin/python projects/Leader-cards/leader_card.py $S/cou
 .venv/bin/python scripts/render_stl.py $S/coupon-stage1.stl $S/coupon-stage1.png 90,-90 35,-60
 ```
 
-Expected: `stage 1 -> ... bbox Vector: (X=52, Y=12, Z=3)` and `rendered 2 views`. Open the PNG: a rounded strip, both short ends showing two small rounded valleys, no slots.
+Expected: `stage 1 -> ... bbox Vector: (X=52, Y=11.8, Z=3)` and `rendered 2 views`. Open the PNG: a rounded strip, both short ends showing two small rounded valleys, no slots.
 
 - [ ] **Step 5: Feature 2 render, slots**
 
@@ -313,14 +313,14 @@ PART=coupon STAGE=2 .venv/bin/python projects/Leader-cards/leader_card.py $S/cou
 .venv/bin/python scripts/render_stl.py $S/coupon-stage2.stl $S/coupon-stage2.png 90,-90 35,-60
 ```
 
-Expected: `stage 2 -> ... bbox Vector: (X=52, Y=12, Z=3)`. Open the PNG: four slots entering the -Y long edge, each turning toward +X into a pocket that angles back toward the edge; slot 3 has the steepest hook, slot 4 the widest lead-in.
+Expected: `stage 2 -> ... bbox Vector: (X=52, Y=11.8, Z=3)`. Open the PNG: four slots entering the -Y long edge, each turning toward +X into a pocket that angles back toward the edge; slot 3 has the steepest hook, slot 4 the widest lead-in.
 
 - [ ] **Step 6: Full build, checks and export (green)**
 
 Run: `PART=coupon .venv/bin/python projects/Leader-cards/leader_card.py`
 Expected:
 ```
-checks passed {'size': (52.0000002, 12.000000000000002, 3.000000000000002), 'volume_mm3': 1683.0, 'valleys_per_edge': 2, 'slots': 4}
+checks passed {'size': (52.0000002, 11.800000000000004, 3.0000000000000018), 'volume_mm3': 1653.4, 'valleys_per_edge': 2, 'slots': 4}
 exported .../projects/Leader-cards/leader-card-coupon.stl .../projects/Leader-cards/leader-card-coupon.3mf
 ```
 
@@ -590,14 +590,14 @@ PART=card STAGE=2 .venv/bin/python projects/Leader-cards/leader_card.py $S/card-
 .venv/bin/python scripts/render_stl.py $S/card-stage2.stl $S/card-stage2.png 90,-90 35,-60
 ```
 
-Expected: both print `bbox Vector: (X=70, Y=45, Z=3)`. Open each PNG: stage 1 is the plain card with wavy short edges; stage 2 adds one slot on the -Y edge near +X and one on the +Y edge near -X, each hooking toward its nearest short edge.
+Expected: both print `bbox Vector: (X=76.2, Y=50.8, Z=3)`. Open each PNG: stage 1 is the plain card with wavy short edges; stage 2 adds one slot on the -Y edge near +X and one on the +Y edge near -X, each hooking toward its nearest short edge.
 
 - [ ] **Step 4: Full build, checks and export (green)**
 
 Run: `PART=card .venv/bin/python projects/Leader-cards/leader_card.py`
 Expected (verified with `WINNER = 1`; the volume changes slightly for other winners, everything else is identical):
 ```
-checks passed {'size': (70.0000002, 45.00000000000001, 3.0000000000000013), 'volume_mm3': 9238.2, 'valleys_per_edge': 13, 'slots': 2}
+checks passed {'size': (76.2000002, 50.8000001, 3.0000000000000004), 'volume_mm3': 11385.3, 'valleys_per_edge': 15, 'slots': 2}
 exported .../projects/Leader-cards/leader-card.stl .../projects/Leader-cards/leader-card.3mf
 ```
 
@@ -620,14 +620,14 @@ Expected: `rendered 4 views` then `rendered 2 views`. Open `final-card-corner.pn
 - [ ] **Step 6: Print file and real slice**
 
 Run: `.venv/bin/python projects/Leader-cards/make_plate.py card`
-Expected (verified with `WINNER = 1`): `.../projects/Leader-cards/leader-card-print.3mf {'minutes': 12, 'grams': 7.3}`
+Expected (verified with `WINNER = 1`): `.../projects/Leader-cards/leader-card-print.3mf {'minutes': 14, 'grams': 9.0}`
 
 - [ ] **Step 7: Record the outcome in the brief**
 
 Set the frontmatter `status:` line to:
 
 ```
-status: card built and sliced (12 min, 7.3 g) with slot variant N. Waiting on Brian's tackle box fit and 36 in wrap test
+status: card built and sliced (14 min, 9.0 g) with slot variant N. Waiting on Brian's tackle box fit and 36 in wrap test
 ```
 
 and append under `## Outcomes` (real numbers from Steps 4 and 6):
@@ -637,7 +637,7 @@ and append under `## Outcomes` (real numbers from Steps 4 and 6):
 
 - Winning slot: variant N, chosen by Brian on <YYYY-MM-DD>. His coupon notes: <his words on each variant and on the wave>.
 - Files: `leader-card.stl`, `leader-card.3mf`, `leader-card-print.3mf` (open this one), renders `images/final-card.png` and `images/final-card-corner.png`.
-- Real slice: 12 min, 7.3 g, same settings as the coupon.
+- Real slice: 14 min, 9.0 g, same settings as the coupon.
 ```
 
 - [ ] **Step 8: Commit and push**
@@ -703,7 +703,7 @@ Project: [[brief]] in `projects/Leader-cards/`. Printed PETG card that replaces 
 
 ## Measured and sliced
 
-- Coupon 52 x 12 x 3 mm: 5 min, 1.6 g. Card 70 x 45 x 3 mm: 12 min, 7.3 g.
+- Coupon 52 x 11.8 x 3 mm: 5 min, 1.6 g. Card 3 x 2 in (76.2 x 50.8 x 3 mm): 14 min, 9.0 g.
 - <from Brian: tackle box fit, wraps per 36 in rig, line sizes tested>
 
 ## Reuse
@@ -723,11 +723,11 @@ metadata:
   type: project
 ---
 
-Leader cards (projects/Leader-cards) replace cardboard for wrapping 25 to 40 lb fishing leaders up to 36 in. Card 70 x 45 x 3 mm white PETG, hook-bend slot variant N, 3 mm wave on the wrap edges. Status as of <YYYY-MM-DD>: <from Brian's final report>.
+Leader cards (projects/Leader-cards) replace cardboard for wrapping 25 to 40 lb fishing leaders up to 36 in. Card 3 x 2 in (76.2 x 50.8 x 3 mm) white PETG, hook-bend slot variant N, 3 mm wave on the wrap edges. Status as of <YYYY-MM-DD>: <from Brian's final report>.
 
 **Why:** cardboard slits tore and the card went soft when rigs were stored wet.
 
-**How to apply:** for more cards, reprint `leader-card-print.3mf`; for a new size, change CARD_L and CARD_W in `leader_card.py` (card width minus 6 mm must be an even multiple of 1.5 mm, the outline asserts it). Retrospective: knowledge/learnings/leader-cards.md. Related: [[feedback-minimal-test-coupons]], [[marine-materials]].
+**How to apply:** for more cards, reprint `leader-card-print.3mf`; for a new size, change CARD_L and CARD_W in `leader_card.py` (width minus 2 x CORNER_R must be a whole number of 3 mm wave pitches, the outline asserts it). Retrospective: knowledge/learnings/leader-cards.md. Related: [[feedback-minimal-test-coupons]], [[marine-materials]].
 ```
 
 Append this line to `memory/MEMORY.md`:
