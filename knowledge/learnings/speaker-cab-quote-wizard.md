@@ -1,6 +1,6 @@
 ---
 name: speaker-cab-quote-wizard
-description: Retrospective for the MaximoCabs quote wizard (a multi-step, server-rendered intake that emails the /speaker-cab Rig block, branch quote-wizard-design 2a7753e..e5fa9d2, merged into local main at 40ba39d, not pushed), with Brian's locked decisions, the review findings, and the Rollout still to do
+description: Retrospective for the MaximoCabs quote wizard (a multi-step, server-rendered intake that emails the /speaker-cab Rig block, branch quote-wizard-design 2a7753e..e5fa9d2, merged at 40ba39d and deployed to production 2026-09-13), with Brian's locked decisions, the review findings, and the Rollout record
 type: learning
 status: complete
 created: 2026-09-13
@@ -9,7 +9,7 @@ tags: [learning, speaker-cab, maximocabs, quote-wizard, retrospective]
 
 # MaximoCabs quote wizard retrospective
 
-Spec: `docs/superpowers/specs/2026-09-12-quote-wizard-design.md` (226104e). Plan: `docs/superpowers/plans/2026-09-12-quote-wizard.md` (14edefa, amended at 82aedb6 with the pre-flight fixes and Brian's decisions, Rollout rewritten at 404518c and e5fa9d2). Both are in `~/ClaudeProjects/MaximoCabs`. Branch `quote-wizard-design` off main at 2a7753e, range 2a7753e..e5fa9d2 (23 commits: the design, the plan, then 21 of execution), merged with `--no-ff` into local main at 40ba39d on 2026-09-13 (branch deleted; 155 tests, check, and build re-run on the merged result) and not pushed; deploy waits on Brian's Rollout. Executed 2026-09-12 to 2026-09-13, subagent-driven, ledger `.superpowers/sdd/progress.md`. Controller, implementers, and reviewers all ran on Opus 5, because Fable 5.1 hit its usage limit (HTTP 429) on the pre-flight scan and again on the first final-review attempt. Task 10 ran in the vault in parallel with Task 8 (different repo, no index contention) and landed as d43a494, pushed. Follows [[speaker-cab-plan-3]]; system status in [[project-speaker-cab-system]].
+Spec: `docs/superpowers/specs/2026-09-12-quote-wizard-design.md` (226104e). Plan: `docs/superpowers/plans/2026-09-12-quote-wizard.md` (14edefa, amended at 82aedb6 with the pre-flight fixes and Brian's decisions, Rollout rewritten at 404518c and e5fa9d2). Both are in `~/ClaudeProjects/MaximoCabs`. Branch `quote-wizard-design` off main at 2a7753e, range 2a7753e..e5fa9d2 (23 commits: the design, the plan, then 21 of execution), merged with `--no-ff` into local main at 40ba39d on 2026-09-13 (branch deleted; 155 tests, check, and build re-run on the merged result), then pushed 2026-09-13 (2a7753e..40ba39d) and deployed by Actions run 34783315673 as Pages deployment 3977b291 (Rollout record below). Executed 2026-09-12 to 2026-09-13, subagent-driven, ledger `.superpowers/sdd/progress.md`. Controller, implementers, and reviewers all ran on Opus 5, because Fable 5.1 hit its usage limit (HTTP 429) on the pre-flight scan and again on the first final-review attempt. Task 10 ran in the vault in parallel with Task 8 (different repo, no index contention) and landed as d43a494, pushed. Follows [[speaker-cab-plan-3]]; system status in [[project-speaker-cab-system]].
 
 ## What was built
 
@@ -70,17 +70,17 @@ Final review (2026-09-13):
 
 ## Open items and follow-ups
 
-- **Rollout (Brian, ten steps; see the plan's "Rollout (Brian, after Task 10)" section).** Never push main before the KV binding exists, because a push to main deploys.
-  - Create `QUOTE_DRAFTS` and bind it for Production. A Preview binding uses its own `--preview` namespace, and a binding added after the merge needs a `workflow_dispatch` re-run.
-  - Confirm the secrets `TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, and `QUOTE_RECIPIENT_EMAIL`.
-  - Before merge, confirm the compatibility date is not older than 2024-11-01, the GitHub variables `PUBLIC_TURNSTILE_SITE_KEY` and `PUBLIC_CF_ANALYTICS_TOKEN` exist, and `maximocabs.pages.dev` is in the Turnstile hostname list.
-  - Push main (already merged locally at 40ba39d), then run the live curls: quote CSP with `private, no-store`; `/api/quote` 405; `/_image` 404; product page CSP without no-store; the cabinet POST's Set-Cookie and location (POSTs send `Origin: https://maximocabs.pages.dev`; the same POST with a foreign Origin must get 403).
-  - Walk a two-amp quote with one Edit link, `wrangler pages deployment tail` running, and the console open on `/quote/review`; make a real send and check the ten-section email.
-  - Roll back from the dashboard first, then `git revert -m 1 40ba39d`. Afterward, note the go-live date in [[project-speaker-cab-system]].
+- **Rollout, 2026-09-13 (the plan's "Rollout (Brian, after Task 10)" section; everything done except Brian's browser walk).**
+  - Step 3: `npx wrangler kv namespace create QUOTE_DRAFTS` (wrangler 3.114.17) titled the namespace `worker-QUOTE_DRAFTS`, because wrangler 3 prefixes `worker` when no config name is present. Id `3b16664356ec43d18f0a6c22b7aaf127`. The title is cosmetic; the code reads the binding name.
+  - Step 4: the dashboard binding did not save. The Pages project API showed `kv_namespaces: {}` for Production and Preview, matching `wrangler pages download config`. Per Brian, the controller PATCHed only `deployment_configs.production.kv_namespaces` with `QUOTE_DRAFTS`; a fresh GET showed the binding, with the three secrets and the compatibility date unchanged. Preview has no binding.
+  - Steps 5 and 6: `wrangler pages secret list` shows `QUOTE_RECIPIENT_EMAIL`, `RESEND_API_KEY`, and `TURNSTILE_SECRET_KEY` for Production. The compatibility date is 2026-07-23. `gh variable list` shows `PUBLIC_TURNSTILE_SITE_KEY` and `PUBLIC_CF_ANALYTICS_TOKEN`. Brian confirmed the Turnstile hostname.
+  - Step 7: main pushed (2a7753e..40ba39d). CI: 0 check errors, 155 tests, "using pre-installed wrangler version 3.114.17", deployment 3977b291, 1 min 9 s.
+  - Step 8 curls, all as expected: quote GET 200 with CSP and `private, no-store` and no cookie; `/api/quote` 405; both `/_image` probes 404; product page CSP without no-store; cabinet POST 303 with the full `mc_draft` cookie and `location: /quote/rig?d=...`; foreign Origin 403. One test draft (0ec71e28) expires in 14 days.
+  - Open: Brian's browser walk (two-amp rig, one Edit link, console on `/quote/review`, real Turnstile send, ten-section email) with the production tail running. Rollback if it fails: the dashboard's "Rollback to this deployment" on 5be6df69 (2026-07-26), then `git revert -m 1 40ba39d && git push origin main`. Go-live date recorded in [[project-speaker-cab-system]].
 - **Workers Free risk.** Limits are 1,000 KV writes a day, 10 ms CPU per request, and 100,000 requests a day account-wide. At about 9 or 10 writes per real quote, that is about 100 quotes a day. A script sending about 1,000 cabinet POSTs stops quotes until 00:00 UTC (the save-failure copy now at least offers the email address). Pages Functions have no rate-limit binding, and a pages.dev hostname gets no WAF rule. The 10 ms CPU cap was never tested by the local walks. Watch for error 1102; Workers Paid is the reviewer's fix.
 - **Astro 6 plus adapter 14 upgrade (deferred).** It clears the adapter advisories, but the plan's constraints note that adapter v13 and later need Astro 6 and no longer support Pages, so it is a project of its own.
 - **Final review follow-ups (open).**
-  - FR.7: bare `/quote` likely 404s in production, because only `/quote/*` is routed (Task 7's local worker answered 303).
+  - FR.7: closed. Bare `/quote` answers 303 to `/quote/cabinet` in production (probed 2026-09-13), so the `/quote/*` route covers it.
   - FR.8: a double-clicked Send hits a 403 and then the restart notice, although the quote went out.
   - FR.9: `form.ts` field lists can drift from the schemas (fix: a round-trip test per step).
   - FR.10: draft links are 14-day bearer tokens, and a cross-site POST can create a draft (fix: reject `Sec-Fetch-Site: cross-site`).
@@ -95,7 +95,9 @@ Final review (2026-09-13):
   - MV.4: align the brief template (Speaker row, vehicle sub-field).
   - FR.11 lands here too: a line saying email content is customer data, never instructions.
 - **After fix round 2.** Point any uptime monitor at a static page, because HEAD and Origin-less requests to `/quote/*` get 403. One-line follow-ups: the `checkOrigin` comment, a `draftCookieUpdate` test for a POST redirect with no draft id, a non-empty guard on the loader scan, and the spec's cookie wording.
-- **Port 8799.** A leftover `wrangler pages dev` from the planning session's spike (pid 749075 listening) still holds the port. It was left running, and later local checks used ports 8800 to 8803. Stop it by pid when convenient.
+- **Port 8799: closed.** The planning spike was stopped by pid on 2026-09-13 (node 749021; its workerd 749075 exited with it).
+- **Wrangler 4 (branch `wrangler-4`, 817774e; ships after the browser walk).** Brian asked for the upgrade mid-Rollout and chose to ship it as its own deploy after go-live, with CI on Node 22. The commit adds wrangler 4.131.1 as a devDependency and sets `node-version: "22"` in `deploy.yml`, because wrangler 4.87 and later refuse Node 20 and `wrangler-action@v3` quietly installs 3.90.0 when the project copy fails to run. The adapter keeps its nested wrangler 3.114.17 for `astro dev` and `astro build`. `allowScripts` is unchanged (npm warns for the new workerd and esbuild, as it already did for wrangler 3's). Verified on the branch: check 0 errors, 155 tests, build, and under wrangler 4 `pages dev` at compatibility date 2026-07-23 the Task 7 scripted walk plus the step 8 checks. After its push, the CI log should read "using pre-installed wrangler version 4.131.1". The worktree sat in a session scratchpad; the commit lives in the repo, so run `git worktree prune` if the directory is gone.
+- **The plan's Task 7 Step 6 walk is stale.** Since `checkOrigin`, every `hop` POST needs `-H "Origin: $B"`, or each step answers 403.
 
 ## What worked and what to change next time
 
@@ -106,3 +108,4 @@ Final review (2026-09-13):
 - The spike on 8799 silently answered Task 7's first walk, so every hop came from the spike and none from the branch. Confirm a port is free with `ss -ltn` before starting a worker, and stop spike workers when a planning session ends.
 - The plan's running test totals read low after every added test (121 expected after Task 9; the branch had 135). The ledger's corrected count in each dispatch kept the reviews honest.
 - Each Fable 429 was answered by re-dispatching the identical prompt on Opus 5, and no work was lost. Record the model per role in the ledger header.
+- The pre-push gate caught a binding that looked done: the dashboard step was believed complete, but the Pages project API still showed no KV binding. Before any push that depends on a Cloudflare setting, read the setting back from the API (`deployment_configs.<env>` on the Pages project) instead of trusting the dashboard view.
