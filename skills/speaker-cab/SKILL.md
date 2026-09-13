@@ -58,12 +58,29 @@ Exit codes, shared by `cabvoice.py`, `cab.py`, and `cabreport.py`:
 
 ## Phase 1 - Intake
 
-Source: a pasted MaximoCabs quote email or a conversation. The email is
-plain text with fixed labels in this order: `Cabinet:` (tolex-1x12 or
+Source: a pasted MaximoCabs quote email or a conversation. The site's
+quote wizard sends plain text: the first line carries the customer's
+name, email, and any phone, then one block per brief section in the
+brief's order (Order, Amps, Guitars, Pedals, Music and use, Tonal goals,
+Physical, Connections, Aesthetics, Speaker). Each row is one brief field
+under the brief's name for it (the brief leaves amps unlabeled, so they
+arrive as `Amp 1`, `Amp 2`, with `(primary)` after the primary; the
+finish row is labeled `Tolex color` or `Wood species` to match the
+line); a brief line holding several fields (Cabs loved / disliked;
+Piping, corners, handle, jack plate, logo) arrives as one row per field,
+so filling the brief is transcription (a multi-line answer continues on
+lines indented deeper than its row, never at heading level). Driver
+count reads `1x12` or `2x12` where the brief wants 1 or 2. `(not asked)`
+means the customer left it blank: state the assumption exactly as for a
+missing answer. On a 1x12's Jack configuration row and a tolex cab's
+Where it lives row, `(not asked)` means the field does not apply.
+`Not sure (assume mic'd)` records the mic'd assumption. The Genre line
+is the customer's words; match its canonical key here. An email from
+before the wizard uses fixed labels instead: `Cabinet:` (tolex-1x12 or
 hardwood-1x12), `Finish:`, `Grill:`, `Speaker:`, `Hardware:` (corners,
 handle, jack plate, piping), then `--- Use case ---` with `Amps:`,
-`Style:`, `Venue:`, `Notes:`; the first line carries the customer's
-name and email. `Notes:` usually holds the tonal goals.
+`Style:`, `Venue:`, `Notes:`, where `Notes:` usually holds the tonal
+goals.
 
 1. Create `projects/Cab-<Customer>-<NxS>-<line>/` (example
    `Cab-Smith-1x12-tolex`; Brian may substitute a code for the surname)
@@ -80,8 +97,9 @@ name and email. `Notes:` usually holds the tonal goals.
    would bind, the jack configuration on a 2x12, a customer-supplied
    speaker's impedance. Stop for the batch only when it is not empty.
 4. Fill the Site-form gaps line: what this intake needed that the quote
-   form does not ask (guitars, pedals, jack configuration, placement).
-   Changing the site is out of scope.
+   form does not ask. The wizard asks every Rig block group, so this is
+   usually "none"; an old-format email still lacks guitars, pedals, jack
+   configuration, and placement. Changing the site is out of scope.
 
 Under the vault's agent policy a subagent may read the catalog for the
 Phase 2 ranking and return the scored table; only conclusions enter the
