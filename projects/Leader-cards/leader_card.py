@@ -78,7 +78,7 @@ VARIANTS = [
     dict(lead_w=1.2, angle=30, pocket_w=1.0, pocket_l=6.0, exit=-1),  # 5 longer pocket, mirrored (Brian's pick 2026-09-12)
 ]
 COUPON_SLOTS = (1, 2, 3, 4)  # variant numbers on the coupon, from its -X end
-WINNER = None  # variant number for the card; PART=card refuses to build until set
+WINNER = 5  # variant 5 reversed, Brian 2026-09-12; printed directly, no coupon
 
 NAMES = {"coupon": "leader-card-coupon", "card": "leader-card"}
 

@@ -1,8 +1,9 @@
-"""Exact plan-view drawings of five slot variants, filled into the page template.
+"""Exact plan-view drawings of the slot variants, filled into the page template.
 
 Solid outline: the card at mid-thickness (plan_face, the same face the model
 extrudes). Shaded band: the exit ramp on the top face, from the pocket wall to
 where it meets the face. Dashed line: where the 0.6 mm top round starts.
+Every drawing uses the same view size, so all are at one scale.
 """
 import os
 import sys
@@ -12,11 +13,10 @@ import leader_card as lc  # noqa: E402
 from build123d import Align, Kind, Polygon, Pos, Rectangle, offset  # noqa: E402
 
 HERE = sys.argv[1]
-VARIANTS = lc.VARIANTS + [dict(lead_w=1.2, angle=30, pocket_w=1.0, pocket_l=6.0)]
 
 X0 = lc.CARD_L / 2 - lc.SLOT_INSET  # slot mouth x, card frame
 EDGE = -lc.CARD_W / 2
-VIEW = (X0 - 4.6, EDGE - 1.3, lc.CARD_L / 2 + 1.3, EDGE + 10.4)  # xmin, ymin, xmax, ymax (mm)
+VIEW = (X0 - 8.6, EDGE - 1.3, lc.CARD_L / 2 + 1.3, EDGE + 10.4)  # xmin, ymin, xmax, ymax (mm)
 PAD = 1.0  # crop past the view so crop edges fall outside the drawing
 
 
@@ -62,30 +62,39 @@ crop = Pos(VIEW[0] - PAD, VIEW[1] - PAD) * Rectangle(VIEW[2] - VIEW[0] + 2 * PAD
 vb = f"{VIEW[0]:.3f} {-VIEW[3]:.3f} {VIEW[2] - VIEW[0]:.3f} {VIEW[3] - VIEW[1]:.3f}"
 tpl = open(f"{HERE}/slot-variants-template.html").read()
 
-for i, v in enumerate(VARIANTS, 1):
+for i, v in enumerate(lc.VARIANTS, 1):
+    m = v["exit"]
     face = lc.plan_face(lc.CARD_L, lc.CARD_W, [(X0, 1, v)])
     card = face & crop
     top = offset(face, -lc.TOP_ROUND, kind=Kind.ARC) & crop
 
-    # ramp on the top face: from the exit wall to where the rising plane meets the face
+    # ramp on the top face: from the exit wall to where it meets the face, flipped for mirrored slots
     wall_x, y_lo, y_hi, run, _ = lc.ramp_geometry(v)
-    band = Pos(X0, EDGE) * Polygon((wall_x(y_lo), y_lo), (wall_x(y_lo) + run, y_lo), (wall_x(y_hi) + run, y_hi),
-                                   (wall_x(y_hi), y_hi), align=None)
-    ramp = band & face
+    corners = [(wall_x(y_lo), y_lo), (wall_x(y_lo) + run, y_lo), (wall_x(y_hi) + run, y_hi), (wall_x(y_hi), y_hi)]
+    if m < 0:
+        corners.reverse()  # keep the polygon counterclockwise after the flip
+    ramp = Polygon(*[(X0 + m * x, EDGE + y) for x, y in corners], align=None) & face
     ym = sum(p[1] for p in lc.line_stops(v)) / 2
-    gx1, gx2 = X0 + wall_x(ym), X0 + wall_x(ym) + run
+    gx1, gx2 = X0 + m * wall_x(ym), X0 + m * (wall_x(ym) + run)
 
-    dots = "".join(f'<circle class="l{j}" cx="{X0 + x:.3f}" cy="{-(EDGE + y):.3f}" r="{d / 2:.3f}"/>'
-                   for j, ((x, y), d) in enumerate(zip(lc.line_stops(v), lc.LINE_DIAS)))
+    dots = "".join(f'<circle class="l{j}" cx="{X0 + m * x:.3f}" cy="{-(EDGE + y):.3f}" r="{dia / 2:.3f}"/>'
+                   for j, ((x, y), dia) in enumerate(zip(lc.line_stops(v), lc.LINE_DIAS)))
 
     # annotations in drawing units (mm); SVG y is -world y
     ey = -EDGE
+    ay = ey - 8.9
+    if m > 0:
+        arrow = (f'<line class="annline" x1="{X0 - 1.0:.2f}" y1="{ay:.2f}" x2="{X0 + 5.2:.2f}" y2="{ay:.2f}"/>'
+                 f'<path class="arrowhead" d="M{X0 + 5.6:.2f},{ay:.2f} L{X0 + 5.0:.2f},{ay - 0.3:.2f} L{X0 + 5.0:.2f},{ay + 0.3:.2f} Z"/>'
+                 f'<text class="ann" x="{X0 - 1.0:.2f}" y="{ay - 0.4:.2f}">wrap tension, to this wrap edge</text>')
+    else:
+        arrow = (f'<line class="annline" x1="{X0 + 4.0:.2f}" y1="{ay:.2f}" x2="{X0 - 7.4:.2f}" y2="{ay:.2f}"/>'
+                 f'<path class="arrowhead" d="M{X0 - 7.8:.2f},{ay:.2f} L{X0 - 7.2:.2f},{ay - 0.3:.2f} L{X0 - 7.2:.2f},{ay + 0.3:.2f} Z"/>'
+                 f'<text class="ann" x="{X0 - 7.6:.2f}" y="{ay - 0.4:.2f}">wrap tension, to the far wrap edge</text>')
     ann = (
         f'<text class="ann" x="{VIEW[0] + 0.3:.2f}" y="{ey + 0.95:.2f}">LONG EDGE</text>'
         f'<text class="ann" x="{lc.CARD_L / 2 + 0.9:.2f}" y="{ey - 6.5:.2f}" transform="rotate(-90 {lc.CARD_L / 2 + 0.9:.2f} {ey - 6.5:.2f})">WRAP EDGE</text>'
-        f'<line class="annline" x1="{X0 - 1.0:.2f}" y1="{ey - 8.9:.2f}" x2="{X0 + 5.2:.2f}" y2="{ey - 8.9:.2f}"/>'
-        f'<path class="arrowhead" d="M{X0 + 5.6:.2f},{ey - 8.9:.2f} L{X0 + 5.0:.2f},{ey - 9.2:.2f} L{X0 + 5.0:.2f},{ey - 8.6:.2f} Z"/>'
-        f'<text class="ann" x="{X0 - 1.0:.2f}" y="{ey - 9.3:.2f}">wrap tension</text>'
+        f'{arrow}'
         f'<line class="scale" x1="{VIEW[0] + 0.4:.2f}" y1="{ey - 2.2:.2f}" x2="{VIEW[0] + 2.4:.2f}" y2="{ey - 2.2:.2f}"/>'
         f'<line class="scale" x1="{VIEW[0] + 0.4:.2f}" y1="{ey - 2.45:.2f}" x2="{VIEW[0] + 0.4:.2f}" y2="{ey - 1.95:.2f}"/>'
         f'<line class="scale" x1="{VIEW[0] + 2.4:.2f}" y1="{ey - 2.45:.2f}" x2="{VIEW[0] + 2.4:.2f}" y2="{ey - 1.95:.2f}"/>'

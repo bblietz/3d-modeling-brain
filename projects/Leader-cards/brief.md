@@ -1,7 +1,7 @@
 ---
 title: Leader cards
 type: project-brief
-status: design approved 2026-09-12, hook-bend slot hitch and wavy wrap edges added same day. Next is the slot test coupon
+status: card built and sliced 2026-09-12 (variant 5 reversed, 14 min, 8.7 g). Waiting on Brian to print, check tackle box fit, and wrap a real 36 in rig
 created: 2026-09-12
 tags: [fishing, tackle, petg, leader, x2d]
 ---
@@ -25,6 +25,8 @@ Printed replacement for the cardboard cards Brian wraps long fishing leaders on 
 - Card size 3 x 2 in (Brian, 2026-09-12), replacing the 70 x 45 mm estimate from the photo.
 - Nothing sharp touches the line (Brian, 2026-09-12): the slot walls get the same 0.6 mm top round and 0.6 mm bottom chamfer as the card edge, and the slot's outside corners (hook tongue, funnel, mouth) are rounded to 0.8 mm in plan view.
 - Gradual exit (Brian, 2026-09-12): a 15 degree exit ramp on both faces, from the pocket wall toward the wrap edge, so line under wrap tension does not bend 90 degrees over the face edge and take a permanent kink. Chosen over an angled entry from the long edge.
+- Slot pick (Brian, 2026-09-12): variant 5 reversed. A 6 mm pocket (1.0 mm wide, 30 degree hook, 1.2 mm lead-in) mirrored so the lead-in sits on the wrap-edge side and the pocket and exit ramp point toward the card centre; wrap tension runs toward the far wrap edge.
+- Corner lugs (Brian, 2026-09-12): the four corners stand 1.5 mm proud of the wavy wrap edge so slack wraps cannot slide off its ends. Overall size stays 3 x 2 in.
 - Visual options are shown on an HTML page, never ASCII art ([[feedback-html-visual-companion]]). Slot variants page: https://claude.ai/code/artifact/18ae8924-111d-4f77-ab7c-6c4948e84995
 
 ## Card geometry
@@ -34,6 +36,7 @@ Printed replacement for the cardboard cards Brian wraps long fishing leaders on 
 - Line wraps end to end around the long axis, bending over the two 50.8 mm short edges. About 152 mm per wrap, about 6 wraps for 36 in.
 - Plan-view corners: 2.9 mm radius, chosen so the straight part of each short edge is exactly 45.0 mm, a whole number of wave pitches.
 - Short (wrap) edges: the straight 45 mm between the corners is a wave of alternating tangent arcs, 3 mm peak to peak, 0.6 mm deep, arc radius about 1.09 mm, giving 15 valleys per edge.
+- Corner lugs: the wave is set back 1.5 mm from the card ends. Each corner is a 5.9 mm wide lug out to the full 3 in length, its flank landing on a wave peak, rounded 0.8 mm into the wave and at its tip. 13 valleys stay exposed per wrap edge. Verified in `prototype/leader_card.py` (card with variant 5 reversed: 14 min, 8.7 g real slice).
 - Whole perimeter: 0.6 mm round on the top face, 0.6 mm 45 degree chamfer on the bottom face so the edge prints without a feather lip at the bed. Both are capped at 0.6 mm because a larger round or chamfer cannot follow the 1.09 mm wave peaks.
 - Both faces plain and flat. No pockets, ribs, or text. The slots are through cuts, so they drain.
 
@@ -61,7 +64,7 @@ Final lead-in width, pocket angle, and pocket taper come from the test coupon, n
 
 ## Test coupon (before any card)
 
-Minimal per [[feedback-minimal-test-coupons]]: a 52 x 11.8 x 3 mm strip carrying four hook-bend slot variants (varying lead-in width, pocket angle, and pocket taper) along one long edge. Its two short ends carry the same wave as the card (2 valleys each), so the wave is tested too. Nothing else. Quote print time from a real slice.
+Minimal per [[feedback-minimal-test-coupons]]: a 52 x 17.8 x 3 mm strip (widened so two wave valleys stay exposed between its corner lugs) carrying four hook-bend slot variants (varying lead-in width, pocket angle, and pocket taper) along one long edge. Its two short ends carry the same wave as the card (2 valleys each), so the wave is tested too. Nothing else. Quote print time from a real slice.
 
 Brian tests each variant with real 25 lb and 40 lb line. Pass criteria:
 
@@ -81,10 +84,21 @@ The best variant goes on the card. If no variant holds 25 lb line reliably, revi
 
 ## Build sequence
 
-1. Test coupon: CAD, STL and 3MF, print. Stop: Brian tests with real line and picks a variant.
+1. Test coupon: skipped. Brian picked variant 5 reversed from the variants page and chose to print the card directly (2026-09-12).
 2. One card with the winning slot. Stop: Brian checks tackle box fit and wraps a real 36 in rig.
 3. Retrospective in `knowledge/learnings/leader-cards.md`.
 
 ## Files
 
 All in `projects/Leader-cards/`: this brief, the CAD source, and STL and 3MF for the coupon and the card. Built with the `/3d-model` skill.
+
+## Outcomes
+
+### Card (2026-09-12)
+
+- Source: `leader_card.py` (`WINNER = 5`), run `PART=card .venv/bin/python projects/Leader-cards/leader_card.py`. All checks pass: 76.2 x 50.8 x 3 mm, one solid, 13 exposed valleys per wrap edge, four corner lugs, both slots open with rounded face edges, exit ramps on both faces, pinch band 1.22 mm.
+- Files: `leader-card.stl`, `leader-card.3mf`, `leader-card-print.3mf` (open this one in Bambu Studio). Renders `images/final-card.png`, `images/final-card-corner.png`.
+- Real slice: 14 min, 8.7 g. Bambu Lab X2D 0.4 nozzle, 0.20mm Standard, Bambu PETG Basic, Textured PEI Plate. Print flat as loaded, chamfered edge on the bed, no supports.
+- Printability: thinnest wall 3.0 mm under the pocket; lugs 5.9 mm wide; bed-side ramps are shallow bridges under 3 mm; only sloped underside is the 45 degree chamfer. The pocket's last 0.3 mm of taper is under one 0.4 mm line width and may print closed, which is fine because both lines stop where the gap is 0.5 mm or wider.
+- Printer at build time (`scripts/x2d-status.py`): main nozzle 0.4 mm hardened steel HIGH FLOW (HH01); white PETG Basic in AMS slot 3 at 68 percent. The file was sliced with the standard 0.4 profile, so set Studio's nozzle to the installed high-flow 0.4 before printing ([[printer-x2d]]).
+- Variants page: https://claude.ai/code/artifact/18ae8924-111d-4f77-ab7c-6c4948e84995. The coupon files were not exported to the project; `COUPON_SLOTS` still lists variants 1 to 4 if a coupon is ever wanted.

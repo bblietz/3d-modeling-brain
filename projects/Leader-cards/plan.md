@@ -7,6 +7,8 @@ tags: [fishing, tackle, petg, leader, x2d, plan]
 
 # Leader Cards Implementation Plan
 
+> **Superseded 2026-09-12.** Written before the rounded slot edges, 0.3 mm pocket tip, exit ramps, corner lugs and Brian's pick of variant 5 reversed. Brian chose to print the card directly with no coupon. The current source is `leader_card.py` (verified copy in `prototype/`); the decisions are in [[brief]]. Kept for history only; do not execute.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Modeling work also follows the `/3d-model` skill (build123d backend, per-feature render, printability check, STL plus 3MF export).
 
 **Goal:** Build and print a slot test coupon, then one 3 x 2 in (76.2 x 50.8 mm), 3 mm thick white PETG leader card with wavy wrap edges and hook-bend line slots, per [[brief]].
