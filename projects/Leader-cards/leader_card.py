@@ -1,4 +1,4 @@
-"""Leader card LC2: flat PETG card for wrapping fishing leaders.
+"""Leader card LC3: flat PETG card for wrapping fishing leaders.
 
 Spec: projects/Leader-cards/brief.md (LC2 decisions). Prints flat, chamfered edge on
 the bed, 0.4 mm nozzle, PETG. Both wrap edges are a comb of identical straight
@@ -7,7 +7,7 @@ three of the same slots at 25, 50 and 75 percent of the length for starting and
 finishing the leader. Each line size wedges at its own depth, 10 lb deepest. Slot face edges are
 rounded (0.6 mm top round, 0.6 mm bottom chamfer), and slot mouths and comb tooth
 tips are rounded in plan. A recessed version label sits in the long-edge strip that
-the wraps never cross, plus a recessed "Leader" / "Card" wordmark filling most of the
+the wraps never cross, plus a recessed "leader" / "board" wordmark filling most of the
 open interior between the two combs. The wordmark was picked from four to-scale
 options on a comparison page (prototype/text_options.py); Brian chose the tight,
 maximal-scale layout at 80% of the width that layout could fully fill. LC1 (hook
@@ -15,7 +15,7 @@ slots, wavy edges) is in git history and prototype/.
 
 Run:  .venv/bin/python projects/Leader-cards/leader_card.py
 Env:  STAGE=1 builds only the blank, STAGE=2 adds the slots, STAGE=3 adds the small
-      reference label, STAGE=4 (default) adds the "Leader Card" wordmark; a STAGE
+      reference label, STAGE=4 (default) adds the "leader board" wordmark; a STAGE
       run exports a scratch STL (argv[1]) for the per-feature render.
       SHOW=1|reset pushes to the OCP viewer.
 Out:  leader-card-<VERSION>.stl and .3mf; then make_plate.py leader-card-<VERSION>.
@@ -31,10 +31,9 @@ from build123d import (Axis, Kind, Mesher, Polygon, Pos, RectangleRounded, Rot, 
 PROJECT = os.path.dirname(os.path.abspath(__file__))
 IN = 25.4
 
-VERSION = "LC3"  # file/version-log identifier; bump on every design change, see the brief
+VERSION = "LC3"  # file/version-log identifier AND the on-card recessed reference text; bump both
+                  # together on every design change, see the brief's version log
 NAME = f"leader-card-{VERSION}"
-REF_LABEL_TEXT = "LC2"  # the ON-CARD recessed reference text; Brian asked to keep reading "LC2"
-                         # for continuity with earlier field-test units, even as VERSION moves on
 
 # card
 CARD_L = 3 * IN  # along X; the line wraps over the short (wrap) edges at x = +/- CARD_L / 2
@@ -60,7 +59,7 @@ LABEL_SIZE = 4.8  # font size, mm; the build fails if the text does not fit the 
 LABEL_DEPTH = 0.6  # three 0.2 mm layers
 LABEL_X = 0.0  # label centred along the card
 
-# "Leader Card" wordmark: the tight-leading, even-weight layout from the comparison page,
+# "leader board" wordmark: the tight-leading, even-weight layout from the comparison page,
 # scaled to 80% of the width that layout could fill (Brian, 2026-09-12: "go with 4, but
 # reduce the font by 20%"). Same font and recess depth as the small reference label.
 WORDMARK_FONT = LABEL_FONT
@@ -105,10 +104,10 @@ def plan_face(slots=True):
 
 
 def label_sketch():
-    """REF_LABEL_TEXT centred in the -Y edge strip: inside the edge round, outside the comb's span."""
+    """VERSION centred in the -Y edge strip: inside the edge round, outside the comb's span."""
     y_lo = -CARD_W / 2 + TOP_ROUND + 0.5
     y_hi = -CARD_W / 2 + LABEL_STRIP_TOP
-    text = Text(REF_LABEL_TEXT, LABEL_SIZE, font_path=LABEL_FONT)
+    text = Text(VERSION, LABEL_SIZE, font_path=LABEL_FONT)
     c = text.bounding_box().center()
     text = Pos(LABEL_X - c.X, (y_lo + y_hi) / 2 - c.Y) * text
     bb = text.bounding_box()
@@ -117,12 +116,12 @@ def label_sketch():
 
 
 def wordmark_sketch():
-    """'Leader' over 'Card', tight leading, both at the font size that fills WORDMARK_TARGET_W.
-    Centred in the band between the reference label and the side-slot band (conservative: this
+    """'leader' over 'board', tight leading, both at the font size that fills WORDMARK_TARGET_W.
+    Centred in the band between the small version label and the side-slot band (conservative: this
     stays clear of all three side slots regardless of x, not just the one at x=0)."""
-    probe = Text("Leader", 10, font_path=WORDMARK_FONT)
+    probe = Text("leader", 10, font_path=WORDMARK_FONT)
     fs = 10 * WORDMARK_TARGET_W / probe.bounding_box().size.X
-    top, bot = Text("Leader", fs, font_path=WORDMARK_FONT), Text("Card", fs, font_path=WORDMARK_FONT)
+    top, bot = Text("leader", fs, font_path=WORDMARK_FONT), Text("board", fs, font_path=WORDMARK_FONT)
     ht, hb = top.bounding_box().size.Y, bot.bounding_box().size.Y
     gap = WORDMARK_GAP_FRAC * (ht + hb) / 2
     total_h = ht + gap + hb
@@ -212,7 +211,7 @@ def check(part):
     assert 0.9 < ratio < 2.0, (removed, expected)
     return {"size": (round(bb.size.X, 3), round(bb.size.Y, 3), round(bb.size.Z, 3)), "volume_mm3": round(part.volume, 1),
             "slots": len(slot_places()), "comb_per_edge": COMB_N, "removal_ratio": round(ratio, 3),
-            "stops_mm": {k: round(stop_depth(d), 2) for k, d in LINES.items()}, "version": VERSION, "ref_label": REF_LABEL_TEXT}
+            "stops_mm": {k: round(stop_depth(d), 2) for k, d in LINES.items()}, "label": VERSION}
 
 
 def export(part):

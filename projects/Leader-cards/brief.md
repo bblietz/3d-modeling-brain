@@ -1,7 +1,7 @@
 ---
 title: Leader cards
 type: project-brief
-status: LC3 built and sliced 2026-09-12 (LC2 geometry plus a recessed Leader/Card wordmark, 18 min, 7.2 g). Waiting on Brian to print, check tackle box fit, and wrap a real rig
+status: LC3 built and sliced 2026-09-12 (LC2 geometry plus a recessed lower-case "leader / board" wordmark, small label now reads LC3, 18 min, 7.3 g). Waiting on Brian to print, check tackle box fit, and wrap a real rig
 created: 2026-09-12
 tags: [fishing, tackle, petg, leader, x2d]
 ---
@@ -45,13 +45,13 @@ These supersede the hook slot, entry channel, funnel, exit ramp, wave, corner lu
 
 ## LC3 decisions (Brian, 2026-09-12)
 
-LC2's geometry is unchanged; LC3 adds a recessed "Leader" / "Card" wordmark. Options page: https://claude.ai/code/artifact/79b741a8-77dd-4a83-bb4c-5eadf0df6dee
+LC2's geometry is unchanged; LC3 adds a recessed "leader" / "board" wordmark. Options page: https://claude.ai/code/artifact/79b741a8-77dd-4a83-bb4c-5eadf0df6dee
 
-- LC2 "needs more testing in the field." The small recessed reference label keeps reading **"LC2"** (Brian: "Leave the LC2 label for reference") even though the file/version identifier moves on to LC3. `leader_card.py` now separates these: `REF_LABEL_TEXT = "LC2"` (the on-card text, unchanged) from `VERSION = "LC3"` (file naming and this log).
-- Wordmark: "Leader" over "Card", one word per line, DejaVu Sans Bold (same face as the reference label), tight leading (lines almost touching). Picked as option 4 of 4 on the comparison page, then reduced 20% (Brian: "go with 4, but reduce the font by 20%").
+- LC2 "needs more testing in the field." Brian first asked to freeze the small recessed label at "LC2" for continuity with earlier field-test units, decoupled from the file/version identifier; on reflection (Brian, same day: "isn't this LC3?" then "Track it: change to LC3") the label now simply reads `VERSION` again, as in LC2 -- the frozen `REF_LABEL_TEXT` split was removed. The label currently reads **"LC3"**.
+- Wordmark: "leader" over "board", one word per line, DejaVu Sans Bold (same face as the reference label), tight leading (lines almost touching). Picked as option 4 of 4 on the comparison page (there shown as "Leader" / "Card"), then reduced 20% (Brian: "go with 4, but reduce the font by 20%"), then the text changed to "Leader Board" and finally to lower case (both same day).
 - Sizing: the page's option 4 filled the full 2.25 in interior between the two wrap-edge combs (exactly the card's 3 in length minus a 3/8 in comb depth off each end). LC3 targets 80% of that, 45.72 mm. Resulting cap size 12.09 mm, block height 19.46 mm.
-- Position: centred in the band between the reference label and the side-slot band, y0 computed from real geometry, not eyeballed. Checked with a real 2D boolean against every slot cut (`wordmark_sketch() - plan_face()` area under 1e-6 mm2), not just a bounding-box estimate; the exploration page's other two options (poster fill, condensed caps) both failed that exact check at full width and had to shrink to clear the middle side slot and the reference label.
-- Depth: 0.6 mm, same as the reference label.
+- Position: centred in the band between the small version label and the side-slot band, y0 computed from real geometry, not eyeballed. Checked with a real 2D boolean against every slot cut (`wordmark_sketch() - plan_face()` area under 1e-6 mm2), not just a bounding-box estimate; the exploration page's other two options (poster fill, condensed caps) both failed that exact check at full width and had to shrink to clear the middle side slot and the label.
+- Depth: 0.6 mm, same as the version label.
 
 ## Card geometry
 
@@ -122,7 +122,7 @@ All in `projects/Leader-cards/`: this brief, the CAD source, and STL and 3MF for
 |---|---|---|
 | LC1 | 2026-09-12 | 3 x 2 in PETG; variant 5 reversed with the slot 3x longer (18 mm lead-in, 18 mm pocket, 30 degree hook); 15 degree exit ramps both faces; 1.5 mm corner lugs; 3 mm wave, 13 exposed valleys. Not printed; files `leader-card-LC1.*` |
 | LC2 | 2026-09-12 | 3 x 1.5 in PETG; comb of 9 straight tapered 3/8 in slots (1.2 mm to closed) per wrap edge at 3 mm; 3 same slots on the +Y long edge at 25/50/75 percent; no hook, ramps, wave or corner lugs; files `leader-card-LC2.*` |
-| LC3 | 2026-09-12 | LC2 geometry unchanged, plus a recessed "Leader" / "Card" wordmark (DejaVu Sans Bold, tight leading, 80% of the full 2.25 in interior); on-card reference label still reads "LC2"; files `leader-card-LC3.*` |
+| LC3 | 2026-09-12 | LC2 geometry unchanged, plus a recessed "leader" / "board" wordmark (DejaVu Sans Bold, tight leading, lower case, 80% of the full 2.25 in interior); files `leader-card-LC3.*` |
 
 ## Outcomes
 
@@ -144,8 +144,8 @@ All in `projects/Leader-cards/`: this brief, the CAD source, and STL and 3MF for
 
 ### LC3 card (2026-09-12)
 
-- Source: `leader_card.py` (`VERSION = "LC3"`, `REF_LABEL_TEXT = "LC2"`), run `.venv/bin/python projects/Leader-cards/leader_card.py`. All checks pass, including the LC2 checks plus: wordmark text non-empty, fully recessed, floor intact beneath it, and zero real overlap with any slot cut.
+- Source: `leader_card.py` (`VERSION = "LC3"`, also the on-card label text), run `.venv/bin/python projects/Leader-cards/leader_card.py`. All checks pass, including the LC2 checks plus: wordmark text non-empty, fully recessed, floor intact beneath it, and zero real overlap with any slot cut.
 - Files: `leader-card-LC3.stl`, `leader-card-LC3.3mf`, `leader-card-LC3-print.3mf` (open this one). Renders `images/final-card-LC3.png` (four views) and `images/final-card-LC3-wordmark.png` (raking-light close-up of the recessed letters; the model's default top-down render flattens shallow recessed text almost to invisibility, so use the raking-light view to actually judge it).
-- Real slice: 18 min, 7.2 g. Same settings as LC2 (0.4 standard-flow nozzle, 0.20mm Standard, PETG Basic, Textured PEI).
-- Printability: recess is 0.6 mm deep, same as the reference label; no new overhangs or thin walls beyond LC2's.
+- Real slice: 18 min, 7.3 g. Same settings as LC2 (0.4 standard-flow nozzle, 0.20mm Standard, PETG Basic, Textured PEI).
+- Printability: recess is 0.6 mm deep, same as the version label; no new overhangs or thin walls beyond LC2's.
 
