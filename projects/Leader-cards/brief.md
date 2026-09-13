@@ -1,7 +1,7 @@
 ---
 title: Leader cards
 type: project-brief
-status: LC2 built and sliced 2026-09-12 (3 x 1.5 in, comb wrap edges, 3 side slots, 15 min, 6.9 g). Waiting on Brian to print, check tackle box fit, and wrap a real rig
+status: LC3 built and sliced 2026-09-12 (LC2 geometry plus a recessed Leader/Card wordmark, 18 min, 7.2 g). Waiting on Brian to print, check tackle box fit, and wrap a real rig
 created: 2026-09-12
 tags: [fishing, tackle, petg, leader, x2d]
 ---
@@ -42,6 +42,16 @@ These supersede the hook slot, entry channel, funnel, exit ramp, wave, corner lu
 - Removed: corner long-edge slots, hook, 18 mm entry channel, funnel, exit ramps ("lead-in", not helping), wave, raised corners (the comb stops the line sliding off).
 - Kept: 0.6 mm top round and bottom chamfer on every edge including slot walls; slot mouths and tooth tips rounded 0.8 mm in plan; recessed version label (LC2) centred in the -Y long-edge strip outside the comb span.
 - Files are versioned: `leader-card-LC2.*`; LC1 files renamed `leader-card-LC1.*`.
+
+## LC3 decisions (Brian, 2026-09-12)
+
+LC2's geometry is unchanged; LC3 adds a recessed "Leader" / "Card" wordmark. Options page: https://claude.ai/code/artifact/79b741a8-77dd-4a83-bb4c-5eadf0df6dee
+
+- LC2 "needs more testing in the field." The small recessed reference label keeps reading **"LC2"** (Brian: "Leave the LC2 label for reference") even though the file/version identifier moves on to LC3. `leader_card.py` now separates these: `REF_LABEL_TEXT = "LC2"` (the on-card text, unchanged) from `VERSION = "LC3"` (file naming and this log).
+- Wordmark: "Leader" over "Card", one word per line, DejaVu Sans Bold (same face as the reference label), tight leading (lines almost touching). Picked as option 4 of 4 on the comparison page, then reduced 20% (Brian: "go with 4, but reduce the font by 20%").
+- Sizing: the page's option 4 filled the full 2.25 in interior between the two wrap-edge combs (exactly the card's 3 in length minus a 3/8 in comb depth off each end). LC3 targets 80% of that, 45.72 mm. Resulting cap size 12.09 mm, block height 19.46 mm.
+- Position: centred in the band between the reference label and the side-slot band, y0 computed from real geometry, not eyeballed. Checked with a real 2D boolean against every slot cut (`wordmark_sketch() - plan_face()` area under 1e-6 mm2), not just a bounding-box estimate; the exploration page's other two options (poster fill, condensed caps) both failed that exact check at full width and had to shrink to clear the middle side slot and the reference label.
+- Depth: 0.6 mm, same as the reference label.
 
 ## Card geometry
 
@@ -112,6 +122,7 @@ All in `projects/Leader-cards/`: this brief, the CAD source, and STL and 3MF for
 |---|---|---|
 | LC1 | 2026-09-12 | 3 x 2 in PETG; variant 5 reversed with the slot 3x longer (18 mm lead-in, 18 mm pocket, 30 degree hook); 15 degree exit ramps both faces; 1.5 mm corner lugs; 3 mm wave, 13 exposed valleys. Not printed; files `leader-card-LC1.*` |
 | LC2 | 2026-09-12 | 3 x 1.5 in PETG; comb of 9 straight tapered 3/8 in slots (1.2 mm to closed) per wrap edge at 3 mm; 3 same slots on the +Y long edge at 25/50/75 percent; no hook, ramps, wave or corner lugs; files `leader-card-LC2.*` |
+| LC3 | 2026-09-12 | LC2 geometry unchanged, plus a recessed "Leader" / "Card" wordmark (DejaVu Sans Bold, tight leading, 80% of the full 2.25 in interior); on-card reference label still reads "LC2"; files `leader-card-LC3.*` |
 
 ## Outcomes
 
@@ -130,4 +141,11 @@ All in `projects/Leader-cards/`: this brief, the CAD source, and STL and 3MF for
 - Files: `leader-card-LC2.stl`, `leader-card-LC2.3mf`, `leader-card-LC2-print.3mf` (open this one). Renders `images/final-card-LC2.png`. Page: https://claude.ai/code/artifact/8d43738c-84e6-45d4-b31c-25e05321d7f0
 - Real slice: 15 min, 6.9 g. Same settings as LC1 (0.4 standard-flow nozzle, 0.20mm Standard, PETG Basic, Textured PEI).
 - Printability: comb teeth 1.8 mm at the tip, 3 mm at the root, 9.5 mm long; the last 0.2 to 0.4 mm of each taper is under one line width and may print closed, which is below where 10 lb line stops.
+
+### LC3 card (2026-09-12)
+
+- Source: `leader_card.py` (`VERSION = "LC3"`, `REF_LABEL_TEXT = "LC2"`), run `.venv/bin/python projects/Leader-cards/leader_card.py`. All checks pass, including the LC2 checks plus: wordmark text non-empty, fully recessed, floor intact beneath it, and zero real overlap with any slot cut.
+- Files: `leader-card-LC3.stl`, `leader-card-LC3.3mf`, `leader-card-LC3-print.3mf` (open this one). Renders `images/final-card-LC3.png` (four views) and `images/final-card-LC3-wordmark.png` (raking-light close-up of the recessed letters; the model's default top-down render flattens shallow recessed text almost to invisibility, so use the raking-light view to actually judge it).
+- Real slice: 18 min, 7.2 g. Same settings as LC2 (0.4 standard-flow nozzle, 0.20mm Standard, PETG Basic, Textured PEI).
+- Printability: recess is 0.6 mm deep, same as the reference label; no new overhangs or thin walls beyond LC2's.
 

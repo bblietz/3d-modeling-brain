@@ -7,11 +7,16 @@ three of the same slots at 25, 50 and 75 percent of the length for starting and
 finishing the leader. Each line size wedges at its own depth, 10 lb deepest. Slot face edges are
 rounded (0.6 mm top round, 0.6 mm bottom chamfer), and slot mouths and comb tooth
 tips are rounded in plan. A recessed version label sits in the long-edge strip that
-the wraps never cross. LC1 (hook slots, wavy edges) is in git history and prototype/.
+the wraps never cross, plus a recessed "Leader" / "Card" wordmark filling most of the
+open interior between the two combs. The wordmark was picked from four to-scale
+options on a comparison page (prototype/text_options.py); Brian chose the tight,
+maximal-scale layout at 80% of the width that layout could fully fill. LC1 (hook
+slots, wavy edges) is in git history and prototype/.
 
 Run:  .venv/bin/python projects/Leader-cards/leader_card.py
-Env:  STAGE=1 builds only the blank, STAGE=2 adds the slots, STAGE=3 (default) adds
-      the label; a STAGE run exports a scratch STL (argv[1]) for the per-feature render.
+Env:  STAGE=1 builds only the blank, STAGE=2 adds the slots, STAGE=3 adds the small
+      reference label, STAGE=4 (default) adds the "Leader Card" wordmark; a STAGE
+      run exports a scratch STL (argv[1]) for the per-feature render.
       SHOW=1|reset pushes to the OCP viewer.
 Out:  leader-card-<VERSION>.stl and .3mf; then make_plate.py leader-card-<VERSION>.
 """
@@ -26,8 +31,10 @@ from build123d import (Axis, Kind, Mesher, Polygon, Pos, RectangleRounded, Rot, 
 PROJECT = os.path.dirname(os.path.abspath(__file__))
 IN = 25.4
 
-VERSION = "LC2"  # bump on every design change; the brief keeps the version log
+VERSION = "LC3"  # file/version-log identifier; bump on every design change, see the brief
 NAME = f"leader-card-{VERSION}"
+REF_LABEL_TEXT = "LC2"  # the ON-CARD recessed reference text; Brian asked to keep reading "LC2"
+                         # for continuity with earlier field-test units, even as VERSION moves on
 
 # card
 CARD_L = 3 * IN  # along X; the line wraps over the short (wrap) edges at x = +/- CARD_L / 2
@@ -52,6 +59,16 @@ LABEL_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 LABEL_SIZE = 4.8  # font size, mm; the build fails if the text does not fit the strip
 LABEL_DEPTH = 0.6  # three 0.2 mm layers
 LABEL_X = 0.0  # label centred along the card
+
+# "Leader Card" wordmark: the tight-leading, even-weight layout from the comparison page,
+# scaled to 80% of the width that layout could fill (Brian, 2026-09-12: "go with 4, but
+# reduce the font by 20%"). Same font and recess depth as the small reference label.
+WORDMARK_FONT = LABEL_FONT
+WORDMARK_GAP_FRAC = 0.08  # tight leading: lines almost touching
+WORDMARK_SCALE = 0.8  # of the full interior clear width, matching Brian's "reduce by 20%"
+WORDMARK_TARGET_W = WORDMARK_SCALE * (CARD_L - 2 * SLOT_D)
+WORDMARK_MARGIN = 1.0  # clearance kept above the reference label and below the side-slot band
+WORDMARK_DEPTH = LABEL_DEPTH
 LABEL_STRIP_TOP = CARD_W / 2 - (max((i - (COMB_N - 1) / 2) * COMB_PITCH for i in range(COMB_N)) + SLOT_W / 2) - 0.5  # strip top, measured up from the -Y edge
 
 
@@ -88,10 +105,10 @@ def plan_face(slots=True):
 
 
 def label_sketch():
-    """VERSION centred in the -Y edge strip: inside the edge round, outside the comb's span."""
+    """REF_LABEL_TEXT centred in the -Y edge strip: inside the edge round, outside the comb's span."""
     y_lo = -CARD_W / 2 + TOP_ROUND + 0.5
     y_hi = -CARD_W / 2 + LABEL_STRIP_TOP
-    text = Text(VERSION, LABEL_SIZE, font_path=LABEL_FONT)
+    text = Text(REF_LABEL_TEXT, LABEL_SIZE, font_path=LABEL_FONT)
     c = text.bounding_box().center()
     text = Pos(LABEL_X - c.X, (y_lo + y_hi) / 2 - c.Y) * text
     bb = text.bounding_box()
@@ -99,12 +116,37 @@ def label_sketch():
     return text
 
 
-def build(stage=3):
+def wordmark_sketch():
+    """'Leader' over 'Card', tight leading, both at the font size that fills WORDMARK_TARGET_W.
+    Centred in the band between the reference label and the side-slot band (conservative: this
+    stays clear of all three side slots regardless of x, not just the one at x=0)."""
+    probe = Text("Leader", 10, font_path=WORDMARK_FONT)
+    fs = 10 * WORDMARK_TARGET_W / probe.bounding_box().size.X
+    top, bot = Text("Leader", fs, font_path=WORDMARK_FONT), Text("Card", fs, font_path=WORDMARK_FONT)
+    ht, hb = top.bounding_box().size.Y, bot.bounding_box().size.Y
+    gap = WORDMARK_GAP_FRAC * (ht + hb) / 2
+    total_h = ht + gap + hb
+
+    y_lo = label_sketch().bounding_box().max.Y + WORDMARK_MARGIN
+    y_hi = (CARD_W / 2 - SLOT_D) - WORDMARK_MARGIN
+    assert total_h <= y_hi - y_lo, ("wordmark too tall for the clear band", total_h, y_hi - y_lo)
+    y0 = (y_lo + y_hi) / 2
+
+    yt = y0 + (total_h / 2 - ht / 2)
+    yb = y0 - (total_h / 2 - hb / 2)
+    top = Pos(-top.bounding_box().center().X, yt - top.bounding_box().center().Y) * top
+    bot = Pos(-bot.bounding_box().center().X, yb - bot.bounding_box().center().Y) * bot
+    return top + bot
+
+
+def build(stage=4):
     part = extrude(plan_face(slots=stage >= 2), amount=THICK)
     part = fillet(part.edges().group_by(Axis.Z)[-1], TOP_ROUND)
     part = chamfer(part.edges().group_by(Axis.Z)[0], BOT_CHAMFER)
     if stage >= 3:
         part -= Pos(0, 0, THICK - LABEL_DEPTH) * extrude(label_sketch(), amount=LABEL_DEPTH + 1)
+    if stage >= 4:
+        part -= Pos(0, 0, THICK - WORDMARK_DEPTH) * extrude(wordmark_sketch(), amount=WORDMARK_DEPTH + 1)
     return part
 
 
@@ -151,15 +193,26 @@ def check(part):
     lb = text.bounding_box()
     assert max(abs(lb.min.X), abs(lb.max.X)) <= CARD_L / 2 - SLOT_D - 2.0, "label runs into a comb"
 
+    # wordmark: same checks as the label, plus a real overlap test against every slot cut
+    # (the label check above already confirms the wordmark clears the label's own footprint,
+    # since wordmark_sketch() is built above label_sketch()'s top edge with WORDMARK_MARGIN)
+    word = wordmark_sketch()
+    wletters = Pos(0, 0, THICK - WORDMARK_DEPTH) * extrude(word, amount=WORDMARK_DEPTH)
+    wfloor = Pos(0, 0, THICK - WORDMARK_DEPTH - 0.3) * extrude(word, amount=0.3)
+    assert wletters.volume > 50 * WORDMARK_DEPTH, "wordmark text is empty"
+    assert (part & wletters).volume < 1e-3, "wordmark not recessed"
+    assert abs((part & wfloor).volume - wfloor.volume) < 1e-3, "wordmark floor not intact"
+    assert (word - plan_face()).area < 1e-6, "wordmark overlaps a slot cut"
+
     # volume sanity: the slots remove at least their taper area times the thickness, plus the
-    # mouth rounds, edge rounds and label
+    # mouth rounds, edge rounds, label and wordmark
     removed = build(stage=1).volume - part.volume
     expected = len(slot_places()) * 0.5 * SLOT_W * SLOT_D * THICK
     ratio = removed / expected
     assert 0.9 < ratio < 2.0, (removed, expected)
     return {"size": (round(bb.size.X, 3), round(bb.size.Y, 3), round(bb.size.Z, 3)), "volume_mm3": round(part.volume, 1),
             "slots": len(slot_places()), "comb_per_edge": COMB_N, "removal_ratio": round(ratio, 3),
-            "stops_mm": {k: round(stop_depth(d), 2) for k, d in LINES.items()}, "label": VERSION}
+            "stops_mm": {k: round(stop_depth(d), 2) for k, d in LINES.items()}, "version": VERSION, "ref_label": REF_LABEL_TEXT}
 
 
 def export(part):
@@ -183,7 +236,7 @@ def export(part):
 
 
 if __name__ == "__main__":
-    stage = int(os.environ.get("STAGE", "3"))
+    stage = int(os.environ.get("STAGE", "4"))
     part = build(stage)
     if "STAGE" in os.environ:
         out = sys.argv[1] if len(sys.argv) > 1 else f"/tmp/{NAME}-stage{stage}.stl"
