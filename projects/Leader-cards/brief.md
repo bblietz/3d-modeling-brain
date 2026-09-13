@@ -1,7 +1,7 @@
 ---
 title: Leader cards
 type: project-brief
-status: design approved 2026-09-12. Next is the slot test coupon
+status: design approved 2026-09-12, hook-bend slot hitch added same day. Next is the slot test coupon
 created: 2026-09-12
 tags: [fishing, tackle, petg, leader, x2d]
 ---
@@ -14,11 +14,12 @@ Printed replacement for the cardboard cards Brian wraps long fishing leaders on 
 
 - One universal card for every rig. The card holds only the leader line. Hooks, swivels, and lure bodies hang free off the ends and may be longer than the card.
 - Line: 25 to 40 lb, about 0.5 to 0.7 mm diameter, mono or fluoro.
-- Both ends lock by pinching the line in tapered slots. No hook-point holes, no swivel notches.
+- Both ends lock the line in slots. No hook-point holes, no swivel notches.
+- Each slot has a hook-bend hitch so a line that goes slack stays caught. Chosen over a bump detent because it needs no flexing of a stiff 3 mm PETG wall, so print tolerance matters little.
 - Wrapping order: start at the swivel, wrap toward the lure, finish near the lure.
 - Storage: rigs go back on the cards wet and stay closed in the box between trips. Material must not absorb water; the card must have no pockets that hold water.
 - Material: white PETG. PLA (heat) and nylon (water) are out; ASA is out on sunscreen ([[marine-materials]]).
-- Approach: flat card with tapered slots (option 1 of 3). Rejected: railed spool card (thicker, traps water) and TPU slot inserts (two materials, TPU feeds poorly in the AMS; held in reserve if PETG slots fail).
+- Approach: flat card with slots (option 1 of 3). Rejected: railed spool card (thicker, traps water) and TPU slot inserts (two materials, TPU feeds poorly in the AMS; held in reserve if PETG slots fail).
 - First batch: 1 card.
 
 ## Card geometry
@@ -28,25 +29,34 @@ Printed replacement for the cardboard cards Brian wraps long fishing leaders on 
 - Line wraps end to end around the long axis, bending over the two 45 mm short edges. About 140 mm per wrap, about 6.5 wraps for 36 in.
 - Short (wrap) edges: rounded on the top face, 45 degree chamfer on the bottom face so the edge prints without a feather lip at the bed.
 - Corners and long edges lightly rounded.
-- Both faces plain and flat. No pockets, ribs, or text.
+- Both faces plain and flat. No pockets, ribs, or text. The slots are through cuts, so they drain.
 
 ## Slots
 
-- One slot per end, entering from a long edge about 8 mm in from the short edge. The two slots sit on opposite long edges, so the card is the same after a half turn.
-- Each slot slants about 45 degrees toward its nearest short edge, so wrap tension pulls the line deeper rather than out.
-- Through the full thickness. Mouth about 1.2 mm with a small lead-in funnel, tapering to closed over about 8 to 10 mm. Heavier line stops shallower, lighter line deeper; print tolerance only moves the stop point.
-- Final taper numbers come from the test coupon, not from this brief.
+One slot per end, each cut through the full thickness. The two slots sit on opposite long edges about 8 mm in from their short edges, so the card is the same after a half turn.
+
+Each slot is a hook bend in two parts:
+
+1. **Lead-in:** straight in from the long edge, about 1.2 mm wide with a small funnel at the mouth so the line finds it by feel, about 5 mm deep.
+2. **Pocket:** at the bottom of the lead-in the slot turns toward the nearest short edge and angles back toward the mouth side, about 4 to 5 mm long, tapering from about 1.0 mm to closed. Keep at least 2 mm of solid wall between the pocket and the long edge.
+
+Why it holds: the line leaves the slot heading for the nearest short edge, so wrap tension on either slot pulls toward that edge and seats the line in the pocket tip, where heavier line stops shallower and lighter line deeper. If the wraps go slack, the line still sits in the pocket; to escape it must travel backward, away from the short edge, and around the corner into the lead-in.
+
+In use: press the line into the lead-in, slide it around the corner into the pocket, then run it to the nearest short edge. Start slot just past the swivel, wrap toward the lure, finish in the other slot; the lure hangs off that end. To unwind, slide the line back around the corner and out.
+
+Final lead-in width, pocket angle, and pocket taper come from the test coupon, not from this brief.
 
 ## Test coupon (before any card)
 
-Minimal per [[feedback-minimal-test-coupons]]: a 3 mm thick strip carrying four slot variants (varying taper length and mouth width) and one wrap edge profile. Nothing else. Quote print time from a real slice.
+Minimal per [[feedback-minimal-test-coupons]]: a 3 mm thick strip carrying four hook-bend slot variants (varying lead-in width, pocket angle, and pocket taper) and one wrap edge profile. Nothing else. Quote print time from a real slice.
 
 Brian tests each variant with real 25 lb and 40 lb line. Pass criteria:
 
-1. Line presses in by hand without a tool.
+1. Line goes in and around the corner by hand without a tool.
 2. Line holds with the lure's weight hanging on it and does not creep out.
-3. Line pulls out with no visible crimp or nick.
-4. About 20 in and out cycles do not wear the slot open.
+3. With the line slack, shaking the coupon does not free it from the pocket.
+4. Line comes out with no visible crimp or nick.
+5. About 20 in and out cycles do not wear the slot open.
 
 The best variant goes on the card. If no variant holds 25 lb line reliably, revisit the TPU slot insert approach.
 
