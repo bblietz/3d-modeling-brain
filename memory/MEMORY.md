@@ -14,3 +14,4 @@
 - [Model dispatch](feedback-model-dispatch.md) - say which model fits each task, flag when Fable 5.1 beats the active model, never switch silently
 - [Speaker cab system](project-speaker-cab-system.md) - MaximoCabs guitar cab capability; plans 1 to 3 built (engine, generator, /speaker-cab skill with two fixture orders); next is the first real order, open items in knowledge/learnings/speaker-cab-plan-3.md
 - [Friction fit recipe](feedback-friction-fit-recipe.md) - crush ribs not tighter clearance, plus a designed opening feature; read knowledge/friction-fits-x2d.md first
+- [HTML visuals, no ASCII](feedback-html-visual-companion.md) - show visual options and geometry in an HTML page, never ASCII art previews
