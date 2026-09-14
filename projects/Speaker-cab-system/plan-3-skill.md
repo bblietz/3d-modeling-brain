@@ -1148,7 +1148,7 @@ def test_report_carries_the_aesthetics_block():
     rep = L.layout_report(lay, L.check_layout(lay, spec))
     json.dumps(rep)
     block = rep["aesthetics"]
-    assert len(block) == 22
+    assert len(block) == 23
     assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
                                   "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
         "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",
@@ -1392,7 +1392,7 @@ def _corner_probes(W, D, H):
 
 
 def test_roundover_rounds_the_hardwood_open_back_site_box_shell_and_nothing_else():
-    plain_lay = _site_box("open", "hardwood", "black walnut", None)
+    plain_lay = _site_box("open", "hardwood", "black walnut", 0)
     lay = _site_box("open", "hardwood", "black walnut", ROUNDOVER_MM)
     fr = L.frame(lay.spec)
     W, H, D, t, r = fr.W, fr.H, fr.D, fr.t, ROUNDOVER_MM
@@ -1505,6 +1505,28 @@ def test_strap_handle_is_a_leather_strap_between_two_end_caps(tmp_path):
     M.export_step(M.compound_of(handle), str(step))
     text = step.read_text(errors="ignore")
     assert all(f"'{name}'" in text for name in STRAP_HANDLE_LABELS)
+
+
+# ---- the hardwood roundover default through the CAD path ----
+def test_hardwood_default_rounds_the_panels_and_zero_leaves_them_sharp():
+    default = _site_box("open", "hardwood", "black walnut", None)
+    sharp = _site_box("open", "hardwood", "black walnut", 0)
+    assert default.spec.aesthetics.roundover_mm == 12.7 and sharp.spec.aesthetics.roundover_mm == 0
+    envelope = M.roundover_envelope(default)
+    assert envelope is not None and M.roundover_envelope(sharp) is None
+    W, H, D = default.spec.external_mm
+    removed = 0.0
+    for b in default.parts:
+        if b.name in M.SHELL_NAMES:
+            plain = M.blank_solid(b)
+            removed += plain.volume - M.shell_solid(b, envelope).volume
+            assert M.shell_solid(b, None).volume == plain.volume, b.name
+    assert abs(removed - _rounded_box_removed_mm3(W, D, H, 12.7)) < 1.0
+    cab = M.build(sharp)                       # 0 builds the plain blanks
+    for e, b in zip(cab.parts, sharp.parts):
+        if b.name in M.SHELL_NAMES:
+            assert abs(e["solid"].volume - L.blank_volume_mm3(b)) < 1.0, b.name
+    assert [c.level for c in M.check_build(cab, sharp)] == ["pass"] * 4
 ```
 <!-- /code -->
 
@@ -2465,9 +2487,9 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 - **Both lines**: top, bottom, and two sides joined at the four front-to-back corner edges. The tolex line gets finger joints; the hardwood line gets finger joints by default or through dovetails as the option. The generator models the joint so renders and STEP are truthful; the cut list keeps each panel as a rectangular blank with the joint schedule in the note.
 - **Tolex line**: 18 mm birch. Recessed metal jack plate. Metal corners, black or chrome, or none. Site: "13-ply void-free Baltic birch, hand-cut finger joints".
-- **Hardwood line**: 19 mm resawn, book-matched panels, show face out. Recessed brass jack plate. No metal corners by default. Oil finish. The site copy still says "through-tenon corner posts glued + pinned" while the site's own renders show finger joints; the copy is wrong and is a site fix outside this vault.
+- **Hardwood line**: 19 mm resawn, book-matched panels, show face out. A 12.7 mm (1/2 in) roundover on every outside edge by default (see Roundover). Recessed brass jack plate. No metal corners by default. Oil finish. The site copy still says "through-tenon corner posts glued + pinned" while the site's own renders show finger joints; the copy is wrong and is a site fix outside this vault.
 - **Joinery survey**: finger joints are the plurality at the top of the market and the vintage-correct choice; the through dovetail is the only structural peer for solid wood; miters and rabbets are styling or budget choices. Details and sources in [[guitar-cab-joinery-survey]].
-- **Roundover (option)**: a radius on every outside edge of the shell (Aesthetics.roundover_mm), routed after the carcass is glued up; 12.7 mm (1/2 in) on the first walnut order (Brian, 2026-09-13). The internal volume is unchanged.
+- **Roundover**: the hardwood line's default is a 12.7 mm (1/2 in) radius on every outside edge of the shell, routed after the carcass is glued up (Brian, 2026-09-13); the tolex line has none by default. Aesthetics.roundover_mm left at None takes the line default, 0 gives sharp edges, and any other value sets the radius, which must stay under the shell thickness. The internal volume is unchanged either way.
 
 ## Joinery conventions
 
@@ -2478,7 +2500,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 ## Baffle
 
 - 18 mm birch on both lines. Front face 20 mm behind the front edge of the shell (the recess that holds the grill frame). Driver mounts from the front of the baffle onto T-nuts fitted from the back. Bolts M6 or 1/4-20, 6.5 mm holes on the note's bolt circle, first hole at twelve o'clock.
-- **Floating (default)**: 1 mm clearance to each side, on 18 x 18 mm cleats glued to the shell, felt strip between cleat and baffle, held with screws through the cleats, removable. Site: "floating 3/4 in birch with felt isolation".
+- **Floating (default)**: 1 mm clearance to each side, on 18 x 18 mm cleats glued to the shell, felt strip between cleat and baffle, held with screws through the cleats, removable. Site: "floating 3/4 in birch with felt isolation". Which edges carry cleats is the Aesthetics.baffle_cleat_edges option, and None takes the enclosure default: all four on a closed or closed-ported box, where the perimeter cleats hold the seal the volume model assumes, and top and bottom only on an open or semi-open box, which has no sealed volume to protect, so it takes fewer parts and leaves the baffle free at its sides. Unverified starting value pending listening notes (Brian, 2026-09-13).
 - **Fixed (option)**: glued into a 6 mm deep dado in all four shell panels (three with a front slot port, where the shelf carries the baffle's bottom edge), blank 12 mm larger in width and height, no baffle cleats. On hardwood it is glued along the full dado too, since the dados run with the grain (see Wood movement).
 - Driver cutout, bolt circle, bolt count, frame diameter, and magnet diameter come from the speaker note. Typical: Celestion 283 mm cutout on a 297 mm circle, Eminence 281 mm on 294 mm, Jensen 277 mm on 293.5 mm; frames 306 to 310 mm, so the flange overhangs the cutout by 11 to 15 mm; flange thickness 5 mm starting value.
 - **Margins**: at least 44 mm from a cutout edge to any shell panel (grill strip 40 plus 2 mm clearance plus 2), 25 mm from a cutout edge to the brace or divider, so the two cutouts of a 2x12 sit 68 mm apart (18 plus 2 x 25). Minimum internal width = n x cutout + (n - 1) x 68 + 2 x 44, the same for mono and stereo since the divider replaces the brace (2x12 with 283 mm cutouts: 722 mm internal, 758 mm external, 29.8 in). Minimum internal height = cutout + 88, plus slot height + 18 with a front slot port.
@@ -2506,7 +2528,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 ## Hardware
 
 - **Jack plate**: recessed dish plate, metal on the tolex line, brass on the hardwood line. Cutout is measured from the plate purchased; starting value 110 x 70 mm (the Marshall-style CJP-1 dish cuts 76.2 x 87.3 mm, so reconcile against the part bought). Placed at the bottom center of the back panel or lower open-back panel, 25 mm above the cleat, one per chamber. Mono: one 1/4 in jack. Mono with parallel out: two jacks on one plate wired in parallel. Stereo: one plate per chamber.
-- **Handle**: top-center strap handle by default on both lines (the site shows a strap on the hardwood cab too), screw pair 228.6 mm apart (Marshall style; Fender style 203.2 mm), centered on the loaded center of mass in width and depth, kept 50 mm inside the edges. Recessed side handles as the option, one per side at the depth center of mass in the upper third, cutout 140 x 90 mm starting value (Penn Elcom H7154Z flange 161 x 107 mm, dish 8.5 mm). The handle check: within 15 mm of the loaded center of mass on the width axis.
+- **Handle**: top-center strap handle by default on both lines (the site shows a strap on the hardwood cab too), screw pair 228.6 mm apart (Marshall style; Fender style 203.2 mm), centered on the top panel in width and depth (Brian, 2026-09-13), kept 50 mm inside the edges. The speaker pulls the loaded center of mass forward, so a cab carried by the strap hangs slightly nose-down. Recessed side handles as the option, one per side at the depth center of mass in the upper third, cutout 140 x 90 mm starting value (Penn Elcom H7154Z flange 161 x 107 mm, dish 8.5 mm). The handle check: within 15 mm of the loaded center of mass on the width axis.
 - **Feet**: four rubber feet, 40 mm, inset 32 mm from the bottom corners. Tilt-back legs on the tolex line when the intake says placement is tilted: pivot screws 100 mm from the front and bottom edges, a hardware line only.
 - **Corners**: metal corners on the tolex line by default (black or chrome), none on hardwood. Leg length is unpublished by every supplier, so every cutout keeps 50 mm from the external corners.
 - Hardware dimensions and sources: [[speaker-envelopes-and-port-stock]].
@@ -3721,16 +3743,21 @@ No CAD before Brian approves this phase.
 - Grain and show faces on the hardwood line: book-matched panels, grain
   wrapping around the box on all four shell panels (left to right on top
   and bottom, vertical on the sides, never front to back), the species.
-- Hardware positions: one jack plate per chamber, the strap handle over
-  the center of mass (or recessed side handles), corners, feet or
-  tilt-back legs, piping. Port location from the sheet; the port lines
-  and the box size are provisional until the Phase 4 port loop closes.
+- Hardware positions: one jack plate per chamber, the strap handle
+  centered on the top panel (or recessed side handles), corners, feet
+  or tilt-back legs, piping. Port location from the sheet; the port
+  lines and the box size are provisional until the Phase 4 port loop
+  closes.
 - Aesthetics block: copy
   `projects/Speaker-cab-system/fixtures/site-default/cab.py` into the
   order directory as `cab.py` and edit its `AESTHETICS` constants
-  (`corner_joint`, `baffle_mount`, `handle`, `corners`, `piping`,
-  `feet`, `tolex_roll_in`, `tolex_color`, `grill_cloth`,
-  `head_width_mm`, `roundover_mm`) and reduce its module docstring to
+  (`corner_joint`, `baffle_mount`, `baffle_cleat_edges`, `handle`,
+  `corners`, `piping`, `feet`, `tolex_roll_in`, `tolex_color`,
+  `grill_cloth`, `head_width_mm`, `roundover_mm`; left at None,
+  `baffle_cleat_edges` is all four baffle cleats on a closed or
+  closed-ported box and top and bottom only on an open or semi-open
+  one, and `roundover_mm` is a 1/2 in roundover on hardwood and none
+  on tolex, with 0 turning it off) and reduce its module docstring to
   one line naming the order (the template's copy instructions are
   dropped). Everything below the docstring stays unchanged; a hardware
   qualifier the constants cannot hold (the form's "Leather strap

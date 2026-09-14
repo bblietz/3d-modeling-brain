@@ -667,6 +667,7 @@ CLEAT_MM = 18.0                 # 18 x 18 cleats along the baffle and the back
 STIFFENER_MM = (18.0, 40.0)     # 18 proud, 40 flat, across any span over SPAN_MAX_MM
 SPAN_MAX_MM = 450.0
 NO_SHELL_STIFFENER_LINES = ("hardwood",)   # lines whose top, bottom, and sides take no stiffener (as cablayout)
+DEFAULT_BAFFLE_CLEAT_EDGES = {"closed": "all", "closed-ported": "all", "open": "top-bottom", "semi-open": "top-bottom"}   # floating baffle cleat edges by enclosure (as cablayout); a cab.py override can still diverge, like the stiffener case above; the layout and air-volume checks are the final authority
 BRACE_MM = (18.0, 60.0)         # center brace on a mono 2x12
 JACK_PLATE_H_MM = 70.0          # jack plate cutout height; the back stiffener stops above it
 JACK_CLEAR_MM = 25.0
@@ -863,7 +864,9 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
                    port_count: int | None = None, panel_mm: float = PANEL_MM) -> float:
     """Liters taken by the parts the generator builds inside the air box,
     estimated the way scripts/cablayout.py builds them: 18 x 18 cleats along
-    the baffle (top, bottom unless a slot port, two outer sides) and the back
+    the baffle (top, bottom unless a slot port, and the two outer sides only
+    when DEFAULT_BAFFLE_CLEAT_EDGES resolves to "all" for the enclosure) and
+    the back
     (closed: a full frame; open: top, bottom, and the panel-height side
     cleats), the modeled center brace of a mono 2x12 (Constraints.brace_l and
     --brace-l mean extra bracing beyond it), 18 x 40 stiffeners across any
@@ -875,7 +878,9 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
     on both lines, and a NO_SHELL_STIFFENER_LINES line (hardwood) has no top,
     bottom, or side stiffener, as in the layout; jack_config is accepted for
     symmetry with the callers and unused. panel_mm is the divider thickness of
-    a stereo box."""
+    a stereo box. This has no baffle_cleat_edges argument: the sheet's
+    allowance is a prediction from the line and enclosure alone, before
+    cab.py's aesthetics exist, exactly like the stiffener prediction above."""
     w, h, d = internal_mm
     per_chamber = driver_count // chambers
     count = port_count or per_chamber
@@ -890,8 +895,9 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
     total += chambers * w_c * c2
     if not slot:
         total += chambers * w_c * c2
-    side_len = h - CLEAT_MM - ((slot_h + BAFFLE_MM) if slot else CLEAT_MM)
-    total += 2 * side_len * c2
+    if DEFAULT_BAFFLE_CLEAT_EDGES[enclosure] == "all":
+        side_len = h - CLEAT_MM - ((slot_h + BAFFLE_MM) if slot else CLEAT_MM)
+        total += 2 * side_len * c2
     # back cleats
     total += 2 * chambers * w_c * c2
     if closed:

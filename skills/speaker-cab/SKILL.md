@@ -241,16 +241,21 @@ No CAD before Brian approves this phase.
 - Grain and show faces on the hardwood line: book-matched panels, grain
   wrapping around the box on all four shell panels (left to right on top
   and bottom, vertical on the sides, never front to back), the species.
-- Hardware positions: one jack plate per chamber, the strap handle over
-  the center of mass (or recessed side handles), corners, feet or
-  tilt-back legs, piping. Port location from the sheet; the port lines
-  and the box size are provisional until the Phase 4 port loop closes.
+- Hardware positions: one jack plate per chamber, the strap handle
+  centered on the top panel (or recessed side handles), corners, feet
+  or tilt-back legs, piping. Port location from the sheet; the port
+  lines and the box size are provisional until the Phase 4 port loop
+  closes.
 - Aesthetics block: copy
   `projects/Speaker-cab-system/fixtures/site-default/cab.py` into the
   order directory as `cab.py` and edit its `AESTHETICS` constants
-  (`corner_joint`, `baffle_mount`, `handle`, `corners`, `piping`,
-  `feet`, `tolex_roll_in`, `tolex_color`, `grill_cloth`,
-  `head_width_mm`, `roundover_mm`) and reduce its module docstring to
+  (`corner_joint`, `baffle_mount`, `baffle_cleat_edges`, `handle`,
+  `corners`, `piping`, `feet`, `tolex_roll_in`, `tolex_color`,
+  `grill_cloth`, `head_width_mm`, `roundover_mm`; left at None,
+  `baffle_cleat_edges` is all four baffle cleats on a closed or
+  closed-ported box and top and bottom only on an open or semi-open
+  one, and `roundover_mm` is a 1/2 in roundover on hardwood and none
+  on tolex, with 0 turning it off) and reduce its module docstring to
   one line naming the order (the template's copy instructions are
   dropped). Everything below the docstring stays unchanged; a hardware
   qualifier the constants cannot hold (the form's "Leather strap

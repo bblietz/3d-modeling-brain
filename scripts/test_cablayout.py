@@ -531,9 +531,9 @@ def test_handle_strap_and_recessed():
     spec = spec_for()
     fr = L.frame(spec)
     hw, feats, warn = L.handle_hardware(spec, fr, (0.0, 108.0, 229.0))
-    assert hw[0].item == "strap handle" and hw[0].position == (0.0, 108.0, 457.2) and feats == {} and warn == []
+    assert hw[0].item == "strap handle" and hw[0].position == (0.0, fr.D / 2.0, 457.2) and feats == {} and warn == []
     hw, _, _ = L.handle_hardware(spec, fr, (0.0, 10.0, 229.0))
-    assert hw[0].position[1] == 50.0
+    assert hw[0].position == (0.0, fr.D / 2.0, 457.2)      # the strap sits on the top panel center, not the center of mass
     rec = spec_for(aesthetics=L.Aesthetics(handle="recessed-side"))
     hw, feats, warn = L.handle_hardware(rec, fr, (0.0, 108.0, 229.0))
     assert [h.item for h in hw] == ["recessed handle", "recessed handle"] and warn == []
@@ -836,7 +836,7 @@ def test_report_carries_the_aesthetics_block():
     rep = L.layout_report(lay, L.check_layout(lay, spec))
     json.dumps(rep)
     block = rep["aesthetics"]
-    assert len(block) == 22
+    assert len(block) == 23
     assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
                                   "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
         "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",
@@ -953,6 +953,8 @@ def test_hardwood_site_box_has_no_shell_stiffeners():
         for line, species in (("tolex", None), ("hardwood", "black walnut")):
             c = cabvoice.Constraints(line=line, species=species)
             v = cabvoice.evaluate([drv], [16], enclosure, TONE, (472.0, 421.2, 229.4), constraints=c).to_dict()
+            # default resolution: the engine's inside-parts allowance now follows the same
+            # enclosure-based baffle_cleat_edges default as the layout, so they still match
             spec = L.order_from(v, L.Aesthetics())
             lay = L.layout(spec)
             by = {ch.name: ch for ch in L.check_layout(lay, spec)}
@@ -1031,13 +1033,13 @@ SHELL_PANELS = ("side_left", "side_right", "top", "bottom")
 ROUNDOVER_CLAUSE = "; 12.7 mm (1/2 in) roundover on every outside edge"
 
 
-def test_roundover_is_positive_or_none():
+def test_roundover_is_none_zero_or_positive():
     assert L.Aesthetics().roundover_mm is None
-    for ok in (None, 3.175, 12.7):
+    for ok in (None, 0.0, 3.175, 12.7):
         assert L.Aesthetics(roundover_mm=ok).validate() == [], ok
-    for bad in (0.0, -6.35):
-        assert L.Aesthetics(roundover_mm=bad).validate() == ["roundover_mm must be positive or None"], bad
-        with pytest.raises(ValueError, match="aesthetics: roundover_mm must be positive or None"):
+    for bad in (-0.1, -6.35):
+        assert L.Aesthetics(roundover_mm=bad).validate() == ["roundover_mm must not be negative"], bad
+        with pytest.raises(ValueError, match="aesthetics: roundover_mm must not be negative"):
             spec_for(aesthetics=L.Aesthetics(roundover_mm=bad))
 
 
@@ -1058,7 +1060,8 @@ def test_roundover_note_on_the_four_shell_blanks_only():
                     (9.525, "9.525 mm (3/8 in)"), (15.875, "15.875 mm (5/8 in)"), (10.0, "10 mm"), (5.0, "5 mm")):
         assert L.roundover_note(r) == f"; {size} roundover on every outside edge", r
     for mount in ("floating", "fixed"):
-        plain = L.layout(spec_for(**WALNUT, **OPEN_BACK, aesthetics=L.Aesthetics(baffle_mount=mount)))
+        plain = L.layout(spec_for(**WALNUT, **OPEN_BACK,
+                                  aesthetics=L.Aesthetics(baffle_mount=mount, roundover_mm=0)))
         spec = spec_for(**WALNUT, **OPEN_BACK, aesthetics=L.Aesthetics(baffle_mount=mount, roundover_mm=12.7))
         lay = L.layout(spec)
         assert [p.name for p in lay.parts] == [p.name for p in plain.parts], mount
@@ -1072,7 +1075,7 @@ def test_roundover_note_on_the_four_shell_blanks_only():
         # cab.json's aesthetics block (asdict) carries the option with no extra code
         rep = json.loads(json.dumps(L.layout_report(lay, L.check_layout(lay, spec))))
         assert rep["aesthetics"]["roundover_mm"] == 12.7
-        assert L.layout_report(plain, [])["aesthetics"]["roundover_mm"] is None
+        assert L.layout_report(plain, [])["aesthetics"]["roundover_mm"] == 0
 
 
 def test_site_default_template_leaves_roundover_unset_and_its_layout_notes_unchanged():
@@ -1085,3 +1088,79 @@ def test_site_default_template_leaves_roundover_unset_and_its_layout_notes_uncha
     spec = L.order_from(L.load_voicing(SITE_DEFAULT / "voicing.json"), L.Aesthetics(**kw))
     committed = json.loads((SITE_DEFAULT / "cab.json").read_text())
     assert [(p.name, p.notes) for p in L.layout(spec).parts] == [(p["name"], p["notes"]) for p in committed["parts"]]
+
+
+# ---- hardwood roundover default, centered strap handle, floating baffle cleat edges ----
+def test_roundover_defaults_to_a_half_inch_on_hardwood_and_none_on_tolex():
+    assert L.DEFAULT_ROUNDOVER_MM == {"hardwood": 12.7, "tolex": None}
+    aest = L.Aesthetics()
+    hw = spec_for(**WALNUT, **OPEN_BACK, aesthetics=aest)
+    assert hw.aesthetics.roundover_mm == 12.7 and aest.roundover_mm is None   # the caller's block is not touched
+    lay = L.layout(hw)
+    shell = [p for p in lay.parts if p.name in SHELL_PANELS]
+    assert len(shell) == 4 and all(p.notes.count(ROUNDOVER_CLAUSE) == 1 for p in shell)
+    assert L.layout_report(lay, [])["aesthetics"]["roundover_mm"] == 12.7
+    sharp = spec_for(**WALNUT, **OPEN_BACK, aesthetics=L.Aesthetics(roundover_mm=0))
+    sharp_lay = L.layout(sharp)
+    assert sharp.aesthetics.roundover_mm == 0
+    assert all("roundover" not in p.notes for p in sharp_lay.parts)
+    assert [p.blank_mm for p in sharp_lay.parts] == [p.blank_mm for p in lay.parts]
+    tolex = spec_for()
+    assert tolex.aesthetics.roundover_mm is None
+    assert all("roundover" not in p.notes for p in L.layout(tolex).parts)
+    assert L.layout_report(L.layout(tolex), [])["aesthetics"]["roundover_mm"] is None
+    for line in (WALNUT, {}):      # an explicit radius wins on either line
+        assert spec_for(**line, aesthetics=L.Aesthetics(roundover_mm=6.35)).aesthetics.roundover_mm == 6.35
+
+
+def test_strap_handle_sits_at_the_top_panel_center():
+    for kw in ({**WALNUT, **OPEN_BACK}, {"enclosure": "closed", "net": 42.5}):
+        spec = spec_for(**kw)
+        fr = L.frame(spec)
+        lay = L.layout(spec)
+        straps = [h for h in lay.hardware if h.item == "strap handle"]
+        assert len(straps) == 1, kw
+        x, y, z = straps[0].position
+        assert abs(x) < 0.1 and abs(y - fr.D / 2.0) < 0.1 and z == fr.H, kw
+        assert "centered on the top panel" in straps[0].notes, kw
+        assert abs(lay.com_mm[1] - fr.D / 2.0) > 1.0, kw       # the center of mass is not at the depth center
+        by = {c.name: c for c in L.check_layout(lay, spec)}
+        assert by["handle"].level == "pass", (kw, by["handle"].message)
+
+
+BAFFLE_SIDE_CLEATS = {"cleat_baffle_left", "cleat_baffle_right"}
+BAFFLE_TB_CLEATS = {"cleat_baffle_top", "cleat_baffle_bottom"}
+
+
+def _cleat_names(spec):
+    return {p.name for p in L.layout(spec).parts if p.name.startswith("cleat_baffle")}
+
+
+def test_floating_baffle_cleat_edges_default_by_enclosure():
+    assert L.BAFFLE_CLEAT_EDGES == ("all", "top-bottom")
+    assert set(L.DEFAULT_BAFFLE_CLEAT_EDGES) == set(cabvoice.ENCLOSURE_TYPES)
+    op = spec_for(**OPEN_BACK)
+    assert op.aesthetics.baffle_cleat_edges == "top-bottom"
+    assert _cleat_names(op) == BAFFLE_TB_CLEATS
+    assert spec_for(enclosure="semi-open", port=None, open_fraction=0.25).aesthetics.baffle_cleat_edges == "top-bottom"
+    op_all = spec_for(**OPEN_BACK, aesthetics=L.Aesthetics(baffle_cleat_edges="all"))
+    assert _cleat_names(op_all) == BAFFLE_TB_CLEATS | BAFFLE_SIDE_CLEATS
+    # the baffle blank does not depend on the side cleats
+    baffles = [next(p for p in L.layout(s).parts if p.name == "baffle") for s in (op, op_all)]
+    assert baffles[0].blank_mm == baffles[1].blank_mm and baffles[0].size == baffles[1].size
+    assert baffles[0].pos == baffles[1].pos
+    for enclosure, net in (("closed", 42.5), ("closed-ported", 43.5)):
+        spec = spec_for(enclosure=enclosure, net=net)
+        assert spec.aesthetics.baffle_cleat_edges == "all", enclosure
+        assert _cleat_names(spec) == BAFFLE_TB_CLEATS | BAFFLE_SIDE_CLEATS, enclosure
+    assert L.layout_report(L.layout(op), [])["aesthetics"]["baffle_cleat_edges"] == "top-bottom"
+
+
+def test_bad_baffle_cleat_edges_is_an_input_error_and_a_fixed_baffle_ignores_it():
+    assert L.Aesthetics(baffle_cleat_edges="sides").validate() == [
+        "baffle_cleat_edges must be one of all, top-bottom or None"]
+    with pytest.raises(ValueError, match="aesthetics: baffle_cleat_edges must be one of all, top-bottom or None"):
+        spec_for(aesthetics=L.Aesthetics(baffle_cleat_edges="sides"))
+    # on a fixed baffle the value is carried but unused, like the dovetail numbers on a finger joint
+    fixed = spec_for(**OPEN_BACK, aesthetics=L.Aesthetics(baffle_mount="fixed", baffle_cleat_edges="all"))
+    assert fixed.aesthetics.baffle_cleat_edges == "all" and _cleat_names(fixed) == set()

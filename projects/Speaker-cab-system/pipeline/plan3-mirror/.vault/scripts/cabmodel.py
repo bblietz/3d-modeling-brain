@@ -175,11 +175,12 @@ def blank_solid(blank):
 
 def roundover_envelope(layout):
     """The external box (the layout frame's W x D x H) with all 12 edges
-    filleted at Aesthetics.roundover_mm; None when the option is off.
-    order_from keeps the radius under the shell thickness, so the fillets stay
-    in the outer skin and never reach a panel's inside face."""
+    filleted at the spec's resolved Aesthetics.roundover_mm; None when that
+    radius is 0 or None, which both mean no roundover. order_from keeps the
+    radius under the shell thickness, so the fillets stay in the outer skin
+    and never reach a panel's inside face."""
     r = layout.spec.aesthetics.roundover_mm
-    if r is None:
+    if not r:
         return None
     fr = L.frame(layout.spec)
     return fillet(_box(-fr.W / 2.0, 0.0, 0.0, fr.W / 2.0, fr.D, fr.H).edges(), r)

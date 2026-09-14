@@ -514,7 +514,7 @@ def _corner_probes(W, D, H):
 
 
 def test_roundover_rounds_the_hardwood_open_back_site_box_shell_and_nothing_else():
-    plain_lay = _site_box("open", "hardwood", "black walnut", None)
+    plain_lay = _site_box("open", "hardwood", "black walnut", 0)
     lay = _site_box("open", "hardwood", "black walnut", ROUNDOVER_MM)
     fr = L.frame(lay.spec)
     W, H, D, t, r = fr.W, fr.H, fr.D, fr.t, ROUNDOVER_MM
@@ -627,3 +627,25 @@ def test_strap_handle_is_a_leather_strap_between_two_end_caps(tmp_path):
     M.export_step(M.compound_of(handle), str(step))
     text = step.read_text(errors="ignore")
     assert all(f"'{name}'" in text for name in STRAP_HANDLE_LABELS)
+
+
+# ---- the hardwood roundover default through the CAD path ----
+def test_hardwood_default_rounds_the_panels_and_zero_leaves_them_sharp():
+    default = _site_box("open", "hardwood", "black walnut", None)
+    sharp = _site_box("open", "hardwood", "black walnut", 0)
+    assert default.spec.aesthetics.roundover_mm == 12.7 and sharp.spec.aesthetics.roundover_mm == 0
+    envelope = M.roundover_envelope(default)
+    assert envelope is not None and M.roundover_envelope(sharp) is None
+    W, H, D = default.spec.external_mm
+    removed = 0.0
+    for b in default.parts:
+        if b.name in M.SHELL_NAMES:
+            plain = M.blank_solid(b)
+            removed += plain.volume - M.shell_solid(b, envelope).volume
+            assert M.shell_solid(b, None).volume == plain.volume, b.name
+    assert abs(removed - _rounded_box_removed_mm3(W, D, H, 12.7)) < 1.0
+    cab = M.build(sharp)                       # 0 builds the plain blanks
+    for e, b in zip(cab.parts, sharp.parts):
+        if b.name in M.SHELL_NAMES:
+            assert abs(e["solid"].volume - L.blank_volume_mm3(b)) < 1.0, b.name
+    assert [c.level for c in M.check_build(cab, sharp)] == ["pass"] * 4

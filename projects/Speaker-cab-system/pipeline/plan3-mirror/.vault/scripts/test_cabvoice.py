@@ -1617,3 +1617,30 @@ def test_inside_parts_hardwood_drops_only_the_shell_stiffeners(drv, tone):
     c = cabvoice.Constraints(line="hardwood", species="black walnut")
     v = cabvoice.evaluate([drv], [16], "closed", tone, SITE_INTERNAL, constraints=c)
     assert v.volumes["inside_parts_l"] == pytest.approx(closed, abs=0.001)
+
+
+# ---- open and semi-open enclosures price only the top and bottom baffle cleats ----
+def test_inside_parts_open_and_semi_open_drop_the_side_baffle_cleats(drv, tone):
+    assert cabvoice.DEFAULT_BAFFLE_CLEAT_EDGES == {"closed": "all", "closed-ported": "all",
+                                                    "open": "top-bottom", "semi-open": "top-bottom"}
+    two_side_cleats = 2 * (SITE_INTERNAL[1] - 2 * cabvoice.CLEAT_MM) * cabvoice.CLEAT_MM ** 2 / 1e6
+    # before this fix every enclosure priced all four baffle cleats; open and closed also differ in
+    # their back cleat frame, so isolate the cleat-edges change itself against each enclosure's own
+    # pre-fix total (hand-captured from the unfixed formula) rather than diffing open against closed
+    before = {("open", "hardwood"): 1.00175616, ("open", "tolex"): 1.2802521599999999,
+              ("semi-open", "hardwood"): 1.0426967999999999, ("semi-open", "tolex"): 1.3211927999999997}
+    for (enclosure, line), old in before.items():
+        new = cabvoice.inside_parts_l(SITE_INTERNAL, enclosure, 1, 1, "mono", None, line)
+        assert old - new == pytest.approx(two_side_cleats, abs=1e-6), (enclosure, line)
+    # closed and closed-ported still price all four, unchanged, on both lines
+    for enclosure in ("closed", "closed-ported"):
+        for line, old in (("hardwood", 1.3018752), ("tolex", 1.5803711999999999)):
+            new = cabvoice.inside_parts_l(SITE_INTERNAL, enclosure, 1, 1, "mono", None, line)
+            assert new == pytest.approx(old, abs=1e-6), (enclosure, line)
+    open_hardwood = cabvoice.inside_parts_l(SITE_INTERNAL, "open", 1, 1, "mono", None, "hardwood")
+    closed_hardwood = cabvoice.inside_parts_l(SITE_INTERNAL, "closed", 1, 1, "mono", None, "hardwood")
+    assert open_hardwood < closed_hardwood
+    # a closed hardwood order's sheet allowance still matches the direct call, as for the stiffener fix
+    c = cabvoice.Constraints(line="hardwood", species="black walnut")
+    v = cabvoice.evaluate([drv], [16], "closed", tone, SITE_INTERNAL, constraints=c)
+    assert v.volumes["inside_parts_l"] == pytest.approx(closed_hardwood, abs=0.001)

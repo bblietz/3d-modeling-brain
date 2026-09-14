@@ -19,7 +19,7 @@ from __future__ import annotations
 import json
 import math
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date
 from pathlib import Path
 
@@ -86,6 +86,7 @@ assert MM_PER_INCH == cabvoice.MM_PER_INCH
 
 JOINTS = ("finger", "dovetail")
 BAFFLE_MOUNTS = ("floating", "fixed")
+BAFFLE_CLEAT_EDGES = ("all", "top-bottom")
 HANDLES = ("strap", "recessed-side")
 CORNERS = ("black", "chrome", "none")
 FEET = ("rubber", "tilt-back")
@@ -99,6 +100,7 @@ class Aesthetics:
     dovetail_pin_mm: float | None = None
     dovetail_tail_mm: float = 30.0
     baffle_mount: str = "floating"
+    baffle_cleat_edges: str | None = None   # floating baffle: None takes the enclosure default
     handle: str = "strap"
     handle_screw_spacing_mm: float = 228.6
     recessed_handle_cutout_mm: tuple = (140.0, 90.0)
@@ -114,7 +116,7 @@ class Aesthetics:
     tolex_color: str = ""
     grill_cloth: str = ""
     finish: str = ""
-    roundover_mm: float | None = None
+    roundover_mm: float | None = None   # None takes the line default; 0 is none (sharp edges)
 
     def validate(self) -> list:
         errors = []
@@ -122,6 +124,8 @@ class Aesthetics:
             errors.append(f"corner_joint must be one of {', '.join(JOINTS)}")
         if self.baffle_mount not in BAFFLE_MOUNTS:
             errors.append(f"baffle_mount must be one of {', '.join(BAFFLE_MOUNTS)}")
+        if self.baffle_cleat_edges is not None and self.baffle_cleat_edges not in BAFFLE_CLEAT_EDGES:
+            errors.append(f"baffle_cleat_edges must be one of {', '.join(BAFFLE_CLEAT_EDGES)} or None")
         if self.handle not in HANDLES:
             errors.append(f"handle must be one of {', '.join(HANDLES)}")
         if self.corners is not None and self.corners not in CORNERS:
@@ -130,10 +134,12 @@ class Aesthetics:
             errors.append(f"feet must be one of {', '.join(FEET)}")
         if self.tolex_roll_in not in ROLL_MM:
             errors.append("tolex_roll_in must be 54 or 32")
-        for name in ("finger_width_mm", "dovetail_pin_mm", "head_width_mm", "roundover_mm"):
+        for name in ("finger_width_mm", "dovetail_pin_mm", "head_width_mm"):
             v = getattr(self, name)
             if v is not None and not v > 0:
                 errors.append(f"{name} must be positive or None")
+        if self.roundover_mm is not None and self.roundover_mm < 0:
+            errors.append("roundover_mm must not be negative")
         for name in ("dovetail_slope", "dovetail_tail_mm", "handle_screw_spacing_mm",
                      "foot_diameter_mm"):
             if not getattr(self, name) > 0:
@@ -427,8 +433,10 @@ def _port_from(p: dict) -> PortSpec:
 def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
     """CabSpec from a voicing.json dict and the aesthetics block.
     ValueError on sheet blockers, missing keys, a dovetail on the tolex line,
-    a roundover of the shell thickness or more, or invalid aesthetics. Never
-    reads warning text."""
+    a roundover of the shell thickness or more, or invalid aesthetics. A
+    roundover_mm of None resolves to the line default and a
+    baffle_cleat_edges of None to the enclosure default; the spec carries
+    both resolved values. Never reads warning text."""
     errors = aesthetics.validate()
     if errors:
         raise ValueError("aesthetics: " + "; ".join(errors))
@@ -465,13 +473,17 @@ def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
         raise ValueError(f"line must be tolex or hardwood, not {line!r}")
     if aesthetics.corner_joint == "dovetail" and line != "hardwood":
         raise ValueError("dovetail corners are a hardwood line option")
-    if aesthetics.roundover_mm is not None and aesthetics.roundover_mm >= PANEL_MM[line]:
+    if aesthetics.roundover_mm is None:
+        aesthetics = replace(aesthetics, roundover_mm=DEFAULT_ROUNDOVER_MM[line])
+    if aesthetics.roundover_mm and aesthetics.roundover_mm >= PANEL_MM[line]:
         raise ValueError(f"roundover_mm {aesthetics.roundover_mm:g} must be under the {line} shell thickness, "
                          f"{PANEL_MM[line]:g} mm")
     if len(speakers) != driver_count:
         raise ValueError(f"{len(speakers)} speaker entries for {driver_count} drivers")
     if enclosure_type not in cabvoice.ENCLOSURE_TYPES:
         raise ValueError(f"unknown enclosure type {enclosure_type!r}")
+    if aesthetics.baffle_cleat_edges is None:
+        aesthetics = replace(aesthetics, baffle_cleat_edges=DEFAULT_BAFFLE_CLEAT_EDGES[enclosure_type])
     if (back_mm, baffle_mm, recess_mm) != (BACK_MM, BAFFLE_MM, RECESS_MM):
         raise ValueError("sheet construction thicknesses differ from the layout constants")
     if port_spec is not None:
@@ -597,6 +609,10 @@ def shell_material(spec: CabSpec) -> tuple:
 
 HARDWOOD_GRAIN_NOTE = "grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"
 
+DEFAULT_BAFFLE_CLEAT_EDGES = {"closed": "all", "closed-ported": "all", "open": "top-bottom", "semi-open": "top-bottom"}   # a closed box keeps the perimeter cleats that hold the seal the volume model assumes; an open box has no seal to protect, so fewer parts and a baffle free at its sides (Brian, 2026-09-13)
+
+DEFAULT_ROUNDOVER_MM = {"hardwood": 12.7, "tolex": None}   # 1/2 in on every outside edge of a hardwood shell (Brian, 2026-09-13); none on the tolex line
+
 ROUNDOVER_EIGHTHS_TOL = 0.02   # a radius within this many eighths of an inch of an eighth-inch size is named by its fraction
 
 
@@ -604,8 +620,8 @@ def roundover_note(radius_mm: float | None) -> str:
     """The shell blank notes' clause for Aesthetics.roundover_mm, for example
     '; 12.7 mm (1/2 in) roundover on every outside edge'. The inch fraction
     appears only when the radius is an eighth-inch size (the share page names
-    it the same way); '' when the option is off."""
-    if radius_mm is None:
+    it the same way); '' for 0 (sharp edges) and for an unresolved None."""
+    if not radius_mm:
         return ""
     size = f"{radius_mm:g} mm"
     eighths = radius_mm / MM_PER_INCH * 8.0
@@ -750,7 +766,8 @@ def _cleat(name, pos, size, axis, chamber, note) -> Blank:
 
 
 def cleat_blanks(spec: CabSpec, fr: Frame) -> list:
-    """Baffle cleats (floating baffle only) and back cleats, per chamber, on
+    """Baffle cleats (floating baffle only, the sides unless
+    baffle_cleat_edges is top-bottom) and back cleats, per chamber, on
     the shell faces. The divider carries no cleats: the baffle and the back
     screw into its edges."""
     parts = []
@@ -761,15 +778,16 @@ def cleat_blanks(spec: CabSpec, fr: Frame) -> list:
         sfx = _suffix(spec, c)
         if spec.aesthetics.baffle_mount == "floating":
             zlo = fr.z_vis0 if fr.slot_h else fr.z0 + CLEAT_MM
+            sides = spec.aesthetics.baffle_cleat_edges != "top-bottom"
             parts.append(_cleat(f"cleat_baffle_top{sfx}", (xa, fr.y_bb, fr.z1 - CLEAT_MM),
                                 (xb - xa, CLEAT_MM, CLEAT_MM), "X", c, bnote))
             if not fr.slot_h:
                 parts.append(_cleat(f"cleat_baffle_bottom{sfx}", (xa, fr.y_bb, fr.z0),
                                     (xb - xa, CLEAT_MM, CLEAT_MM), "X", c, bnote))
-            if xa == fr.x0:
+            if sides and xa == fr.x0:
                 parts.append(_cleat(f"cleat_baffle_left{sfx}", (xa, fr.y_bb, zlo),
                                     (CLEAT_MM, CLEAT_MM, fr.z1 - CLEAT_MM - zlo), "Z", c, bnote))
-            if xb == fr.x1:
+            if sides and xb == fr.x1:
                 parts.append(_cleat(f"cleat_baffle_right{sfx}", (xb - CLEAT_MM, fr.y_bb, zlo),
                                     (CLEAT_MM, CLEAT_MM, fr.z1 - CLEAT_MM - zlo), "Z", c, bnote))
         if spec.closed:
@@ -1320,21 +1338,20 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
 
 
 def handle_hardware(spec: CabSpec, fr: Frame, com: tuple) -> tuple:
-    """(hardware, features by panel, warnings). Strap: screw pair on the top
-    at the loaded center of mass. Recessed side handles: one per side at the
-    depth center of mass, upper third, between the cleats."""
+    """(hardware, features by panel, warnings). Strap: screw pair centered on
+    the top panel in width and depth. Recessed side handles: one per side at
+    the depth center of mass, upper third, between the cleats."""
     a = spec.aesthetics
     xm, ym, zm = com
     hardware, features, warnings = [], {}, []
     allow = a.corner_allowance_mm
     if a.handle == "strap":
-        y_h = min(max(ym, allow), fr.D - allow)
         half = a.handle_screw_spacing_mm / 2.0
-        if abs(xm) + half > fr.W / 2.0 - allow:
+        if half > fr.W / 2.0 - allow:
             warnings.append("strap handle screws fall inside the corner allowance; shorten the spacing")
-        hardware.append(Hardware("strap handle", (xm, y_h, fr.H), None, "top",
+        hardware.append(Hardware("strap handle", (0.0, fr.D / 2.0, fr.H), None, "top",
                                  f"screw pair {a.handle_screw_spacing_mm:g} mm apart on the width axis, "
-                                 "centered on the loaded center of mass, T-nuts inside"))
+                                 "centered on the top panel, T-nuts inside"))
         return hardware, features, warnings
     w, h = a.recessed_handle_cutout_mm
     y_lo = fr.y_bb + CLEAT_MM + CLEARANCE_MM + w / 2.0

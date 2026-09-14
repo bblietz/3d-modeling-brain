@@ -36,6 +36,7 @@ import cablayout as L  # noqa: E402
 AESTHETICS = L.Aesthetics(
     corner_joint="finger",          # "dovetail" on the hardwood line only
     baffle_mount="floating",        # or "fixed" (glued into 6 mm dados)
+    baffle_cleat_edges=None,        # floating baffle cleats: None = enclosure default (all four closed, top and bottom open), or "all" / "top-bottom"
     handle="strap",                 # or "recessed-side"
     corners="black",                # "black", "chrome", or "none"
     piping=False,
@@ -44,7 +45,7 @@ AESTHETICS = L.Aesthetics(
     tolex_color="Fender Style Black",
     grill_cloth="British Small Weave Cane",
     head_width_mm=None,             # set to match a head: external width = head + 0 to 10 mm
-    roundover_mm=None,              # outside-edge roundover radius, 12.7 for 1/2 in
+    roundover_mm=None,              # outside-edge roundover: None = line default (1/2 in on hardwood, none on tolex), 0 = none
 )
 
 try:
