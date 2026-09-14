@@ -1,8 +1,8 @@
 qty,part,thickness_mm,width_mm,length_mm,material,notes
 1,back_upper,12,125.8,470,baltic birch 12 mm,"open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats; carries the jack plate"
 1,back_lower,12,125.8,470,baltic birch 12 mm,"open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats"
-2,grill_top/grill_bottom,12,40,466,baltic birch 12 mm,"grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
-2,grill_left/grill_right,12,40,415.2,baltic birch 12 mm,"grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
+2,grill_top/grill_bottom,12,40,462,baltic birch 12 mm,"grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
+2,grill_left/grill_right,12,40,411.2,baltic birch 12 mm,"grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
 2,cleat_baffle_top/cleat_baffle_bottom,18,18,470,baltic birch 18 mm,"18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
 2,cleat_back_top/cleat_back_bottom,18,18,470,baltic birch 18 mm,"18 x 18 birch cleat, screws every 150 mm"
 1,baffle,18,417.2,468,baltic birch 18 mm,"floating baffle: 1 mm clearance per side, felt strips on the cleats, screwed through the cleats, removable; speakers front-mounted on T-nuts, 8 bolts on a 294.4 mm circle"

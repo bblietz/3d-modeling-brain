@@ -79,14 +79,14 @@
     "sheet_inside_parts_l": 0.752
   },
   "mass": {
-    "total_kg": 14.285,
-    "parts_kg": 9.565,
+    "total_kg": 14.28,
+    "parts_kg": 9.56,
     "speakers_kg": 3.72,
     "hardware_kg": 1.0,
     "com_mm": [
       0.0,
-      103.09,
-      227.955
+      103.125,
+      227.954
     ]
   },
   "hardware": [
@@ -322,7 +322,7 @@
       "blank_mm": [
         12.0,
         40.0,
-        466.0
+        462.0
       ],
       "material": "baltic birch 12 mm",
       "notes": "grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
@@ -333,7 +333,7 @@
       "blank_mm": [
         12.0,
         40.0,
-        466.0
+        462.0
       ],
       "material": "baltic birch 12 mm",
       "notes": "grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
@@ -344,7 +344,7 @@
       "blank_mm": [
         12.0,
         40.0,
-        415.2
+        411.2
       ],
       "material": "baltic birch 12 mm",
       "notes": "grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
@@ -355,7 +355,7 @@
       "blank_mm": [
         12.0,
         40.0,
-        415.2
+        411.2
       ],
       "material": "baltic birch 12 mm",
       "notes": "grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
@@ -402,12 +402,12 @@
     {
       "name": "cutout",
       "level": "pass",
-      "message": "1 cutout(s) at the note diameter with 44 mm shell margins"
+      "message": "1 cutout(s) at the note diameter with 48 mm shell margins"
     },
     {
       "name": "grill opening",
       "level": "pass",
-      "message": "strip inner edges clear every cutout by 2 mm"
+      "message": "strip inner edges clear every cutout by 4 mm"
     },
     {
       "name": "port fit",

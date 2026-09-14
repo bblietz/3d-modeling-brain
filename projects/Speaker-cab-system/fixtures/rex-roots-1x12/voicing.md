@@ -2,7 +2,7 @@
 name: rex-roots-1x12-voicing
 type: voicing-sheet
 project: rex-roots-1x12
-created: 2026-09-11
+created: 2026-09-14
 status: unverified-prediction
 tags: [speaker-cab, voicing]
 ---
@@ -41,13 +41,13 @@ Mode: propose. Every number here is a prediction: unverified, ears only.
 | Brace | 0.00 L |
 | Port air inside the box | 1.14 L |
 | Divider | 0.00 L |
-| Inside parts (cleats, stiffeners, shelf, ring) | 1.42 L |
+| Inside parts (cleats, stiffeners, shelf, ring) | 1.43 L |
 | Gross internal | 37.9 L (1.34 cu ft) |
 
 ## Dimensions
 
-- Internal: 439 x 427 x 202 mm (17.28 x 16.82 x 7.96 in, W x H x D)
-- External: 475 x 463 x 252 mm (18.70 x 18.24 x 9.93 in, W x H x D)
+- Internal: 439 x 435 x 199 mm (17.28 x 17.13 x 7.82 in, W x H x D)
+- External: 475 x 471 x 249 mm (18.70 x 18.55 x 9.79 in, W x H x D)
 - Chamber internal width: 439 mm
 - Construction: tolex line, walls baltic birch plywood; voiced with 18 mm walls
 
@@ -88,7 +88,7 @@ Mode: propose. Every number here is a prediction: unverified, ears only.
 
 ## Warnings
 
-- width and height are within 5 percent of 1:1 (1.03); coincident standing waves
+- width and height are within 5 percent of 1:1 (1.01); coincident standing waves
 
 ## Blockers
 

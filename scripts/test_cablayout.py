@@ -60,7 +60,7 @@ def test_constants_match_engine():
     assert L.BACK_MM == cabvoice.BACK_MM == 12.0
     assert L.CUTOUT_MARGIN_MM == cabvoice.CUTOUT_MARGIN_MM == 25.0
     assert L.MM_PER_INCH == cabvoice.MM_PER_INCH == 25.4
-    assert L.SHELL_MARGIN_MM == cabvoice.SHELL_MARGIN_MM == 44.0
+    assert L.SHELL_MARGIN_MM == cabvoice.SHELL_MARGIN_MM == 48.0
     assert L.CUTOUT_GAP_MM == cabvoice.CUTOUT_GAP_MM == 68.0
     assert L.PORT_TUBE_OD_MM == cabvoice.PORT_TUBE_OD_MM and set(L.PORT_TUBE_OD_MM) == {52.0, 77.3, 101.5, 153.2}
     assert not hasattr(L, "FOOT_DEFAULT_INSET_MM")     # the inset lives in Aesthetics.foot_inset_mm
@@ -224,11 +224,13 @@ def test_2x12_cutout_spacing_and_stereo_centers():
     fr = L.frame(st)
     assert fr.chambers == [(-382.0, -9.0), (9.0, 382.0)]
     _, cutouts, _ = L.baffle_and_cutouts(st, fr)
-    assert [c.center[0] for c in cutouts] == pytest.approx([-186.0, 186.0]) and [c.chamber for c in cutouts] == [0, 1]
+    assert [c.center[0] for c in cutouts] == pytest.approx([-184.0, 184.0]) and [c.chamber for c in cutouts] == [0, 1]
     tight = spec_for(external=(722.0 + 36.0, 457.2, 279.4), drivers=2, chambers=2, jack="stereo")
     _, cutouts, _ = L.baffle_and_cutouts(tight, L.frame(tight))
-    assert cutouts[0].center[0] + 141.5 == pytest.approx(-9.0 - 25.0)   # 25 mm to the divider
-    assert cutouts[0].center[0] - 141.5 == pytest.approx(-361.0 + 44.0)  # 44 mm to the shell
+    # Over-constrained (shell wants center >= -171.5, divider wants <= -175.5): the split lands
+    # the cutout 2 mm short of each margin rather than exactly meeting either one.
+    assert cutouts[0].center[0] + 141.5 == pytest.approx(-32.0)   # 2 mm short of the divider's 25
+    assert cutouts[0].center[0] - 141.5 == pytest.approx(-315.0)  # 2 mm short of the shell's 48
 
 
 def test_cleats_by_mount_port_and_chambers():
@@ -258,8 +260,8 @@ def test_grill_frame_geometry():
     strips = L.grill_frame_blanks(spec, L.frame(spec))
     assert [s.name for s in strips] == ["grill_top", "grill_bottom", "grill_left", "grill_right"]
     top, left = strips[0], strips[2]
-    assert top.pos == (-234.0, 3.0, 397.2) and top.size == (468.0, 12.0, 40.0)
-    assert left.pos == (-234.0, 3.0, 20.0) and left.size == (40.0, 12.0, 417.2)
+    assert top.pos == (-232.0, 3.0, 395.2) and top.size == (464.0, 12.0, 40.0)
+    assert left.pos == (-232.0, 3.0, 22.0) and left.size == (40.0, 12.0, 413.2)
     assert len(top.features) == 2 and len(left.features) == 2
     assert top.features[0]["box"][0][1] == 3.0 and top.features[0]["box"][1][1] == 9.0
     assert left.features[0]["box"][0][1] == 9.0 and left.features[0]["box"][1][1] == 15.0
@@ -267,7 +269,7 @@ def test_grill_frame_geometry():
     slot = spec_for(port="slot")
     fr = L.frame(slot)
     bottom = L.grill_frame_blanks(slot, fr)[1]
-    assert bottom.pos[2] == pytest.approx(fr.shelf_top + 2.0)
+    assert bottom.pos[2] == pytest.approx(fr.shelf_top + 4.0)
 
 
 def test_brace_and_divider():

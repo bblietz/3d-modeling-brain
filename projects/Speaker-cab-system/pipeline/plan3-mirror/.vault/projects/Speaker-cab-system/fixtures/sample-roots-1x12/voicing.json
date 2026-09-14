@@ -18,7 +18,7 @@
       "slug": "celestion-g12h-30-anniversary",
       "brand": "Celestion",
       "model": "G12H Anniversary",
-      "impedance_ohm": 16.0,
+      "impedance_ohm": 16,
       "power_w": 30,
       "sensitivity_db": 100,
       "data_status": "analog",
@@ -51,31 +51,31 @@
     "brace_l": 0.0,
     "port_l": 0.31611309980491736,
     "divider_l": 0.0,
-    "inside_parts_l": 1.2411433915834194,
-    "gross_l": 33.057254686111506
+    "inside_parts_l": 1.241513012895314,
+    "gross_l": 33.05762521738632
   },
   "box": {
     "internal_mm": [
-      423.99070419612366,
-      378.3578063716256,
-      206.06666852243805
+      423.6337121972976,
+      379.0,
+      205.89316436029677
     ],
     "external_mm": [
-      459.99070419612366,
-      414.3578063716256,
-      256.066668522438
+      459.6337121972976,
+      415.0,
+      255.89316436029677
     ],
     "internal_in": [
-      16.69,
-      14.9,
+      16.68,
+      14.92,
       8.11
     ],
     "external_in": [
-      18.11,
-      16.31,
-      10.08
+      18.1,
+      16.34,
+      10.07
     ],
-    "chamber_internal_width_mm": 423.99070419612366
+    "chamber_internal_width_mm": 423.6337121972976
   },
   "port": {
     "shape": "round",

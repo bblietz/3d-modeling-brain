@@ -477,9 +477,9 @@ def test_dims_for_volume_pinned_width_keeps_h_d_ratio():
 
 def test_dims_for_volume_min_width_for_two_drivers():
     min_w = cabvoice.min_internal_width_mm(2, 283.0)
-    assert min_w == pytest.approx(722.0)
+    assert min_w == pytest.approx(730.0)
     box = cabvoice.dims_for_volume(90.0, min_internal_width_mm=min_w)
-    assert box.internal_mm[0] == pytest.approx(722.0)
+    assert box.internal_mm[0] == pytest.approx(730.0)
     assert box.gross_l == pytest.approx(90.0, abs=0.01)
 
 
@@ -1101,13 +1101,13 @@ def test_cli_port_diameter_default_is_the_tube_start():
 
 
 def test_min_internal_width_and_height():
-    assert cabvoice.SHELL_MARGIN_MM == 44.0 and cabvoice.CUTOUT_GAP_MM == 68.0
+    assert cabvoice.SHELL_MARGIN_MM == 48.0 and cabvoice.CUTOUT_GAP_MM == 68.0
     assert cabvoice.CUTOUT_MARGIN_MM == 25.0
-    assert cabvoice.min_internal_width_mm(1, 283.0) == pytest.approx(371.0)
-    assert cabvoice.min_internal_width_mm(2, 283.0) == pytest.approx(722.0)
-    assert cabvoice.min_internal_height_mm(283.0) == pytest.approx(371.0)
-    assert cabvoice.min_internal_height_mm(283.0, None) == pytest.approx(371.0)
-    assert cabvoice.min_internal_height_mm(283.0, 40.0) == pytest.approx(429.0)
+    assert cabvoice.min_internal_width_mm(1, 283.0) == pytest.approx(379.0)
+    assert cabvoice.min_internal_width_mm(2, 283.0) == pytest.approx(730.0)
+    assert cabvoice.min_internal_height_mm(283.0) == pytest.approx(379.0)
+    assert cabvoice.min_internal_height_mm(283.0, None) == pytest.approx(379.0)
+    assert cabvoice.min_internal_height_mm(283.0, 40.0) == pytest.approx(437.0)
 
 
 def test_dims_for_volume_height_floor():
@@ -1386,8 +1386,8 @@ def test_propose_fb_override_is_applied_and_recorded(drv, tone):
 def test_propose_width_floor_over_the_limit_is_a_blocker(drv, tone):
     limit = cabvoice.Constraints(max_external_mm=(600.0, 457.2, 400.0))
     two = cabvoice.propose([drv, drv], [16, 16], "closed", tone, jack_config="mono", constraints=limit)
-    assert two.box["internal_mm"][0] == pytest.approx(722.0)
-    assert ("width floor 722.0 mm internal (the driver-count minimum) exceeds the size limit "
+    assert two.box["internal_mm"][0] == pytest.approx(730.0)
+    assert ("width floor 730.0 mm internal (the driver-count minimum) exceeds the size limit "
             "564.0 mm internal") in two.blockers
     pinned = cabvoice.Constraints(pinned_external_width_mm=700.0, max_external_mm=(600.0, 457.2, 400.0))
     one = cabvoice.propose([drv], [16], "closed", tone, constraints=pinned)
@@ -1396,14 +1396,14 @@ def test_propose_width_floor_over_the_limit_is_a_blocker(drv, tone):
             "564.0 mm internal") in one.blockers
     assert not any("floor" in w for w in one.warnings + two.warnings)
     with pytest.raises(ValueError, match="width floor"):     # the direct call stays strict
-        cabvoice.dims_for_volume(90.0, min_internal_width_mm=722.0, max_external_mm=(600.0, 457.2, 400.0))
+        cabvoice.dims_for_volume(90.0, min_internal_width_mm=730.0, max_external_mm=(600.0, 457.2, 400.0))
 
 
 def test_propose_height_floor_over_the_limit_is_a_blocker(drv, tone):
     c = cabvoice.Constraints(port_slot_mm=(352.0, 40.0), max_external_mm=(600.0, 400.0, 400.0))
     v = cabvoice.propose([drv], [16], "closed-ported", tone, constraints=c)
-    assert v.box["internal_mm"][1] == pytest.approx(429.0)
-    assert ("height floor 429.0 mm internal (the cutout minimum) exceeds the size limit "
+    assert v.box["internal_mm"][1] == pytest.approx(437.0)
+    assert ("height floor 437.0 mm internal (the cutout minimum) exceeds the size limit "
             "364.0 mm internal") in v.blockers
     assert v.blockers.count(v.blockers[0]) == 1      # one line: the floor is read from the final box, not every settle pass
 
@@ -1473,8 +1473,8 @@ def test_cli_width_floor_blocker_exits_2_with_the_sheet(speakers_dir, tmp_path):
     run = subprocess.run(cmd, capture_output=True, text=True)
     assert run.returncode == 2
     data = json.loads((out / "voicing.json").read_text())
-    assert data["blockers"][0].startswith("width floor 722.0 mm internal (the driver-count minimum)")
-    assert data["box"]["internal_mm"][0] == pytest.approx(722.0)
+    assert data["blockers"][0].startswith("width floor 730.0 mm internal (the driver-count minimum)")
+    assert data["box"]["internal_mm"][0] == pytest.approx(730.0)
 
 
 def test_cannabis_rex_roots_port_loop_cases(tone):
@@ -1506,7 +1506,7 @@ def test_propose_height_floor_blocker_reports_the_final_height_once(drv, tone):
     c = cabvoice.Constraints(port_slot_mm=(200.0, 20.0), max_external_mm=(600.0, 400.0, 400.0))
     v = cabvoice.propose([drv], [16], "closed-ported", tone, constraints=c)
     assert v.port["shape"] == "slot" and v.port["slot_h_mm"] > 20.0
-    assert v.box["internal_mm"][1] == pytest.approx(458.0, abs=0.1)
+    assert v.box["internal_mm"][1] == pytest.approx(466.0, abs=0.1)
     floors = [b for b in v.blockers if b.startswith("height floor")]
     assert floors == [f"height floor {v.box['internal_mm'][1]:.1f} mm internal (the cutout minimum) "
                       "exceeds the size limit 364.0 mm internal"]

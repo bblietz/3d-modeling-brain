@@ -2,7 +2,7 @@
 name: sample-roots-1x12-voicing
 type: voicing-sheet
 project: sample-roots-1x12
-created: 2026-09-11
+created: 2026-09-14
 status: unverified-prediction
 tags: [speaker-cab, voicing]
 ---
@@ -46,8 +46,8 @@ Mode: propose. Every number here is a prediction: unverified, ears only.
 
 ## Dimensions
 
-- Internal: 424 x 378 x 206 mm (16.69 x 14.90 x 8.11 in, W x H x D)
-- External: 460 x 414 x 256 mm (18.11 x 16.31 x 10.08 in, W x H x D)
+- Internal: 424 x 379 x 206 mm (16.68 x 14.92 x 8.11 in, W x H x D)
+- External: 460 x 415 x 256 mm (18.10 x 16.34 x 10.07 in, W x H x D)
 - Chamber internal width: 424 mm
 - Construction: tolex line, walls baltic birch plywood; voiced with 18 mm walls
 

@@ -18,7 +18,7 @@
       "slug": "eminence-cannabis-rex",
       "brand": "Eminence",
       "model": "Cannabis Rex 12",
-      "impedance_ohm": 8.0,
+      "impedance_ohm": 8,
       "power_w": 50,
       "sensitivity_db": 101.8,
       "data_status": "datasheet",
@@ -51,29 +51,29 @@
     "brace_l": 0.0,
     "port_l": 1.1421100791775265,
     "divider_l": 0.0,
-    "inside_parts_l": 1.4216355356298869,
-    "gross_l": 37.91574561480741
+    "inside_parts_l": 1.4320035356298868,
+    "gross_l": 37.92611361480741
   },
   "box": {
     "internal_mm": [
       438.9,
-      427.2,
-      202.21938067209763
+      435.2,
+      198.55639273027683
     ],
     "external_mm": [
       474.9,
-      463.2,
-      252.21938067209763
+      471.2,
+      248.55639273027683
     ],
     "internal_in": [
       17.28,
-      16.82,
-      7.96
+      17.13,
+      7.82
     ],
     "external_in": [
       18.7,
-      18.24,
-      9.93
+      18.55,
+      9.79
     ],
     "chamber_internal_width_mm": 438.9
   },
@@ -208,7 +208,7 @@
     "wall_material": "baltic birch plywood"
   },
   "warnings": [
-    "width and height are within 5 percent of 1:1 (1.03); coincident standing waves"
+    "width and height are within 5 percent of 1:1 (1.01); coincident standing waves"
   ],
   "blockers": [],
   "prediction_status": "unverified, ears only"

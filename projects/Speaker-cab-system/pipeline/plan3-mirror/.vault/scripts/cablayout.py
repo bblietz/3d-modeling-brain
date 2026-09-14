@@ -37,10 +37,15 @@ RECESS_MM = 20.0          # baffle front face behind the front edge (locked)
 CLEAT_MM = 18.0
 GRILL_STRIP_T_MM = 12.0
 GRILL_STRIP_W_MM = 40.0
-GRILL_CLEARANCE_MM = 2.0
+GRILL_CLEARANCE_MM = 4.0  # wood-to-shell gap for the cloth-wrapped grill frame: was 2 mm,
+                          # not enough room for cloth folded double at the stapled wrap
+                          # (Brian, from experience, 2026-09-14)
 FLANGE_T_MM = 5.0
 SPACER_MM = 5.0
-SHELL_MARGIN_MM = 44.0    # cutout edge to shell inner face
+SHELL_MARGIN_MM = 48.0    # cutout edge to shell inner face: grill strip 40 + 2 x GRILL_CLEARANCE_MM
+                          # (once past the strip, the cutout still owes the grill's inner opening
+                          # its own GRILL_CLEARANCE_MM; the old "40 + 2 clearance + 2" read as a
+                          # separate +2 pad only because clearance was coincidentally also 2 mm)
 CUTOUT_MARGIN_MM = 25.0   # cutout edge to brace or divider
 CUTOUT_GAP_MM = 68.0      # between the two cutouts of a 2x12 (18 + 2 x 25)
 BRACE_MM = (18.0, 60.0)
@@ -1819,7 +1824,8 @@ def check_layout(lay: Layout, spec: CabSpec) -> list:
                 or zc - r - inner_z0 < GRILL_CLEARANCE_MM - 1e-6 or inner_z1 - (zc + r) < GRILL_CLEARANCE_MM - 1e-6):
             problems.append(f"grill strip covers cutout {co.speaker}")
     checks.append(Check("grill opening", "blocker" if problems else "pass",
-                        "; ".join(problems) if problems else "strip inner edges clear every cutout by 2 mm"))
+                        "; ".join(problems) if problems else
+                        f"strip inner edges clear every cutout by {GRILL_CLEARANCE_MM:g} mm"))
     # port fit
     port_blockers = [n[len("blocker: "):] for n in lay.notes if n.startswith("blocker: port fit")]
     if spec.port is None:

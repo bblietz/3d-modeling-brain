@@ -11,8 +11,8 @@ generated: 2026-09-14
 | sheet | prediction unverified, ears only; no blockers on the sheet | pass |
 | net volume | chamber 0 net 42.4 L vs sheet 42.9 L (-0.9 percent); inside parts 0.75 L vs sheet allowance 0.75 L | pass |
 | stereo balance | single chamber | pass |
-| cutout | 1 cutout(s) at the note diameter with 44 mm shell margins | pass |
-| grill opening | strip inner edges clear every cutout by 2 mm | pass |
+| cutout | 1 cutout(s) at the note diameter with 48 mm shell margins | pass |
+| grill opening | strip inner edges clear every cutout by 4 mm | pass |
 | port fit | no port | pass |
 | port mouth | no port | pass |
 | magnet to back | open back | pass |
