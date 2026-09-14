@@ -57,7 +57,7 @@ Every field stays in this list even when empty; an empty value means the custome
 - **Aesthetics**
   - Wood species or tolex color: <>
   - Grill cloth: <>
-  - Piping: <yes | no>; corners: <black | chrome | none>; handle: <strap | recessed side>; jack plate: <recessed | flush>; logo: <>
+  - Piping: <yes | no>; corners: <black | chrome | none>; logo: <>; notes: <>
 - **Speaker**
   - <catalog slug at <8 | 16> ohm | customer supplied: <model, impedance, datasheet link> | recommend>
 

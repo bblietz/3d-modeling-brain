@@ -67,7 +67,7 @@ under the brief's name for it (the brief leaves amps unlabeled, so they
 arrive as `Amp 1`, `Amp 2`, with `(primary)` after the primary; the
 finish row is labeled `Tolex color` or `Wood species` to match the
 line); a brief line holding several fields (Cabs loved / disliked;
-Piping, corners, handle, jack plate, logo) arrives as one row per field,
+Piping, corners, logo, notes) arrives as one row per field,
 so filling the brief is transcription (a multi-line answer continues on
 lines indented deeper than its row, never at heading level). Driver
 count reads `1x12` or `2x12` where the brief wants 1 or 2. `(not asked)`
