@@ -19,6 +19,24 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 DEFAULT_VIEWS = [("iso", 30, -60), ("front", 0, -90), ("top", 90, -90), ("right", 0, 0)]
 
 
+def facet_shade(mesh: trimesh.Trimesh, shade: np.ndarray) -> np.ndarray:
+    """Flatten shading within each coplanar facet group to its mean value.
+
+    A flat panel is exported as many small triangles; per-triangle shading
+    from face_normals carries tiny floating-point variance across an
+    otherwise-flat surface, and matplotlib's Poly3DCollection has no true
+    z-buffer, so that variance (plus its own z-sort ambiguity on many
+    near-coplanar triangles) shows up as visible hatching. Curved surfaces
+    (the roundover fillets) are not part of a multi-triangle facet and keep
+    their own per-triangle shading, which is where real curvature should
+    still show.
+    """
+    shade = shade.copy()
+    for group in mesh.facets:
+        shade[group] = shade[group].mean()
+    return shade
+
+
 def main():
     stl_path, png_path = sys.argv[1], sys.argv[2]
     if len(sys.argv) > 3:
@@ -33,6 +51,7 @@ def main():
     light = np.array([0.4, -0.5, 0.75])
     light = light / np.linalg.norm(light)
     shade = 0.35 + 0.65 * np.clip(mesh.face_normals @ light, 0, 1)
+    shade = facet_shade(mesh, shade)
     colors = np.outer(shade, np.array([0.55, 0.65, 0.85]))
 
     lo, hi = mesh.bounds
@@ -44,7 +63,7 @@ def main():
     fig = plt.figure(figsize=(6 * ncols, 5.5 * nrows))
     for i, (name, elev, azim) in enumerate(views):
         ax = fig.add_subplot(nrows, ncols, i + 1, projection="3d")
-        pc = Poly3DCollection(tris, facecolors=colors, edgecolor="none")
+        pc = Poly3DCollection(tris, facecolors=colors, edgecolor="none", antialiased=False)
         ax.add_collection3d(pc)
         ax.set_xlim(center[0] - radius, center[0] + radius)
         ax.set_ylim(center[1] - radius, center[1] + radius)
