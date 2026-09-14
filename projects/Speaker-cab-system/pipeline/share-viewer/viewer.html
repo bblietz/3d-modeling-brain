@@ -360,6 +360,7 @@
       speaker: new THREE.MeshStandardMaterial({ color: 0x2a2826, roughness: 0.42, metalness: 0.65 }),
       brass: new THREE.MeshStandardMaterial({ color: 0xbb985e, roughness: 0.3, metalness: 1 }),
       chrome: new THREE.MeshStandardMaterial({ color: 0xc9ccd0, roughness: 0.18, metalness: 1 }),
+      jackplate: new THREE.MeshStandardMaterial({ map: jackPlateFace(hardwood, maxAniso), color: 0xffffff, roughness: 0.34, metalness: 0.85 }),
       leather: new THREE.MeshStandardMaterial({ color: 0x3b2418, roughness: 0.62 }),
       rubber: new THREE.MeshStandardMaterial({ color: 0x1a1918, roughness: 0.92 }),
     };
@@ -367,8 +368,9 @@
       if (CAB.shell.includes(name)) return "shell";
       if (name.startsWith("grill_")) return "cloth";
       if (name.startsWith("speaker_")) return "speaker";
-      // Jack plate and strap-handle end caps: brass on the hardwood line, metal on tolex (construction note).
-      if (name.startsWith("jack_plate") || name.startsWith("strap_handle_cap")) return hardwood ? "brass" : "chrome";
+      // Strap-handle end caps: brass on the hardwood line, chrome on tolex (construction note).
+      if (name.startsWith("strap_handle_cap")) return hardwood ? "brass" : "chrome";
+      if (name.startsWith("jack_plate")) return "jackplate";
       if (name.includes("handle")) return "leather";
       if (name.startsWith("foot_")) return "rubber";
       return "birch";
@@ -401,6 +403,23 @@
           : { uMM: 160, vMM: 160, seed: hash(part.name) });
       }
       if (kind === "cloth") projectUVs(geometry, { uMM: 110, vMM: 110 });
+      if (kind === "jackplate") {
+        // The plate is a thin box on the back panel's XZ face: map its own bounding
+        // rectangle to the full 0..1 texture square so the drawn socket lands centered.
+        // toCreasedNormals de-indexes the geometry, so read its own (post-crease) buffer,
+        // not the pre-crease `positions`/`part.vcount` used to build it.
+        geometry.computeBoundingBox();
+        const bb = geometry.boundingBox;
+        const dx = bb.max.x - bb.min.x || 1, dz = bb.max.z - bb.min.z || 1;
+        const gp = geometry.attributes.position.array;
+        const gCount = geometry.attributes.position.count;
+        const uv = new Float32Array(gCount * 2);
+        for (let i = 0; i < gCount; i++) {
+          uv[i * 2] = (gp[i * 3] - bb.min.x) / dx;
+          uv[i * 2 + 1] = (gp[i * 3 + 2] - bb.min.z) / dz;
+        }
+        geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+      }
       const mesh = new THREE.Mesh(geometry, MAT[kind]);
       mesh.name = part.name;
       mesh.castShadow = true;
@@ -585,6 +604,115 @@
         window.__cabReady = true;
       }
     });
+  }
+
+  // A recessed dish jack plate: brushed metal, a routed lip, four corner screws,
+  // and a 1/4 in jack socket, drawn at the plate's own 110 x 70 mm aspect ratio.
+  function jackPlateFace(brass, anisotropy) {
+    const w = 440, h = 280;
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const x = canvas.getContext("2d");
+    const base = brass ? ["#cbaa6d", "#9c7c48", "#e9cf98"] : ["#c7cbd0", "#9599a0", "#eef1f4"];
+    const dark = brass ? "#5c4a29" : "#54575c";
+    let seed = 11;
+    const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+
+    function roundRect(ctx, x0, y0, rw, rh, rad) {
+      ctx.beginPath();
+      ctx.moveTo(x0 + rad, y0);
+      ctx.arcTo(x0 + rw, y0, x0 + rw, y0 + rh, rad);
+      ctx.arcTo(x0 + rw, y0 + rh, x0, y0 + rh, rad);
+      ctx.arcTo(x0, y0 + rh, x0, y0, rad);
+      ctx.arcTo(x0, y0, x0 + rw, y0, rad);
+      ctx.closePath();
+    }
+
+    // Plate face: a brushed gradient plus faint horizontal brush strokes.
+    let g = x.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, base[2]);
+    g.addColorStop(0.5, base[0]);
+    g.addColorStop(1, base[1]);
+    x.fillStyle = g;
+    x.fillRect(0, 0, w, h);
+    x.globalAlpha = 0.5;
+    for (let i = 0; i < 260; i++) {
+      const yy = rand() * h;
+      x.strokeStyle = rand() < 0.5 ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)";
+      x.lineWidth = 1;
+      x.beginPath();
+      x.moveTo(rand() * w * 0.2, yy);
+      x.lineTo(w - rand() * w * 0.2, yy + (rand() - 0.5) * 1.5);
+      x.stroke();
+    }
+    x.globalAlpha = 1;
+
+    // Routed recess: an inset panel with a dark lip shadow, sunken toward the center.
+    const inset = 16;
+    roundRect(x, inset, inset, w - inset * 2, h - inset * 2, 14);
+    x.save();
+    x.clip();
+    x.fillStyle = dark;
+    x.globalAlpha = 0.55;
+    x.fillRect(inset, inset, w - inset * 2, h - inset * 2);
+    x.globalAlpha = 1;
+    const dish = x.createRadialGradient(w / 2, h / 2, 30, w / 2, h / 2, h / 2);
+    dish.addColorStop(0, base[0]);
+    dish.addColorStop(0.75, base[1]);
+    dish.addColorStop(1, dark);
+    x.fillStyle = dish;
+    x.fillRect(inset, inset, w - inset * 2, h - inset * 2);
+    x.restore();
+    x.lineWidth = 3;
+    x.strokeStyle = "rgba(0,0,0,0.35)";
+    roundRect(x, inset, inset, w - inset * 2, h - inset * 2, 14);
+    x.stroke();
+
+    // The 1/4 in jack socket, centered: a chrome bezel around a dark barrel.
+    const jr = 34;
+    let sock = x.createRadialGradient(w / 2 - 6, h / 2 - 6, 2, w / 2, h / 2, jr);
+    sock.addColorStop(0, "#f4f6f8");
+    sock.addColorStop(0.35, "#aeb3b9");
+    sock.addColorStop(0.7, "#4a4d51");
+    sock.addColorStop(1, "#232527");
+    x.beginPath();
+    x.arc(w / 2, h / 2, jr, 0, Math.PI * 2);
+    x.fillStyle = sock;
+    x.fill();
+    x.beginPath();
+    x.arc(w / 2, h / 2, jr * 0.5, 0, Math.PI * 2);
+    x.fillStyle = "#0c0c0d";
+    x.fill();
+    x.beginPath();
+    x.arc(w / 2 - jr * 0.28, h / 2 - jr * 0.28, jr * 0.14, 0, Math.PI * 2);
+    x.fillStyle = "rgba(255,255,255,0.55)";
+    x.fill();
+
+    // Four corner screws on the recess, flat-head with a single slot.
+    const sx = w / 2 - 150, sy = h / 2 - 88;
+    for (const [dx, dy] of [[-sx, -sy], [sx, -sy], [-sx, sy], [sx, sy]]) {
+      const cx = w / 2 + dx, cy = h / 2 + dy, sr = 10;
+      let head = x.createRadialGradient(cx - 3, cy - 3, 1, cx, cy, sr);
+      head.addColorStop(0, "#e7e9ec");
+      head.addColorStop(0.6, "#8c9095");
+      head.addColorStop(1, "#4d4f52");
+      x.beginPath();
+      x.arc(cx, cy, sr, 0, Math.PI * 2);
+      x.fillStyle = head;
+      x.fill();
+      x.strokeStyle = "rgba(0,0,0,0.5)";
+      x.lineWidth = 1.5;
+      x.beginPath();
+      x.moveTo(cx - sr * 0.6, cy);
+      x.lineTo(cx + sr * 0.6, cy);
+      x.stroke();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = anisotropy;
+    return tex;
   }
 
   function speakerFace(cone, anisotropy) {

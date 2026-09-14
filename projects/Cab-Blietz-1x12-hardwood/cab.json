@@ -1,6 +1,6 @@
 {
   "name": "Cab-Blietz-1x12-hardwood",
-  "generated": "2026-09-13",
+  "generated": "2026-09-14",
   "line": "hardwood",
   "species": "walnut",
   "corner_joint": "finger",
@@ -13,6 +13,7 @@
     "dovetail_tail_mm": 30.0,
     "baffle_mount": "floating",
     "baffle_cleat_edges": "top-bottom",
+    "jack_plate_position": "top",
     "handle": "strap",
     "handle_screw_spacing_mm": 228.6,
     "recessed_handle_cutout_mm": [
@@ -85,7 +86,7 @@
     "com_mm": [
       0.0,
       103.09,
-      229.245
+      227.955
     ]
   },
   "hardware": [
@@ -94,13 +95,13 @@
       "position_mm": [
         0.0,
         279.4,
-        97.0
+        360.2
       ],
       "cutout_mm": [
         110.0,
         70.0
       ],
-      "panel": "back_lower",
+      "panel": "back_upper",
       "notes": "recessed brass plate, cutout 110 x 70 mm, one 1/4 in jack"
     },
     {
@@ -368,7 +369,7 @@
         470.0
       ],
       "material": "baltic birch 12 mm",
-      "notes": "open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats"
+      "notes": "open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats; carries the jack plate"
     },
     {
       "name": "back_lower",
@@ -379,7 +380,7 @@
         470.0
       ],
       "material": "baltic birch 12 mm",
-      "notes": "open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats; carries the jack plate"
+      "notes": "open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats"
     }
   ],
   "checks": [
@@ -441,7 +442,7 @@
     {
       "name": "jack plate",
       "level": "pass",
-      "message": "plates fit above the cleat"
+      "message": "plates fit below the cleat"
     },
     {
       "name": "stock",
@@ -476,7 +477,7 @@
     {
       "name": "rectangularity",
       "level": "pass",
-      "message": "blanks below 98 percent of their bounding box (cut list uses the blank dims): side_left 94%, side_right 94%, top 95%, bottom 95%, baffle 68%, grill_top 91%, grill_bottom 91%, grill_left 90%, grill_right 90%, back_lower 87%"
+      "message": "blanks below 98 percent of their bounding box (cut list uses the blank dims): side_left 94%, side_right 94%, top 95%, bottom 95%, baffle 68%, grill_top 91%, grill_bottom 91%, grill_left 90%, grill_right 90%, back_upper 87%"
     }
   ],
   "prediction_status": "unverified, ears only",

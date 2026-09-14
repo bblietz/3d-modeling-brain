@@ -7,8 +7,8 @@ project: Cab-Blietz-1x12-hardwood
 
 | Qty | Part | T x W x L (mm) | T x W x L (in) | Material | Notes |
 |---|---|---|---|---|---|
-| 1 | back_upper | 12 x 125.8 x 470 | 1/2 x 4-15/16 x 18-1/2 | baltic birch 12 mm | open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats |
-| 1 | back_lower | 12 x 125.8 x 470 | 1/2 x 4-15/16 x 18-1/2 | baltic birch 12 mm | open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats; carries the jack plate |
+| 1 | back_upper | 12 x 125.8 x 470 | 1/2 x 4-15/16 x 18-1/2 | baltic birch 12 mm | open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats; carries the jack plate |
+| 1 | back_lower | 12 x 125.8 x 470 | 1/2 x 4-15/16 x 18-1/2 | baltic birch 12 mm | open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats |
 | 2 | grill_top/grill_bottom | 12 x 40 x 466 | 1/2 x 1-9/16 x 18-3/8 | baltic birch 12 mm | grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle |
 | 2 | grill_left/grill_right | 12 x 40 x 415.2 | 1/2 x 1-9/16 x 16-3/8 | baltic birch 12 mm | grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle |
 | 2 | cleat_baffle_top/cleat_baffle_bottom | 18 x 18 x 470 | 11/16 x 11/16 x 18-1/2 | baltic birch 18 mm | 18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle |
