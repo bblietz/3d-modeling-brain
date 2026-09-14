@@ -34,14 +34,14 @@ Mode: evaluate. Every number here is a prediction: unverified, ears only.
 
 | Quantity | Value |
 |---|---|
-| Net per driver | 42.6 L (1.50 cu ft) |
-| Net per chamber | 42.6 L (1.50 cu ft) |
-| Net total | 42.6 L (1.50 cu ft) |
+| Net per driver | 42.9 L (1.51 cu ft) |
+| Net per chamber | 42.9 L (1.51 cu ft) |
+| Net total | 42.9 L (1.51 cu ft) |
 | Driver displacement | 2.00 L |
 | Brace | 0.00 L |
 | Port air inside the box | 0.00 L |
 | Divider | 0.00 L |
-| Inside parts (cleats, stiffeners, shelf, ring) | 1.00 L |
+| Inside parts (cleats, stiffeners, shelf, ring) | 0.75 L |
 | Gross internal | 45.6 L (1.61 cu ft) |
 
 ## Dimensions

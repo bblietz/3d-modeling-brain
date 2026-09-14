@@ -12,6 +12,7 @@
     "dovetail_pin_mm": null,
     "dovetail_tail_mm": 30.0,
     "baffle_mount": "floating",
+    "baffle_cleat_edges": "top-bottom",
     "handle": "strap",
     "handle_screw_spacing_mm": 228.6,
     "recessed_handle_cutout_mm": [
@@ -65,26 +66,26 @@
       45.197
     ],
     "net_l": [
-      42.2
+      42.449
     ],
     "sheet_net_l": [
-      42.604
+      42.854
     ],
     "delta_pct": [
-      -0.949
+      -0.946
     ],
-    "inside_parts_l": 0.997,
-    "sheet_inside_parts_l": 1.002
+    "inside_parts_l": 0.749,
+    "sheet_inside_parts_l": 0.752
   },
   "mass": {
-    "total_kg": 14.454,
-    "parts_kg": 9.734,
+    "total_kg": 14.285,
+    "parts_kg": 9.565,
     "speakers_kg": 3.72,
     "hardware_kg": 1.0,
     "com_mm": [
       0.0,
-      102.435,
-      229.238
+      103.09,
+      229.245
     ]
   },
   "hardware": [
@@ -106,12 +107,12 @@
       "item": "strap handle",
       "position_mm": [
         0.0,
-        102.435,
+        139.7,
         457.2
       ],
       "cutout_mm": null,
       "panel": "top",
-      "notes": "screw pair 228.6 mm apart on the width axis, centered on the loaded center of mass, T-nuts inside"
+      "notes": "screw pair 228.6 mm apart on the width axis, centered on the top panel, T-nuts inside"
     },
     {
       "item": "foot",
@@ -244,28 +245,6 @@
         18.0,
         18.0,
         470.0
-      ],
-      "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
-    },
-    {
-      "name": "cleat_baffle_left",
-      "qty": 1,
-      "blank_mm": [
-        18.0,
-        18.0,
-        383.2
-      ],
-      "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
-    },
-    {
-      "name": "cleat_baffle_right",
-      "qty": 1,
-      "blank_mm": [
-        18.0,
-        18.0,
-        383.2
       ],
       "material": "baltic birch 18 mm",
       "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
@@ -412,7 +391,7 @@
     {
       "name": "net volume",
       "level": "pass",
-      "message": "chamber 0 net 42.2 L vs sheet 42.6 L (-0.9 percent); inside parts 1.00 L vs sheet allowance 1.00 L"
+      "message": "chamber 0 net 42.4 L vs sheet 42.9 L (-0.9 percent); inside parts 0.75 L vs sheet allowance 0.75 L"
     },
     {
       "name": "stereo balance",
@@ -472,7 +451,7 @@
     {
       "name": "part count",
       "level": "pass",
-      "message": "21 parts"
+      "message": "19 parts"
     },
     {
       "name": "spans",
@@ -482,17 +461,17 @@
     {
       "name": "interference",
       "level": "pass",
-      "message": "30 solids, no pair overlaps by more than 1 mm3"
+      "message": "28 solids, no pair overlaps by more than 1 mm3"
     },
     {
       "name": "air volume",
       "level": "pass",
-      "message": "chamber 0 measured 42.20 L vs layout 42.20 L (-0.00 percent)"
+      "message": "chamber 0 measured 42.45 L vs layout 42.45 L (-0.00 percent)"
     },
     {
       "name": "solid count",
       "level": "pass",
-      "message": "21 solids for 21 blanks"
+      "message": "19 solids for 19 blanks"
     },
     {
       "name": "rectangularity",

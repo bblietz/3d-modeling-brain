@@ -46,14 +46,14 @@
   },
   "volumes": {
     "method": "evaluate",
-    "per_driver_net_l": 42.604431999999996,
-    "per_chamber_net_l": 42.604431999999996,
-    "net_total_l": 42.604431999999996,
+    "per_driver_net_l": 42.854041599999995,
+    "per_chamber_net_l": 42.854041599999995,
+    "net_total_l": 42.854041599999995,
     "displacement_l": 2.0,
     "brace_l": 0.0,
     "port_l": 0.0,
     "divider_l": 0.0,
-    "inside_parts_l": 1.00175616,
+    "inside_parts_l": 0.7521465599999999,
     "gross_l": 45.606188159999995
   },
   "box": {
