@@ -1,0 +1,644 @@
+<title>{{title}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ground: #f4efe6;
+    --stage-hi: #efe6d8;
+    --stage-lo: #dccfba;
+    --ink: #111111;
+    --muted: #5f5447;
+    --oak: #7a5a3a;
+    --rust: #8a3a25;
+    --line: rgba(122, 90, 58, 0.26);
+    --pill: rgba(122, 90, 58, 0.10);
+    --pill-hover: rgba(122, 90, 58, 0.18);
+    --pill-on: #111111;
+    --pill-on-ink: #f4efe6;
+    --shadow-strength: 0.30;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #15120e;
+      --stage-hi: #262019;
+      --stage-lo: #110e0b;
+      --ink: #eee5d6;
+      --muted: #a89a88;
+      --oak: #c39a73;
+      --rust: #d97d62;
+      --line: rgba(195, 154, 115, 0.24);
+      --pill: rgba(195, 154, 115, 0.12);
+      --pill-hover: rgba(195, 154, 115, 0.22);
+      --pill-on: #eee5d6;
+      --pill-on-ink: #15120e;
+      --shadow-strength: 0.58;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #15120e;
+    --stage-hi: #262019;
+    --stage-lo: #110e0b;
+    --ink: #eee5d6;
+    --muted: #a89a88;
+    --oak: #c39a73;
+    --rust: #d97d62;
+    --line: rgba(195, 154, 115, 0.24);
+    --pill: rgba(195, 154, 115, 0.12);
+    --pill-hover: rgba(195, 154, 115, 0.22);
+    --pill-on: #eee5d6;
+    --pill-on-ink: #15120e;
+    --shadow-strength: 0.58;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 15.5px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1340px; margin-inline: auto; padding-inline: clamp(16px, 3.2vw, 44px); padding-block: 18px 40px; }
+  .display { font-family: "Cormorant Garamond", "Iowan Old Style", Georgia, serif; }
+  .label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    color: var(--muted);
+  }
+
+  .mast {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .wordmark { font-weight: 600; font-size: 1.6rem; letter-spacing: 0.01em; line-height: 1; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    gap: clamp(22px, 3.4vw, 56px);
+    margin-top: clamp(18px, 2.4vw, 30px);
+    align-items: start;
+  }
+
+  .viewer { display: grid; gap: 14px; min-width: 0; }
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 6 / 5;
+    border-radius: 6px;
+    overflow: hidden;
+    background: radial-gradient(110% 85% at 42% 28%, var(--stage-hi) 0%, var(--stage-lo) 100%);
+  }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
+  .stage canvas:active { cursor: grabbing; }
+  .stage-status {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 24px;
+    text-align: center;
+    font-style: italic;
+    font-size: 1.35rem;
+    color: var(--muted);
+  }
+  .stage-hint { position: absolute; left: 16px; bottom: 12px; margin: 0; font-size: 0.78rem; color: var(--muted); pointer-events: none; }
+
+  .controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 14px; }
+  .views { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: var(--pill); }
+  .views button, .grill {
+    appearance: none;
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 500;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  }
+  .views button:hover { background: var(--pill-hover); }
+  .views button[aria-pressed="true"] { background: var(--pill-on); color: var(--pill-on-ink); }
+  .grill { display: inline-flex; align-items: center; gap: 9px; border: 1px solid var(--line); padding: 6px 15px 6px 7px; }
+  .grill img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
+  .grill:hover { border-color: var(--oak); }
+  :focus-visible { outline: 2px solid var(--rust); outline-offset: 2px; }
+
+  .sheet { display: grid; gap: 28px; padding-top: 2px; min-width: 0; }
+  .eyebrow { color: var(--oak); margin: 0; }
+  h1 {
+    font-weight: 500;
+    font-size: clamp(2.7rem, 4.6vw, 4.4rem);
+    line-height: 0.96;
+    letter-spacing: -0.015em;
+    margin: 10px 0 0;
+    text-wrap: balance;
+  }
+  .dims { display: grid; gap: 3px; }
+  .dims .in { font-size: 2.05rem; font-weight: 500; line-height: 1.05; font-variant-numeric: lining-nums tabular-nums; }
+  .dims .mm { font-size: 0.84rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .specs { display: grid; grid-template-columns: 6.6rem minmax(0, 1fr); gap: 12px 18px; margin: 0; }
+  .specs dt { padding-top: 0.28em; }
+  .specs dd { margin: 0; }
+  .finishes { display: flex; flex-wrap: wrap; gap: 16px 26px; }
+  .finishes figure { margin: 0; display: flex; align-items: center; gap: 12px; }
+  .finishes img { width: 56px; height: 56px; border-radius: 4px; object-fit: cover; box-shadow: 0 0 0 1px var(--line); }
+  .finishes figcaption { display: grid; gap: 2px; font-size: 0.92rem; line-height: 1.3; }
+  .designed h2 { font-weight: 500; font-size: 1.6rem; line-height: 1.15; margin: 0 0 8px; text-wrap: balance; }
+  .designed p { margin: 0; max-width: 62ch; }
+
+  .foot {
+    margin-top: clamp(30px, 4vw, 52px);
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 28px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .foot p { margin: 0; max-width: 70ch; }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .stage { aspect-ratio: 1 / 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .views button, .grill { transition: none; }
+  }
+</style>
+
+<div class="page">
+  <header class="mast">
+    <span class="wordmark display">MaximoCabs</span>
+    <span class="label">{{prepared}}</span>
+  </header>
+
+  <main class="layout">
+    <section class="viewer" aria-label="3D model of the cabinet">
+      <div class="stage" id="stage">
+        <p class="stage-status display" id="stage-status">Loading your cabinet&hellip;</p>
+        <p class="stage-hint" id="stage-hint" hidden>Drag to turn it. Scroll or pinch to zoom.</p>
+      </div>
+      <div class="controls">
+        <div class="views" role="group" aria-label="Viewpoint">
+          <button type="button" id="view-three-quarter" data-view="three-quarter" aria-pressed="true">Three-quarter</button>
+          <button type="button" id="view-front" data-view="front" aria-pressed="false">Front</button>
+          <button type="button" id="view-back" data-view="back" aria-pressed="false">{{back_view_label}}</button>
+        </div>
+        <button type="button" class="grill" id="grill-toggle" aria-pressed="false">{{grill_icon}}<span id="grill-label">Take off the grill</span></button>
+      </div>
+    </section>
+
+    <aside class="sheet">
+      <div>
+        <p class="label eyebrow">{{eyebrow}}</p>
+        <h1 class="display">{{headline}}</h1>
+      </div>
+      <div class="dims">
+        <span class="label">Size, width &times; height &times; depth</span>
+        <span class="in display">{{size_in}}</span>
+        <span class="mm">{{size_mm}}</span>
+      </div>
+      <dl class="specs">
+{{spec_rows}}
+      </dl>
+      <div class="finishes">
+{{finishes}}
+      </div>
+      <div class="designed">
+        <h2 class="display">What it is designed to do</h2>
+        <p>{{designed}}</p>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="foot">
+    <p>{{model_note}}</p>
+    <p>{{status_line}}</p>
+  </footer>
+</div>
+
+<script type="importmap">
+  {"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+               "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+</script>
+<script type="module">
+  import * as THREE from "three";
+  import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+  import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+  import { toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
+
+  const CAB = window.CAB;
+  const stage = document.getElementById("stage");
+  const statusEl = document.getElementById("stage-status");
+  const hintEl = document.getElementById("stage-hint");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const deg = THREE.MathUtils.degToRad;
+
+  function fail(message) {
+    statusEl.textContent = message;
+    statusEl.hidden = false;
+    window.__cabFailed = true;
+  }
+
+  function bytesFromBase64(b64) {
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  function hash(text) {
+    let h = 2166136261;
+    for (const ch of text) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+
+  // Box-projected UVs in CAD millimetres. On a hardwood shell panel the texture's long
+  // axis follows the grain, and faces cut across it (the finger ends) read as end grain.
+  function projectUVs(geometry, { grain = -1, uMM = 100, vMM = 100, endShade = 1, seed = 0 }) {
+    const pos = geometry.attributes.position.array;
+    const count = pos.length / 3;
+    const uv = new Float32Array(count * 2);
+    const color = new Float32Array(count * 3);
+    const ou = (seed % 997) / 997;
+    const ov = ((seed >>> 10) % 991) / 991;
+    for (let t = 0; t < count; t += 3) {
+      const a = t * 3, b = a + 3, c = a + 6;
+      const e1x = pos[b] - pos[a], e1y = pos[b + 1] - pos[a + 1], e1z = pos[b + 2] - pos[a + 2];
+      const e2x = pos[c] - pos[a], e2y = pos[c + 1] - pos[a + 1], e2z = pos[c + 2] - pos[a + 2];
+      const nx = Math.abs(e1y * e2z - e1z * e2y);
+      const ny = Math.abs(e1z * e2x - e1x * e2z);
+      const nz = Math.abs(e1x * e2y - e1y * e2x);
+      const dom = nx >= ny && nx >= nz ? 0 : ny >= nz ? 1 : 2;
+      const plane = [0, 1, 2].filter((axis) => axis !== dom);
+      let uAxis = plane[0], vAxis = plane[1], shade = 1;
+      if (grain >= 0) {
+        if (grain === dom) shade = endShade;
+        else { vAxis = grain; uAxis = plane[0] === grain ? plane[1] : plane[0]; }
+      }
+      for (let k = 0; k < 3; k++) {
+        const v = t + k, p = v * 3;
+        uv[v * 2] = pos[p + uAxis] / uMM + ou;
+        uv[v * 2 + 1] = pos[p + vAxis] / vMM + ov;
+        color[p] = color[p + 1] = color[p + 2] = shade;
+      }
+    }
+    geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+    geometry.setAttribute("color", new THREE.BufferAttribute(color, 3));
+  }
+
+  function union(names) {
+    const hit = CAB.mesh.parts.filter((p) => names(p.name));
+    if (!hit.length) return null;
+    const min = [0, 1, 2].map((i) => Math.min(...hit.map((p) => p.min[i])));
+    const max = [0, 1, 2].map((i) => Math.max(...hit.map((p) => p.max[i])));
+    return { min, max };
+  }
+
+  function start() {
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (err) {
+      fail("This browser could not open the 3D view. The rest of this page still describes your cabinet.");
+      return;
+    }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.domElement.setAttribute("role", "img");
+    renderer.domElement.setAttribute("aria-label", CAB.label);
+    stage.prepend(renderer.domElement);
+    const maxAniso = renderer.capabilities.getMaxAnisotropy();
+
+    const scene = new THREE.Scene();
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environmentIntensity = 0.45;
+
+    const loader = new THREE.TextureLoader();
+    function texture(uri, wrap) {
+      if (!uri) return null;
+      const tex = loader.load(uri);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.wrapS = tex.wrapT = wrap;
+      tex.anisotropy = maxAniso;
+      return tex;
+    }
+    const shellTex = texture(CAB.textures.shell, THREE.MirroredRepeatWrapping);
+    const clothTex = texture(CAB.textures.cloth, THREE.MirroredRepeatWrapping);
+    const hardwood = CAB.line === "hardwood";
+
+    const MAT = {
+      shell: new THREE.MeshStandardMaterial({ map: shellTex, color: shellTex ? 0xffffff : 0x5a4030, vertexColors: true, roughness: hardwood ? 0.56 : 0.8 }),
+      birch: new THREE.MeshStandardMaterial({ color: 0xd9c49e, roughness: 0.8 }),
+      cloth: new THREE.MeshStandardMaterial({ map: clothTex, color: clothTex ? 0x8a8a84 : 0x55524c, vertexColors: true, roughness: 0.97 }),
+      speaker: new THREE.MeshStandardMaterial({ color: 0x2a2826, roughness: 0.42, metalness: 0.65 }),
+      brass: new THREE.MeshStandardMaterial({ color: 0xbb985e, roughness: 0.3, metalness: 1 }),
+      leather: new THREE.MeshStandardMaterial({ color: 0x3b2418, roughness: 0.62 }),
+      rubber: new THREE.MeshStandardMaterial({ color: 0x1a1918, roughness: 0.92 }),
+    };
+    function kindOf(name) {
+      if (CAB.shell.includes(name)) return "shell";
+      if (name.startsWith("grill_")) return "cloth";
+      if (name.startsWith("speaker_")) return "speaker";
+      if (name.startsWith("jack_plate")) return "brass";
+      if (name.includes("handle")) return "leather";
+      if (name.startsWith("foot_")) return "rubber";
+      return "birch";
+    }
+
+    // CAD space: x across, y front to back, z up. Rotating -90 degrees about x puts z up
+    // and the front facing the camera's default +z.
+    const cad = new THREE.Group();
+    cad.rotation.x = -Math.PI / 2;
+    scene.add(cad);
+    const grill = new THREE.Group();
+    cad.add(grill);
+
+    const blob = bytesFromBase64(CAB.mesh.data);
+    for (const part of CAB.mesh.parts) {
+      const q = new Int16Array(blob.buffer, part.voff, part.vcount * 3);
+      const positions = new Float32Array(q.length);
+      for (let i = 0; i < q.length; i++) positions[i] = q[i] * CAB.mesh.step;
+      const index = part.i32
+        ? new Uint32Array(blob.buffer, part.ioff, part.icount)
+        : new Uint16Array(blob.buffer, part.ioff, part.icount);
+      let geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geometry.setIndex(new THREE.BufferAttribute(index, 1));
+      geometry = toCreasedNormals(geometry, deg(32));
+      const kind = kindOf(part.name);
+      if (kind === "shell") {
+        projectUVs(geometry, hardwood
+          ? { grain: CAB.grain[part.name] ?? -1, uMM: 225, vMM: 450, endShade: 0.56, seed: hash(part.name) }
+          : { uMM: 160, vMM: 160, seed: hash(part.name) });
+      }
+      if (kind === "cloth") projectUVs(geometry, { uMM: 110, vMM: 110 });
+      const mesh = new THREE.Mesh(geometry, MAT[kind]);
+      mesh.name = part.name;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      (kind === "cloth" ? grill : cad).add(mesh);
+    }
+
+    // Grill cloth across the frame's face (the CAD models the frame, not the cloth).
+    const g = union((n) => n.startsWith("grill_"));
+    if (g) {
+      const plane = new THREE.PlaneGeometry(g.max[0] - g.min[0], g.max[2] - g.min[2]).toNonIndexed();
+      plane.rotateX(Math.PI / 2);
+      plane.translate((g.min[0] + g.max[0]) / 2, g.min[1] - 0.4, (g.min[2] + g.max[2]) / 2);
+      projectUVs(plane, { uMM: 110, vMM: 110 });
+      const cloth = new THREE.Mesh(plane, MAT.cloth);
+      cloth.receiveShadow = true;
+      grill.add(cloth);
+    }
+
+    // Speaker face: the CAD speaker is a clearance envelope, so paint a cone on its front.
+    const s = union((n) => n.startsWith("speaker_"));
+    if (s) {
+      const radius = (s.max[0] - s.min[0]) / 2;
+      const disc = new THREE.CircleGeometry(radius, 96);
+      disc.rotateX(Math.PI / 2);
+      disc.translate((s.min[0] + s.max[0]) / 2, s.min[1] - 0.3, (s.min[2] + s.max[2]) / 2);
+      cad.add(new THREE.Mesh(disc, new THREE.MeshStandardMaterial({ map: speakerFace(CAB.speakerCone, maxAniso), roughness: 0.86 })));
+    }
+
+    const shellBox = union((n) => CAB.shell.includes(n)) || union(() => true);
+    const allBox = union(() => true);
+    const target = new THREE.Vector3(
+      (shellBox.min[0] + shellBox.max[0]) / 2,
+      (shellBox.min[2] + shellBox.max[2]) / 2,
+      -(shellBox.min[1] + shellBox.max[1]) / 2,
+    );
+    const span = new THREE.Vector3(allBox.max[0] - allBox.min[0], allBox.max[2] - allBox.min[2], allBox.max[1] - allBox.min[1]);
+    const sphere = span.length() / 2;
+
+    scene.add(new THREE.HemisphereLight(0xfff3e2, 0x2e241a, 0.55));
+    const key = new THREE.DirectionalLight(0xfff0db, 2.4);
+    key.position.set(target.x - 760, target.y + 1150, target.z + 980);
+    key.target.position.copy(target);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    Object.assign(key.shadow.camera, { left: -700, right: 700, top: 700, bottom: -700, near: 200, far: 4200 });
+    key.shadow.bias = -0.0005;
+    key.shadow.normalBias = 1.2;
+    scene.add(key, key.target);
+    const rim = new THREE.DirectionalLight(0xe6edff, 0.75);
+    rim.position.set(target.x + 950, target.y + 450, target.z - 1150);
+    rim.target.position.copy(target);
+    scene.add(rim, rim.target);
+
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(8000, 8000), new THREE.ShadowMaterial({ opacity: 0.3 }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = allBox.min[2];
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    const camera = new THREE.PerspectiveCamera(30, 1, 5, 20000);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.copy(target);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.enablePan = false;
+    controls.rotateSpeed = 0.7;
+    controls.zoomSpeed = 0.8;
+    controls.maxPolarAngle = deg(87);
+    controls.minDistance = sphere * 1.6;
+    controls.maxDistance = sphere * 8;
+
+    const VIEWS = { "three-quarter": { az: 34, el: 15 }, front: { az: 0, el: 5 }, back: { az: 204, el: 15 } };
+    const viewButtons = [...document.querySelectorAll("[data-view]")];
+    function setPressed(name) {
+      for (const b of viewButtons) b.setAttribute("aria-pressed", String(b.dataset.view === name));
+    }
+    function fitRadius() {
+      const half = Math.min(deg(15), Math.atan(Math.tan(deg(15)) * camera.aspect));
+      return (sphere / Math.sin(half)) * 1.04;
+    }
+    function place(v) {
+      const az = deg(v.az), el = deg(v.el);
+      return new THREE.Vector3(
+        target.x + v.r * Math.cos(el) * Math.sin(az),
+        target.y + v.r * Math.sin(el),
+        target.z + v.r * Math.cos(el) * Math.cos(az),
+      );
+    }
+    function current() {
+      const off = camera.position.clone().sub(target);
+      const r = off.length();
+      return { az: THREE.MathUtils.radToDeg(Math.atan2(off.x, off.z)), el: THREE.MathUtils.radToDeg(Math.asin(off.y / r)), r };
+    }
+
+    let tween = null;
+    function goTo(name, duration = 950) {
+      const to = { ...VIEWS[name], r: fitRadius() };
+      setPressed(name);
+      if (reduceMotion || duration === 0) {
+        tween = null;
+        camera.position.copy(place(to));
+        camera.lookAt(target);
+        controls.update();
+        return;
+      }
+      const from = current();
+      const dAz = ((to.az - from.az + 540) % 360) - 180;
+      tween = { from, to: { az: from.az + dAz, el: to.el, r: to.r }, t0: performance.now(), duration };
+    }
+    for (const b of viewButtons) b.addEventListener("click", () => goTo(b.dataset.view));
+    controls.addEventListener("start", () => { tween = null; setPressed(null); });
+
+    const toggle = document.getElementById("grill-toggle");
+    const toggleLabel = document.getElementById("grill-label");
+    let fade = null;
+    let grillOn = true;
+    toggle.addEventListener("click", () => {
+      grillOn = !grillOn;
+      toggle.setAttribute("aria-pressed", String(!grillOn));
+      toggleLabel.textContent = grillOn ? "Take off the grill" : "Put the grill back";
+      if (reduceMotion) {
+        grill.visible = grillOn;
+        return;
+      }
+      grill.visible = true;
+      MAT.cloth.transparent = true;
+      MAT.cloth.needsUpdate = true;
+      fade = { from: grillOn ? 0 : 1, to: grillOn ? 1 : 0, t0: performance.now(), duration: 320 };
+    });
+
+    function applyTheme() {
+      const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--shadow-strength"));
+      floor.material.opacity = Number.isFinite(v) ? v : 0.3;
+    }
+    applyTheme();
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
+    new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+    function resize() {
+      const w = Math.max(1, stage.clientWidth), h = Math.max(1, stage.clientHeight);
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    new ResizeObserver(resize).observe(stage);
+
+    camera.position.copy(place({ az: 62, el: 24, r: fitRadius() * 1.12 }));
+    camera.lookAt(target);
+    goTo("three-quarter", 1500);
+
+    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    let first = true;
+    renderer.setAnimationLoop(() => {
+      const now = performance.now();
+      if (tween) {
+        const t = Math.min(1, (now - tween.t0) / tween.duration), e = ease(t);
+        const lerp = (k) => tween.from[k] + (tween.to[k] - tween.from[k]) * e;
+        camera.position.copy(place({ az: lerp("az"), el: lerp("el"), r: lerp("r") }));
+        camera.lookAt(target);
+        if (t === 1) { tween = null; controls.update(); }
+      } else {
+        controls.update();
+      }
+      if (fade) {
+        const t = Math.min(1, (now - fade.t0) / fade.duration);
+        MAT.cloth.opacity = fade.from + (fade.to - fade.from) * t;
+        if (t === 1) {
+          if (fade.to === 0) grill.visible = false;
+          MAT.cloth.opacity = 1;
+          MAT.cloth.transparent = false;
+          MAT.cloth.needsUpdate = true;
+          fade = null;
+        }
+      }
+      renderer.render(scene, camera);
+      if (first) {
+        first = false;
+        statusEl.hidden = true;
+        hintEl.hidden = false;
+        window.__cabReady = true;
+      }
+    });
+  }
+
+  function speakerFace(cone, anisotropy) {
+    const size = 512, r = size / 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = size;
+    const x = canvas.getContext("2d");
+    const hemp = cone === "hemp";
+    let seed = 7;
+    const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    x.fillStyle = "#1d1b19";
+    x.fillRect(0, 0, size, size);
+    x.beginPath(); x.arc(r, r, r, 0, Math.PI * 2); x.fillStyle = "#282521"; x.fill();
+    const coneR = r * 0.84;
+    let grad = x.createRadialGradient(r, r, coneR * 0.92, r, r, coneR * 1.05);
+    grad.addColorStop(0, hemp ? "#8e8464" : "#2c2a27");
+    grad.addColorStop(0.55, "#3a362e");
+    grad.addColorStop(1, "#1c1a18");
+    x.beginPath(); x.arc(r, r, coneR * 1.05, 0, Math.PI * 2); x.fillStyle = grad; x.fill();
+    grad = x.createRadialGradient(r * 0.94, r * 0.9, r * 0.08, r, r, coneR * 0.94);
+    grad.addColorStop(0, hemp ? "#c2b48f" : "#3b3732");
+    grad.addColorStop(1, hemp ? "#998b69" : "#232120");
+    x.beginPath(); x.arc(r, r, coneR * 0.94, 0, Math.PI * 2); x.fillStyle = grad; x.fill();
+    x.strokeStyle = "rgba(0, 0, 0, 0.07)";
+    x.lineWidth = 2;
+    for (let k = 1; k < 9; k++) { x.beginPath(); x.arc(r, r, (coneR * 0.94 * k) / 9, 0, Math.PI * 2); x.stroke(); }
+    if (hemp) {
+      for (let i = 0; i < 2600; i++) {
+        const a = rand() * Math.PI * 2, d = Math.sqrt(rand()) * coneR * 0.93;
+        x.fillStyle = rand() < 0.5 ? "rgba(60, 50, 30, 0.10)" : "rgba(236, 226, 196, 0.10)";
+        x.fillRect(r + Math.cos(a) * d, r + Math.sin(a) * d, 2, 2);
+      }
+    }
+    grad = x.createRadialGradient(r * 0.93, r * 0.9, 4, r, r, r * 0.23);
+    grad.addColorStop(0, hemp ? "#d3c5a0" : "#4a4640");
+    grad.addColorStop(1, hemp ? "#a39570" : "#2a2825");
+    x.beginPath(); x.arc(r, r, r * 0.23, 0, Math.PI * 2); x.fillStyle = grad; x.fill();
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = anisotropy;
+    return tex;
+  }
+
+  try {
+    start();
+  } catch (err) {
+    console.error(err);
+    fail("The 3D view could not load here. The rest of this page still describes your cabinet.");
+  }
+</script>
+<script>
+  window.CAB = /*__CAB_DATA__*/null;
+  setTimeout(function () {
+    var s = document.getElementById("stage-status");
+    if (s && !window.__cabReady && !window.__cabFailed) {
+      s.textContent = "The 3D view is taking a while. Check your connection and reload; the rest of this page still describes your cabinet.";
+    }
+  }, 20000);
+</script>

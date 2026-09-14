@@ -234,7 +234,7 @@
         470.0
       ],
       "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only; felt strip between cleat and baffle"
+      "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
     },
     {
       "name": "cleat_baffle_bottom",
@@ -245,7 +245,7 @@
         470.0
       ],
       "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only; felt strip between cleat and baffle"
+      "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
     },
     {
       "name": "cleat_baffle_left",
@@ -256,7 +256,7 @@
         383.2
       ],
       "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only; felt strip between cleat and baffle"
+      "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
     },
     {
       "name": "cleat_baffle_right",
@@ -267,7 +267,7 @@
         383.2
       ],
       "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only; felt strip between cleat and baffle"
+      "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
     },
     {
       "name": "cleat_back_top",
@@ -278,7 +278,7 @@
         470.0
       ],
       "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only"
+      "notes": "18 x 18 birch cleat, screws every 150 mm"
     },
     {
       "name": "cleat_back_bottom",
@@ -289,7 +289,7 @@
         470.0
       ],
       "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only"
+      "notes": "18 x 18 birch cleat, screws every 150 mm"
     },
     {
       "name": "cleat_back_left_upper",
@@ -300,7 +300,7 @@
         107.76
       ],
       "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only"
+      "notes": "18 x 18 birch cleat, screws every 150 mm"
     },
     {
       "name": "cleat_back_left_lower",
@@ -311,7 +311,7 @@
         107.76
       ],
       "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only"
+      "notes": "18 x 18 birch cleat, screws every 150 mm"
     },
     {
       "name": "cleat_back_right_upper",
@@ -322,7 +322,7 @@
         107.76
       ],
       "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only"
+      "notes": "18 x 18 birch cleat, screws every 150 mm"
     },
     {
       "name": "cleat_back_right_lower",
@@ -333,7 +333,7 @@
         107.76
       ],
       "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only"
+      "notes": "18 x 18 birch cleat, screws every 150 mm"
     },
     {
       "name": "grill_top",
@@ -476,7 +476,7 @@
     {
       "name": "spans",
       "level": "pass",
-      "message": "no panel span over 450 mm"
+      "message": "hardwood shell panels take no stiffener: top and bottom span 470 mm"
     },
     {
       "name": "interference",
