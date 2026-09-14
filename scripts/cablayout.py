@@ -619,7 +619,7 @@ def shell_material(spec: CabSpec) -> tuple:
     return f"{name} {PANEL_MM['hardwood']:g} mm", (dens if dens is not None else BIRCH_DENSITY)
 
 
-HARDWOOD_GRAIN_NOTE = "grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"
+HARDWOOD_GRAIN_NOTE = "grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out"
 
 DEFAULT_BAFFLE_CLEAT_EDGES = {"closed": "all", "closed-ported": "all", "open": "top-bottom", "semi-open": "top-bottom"}   # a closed box keeps the perimeter cleats that hold the seal the volume model assumes; an open box has no seal to protect, so fewer parts and a baffle free at its sides (Brian, 2026-09-13)
 DEFAULT_JACK_PLATE_POSITION = {"closed": "bottom", "closed-ported": "bottom", "open": "top", "semi-open": "top"}   # top on an open or semi-open back, easier to reach without bending down when the cab sits on the floor; bottom, unchanged, on a closed or closed-ported back (Brian, 2026-09-14)

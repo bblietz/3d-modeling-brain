@@ -214,8 +214,8 @@ def test_propose_fb_override_is_applied_and_recorded(drv, tone):
 def test_propose_width_floor_over_the_limit_is_a_blocker(drv, tone):
     limit = cabvoice.Constraints(max_external_mm=(600.0, 457.2, 400.0))
     two = cabvoice.propose([drv, drv], [16, 16], "closed", tone, jack_config="mono", constraints=limit)
-    assert two.box["internal_mm"][0] == pytest.approx(722.0)
-    assert ("width floor 722.0 mm internal (the driver-count minimum) exceeds the size limit "
+    assert two.box["internal_mm"][0] == pytest.approx(730.0)
+    assert ("width floor 730.0 mm internal (the driver-count minimum) exceeds the size limit "
             "564.0 mm internal") in two.blockers
     pinned = cabvoice.Constraints(pinned_external_width_mm=700.0, max_external_mm=(600.0, 457.2, 400.0))
     one = cabvoice.propose([drv], [16], "closed", tone, constraints=pinned)
@@ -224,13 +224,13 @@ def test_propose_width_floor_over_the_limit_is_a_blocker(drv, tone):
             "564.0 mm internal") in one.blockers
     assert not any("floor" in w for w in one.warnings + two.warnings)
     with pytest.raises(ValueError, match="width floor"):     # the direct call stays strict
-        cabvoice.dims_for_volume(90.0, min_internal_width_mm=722.0, max_external_mm=(600.0, 457.2, 400.0))
+        cabvoice.dims_for_volume(90.0, min_internal_width_mm=730.0, max_external_mm=(600.0, 457.2, 400.0))
 
 def test_propose_height_floor_over_the_limit_is_a_blocker(drv, tone):
     c = cabvoice.Constraints(port_slot_mm=(352.0, 40.0), max_external_mm=(600.0, 400.0, 400.0))
     v = cabvoice.propose([drv], [16], "closed-ported", tone, constraints=c)
-    assert v.box["internal_mm"][1] == pytest.approx(429.0)
-    assert ("height floor 429.0 mm internal (the cutout minimum) exceeds the size limit "
+    assert v.box["internal_mm"][1] == pytest.approx(437.0)
+    assert ("height floor 437.0 mm internal (the cutout minimum) exceeds the size limit "
             "364.0 mm internal") in v.blockers
     assert v.blockers.count(v.blockers[0]) == 1      # one line: the floor is read from the final box, not every settle pass
 
@@ -297,8 +297,8 @@ def test_cli_width_floor_blocker_exits_2_with_the_sheet(speakers_dir, tmp_path):
     run = subprocess.run(cmd, capture_output=True, text=True)
     assert run.returncode == 2
     data = json.loads((out / "voicing.json").read_text())
-    assert data["blockers"][0].startswith("width floor 722.0 mm internal (the driver-count minimum)")
-    assert data["box"]["internal_mm"][0] == pytest.approx(722.0)
+    assert data["blockers"][0].startswith("width floor 730.0 mm internal (the driver-count minimum)")
+    assert data["box"]["internal_mm"][0] == pytest.approx(730.0)
 
 def test_cannabis_rex_roots_port_loop_cases(tone):
     # The Plan 2 review's case: under the roots tone the Cannabis Rex solves a 113 mm port that
@@ -328,7 +328,7 @@ def test_propose_height_floor_blocker_reports_the_final_height_once(drv, tone):
     c = cabvoice.Constraints(port_slot_mm=(200.0, 20.0), max_external_mm=(600.0, 400.0, 400.0))
     v = cabvoice.propose([drv], [16], "closed-ported", tone, constraints=c)
     assert v.port["shape"] == "slot" and v.port["slot_h_mm"] > 20.0
-    assert v.box["internal_mm"][1] == pytest.approx(458.0, abs=0.1)
+    assert v.box["internal_mm"][1] == pytest.approx(466.0, abs=0.1)
     floors = [b for b in v.blockers if b.startswith("height floor")]
     assert floors == [f"height floor {v.box['internal_mm'][1]:.1f} mm internal (the cutout minimum) "
                       "exceeds the size limit 364.0 mm internal"]
@@ -1887,7 +1887,8 @@ def check_layout(lay: Layout, spec: CabSpec) -> list:
                 or zc - r - inner_z0 < GRILL_CLEARANCE_MM - 1e-6 or inner_z1 - (zc + r) < GRILL_CLEARANCE_MM - 1e-6):
             problems.append(f"grill strip covers cutout {co.speaker}")
     checks.append(Check("grill opening", "blocker" if problems else "pass",
-                        "; ".join(problems) if problems else "strip inner edges clear every cutout by 2 mm"))
+                        "; ".join(problems) if problems else
+                        f"strip inner edges clear every cutout by {GRILL_CLEARANCE_MM:g} mm"))
     # port fit
     port_blockers = [n[len("blocker: "):] for n in lay.notes if n.startswith("blocker: port fit")]
     if spec.port is None:
@@ -2488,7 +2489,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 - **Both lines**: top, bottom, and two sides joined at the four front-to-back corner edges. The tolex line gets finger joints; the hardwood line gets finger joints by default or through dovetails as the option. The generator models the joint so renders and STEP are truthful; the cut list keeps each panel as a rectangular blank with the joint schedule in the note.
 - **Tolex line**: 18 mm birch. Recessed metal jack plate. Metal corners, black or chrome, or none. Site: "13-ply void-free Baltic birch, hand-cut finger joints".
-- **Hardwood line**: 19 mm resawn, book-matched panels, show face out. A 12.7 mm (1/2 in) roundover on every outside edge by default (see Roundover). Recessed brass jack plate. No metal corners by default. Oil finish. The site copy still says "through-tenon corner posts glued + pinned" while the site's own renders show finger joints; the copy is wrong and is a site fix outside this vault.
+- **Hardwood line**: 19 mm resawn, show face out; no book-matching, since the corners join on end grain and book-matching is a long-grain glue-up (Brian, 2026-09-14). A 12.7 mm (1/2 in) roundover on every outside edge by default (see Roundover). Recessed brass jack plate. No metal corners by default. Oil finish.
 - **Joinery survey**: finger joints are the plurality at the top of the market and the vintage-correct choice; the through dovetail is the only structural peer for solid wood; miters and rabbets are styling or budget choices. Details and sources in [[guitar-cab-joinery-survey]].
 - **Roundover**: the hardwood line's default is a 12.7 mm (1/2 in) radius on every outside edge of the shell, routed after the carcass is glued up (Brian, 2026-09-13); the tolex line has none by default. Aesthetics.roundover_mm left at None takes the line default, 0 gives sharp edges, and any other value sets the radius, which must stay under the shell thickness. The internal volume is unchanged either way.
 
@@ -2504,13 +2505,13 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 - **Floating (default)**: 1 mm clearance to each side, on 18 x 18 mm cleats glued to the shell, felt strip between cleat and baffle, held with screws through the cleats, removable. Site: "floating 3/4 in birch with felt isolation". Which edges carry cleats is the Aesthetics.baffle_cleat_edges option, and None takes the enclosure default: all four on a closed or closed-ported box, where the perimeter cleats hold the seal the volume model assumes, and top and bottom only on an open or semi-open box, which has no sealed volume to protect, so it takes fewer parts and leaves the baffle free at its sides. Unverified starting value pending listening notes (Brian, 2026-09-13).
 - **Fixed (option)**: glued into a 6 mm deep dado in all four shell panels (three with a front slot port, where the shelf carries the baffle's bottom edge), blank 12 mm larger in width and height, no baffle cleats. On hardwood it is glued along the full dado too, since the dados run with the grain (see Wood movement).
 - Driver cutout, bolt circle, bolt count, frame diameter, and magnet diameter come from the speaker note. Typical: Celestion 283 mm cutout on a 297 mm circle, Eminence 281 mm on 294 mm, Jensen 277 mm on 293.5 mm; frames 306 to 310 mm, so the flange overhangs the cutout by 11 to 15 mm; flange thickness 5 mm starting value.
-- **Margins**: at least 44 mm from a cutout edge to any shell panel (grill strip 40 plus 2 mm clearance plus 2), 25 mm from a cutout edge to the brace or divider, so the two cutouts of a 2x12 sit 68 mm apart (18 plus 2 x 25). Minimum internal width = n x cutout + (n - 1) x 68 + 2 x 44, the same for mono and stereo since the divider replaces the brace (2x12 with 283 mm cutouts: 722 mm internal, 758 mm external, 29.8 in). Minimum internal height = cutout + 88, plus slot height + 18 with a front slot port.
+- **Margins**: at least 48 mm from a cutout edge to any shell panel (grill strip 40 plus 2 x the 4 mm grill clearance below), 25 mm from a cutout edge to the brace or divider, so the two cutouts of a 2x12 sit 68 mm apart (18 plus 2 x 25). Minimum internal width = n x cutout + (n - 1) x 68 + 2 x 48, the same for mono and stereo since the divider replaces the brace (2x12 with 283 mm cutouts: 730 mm internal, 766 mm external, 30.2 in). Minimum internal height = cutout + 96, plus slot height + 18 with a front slot port.
 - **Speaker envelope** (for clearance checks): behind the baffle a basket cylinder at the cutout diameter for the first 100 mm from the baffle front face, then the magnet cylinder at the note's magnet diameter plus 12 mm cover allowance (185 mm when the note has none), total length the note's depth. At least 25 mm from any envelope part to the back panel, a port tube, a cleat, a shelf, a stiffener, the brace, or the divider.
 
 ## Bracing and dividers
 
 - Mono 2x12: one vertical 18 x 60 mm birch brace between top and bottom at the center of the baffle span, its front face 2 mm behind the baffle back, glued to top and bottom, notched around the baffle cleats (no notch with a fixed baffle).
-- Stereo 2x12: a full-height 18 mm birch divider from the baffle back face to the back panel inner face replaces the brace and splits the box into two equal chambers, sealed with glue on top and bottom. The divider carries no cleats: the baffle and the back screw into its front and rear edges (cleats on its faces would crowd the 25 mm cutout margin). Each chamber's cutout sits 44 mm from the shell and 25 mm from the divider at the minimum width, any surplus split evenly. Each chamber gets its own jack plate and, when ported, its own port.
+- Stereo 2x12: a full-height 18 mm birch divider from the baffle back face to the back panel inner face replaces the brace and splits the box into two equal chambers, sealed with glue on top and bottom. The divider carries no cleats: the baffle and the back screw into its front and rear edges (cleats on its faces would crowd the 25 mm cutout margin). Each chamber's cutout sits 48 mm from the shell and 25 mm from the divider at the minimum width, any surplus split evenly. Each chamber gets its own jack plate and, when ported, its own port.
 - Any shell or back panel span over 450 mm between glued members gets one 18 x 40 mm stiffener across its middle, glued flat to the panel (on a mono 2x12 that is the back panel). Hardwood shell panels get none: solid 19 mm stock needs no stiffener at these spans, and a birch stiffener glued flat would cross the grain (Brian, 2026-09-13).
 
 ## Backs and ports
@@ -2523,7 +2524,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 ## Grill
 
-- Frame from 12 x 40 mm birch strips with half-lap corners, outer size the recess opening minus 2 mm per side, cloth wrapped around the frame and stapled at the back. The frame rests on the speaker flanges and on 5 mm felt spacers at its corners, so its face sits 3 mm behind the front edge; a strip may cover a flange but must clear every cutout by 2 mm. With a front slot port the frame covers only the baffle above the shelf.
+- Frame from 12 x 40 mm birch strips with half-lap corners, outer size the recess opening minus 4 mm per side (room for the cloth folded double at the stapled wrap; 2 mm was not enough, Brian from experience, 2026-09-14), cloth wrapped around the frame and stapled at the back. The frame rests on the speaker flanges and on 5 mm felt spacers at its corners, so its face sits 3 mm behind the front edge; a strip may cover a flange but must clear every cutout by 4 mm. With a front slot port the frame covers only the baffle above the shelf.
 - Retained with hook-and-loop strips to the baffle. Piping (optional) is glued into the corner between grill frame and shell.
 
 ## Hardware
@@ -2551,7 +2552,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 - External 20 x 18 x 11 in (508 x 457.2 x 279.4 mm), 1x12 closed-ported.
 - Internal with the rules above: 472 x 421.2 x 229.4 mm, gross 45.6 L, net about 42.5 L closed and 42.1 L ported after one driver and the inside parts.
 - The engine voices both lines with the tolex line's 18 mm walls; the hardwood line's 19 mm panels take about 1 percent more of the same external size, inside the model's error, so no separate voicing. The line and species travel in voicing.json's construction block so the generator picks the density and joinery.
-- A slot-ported 1x12 on the site box grows from 18.0 to 18.3 in tall through the engine's height floor; a 2x12 starts at 29.8 in wide.
+- A slot-ported 1x12 on the site box grows from 18.0 to 18.6 in tall through the engine's height floor; a 2x12 starts at 30.2 in wide.
 ````
 <!-- /code -->
 
@@ -3283,7 +3284,7 @@ def check_rows(voicing: dict, cab: dict) -> list:
     rows.append(Row("stock thickness", f"{line} line: shell {_thickness(parts, ('side_left', 'side_right', 'top', 'bottom'))}, "
                     f"baffle {_thickness(parts, ('baffle',))}, back {_thickness(parts, ('back',))}", OPERATOR))
     if line == "hardwood":
-        rows.append(Row("grain and show face", f"{species}: book-matched panels, show face out, "
+        rows.append(Row("grain and show face", f"{species}: show face out, "
                         "grain wrapping around the box on every shell panel, never front to back (see the plan)", OPERATOR))
     else:
         rows.append(Row("grain and show face", "n/a, tolex line", "pass"))
@@ -3579,12 +3580,29 @@ Exit codes, shared by `cabvoice.py`, `cab.py`, and `cabreport.py`:
 
 ## Phase 1 - Intake
 
-Source: a pasted MaximoCabs quote email or a conversation. The email is
-plain text with fixed labels in this order: `Cabinet:` (tolex-1x12 or
+Source: a pasted MaximoCabs quote email or a conversation. The site's
+quote wizard sends plain text: the first line carries the customer's
+name, email, and any phone, then one block per brief section in the
+brief's order (Order, Amps, Guitars, Pedals, Music and use, Tonal goals,
+Physical, Connections, Aesthetics, Speaker). Each row is one brief field
+under the brief's name for it (the brief leaves amps unlabeled, so they
+arrive as `Amp 1`, `Amp 2`, with `(primary)` after the primary; the
+finish row is labeled `Tolex color` or `Wood species` to match the
+line); a brief line holding several fields (Cabs loved / disliked;
+Piping, corners, logo, notes) arrives as one row per field,
+so filling the brief is transcription (a multi-line answer continues on
+lines indented deeper than its row, never at heading level). Driver
+count reads `1x12` or `2x12` where the brief wants 1 or 2. `(not asked)`
+means the customer left it blank: state the assumption exactly as for a
+missing answer. On a 1x12's Jack configuration row and a tolex cab's
+Where it lives row, `(not asked)` means the field does not apply.
+`Not sure (assume mic'd)` records the mic'd assumption. The Genre line
+is the customer's words; match its canonical key here. An email from
+before the wizard uses fixed labels instead: `Cabinet:` (tolex-1x12 or
 hardwood-1x12), `Finish:`, `Grill:`, `Speaker:`, `Hardware:` (corners,
 handle, jack plate, piping), then `--- Use case ---` with `Amps:`,
-`Style:`, `Venue:`, `Notes:`; the first line carries the customer's
-name and email. `Notes:` usually holds the tonal goals.
+`Style:`, `Venue:`, `Notes:`, where `Notes:` usually holds the tonal
+goals.
 
 1. Create `projects/Cab-<Customer>-<NxS>-<line>/` (example
    `Cab-Smith-1x12-tolex`; Brian may substitute a code for the surname)
@@ -3601,8 +3619,9 @@ name and email. `Notes:` usually holds the tonal goals.
    would bind, the jack configuration on a 2x12, a customer-supplied
    speaker's impedance. Stop for the batch only when it is not empty.
 4. Fill the Site-form gaps line: what this intake needed that the quote
-   form does not ask (guitars, pedals, jack configuration, placement).
-   Changing the site is out of scope.
+   form does not ask. The wizard asks every Rig block group, so this is
+   usually "none"; an old-format email still lacks guitars, pedals, jack
+   configuration, and placement. Changing the site is out of scope.
 
 Under the vault's agent policy a subagent may read the catalog for the
 Phase 2 ranking and return the scored table; only conclusions enter the
@@ -3741,9 +3760,11 @@ No CAD before Brian approves this phase.
   joints on both lines, through dovetails as the hardwood option; the
   baffle floating on cleats (default) or fixed in a 6 mm dado; the
   divider without cleats.
-- Grain and show faces on the hardwood line: book-matched panels, grain
-  wrapping around the box on all four shell panels (left to right on top
-  and bottom, vertical on the sides, never front to back), the species.
+- Grain and show faces on the hardwood line: grain wrapping around the
+  box on all four shell panels (left to right on top and bottom,
+  vertical on the sides, never front to back), the species; no
+  book-matching (the corners join on end grain, and book-matching is a
+  long-grain glue-up).
 - Hardware positions: one jack plate per chamber, the strap handle
   centered on the top panel (or recessed side handles), corners, feet
   or tilt-back legs, piping. Port location from the sheet; the port
@@ -3761,11 +3782,14 @@ No CAD before Brian approves this phase.
   of the upper open-back panel on an open or semi-open box and the
   bottom of the back on a closed or closed-ported one, and
   `roundover_mm` is a 1/2 in roundover on hardwood and none on
-  tolex, with 0 turning it off) and reduce its module docstring to
-  one line naming the order (the template's copy instructions are
-  dropped). Everything below the docstring stays unchanged; a
-  hardware qualifier the constants cannot hold (the form's "Leather
-  strap handle" is `handle="strap"`) survives in the brief only.
+  tolex, with 0 turning it off). `handle` and `jack_plate_position`
+  are Brian's picks every order, the defaults above being a starting
+  point rather than something read from the customer's answers:
+  confirm both with him before locking the layout. Reduce the module
+  docstring to one line naming the order (the template's copy
+  instructions are dropped). Everything below the docstring stays
+  unchanged; a hardware qualifier the constants cannot hold survives
+  in the brief only (its `notes` row, or Brian's own words).
 
 Write the plan into the brief and present it briefly; no stop.
 

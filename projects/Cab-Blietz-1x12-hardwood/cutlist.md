@@ -15,8 +15,8 @@ project: Cab-Blietz-1x12-hardwood
 | 2 | cleat_back_top/cleat_back_bottom | 18 x 18 x 470 | 11/16 x 11/16 x 18-1/2 | baltic birch 18 mm | 18 x 18 birch cleat, screws every 150 mm |
 | 1 | baffle | 18 x 417.2 x 468 | 11/16 x 16-7/16 x 18-7/16 | baltic birch 18 mm | floating baffle: 1 mm clearance per side, felt strips on the cleats, screwed through the cleats, removable; speakers front-mounted on T-nuts, 8 bolts on a 294.4 mm circle |
 | 4 | cleat_back_left_upper/cleat_back_left_lower/cleat_back_right_upper/cleat_back_right_lower | 18 x 18 x 107.8 | 11/16 x 11/16 x 4-1/4 | baltic birch 18 mm | 18 x 18 birch cleat, screws every 150 mm |
-| 2 | top/bottom | 19 x 508 x 279.4 | 3/4 x 20 x 11 | black walnut 19 mm | finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out; 12.7 mm (1/2 in) roundover on every outside edge |
-| 2 | side_left/side_right | 19 x 457.2 x 279.4 | 3/4 x 18 x 11 | black walnut 19 mm | finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out; 12.7 mm (1/2 in) roundover on every outside edge |
+| 2 | top/bottom | 19 x 508 x 279.4 | 3/4 x 20 x 11 | black walnut 19 mm | finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge |
+| 2 | side_left/side_right | 19 x 457.2 x 279.4 | 3/4 x 18 x 11 | black walnut 19 mm | finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge |
 
 Inches rounded to the nearest 1/16.
 

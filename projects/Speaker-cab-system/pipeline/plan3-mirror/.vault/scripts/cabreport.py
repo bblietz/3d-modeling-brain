@@ -203,7 +203,7 @@ def check_rows(voicing: dict, cab: dict) -> list:
     rows.append(Row("stock thickness", f"{line} line: shell {_thickness(parts, ('side_left', 'side_right', 'top', 'bottom'))}, "
                     f"baffle {_thickness(parts, ('baffle',))}, back {_thickness(parts, ('back',))}", OPERATOR))
     if line == "hardwood":
-        rows.append(Row("grain and show face", f"{species}: book-matched panels, show face out, "
+        rows.append(Row("grain and show face", f"{species}: show face out, "
                         "grain wrapping around the box on every shell panel, never front to back (see the plan)", OPERATOR))
     else:
         rows.append(Row("grain and show face", "n/a, tolex line", "pass"))

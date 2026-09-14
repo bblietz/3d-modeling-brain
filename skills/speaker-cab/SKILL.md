@@ -238,9 +238,11 @@ No CAD before Brian approves this phase.
   joints on both lines, through dovetails as the hardwood option; the
   baffle floating on cleats (default) or fixed in a 6 mm dado; the
   divider without cleats.
-- Grain and show faces on the hardwood line: book-matched panels, grain
-  wrapping around the box on all four shell panels (left to right on top
-  and bottom, vertical on the sides, never front to back), the species.
+- Grain and show faces on the hardwood line: grain wrapping around the
+  box on all four shell panels (left to right on top and bottom,
+  vertical on the sides, never front to back), the species; no
+  book-matching (the corners join on end grain, and book-matching is a
+  long-grain glue-up).
 - Hardware positions: one jack plate per chamber, the strap handle
   centered on the top panel (or recessed side handles), corners, feet
   or tilt-back legs, piping. Port location from the sheet; the port
