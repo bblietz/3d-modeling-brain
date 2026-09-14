@@ -666,6 +666,7 @@ BASE_EXTERNAL_IN = (20.0, 18.0, 11.0)
 CLEAT_MM = 18.0                 # 18 x 18 cleats along the baffle and the back
 STIFFENER_MM = (18.0, 40.0)     # 18 proud, 40 flat, across any span over SPAN_MAX_MM
 SPAN_MAX_MM = 450.0
+NO_SHELL_STIFFENER_LINES = ("hardwood",)   # lines whose top, bottom, and sides take no stiffener (as cablayout)
 BRACE_MM = (18.0, 60.0)         # center brace on a mono 2x12
 JACK_PLATE_H_MM = 70.0          # jack plate cutout height; the back stiffener stops above it
 JACK_CLEAR_MM = 25.0
@@ -871,8 +872,10 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
     shelf starts at the baffle face, so its 18 mm through the baffle lies
     outside the box), and a round port's tube wall and flange ring. The
     divider and the port air have their own volume terms. Every part is birch
-    on both lines; line and jack_config are accepted for symmetry with the
-    callers and unused. panel_mm is the divider thickness of a stereo box."""
+    on both lines, and a NO_SHELL_STIFFENER_LINES line (hardwood) has no top,
+    bottom, or side stiffener, as in the layout; jack_config is accepted for
+    symmetry with the callers and unused. panel_mm is the divider thickness of
+    a stereo box."""
     w, h, d = internal_mm
     per_chamber = driver_count // chambers
     count = port_count or per_chamber
@@ -909,8 +912,9 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
         segs = [w]
     top_len = d - 2 * CLEAT_MM
     bot_len = (d - max(shelf, 2 * CLEAT_MM)) if slot else top_len
+    shell = line not in NO_SHELL_STIFFENER_LINES
     for span in segs:
-        if span > SPAN_MAX_MM:
+        if shell and span > SPAN_MAX_MM:
             if top_len > 50.0:
                 total += sw * sd * top_len
             if bot_len > 50.0:
@@ -920,7 +924,7 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
         if w_c > SPAN_MAX_MM and back_len > 50.0:
             total += chambers * sw * sd * back_len
     side_span = max(slot_h, h - slot_h - BAFFLE_MM) if slot else h
-    if side_span > SPAN_MAX_MM:
+    if shell and side_span > SPAN_MAX_MM:
         total += 2 * sw * sd * top_len
     # slot shelf, end cheeks, center cheeks
     if slot:

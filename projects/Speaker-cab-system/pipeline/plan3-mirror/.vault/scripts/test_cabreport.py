@@ -104,7 +104,7 @@ def test_site_default_facts(tmp_path):
     assert f["grill_cloth"] == "British Small Weave Cane"
     assert f["hardware"] == "Black corners, strap handle, recessed metal jack plate, no piping, rubber feet."
     assert f["swatch_finish"] == "![Fender Style Black](images/fender-black.jpg)"
-    assert f["swatch_cloth"] == "![British Small Weave Cane](images/cane.jpg)"
+    assert f["swatch_cloth"] == "![British Small Weave Cane](images/british-small-weave-cane.jpg)"
     assert f["lead_time"] == "8 to 12 weeks from confirmed order"
     assert f["status_line"] == ("Every figure in this proposal is a design target, not a measurement. "
                                 "Prediction status: unverified, ears only.")
@@ -227,7 +227,7 @@ def test_no_swatch_on_file_warns_and_still_writes(tmp_path, capsys):
     proposal = (order / "proposal.md").read_text()
     assert "- Grill cloth: Salt-and-pepper" in proposal
     assert "![Fender Style Black](images/fender-black.jpg)\nno swatch on file" in proposal
-    assert cabreport.swatch("fender style TWEED") == "![fender style TWEED](images/fender-tweed.jpg)"
+    assert cabreport.swatch("fender style TWEED") == "![fender style TWEED](images/fender-tweed-olive-stripe.jpg)"
     assert cabreport.swatch(None) == cabreport.NO_SWATCH
     (order / "proposal.md").write_text(_fill_slots(proposal))
     assert cabreport.main([str(order), "--customer", "Pat Player", "--verify"]) == 0
@@ -305,3 +305,23 @@ def test_accepted_impedance_mismatch_is_a_warn_wiring_row(tmp_path):
     rows = {r.name: r for r in cabreport.check_rows(voicing, cab)}
     assert (rows["wiring"].value, rows["wiring"].verdict) == ("no recommended wiring on the sheet", "warn")
     assert cabreport.facts(voicing, cab, CUSTOMER)["wiring"] == "wiring to be confirmed"
+
+
+# ---- swatch table: the site's current option names and photos ----
+MAXIMOCABS = Path.home() / "ClaudeProjects" / "MaximoCabs"
+
+
+def test_swatches_resolve_every_site_option():
+    if not MAXIMOCABS.exists():
+        pytest.skip(f"{MAXIMOCABS} is absent")
+    materials = MAXIMOCABS / "public" / "materials"
+    assert [f for f in cabreport.SWATCHES.values() if not (materials / f).is_file()] == []
+    options = []
+    for page in ("tolex-1x12.md", "hardwood-1x12.md"):
+        meta = cabreport.cabvoice.parse_frontmatter((MAXIMOCABS / "src" / "content" / "cabinets" / page).read_text())
+        options += meta["finishOptions"] + meta["grillOptions"]
+    assert options
+    for o in options:
+        name, path = o["name"], o["swatch"]
+        assert cabreport.swatch(name) == f"![{name}](images/{Path(path).name})", name
+        assert cabreport.SWATCHES[name.lower()] == path.removeprefix("/materials/"), name

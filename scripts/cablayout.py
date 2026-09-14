@@ -47,6 +47,7 @@ BRACE_MM = (18.0, 60.0)
 DIVIDER_MM = 18.0
 STIFFENER_MM = (18.0, 40.0)
 SPAN_MAX_MM = 450.0
+NO_SHELL_STIFFENER_LINES = ("hardwood",)   # solid 19 mm shells take no stiffener; birch glued flat would cross the grain
 BOLT_HOLE_MM = 6.5
 DADO_MM = 6.0
 BASKET_LEN_MM = 100.0
@@ -589,7 +590,7 @@ def shell_material(spec: CabSpec) -> tuple:
     return f"{name} {PANEL_MM['hardwood']:g} mm", (dens if dens is not None else BIRCH_DENSITY)
 
 
-HARDWOOD_GRAIN_NOTE = "grain front to back on all four panels, book-matched, show face out"
+HARDWOOD_GRAIN_NOTE = "grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"
 HARDWOOD_CLEAT_NOTE = "screwed through slotted holes, glued at the center 100 mm only"
 
 
@@ -861,8 +862,10 @@ def _chamber_of(fr: Frame, x: float) -> int:
 def stiffener_blanks(spec: CabSpec, fr: Frame) -> tuple:
     """(blanks, span notes): one 18 x 40 stiffener glued flat across the
     middle of any shell or back panel span over 450 mm between glued members.
-    Open-back panels are left alone (short and removable)."""
+    Open-back panels are left alone (short and removable), and so are the top,
+    bottom, and sides on a NO_SHELL_STIFFENER_LINES line (hardwood)."""
     sw, sd = STIFFENER_MM       # 18 proud, 40 flat on the panel
+    shell = spec.line not in NO_SHELL_STIFFENER_LINES
     floating = spec.aesthetics.baffle_mount == "floating"
     y_cleat = fr.D - BACK_MM - CLEAT_MM
     ya_default = fr.y_bb + (CLEAT_MM if floating else 0.0)
@@ -877,7 +880,7 @@ def stiffener_blanks(spec: CabSpec, fr: Frame) -> tuple:
     mat = birch(sw)
     for (xa, xb) in segs:
         span = xb - xa
-        if span <= SPAN_MAX_MM:
+        if not shell or span <= SPAN_MAX_MM:
             continue
         xc = (xa + xb) / 2.0
         c = _chamber_of(fr, xc)
@@ -915,7 +918,7 @@ def stiffener_blanks(spec: CabSpec, fr: Frame) -> tuple:
                 notes.append(f"back panel span {span:.0f} mm over {SPAN_MAX_MM:.0f}: stiffener added")
     # side panels: span along z, split by the shelf with a slot port
     side_span = max(fr.slot_h, fr.z1 - fr.z_vis0) if fr.slot_h else fr.z1 - fr.z0
-    if side_span > SPAN_MAX_MM:
+    if shell and side_span > SPAN_MAX_MM:
         zc = (fr.z_vis0 + fr.z1) / 2.0 if fr.slot_h else (fr.z0 + fr.z1) / 2.0
         ya, yb = ya_default, y_cleat
         for side, x_c, c in (("left", fr.x0, 0), ("right", fr.x1 - sw, len(fr.chambers) - 1)):

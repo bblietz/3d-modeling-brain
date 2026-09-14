@@ -239,7 +239,8 @@ No CAD before Brian approves this phase.
   baffle floating on cleats (default) or fixed in a 6 mm dado; the
   divider without cleats.
 - Grain and show faces on the hardwood line: book-matched panels, grain
-  front to back on all four shell panels, the species.
+  wrapping around the box on all four shell panels (left to right on top
+  and bottom, vertical on the sides, never front to back), the species.
 - Hardware positions: one jack plate per chamber, the strap handle over
   the center of mass (or recessed side handles), corners, feet or
   tilt-back legs, piping. Port location from the sheet; the port lines

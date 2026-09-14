@@ -45,16 +45,35 @@ LEAD_TIME = {
 
 # Site option name (lower case) to the swatch file under the MaximoCabs repo's
 # public/materials/ tree; the proposal references images/<basename> and the
-# skill copies the file there. The species keys are the layout's.
+# skill copies the file there. The full names are the finishOptions and
+# grillOptions of the site's src/content/cabinets/tolex-1x12.md and
+# hardwood-1x12.md as of 2026-09-13, roll widths and quotes included; the short
+# legacy keys stay only where the same material still has a photo. The species
+# keys are the layout's.
 SWATCHES = {
-    "british style red": "tolex/british-red.jpg",
+    'fender style black vinyl tolex, 54"': "tolex/fender-black.jpg",
+    'fender style smooth blonde vinyl tolex, 54"': "tolex/fender-smooth-blonde.jpg",
+    'fender style smooth brown vinyl tolex, 54"': "tolex/fender-smooth-brown.jpg",
+    'fender style tweed olive stripe, 32"': "tolex/fender-tweed-olive-stripe.jpg",
+    'british style black levant vinyl tolex, 54"': "tolex/british-black-levant.jpg",
+    'british red garnet levant, 54"': "tolex/british-red-garnet-levant.jpg",
+    'british style white levant vinyl tolex, 54"': "tolex/british-white-levant.jpg",
+    'vox-hiwatt style black vinyl tolex, 54"': "tolex/vox-hiwatt-black.jpg",
+    'fender style black, 36"': "grill-cloth/fender-black.jpg",
+    'fender style oxblood, 36"': "grill-cloth/fender-oxblood.jpg",
+    'fender style black/white/silver, 36"': "grill-cloth/fender-black-white-silver.jpg",
+    'fender style beige brown (wheat), 36"': "grill-cloth/fender-wheat.jpg",
+    'british style small weave cane, 32"': "grill-cloth/british-small-weave-cane.jpg",
+    'british style black, 48" (marshall replacement)': "grill-cloth/british-black.jpg",
+    'british brown diamond, 30"x36"': "grill-cloth/british-brown-diamond.jpg",
+    'salt and pepper, 32"': "grill-cloth/salt-and-pepper.jpg",
     "fender style black": "tolex/fender-black.jpg",
-    "fender style tweed": "tolex/fender-tweed.jpg",
-    "british style orange": "tolex/british-orange.jpg",
-    "fender style oxblood": "grill-cloth/oxblood.jpg",
-    "fender style beige": "grill-cloth/beige.jpg",
-    "british small weave cane": "grill-cloth/cane.jpg",
-    "british brown diamond": "grill-cloth/brown-diamond.jpg",
+    "fender style tweed": "tolex/fender-tweed-olive-stripe.jpg",
+    "british style red": "tolex/british-red-garnet-levant.jpg",
+    "fender style oxblood": "grill-cloth/fender-oxblood.jpg",
+    "fender style beige": "grill-cloth/fender-wheat.jpg",
+    "british small weave cane": "grill-cloth/british-small-weave-cane.jpg",
+    "british brown diamond": "grill-cloth/british-brown-diamond.jpg",
     "walnut": "wood/walnut.jpg",
     "black walnut": "wood/walnut.jpg",
     "cherry": "wood/cherry.jpg",
@@ -185,7 +204,7 @@ def check_rows(voicing: dict, cab: dict) -> list:
                     f"baffle {_thickness(parts, ('baffle',))}, back {_thickness(parts, ('back',))}", OPERATOR))
     if line == "hardwood":
         rows.append(Row("grain and show face", f"{species}: book-matched panels, show face out, "
-                        "grain front to back on every shell panel (see the plan)", OPERATOR))
+                        "grain wrapping around the box on every shell panel, never front to back (see the plan)", OPERATOR))
     else:
         rows.append(Row("grain and show face", "n/a, tolex line", "pass"))
     rows.append(Row("joinery fit", f"{aes['corner_joint']} corners, {aes['baffle_mount']} baffle", OPERATOR))

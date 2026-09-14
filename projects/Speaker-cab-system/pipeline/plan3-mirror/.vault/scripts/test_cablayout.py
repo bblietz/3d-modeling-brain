@@ -940,3 +940,40 @@ def test_slot_over_the_trim_tolerance_still_blocks():
     assert blanks == []
     by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
     assert by["port fit"].level == "blocker"
+
+
+# ---- hardwood shell panels take no stiffener ----
+SHELL_STIFFENERS = {"stiffener_top", "stiffener_bottom", "stiffener_side_left", "stiffener_side_right"}
+
+
+def test_hardwood_site_box_has_no_shell_stiffeners():
+    assert L.NO_SHELL_STIFFENER_LINES == cabvoice.NO_SHELL_STIFFENER_LINES == ("hardwood",)
+    drv = cabvoice.load_speaker(SPEAKER["slug"])
+    for enclosure in ("open", "closed"):
+        for line, species in (("tolex", None), ("hardwood", "black walnut")):
+            c = cabvoice.Constraints(line=line, species=species)
+            v = cabvoice.evaluate([drv], [16], enclosure, TONE, (472.0, 421.2, 229.4), constraints=c).to_dict()
+            spec = L.order_from(v, L.Aesthetics())
+            lay = L.layout(spec)
+            by = {ch.name: ch for ch in L.check_layout(lay, spec)}
+            case = (enclosure, line)
+            shell = {p.name for p in lay.parts} & SHELL_STIFFENERS
+            spans = by["spans"].message
+            if line == "tolex":
+                assert shell == {"stiffener_top", "stiffener_bottom"}, case
+                assert "top panel span 472 mm" in spans and "bottom panel span 472 mm" in spans, case
+            else:
+                assert shell == set(), case
+                assert all(panel not in spans for panel in ("top panel", "bottom panel", "side panel")), case
+            assert any(p.name == "stiffener_back" for p in lay.parts) == (enclosure == "closed"), case
+            assert by["spans"].level == ("pass" if case == ("open", "hardwood") else "warn"), case
+            assert by["net volume"].level == "pass", (case, by["net volume"].message)
+            assert L.layout_inside_parts_l(lay) == pytest.approx(spec.sheet_inside_parts_l, abs=0.02), case
+
+
+def test_hardwood_tall_box_has_no_side_stiffeners():
+    for line, species, names in (("tolex", None, ["stiffener_side_left", "stiffener_side_right"]),
+                                 ("hardwood", "black walnut", [])):
+        tall = spec_for(external=(470.0, 520.0, 279.4), line=line, species=species)
+        parts, notes = L.stiffener_blanks(tall, L.frame(tall))
+        assert [p.name for p in parts] == names and len(notes) == (1 if names else 0), line

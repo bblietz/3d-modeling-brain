@@ -2328,7 +2328,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 - **Fingers**: width half the panel thickness (9 mm on 18 mm birch, 9.5 mm on 19 mm hardwood), count the nearest odd integer to depth / width so both ends are full fingers, width recomputed as depth / count. The top and bottom panels carry a full finger at the front edge; the sides start with a gap. Trade practice runs 1/4 in fingers; the width is a parameter.
 - **Dovetails** (hardwood only): tails on the side panels so a lift by the top handle loads the joint in its locked direction, pins on top and bottom, half-pins at both ends, slope 1:8, pin width half the panel thickness at the outer face, tails about 30 mm.
-- **Wood movement (hardwood line)**: grain runs front to back on all four shell panels so every panel moves along the depth axis together; expect roughly 2.6 mm (cherry), 2.8 (sapele), 2.9 (walnut), 3.7 mm (hard maple) of depth change per 4-point moisture swing flatsawn, about half quartersawn. Every cleat on the hardwood line runs across the grain, so cleats are screwed through slotted holes and glued only at their center 100 mm, and a fixed baffle is glued in the front 100 mm of its dado only. The intake's "where it lives" answer sets the expected humidity swing.
+- **Wood movement (hardwood line)**: grain wraps around the box on all four shell panels (left to right on the top and bottom, vertical on the sides), so the corner joints are cut in end grain and every panel moves along the depth axis together; never run hardwood grain front to back, which puts the corners in long grain and sets the panels moving in different directions (Brian, 2026-09-13); expect roughly 2.6 mm (cherry), 2.8 (sapele), 2.9 (walnut), 3.7 mm (hard maple) of depth change per 4-point moisture swing flatsawn, about half quartersawn. Cleats on the hardwood line are screwed through slotted holes and glued only at their center 100 mm, and a fixed baffle is glued in the front 100 mm of its dado only; these rules date from the front-to-back grain wording, and with the grain wrapping, the cleats and dados run with the grain, so whether to relax them is open for Brian. The intake's "where it lives" answer sets the expected humidity swing.
 
 ## Baffle
 
@@ -2343,7 +2343,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 - Mono 2x12: one vertical 18 x 60 mm birch brace between top and bottom at the center of the baffle span, its front face 2 mm behind the baffle back, glued to top and bottom, notched around the baffle cleats (no notch with a fixed baffle).
 - Stereo 2x12: a full-height 18 mm birch divider from the baffle back face to the back panel inner face replaces the brace and splits the box into two equal chambers, sealed with glue on top and bottom. The divider carries no cleats: the baffle and the back screw into its front and rear edges (cleats on its faces would crowd the 25 mm cutout margin). Each chamber's cutout sits 44 mm from the shell and 25 mm from the divider at the minimum width, any surplus split evenly. Each chamber gets its own jack plate and, when ported, its own port.
-- Any shell or back panel span over 450 mm between glued members gets one 18 x 40 mm stiffener across its middle, glued flat to the panel (on a mono 2x12 that is the back panel).
+- Any shell or back panel span over 450 mm between glued members gets one 18 x 40 mm stiffener across its middle, glued flat to the panel (on a mono 2x12 that is the back panel). Hardwood shell panels get none: solid 19 mm stock needs no stiffener at these spans, and a birch stiffener glued flat would cross the grain (Brian, 2026-09-13).
 
 ## Backs and ports
 
@@ -2587,7 +2587,7 @@ def test_site_default_facts(tmp_path):
     assert f["grill_cloth"] == "British Small Weave Cane"
     assert f["hardware"] == "Black corners, strap handle, recessed metal jack plate, no piping, rubber feet."
     assert f["swatch_finish"] == "![Fender Style Black](images/fender-black.jpg)"
-    assert f["swatch_cloth"] == "![British Small Weave Cane](images/cane.jpg)"
+    assert f["swatch_cloth"] == "![British Small Weave Cane](images/british-small-weave-cane.jpg)"
     assert f["lead_time"] == "8 to 12 weeks from confirmed order"
     assert f["status_line"] == ("Every figure in this proposal is a design target, not a measurement. "
                                 "Prediction status: unverified, ears only.")
@@ -2710,7 +2710,7 @@ def test_no_swatch_on_file_warns_and_still_writes(tmp_path, capsys):
     proposal = (order / "proposal.md").read_text()
     assert "- Grill cloth: Salt-and-pepper" in proposal
     assert "![Fender Style Black](images/fender-black.jpg)\nno swatch on file" in proposal
-    assert cabreport.swatch("fender style TWEED") == "![fender style TWEED](images/fender-tweed.jpg)"
+    assert cabreport.swatch("fender style TWEED") == "![fender style TWEED](images/fender-tweed-olive-stripe.jpg)"
     assert cabreport.swatch(None) == cabreport.NO_SWATCH
     (order / "proposal.md").write_text(_fill_slots(proposal))
     assert cabreport.main([str(order), "--customer", "Pat Player", "--verify"]) == 0
@@ -2788,6 +2788,26 @@ def test_accepted_impedance_mismatch_is_a_warn_wiring_row(tmp_path):
     rows = {r.name: r for r in cabreport.check_rows(voicing, cab)}
     assert (rows["wiring"].value, rows["wiring"].verdict) == ("no recommended wiring on the sheet", "warn")
     assert cabreport.facts(voicing, cab, CUSTOMER)["wiring"] == "wiring to be confirmed"
+
+
+# ---- swatch table: the site's current option names and photos ----
+MAXIMOCABS = Path.home() / "ClaudeProjects" / "MaximoCabs"
+
+
+def test_swatches_resolve_every_site_option():
+    if not MAXIMOCABS.exists():
+        pytest.skip(f"{MAXIMOCABS} is absent")
+    materials = MAXIMOCABS / "public" / "materials"
+    assert [f for f in cabreport.SWATCHES.values() if not (materials / f).is_file()] == []
+    options = []
+    for page in ("tolex-1x12.md", "hardwood-1x12.md"):
+        meta = cabreport.cabvoice.parse_frontmatter((MAXIMOCABS / "src" / "content" / "cabinets" / page).read_text())
+        options += meta["finishOptions"] + meta["grillOptions"]
+    assert options
+    for o in options:
+        name, path = o["name"], o["swatch"]
+        assert cabreport.swatch(name) == f"![{name}](images/{Path(path).name})", name
+        assert cabreport.SWATCHES[name.lower()] == path.removeprefix("/materials/"), name
 ```
 <!-- /code -->
 
@@ -2923,16 +2943,35 @@ LEAD_TIME = {
 
 # Site option name (lower case) to the swatch file under the MaximoCabs repo's
 # public/materials/ tree; the proposal references images/<basename> and the
-# skill copies the file there. The species keys are the layout's.
+# skill copies the file there. The full names are the finishOptions and
+# grillOptions of the site's src/content/cabinets/tolex-1x12.md and
+# hardwood-1x12.md as of 2026-09-13, roll widths and quotes included; the short
+# legacy keys stay only where the same material still has a photo. The species
+# keys are the layout's.
 SWATCHES = {
-    "british style red": "tolex/british-red.jpg",
+    'fender style black vinyl tolex, 54"': "tolex/fender-black.jpg",
+    'fender style smooth blonde vinyl tolex, 54"': "tolex/fender-smooth-blonde.jpg",
+    'fender style smooth brown vinyl tolex, 54"': "tolex/fender-smooth-brown.jpg",
+    'fender style tweed olive stripe, 32"': "tolex/fender-tweed-olive-stripe.jpg",
+    'british style black levant vinyl tolex, 54"': "tolex/british-black-levant.jpg",
+    'british red garnet levant, 54"': "tolex/british-red-garnet-levant.jpg",
+    'british style white levant vinyl tolex, 54"': "tolex/british-white-levant.jpg",
+    'vox-hiwatt style black vinyl tolex, 54"': "tolex/vox-hiwatt-black.jpg",
+    'fender style black, 36"': "grill-cloth/fender-black.jpg",
+    'fender style oxblood, 36"': "grill-cloth/fender-oxblood.jpg",
+    'fender style black/white/silver, 36"': "grill-cloth/fender-black-white-silver.jpg",
+    'fender style beige brown (wheat), 36"': "grill-cloth/fender-wheat.jpg",
+    'british style small weave cane, 32"': "grill-cloth/british-small-weave-cane.jpg",
+    'british style black, 48" (marshall replacement)': "grill-cloth/british-black.jpg",
+    'british brown diamond, 30"x36"': "grill-cloth/british-brown-diamond.jpg",
+    'salt and pepper, 32"': "grill-cloth/salt-and-pepper.jpg",
     "fender style black": "tolex/fender-black.jpg",
-    "fender style tweed": "tolex/fender-tweed.jpg",
-    "british style orange": "tolex/british-orange.jpg",
-    "fender style oxblood": "grill-cloth/oxblood.jpg",
-    "fender style beige": "grill-cloth/beige.jpg",
-    "british small weave cane": "grill-cloth/cane.jpg",
-    "british brown diamond": "grill-cloth/brown-diamond.jpg",
+    "fender style tweed": "tolex/fender-tweed-olive-stripe.jpg",
+    "british style red": "tolex/british-red-garnet-levant.jpg",
+    "fender style oxblood": "grill-cloth/fender-oxblood.jpg",
+    "fender style beige": "grill-cloth/fender-wheat.jpg",
+    "british small weave cane": "grill-cloth/british-small-weave-cane.jpg",
+    "british brown diamond": "grill-cloth/british-brown-diamond.jpg",
     "walnut": "wood/walnut.jpg",
     "black walnut": "wood/walnut.jpg",
     "cherry": "wood/cherry.jpg",
@@ -3063,7 +3102,7 @@ def check_rows(voicing: dict, cab: dict) -> list:
                     f"baffle {_thickness(parts, ('baffle',))}, back {_thickness(parts, ('back',))}", OPERATOR))
     if line == "hardwood":
         rows.append(Row("grain and show face", f"{species}: book-matched panels, show face out, "
-                        "grain front to back on every shell panel (see the plan)", OPERATOR))
+                        "grain wrapping around the box on every shell panel, never front to back (see the plan)", OPERATOR))
     else:
         rows.append(Row("grain and show face", "n/a, tolex line", "pass"))
     rows.append(Row("joinery fit", f"{aes['corner_joint']} corners, {aes['baffle_mount']} baffle", OPERATOR))
@@ -3511,7 +3550,8 @@ No CAD before Brian approves this phase.
   baffle floating on cleats (default) or fixed in a 6 mm dado; the
   divider without cleats.
 - Grain and show faces on the hardwood line: book-matched panels, grain
-  front to back on all four shell panels, the species.
+  wrapping around the box on all four shell panels (left to right on top
+  and bottom, vertical on the sides, never front to back), the species.
 - Hardware positions: one jack plate per chamber, the strap handle over
   the center of mass (or recessed side handles), corners, feet or
   tilt-back legs, piping. Port location from the sheet; the port lines

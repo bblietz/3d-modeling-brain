@@ -1595,3 +1595,25 @@ def test_evaluate_impedance_mismatch_blocks_unless_accepted(drv, tone, speakers_
     assert run.returncode == 0, run.stderr
     data = json.loads((tmp_path / "accepted" / "voicing.json").read_text())
     assert data["blockers"] == [] and data["wiring"]["mismatch_accepted"] is True
+
+
+# ---- hardwood shell panels take no stiffener ----
+def test_inside_parts_hardwood_drops_only_the_shell_stiffeners(drv, tone):
+    assert cabvoice.NO_SHELL_STIFFENER_LINES == ("hardwood",)
+    shell = 18 * 40 * (229.4 - 36) / 1e6       # one top or bottom stiffener at the site depth
+    for enclosure in ("open", "closed"):
+        tolex = cabvoice.inside_parts_l(SITE_INTERNAL, enclosure, 1, 1, "mono", None, "tolex")
+        hardwood = cabvoice.inside_parts_l(SITE_INTERNAL, enclosure, 1, 1, "mono", None, "hardwood")
+        assert tolex - hardwood == pytest.approx(2 * shell, abs=1e-9), enclosure
+    # closed: the cleats and the back stiffener stay (the hand numbers of the site box above)
+    closed = cabvoice.inside_parts_l(SITE_INTERNAL, "closed", 1, 1, "mono", None, "hardwood")
+    assert closed == pytest.approx(0.555 + 0.555 + 0.191, rel=0.05)
+    # over 450 mm tall: the two side stiffeners go too
+    tall = (472.0, 482.0, 229.4)
+    tolex = cabvoice.inside_parts_l(tall, "closed", 1, 1, "mono", None, "tolex")
+    hardwood = cabvoice.inside_parts_l(tall, "closed", 1, 1, "mono", None, "hardwood")
+    assert tolex - hardwood == pytest.approx(4 * shell, abs=1e-9)
+    # the sheet's allowance follows the line
+    c = cabvoice.Constraints(line="hardwood", species="black walnut")
+    v = cabvoice.evaluate([drv], [16], "closed", tone, SITE_INTERNAL, constraints=c)
+    assert v.volumes["inside_parts_l"] == pytest.approx(closed, abs=0.001)
