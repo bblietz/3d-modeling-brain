@@ -258,11 +258,14 @@ No CAD before Brian approves this phase.
   of the upper open-back panel on an open or semi-open box and the
   bottom of the back on a closed or closed-ported one, and
   `roundover_mm` is a 1/2 in roundover on hardwood and none on
-  tolex, with 0 turning it off) and reduce its module docstring to
-  one line naming the order (the template's copy instructions are
-  dropped). Everything below the docstring stays unchanged; a
-  hardware qualifier the constants cannot hold (the form's "Leather
-  strap handle" is `handle="strap"`) survives in the brief only.
+  tolex, with 0 turning it off). `handle` and `jack_plate_position`
+  are Brian's picks every order, the defaults above being a starting
+  point rather than something read from the customer's answers:
+  confirm both with him before locking the layout. Reduce the module
+  docstring to one line naming the order (the template's copy
+  instructions are dropped). Everything below the docstring stays
+  unchanged; a hardware qualifier the constants cannot hold survives
+  in the brief only (its `notes` row, or Brian's own words).
 
 Write the plan into the brief and present it briefly; no stop.
 
