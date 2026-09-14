@@ -87,6 +87,18 @@ def swatch_path(name: str):
     return MATERIALS / rel if rel else None
 
 
+def edge_size(mm) -> str:
+    """A roundover radius as the shop says it: an eighth-inch fraction when it is one, else millimetres."""
+    eighths = mm / 25.4 * 8
+    if abs(eighths - round(eighths)) < 0.02 and round(eighths) > 0:
+        n, d = round(eighths), 8
+        while n % 2 == 0 and d > 1:
+            n, d = n // 2, d // 2
+        whole, rem = divmod(n, d)
+        return (f"{whole} " if whole else "") + (f"{rem}/{d}" if rem else "") + " in" if rem else f"{whole} in"
+    return f"{mm:g} mm"
+
+
 def slot(text: str, name: str) -> str:
     m = re.search(rf"<!-- slot: {name} -->\n(.*?)\n<!-- /slot -->", text, re.S)
     return m.group(1).strip() if m else ""
@@ -108,8 +120,10 @@ def build(order: Path, customer: str | None) -> Path:
     today = datetime.date.today()
     proposal = (order / "proposal.md").read_text() if (order / "proposal.md").exists() else ""
 
-    shell_text = (f"Solid {finish.lower()}, hand-cut {joint} joints, grain wrapping around the box"
-                  if hardwood else f"Baltic birch covered in {finish}, hand-cut finger joints")
+    roundover = cab.get("aesthetics", {}).get("roundover_mm")
+    edges = f", {edge_size(roundover)} roundover on every outside edge" if roundover else ""
+    shell_text = (f"Solid {finish.lower()}, hand-cut {joint} joints{edges}, grain wrapping around the box"
+                  if hardwood else f"Baltic birch covered in {finish}, hand-cut finger joints{edges}")
     rows = [("Speaker", f"{f['speaker_label']}, {ohm}"), ("Shell", shell_text), ("Grill cloth", f["grill_cloth"]),
             ("Hardware", ", ".join(h for h in f["hardware"].rstrip(".").split(", ") if not h.lower().startswith("no ")).capitalize()), ("Weight", f"About {f['mass_lb']} lb loaded ({f['mass_kg']} kg)"),
             ("Lead time", f["lead_time"])]

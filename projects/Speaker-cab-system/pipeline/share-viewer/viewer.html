@@ -359,6 +359,7 @@
       cloth: new THREE.MeshStandardMaterial({ map: clothTex, color: clothTex ? 0x8a8a84 : 0x55524c, vertexColors: true, roughness: 0.97 }),
       speaker: new THREE.MeshStandardMaterial({ color: 0x2a2826, roughness: 0.42, metalness: 0.65 }),
       brass: new THREE.MeshStandardMaterial({ color: 0xbb985e, roughness: 0.3, metalness: 1 }),
+      chrome: new THREE.MeshStandardMaterial({ color: 0xc9ccd0, roughness: 0.18, metalness: 1 }),
       leather: new THREE.MeshStandardMaterial({ color: 0x3b2418, roughness: 0.62 }),
       rubber: new THREE.MeshStandardMaterial({ color: 0x1a1918, roughness: 0.92 }),
     };
@@ -366,7 +367,8 @@
       if (CAB.shell.includes(name)) return "shell";
       if (name.startsWith("grill_")) return "cloth";
       if (name.startsWith("speaker_")) return "speaker";
-      if (name.startsWith("jack_plate")) return "brass";
+      // Jack plate and strap-handle end caps: brass on the hardwood line, metal on tolex (construction note).
+      if (name.startsWith("jack_plate") || name.startsWith("strap_handle_cap")) return hardwood ? "brass" : "chrome";
       if (name.includes("handle")) return "leather";
       if (name.startsWith("foot_")) return "rubber";
       return "birch";

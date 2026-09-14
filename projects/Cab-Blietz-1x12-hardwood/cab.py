@@ -29,6 +29,7 @@ AESTHETICS = L.Aesthetics(
     tolex_color="",
     grill_cloth='Salt and Pepper, 32"',
     head_width_mm=None,             # set to match a head: external width = head + 0 to 10 mm
+    roundover_mm=12.7,              # 1/2 in roundover on every outside edge (Brian, 2026-09-13)
 )
 
 try:

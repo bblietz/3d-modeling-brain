@@ -32,7 +32,8 @@
     "head_width_mm": null,
     "tolex_color": "",
     "grill_cloth": "Salt and Pepper, 32\"",
-    "finish": ""
+    "finish": "",
+    "roundover_mm": 12.7
   },
   "external_mm": [
     508.0,
@@ -179,7 +180,7 @@
         279.4
       ],
       "material": "black walnut 19 mm",
-      "notes": "finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"
+      "notes": "finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out; 12.7 mm (1/2 in) roundover on every outside edge"
     },
     {
       "name": "side_right",
@@ -190,7 +191,7 @@
         279.4
       ],
       "material": "black walnut 19 mm",
-      "notes": "finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"
+      "notes": "finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out; 12.7 mm (1/2 in) roundover on every outside edge"
     },
     {
       "name": "top",
@@ -201,7 +202,7 @@
         279.4
       ],
       "material": "black walnut 19 mm",
-      "notes": "finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"
+      "notes": "finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out; 12.7 mm (1/2 in) roundover on every outside edge"
     },
     {
       "name": "bottom",
@@ -212,7 +213,7 @@
         279.4
       ],
       "material": "black walnut 19 mm",
-      "notes": "finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"
+      "notes": "finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out; 12.7 mm (1/2 in) roundover on every outside edge"
     },
     {
       "name": "baffle",
@@ -481,7 +482,7 @@
     {
       "name": "interference",
       "level": "pass",
-      "message": "28 solids, no pair overlaps by more than 1 mm3"
+      "message": "30 solids, no pair overlaps by more than 1 mm3"
     },
     {
       "name": "air volume",
@@ -496,7 +497,7 @@
     {
       "name": "rectangularity",
       "level": "pass",
-      "message": "blanks below 98 percent of their bounding box (cut list uses the blank dims): side_left 96%, side_right 96%, top 96%, bottom 96%, baffle 68%, grill_top 91%, grill_bottom 91%, grill_left 90%, grill_right 90%, back_lower 87%"
+      "message": "blanks below 98 percent of their bounding box (cut list uses the blank dims): side_left 94%, side_right 94%, top 95%, bottom 95%, baffle 68%, grill_top 91%, grill_bottom 91%, grill_left 90%, grill_right 90%, back_lower 87%"
     }
   ],
   "prediction_status": "unverified, ears only",
