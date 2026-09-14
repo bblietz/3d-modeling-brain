@@ -1,0 +1,201 @@
+{
+  "name": "Cab-Blietz-1x12-hardwood",
+  "mode": "evaluate",
+  "tone_target": {
+    "low_end": "balanced",
+    "mids": "scooped",
+    "top": "smooth",
+    "breakup": "moderate",
+    "dispersion": "wide",
+    "placement": "floor",
+    "min_power_w": 57,
+    "impedance_options_ohm": [
+      4,
+      8,
+      16
+    ]
+  },
+  "speakers": [
+    {
+      "slug": "eminence-cannabis-rex",
+      "brand": "Eminence",
+      "model": "Cannabis Rex 12",
+      "impedance_ohm": 8.0,
+      "power_w": 50,
+      "sensitivity_db": 101.8,
+      "data_status": "datasheet",
+      "analog_of": null,
+      "cutout_mm": 281.2,
+      "bolt_circle_mm": 294.4,
+      "bolt_count": 8,
+      "depth_mm": 129.5,
+      "weight_kg": 3.72,
+      "displacement_l": 2.0,
+      "displacement_estimated": false,
+      "frame_diameter_mm": 305.6,
+      "magnet_diameter_mm": 150,
+      "magnet_diameter_estimated": true
+    }
+  ],
+  "enclosure": {
+    "type": "open",
+    "driver_count": 1,
+    "chambers": 1,
+    "jack_config": "mono",
+    "open_fraction": 0.4
+  },
+  "volumes": {
+    "method": "evaluate",
+    "per_driver_net_l": 42.604431999999996,
+    "per_chamber_net_l": 42.604431999999996,
+    "net_total_l": 42.604431999999996,
+    "displacement_l": 2.0,
+    "brace_l": 0.0,
+    "port_l": 0.0,
+    "divider_l": 0.0,
+    "inside_parts_l": 1.00175616,
+    "gross_l": 45.606188159999995
+  },
+  "box": {
+    "internal_mm": [
+      472.0,
+      421.2,
+      229.4
+    ],
+    "external_mm": [
+      508.0,
+      457.2,
+      279.4
+    ],
+    "internal_in": [
+      18.58,
+      16.58,
+      9.03
+    ],
+    "external_in": [
+      20.0,
+      18.0,
+      11.0
+    ],
+    "chamber_internal_width_mm": 472.0
+  },
+  "port": null,
+  "prediction": {
+    "model": "open-back path estimate",
+    "f_cancel_hz": 368.50021486892996,
+    "path_m": 0.4654,
+    "panel_height_mm": 126.35999999999999,
+    "character": "open, wide dispersion, 6 dB per octave below 369 Hz relative to closed",
+    "response_relative_db": [
+      [
+        20.0,
+        -25.30815499528194
+      ],
+      [
+        25.2,
+        -23.30074409293068
+      ],
+      [
+        31.75,
+        -21.293880316001676
+      ],
+      [
+        40.0,
+        -19.287555082002314
+      ],
+      [
+        50.4,
+        -17.280144179651057
+      ],
+      [
+        63.5,
+        -15.27328040272205
+      ],
+      [
+        80.0,
+        -13.266955168722692
+      ],
+      [
+        100.79,
+        -11.260406004517689
+      ],
+      [
+        126.99,
+        -9.25336444468811
+      ],
+      [
+        160.0,
+        -7.246355255443068
+      ],
+      [
+        201.59,
+        -5.23937521147817
+      ],
+      [
+        253.98,
+        -3.232764531408485
+      ],
+      [
+        320.0,
+        -1.2257553421634435
+      ],
+      [
+        400.0,
+        0.0
+      ]
+    ]
+  },
+  "wiring": {
+    "jack_config": "mono",
+    "recommended": {
+      "name": "single",
+      "impedance_ohm": 8.0,
+      "matches_tap": true,
+      "jack_text": "Single driver, 8 ohm"
+    },
+    "options": [
+      {
+        "name": "single",
+        "impedance_ohm": 8.0,
+        "matches_tap": true,
+        "jack_text": "Single driver, 8 ohm"
+      }
+    ],
+    "mismatch_accepted": false
+  },
+  "power": {
+    "amp_power_w": 38.0,
+    "total_handling_w": 50.0,
+    "min_power_w": 57.0,
+    "status": "warning",
+    "message": "handling 50 W is under the 57 W target (1.5 x amp power)",
+    "per_side": [
+      {
+        "total_handling_w": 50.0,
+        "amp_power_w": 38.0,
+        "min_power_w": 57.0,
+        "status": "warning",
+        "message": "handling 50 W is under the 57 W target (1.5 x amp power)"
+      }
+    ]
+  },
+  "construction": {
+    "panel_mm": 18.0,
+    "back_mm": 12.0,
+    "baffle_mm": 18.0,
+    "recess_mm": 20.0,
+    "brace_l": 0.0,
+    "pinned_external_width_mm": null,
+    "max_external_mm": null,
+    "port_count": null,
+    "line": "hardwood",
+    "species": "walnut",
+    "wall_material": "walnut"
+  },
+  "warnings": [
+    "width and depth are within 5 percent of 2:1 (2.06); coincident standing waves",
+    "handling 50 W is under the 57 W target (1.5 x amp power)"
+  ],
+  "blockers": [],
+  "prediction_status": "unverified, ears only"
+}

@@ -1,0 +1,12 @@
+qty,part,thickness_mm,width_mm,length_mm,material,notes
+1,back_upper,12,125.8,470,baltic birch 12 mm,"open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats"
+1,back_lower,12,125.8,470,baltic birch 12 mm,"open back panel 12 mm birch, 126 mm tall ((1 - 0.40) x internal height / 2), screwed to the cleats; carries the jack plate"
+2,grill_top/grill_bottom,12,40,466,baltic birch 12 mm,"grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
+2,grill_left/grill_right,12,40,415.2,baltic birch 12 mm,"grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
+2,cleat_baffle_top/cleat_baffle_bottom,18,18,470,baltic birch 18 mm,"18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only; felt strip between cleat and baffle"
+2,cleat_back_top/cleat_back_bottom,18,18,470,baltic birch 18 mm,"18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only"
+1,baffle,18,417.2,468,baltic birch 18 mm,"floating baffle: 1 mm clearance per side, felt strips on the cleats, screwed through the cleats, removable; speakers front-mounted on T-nuts, 8 bolts on a 294.4 mm circle"
+2,cleat_baffle_left/cleat_baffle_right,18,18,383.2,baltic birch 18 mm,"18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only; felt strip between cleat and baffle"
+4,cleat_back_left_upper/cleat_back_left_lower/cleat_back_right_upper/cleat_back_right_lower,18,18,107.8,baltic birch 18 mm,"18 x 18 birch cleat, screws every 150 mm; screwed through slotted holes, glued at the center 100 mm only"
+2,top/bottom,19,508,279.4,black walnut 19 mm,"finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"
+2,side_left/side_right,19,457.2,279.4,black walnut 19 mm,"finger joint, 29 fingers of 9.6 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"

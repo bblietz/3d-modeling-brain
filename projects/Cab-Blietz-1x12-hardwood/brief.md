@@ -1,0 +1,180 @@
+---
+name: cab-blietz-1x12-hardwood
+description: MaximoCabs order brief for Cecilia Blietz, a 1x12 hardwood cabinet in walnut, open back, Eminence Cannabis Rex 8 ohm
+type: order
+status: built
+created: 2026-09-13
+customer: Cecilia Blietz
+line: hardwood
+configuration: 1x12
+tags: [order, speaker-cab, maximocabs]
+---
+
+# Order: Cecilia Blietz, 1x12 hardwood
+
+Source: pasted quote email dated 2026-09-13, the first quote the live site wizard sent (production went live that day). The email matched the Phase 1 format: the first line carries name, email, and phone, then the ten blocks in the brief's order, one row per field.
+Design rules: [[speaker-cab-voicing]], [[speaker-cab-construction]].
+
+## Order
+
+- Customer: Cecilia Blietz
+- Contact: andradem74@gmail.com, 415 407 5201
+- Line: hardwood
+- Driver count: 1
+- Back type asked: open (the wizard's "Open-back"; the back-type rule and stop one decide, see Assumptions stated)
+
+## Rig block
+
+Every field stays in this list even when empty; an empty value means the customer was not asked or did not say.
+
+- **Amps** (one line per amp; the primary amp is the one the voicing serves)
+  - Dr. Z MAZ 38 (the customer's "Dr Z Max 38 Sr Studio Lead", read as the MAZ 38 Sr. or its forerunner the MAZ 38 Studio Lead): rated 38 W, taps [4, 8, 16] (separate 4, 8, and 16 ohm jacks on the MAZ 38 Sr., one output at a time, no extension jack; the Studio Lead's jacks unverified), head or combo (not stated), primary: yes, type tube (four EL84, cathode biased, GZ34 rectifier; derived from the model), family boutique clean (the amp-family table names Dr Z)
+- **Guitars**
+  - Pickups and output: humbucker (the customer's "humbuckers")
+  - Low-end shifters: none
+- **Pedals**
+  - Dirt: overdrive, two Tube Screamers (the customer's "tubescreamer (x2)")
+  - Boosts and EQ: (not asked)
+  - Drive source: pedal platform with a lightly driven amp (the customer's words: "The amp is slight overdrive, but can't be more due to volume. Most comes from the 2 tubescreamers")
+- **Music and use**
+  - Genre: "rock, funk, country" (canonical keys: classic-rock, funk-rnb, roots-country; "rock" is not a table row and maps to classic-rock, the nearest row, by ear)
+  - Approach: edge of breakup
+  - Typical venue: practice room
+  - Typical volume: practice volume, "About 20% of amp volume"
+  - Mic'd or filling the room: room (the customer's "Filling the room")
+  - Placement: floor
+- **Tonal goals**
+  - Customer's words: "Crisp leads with milky high notes and noticable low end"
+  - Reference records or players: (not asked)
+  - Cabs loved: (not asked) / disliked: (not asked)
+- **Physical**
+  - Weight limit: (not asked)
+  - Size limits: (not asked) (vehicle: not stated)
+  - Dimensions to match: (not asked)
+  - Where it lives (hardwood line, wood movement): home (climate and heating not stated)
+- **Connections**
+  - Jack configuration: mono ((not asked), which on a 1x12 means the field does not apply)
+- **Aesthetics**
+  - Wood species or tolex color: Walnut (the site's domestic black walnut, oil finish)
+  - Grill cloth: Salt and Pepper, 32" (a site cloth, swatch on file)
+  - Piping: no; corners: none; handle: (not asked); jack plate: (not asked); logo: (not asked)
+- **Speaker**
+  - recommend (the customer's "Recommend one for me")
+
+## Assumptions stated
+
+- Amp model: "Dr Z Max 38 Sr Studio Lead" is a Dr. Z MAZ 38. Dr. Z never sold a model officially named Studio Lead; owners use the name for the MAZ 38 Sr.'s forerunner, which has a Presence knob where the Sr. has Cut. Either way it is 38 W from four cathode-biased EL84s with a GZ34 rectifier and no negative feedback. The model is known, so no power or tap follow-up was asked. Sources: https://drzamps.com/product/maz38/, the MAZ 18/38 manual http://drzamps.com/wp-content/uploads/2016/12/Maz-18-38-12-1-2016.pdf, https://ztalk.proboards.com/thread/78200/studio-lead.
+- Taps and impedance: [4, 8, 16] from the MAZ 38 Sr. manual (separate jacks). The Studio Lead's jacks are unverified, so the order voices the 8 ohm variant of the chosen speaker, which every MAZ 38 version has a tap for; the unverified jacks cannot cause a mismatch.
+- Load: the MAZ 38 has no extension jack and Dr. Z says to use one output at a time, so this cabinet is the amp's only load, whether the amp is a head or a combo with its own speaker unplugged. No combined parallel load applies.
+- Power: rated 38 W at full power (the Mk.II's 18 W half-power setting is not assumed), so `min_power_w` is 57 W. The practice volume allows early breakup and low-power speakers under the venue rule, but the engine still stops under 38 W of handling and warns under 57 W.
+- Amp tone: Dr. Z describes the MAZ 38 as "mid 60s blackface" with "UK flavored chime" and more "low end push" than the MAZ 18; owners call its top trebly; Dr. Z calls it a pedal platform. These feed the tone target's reason lines, not its values; the family row is boutique clean.
+- Three genres: the note has no rule for several genres. The intake reads each tone field from the three rows (classic-rock, funk-rnb, roots-country) by the value two of the three share, with the first-listed genre (rock) breaking a three-way split; the ranking's genre point counts once when a note lists any of the three keys. This reading is presented at stop one.
+- Tonal words: none of "crisp", "milky", or "noticable" names a vocabulary value, so each only leans and becomes a reason line: "crisp leads" toward an articulate top, "milky high notes" toward smooth, "noticable low end" away from tight.
+- Filling the room: an unmic'd practice room the cab fills by itself is read like the venue rule's unmic'd small club, so dispersion reads wide.
+- Placement on the floor shifts low_end one step toward tight (boundary gain).
+- Back type asked: open-back is recorded as the customer's ask. The note's choice rule sets the back type from the tone target; where the rule and the ask disagree, both go to stop one.
+- Boosts and EQ (not asked): none assumed; boosts and EQ do not change the target either way.
+- Drive source: most of the drive comes from the two Tube Screamers into an amp just past clean at practice volume, a pedal platform with a lightly driven amp; the edge-of-breakup approach already sets breakup moderate.
+- References and cabs loved or disliked (not asked): no ranking adjustment.
+- Weight, size, and dimensions to match (not asked): none, so the order is standard size and the site box is evaluated first; no head width is pinned.
+- Where it lives: "home", assumed a heated indoor house; the hardwood wood-movement rule applies with the construction note's defaults.
+- Jack configuration (not asked): does not apply on a 1x12; mono.
+- Aesthetics (not asked): handle a leather strap and jack plate recessed, the hardwood page's defaults; no logo assumed, Brian's call at stop two. Piping no and corners none as asked, which match the page's "typically omitted" for hardwood.
+- Customer: Cecilia Blietz shares Brian's surname; treated as a real order, with the surname in the directory name.
+
+## Follow-ups asked
+
+- none (the batch was empty on 2026-09-13: the model is known as a 38 W MAZ 38, an 8 ohm driver matches every version's taps, no limit was named, the jack is mono on a 1x12, and no speaker is supplied). Optional and not blocking, for Brian's next note to the customer: head or combo, and whether the front panel reads Presence or Cut (Studio Lead or Sr.).
+
+## Tone target
+
+| Field | Value | Reason |
+|---|---|---|
+| low_end | balanced | the rule reading is tight (the funk-rnb and roots-country rows read tight, the classic-rock row balanced, and the floor shifts one step toward tight); her "noticable low end" is read as not tight, a departure from the note's lean rule that Brian approved with the open back at stop one; an open back's low end is set by its panels, and balanced takes open panels |
+| mids | scooped | two of the three rows read neutral (funk-rnb, roots-country); humbuckers push one step toward scooped; the two Tube Screamers bring their own mid hump (overdrive is neutral in the note) |
+| top | smooth | the classic-rock and roots-country rows read smooth; "milky high notes" leans smooth and "crisp leads" toward an articulate top; the MAZ 38's trebly EL84 chime argues against chimey, which humbuckers allow but do not set |
+| breakup | moderate | edge of breakup sets moderate (the approach override); the classic-rock and roots-country rows agree |
+| dispersion | wide | "Filling the room" unmic'd in a practice room, read like the venue rule's unmic'd small club; her open-back ask agrees (two of the three genre rows read focused, for stage use) |
+| placement | floor | the customer's answer |
+| min_power_w | 57 | 1.5 x 38 W, the Dr. Z MAZ 38, the only amp |
+| impedance_options_ohm | [4, 8, 16] | the MAZ 38 Sr.'s three output jacks; the Studio Lead's jacks are unverified, and the 8 ohm driver matches every version |
+
+Written to `tone.json` on 2026-09-13. Stop one's other targets ran from scratch tone files outside the order directory: tight (the rule reading, closed-ported) and big (semi-open, the recommendation).
+
+## Speaker ranking
+
+Hard filters: the power rule drops every speaker handling under the amp's 38 W rating (Celestion Blue 15 W, G12H Anniversary 30 W, G12M-25 Greenback 25 W, Heritage G12H(55) 30 W, WGS Green Beret 25 W); every remaining note offers 8 ohm. Scored 2 per matching character word (balanced, scooped, smooth, moderate; no catalog note reads scooped, so no speaker scores on mids), 1 for the boutique clean row of the amp-family table (Celestion Gold, Cream, Cannabis Rex, Vintage 30), 1 when the note's Genres line holds any of classic-rock, funk-rnb, roots-country; no loved or disliked cab.
+
+| Candidate | Points | Matched keys | Data status | Reason |
+|---|---|---|---|---|
+| eminence-cannabis-rex | 8 | low_end, top, breakup, family, genre | datasheet | the boutique clean row's datasheet speaker: balanced low end, neutral mids under two Tube Screamers, a smooth top for "milky high notes" on a trebly EL84 amp; its note says closed or open back both suit it (Qts 0.64); 50 W, a power warning |
+| celestion-g12m-65-creamback | 7 | low_end, top, breakup, genre | missing | the same balanced, smooth, moderate words with forward mids and 65 W headroom, but no family point and no Thiele-Small data |
+| celestion-vintage-30 | 6 | low_end, top, family, genre | analog | boutique clean row and 60 W, but clean breakup and forward mids on paper, a harder voice for edge-of-breakup humbucker leads |
+
+Next at 5: celestion-g12-65-heritage (missing), celestion-gold (missing), eminence-texas-heat (datasheet), jensen-c12n (datasheet), jensen-p12n (datasheet), wgs-et65 (estimated), wgs-veteran-30 (estimated). The Cannabis Rex also ranked second under the rule reading's tight target (the G12-65 Heritage, no Thiele-Small data, first at 7) and first under the semi-open big target.
+
+Chosen: eminence-cannabis-rex at 8 ohm. Top of the ranking with the best data; the 8 ohm variant matches a tap on every MAZ 38 version.
+
+## Back type
+
+open: the customer asked for an open back, and with dispersion wide and low_end balanced the choice rule leads to open or semi-open, balanced taking open panels. Precedence: the rule reading's tight low end would beat wide dispersion and take closed-ported; Brian chose the open back as asked at stop one (see Trade-offs presented). The Cannabis Rex's Qts 0.64 sits under the 0.9 threshold, so the driver adds no preference; no low-end shifter.
+
+## Voicing decision
+
+- Mode: evaluate on the site box (an open back is accepted on the site box whenever the rules choose open; no size limit, pinned width, or second driver)
+- Engine command (verbatim), exit 0, no blockers:
+
+  ```bash
+  cd /home/brian/ClaudeProjects/3d-modeling-brain
+  /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/cabvoice.py evaluate --speaker eminence-cannabis-rex --impedance 8 \
+    --enclosure open --tone projects/Cab-Blietz-1x12-hardwood/tone.json --line hardwood --species walnut \
+    --internal 472 421.2 229.4 --name Cab-Blietz-1x12-hardwood --out projects/Cab-Blietz-1x12-hardwood/
+  ```
+
+- Reading: the site box, 42.6 L net (45.6 L gross; 42.3 L at approval, before hardwood shells dropped their stiffeners), internal 472 x 421 x 229 mm, external 508 x 457 x 279 mm (20.0 x 18.0 x 11.0 in), walnut walls voiced at 18 mm. The back is open: two panels, top and bottom, each 126 mm tall, leaving about 168 mm open across the middle (40 percent). The engine's estimate puts the front-to-back cancellation at 369 Hz: below it the back wave thins the low end at 6 dB per octave against a closed box, about 3 dB down at 254 Hz, 9 dB at 127 Hz, and 13 dB at 80 Hz. For Cecilia that is an airy, wide sound that fills the practice room at low volume and suits an EL84 amp at edge of breakup; the low end is lighter than any closed box would give, and the floor's boundary gain and a nearby wall give some of it back, so her "noticable low end" rests on the Cannabis Rex's balanced low end, the floor, and the room. The open-back figure is a path-length estimate that ranks options, not a response curve. Wiring: a single 8 ohm driver on the amp's 8 ohm jack, the only output in use (the MAZ 38 takes one output at a time). Power: the Cannabis Rex's 50 W clears the amp's 38 W rating and sits under the 57 W target, a warning, accepted: edge of breakup at about 20 percent volume at home will not push 38 W into this cabinet. Advisory: width to depth 2.06:1, within 5 percent of 2:1 (coincident standing waves), the site box's own advisory. Every number here is unverified, ears only.
+- Stop one presented four options (see Trade-offs presented): semi-open (recommended), the open back as asked, closed-ported with the site port, and the strict rule reading.
+- Approved by Brian on 2026-09-13: redirected from the recommended semi-open to the open back the customer asked for (balanced target, two 126 mm panels)
+
+## Plan
+
+- Parts in build order: shell (top, bottom, two sides, 19 mm resawn walnut, finger-jointed at the four front-to-back corners); baffle (18 mm Baltic birch, floating, front face 20 mm behind the front edge, the Cannabis Rex's 281 mm cutout with 8 bolts on a 294.4 mm circle, T-nuts from the back); baffle cleats (18 x 18 mm birch, felt strip, screws); no brace or divider (1x12, mono); no stiffeners (hardwood shell panels take none, Brian's rule of 2026-09-13; the first export carried two 18 x 40 x 193 mm birch stiffeners under the top and bottom); back cleats (18 x 18 mm) for the two open-back panels; two open-back panels (12 mm birch, 126 mm tall, top and bottom, screwed to the cleats, about 168 mm open between them), the lower one carrying the jack plate; grill frame (12 x 40 mm birch strips, half-lap corners, Salt and Pepper cloth wrapped and stapled, hook-and-loop to the baffle); hardware (recessed brass jack plate, leather strap handle, four rubber feet). No port. The layout kernel produces the actual list; this is what Brian can object to first.
+- Joinery per connection: finger joints at the four shell corners (9.5 mm fingers on 19 mm walnut, an odd count so both ends are full fingers, cut to measured thickness; through dovetails are the hardwood option, not chosen, the customer was not asked); the baffle floating on felt-isolated cleats; the open-back panels screwed to cleats; no divider. Cleats are screwed through slotted holes and glued only at their center 100 mm (the construction note's rule, kept; with the grain wrapping, the cleats run with the grain, and relaxing the rule is open for Brian).
+- Grain and show faces (hardwood): walnut (domestic black walnut, oil finish), book-matched panels glued up from resawn boards, show face out, grain wrapping around the box (left to right on the top and bottom, vertical on the sides, never front to back) so the finger corners are cut in end grain and all four panels move together along the depth axis (about 2.9 mm per 4-point moisture swing flatsawn); "home" is assumed a heated house.
+- Hardware positions: one recessed brass jack plate at the bottom center of the lower open-back panel, 25 mm above the cleat; the leather strap handle top center over the loaded center of mass (within 15 mm on the width axis), screw pair 228.6 mm apart, 50 mm inside the edges; no corners; four 40 mm rubber feet inset 32 mm; no piping.
+- Port location: none (open back)
+- Aesthetics block written into `cab.py` on 2026-09-13: copied from `projects/Speaker-cab-system/fixtures/site-default/cab.py`; changed `corners` to "none", `tolex_color` to "" (the hardwood line takes its finish from the species in voicing.json), and `grill_cloth` to 'Salt and Pepper, 32"'; corner_joint finger, baffle_mount floating, handle strap, piping False, feet rubber, tolex_roll_in 54 (unused on hardwood), head_width_mm None already matched the intake; the module docstring reduced to one line naming the order, nothing below it changed. The handle's leather qualifier and the jack plate's recessed default (the form left both unasked) live in this brief only
+
+## Trade-offs presented
+
+- 2026-09-13: stop one, the rule reading (a tight low end beats wide dispersion, so closed-ported) against the customer's open-back ask and "noticable low end", presented with four options, each the Cannabis Rex 8 ohm in the site box unless noted, every run exit 0 with no blockers: semi-open, the recommendation (low_end big, two 158 mm panels, the same 369 Hz estimate as open, so its extra low end is builder lore); the open back as asked (low_end balanced, two 126 mm panels); closed-ported with the site port (punchy, Fb 67.8 Hz, F3 98.8 Hz, 1.9 dB peak, focused); and the strict rule reading (low_end tight, closed-ported: the site box's punchy misses tight's bridge word flat, so propose a smaller ported box; the top-ranked G12-65 Heritage has no Thiele-Small data, Fb 67.4 Hz, character unpredicted). Brian chose the open back as asked; command re-run: the evaluate command under Voicing decision.
+- 2026-09-13: the first export's `spans` warn (top and bottom panel spans 470 mm over 450, a glued-flat 18 x 40 mm birch stiffener added under each) and the note's grain wording, which read both front to back and wrapping around the box, presented with: mount the stiffeners like cleats, leave them out, or keep grain front to back as generated. Brian ruled that hardwood grain never runs front to back (it wraps around the box) and that hardwood shell panels get no stiffeners on any order; the generator, check table, construction note, and skill were changed to match, and the evaluate and `cab.py` runs are repeated on the changed tools.
+- 2026-09-13: `cabreport.py`'s swatch table was older than the site's Mojotone photos (7 of 14 entries pointed at missing files, and Salt and Pepper did not resolve), presented with fix now or skip for this order; Brian chose fix now.
+
+## Decisions locked
+
+- 2026-09-13: voicing approved (eminence-cannabis-rex at 8 ohm, open back, evaluate on the site box: 42.6 L net after the stiffener change (42.3 L at approval), 508 x 457 x 279 mm external, two 126 mm back panels, cancellation 369 Hz predicted); redirected at stop one from the recommended semi-open to the open back the customer asked for
+- 2026-09-13: tone target low_end balanced instead of the rule reading's tight: her "noticable low end" read past the note's lean rule, approved with the open back
+- 2026-09-13: the 8 ohm variant, so every MAZ 38 version's taps match (the Studio Lead's jacks are unverified)
+- 2026-09-13: power warning accepted: handling 50 W under the 57 W target and above the amp's 38 W rating; no `--accept-low-headroom` (the flag is for an early-breakup target; this one is moderate)
+- 2026-09-13: engine advisory accepted: width to depth 2.06:1, within 5 percent of 2:1, the site box's own advisory
+- 2026-09-13: hardwood grain wraps around the box on all four shell panels, never front to back (Brian's rule, recorded in [[speaker-cab-construction]] and memory)
+- 2026-09-13: no stiffeners on hardwood shell panels, on this and every hardwood order (Brian); the tools were changed rather than the shop omitting parts the CAD shows
+- 2026-09-13: swatch table fixed in `cabreport.py` so the proposal shows the walnut and Salt and Pepper swatches (Brian)
+- 2026-09-13: operator rows judged in `checks.md` from the brief: no weight or size limit, no head to match, no vehicle stated (a one-hand carry at 31.9 lb), walnut in a home assumed heated with the grain wrapping around the box, finger joints and stock thickness on the construction note's defaults, stock yield well under one walnut glue-up and one birch sheet of each thickness; the two warn rows kept (power with its engine warning, and the 2:1 advisory) are covered by the acceptances above; the proposal's four slots filled and `cabreport.py --verify` exit 0
+
+## Artifacts
+
+- `projects/Cab-Blietz-1x12-hardwood/tone.json`, `voicing.json`, `voicing.md`
+- `projects/Cab-Blietz-1x12-hardwood/cab.py`, `cab.json`, `cab.step` and `cab.stl` (regenerated, ignored by the vault, not committed)
+- `projects/Cab-Blietz-1x12-hardwood/checks.md`, `cutlist.md`, `cutlist.csv`
+- `projects/Cab-Blietz-1x12-hardwood/proposal.md`, `images/` (`cab-iso.png`, `cab-front.png`, `cab-top.png`, `cab-right.png`, `cab-exploded.png`, the rear view `cab-rear.png` rendered from the export's STL at `0,90` because the five renders do not show the open back, and the `walnut.jpg` and `salt-and-pepper.jpg` swatches)
+- `projects/Cab-Blietz-1x12-hardwood/.claude/context-check/last-handoff.md`
+- Retrospective: `knowledge/learnings/cab-blietz-1x12.md` (after the build)
+
+## Site-form gaps
+
+- None that bound this order. Two soft gaps: the Amps question takes a model name only, so head or combo and whether a combo's own speaker stays connected are not asked (moot here: the MAZ 38 has no extension jack); and "Where it lives" takes a place, not the climate or heating the wood-movement rule reads.
+
+## Outcome
+
+- 2026-09-13: package built on the changed tools. The evaluate command re-ran with exit 0 (net 42.6 L, inside parts 1.00 L matching the layout); plain `cab.py` exit 0 with every layout check passing (21 parts, spans pass); `TMP_STL=... EXPORT=1 cab.py` exit 0 (28 solids, no pair overlapping, air volume 42.20 L measured against 42.20 L, 21 solids for 21 blanks); rear render from the STL at `0,90`; mass 14.5 kg. The first export (23 parts, 41.9 L, spans warn) was superseded. `checks.md` judged (33 rows, none left `operator`), `proposal.md` slots filled and verified (exit 0), swatches copied. Stop two pending: Brian reviews `checks.md`, the renders, and `proposal.md`, fills `Price:`, and sends.
