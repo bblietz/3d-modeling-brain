@@ -250,11 +250,11 @@ No CAD before Brian approves this phase.
   order directory as `cab.py` and edit its `AESTHETICS` constants
   (`corner_joint`, `baffle_mount`, `handle`, `corners`, `piping`,
   `feet`, `tolex_roll_in`, `tolex_color`, `grill_cloth`,
-  `head_width_mm`) and reduce its module docstring to one line naming
-  the order (the template's copy instructions are dropped). Everything
-  below the docstring stays unchanged; a hardware qualifier the
-  constants cannot hold (the form's "Leather strap handle" is
-  `handle="strap"`) survives in the brief only.
+  `head_width_mm`, `roundover_mm`) and reduce its module docstring to
+  one line naming the order (the template's copy instructions are
+  dropped). Everything below the docstring stays unchanged; a hardware
+  qualifier the constants cannot hold (the form's "Leather strap
+  handle" is `handle="strap"`) survives in the brief only.
 
 Write the plan into the brief and present it briefly; no stop.
 

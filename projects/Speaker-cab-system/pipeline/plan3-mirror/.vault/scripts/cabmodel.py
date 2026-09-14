@@ -25,8 +25,8 @@ import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from build123d import (Align, Box, Compound, Cylinder, Plane, Polygon, Pos, Rot,
-                       export_step, export_stl, extrude)
+from build123d import (Align, Axis, Box, Compound, Cylinder, Edge, Face, Plane, Polygon, Pos, Rot,
+                       Wire, export_step, export_stl, extrude, fillet)
 
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
@@ -173,6 +173,30 @@ def blank_solid(blank):
     return out
 
 
+def roundover_envelope(layout):
+    """The external box (the layout frame's W x D x H) with all 12 edges
+    filleted at Aesthetics.roundover_mm; None when the option is off.
+    order_from keeps the radius under the shell thickness, so the fillets stay
+    in the outer skin and never reach a panel's inside face."""
+    r = layout.spec.aesthetics.roundover_mm
+    if r is None:
+        return None
+    fr = L.frame(layout.spec)
+    return fillet(_box(-fr.W / 2.0, 0.0, 0.0, fr.W / 2.0, fr.D, fr.H).edges(), r)
+
+
+def shell_solid(blank, envelope):
+    """blank_solid for a shell panel, intersected with the roundover envelope
+    when there is one: only the material within the radius of two outer faces
+    goes, through the finger or dovetail combs."""
+    solid = blank_solid(blank)
+    if envelope is None:
+        return solid
+    out = _largest_solid(solid & envelope)
+    out.label = blank.name
+    return out
+
+
 def part_entry(blank, solid):
     """Furniture PARTS registry entry: the cut list reads dims (the rectangular
     blank), the assembly and STEP read the solid."""
@@ -261,7 +285,8 @@ def render_kind(kind: str, layout, png_path):
     task units (interior_solids, back_solids, port_solids, component_solids,
     build, exploded); the names resolve when the kind is rendered."""
     if kind == "shell":
-        solids = [blank_solid(b) for b in layout.parts if b.name in SHELL_NAMES]
+        envelope = roundover_envelope(layout)
+        solids = [shell_solid(b, envelope) for b in layout.parts if b.name in SHELL_NAMES]
         return render(solids, png_path, views=[(30, -60), (20, -150)])
     if kind == "interior":
         return render(list(interior_solids(layout).values()), png_path, views=[(25, -60), (15, 120)])
@@ -355,9 +380,12 @@ def assert_no_overlap(a, b, tol_mm3=1.0) -> float:
 # === TASK 10 ===
 FOOT_H_MM = 16.0
 PLATE_T_MM = 2.0
-STRAP_T_MM = 25.0
-STRAP_W_MM = 25.0
-STRAP_EXTRA_MM = 40.0
+STRAP_T_MM = 5.0                        # leather strap thickness
+STRAP_W_MM = 25.0                       # leather strap width, across the top (y)
+STRAP_RISE_MM = 15.0                    # the strap's lower face above the cap tops at mid-span
+STRAP_GAP_MM = 0.2                      # strap end to cap face, so the pair never overlaps
+STRAP_CAP_MM = (40.0, 32.0, 9.0)        # strap handle end cap: along the strap (x), across (y), tall (z)
+STRAP_CAP_ROUND_MM = 3.0                # radius on the caps' top edges
 RECESSED_DEPTH_MM = 12.0
 
 
@@ -382,6 +410,39 @@ def envelope_solid(env) -> object:
     return _largest_solid(solid)
 
 
+def strap_handle_solids(position, spacing_mm) -> dict:
+    """The strap handle as three placeholders keyed by label: two end caps
+    on the top panel's outer face, each centered on a screw (the handle
+    position plus or minus half the screw spacing along x), and the leather
+    strap between them. The strap is a 5 mm thick arch (concentric arcs in
+    the XZ plane, extruded 25 mm along y) whose ends sit at mid cap height
+    STRAP_GAP_MM off each cap's inner face and whose lower face rises
+    STRAP_RISE_MM above the cap tops at mid-span."""
+    x, y, z = position
+    cap_x, cap_y, cap_h = STRAP_CAP_MM
+    half = spacing_mm / 2.0
+    out = {}
+    for i, xc in enumerate((x - half, x + half)):
+        cap = _box(xc - cap_x / 2, y - cap_y / 2, z, xc + cap_x / 2, y + cap_y / 2, z + cap_h)
+        cap = fillet(cap.edges().group_by(Axis.Z)[-1], STRAP_CAP_ROUND_MM)
+        cap.label = f"strap_handle_cap_{i}"
+        out[cap.label] = cap
+    xa, xb = x - half + cap_x / 2 + STRAP_GAP_MM, x + half - cap_x / 2 - STRAP_GAP_MM
+    z_end, z_mid = z + (cap_h - STRAP_T_MM) / 2.0, z + cap_h + STRAP_RISE_MM
+    c, s = (xb - xa) / 2.0, z_mid - z_end              # half chord and rise of the lower face
+    r = (c * c + s * s) / (2.0 * s)
+    z_top = z_mid - r + ((r + STRAP_T_MM) ** 2 - c * c) ** 0.5   # the upper face where it meets each end
+    y0 = y - STRAP_W_MM / 2.0
+    wire = Wire([Edge.make_three_point_arc((xa, y0, z_end), (x, y0, z_mid), (xb, y0, z_end)),
+                 Edge.make_line((xb, y0, z_end), (xb, y0, z_top)),
+                 Edge.make_three_point_arc((xb, y0, z_top), (x, y0, z_mid + STRAP_T_MM), (xa, y0, z_top)),
+                 Edge.make_line((xa, y0, z_top), (xa, y0, z_end))])
+    strap = extrude(Face(wire), amount=STRAP_W_MM, dir=(0, 1, 0))
+    strap.label = "strap_handle"
+    out[strap.label] = strap
+    return out
+
+
 def component_solids(layout) -> dict:
     """Placeholders for the render and the interference checks, never in the
     cut list: speaker envelopes, jack plates, the handle, the feet."""
@@ -402,11 +463,7 @@ def component_solids(layout) -> dict:
             out[s.label] = s
             n_plate += 1
         elif hw.item == "strap handle":
-            x, y, z = hw.position
-            half = spec.aesthetics.handle_screw_spacing_mm / 2.0 + STRAP_EXTRA_MM / 2.0
-            s = _box(x - half, y - STRAP_W_MM / 2, z, x + half, y + STRAP_W_MM / 2, z + STRAP_T_MM)
-            s.label = "strap_handle"
-            out[s.label] = s
+            out.update(strap_handle_solids(hw.position, spec.aesthetics.handle_screw_spacing_mm))
         elif hw.item == "recessed handle":
             w, h = hw.cutout
             x, y, z = hw.position
@@ -455,10 +512,13 @@ def _port_air_tool(entry: dict):
 
 
 def build(layout) -> CabBuild:
-    """Every blank as one named solid, the component placeholders, the
+    """Every blank as one named solid (the shell panels rounded when
+    Aesthetics.roundover_mm is set), the component placeholders, the
     assembly, and one air shape per chamber (the chamber box minus every
     solid the layout puts inside it minus its port air)."""
-    parts = [part_entry(b, blank_solid(b)) for b in layout.parts]
+    envelope = roundover_envelope(layout)
+    parts = [part_entry(b, shell_solid(b, envelope) if b.name in SHELL_NAMES else blank_solid(b))
+             for b in layout.parts]
     components = component_solids(layout)
     assembly = compound_of(e["solid"] for e in parts)
     air = []

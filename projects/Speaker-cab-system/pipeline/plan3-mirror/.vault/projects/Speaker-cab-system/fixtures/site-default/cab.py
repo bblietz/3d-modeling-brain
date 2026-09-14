@@ -44,6 +44,7 @@ AESTHETICS = L.Aesthetics(
     tolex_color="Fender Style Black",
     grill_cloth="British Small Weave Cane",
     head_width_mm=None,             # set to match a head: external width = head + 0 to 10 mm
+    roundover_mm=None,              # outside-edge roundover radius, 12.7 for 1/2 in
 )
 
 try:

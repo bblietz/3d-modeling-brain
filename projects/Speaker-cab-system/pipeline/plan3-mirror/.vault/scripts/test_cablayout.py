@@ -836,7 +836,7 @@ def test_report_carries_the_aesthetics_block():
     rep = L.layout_report(lay, L.check_layout(lay, spec))
     json.dumps(rep)
     block = rep["aesthetics"]
-    assert len(block) == 21
+    assert len(block) == 22
     assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
                                   "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
         "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",
@@ -1024,3 +1024,64 @@ def test_spans_message_names_the_unstiffened_hardwood_shell():
     narrow = (476.0, 457.2, 279.4)
     for line in ({}, WALNUT):
         assert _spans_check(external=narrow, **line) == ("pass", "no panel span over 450 mm"), line
+
+
+# ---- shell roundover option ----
+SHELL_PANELS = ("side_left", "side_right", "top", "bottom")
+ROUNDOVER_CLAUSE = "; 12.7 mm (1/2 in) roundover on every outside edge"
+
+
+def test_roundover_is_positive_or_none():
+    assert L.Aesthetics().roundover_mm is None
+    for ok in (None, 3.175, 12.7):
+        assert L.Aesthetics(roundover_mm=ok).validate() == [], ok
+    for bad in (0.0, -6.35):
+        assert L.Aesthetics(roundover_mm=bad).validate() == ["roundover_mm must be positive or None"], bad
+        with pytest.raises(ValueError, match="aesthetics: roundover_mm must be positive or None"):
+            spec_for(aesthetics=L.Aesthetics(roundover_mm=bad))
+
+
+def test_roundover_must_be_under_the_shell_thickness():
+    assert L.PANEL_MM == {"tolex": 18.0, "hardwood": 19.0}
+    for line, species in (("tolex", None), ("hardwood", "black walnut")):
+        t = L.PANEL_MM[line]
+        spec = spec_for(line=line, species=species, aesthetics=L.Aesthetics(roundover_mm=t - 0.5))
+        assert spec.aesthetics.roundover_mm == t - 0.5
+        for r in (t, t + 0.5, 25.4):      # 18.5 mm fits the hardwood shell but not the tolex one
+            with pytest.raises(ValueError, match=f"roundover_mm {r:g} must be under the {line} shell thickness, {t:g} mm"):
+                spec_for(line=line, species=species, aesthetics=L.Aesthetics(roundover_mm=r))
+
+
+def test_roundover_note_on_the_four_shell_blanks_only():
+    assert L.roundover_note(None) == ""
+    for r, size in ((12.7, "12.7 mm (1/2 in)"), (3.175, "3.175 mm (1/8 in)"), (6.35, "6.35 mm (1/4 in)"),
+                    (9.525, "9.525 mm (3/8 in)"), (15.875, "15.875 mm (5/8 in)"), (10.0, "10 mm"), (5.0, "5 mm")):
+        assert L.roundover_note(r) == f"; {size} roundover on every outside edge", r
+    for mount in ("floating", "fixed"):
+        plain = L.layout(spec_for(**WALNUT, **OPEN_BACK, aesthetics=L.Aesthetics(baffle_mount=mount)))
+        spec = spec_for(**WALNUT, **OPEN_BACK, aesthetics=L.Aesthetics(baffle_mount=mount, roundover_mm=12.7))
+        lay = L.layout(spec)
+        assert [p.name for p in lay.parts] == [p.name for p in plain.parts], mount
+        for a, b in zip(plain.parts, lay.parts):
+            assert b.blank_mm == a.blank_mm, (mount, b.name)       # blank sizes stay the same
+            if b.name in SHELL_PANELS:
+                assert b.notes.count(ROUNDOVER_CLAUSE) == 1, (mount, b.name)
+                assert b.notes.replace(ROUNDOVER_CLAUSE, "") == a.notes, (mount, b.name)
+            else:
+                assert b.notes == a.notes, (mount, b.name)
+        # cab.json's aesthetics block (asdict) carries the option with no extra code
+        rep = json.loads(json.dumps(L.layout_report(lay, L.check_layout(lay, spec))))
+        assert rep["aesthetics"]["roundover_mm"] == 12.7
+        assert L.layout_report(plain, [])["aesthetics"]["roundover_mm"] is None
+
+
+def test_site_default_template_leaves_roundover_unset_and_its_layout_notes_unchanged():
+    import ast
+    tree = ast.parse((SITE_DEFAULT / "cab.py").read_text())
+    call = next(n.value for n in tree.body
+                if isinstance(n, ast.Assign) and getattr(n.targets[0], "id", None) == "AESTHETICS")
+    kw = {k.arg: ast.literal_eval(k.value) for k in call.keywords}
+    assert "roundover_mm" in kw and kw["roundover_mm"] is None
+    spec = L.order_from(L.load_voicing(SITE_DEFAULT / "voicing.json"), L.Aesthetics(**kw))
+    committed = json.loads((SITE_DEFAULT / "cab.json").read_text())
+    assert [(p.name, p.notes) for p in L.layout(spec).parts] == [(p["name"], p["notes"]) for p in committed["parts"]]

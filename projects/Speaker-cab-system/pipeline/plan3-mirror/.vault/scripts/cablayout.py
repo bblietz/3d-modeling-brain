@@ -114,6 +114,7 @@ class Aesthetics:
     tolex_color: str = ""
     grill_cloth: str = ""
     finish: str = ""
+    roundover_mm: float | None = None
 
     def validate(self) -> list:
         errors = []
@@ -129,7 +130,7 @@ class Aesthetics:
             errors.append(f"feet must be one of {', '.join(FEET)}")
         if self.tolex_roll_in not in ROLL_MM:
             errors.append("tolex_roll_in must be 54 or 32")
-        for name in ("finger_width_mm", "dovetail_pin_mm", "head_width_mm"):
+        for name in ("finger_width_mm", "dovetail_pin_mm", "head_width_mm", "roundover_mm"):
             v = getattr(self, name)
             if v is not None and not v > 0:
                 errors.append(f"{name} must be positive or None")
@@ -426,7 +427,8 @@ def _port_from(p: dict) -> PortSpec:
 def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
     """CabSpec from a voicing.json dict and the aesthetics block.
     ValueError on sheet blockers, missing keys, a dovetail on the tolex line,
-    or invalid aesthetics. Never reads warning text."""
+    a roundover of the shell thickness or more, or invalid aesthetics. Never
+    reads warning text."""
     errors = aesthetics.validate()
     if errors:
         raise ValueError("aesthetics: " + "; ".join(errors))
@@ -463,6 +465,9 @@ def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
         raise ValueError(f"line must be tolex or hardwood, not {line!r}")
     if aesthetics.corner_joint == "dovetail" and line != "hardwood":
         raise ValueError("dovetail corners are a hardwood line option")
+    if aesthetics.roundover_mm is not None and aesthetics.roundover_mm >= PANEL_MM[line]:
+        raise ValueError(f"roundover_mm {aesthetics.roundover_mm:g} must be under the {line} shell thickness, "
+                         f"{PANEL_MM[line]:g} mm")
     if len(speakers) != driver_count:
         raise ValueError(f"{len(speakers)} speaker entries for {driver_count} drivers")
     if enclosure_type not in cabvoice.ENCLOSURE_TYPES:
@@ -592,6 +597,24 @@ def shell_material(spec: CabSpec) -> tuple:
 
 HARDWOOD_GRAIN_NOTE = "grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"
 
+ROUNDOVER_EIGHTHS_TOL = 0.02   # a radius within this many eighths of an inch of an eighth-inch size is named by its fraction
+
+
+def roundover_note(radius_mm: float | None) -> str:
+    """The shell blank notes' clause for Aesthetics.roundover_mm, for example
+    '; 12.7 mm (1/2 in) roundover on every outside edge'. The inch fraction
+    appears only when the radius is an eighth-inch size (the share page names
+    it the same way); '' when the option is off."""
+    if radius_mm is None:
+        return ""
+    size = f"{radius_mm:g} mm"
+    eighths = radius_mm / MM_PER_INCH * 8.0
+    n = round(eighths)
+    if n > 0 and abs(eighths - n) < ROUNDOVER_EIGHTHS_TOL:
+        g = math.gcd(n, 8)
+        size += f" ({n // g}/{8 // g} in)"
+    return f"; {size} roundover on every outside edge"
+
 
 def birch(t: float) -> str:
     return f"baltic birch {t:g} mm"
@@ -624,6 +647,7 @@ def shell_blanks(spec: CabSpec) -> list:
         bot_polys = _dovetail_polys(sch, D, 0.0, t, "pins")
     if spec.line == "hardwood":
         note += "; " + HARDWOOD_GRAIN_NOTE
+    note += roundover_note(a.roundover_mm)
     left = (-W / 2, -W / 2 + t)
     right = (W / 2 - t, W / 2)
     parts = [

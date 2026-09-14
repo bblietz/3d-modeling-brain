@@ -1148,7 +1148,7 @@ def test_report_carries_the_aesthetics_block():
     rep = L.layout_report(lay, L.check_layout(lay, spec))
     json.dumps(rep)
     block = rep["aesthetics"]
-    assert len(block) == 21
+    assert len(block) == 22
     assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
                                   "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
         "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",
@@ -1363,6 +1363,148 @@ def test_fixture_order_runs_clean_with_every_deliverable(name, tmp_path):
                                          "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm"}
     missing = [d for d in DELIVERABLES if not (tmp_path / d).exists()]
     assert missing == [], missing
+
+
+# ---- shell roundover option ----
+ROUNDOVER_MM = 12.7
+SITE_INTERNAL_MM = (472.0, 421.2, 229.4)
+
+
+def _site_box(enclosure, line, species, roundover_mm, joint="finger"):
+    """Layout of the site box voiced live from internal 472 x 421.2 x 229.4 mm on the matrix speaker."""
+    drv = cabvoice.load_speaker(MATRIX_SPEAKER)
+    c = cabvoice.Constraints(line=line, species=species)
+    v = cabvoice.evaluate([drv], [drv.impedance_ohm[0]], enclosure, TONE, SITE_INTERNAL_MM, constraints=c).to_dict()
+    assert not v["blockers"], v["blockers"]
+    return L.layout(L.order_from(v, L.Aesthetics(corner_joint=joint, roundover_mm=roundover_mm)))
+
+
+def _rounded_box_removed_mm3(W, D, H, r):
+    """A W x D x H box's volume minus the same box with all 12 edges filleted at r."""
+    a, b, c = W - 2 * r, D - 2 * r, H - 2 * r
+    kept = a * b * c + 2 * r * (a * b + a * c + b * c) + math.pi * r * r * (a + b + c) + 4.0 / 3.0 * math.pi * r ** 3
+    return W * D * H - kept
+
+
+def _corner_probes(W, D, H):
+    """A point 1 mm in from each outer face at each of the box's eight corners."""
+    return [(sx * (W / 2 - 1.0), y, z) for sx in (-1, 1) for y in (1.0, D - 1.0) for z in (1.0, H - 1.0)]
+
+
+def test_roundover_rounds_the_hardwood_open_back_site_box_shell_and_nothing_else():
+    plain_lay = _site_box("open", "hardwood", "black walnut", None)
+    lay = _site_box("open", "hardwood", "black walnut", ROUNDOVER_MM)
+    fr = L.frame(lay.spec)
+    W, H, D, t, r = fr.W, fr.H, fr.D, fr.t, ROUNDOVER_MM
+    assert (W, H, D, t) == (508.0, 457.2, 279.4, 19.0)
+    assert M.roundover_envelope(plain_lay) is None
+    plain, cab = M.build(plain_lay), M.build(lay)
+    before = {e["name"]: e["solid"] for e in plain.parts}
+    after = {e["name"]: e["solid"] for e in cab.parts}
+    edge_area = (1.0 - math.pi / 4.0) * r * r          # the cross-section a roundover removes along a straight edge
+    # every point within r of at most one outer face: the only material a roundover may not touch
+    skin_and_core = (M._box(-W / 2, r, r, W / 2, D - r, H - r) + M._box(-W / 2 + r, 0.0, r, W / 2 - r, D, H - r)
+                     + M._box(-W / 2 + r, r, 0.0, W / 2 - r, D - r, H))
+    drops = {}
+    for name in M.SHELL_NAMES:
+        s0, s1 = before[name], after[name]
+        assert len(s1.solids()) == 1 and s1.is_valid and s1.label == name, name
+        b0, b1 = s0.bounding_box(), s1.bounding_box()
+        assert (b1.min - b0.min).length < 1e-6 and (b1.max - b0.max).length < 1e-6, name
+        assert abs((s0 & skin_and_core).volume - (s1 & skin_and_core).volume) < 1.0, name   # inside faces untouched
+        drops[name] = s0.volume - s1.volume
+        run = W if name in ("top", "bottom") else H      # the length of the panel's front and back edges
+        # at least those two edges less the corner blocks; at most both whole plus both front-to-back corner edges
+        assert 2 * (run - 2 * t) * edge_area < drops[name] < 2 * (run + D) * edge_area, (name, drops[name])
+    assert abs(sum(drops.values()) - _rounded_box_removed_mm3(W, D, H, r)) < 1.0
+    for p in _corner_probes(W, D, H):
+        assert any(before[n].is_inside(p) for n in M.SHELL_NAMES), p
+        assert not any(after[n].is_inside(p) for n in M.SHELL_NAMES), p
+    for name, p in (("top", (0.0, D / 2, H - 1.0)), ("bottom", (0.0, D / 2, 1.0)),
+                    ("side_left", (-W / 2 + 1.0, D / 2, H / 2)), ("side_right", (W / 2 - 1.0, D / 2, H / 2))):
+        assert after[name].is_inside(p), name
+    for name, solid in after.items():
+        if name not in M.SHELL_NAMES:
+            assert abs(solid.volume - before[name].volume) < 1e-6, name
+    assert {k: v.volume for k, v in cab.components.items()} == {k: v.volume for k, v in plain.components.items()}
+    assert [c.level for c in L.check_layout(lay, lay.spec)] == [c.level for c in L.check_layout(plain_lay, plain_lay.spec)]
+    by0 = {c.name: c for c in M.check_build(plain, plain_lay)}
+    by1 = {c.name: c for c in M.check_build(cab, lay)}
+    assert [c.level for c in by1.values()] == ["pass"] * 4, [c.message for c in by1.values()]
+    assert by1["air volume"].message == by0["air volume"].message
+    assert abs(cab.air[0].volume - plain.air[0].volume) < 1.0
+
+
+def test_roundover_cuts_through_the_dovetail_combs():
+    lay = _site_box("open", "hardwood", "black walnut", ROUNDOVER_MM, joint="dovetail")
+    W, H, D = lay.spec.external_mm
+    envelope = M.roundover_envelope(lay)
+    removed = 0.0
+    for b in lay.parts:
+        if b.name in M.SHELL_NAMES:
+            plain = M.blank_solid(b)
+            rounded = M.shell_solid(b, envelope)
+            assert len((plain & envelope).solids()) == 1 and rounded.is_valid, b.name
+            assert not any(rounded.is_inside(p) for p in _corner_probes(W, D, H)), b.name
+            removed += plain.volume - rounded.volume
+    assert abs(removed - _rounded_box_removed_mm3(W, D, H, ROUNDOVER_MM)) < 1.0
+
+
+def test_roundover_on_a_tolex_closed_site_box_builds_clean():
+    lay = _site_box("closed", "tolex", None, ROUNDOVER_MM)
+    assert [c.message for c in L.check_layout(lay, lay.spec) if c.level == "blocker"] == []
+    cab = M.build(lay)
+    checks = M.check_build(cab, lay)
+    assert [c.level for c in checks] == ["pass"] * 4, [c.message for c in checks]
+    W, H, D = lay.spec.external_mm
+    removed = sum(M.blank_solid(b).volume - e["solid"].volume
+                  for b, e in zip(lay.parts, cab.parts) if b.name in M.SHELL_NAMES)
+    assert abs(removed - _rounded_box_removed_mm3(W, D, H, ROUNDOVER_MM)) < 1.0
+
+
+# ---- strap handle: a leather strap arched between two end caps ----
+STRAP_HANDLE_LABELS = ("strap_handle_cap_0", "strap_handle_cap_1", "strap_handle")
+
+
+def test_strap_handle_is_a_leather_strap_between_two_end_caps(tmp_path):
+    lay = _site_layout()
+    assert lay.spec.aesthetics.handle == "strap"
+    x, y, z = next(h for h in lay.hardware if h.item == "strap handle").position
+    comps = M.component_solids(lay)
+    assert [k for k in comps if k.startswith("strap_handle")] == list(STRAP_HANDLE_LABELS)
+    for name in STRAP_HANDLE_LABELS:
+        assert comps[name].label == name and len(comps[name].solids()) == 1 and comps[name].is_valid, name
+    caps, strap = [comps[n] for n in STRAP_HANDLE_LABELS[:2]], comps["strap_handle"]
+    cap_x, cap_y, cap_h = M.STRAP_CAP_MM
+    boxes = [c.bounding_box() for c in caps]
+    centers = [b.center() for b in boxes]
+    # caps on the top panel's outer face, centered on the two screws
+    assert centers[1].X - centers[0].X == pytest.approx(lay.spec.aesthetics.handle_screw_spacing_mm, abs=1e-6)
+    assert (centers[0].X + centers[1].X) / 2.0 == pytest.approx(x, abs=1e-6)
+    for b, c in zip(boxes, centers):
+        assert c.Y == pytest.approx(y, abs=1e-6)
+        assert (b.max.X - b.min.X, b.max.Y - b.min.Y) == pytest.approx((cap_x, cap_y), abs=1e-6)
+        assert (b.min.Z, b.max.Z) == pytest.approx((z, z + cap_h), abs=1e-6)
+    assert all(c.volume < cap_x * cap_y * cap_h - 100.0 for c in caps)      # top edges rounded
+    # the strap: ends at cap height a gap off each cap face, apex above the cap tops
+    cap_top = z + cap_h
+    sb = strap.bounding_box()
+    assert sb.min.X == pytest.approx(boxes[0].max.X + M.STRAP_GAP_MM, abs=1e-6)
+    assert sb.max.X == pytest.approx(boxes[1].min.X - M.STRAP_GAP_MM, abs=1e-6)
+    assert sb.max.Y - sb.min.Y == pytest.approx(M.STRAP_W_MM, abs=1e-6)
+    assert z < sb.min.Z < cap_top and sb.max.Z > cap_top
+    lower = cap_top + M.STRAP_RISE_MM                 # the lower face at mid-span, the leather above it
+    assert not strap.is_inside((x, y, lower - 0.3)) and strap.is_inside((x, y, lower + 0.3))
+    assert strap.is_inside((x, y, lower + M.STRAP_T_MM - 0.3)) and not strap.is_inside((x, y, lower + M.STRAP_T_MM + 0.3))
+    shell = [M.blank_solid(b) for b in lay.parts if b.name in M.SHELL_NAMES]
+    handle = caps + [strap]
+    for i, a in enumerate(handle):
+        for b in handle[i + 1:] + shell:
+            assert M.overlap_volume(a, b) < 1e-3, (a.label, b.label)
+    step = tmp_path / "handle.step"
+    M.export_step(M.compound_of(handle), str(step))
+    text = step.read_text(errors="ignore")
+    assert all(f"'{name}'" in text for name in STRAP_HANDLE_LABELS)
 ```
 <!-- /code -->
 
@@ -2325,6 +2467,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 - **Tolex line**: 18 mm birch. Recessed metal jack plate. Metal corners, black or chrome, or none. Site: "13-ply void-free Baltic birch, hand-cut finger joints".
 - **Hardwood line**: 19 mm resawn, book-matched panels, show face out. Recessed brass jack plate. No metal corners by default. Oil finish. The site copy still says "through-tenon corner posts glued + pinned" while the site's own renders show finger joints; the copy is wrong and is a site fix outside this vault.
 - **Joinery survey**: finger joints are the plurality at the top of the market and the vintage-correct choice; the through dovetail is the only structural peer for solid wood; miters and rabbets are styling or budget choices. Details and sources in [[guitar-cab-joinery-survey]].
+- **Roundover (option)**: a radius on every outside edge of the shell (Aesthetics.roundover_mm), routed after the carcass is glued up; 12.7 mm (1/2 in) on the first walnut order (Brian, 2026-09-13). The internal volume is unchanged.
 
 ## Joinery conventions
 
@@ -3587,11 +3730,11 @@ No CAD before Brian approves this phase.
   order directory as `cab.py` and edit its `AESTHETICS` constants
   (`corner_joint`, `baffle_mount`, `handle`, `corners`, `piping`,
   `feet`, `tolex_roll_in`, `tolex_color`, `grill_cloth`,
-  `head_width_mm`) and reduce its module docstring to one line naming
-  the order (the template's copy instructions are dropped). Everything
-  below the docstring stays unchanged; a hardware qualifier the
-  constants cannot hold (the form's "Leather strap handle" is
-  `handle="strap"`) survives in the brief only.
+  `head_width_mm`, `roundover_mm`) and reduce its module docstring to
+  one line naming the order (the template's copy instructions are
+  dropped). Everything below the docstring stays unchanged; a hardware
+  qualifier the constants cannot hold (the form's "Leather strap
+  handle" is `handle="strap"`) survives in the brief only.
 
 Write the plan into the brief and present it briefly; no stop.
 

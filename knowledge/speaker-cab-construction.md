@@ -42,6 +42,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 - **Tolex line**: 18 mm birch. Recessed metal jack plate. Metal corners, black or chrome, or none. Site: "13-ply void-free Baltic birch, hand-cut finger joints".
 - **Hardwood line**: 19 mm resawn, book-matched panels, show face out. Recessed brass jack plate. No metal corners by default. Oil finish. The site copy still says "through-tenon corner posts glued + pinned" while the site's own renders show finger joints; the copy is wrong and is a site fix outside this vault.
 - **Joinery survey**: finger joints are the plurality at the top of the market and the vintage-correct choice; the through dovetail is the only structural peer for solid wood; miters and rabbets are styling or budget choices. Details and sources in [[guitar-cab-joinery-survey]].
+- **Roundover (option)**: a radius on every outside edge of the shell (Aesthetics.roundover_mm), routed after the carcass is glued up; 12.7 mm (1/2 in) on the first walnut order (Brian, 2026-09-13). The internal volume is unchanged.
 
 ## Joinery conventions
 
