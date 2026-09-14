@@ -1803,8 +1803,10 @@ def check_layout(lay: Layout, spec: CabSpec) -> list:
                         "over stock: " + ", ".join(over) if over else "every blank fits the stock limits"))
     checks.append(Check("part count", "pass", f"{lay.part_count} parts"))
     spans = [n[len("span: "):] for n in lay.notes if n.startswith("span: ")]
+    unstiffened = unstiffened_shell_spans(spec, fr)
+    words = ([unstiffened] if unstiffened else []) + spans
     checks.append(Check("spans", "warn" if spans else "pass",
-                        "; ".join(spans) if spans else f"no panel span over {SPAN_MAX_MM:.0f} mm"))
+                        "; ".join(words) if words else f"no panel span over {SPAN_MAX_MM:.0f} mm"))
     return checks
 
 def layout_report(lay: Layout, checks: list) -> dict:
@@ -2328,13 +2330,13 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 - **Fingers**: width half the panel thickness (9 mm on 18 mm birch, 9.5 mm on 19 mm hardwood), count the nearest odd integer to depth / width so both ends are full fingers, width recomputed as depth / count. The top and bottom panels carry a full finger at the front edge; the sides start with a gap. Trade practice runs 1/4 in fingers; the width is a parameter.
 - **Dovetails** (hardwood only): tails on the side panels so a lift by the top handle loads the joint in its locked direction, pins on top and bottom, half-pins at both ends, slope 1:8, pin width half the panel thickness at the outer face, tails about 30 mm.
-- **Wood movement (hardwood line)**: grain wraps around the box on all four shell panels (left to right on the top and bottom, vertical on the sides), so the corner joints are cut in end grain and every panel moves along the depth axis together; never run hardwood grain front to back, which puts the corners in long grain and sets the panels moving in different directions (Brian, 2026-09-13); expect roughly 2.6 mm (cherry), 2.8 (sapele), 2.9 (walnut), 3.7 mm (hard maple) of depth change per 4-point moisture swing flatsawn, about half quartersawn. Cleats on the hardwood line are screwed through slotted holes and glued only at their center 100 mm, and a fixed baffle is glued in the front 100 mm of its dado only; these rules date from the front-to-back grain wording, and with the grain wrapping, the cleats and dados run with the grain, so whether to relax them is open for Brian. The intake's "where it lives" answer sets the expected humidity swing.
+- **Wood movement (hardwood line)**: grain wraps around the box on all four shell panels (left to right on the top and bottom, vertical on the sides), so the corner joints are cut in end grain and every panel moves along the depth axis together; never run hardwood grain front to back, which puts the corners in long grain and sets the panels moving in different directions (Brian, 2026-09-13); expect roughly 2.6 mm (cherry), 2.8 (sapele), 2.9 (walnut), 3.7 mm (hard maple) of depth change per 4-point moisture swing flatsawn, about half quartersawn. With the grain wrapping, every cleat and a fixed baffle's dados run with the grain, so hardwood cleats are glued and screwed like the tolex line's and a fixed baffle is glued along its full dado (Brian, 2026-09-13; the earlier slotted-cleat and front-100-mm glue rules came from the front-to-back grain wording). The intake's "where it lives" answer sets the expected humidity swing.
 
 ## Baffle
 
 - 18 mm birch on both lines. Front face 20 mm behind the front edge of the shell (the recess that holds the grill frame). Driver mounts from the front of the baffle onto T-nuts fitted from the back. Bolts M6 or 1/4-20, 6.5 mm holes on the note's bolt circle, first hole at twelve o'clock.
 - **Floating (default)**: 1 mm clearance to each side, on 18 x 18 mm cleats glued to the shell, felt strip between cleat and baffle, held with screws through the cleats, removable. Site: "floating 3/4 in birch with felt isolation".
-- **Fixed (option)**: glued into a 6 mm deep dado in all four shell panels (three with a front slot port, where the shelf carries the baffle's bottom edge), blank 12 mm larger in width and height, no baffle cleats. On hardwood see the cross-grain rule above.
+- **Fixed (option)**: glued into a 6 mm deep dado in all four shell panels (three with a front slot port, where the shelf carries the baffle's bottom edge), blank 12 mm larger in width and height, no baffle cleats. On hardwood it is glued along the full dado too, since the dados run with the grain (see Wood movement).
 - Driver cutout, bolt circle, bolt count, frame diameter, and magnet diameter come from the speaker note. Typical: Celestion 283 mm cutout on a 297 mm circle, Eminence 281 mm on 294 mm, Jensen 277 mm on 293.5 mm; frames 306 to 310 mm, so the flange overhangs the cutout by 11 to 15 mm; flange thickness 5 mm starting value.
 - **Margins**: at least 44 mm from a cutout edge to any shell panel (grill strip 40 plus 2 mm clearance plus 2), 25 mm from a cutout edge to the brace or divider, so the two cutouts of a 2x12 sit 68 mm apart (18 plus 2 x 25). Minimum internal width = n x cutout + (n - 1) x 68 + 2 x 44, the same for mono and stereo since the divider replaces the brace (2x12 with 283 mm cutouts: 722 mm internal, 758 mm external, 29.8 in). Minimum internal height = cutout + 88, plus slot height + 18 with a front slot port.
 - **Speaker envelope** (for clearance checks): behind the baffle a basket cylinder at the cutout diameter for the first 100 mm from the baffle front face, then the magnet cylinder at the note's magnet diameter plus 12 mm cover allowance (185 mm when the note has none), total length the note's depth. At least 25 mm from any envelope part to the back panel, a port tube, a cleat, a shelf, a stiffener, the brace, or the divider.
@@ -2586,7 +2588,7 @@ def test_site_default_facts(tmp_path):
     assert f["finish"] == "Fender Style Black"
     assert f["grill_cloth"] == "British Small Weave Cane"
     assert f["hardware"] == "Black corners, strap handle, recessed metal jack plate, no piping, rubber feet."
-    assert f["swatch_finish"] == "![Fender Style Black](images/fender-black.jpg)"
+    assert f["swatch_finish"] == "![Fender Style Black](images/tolex-fender-black.jpg)"
     assert f["swatch_cloth"] == "![British Small Weave Cane](images/british-small-weave-cane.jpg)"
     assert f["lead_time"] == "8 to 12 weeks from confirmed order"
     assert f["status_line"] == ("Every figure in this proposal is a design target, not a measurement. "
@@ -2709,7 +2711,7 @@ def test_no_swatch_on_file_warns_and_still_writes(tmp_path, capsys):
     assert "warning: no swatch on file for the grill cloth" in captured.err
     proposal = (order / "proposal.md").read_text()
     assert "- Grill cloth: Salt-and-pepper" in proposal
-    assert "![Fender Style Black](images/fender-black.jpg)\nno swatch on file" in proposal
+    assert "![Fender Style Black](images/tolex-fender-black.jpg)\nno swatch on file" in proposal
     assert cabreport.swatch("fender style TWEED") == "![fender style TWEED](images/fender-tweed-olive-stripe.jpg)"
     assert cabreport.swatch(None) == cabreport.NO_SWATCH
     (order / "proposal.md").write_text(_fill_slots(proposal))
@@ -2806,8 +2808,22 @@ def test_swatches_resolve_every_site_option():
     assert options
     for o in options:
         name, path = o["name"], o["swatch"]
-        assert cabreport.swatch(name) == f"![{name}](images/{Path(path).name})", name
+        assert cabreport.swatch(name) == f"![{name}](images/{cabreport.swatch_image(path.removeprefix('/materials/'))})", name
         assert cabreport.SWATCHES[name.lower()] == path.removeprefix("/materials/"), name
+
+
+# ---- swatch image names: a shared basename takes its folder ----
+def test_swatch_image_prefixes_a_shared_basename_with_its_folder():
+    assert cabreport.swatch_image("tolex/fender-black.jpg") == "tolex-fender-black.jpg"
+    assert cabreport.swatch_image("grill-cloth/fender-black.jpg") == "grill-cloth-fender-black.jpg"
+    assert cabreport.swatch("Fender Style Black") == "![Fender Style Black](images/tolex-fender-black.jpg)"
+    assert cabreport.swatch('Fender Style Black, 36"') == '![Fender Style Black, 36"](images/grill-cloth-fender-black.jpg)'
+    assert cabreport.swatch("Black Walnut") == "![Black Walnut](images/walnut.jpg)"
+    assert cabreport.swatch('Salt and Pepper, 32"') == '![Salt and Pepper, 32"](images/salt-and-pepper.jpg)'
+    files = set(cabreport.SWATCHES.values())
+    images = {cabreport.swatch_image(f) for f in files}
+    assert len(images) == len(files)
+    assert images - {Path(f).name for f in files} == {"tolex-fender-black.jpg", "grill-cloth-fender-black.jpg"}
 ```
 <!-- /code -->
 
@@ -2877,7 +2893,7 @@ Prepared for {{customer}}.
 - Grill cloth: {{grill_cloth}}
 - Hardware: {{hardware}}
 
-<!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. -->
+<!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. A name prefixed with its folder is the file <folder>/<rest of the name> copied under the prefixed name: images/tolex-fender-black.jpg is tolex/fender-black.jpg. -->
 {{swatch_finish}}
 {{swatch_cloth}}
 
@@ -2942,8 +2958,8 @@ LEAD_TIME = {
 }
 
 # Site option name (lower case) to the swatch file under the MaximoCabs repo's
-# public/materials/ tree; the proposal references images/<basename> and the
-# skill copies the file there. The full names are the finishOptions and
+# public/materials/ tree; the proposal references images/<swatch_image> and
+# the skill copies the file there. The full names are the finishOptions and
 # grillOptions of the site's src/content/cabinets/tolex-1x12.md and
 # hardwood-1x12.md as of 2026-09-13, roll widths and quotes included; the short
 # legacy keys stay only where the same material still has a photo. The species
@@ -3128,10 +3144,20 @@ def write_checks(rows: list, path, name: str) -> int:
     return pending
 
 
+def swatch_image(file: str) -> str:
+    """The images/ name for a SWATCHES file: its basename, or its folder and
+    basename joined by a hyphen when another SWATCHES file shares the
+    basename (tolex/fender-black.jpg is images/tolex-fender-black.jpg, since
+    grill-cloth/fender-black.jpg exists too)."""
+    path = Path(file)
+    shared = {f for f in SWATCHES.values() if Path(f).name == path.name}
+    return f"{path.parent.name}-{path.name}" if len(shared) > 1 else path.name
+
+
 def swatch(name) -> str:
     """A markdown image line for a site option name, or the no-swatch text."""
     file = SWATCHES.get((name or "").strip().lower())
-    return f"![{name}](images/{Path(file).name})" if file else NO_SWATCH
+    return f"![{name}](images/{swatch_image(file)})" if file else NO_SWATCH
 
 
 def _speaker_label(voicing: dict) -> str:
@@ -3695,7 +3721,7 @@ with a verdict line judged against the brief:
 | grain and show face | the Phase 3 plan; hardwood line only (on tolex the tool writes `pass`, n/a, so a tolex order has 7 operator rows and a hardwood order 8) |
 | joinery fit | fingers and dovetails cut to measured thickness, test cut first |
 | stock yield | the blank count and area against the sheets Brian has, 3 mm kerf, no nesting assumed |
-| wood movement | hardwood plus the brief's "where it lives" answer: cleats slotted, a fixed baffle glued at the front only |
+| wood movement | hardwood plus the brief's "where it lives" answer: the grain wrapping around the box, cleats and a fixed baffle glued full length with the grain |
 | transport | the brief's vehicle and doorway against the external size and the mass in lb |
 | weight vs limit | the brief's weight limit against the mass in kg and lb |
 | size vs limit | the brief's size limits and the head to match against the external size |
@@ -3748,7 +3774,10 @@ predicted frequencies never enter the proposal.
 2. Copy the swatches the proposal names from the `tolex/`,
    `grill-cloth/`, or `wood/` subfolder of
    `~/ClaudeProjects/MaximoCabs/public/materials/` into
-   `projects/Cab-<...>/images/`.
+   `projects/Cab-<...>/images/`. A name prefixed with its folder is the
+   file `<folder>/<rest of the name>` copied under the prefixed name:
+   `images/tolex-fender-black.jpg` is `tolex/fender-black.jpg` (the
+   `grill-cloth/` folder has a `fender-black.jpg` too).
 3. Verify; exit 2 lists every missing fact string and every empty slot,
    fixed inside the slots, never in the facts:
 

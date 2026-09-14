@@ -12,7 +12,7 @@ tags: [handoff, speaker-cab, maximocabs]
 
 - Order: Pat Player (the site's test persona), 1x12 tolex, closed-ported with a front slot, Eminence Cannabis Rex at 8 ohm, on the '65 Deluxe Reverb reissue's extension jack.
 - Brief `status: proposed`. Stop one (voicing), the port-loop trade-off stop, and stop two (package review) were answered from the task's answer sheet, not by Brian.
-- Package on disk in `projects/Speaker-cab-system/fixtures/rex-roots-1x12/`: `brief.md`, `tone.json`, `voicing.json`, `voicing.md`, `cab.py` (one-line docstring naming the order; `grill_cloth` the one AESTHETICS edit), `cab.json`, `cab.step`, `cutlist.md`, `cutlist.csv`, `checks.md` (32 rows, 0 read `operator`), `proposal.md` (verified, `Price:` empty), `images/` (five renders and the `fender-black.jpg` swatch; no rear view, the port is a front slot; no swatch on file for the Salt-and-pepper cloth).
+- Package on disk in `projects/Speaker-cab-system/fixtures/rex-roots-1x12/`: `brief.md`, `tone.json`, `voicing.json`, `voicing.md`, `cab.py` (one-line docstring naming the order; `grill_cloth` the one AESTHETICS edit), `cab.json`, `cab.step`, `cutlist.md`, `cutlist.csv`, `checks.md` (32 rows, 0 read `operator`), `proposal.md` (verified, `Price:` empty), `images/` (five renders and the `tolex-fender-black.jpg` swatch; no rear view, the port is a front slot; no swatch on file for the Salt-and-pepper cloth).
 - Not committed: this session ran no `git add`, `git commit`, or `git push`; the controller commits the fixture. Phase 8 skipped (no cabinet built).
 - Dry-run findings on the skill text: `.superpowers/sdd/task-8-report.md`.
 

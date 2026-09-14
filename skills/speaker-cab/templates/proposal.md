@@ -53,7 +53,7 @@ Prepared for {{customer}}.
 - Grill cloth: {{grill_cloth}}
 - Hardware: {{hardware}}
 
-<!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. -->
+<!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. A name prefixed with its folder is the file <folder>/<rest of the name> copied under the prefixed name: images/tolex-fender-black.jpg is tolex/fender-black.jpg. -->
 {{swatch_finish}}
 {{swatch_cloth}}
 

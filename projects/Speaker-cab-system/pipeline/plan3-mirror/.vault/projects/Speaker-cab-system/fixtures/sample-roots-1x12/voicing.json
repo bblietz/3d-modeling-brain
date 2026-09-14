@@ -1,0 +1,218 @@
+{
+  "name": "sample-roots-1x12",
+  "mode": "propose",
+  "tone_target": {
+    "low_end": "tight",
+    "mids": "neutral",
+    "top": "smooth",
+    "breakup": "moderate",
+    "dispersion": "focused",
+    "placement": "floor",
+    "min_power_w": 33,
+    "impedance_options_ohm": [
+      8
+    ]
+  },
+  "speakers": [
+    {
+      "slug": "celestion-g12h-30-anniversary",
+      "brand": "Celestion",
+      "model": "G12H Anniversary",
+      "impedance_ohm": 16.0,
+      "power_w": 30,
+      "sensitivity_db": 100,
+      "data_status": "analog",
+      "analog_of": "celestion-heritage-g12h55",
+      "cutout_mm": 283,
+      "bolt_circle_mm": 297,
+      "bolt_count": 4,
+      "depth_mm": 135,
+      "weight_kg": 4.7,
+      "displacement_l": 1.5,
+      "displacement_estimated": true,
+      "frame_diameter_mm": 309,
+      "magnet_diameter_mm": 156,
+      "magnet_diameter_estimated": false
+    }
+  ],
+  "enclosure": {
+    "type": "closed-ported",
+    "driver_count": 1,
+    "chambers": 1,
+    "jack_config": "mono",
+    "open_fraction": null
+  },
+  "volumes": {
+    "method": "thiele-small",
+    "per_driver_net_l": 30.0,
+    "per_chamber_net_l": 30.0,
+    "net_total_l": 30.0,
+    "displacement_l": 1.5,
+    "brace_l": 0.0,
+    "port_l": 0.31611309980491736,
+    "divider_l": 0.0,
+    "inside_parts_l": 1.2411433915834194,
+    "gross_l": 33.057254686111506
+  },
+  "box": {
+    "internal_mm": [
+      423.99070419612366,
+      378.3578063716256,
+      206.06666852243805
+    ],
+    "external_mm": [
+      459.99070419612366,
+      414.3578063716256,
+      256.066668522438
+    ],
+    "internal_in": [
+      16.69,
+      14.9,
+      8.11
+    ],
+    "external_in": [
+      18.11,
+      16.31,
+      10.08
+    ],
+    "chamber_internal_width_mm": 423.99070419612366
+  },
+  "port": {
+    "shape": "round",
+    "diameter_mm": 101.5,
+    "slot_w_mm": null,
+    "slot_h_mm": null,
+    "area_cm2": 80.91368228861361,
+    "length_mm": 51.06794139925104,
+    "volume_l": 0.4132095185512537,
+    "air_speed_ms": 2.2579650076439615,
+    "warnings": [
+      "port diameter snapped to the 101.5 mm tube (from 85.0 mm)"
+    ],
+    "pinned": false,
+    "fb_override_hz": null,
+    "location": "rear",
+    "per_chamber": true,
+    "count": 1
+  },
+  "prediction": {
+    "model": "thiele-small vented",
+    "fb_hz": 76.5,
+    "alpha": 0.9833333333333333,
+    "h": 0.9,
+    "f3_hz": 79.09493049612766,
+    "peak_db": 2.1004161783356894,
+    "character": "punchy",
+    "response_db": [
+      [
+        20.0,
+        -47.51008919757471
+      ],
+      [
+        25.2,
+        -38.94965322327283
+      ],
+      [
+        31.75,
+        -30.13536074635106
+      ],
+      [
+        40.0,
+        -21.128206909234567
+      ],
+      [
+        50.4,
+        -12.69817272958232
+      ],
+      [
+        63.5,
+        -6.659474756765418
+      ],
+      [
+        80.0,
+        -2.78761822610486
+      ],
+      [
+        100.79,
+        0.18111591541630556
+      ],
+      [
+        126.99,
+        1.8835101077899234
+      ],
+      [
+        160.0,
+        2.1004161783356894
+      ],
+      [
+        201.59,
+        1.6469776507403242
+      ],
+      [
+        253.98,
+        1.1404928114836617
+      ],
+      [
+        320.0,
+        0.7518692857885624
+      ],
+      [
+        400.0,
+        0.49250507804612936
+      ]
+    ]
+  },
+  "wiring": {
+    "jack_config": "mono",
+    "recommended": null,
+    "options": [
+      {
+        "name": "single",
+        "impedance_ohm": 16.0,
+        "matches_tap": false,
+        "jack_text": "Single driver, 16 ohm"
+      }
+    ],
+    "mismatch_accepted": true
+  },
+  "power": {
+    "amp_power_w": 22.0,
+    "total_handling_w": 30.0,
+    "min_power_w": 33.0,
+    "status": "warning",
+    "message": "handling 30 W is under the 33 W target (1.5 x amp power)",
+    "per_side": [
+      {
+        "total_handling_w": 30.0,
+        "amp_power_w": 22.0,
+        "min_power_w": 33.0,
+        "status": "warning",
+        "message": "handling 30 W is under the 33 W target (1.5 x amp power)"
+      }
+    ]
+  },
+  "construction": {
+    "panel_mm": 18.0,
+    "back_mm": 12.0,
+    "baffle_mm": 18.0,
+    "recess_mm": 20.0,
+    "brace_l": 0.0,
+    "pinned_external_width_mm": null,
+    "max_external_mm": null,
+    "port_count": 1,
+    "line": "tolex",
+    "species": null,
+    "wall_material": "baltic birch plywood"
+  },
+  "warnings": [
+    "celestion-g12h-30-anniversary: Thiele-Small volume 19.7 L for 'tight' is outside the practical range 30 to 68 L; started from the clamped 30.0 L",
+    "driver displacement assumed 1.5 L per driver",
+    "width and depth are within 5 percent of 2:1 (2.06); coincident standing waves",
+    "port diameter snapped to the 101.5 mm tube (from 85.0 mm)",
+    "no wiring option matches amp taps [8]",
+    "impedance mismatch accepted: 16 ohm cabinet on amp taps [8]",
+    "handling 30 W is under the 33 W target (1.5 x amp power)"
+  ],
+  "blockers": [],
+  "prediction_status": "unverified, ears only"
+}

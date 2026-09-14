@@ -591,7 +591,6 @@ def shell_material(spec: CabSpec) -> tuple:
 
 
 HARDWOOD_GRAIN_NOTE = "grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"
-HARDWOOD_CLEAT_NOTE = "screwed through slotted holes, glued at the center 100 mm only"
 
 
 def birch(t: float) -> str:
@@ -699,8 +698,6 @@ def baffle_and_cutouts(spec: CabSpec, fr: Frame) -> tuple:
                 "screwed through the cleats, removable")
     else:
         note = "fixed baffle: glued into 6 mm dados, blank 12 mm oversize"
-        if spec.line == "hardwood":
-            note += "; glued in the front 100 mm of each dado only (cross-grain rule)"
     if fr.slot_h:
         note += "; bottom edge rests on the slot port shelf"
     mounts = ", ".join(f"{s.bolt_count} bolts on a {s.bolt_circle_mm:g} mm circle"
@@ -734,8 +731,6 @@ def cleat_blanks(spec: CabSpec, fr: Frame) -> list:
     screw into its edges."""
     parts = []
     base = "18 x 18 birch cleat, screws every 150 mm"
-    if spec.line == "hardwood":
-        base += "; " + HARDWOOD_CLEAT_NOTE
     bnote = base + "; felt strip between cleat and baffle"
     y_cleat = fr.D - BACK_MM - CLEAT_MM
     for c, (xa, xb) in enumerate(fr.chambers):
@@ -859,6 +854,36 @@ def _chamber_of(fr: Frame, x: float) -> int:
     return 0
 
 
+def shell_segments(spec: CabSpec, fr: Frame) -> list:
+    """[(xa, xb)] spans of the top and bottom panels between glued members:
+    split by the divider with two chambers, by the brace on a mono 2x12."""
+    if spec.chambers == 2:
+        return list(fr.chambers)
+    if spec.driver_count == 2:
+        return [(fr.x0, -BRACE_MM[0] / 2), (BRACE_MM[0] / 2, fr.x1)]
+    return [(fr.x0, fr.x1)]
+
+
+def shell_side_span(fr: Frame) -> float:
+    """The side panels' span along z, split by the shelf with a slot port."""
+    return max(fr.slot_h, fr.z1 - fr.z_vis0) if fr.slot_h else fr.z1 - fr.z0
+
+
+def unstiffened_shell_spans(spec: CabSpec, fr: Frame) -> str | None:
+    """The spans check's words for a NO_SHELL_STIFFENER_LINES shell whose top
+    and bottom or sides span over SPAN_MAX_MM, which stiffener_blanks leaves
+    without a stiffener by rule; None on any other line or when no shell span
+    is over the limit."""
+    if spec.line not in NO_SHELL_STIFFENER_LINES:
+        return None
+    over = list(dict.fromkeys(f"{xb - xa:.0f}" for xa, xb in shell_segments(spec, fr) if xb - xa > SPAN_MAX_MM))
+    words = [f"top and bottom span {' and '.join(over)} mm"] if over else []
+    side = shell_side_span(fr)
+    if side > SPAN_MAX_MM:
+        words.append(f"sides span {side:.0f} mm")
+    return f"{spec.line} shell panels take no stiffener: " + ", ".join(words) if words else None
+
+
 def stiffener_blanks(spec: CabSpec, fr: Frame) -> tuple:
     """(blanks, span notes): one 18 x 40 stiffener glued flat across the
     middle of any shell or back panel span over 450 mm between glued members.
@@ -869,12 +894,7 @@ def stiffener_blanks(spec: CabSpec, fr: Frame) -> tuple:
     floating = spec.aesthetics.baffle_mount == "floating"
     y_cleat = fr.D - BACK_MM - CLEAT_MM
     ya_default = fr.y_bb + (CLEAT_MM if floating else 0.0)
-    if spec.chambers == 2:
-        segs = list(fr.chambers)
-    elif spec.driver_count == 2:
-        segs = [(fr.x0, -BRACE_MM[0] / 2), (BRACE_MM[0] / 2, fr.x1)]
-    else:
-        segs = [(fr.x0, fr.x1)]
+    segs = shell_segments(spec, fr)
     parts, notes = [], []
     note = "stiffener 18 x 40 birch glued flat across the middle of a span over 450 mm"
     mat = birch(sw)
@@ -917,7 +937,7 @@ def stiffener_blanks(spec: CabSpec, fr: Frame) -> tuple:
                                    chamber=c, length_axis="Z"))
                 notes.append(f"back panel span {span:.0f} mm over {SPAN_MAX_MM:.0f}: stiffener added")
     # side panels: span along z, split by the shelf with a slot port
-    side_span = max(fr.slot_h, fr.z1 - fr.z_vis0) if fr.slot_h else fr.z1 - fr.z0
+    side_span = shell_side_span(fr)
     if shell and side_span > SPAN_MAX_MM:
         zc = (fr.z_vis0 + fr.z1) / 2.0 if fr.slot_h else (fr.z0 + fr.z1) / 2.0
         ya, yb = ya_default, y_cleat
@@ -1481,8 +1501,6 @@ def layout(spec: CabSpec) -> Layout:
         panel = _attach(parts, name, [feat])
         panel.notes += (f"; {DADO_MM:g} mm deep x {BAFFLE_MM:g} mm dado for the baffle, "
                         f"front face {fr.y_bf:g} mm behind the front edge")
-        if spec.line == "hardwood":
-            panel.notes += "; glued in the front 100 mm only"
     parts.append(baffle)
     parts += cleat_blanks(spec, fr)
     parts += grill_frame_blanks(spec, fr)
@@ -1815,8 +1833,10 @@ def check_layout(lay: Layout, spec: CabSpec) -> list:
                         "over stock: " + ", ".join(over) if over else "every blank fits the stock limits"))
     checks.append(Check("part count", "pass", f"{lay.part_count} parts"))
     spans = [n[len("span: "):] for n in lay.notes if n.startswith("span: ")]
+    unstiffened = unstiffened_shell_spans(spec, fr)
+    words = ([unstiffened] if unstiffened else []) + spans
     checks.append(Check("spans", "warn" if spans else "pass",
-                        "; ".join(spans) if spans else f"no panel span over {SPAN_MAX_MM:.0f} mm"))
+                        "; ".join(words) if words else f"no panel span over {SPAN_MAX_MM:.0f} mm"))
     return checks
 
 

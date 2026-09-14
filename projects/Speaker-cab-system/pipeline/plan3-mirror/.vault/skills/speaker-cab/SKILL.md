@@ -366,7 +366,7 @@ with a verdict line judged against the brief:
 | grain and show face | the Phase 3 plan; hardwood line only (on tolex the tool writes `pass`, n/a, so a tolex order has 7 operator rows and a hardwood order 8) |
 | joinery fit | fingers and dovetails cut to measured thickness, test cut first |
 | stock yield | the blank count and area against the sheets Brian has, 3 mm kerf, no nesting assumed |
-| wood movement | hardwood plus the brief's "where it lives" answer: cleats slotted, a fixed baffle glued at the front only |
+| wood movement | hardwood plus the brief's "where it lives" answer: the grain wrapping around the box, cleats and a fixed baffle glued full length with the grain |
 | transport | the brief's vehicle and doorway against the external size and the mass in lb |
 | weight vs limit | the brief's weight limit against the mass in kg and lb |
 | size vs limit | the brief's size limits and the head to match against the external size |
@@ -419,7 +419,10 @@ predicted frequencies never enter the proposal.
 2. Copy the swatches the proposal names from the `tolex/`,
    `grill-cloth/`, or `wood/` subfolder of
    `~/ClaudeProjects/MaximoCabs/public/materials/` into
-   `projects/Cab-<...>/images/`.
+   `projects/Cab-<...>/images/`. A name prefixed with its folder is the
+   file `<folder>/<rest of the name>` copied under the prefixed name:
+   `images/tolex-fender-black.jpg` is `tolex/fender-black.jpg` (the
+   `grill-cloth/` folder has a `fender-black.jpg` too).
 3. Verify; exit 2 lists every missing fact string and every empty slot,
    fixed inside the slots, never in the facts:
 

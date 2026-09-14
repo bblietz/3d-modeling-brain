@@ -103,7 +103,7 @@ def test_site_default_facts(tmp_path):
     assert f["finish"] == "Fender Style Black"
     assert f["grill_cloth"] == "British Small Weave Cane"
     assert f["hardware"] == "Black corners, strap handle, recessed metal jack plate, no piping, rubber feet."
-    assert f["swatch_finish"] == "![Fender Style Black](images/fender-black.jpg)"
+    assert f["swatch_finish"] == "![Fender Style Black](images/tolex-fender-black.jpg)"
     assert f["swatch_cloth"] == "![British Small Weave Cane](images/british-small-weave-cane.jpg)"
     assert f["lead_time"] == "8 to 12 weeks from confirmed order"
     assert f["status_line"] == ("Every figure in this proposal is a design target, not a measurement. "
@@ -226,7 +226,7 @@ def test_no_swatch_on_file_warns_and_still_writes(tmp_path, capsys):
     assert "warning: no swatch on file for the grill cloth" in captured.err
     proposal = (order / "proposal.md").read_text()
     assert "- Grill cloth: Salt-and-pepper" in proposal
-    assert "![Fender Style Black](images/fender-black.jpg)\nno swatch on file" in proposal
+    assert "![Fender Style Black](images/tolex-fender-black.jpg)\nno swatch on file" in proposal
     assert cabreport.swatch("fender style TWEED") == "![fender style TWEED](images/fender-tweed-olive-stripe.jpg)"
     assert cabreport.swatch(None) == cabreport.NO_SWATCH
     (order / "proposal.md").write_text(_fill_slots(proposal))
@@ -323,5 +323,19 @@ def test_swatches_resolve_every_site_option():
     assert options
     for o in options:
         name, path = o["name"], o["swatch"]
-        assert cabreport.swatch(name) == f"![{name}](images/{Path(path).name})", name
+        assert cabreport.swatch(name) == f"![{name}](images/{cabreport.swatch_image(path.removeprefix('/materials/'))})", name
         assert cabreport.SWATCHES[name.lower()] == path.removeprefix("/materials/"), name
+
+
+# ---- swatch image names: a shared basename takes its folder ----
+def test_swatch_image_prefixes_a_shared_basename_with_its_folder():
+    assert cabreport.swatch_image("tolex/fender-black.jpg") == "tolex-fender-black.jpg"
+    assert cabreport.swatch_image("grill-cloth/fender-black.jpg") == "grill-cloth-fender-black.jpg"
+    assert cabreport.swatch("Fender Style Black") == "![Fender Style Black](images/tolex-fender-black.jpg)"
+    assert cabreport.swatch('Fender Style Black, 36"') == '![Fender Style Black, 36"](images/grill-cloth-fender-black.jpg)'
+    assert cabreport.swatch("Black Walnut") == "![Black Walnut](images/walnut.jpg)"
+    assert cabreport.swatch('Salt and Pepper, 32"') == '![Salt and Pepper, 32"](images/salt-and-pepper.jpg)'
+    files = set(cabreport.SWATCHES.values())
+    images = {cabreport.swatch_image(f) for f in files}
+    assert len(images) == len(files)
+    assert images - {Path(f).name for f in files} == {"tolex-fender-black.jpg", "grill-cloth-fender-black.jpg"}

@@ -44,8 +44,8 @@ LEAD_TIME = {
 }
 
 # Site option name (lower case) to the swatch file under the MaximoCabs repo's
-# public/materials/ tree; the proposal references images/<basename> and the
-# skill copies the file there. The full names are the finishOptions and
+# public/materials/ tree; the proposal references images/<swatch_image> and
+# the skill copies the file there. The full names are the finishOptions and
 # grillOptions of the site's src/content/cabinets/tolex-1x12.md and
 # hardwood-1x12.md as of 2026-09-13, roll widths and quotes included; the short
 # legacy keys stay only where the same material still has a photo. The species
@@ -230,10 +230,20 @@ def write_checks(rows: list, path, name: str) -> int:
     return pending
 
 
+def swatch_image(file: str) -> str:
+    """The images/ name for a SWATCHES file: its basename, or its folder and
+    basename joined by a hyphen when another SWATCHES file shares the
+    basename (tolex/fender-black.jpg is images/tolex-fender-black.jpg, since
+    grill-cloth/fender-black.jpg exists too)."""
+    path = Path(file)
+    shared = {f for f in SWATCHES.values() if Path(f).name == path.name}
+    return f"{path.parent.name}-{path.name}" if len(shared) > 1 else path.name
+
+
 def swatch(name) -> str:
     """A markdown image line for a site option name, or the no-swatch text."""
     file = SWATCHES.get((name or "").strip().lower())
-    return f"![{name}](images/{Path(file).name})" if file else NO_SWATCH
+    return f"![{name}](images/{swatch_image(file)})" if file else NO_SWATCH
 
 
 def _speaker_label(voicing: dict) -> str:

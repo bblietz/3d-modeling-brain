@@ -62,7 +62,7 @@ This cabinet is designed for a tight, dry low end under a blackface combo on a c
 - Hardware: Black corners, strap handle, recessed metal jack plate, no piping, rubber feet.
 
 <!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. -->
-![Fender Style Black](images/fender-black.jpg)
+![Fender Style Black](images/tolex-fender-black.jpg)
 no swatch on file
 
 ## 6. Lead time and price

@@ -202,14 +202,14 @@ def test_baffle_fixed_dados():
     slot = spec_for(port="slot", aesthetics=L.Aesthetics(baffle_mount="fixed"))
     _, _, dados = L.baffle_and_cutouts(slot, L.frame(slot))
     assert "bottom" not in dados
-    # layout() notes the dado on every shell row it cuts, plus the cross-grain glue rule on hardwood
+    # layout() notes the dado on every shell row it cuts, the same on hardwood
     dado = "; 6 mm deep x 18 mm dado for the baffle, front face 20 mm behind the front edge"
     shell = ("side_left", "side_right", "top", "bottom")
     notes = {p.name: p.notes for p in L.layout(spec).parts if p.name in shell}
     assert len(notes) == 4 and all(n.endswith(dado) for n in notes.values())
     hw = spec_for(line="hardwood", species="black walnut", aesthetics=L.Aesthetics(baffle_mount="fixed"))
     notes = {p.name: p.notes for p in L.layout(hw).parts if p.name in shell}
-    assert all(n.endswith(dado + "; glued in the front 100 mm only") for n in notes.values())
+    assert all(n.endswith(dado) for n in notes.values())
     notes = {p.name: p.notes for p in L.layout(slot).parts if p.name in shell}
     assert "dado" not in notes["bottom"] and all("dado" in notes[n] for n in ("side_left", "side_right", "top"))
     assert all("dado" not in p.notes for p in L.layout(spec_for()).parts if p.name in shell)
@@ -247,7 +247,7 @@ def test_cleats_by_mount_port_and_chambers():
     assert "cleat_baffle_right_0" not in st_names and "cleat_baffle_left_1" not in st_names
     assert "cleat_baffle_left_0" in st_names and "cleat_baffle_right_1" in st_names
     hw = spec_for(line="hardwood", species="cherry")
-    assert L.HARDWOOD_CLEAT_NOTE in L.cleat_blanks(hw, L.frame(hw))[0].notes
+    assert L.cleat_blanks(hw, L.frame(hw))[0].notes == top.notes
     op = spec_for(enclosure="open", port=None, open_fraction=0.4)
     op_names = [p.name for p in L.cleat_blanks(op, L.frame(op))]
     assert "cleat_back_left_upper" in op_names and "cleat_back_right_lower" in op_names
@@ -977,3 +977,50 @@ def test_hardwood_tall_box_has_no_side_stiffeners():
         tall = spec_for(external=(470.0, 520.0, 279.4), line=line, species=species)
         parts, notes = L.stiffener_blanks(tall, L.frame(tall))
         assert [p.name for p in parts] == names and len(notes) == (1 if names else 0), line
+
+
+# ---- hardwood cleats and a fixed baffle glue like the tolex line's ----
+def _cleat_and_baffle_notes(lay):
+    return {p.name: p.notes for p in lay.parts if p.name.startswith("cleat_") or p.name == "baffle"}
+
+
+def test_hardwood_site_box_cleats_and_fixed_baffle_glue_like_tolex():
+    # spec_for's default external size is the site box, 508 x 457.2 x 279.4 mm
+    for mount in ("floating", "fixed"):
+        tolex = L.layout(spec_for(aesthetics=L.Aesthetics(baffle_mount=mount)))
+        hw = L.layout(spec_for(line="hardwood", species="black walnut",
+                               aesthetics=L.Aesthetics(baffle_mount=mount)))
+        notes = _cleat_and_baffle_notes(hw)
+        assert notes == _cleat_and_baffle_notes(tolex), mount
+        assert "baffle" in notes and any(n.startswith("cleat_") for n in notes), mount
+        assert all("slotted" not in n and "front 100" not in n for n in notes.values()), mount
+        assert all("slotted" not in p.notes and "front 100" not in p.notes for p in hw.parts), mount
+    assert notes["baffle"].startswith("fixed baffle: glued into 6 mm dados")
+
+
+# ---- spans message on a hardwood shell ----
+OPEN_BACK = {"enclosure": "open", "port": None, "open_fraction": 0.4}
+WALNUT = {"line": "hardwood", "species": "black walnut"}
+
+
+def _spans_check(**kw):
+    spec = spec_for(**kw)
+    by = {c.name: c for c in L.check_layout(L.layout(spec), spec)}
+    return by["spans"].level, by["spans"].message
+
+
+def test_spans_message_names_the_unstiffened_hardwood_shell():
+    # spec_for's default external size is the site box, 508 x 457.2 x 279.4 mm
+    unstiffened = "hardwood shell panels take no stiffener: top and bottom span 470 mm"
+    assert _spans_check(**WALNUT, **OPEN_BACK) == ("pass", unstiffened)
+    assert _spans_check(**WALNUT) == ("warn", unstiffened + "; back panel span 470 mm over 450: stiffener added")
+    tolex = "top panel span 472 mm over 450: stiffener added; bottom panel span 472 mm over 450: stiffener added"
+    assert _spans_check(**OPEN_BACK) == ("warn", tolex)
+    assert _spans_check() == ("warn", tolex + "; back panel span 472 mm over 450: stiffener added")
+    tall = (470.0, 520.0, 279.4)
+    assert _spans_check(external=tall, **WALNUT, **OPEN_BACK) == (
+        "pass", "hardwood shell panels take no stiffener: sides span 482 mm")
+    assert _spans_check(external=tall, **OPEN_BACK) == ("warn", "side panel span 484 mm over 450: stiffeners added")
+    narrow = (476.0, 457.2, 279.4)
+    for line in ({}, WALNUT):
+        assert _spans_check(external=narrow, **line) == ("pass", "no panel span over 450 mm"), line
