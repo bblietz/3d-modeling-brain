@@ -87,6 +87,7 @@ assert MM_PER_INCH == cabvoice.MM_PER_INCH
 JOINTS = ("finger", "dovetail")
 BAFFLE_MOUNTS = ("floating", "fixed")
 BAFFLE_CLEAT_EDGES = ("all", "top-bottom")
+JACK_PLATE_POSITIONS = ("top", "bottom")
 HANDLES = ("strap", "recessed-side")
 CORNERS = ("black", "chrome", "none")
 FEET = ("rubber", "tilt-back")
@@ -101,6 +102,7 @@ class Aesthetics:
     dovetail_tail_mm: float = 30.0
     baffle_mount: str = "floating"
     baffle_cleat_edges: str | None = None   # floating baffle: None takes the enclosure default
+    jack_plate_position: str | None = None  # open/semi-open only; None takes the enclosure default
     handle: str = "strap"
     handle_screw_spacing_mm: float = 228.6
     recessed_handle_cutout_mm: tuple = (140.0, 90.0)
@@ -126,6 +128,8 @@ class Aesthetics:
             errors.append(f"baffle_mount must be one of {', '.join(BAFFLE_MOUNTS)}")
         if self.baffle_cleat_edges is not None and self.baffle_cleat_edges not in BAFFLE_CLEAT_EDGES:
             errors.append(f"baffle_cleat_edges must be one of {', '.join(BAFFLE_CLEAT_EDGES)} or None")
+        if self.jack_plate_position is not None and self.jack_plate_position not in JACK_PLATE_POSITIONS:
+            errors.append(f"jack_plate_position must be one of {', '.join(JACK_PLATE_POSITIONS)} or None")
         if self.handle not in HANDLES:
             errors.append(f"handle must be one of {', '.join(HANDLES)}")
         if self.corners is not None and self.corners not in CORNERS:
@@ -435,8 +439,9 @@ def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
     ValueError on sheet blockers, missing keys, a dovetail on the tolex line,
     a roundover of the shell thickness or more, or invalid aesthetics. A
     roundover_mm of None resolves to the line default and a
-    baffle_cleat_edges of None to the enclosure default; the spec carries
-    both resolved values. Never reads warning text."""
+    baffle_cleat_edges or jack_plate_position of None to the enclosure
+    default; the spec carries every resolved value. Never reads warning
+    text."""
     errors = aesthetics.validate()
     if errors:
         raise ValueError("aesthetics: " + "; ".join(errors))
@@ -484,6 +489,8 @@ def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
         raise ValueError(f"unknown enclosure type {enclosure_type!r}")
     if aesthetics.baffle_cleat_edges is None:
         aesthetics = replace(aesthetics, baffle_cleat_edges=DEFAULT_BAFFLE_CLEAT_EDGES[enclosure_type])
+    if aesthetics.jack_plate_position is None:
+        aesthetics = replace(aesthetics, jack_plate_position=DEFAULT_JACK_PLATE_POSITION[enclosure_type])
     if (back_mm, baffle_mm, recess_mm) != (BACK_MM, BAFFLE_MM, RECESS_MM):
         raise ValueError("sheet construction thicknesses differ from the layout constants")
     if port_spec is not None:
@@ -610,6 +617,7 @@ def shell_material(spec: CabSpec) -> tuple:
 HARDWOOD_GRAIN_NOTE = "grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; book-matched, show face out"
 
 DEFAULT_BAFFLE_CLEAT_EDGES = {"closed": "all", "closed-ported": "all", "open": "top-bottom", "semi-open": "top-bottom"}   # a closed box keeps the perimeter cleats that hold the seal the volume model assumes; an open box has no seal to protect, so fewer parts and a baffle free at its sides (Brian, 2026-09-13)
+DEFAULT_JACK_PLATE_POSITION = {"closed": "bottom", "closed-ported": "bottom", "open": "top", "semi-open": "top"}   # top on an open or semi-open back, easier to reach without bending down when the cab sits on the floor; bottom, unchanged, on a closed or closed-ported back (Brian, 2026-09-14)
 
 DEFAULT_ROUNDOVER_MM = {"hardwood": 12.7, "tolex": None}   # 1/2 in on every outside edge of a hardwood shell (Brian, 2026-09-13); none on the tolex line
 
@@ -994,7 +1002,9 @@ def stiffener_blanks(spec: CabSpec, fr: Frame) -> tuple:
 # === TASK 6 ===
 def back_blanks(spec: CabSpec, fr: Frame) -> list:
     """Closed: one 12 mm back flush with the rear edge. Open and semi-open:
-    two 12 mm panels top and bottom sized from the open fraction."""
+    two 12 mm panels top and bottom sized from the open fraction; the jack
+    plate note goes on whichever panel spec.aesthetics.jack_plate_position
+    resolves to."""
     mat = birch(BACK_MM)
     w = fr.x1 - fr.x0
     if spec.closed:
@@ -1008,11 +1018,13 @@ def back_blanks(spec: CabSpec, fr: Frame) -> list:
     f = 1.0 - 2.0 * h_p / (fr.z1 - fr.z0)
     note = (f"open back panel 12 mm birch, {h_p:.0f} mm tall "
             f"((1 - {f:.2f}) x internal height / 2), screwed to the cleats")
+    top_plate = spec.aesthetics.jack_plate_position == "top"
     return [Blank("back_upper", 1, mat, BIRCH_DENSITY, pos=(fr.x0, fr.D - BACK_MM, fr.z1 - h_p),
-                  size=(w, BACK_MM, h_p), blank_mm=_blank_dims(BACK_MM, h_p, w), notes=note),
+                  size=(w, BACK_MM, h_p), blank_mm=_blank_dims(BACK_MM, h_p, w),
+                  notes=note + ("; carries the jack plate" if top_plate else "")),
             Blank("back_lower", 1, mat, BIRCH_DENSITY, pos=(fr.x0, fr.D - BACK_MM, fr.z0),
                   size=(w, BACK_MM, h_p), blank_mm=_blank_dims(BACK_MM, h_p, w),
-                  notes=note + "; carries the jack plate")]
+                  notes=note + ("" if top_plate else "; carries the jack plate"))]
 
 
 def _attach(parts: list, name: str, features: list) -> Blank:
@@ -1025,11 +1037,17 @@ def _attach(parts: list, name: str, features: list) -> Blank:
 
 def jack_plates(spec: CabSpec, fr: Frame) -> tuple:
     """(hardware, features by panel name, warnings): one recessed plate per
-    chamber at the bottom center of the back (or the lower open panel),
-    25 mm above the cleat."""
+    chamber, 25 mm clear of the nearest cleat. Closed and closed-ported: at
+    the bottom center of the back. Open and semi-open: on the panel and
+    cleat spec.aesthetics.jack_plate_position resolves to (top or bottom),
+    mirrored placements both 25 mm clear."""
     w, h = spec.aesthetics.jack_plate_cutout_mm
-    panel = "back" if spec.closed else "back_lower"
-    z_p = fr.z0 + CLEAT_MM + JACK_CLEAR_MM + h / 2.0
+    if spec.closed:
+        panel, z_p = "back", fr.z0 + CLEAT_MM + JACK_CLEAR_MM + h / 2.0
+    elif spec.aesthetics.jack_plate_position == "top":
+        panel, z_p = "back_upper", fr.z1 - CLEAT_MM - JACK_CLEAR_MM - h / 2.0
+    else:
+        panel, z_p = "back_lower", fr.z0 + CLEAT_MM + JACK_CLEAR_MM + h / 2.0
     text = {"mono": "one 1/4 in jack",
             "mono-parallel-out": "two 1/4 in jacks wired in parallel on one plate",
             "stereo": "one 1/4 in jack per chamber plate"}.get(spec.jack_config, spec.jack_config)
@@ -1040,10 +1058,17 @@ def jack_plates(spec: CabSpec, fr: Frame) -> tuple:
                                  f"recessed {finish} plate, cutout {w:g} x {h:g} mm, {text}"))
         features[panel].append({"type": "rect_hole", "axis": "y", "center": (xc, z_p), "w": w, "h": h})
     if not spec.closed:
-        top = fr.z0 + open_panel_height(spec, fr)
-        if z_p + h / 2.0 + 10.0 > top:
-            warnings.append(f"jack plate cutout {h:g} mm tall does not fit the "
-                            f"{top - fr.z0:.0f} mm lower open-back panel with 25 mm above the cleat")
+        h_p = open_panel_height(spec, fr)
+        if panel == "back_upper":
+            bottom_edge = fr.z1 - h_p
+            if z_p - h / 2.0 - 10.0 < bottom_edge:
+                warnings.append(f"jack plate cutout {h:g} mm tall does not fit the "
+                                f"{h_p:.0f} mm upper open-back panel with 25 mm below the cleat")
+        else:
+            top_edge = fr.z0 + h_p
+            if z_p + h / 2.0 + 10.0 > top_edge:
+                warnings.append(f"jack plate cutout {h:g} mm tall does not fit the "
+                                f"{h_p:.0f} mm lower open-back panel with 25 mm above the cleat")
     return hardware, features, warnings
 
 
@@ -1866,8 +1891,9 @@ def check_layout(lay: Layout, spec: CabSpec) -> list:
                         "; ".join(problems) if problems else f"{spec.line} line, {spec.wall_material}"))
     # jack plate fit
     plate_warn = [n[len("warn: "):] for n in lay.notes if n.startswith("warn: jack plate")]
+    side = "below" if spec.aesthetics.jack_plate_position == "top" and not spec.closed else "above"
     checks.append(Check("jack plate", "warn" if plate_warn else "pass",
-                        "; ".join(plate_warn) if plate_warn else "plates fit above the cleat"))
+                        "; ".join(plate_warn) if plate_warn else f"plates fit {side} the cleat"))
     # stock
     over = [p.name for p in lay.parts if not _stock_fits(p, spec)]
     checks.append(Check("stock", "warn" if over else "pass",

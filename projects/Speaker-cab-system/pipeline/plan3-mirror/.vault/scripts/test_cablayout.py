@@ -329,7 +329,9 @@ def test_jack_plates_positions_and_fit():
     st = spec_for(external=(800.0, 457.2, 279.4), drivers=2, chambers=2, jack="stereo")
     hw, feats, _ = L.jack_plates(st, L.frame(st))
     assert [h.position[0] for h in hw] == [-195.5, 195.5] and len(feats["back"]) == 2
-    short = spec_for(external=(508.0, 300.0, 279.4), enclosure="open", port=None, open_fraction=0.4)
+    # bottom, explicit: the pre-2026-09-14 default, still available as an override
+    short = spec_for(external=(508.0, 300.0, 279.4), enclosure="open", port=None, open_fraction=0.4,
+                     aesthetics=L.Aesthetics(jack_plate_position="bottom"))
     _, feats, warn = L.jack_plates(short, L.frame(short))
     assert "back_lower" in feats and warn and "does not fit" in warn[0]
 
@@ -836,7 +838,7 @@ def test_report_carries_the_aesthetics_block():
     rep = L.layout_report(lay, L.check_layout(lay, spec))
     json.dumps(rep)
     block = rep["aesthetics"]
-    assert len(block) == 23
+    assert len(block) == 24
     assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
                                   "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
         "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",
@@ -1164,3 +1166,63 @@ def test_bad_baffle_cleat_edges_is_an_input_error_and_a_fixed_baffle_ignores_it(
     # on a fixed baffle the value is carried but unused, like the dovetail numbers on a finger joint
     fixed = spec_for(**OPEN_BACK, aesthetics=L.Aesthetics(baffle_mount="fixed", baffle_cleat_edges="all"))
     assert fixed.aesthetics.baffle_cleat_edges == "all" and _cleat_names(fixed) == set()
+
+
+# ---- jack plate position defaults to top on an open or semi-open back ----
+def test_jack_plate_position_defaults_top_on_open_and_semi_open():
+    assert L.DEFAULT_JACK_PLATE_POSITION == {"closed": "bottom", "closed-ported": "bottom",
+                                              "open": "top", "semi-open": "top"}
+    for kw in (OPEN_BACK, {"enclosure": "semi-open", "port": None, "open_fraction": 0.25}):
+        spec = spec_for(**kw)
+        assert spec.aesthetics.jack_plate_position == "top"
+        fr = L.frame(spec)
+        hw, feats, warn = L.jack_plates(spec, fr)
+        h = spec.aesthetics.jack_plate_cutout_mm[1]
+        assert warn == [] and hw[0].panel == "back_upper" and "back_upper" in feats and "back_lower" not in feats
+        top_cleat_bottom = fr.z1 - L.CLEAT_MM
+        assert top_cleat_bottom - (hw[0].position[2] + h / 2.0) == pytest.approx(L.JACK_CLEAR_MM)
+        lay = L.layout(spec)
+        by = {p.name: p for p in lay.parts if p.name in ("back_upper", "back_lower")}
+        assert by["back_upper"].notes.endswith("; carries the jack plate")
+        assert "carries the jack plate" not in by["back_lower"].notes
+        fit = next(c for c in L.check_layout(lay, spec) if c.name == "jack plate")
+        assert fit.level == "pass" and fit.message == "plates fit below the cleat", kw
+
+
+def test_jack_plate_position_bottom_override_on_open_back():
+    spec = spec_for(**OPEN_BACK, aesthetics=L.Aesthetics(jack_plate_position="bottom"))
+    assert spec.aesthetics.jack_plate_position == "bottom"
+    fr = L.frame(spec)
+    hw, feats, warn = L.jack_plates(spec, fr)
+    h = spec.aesthetics.jack_plate_cutout_mm[1]
+    assert warn == [] and hw[0].panel == "back_lower" and "back_lower" in feats and "back_upper" not in feats
+    assert (hw[0].position[2] - h / 2.0) - fr.z0 - L.CLEAT_MM == pytest.approx(L.JACK_CLEAR_MM)
+    lay = L.layout(spec)
+    by = {p.name: p for p in lay.parts if p.name in ("back_upper", "back_lower")}
+    assert by["back_lower"].notes.endswith("; carries the jack plate")
+    assert "carries the jack plate" not in by["back_upper"].notes
+    fit = next(c for c in L.check_layout(lay, spec) if c.name == "jack plate")
+    assert fit.level == "pass" and fit.message == "plates fit above the cleat"
+
+
+def test_jack_plate_position_a_short_upper_panel_does_not_fit():
+    tall_cutout = spec_for(external=(508.0, 300.0, 279.4), enclosure="open", port=None, open_fraction=0.4)
+    _, feats, warn = L.jack_plates(tall_cutout, L.frame(tall_cutout))
+    assert "back_upper" in feats and warn and "does not fit" in warn[0] and "upper open-back panel" in warn[0]
+
+
+def test_jack_plate_position_closed_is_unchanged_and_a_bad_value_is_rejected():
+    for kw in ({}, {"port": "slot"}):
+        spec = spec_for(**kw)
+        assert spec.aesthetics.jack_plate_position == "bottom"
+        hw, feats, warn = L.jack_plates(spec, L.frame(spec))
+        assert hw[0].panel == "back" and "back" in feats and warn == []
+        fit = next(c for c in L.check_layout(L.layout(spec), spec) if c.name == "jack plate")
+        assert fit.level == "pass" and fit.message == "plates fit above the cleat", kw
+    # an explicit value on a closed box is carried but has no effect, like baffle_cleat_edges on a fixed baffle
+    forced = spec_for(aesthetics=L.Aesthetics(jack_plate_position="top"))
+    assert forced.aesthetics.jack_plate_position == "top"
+    hw, feats, warn = L.jack_plates(forced, L.frame(forced))
+    assert hw[0].panel == "back" and "back" in feats
+    with pytest.raises(ValueError, match="aesthetics: jack_plate_position must be one of top, bottom or None"):
+        spec_for(aesthetics=L.Aesthetics(jack_plate_position="middle"))

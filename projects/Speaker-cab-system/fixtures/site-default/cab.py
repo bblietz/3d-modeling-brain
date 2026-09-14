@@ -37,6 +37,7 @@ AESTHETICS = L.Aesthetics(
     corner_joint="finger",          # "dovetail" on the hardwood line only
     baffle_mount="floating",        # or "fixed" (glued into 6 mm dados)
     baffle_cleat_edges=None,        # floating baffle cleats: None = enclosure default (all four closed, top and bottom open), or "all" / "top-bottom"
+    jack_plate_position=None,       # None = enclosure default (top open/semi-open, bottom closed), or "top" / "bottom"
     handle="strap",                 # or "recessed-side"
     corners="black",                # "black", "chrome", or "none"
     piping=False,

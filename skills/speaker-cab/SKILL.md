@@ -249,17 +249,20 @@ No CAD before Brian approves this phase.
 - Aesthetics block: copy
   `projects/Speaker-cab-system/fixtures/site-default/cab.py` into the
   order directory as `cab.py` and edit its `AESTHETICS` constants
-  (`corner_joint`, `baffle_mount`, `baffle_cleat_edges`, `handle`,
-  `corners`, `piping`, `feet`, `tolex_roll_in`, `tolex_color`,
-  `grill_cloth`, `head_width_mm`, `roundover_mm`; left at None,
-  `baffle_cleat_edges` is all four baffle cleats on a closed or
-  closed-ported box and top and bottom only on an open or semi-open
-  one, and `roundover_mm` is a 1/2 in roundover on hardwood and none
-  on tolex, with 0 turning it off) and reduce its module docstring to
+  (`corner_joint`, `baffle_mount`, `baffle_cleat_edges`,
+  `jack_plate_position`, `handle`, `corners`, `piping`, `feet`,
+  `tolex_roll_in`, `tolex_color`, `grill_cloth`, `head_width_mm`,
+  `roundover_mm`; left at None, `baffle_cleat_edges` is all four
+  baffle cleats on a closed or closed-ported box and top and bottom
+  only on an open or semi-open one, `jack_plate_position` is the top
+  of the upper open-back panel on an open or semi-open box and the
+  bottom of the back on a closed or closed-ported one, and
+  `roundover_mm` is a 1/2 in roundover on hardwood and none on
+  tolex, with 0 turning it off) and reduce its module docstring to
   one line naming the order (the template's copy instructions are
-  dropped). Everything below the docstring stays unchanged; a hardware
-  qualifier the constants cannot hold (the form's "Leather strap
-  handle" is `handle="strap"`) survives in the brief only.
+  dropped). Everything below the docstring stays unchanged; a
+  hardware qualifier the constants cannot hold (the form's "Leather
+  strap handle" is `handle="strap"`) survives in the brief only.
 
 Write the plan into the brief and present it briefly; no stop.
 
