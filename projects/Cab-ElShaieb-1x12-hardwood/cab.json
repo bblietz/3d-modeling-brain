@@ -68,26 +68,26 @@
       57.809
     ],
     "net_l": [
-      55.485
+      55.673
     ],
     "sheet_net_l": [
       56.0
     ],
     "delta_pct": [
-      -0.92
+      -0.585
     ],
-    "inside_parts_l": 0.824,
+    "inside_parts_l": 0.637,
     "sheet_inside_parts_l": 0.828
   },
   "mass": {
-    "total_kg": 15.211,
-    "parts_kg": 11.011,
+    "total_kg": 15.083,
+    "parts_kg": 10.883,
     "speakers_kg": 3.2,
     "hardware_kg": 1.0,
     "com_mm": [
       0.0,
-      124.642,
-      204.686
+      123.071,
+      202.778
     ]
   },
   "hardware": [
@@ -263,17 +263,6 @@
       "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
     },
     {
-      "name": "cleat_back_top",
-      "qty": 1,
-      "blank_mm": [
-        18.0,
-        18.0,
-        539.85
-      ],
-      "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm"
-    },
-    {
       "name": "cleat_back_bottom",
       "qty": 1,
       "blank_mm": [
@@ -285,45 +274,23 @@
       "notes": "18 x 18 birch cleat, screws every 150 mm"
     },
     {
-      "name": "cleat_back_left_upper",
+      "name": "cleat_back_left",
       "qty": 1,
       "blank_mm": [
         18.0,
         18.0,
-        96.33
+        172.55
       ],
       "material": "baltic birch 18 mm",
       "notes": "18 x 18 birch cleat, screws every 150 mm"
     },
     {
-      "name": "cleat_back_left_lower",
+      "name": "cleat_back_right",
       "qty": 1,
       "blank_mm": [
         18.0,
         18.0,
-        96.33
-      ],
-      "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm"
-    },
-    {
-      "name": "cleat_back_right_upper",
-      "qty": 1,
-      "blank_mm": [
-        18.0,
-        18.0,
-        96.33
-      ],
-      "material": "baltic birch 18 mm",
-      "notes": "18 x 18 birch cleat, screws every 150 mm"
-    },
-    {
-      "name": "cleat_back_right_lower",
-      "qty": 1,
-      "blank_mm": [
-        18.0,
-        18.0,
-        96.33
+        172.55
       ],
       "material": "baltic birch 18 mm",
       "notes": "18 x 18 birch cleat, screws every 150 mm"
@@ -393,7 +360,7 @@
     {
       "name": "net volume",
       "level": "pass",
-      "message": "chamber 0 net 55.5 L vs sheet 56.0 L (-0.9 percent); inside parts 0.82 L vs sheet allowance 0.83 L"
+      "message": "chamber 0 net 55.7 L vs sheet 56.0 L (-0.6 percent); inside parts 0.64 L vs sheet allowance 0.83 L"
     },
     {
       "name": "stereo balance",
@@ -453,7 +420,7 @@
     {
       "name": "part count",
       "level": "pass",
-      "message": "18 parts"
+      "message": "15 parts"
     },
     {
       "name": "spans",
@@ -463,17 +430,17 @@
     {
       "name": "interference",
       "level": "pass",
-      "message": "27 solids, no pair overlaps by more than 1 mm3"
+      "message": "24 solids, no pair overlaps by more than 1 mm3"
     },
     {
       "name": "air volume",
       "level": "pass",
-      "message": "chamber 0 measured 55.48 L vs layout 55.48 L (+0.00 percent)"
+      "message": "chamber 0 measured 55.67 L vs layout 55.67 L (+0.00 percent)"
     },
     {
       "name": "solid count",
       "level": "pass",
-      "message": "18 solids for 18 blanks"
+      "message": "15 solids for 15 blanks"
     },
     {
       "name": "rectangularity",

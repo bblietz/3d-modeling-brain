@@ -125,11 +125,12 @@ open: matches the customer-loved reference cabinet (Mesa Boogie 1x12 WideBody) e
 
 ## Plan
 
-- Parts in build order: shell (top, bottom, two sides), baffle, cleats (baffle and back), single lower back panel, grill frame (four strips), hardware (handle, feet, jack plate). 18 parts total, per the cut list.
+- Parts in build order: shell (top, bottom, two sides), baffle, cleats (baffle and back), single lower back panel, grill frame (four strips), hardware (handle, feet, jack plate). 15 parts total, per the cut list.
 - Joinery per connection: finger joints (35 fingers of 9.5 mm; Brian confirmed over the through-dovetail option, 2026-09-15); baffle floating on top-and-bottom cleats only (the open-back default, unaffected by the back panel's own style)
 - Grain and show faces (hardwood): walnut, wrapping around the box per [[feedback-hardwood-grain-wraps]] (never front to back), no book-matching (end-grain corners). Accent striping in purpleheart or maple per the customer's notes is not modeled in the CAD (the generator has no such parameter) - a manual glue-up detail for Brian to place, still undecided
 - Back panel: **single-lower**, not the generator's previous "split" (two symmetric panels) default - one 12 mm panel over the bottom half (191 mm of 383 mm internal height), the rest of the back fully open above it. This matches the real Mesa Boogie 1x12 WideBody's own construction, confirmed from Gibson's and Mesa's own back-view product photos (cross-checked against two independent retail units) after Brian redirected away from the generator's symmetric two-panel default (2026-09-15). Required a new `cablayout.py` capability, `Aesthetics.open_back_style` (commit bd46228): the existing "split" style is unchanged and remains the default for every other order.
 - Hardware positions: one jack plate, on the single back panel (the only place it can go - "top" is now a rejected input combination, since there is no upper panel); top-center strap handle, confirmed (2026-09-15); no metal corners (hardwood default, matches the customer's own "Corners: none"); piping yes (customer asked for it); rubber feet (standard, no tilt-back - placement is floor, not tilted)
+- Back cleats: bottom, left, and right only (matching the single panel's own edges), not the generator's original top-and-upper-side set left behind from the "split" style - Brian caught this 2026-09-15 ("remove the cleats from the top half of the back. There isn't anything to put on them"), a real gap in the single-lower fix: `cleat_blanks()` in `cablayout.py` had never been updated for the new style at all, so it kept building all six of the old "split" style's cleats regardless. Fixed with its own test; part count dropped from 18 to 15
 - Port location: none (open back)
 - Aesthetics block written into `cab.py` on 2026-09-15
 
@@ -144,6 +145,7 @@ open: matches the customer-loved reference cabinet (Mesa Boogie 1x12 WideBody) e
 - 2026-09-15: voicing approved as presented at stop one (Weber Silver Bell, Alnico, hemp cone, 16 ohm, 75 W; open back; propose mode, pinned width and height; species walnut confirmed)
 - 2026-09-15: mimic the Mesa Boogie 1x12 WideBody's width and height exactly, hardwood construction, depth solved for volume rather than copied (Brian)
 - 2026-09-15: back type open, not semi-open, despite the model's own bridge table nominally pairing "big" with semi-open - the reference cabinet's literal open-back construction wins over the model's unverified panel-fraction heuristic (judgment call, flagged above under Back type)
+- 2026-09-15: back cleats limited to the single panel's own edges (bottom, left, right), not the full "split"-style set; the generator now handles this correctly for every future single-lower order too (`cleat_blanks()` fix, part of commit alongside the redirect)
 - 2026-09-15: genre canonical key indie-alternative, a judgment call given mixed reference-player signals (see Rig block, Genre)
 - 2026-09-15: Weber Silver Bell wattage 75 W and magnet Alnico, chosen by Brian (not specified by the customer)
 - 2026-09-15: both dimension-ratio-advisory and driver-displacement warnings accepted as benign/expected, no re-run needed
