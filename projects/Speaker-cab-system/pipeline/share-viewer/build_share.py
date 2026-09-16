@@ -163,7 +163,7 @@ def build(order: Path, customer: str | None) -> Path:
         "line": cab["line"],
         "grain": GRAIN_AXIS if hardwood else {},
         "shell": list(SHELL),
-        "speakerCone": "hemp" if "cannabis" in f["speaker_label"].lower() else "paper",
+        "speakerCone": "hemp" if any(w in f["speaker_label"].lower() for w in ("hemp", "cannabis")) else "paper",
         "textures": {"shell": jpeg_uri(swatch_path(finish), 900, 84, crop), "cloth": jpeg_uri(swatch_path(f["grill_cloth"]), 512, 86)},
         "mesh": mesh_payload(order / "cab.step"),
     }

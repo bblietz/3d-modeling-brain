@@ -248,7 +248,7 @@
   import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
   import { toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
 
-  const CAB = window.CAB;
+  const CAB = JSON.parse(document.getElementById("cab-data").textContent);
   const stage = document.getElementById("stage");
   const statusEl = document.getElementById("stage-status");
   const hintEl = document.getElementById("stage-hint");
@@ -762,9 +762,6 @@
     console.error(err);
     fail("The 3D view could not load here. The rest of this page still describes your cabinet.");
   }
-</script>
-<script>
-  window.CAB = /*__CAB_DATA__*/null;
   setTimeout(function () {
     var s = document.getElementById("stage-status");
     if (s && !window.__cabReady && !window.__cabFailed) {
@@ -772,3 +769,6 @@
     }
   }, 20000);
 </script>
+<!-- A JSON data island, not a script: CSP's script-src does not apply to a non-JavaScript
+     script type, so this per-order block needs no CSP allowance and no per-order hash. -->
+<script type="application/json" id="cab-data">/*__CAB_DATA__*/null</script>
