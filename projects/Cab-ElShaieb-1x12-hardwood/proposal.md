@@ -33,7 +33,7 @@ Your Ceriatone Overtone Special 50 carries a Les Paul's humbuckers and a Strat's
 - Speaker: Weber Silver Bell, Alnico, hemp cone, 75 W
 - Impedance and wiring: Single driver, 16 ohm
 - External size, width x height x depth: 22.8 x 16.5 x 13 in (578 x 419 x 331 mm)
-- Estimated weight, loaded: 33.3 lb (15.1 kg)
+- Estimated weight, loaded: 33.5 lb (15.2 kg)
 
 <!-- slot: why_this_cabinet -->
 We built this open-back, matched to the WideBody's own proportions - Mesa widened that shape specifically to add low-end fullness to an open-back cab without losing its natural sparkle, which is the direction your girth-and-warmth brief points. For the speaker, we chose the Weber Silver Bell in its hemp-cone version: hemp is built for a warmer, mellower top end than a standard paper cone, staying out of the way of strident highs while your dirt pedals do their work.
@@ -53,7 +53,7 @@ You also mentioned the EVM12L - a speaker with serious headroom that a lot of Du
 
 ## 5. Finishes
 
-- Finish: Walnut
+- Finish: Walnut, with a maple accent stripe (a 1 in center stripe and a 0.25 in stripe on each side, wrapping all the way around the cabinet)
 - Grill cloth: Fender Style Oxblood, 36"
 - Hardware: No metal corners, strap handle, recessed brass jack plate, with piping, rubber feet.
 

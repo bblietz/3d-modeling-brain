@@ -37,23 +37,7 @@
     "grill_cloth": "Fender Style Oxblood, 36\"",
     "finish": "",
     "roundover_mm": 12.7,
-    "accent_stripes": [
-      [
-        0.0,
-        25.4,
-        "maple"
-      ],
-      [
-        34.925,
-        6.35,
-        "maple"
-      ],
-      [
-        -34.925,
-        6.35,
-        "maple"
-      ]
-    ]
+    "accent_stripes": []
   },
   "external_mm": [
     577.85,
@@ -97,14 +81,14 @@
     "sheet_inside_parts_l": 0.828
   },
   "mass": {
-    "total_kg": 15.215,
-    "parts_kg": 11.015,
+    "total_kg": 15.083,
+    "parts_kg": 10.883,
     "speakers_kg": 3.2,
     "hardware_kg": 1.0,
     "com_mm": [
       0.0,
-      123.439,
-      202.837
+      123.071,
+      202.778
     ]
   },
   "hardware": [
@@ -211,7 +195,7 @@
         330.986
       ],
       "material": "black walnut 19 mm",
-      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge; accent stripes (front to back): hard maple 6.4 mm, hard maple 25.4 mm, hard maple 6.4 mm, base black walnut 19 mm elsewhere"
+      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge"
     },
     {
       "name": "side_right",
@@ -222,7 +206,7 @@
         330.986
       ],
       "material": "black walnut 19 mm",
-      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge; accent stripes (front to back): hard maple 6.4 mm, hard maple 25.4 mm, hard maple 6.4 mm, base black walnut 19 mm elsewhere"
+      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge"
     },
     {
       "name": "top",
@@ -233,7 +217,7 @@
         330.986
       ],
       "material": "black walnut 19 mm",
-      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge; accent stripes (front to back): hard maple 6.4 mm, hard maple 25.4 mm, hard maple 6.4 mm, base black walnut 19 mm elsewhere"
+      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge"
     },
     {
       "name": "bottom",
@@ -244,7 +228,7 @@
         330.986
       ],
       "material": "black walnut 19 mm",
-      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge; accent stripes (front to back): hard maple 6.4 mm, hard maple 25.4 mm, hard maple 6.4 mm, base black walnut 19 mm elsewhere"
+      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge"
     },
     {
       "name": "baffle",
@@ -447,7 +431,7 @@
     {
       "name": "interference",
       "level": "pass",
-      "message": "48 solids, no pair overlaps by more than 1 mm3"
+      "message": "24 solids, no pair overlaps by more than 1 mm3"
     },
     {
       "name": "air volume",
@@ -457,12 +441,12 @@
     {
       "name": "solid count",
       "level": "pass",
-      "message": "39 solids for 15 blanks (39 solids expected: accent stripes split some shell panels)"
+      "message": "15 solids for 15 blanks"
     },
     {
       "name": "rectangularity",
       "level": "pass",
-      "message": "blanks below 98 percent of their bounding box (cut list uses the blank dims): side_left_strip0 94%, side_left_strip1 97%, side_left_strip2 95%, side_left_strip3 94%, side_left_strip4 95%, side_left_strip5 97%, side_left_strip6 94%, side_right_strip0 94%, side_right_strip1 97%, side_right_strip2 95%, side_right_strip3 94%, side_right_strip4 95%, side_right_strip5 97%, side_right_strip6 94%, top_strip0 95%, top_strip1 95%, top_strip2 96%, top_strip3 97%, top_strip4 96%, top_strip5 95%, top_strip6 95%, bottom_strip0 95%, bottom_strip1 95%, bottom_strip2 96%, bottom_strip3 97%, bottom_strip4 96%, bottom_strip5 95%, bottom_strip6 95%, baffle 71%, grill_top 92%, grill_bottom 92%, grill_left 89%, grill_right 89%, back_lower 93%"
+      "message": "blanks below 98 percent of their bounding box (cut list uses the blank dims): side_left 94%, side_right 94%, top 95%, bottom 95%, baffle 71%, grill_top 92%, grill_bottom 92%, grill_left 89%, grill_right 89%, back_lower 93%"
     }
   ],
   "prediction_status": "unverified, ears only",

@@ -33,6 +33,13 @@ AESTHETICS = L.Aesthetics(
     grill_cloth="Fender Style Oxblood, 36\"",  # confirmed by Brian, 2026-09-15: Mojotone, matches the site's own catalog name
     head_width_mm=None,              # not matching a head
     roundover_mm=12.7,               # 1/2 in roundover, hardwood default
+    # Accent striping (Brian, 2026-09-15): a 1 in maple stripe centered on the shell's
+    # depth, a 0.25 in maple stripe on each side 0.75 in from the center stripe's own
+    # edge, walnut everywhere else; wraps all the way around on all four shell panels
+    # (same pattern since they share one depth). offset is measured from the panel's
+    # depth center: center stripe at 0; each side stripe at +/-(half the center
+    # stripe's width + the 0.75 in gap + half its own width) = +/-(12.7 + 19.05 + 3.175).
+    accent_stripes=((0.0, 25.4, "maple"), (34.925, 6.35, "maple"), (-34.925, 6.35, "maple")),
 )
 
 try:
