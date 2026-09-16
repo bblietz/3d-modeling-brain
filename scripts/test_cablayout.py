@@ -1237,6 +1237,22 @@ def test_open_back_style_single_lower_rejects_a_top_jack_plate():
                                                        jack_plate_position="top"))
 
 
+def test_open_back_style_single_lower_cleats_only_cover_the_panel():
+    # No cleat above the panel (nothing there to attach to, Brian, 2026-09-15): only the
+    # panel's own bottom, left, and right edges get one, like the closed back's cleats, sized
+    # to the panel's own height, not the "split" style's per-panel height.
+    spec = spec_for(**OPEN_BACK, aesthetics=L.Aesthetics(open_back_style="single-lower"))
+    lay = L.layout(spec)
+    names = {p.name for p in lay.parts if p.name.startswith("cleat_back")}
+    assert names == {"cleat_back_bottom", "cleat_back_left", "cleat_back_right"}
+    fr = L.frame(spec)
+    h_p = L.SINGLE_LOWER_PANEL_FRACTION * (fr.z1 - fr.z0)
+    by = {p.name: p for p in lay.parts if p.name in names}
+    assert by["cleat_back_left"].size[2] == pytest.approx(h_p - L.CLEAT_MM)
+    assert by["cleat_back_right"].size[2] == pytest.approx(h_p - L.CLEAT_MM)
+    assert by["cleat_back_left"].pos[2] == pytest.approx(fr.z0 + L.CLEAT_MM)
+
+
 def test_open_back_style_bad_value_is_an_input_error():
     assert L.Aesthetics(open_back_style="bogus").validate() == [
         "open_back_style must be one of split, single-lower"]

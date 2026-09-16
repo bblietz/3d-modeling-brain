@@ -831,6 +831,20 @@ def cleat_blanks(spec: CabSpec, fr: Frame) -> list:
             if xb == fr.x1:
                 parts.append(_cleat(f"cleat_back_right{sfx}", (xb - CLEAT_MM, y_cleat, fr.z0 + CLEAT_MM),
                                     (CLEAT_MM, CLEAT_MM, fr.z1 - fr.z0 - 2 * CLEAT_MM), "Z", c, base))
+        elif spec.aesthetics.open_back_style == "single-lower":
+            # One panel over the bottom SINGLE_LOWER_PANEL_FRACTION only: cleats on its bottom,
+            # left, and right edges, like the closed back's, sized to its height, not the "split"
+            # style's per-panel height. Its top edge faces open air, same as the closed style
+            # gives no cleat to an edge that faces open air in the split style above.
+            h_p = SINGLE_LOWER_PANEL_FRACTION * (fr.z1 - fr.z0)
+            parts.append(_cleat(f"cleat_back_bottom{sfx}", (xa, y_cleat, fr.z0),
+                                (xb - xa, CLEAT_MM, CLEAT_MM), "X", c, base))
+            if xa == fr.x0:
+                parts.append(_cleat(f"cleat_back_left{sfx}", (xa, y_cleat, fr.z0 + CLEAT_MM),
+                                    (CLEAT_MM, CLEAT_MM, h_p - CLEAT_MM), "Z", c, base))
+            if xb == fr.x1:
+                parts.append(_cleat(f"cleat_back_right{sfx}", (xb - CLEAT_MM, y_cleat, fr.z0 + CLEAT_MM),
+                                    (CLEAT_MM, CLEAT_MM, h_p - CLEAT_MM), "Z", c, base))
         else:
             h_p = open_panel_height(spec, fr)
             parts.append(_cleat(f"cleat_back_top{sfx}", (xa, y_cleat, fr.z1 - CLEAT_MM),
