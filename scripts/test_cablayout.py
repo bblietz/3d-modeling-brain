@@ -701,7 +701,7 @@ ALLOWED_BLOCKERS = {"port fit", "net volume", "magnet to back"}
 def test_matrix_every_configuration_lays_out_or_names_its_blocker():
     t0 = time.time()
     slugs = cabvoice.list_speakers()
-    assert len(slugs) == 20
+    assert len(slugs) == 21
     stats = {"cases": 0, "engine_blocked": 0, "clean": 0, "blocked": 0, "port_mouth_warn": 0}
     reasons = {}
     worst = (0.0, None)
@@ -754,7 +754,7 @@ def test_matrix_every_configuration_lays_out_or_names_its_blocker():
                             if abs(delta) > abs(worst[0]):
                                 worst = (delta, (slug, enclosure, slot is not None, n, jack, line))
     print(f"\nmatrix {stats} reasons {reasons} worst net delta {worst[0]:+.2f} percent at {worst[1]} in {time.time() - t0:.1f} s")
-    assert stats["cases"] == 1200
+    assert stats["cases"] == 1260
     assert stats["clean"] > 0
 
 
@@ -840,7 +840,7 @@ def test_report_carries_the_aesthetics_block():
     rep = L.layout_report(lay, L.check_layout(lay, spec))
     json.dumps(rep)
     block = rep["aesthetics"]
-    assert len(block) == 24
+    assert len(block) == 25
     assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
                                   "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
         "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",
@@ -1211,6 +1211,37 @@ def test_jack_plate_position_a_short_upper_panel_does_not_fit():
     tall_cutout = spec_for(external=(508.0, 300.0, 279.4), enclosure="open", port=None, open_fraction=0.4)
     _, feats, warn = L.jack_plates(tall_cutout, L.frame(tall_cutout))
     assert "back_upper" in feats and warn and "does not fit" in warn[0] and "upper open-back panel" in warn[0]
+
+
+# ---- open_back_style "single-lower": one panel over the bottom half, matching the real
+# Mesa Boogie 1x12 WideBody's construction, instead of the "split" style's two symmetric panels ----
+def test_open_back_style_single_lower_builds_one_panel_and_defaults_the_jack_plate_to_it():
+    spec = spec_for(**OPEN_BACK, aesthetics=L.Aesthetics(open_back_style="single-lower"))
+    assert spec.aesthetics.jack_plate_position == "bottom"   # no upper panel to default to
+    lay = L.layout(spec)
+    backs = {p.name: p for p in lay.parts if p.name.startswith("back")}
+    assert set(backs) == {"back_lower"}   # no back_upper at all
+    fr = L.frame(spec)
+    assert backs["back_lower"].size[2] == pytest.approx(L.SINGLE_LOWER_PANEL_FRACTION * (fr.z1 - fr.z0))
+    assert backs["back_lower"].pos[2] == pytest.approx(fr.z0)
+    assert backs["back_lower"].notes.endswith("; carries the jack plate")
+    hw, feats, warn = L.jack_plates(spec, fr)
+    assert warn == [] and hw[0].panel == "back_lower" and "back_lower" in feats and "back_upper" not in feats
+    fit = next(c for c in L.check_layout(lay, spec) if c.name == "jack plate")
+    assert fit.level == "pass"
+
+
+def test_open_back_style_single_lower_rejects_a_top_jack_plate():
+    with pytest.raises(ValueError, match="open_back_style 'single-lower' has no upper panel"):
+        spec_for(**OPEN_BACK, aesthetics=L.Aesthetics(open_back_style="single-lower",
+                                                       jack_plate_position="top"))
+
+
+def test_open_back_style_bad_value_is_an_input_error():
+    assert L.Aesthetics(open_back_style="bogus").validate() == [
+        "open_back_style must be one of split, single-lower"]
+    with pytest.raises(ValueError, match="aesthetics: open_back_style must be one of split, single-lower"):
+        spec_for(aesthetics=L.Aesthetics(open_back_style="bogus"))
 
 
 def test_jack_plate_position_closed_is_unchanged_and_a_bad_value_is_rejected():

@@ -238,6 +238,18 @@ def test_open_back_panels():
     assert M.assert_no_overlap(backs["back_upper"], backs["back_lower"]) < 1e-6
 
 
+def test_open_back_panels_single_lower_style():
+    spec = spec_for(enclosure="open", port=None, open_fraction=0.4,
+                    aesthetics=L.Aesthetics(open_back_style="single-lower"))
+    lay = L.layout(spec)
+    backs = M.back_solids(lay)
+    assert set(backs) == {"back_lower"}   # no back_upper solid at all
+    fr = L.frame(spec)
+    bb = backs["back_lower"].bounding_box()
+    assert abs((bb.max.Z - bb.min.Z) - L.SINGLE_LOWER_PANEL_FRACTION * (fr.z1 - fr.z0)) < 1e-6
+    assert abs(bb.min.Z - fr.z0) < 1e-6
+
+
 def test_envelope_stepped_cylinder_and_components():
     spec = spec_for(port="round")
     lay = L.layout(spec)

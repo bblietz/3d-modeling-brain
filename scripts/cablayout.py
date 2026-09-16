@@ -96,6 +96,13 @@ JACK_PLATE_POSITIONS = ("top", "bottom")
 HANDLES = ("strap", "recessed-side")
 CORNERS = ("black", "chrome", "none")
 FEET = ("rubber", "tilt-back")
+OPEN_BACK_STYLES = ("split", "single-lower")
+# "single-lower" panel height as a fraction of internal height: measured directly off the
+# real Mesa Boogie 1x12 WideBody's own back photos (Gibson and Mesa's own product images,
+# cross-checked against two independent retail units), which is one solid panel in the
+# bottom roughly half of the back, the rest open above it, not the "split" style's two
+# symmetric panels (Brian, 2026-09-15).
+SINGLE_LOWER_PANEL_FRACTION = 0.5
 
 
 @dataclass
@@ -108,6 +115,9 @@ class Aesthetics:
     baffle_mount: str = "floating"
     baffle_cleat_edges: str | None = None   # floating baffle: None takes the enclosure default
     jack_plate_position: str | None = None  # open/semi-open only; None takes the enclosure default
+    open_back_style: str = "split"          # open/semi-open only: "split" (two symmetric panels,
+                                             # top and bottom) or "single-lower" (one panel over the
+                                             # bottom SINGLE_LOWER_PANEL_FRACTION, open above it)
     handle: str = "strap"
     handle_screw_spacing_mm: float = 228.6
     recessed_handle_cutout_mm: tuple = (140.0, 90.0)
@@ -135,6 +145,8 @@ class Aesthetics:
             errors.append(f"baffle_cleat_edges must be one of {', '.join(BAFFLE_CLEAT_EDGES)} or None")
         if self.jack_plate_position is not None and self.jack_plate_position not in JACK_PLATE_POSITIONS:
             errors.append(f"jack_plate_position must be one of {', '.join(JACK_PLATE_POSITIONS)} or None")
+        if self.open_back_style not in OPEN_BACK_STYLES:
+            errors.append(f"open_back_style must be one of {', '.join(OPEN_BACK_STYLES)}")
         if self.handle not in HANDLES:
             errors.append(f"handle must be one of {', '.join(HANDLES)}")
         if self.corners is not None and self.corners not in CORNERS:
@@ -495,7 +507,12 @@ def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
     if aesthetics.baffle_cleat_edges is None:
         aesthetics = replace(aesthetics, baffle_cleat_edges=DEFAULT_BAFFLE_CLEAT_EDGES[enclosure_type])
     if aesthetics.jack_plate_position is None:
-        aesthetics = replace(aesthetics, jack_plate_position=DEFAULT_JACK_PLATE_POSITION[enclosure_type])
+        default_jack = ("bottom" if aesthetics.open_back_style == "single-lower"
+                        else DEFAULT_JACK_PLATE_POSITION[enclosure_type])
+        aesthetics = replace(aesthetics, jack_plate_position=default_jack)
+    if aesthetics.open_back_style == "single-lower" and aesthetics.jack_plate_position == "top":
+        raise ValueError("open_back_style 'single-lower' has no upper panel; "
+                         "jack_plate_position must be 'bottom' (or left at the default)")
     if (back_mm, baffle_mm, recess_mm) != (BACK_MM, BAFFLE_MM, RECESS_MM):
         raise ValueError("sheet construction thicknesses differ from the layout constants")
     if port_spec is not None:
@@ -1006,10 +1023,14 @@ def stiffener_blanks(spec: CabSpec, fr: Frame) -> tuple:
 
 # === TASK 6 ===
 def back_blanks(spec: CabSpec, fr: Frame) -> list:
-    """Closed: one 12 mm back flush with the rear edge. Open and semi-open:
-    two 12 mm panels top and bottom sized from the open fraction; the jack
-    plate note goes on whichever panel spec.aesthetics.jack_plate_position
-    resolves to."""
+    """Closed: one 12 mm back flush with the rear edge. Open and semi-open,
+    style "split" (default): two 12 mm panels top and bottom sized from the
+    open fraction; the jack plate note goes on whichever panel
+    spec.aesthetics.jack_plate_position resolves to. Style "single-lower":
+    one 12 mm panel over the bottom SINGLE_LOWER_PANEL_FRACTION of the
+    height, the rest of the back fully open above it (no upper panel at
+    all), matching the real Mesa Boogie 1x12 WideBody's construction; it
+    always carries the jack plate, since it is the only panel."""
     mat = birch(BACK_MM)
     w = fr.x1 - fr.x0
     if spec.closed:
@@ -1019,6 +1040,13 @@ def back_blanks(spec: CabSpec, fr: Frame) -> list:
         return [Blank("back", 1, mat, BIRCH_DENSITY, pos=(fr.x0, fr.D - BACK_MM, fr.z0),
                       size=(w, BACK_MM, fr.z1 - fr.z0),
                       blank_mm=_blank_dims(BACK_MM, fr.z1 - fr.z0, w), notes=note)]
+    if spec.aesthetics.open_back_style == "single-lower":
+        h_p = SINGLE_LOWER_PANEL_FRACTION * (fr.z1 - fr.z0)
+        note = (f"open back panel 12 mm birch, {h_p:.0f} mm tall "
+                f"({SINGLE_LOWER_PANEL_FRACTION:.2f} x internal height), one piece, the rest of "
+                "the back open above it, screwed to the cleats; carries the jack plate")
+        return [Blank("back_lower", 1, mat, BIRCH_DENSITY, pos=(fr.x0, fr.D - BACK_MM, fr.z0),
+                      size=(w, BACK_MM, h_p), blank_mm=_blank_dims(BACK_MM, h_p, w), notes=note)]
     h_p = open_panel_height(spec, fr)
     f = 1.0 - 2.0 * h_p / (fr.z1 - fr.z0)
     note = (f"open back panel 12 mm birch, {h_p:.0f} mm tall "
@@ -1063,7 +1091,8 @@ def jack_plates(spec: CabSpec, fr: Frame) -> tuple:
                                  f"recessed {finish} plate, cutout {w:g} x {h:g} mm, {text}"))
         features[panel].append({"type": "rect_hole", "axis": "y", "center": (xc, z_p), "w": w, "h": h})
     if not spec.closed:
-        h_p = open_panel_height(spec, fr)
+        h_p = (SINGLE_LOWER_PANEL_FRACTION * (fr.z1 - fr.z0)
+               if spec.aesthetics.open_back_style == "single-lower" else open_panel_height(spec, fr))
         if panel == "back_upper":
             bottom_edge = fr.z1 - h_p
             if z_p - h / 2.0 - 10.0 < bottom_edge:

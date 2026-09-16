@@ -1030,7 +1030,7 @@ CHECK_NAMES = ["sheet", "net volume", "stereo balance", "cutout", "grill opening
 def test_matrix_every_configuration_lays_out_or_names_its_blocker():
     t0 = time.time()
     slugs = cabvoice.list_speakers()
-    assert len(slugs) == 20
+    assert len(slugs) == 21
     stats = {"cases": 0, "engine_blocked": 0, "clean": 0, "blocked": 0, "port_mouth_warn": 0}
     reasons = {}
     worst = (0.0, None)
@@ -1083,7 +1083,7 @@ def test_matrix_every_configuration_lays_out_or_names_its_blocker():
                             if abs(delta) > abs(worst[0]):
                                 worst = (delta, (slug, enclosure, slot is not None, n, jack, line))
     print(f"\nmatrix {stats} reasons {reasons} worst net delta {worst[0]:+.2f} percent at {worst[1]} in {time.time() - t0:.1f} s")
-    assert stats["cases"] == 1200
+    assert stats["cases"] == 1260
     assert stats["clean"] > 0
 ```
 <!-- /code -->
@@ -1170,7 +1170,7 @@ def test_report_carries_the_aesthetics_block():
     rep = L.layout_report(lay, L.check_layout(lay, spec))
     json.dumps(rep)
     block = rep["aesthetics"]
-    assert len(block) == 24
+    assert len(block) == 25
     assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
                                   "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
         "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",
