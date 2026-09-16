@@ -37,8 +37,16 @@ WOOD_CROP_LEFT = 0.14      # the site walnut photo carries a pale sapwood strip 
 GRAIN_AXIS = {"top": 0, "bottom": 0, "side_left": 2, "side_right": 2}
 
 
-def mesh_payload(step_path: Path) -> dict:
-    """Every labeled solid in the STEP as quantized int16 positions and indices in one base64 blob."""
+def is_shell_part(name: str) -> bool:
+    """A shell panel or one of its accent_stripes segments (cabmodel.py's <panel>_stripN)."""
+    return any(name == s or name.startswith(f"{s}_strip") for s in SHELL)
+
+
+def mesh_payload(step_path: Path, keep=None) -> dict:
+    """Every labeled solid in the STEP as quantized int16 positions and indices in one base64
+    blob. `keep`, when given, skips a solid whose label it rejects: an alternate accent-stripe
+    design's own build (build()'s stripe_options) ships its shell parts only, since the rest
+    of that cabinet is identical to the primary order's."""
     from build123d import import_step
     shape = import_step(str(step_path))
     parts, chunks, offset = [], [], 0
@@ -52,6 +60,8 @@ def mesh_payload(step_path: Path) -> dict:
         return start
 
     for solid in shape.children:
+        if keep is not None and not keep(solid.label):
+            continue
         verts, tris = solid.tessellate(TOLERANCE_MM, ANGULAR_RAD)
         pos = array("h")
         for v in verts:
@@ -100,6 +110,25 @@ def accent_strip_species(D: float, stripes) -> dict:
     return {i: mat for i, (_, _, mat, _) in enumerate(segs) if mat != "__base__"}
 
 
+def stripe_option_payload(spec: str) -> dict:
+    """One CAB.stripeOptions entry, from a --stripe-option LABEL=<spec> value: 'none' recolors
+    the primary mesh's own accent parts to the shell's base material, 'primary' shows them in
+    their own species (this order's own accent_stripes, already in `data`), and another order's
+    directory tessellates that order's own shell parts (a differently-designed accent pattern
+    sharing this cabinet's shell) as a second geometry set the viewer shows in its place."""
+    if spec in ("none", "primary"):
+        return {"kind": spec}
+    alt = Path(spec)
+    alt_cab = json.loads((alt / "cab.json").read_text())
+    species = accent_strip_species(alt_cab["external_mm"][2], alt_cab.get("aesthetics", {}).get("accent_stripes"))
+    return {
+        "kind": "alt",
+        "species": {f"{shell}_strip{i}": sp for shell in SHELL for i, sp in species.items()},
+        "mesh": mesh_payload(alt / "cab.step", keep=is_shell_part),
+        "_species_names": {sp for sp in species.values()},
+    }
+
+
 def edge_size(mm) -> str:
     """A roundover radius as the shop says it: an eighth-inch fraction when it is one, else millimetres."""
     eighths = mm / 25.4 * 8
@@ -117,7 +146,7 @@ def slot(text: str, name: str) -> str:
     return m.group(1).strip() if m else ""
 
 
-def build(order: Path, customer: str | None) -> Path:
+def build(order: Path, customer: str | None, stripe_options: list[str] | None = None) -> Path:
     voicing = json.loads((order / "voicing.json").read_text())
     cab = json.loads((order / "cab.json").read_text())
     brief = (order / "brief.md").read_text() if (order / "brief.md").exists() else ""
@@ -138,6 +167,18 @@ def build(order: Path, customer: str | None) -> Path:
     strip_species = accent_strip_species(cab["external_mm"][2], cab.get("aesthetics", {}).get("accent_stripes"))
     strip_species_names = {sp for sp in strip_species.values()}
     stripe_words = f", with {' and '.join(sorted(strip_species_names))} accent stripes" if strip_species_names else ""
+
+    # The selector's option list: an explicit --stripe-option per order that wants more than
+    # a plain on/off (two or more differently-designed accent patterns to compare), else the
+    # usual on/off derived from this order's own accent_stripes, else none at all.
+    if not stripe_options and strip_species_names:
+        stripe_options = ["Without stripe=none", "With accent stripe=primary"]
+    stripe_opts, all_species_names = [], set(strip_species_names)
+    for raw in stripe_options or []:
+        label, _, spec = raw.partition("=")
+        payload = stripe_option_payload(spec)
+        all_species_names |= payload.pop("_species_names", set())
+        stripe_opts.append({"label": label, **payload})
     shell_text = (f"Solid {finish.lower()}, hand-cut {joint} joints{edges}{stripe_words}, grain wrapping around the box"
                   if hardwood else f"Baltic birch covered in {finish}, hand-cut finger joints{edges}")
     rows = [("Speaker", f"{f['speaker_label']}, {ohm}"), ("Shell", shell_text), ("Grill cloth", f["grill_cloth"]),
@@ -181,12 +222,16 @@ def build(order: Path, customer: str | None) -> Path:
         "shell": list(SHELL),
         # {"top_strip1": "hard maple", ...}: which shell sub-parts (cabmodel.py splits a
         # striped shell panel into one solid per accent_stripes segment) are an accent
-        # species, so the viewer's stripe toggle knows which meshes to swap; empty when
+        # species, so the viewer's stripe selector knows which meshes to swap; empty when
         # this order carries no accent_stripes, since every shell panel is then one part.
         "stripSpecies": {f"{shell}_strip{i}": sp for shell in SHELL for i, sp in strip_species.items()},
+        # The selector's own option list (see stripe_option_payload); empty when this order
+        # carries no accent_stripes and no --stripe-option was given, so the selector stays
+        # hidden. An "alt" entry ships its own shell-only mesh alongside its species map.
+        "stripeOptions": stripe_opts,
         "speakerCone": "hemp" if any(w in f["speaker_label"].lower() for w in ("hemp", "cannabis")) else "paper",
         "textures": {"shell": jpeg_uri(swatch_path(finish), 900, 84, crop), "cloth": jpeg_uri(swatch_path(f["grill_cloth"]), 512, 86),
-                     "accent": {sp: jpeg_uri(swatch_path(sp), 900, 84) for sp in strip_species_names}},
+                     "accent": {sp: jpeg_uri(swatch_path(sp), 900, 84) for sp in all_species_names}},
         "mesh": mesh_payload(order / "cab.step"),
     }
 
@@ -209,12 +254,19 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("order", type=Path, help="order directory holding cab.step, cab.json, voicing.json")
     ap.add_argument("--customer", help="customer name (default: the brief's frontmatter)")
+    ap.add_argument("--stripe-option", action="append", metavar="LABEL=none|primary|PATH",
+                     help="one entry in the stripe selector, in display order (repeatable); "
+                          "'none' shows the shell in its base material, 'primary' shows this "
+                          "order's own accent_stripes, and a path is another order directory "
+                          "sharing this cabinet's shell but designed with a different accent "
+                          "pattern. Omit entirely for the default on/off pair when this order "
+                          "has accent_stripes, or no selector at all when it does not.")
     args = ap.parse_args(argv)
     for name in ("cab.step", "cab.json", "voicing.json"):
         if not (args.order / name).exists():
             print(f"input error: {args.order / name} not found")
             return 1
-    out = build(args.order, args.customer)
+    out = build(args.order, args.customer, args.stripe_option)
     print(f"wrote {out} ({out.stat().st_size / 1e6:.2f} MB)")
     return 0
 

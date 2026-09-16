@@ -1,0 +1,482 @@
+{
+  "name": "Cab-ElShaieb-1x12-hardwood",
+  "generated": "2026-09-15",
+  "line": "hardwood",
+  "species": "walnut",
+  "corner_joint": "finger",
+  "baffle_mount": "floating",
+  "aesthetics": {
+    "corner_joint": "finger",
+    "finger_width_mm": null,
+    "dovetail_slope": 8.0,
+    "dovetail_pin_mm": null,
+    "dovetail_tail_mm": 30.0,
+    "baffle_mount": "floating",
+    "baffle_cleat_edges": "top-bottom",
+    "jack_plate_position": "bottom",
+    "open_back_style": "single-lower",
+    "handle": "strap",
+    "handle_screw_spacing_mm": 228.6,
+    "recessed_handle_cutout_mm": [
+      140.0,
+      90.0
+    ],
+    "jack_plate_cutout_mm": [
+      110.0,
+      70.0
+    ],
+    "corners": "none",
+    "corner_allowance_mm": 50.0,
+    "piping": true,
+    "feet": "rubber",
+    "foot_diameter_mm": 40.0,
+    "foot_inset_mm": 32.0,
+    "tolex_roll_in": 54,
+    "head_width_mm": null,
+    "tolex_color": "",
+    "grill_cloth": "Fender Style Oxblood, 36\"",
+    "finish": "",
+    "roundover_mm": 12.7,
+    "accent_stripes": [
+      [
+        0.0,
+        19.05,
+        "cherry"
+      ],
+      [
+        28.575,
+        38.1,
+        "maple"
+      ],
+      [
+        -28.575,
+        38.1,
+        "maple"
+      ]
+    ]
+  },
+  "external_mm": [
+    577.85,
+    419.1,
+    330.986
+  ],
+  "external_in": [
+    22.75,
+    16.5,
+    13.03
+  ],
+  "internal_mm": [
+    539.85,
+    381.1,
+    280.986
+  ],
+  "enclosure": {
+    "type": "open",
+    "driver_count": 1,
+    "chambers": 1,
+    "jack_config": "mono",
+    "open_fraction": 0.4
+  },
+  "speakers": [
+    "weber-silver-bell-alnico-hemp"
+  ],
+  "volumes": {
+    "gross_l": [
+      57.809
+    ],
+    "net_l": [
+      55.673
+    ],
+    "sheet_net_l": [
+      56.0
+    ],
+    "delta_pct": [
+      -0.585
+    ],
+    "inside_parts_l": 0.637,
+    "sheet_inside_parts_l": 0.828
+  },
+  "mass": {
+    "total_kg": 15.312,
+    "parts_kg": 11.112,
+    "speakers_kg": 3.2,
+    "hardware_kg": 1.0,
+    "com_mm": [
+      0.0,
+      123.706,
+      202.879
+    ]
+  },
+  "hardware": [
+    {
+      "item": "jack plate",
+      "position_mm": [
+        0.0,
+        330.986,
+        97.0
+      ],
+      "cutout_mm": [
+        110.0,
+        70.0
+      ],
+      "panel": "back_lower",
+      "notes": "recessed brass plate, cutout 110 x 70 mm, one 1/4 in jack"
+    },
+    {
+      "item": "strap handle",
+      "position_mm": [
+        0.0,
+        165.493,
+        419.1
+      ],
+      "cutout_mm": null,
+      "panel": "top",
+      "notes": "screw pair 228.6 mm apart on the width axis, centered on the top panel, T-nuts inside"
+    },
+    {
+      "item": "foot",
+      "position_mm": [
+        -236.925,
+        52.0,
+        0.0
+      ],
+      "cutout_mm": null,
+      "panel": "bottom",
+      "notes": "rubber foot 40 mm, one central screw"
+    },
+    {
+      "item": "foot",
+      "position_mm": [
+        -236.925,
+        278.986,
+        0.0
+      ],
+      "cutout_mm": null,
+      "panel": "bottom",
+      "notes": "rubber foot 40 mm, one central screw"
+    },
+    {
+      "item": "foot",
+      "position_mm": [
+        236.925,
+        52.0,
+        0.0
+      ],
+      "cutout_mm": null,
+      "panel": "bottom",
+      "notes": "rubber foot 40 mm, one central screw"
+    },
+    {
+      "item": "foot",
+      "position_mm": [
+        236.925,
+        278.986,
+        0.0
+      ],
+      "cutout_mm": null,
+      "panel": "bottom",
+      "notes": "rubber foot 40 mm, one central screw"
+    },
+    {
+      "item": "piping",
+      "position_mm": [
+        0.0,
+        0.0,
+        209.55
+      ],
+      "cutout_mm": null,
+      "panel": "",
+      "notes": "piping glued into the corner between grill frame and shell"
+    },
+    {
+      "item": "grill cloth",
+      "position_mm": [
+        0.0,
+        3.0,
+        209.55
+      ],
+      "cutout_mm": null,
+      "panel": "grill frame",
+      "notes": "Fender Style Oxblood, 36\""
+    }
+  ],
+  "tolex": null,
+  "parts": [
+    {
+      "name": "side_left",
+      "qty": 1,
+      "blank_mm": [
+        19.0,
+        419.1,
+        330.986
+      ],
+      "material": "black walnut 19 mm",
+      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge; accent stripes (front to back): hard maple 38.1 mm, black cherry 19.1 mm, hard maple 38.1 mm, base black walnut 19 mm elsewhere"
+    },
+    {
+      "name": "side_right",
+      "qty": 1,
+      "blank_mm": [
+        19.0,
+        419.1,
+        330.986
+      ],
+      "material": "black walnut 19 mm",
+      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge; accent stripes (front to back): hard maple 38.1 mm, black cherry 19.1 mm, hard maple 38.1 mm, base black walnut 19 mm elsewhere"
+    },
+    {
+      "name": "top",
+      "qty": 1,
+      "blank_mm": [
+        19.0,
+        577.85,
+        330.986
+      ],
+      "material": "black walnut 19 mm",
+      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge; accent stripes (front to back): hard maple 38.1 mm, black cherry 19.1 mm, hard maple 38.1 mm, base black walnut 19 mm elsewhere"
+    },
+    {
+      "name": "bottom",
+      "qty": 1,
+      "blank_mm": [
+        19.0,
+        577.85,
+        330.986
+      ],
+      "material": "black walnut 19 mm",
+      "notes": "finger joint, 35 fingers of 9.5 mm, both ends full, front finger on top and bottom; grain wraps around the box (left to right on top and bottom, vertical on the sides), never front to back; show face out; 12.7 mm (1/2 in) roundover on every outside edge; accent stripes (front to back): hard maple 38.1 mm, black cherry 19.1 mm, hard maple 38.1 mm, base black walnut 19 mm elsewhere"
+    },
+    {
+      "name": "baffle",
+      "qty": 1,
+      "blank_mm": [
+        18.0,
+        379.1,
+        537.85
+      ],
+      "material": "baltic birch 18 mm",
+      "notes": "floating baffle: 1 mm clearance per side, felt strips on the cleats, screwed through the cleats, removable; speakers front-mounted on T-nuts, 4 bolts on a 297 mm circle"
+    },
+    {
+      "name": "cleat_baffle_top",
+      "qty": 1,
+      "blank_mm": [
+        18.0,
+        18.0,
+        539.85
+      ],
+      "material": "baltic birch 18 mm",
+      "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
+    },
+    {
+      "name": "cleat_baffle_bottom",
+      "qty": 1,
+      "blank_mm": [
+        18.0,
+        18.0,
+        539.85
+      ],
+      "material": "baltic birch 18 mm",
+      "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
+    },
+    {
+      "name": "cleat_back_bottom",
+      "qty": 1,
+      "blank_mm": [
+        18.0,
+        18.0,
+        539.85
+      ],
+      "material": "baltic birch 18 mm",
+      "notes": "18 x 18 birch cleat, screws every 150 mm"
+    },
+    {
+      "name": "cleat_back_left",
+      "qty": 1,
+      "blank_mm": [
+        18.0,
+        18.0,
+        172.55
+      ],
+      "material": "baltic birch 18 mm",
+      "notes": "18 x 18 birch cleat, screws every 150 mm"
+    },
+    {
+      "name": "cleat_back_right",
+      "qty": 1,
+      "blank_mm": [
+        18.0,
+        18.0,
+        172.55
+      ],
+      "material": "baltic birch 18 mm",
+      "notes": "18 x 18 birch cleat, screws every 150 mm"
+    },
+    {
+      "name": "grill_top",
+      "qty": 1,
+      "blank_mm": [
+        12.0,
+        40.0,
+        531.85
+      ],
+      "material": "baltic birch 12 mm",
+      "notes": "grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
+    },
+    {
+      "name": "grill_bottom",
+      "qty": 1,
+      "blank_mm": [
+        12.0,
+        40.0,
+        531.85
+      ],
+      "material": "baltic birch 12 mm",
+      "notes": "grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
+    },
+    {
+      "name": "grill_left",
+      "qty": 1,
+      "blank_mm": [
+        12.0,
+        40.0,
+        373.1
+      ],
+      "material": "baltic birch 12 mm",
+      "notes": "grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
+    },
+    {
+      "name": "grill_right",
+      "qty": 1,
+      "blank_mm": [
+        12.0,
+        40.0,
+        373.1
+      ],
+      "material": "baltic birch 12 mm",
+      "notes": "grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
+    },
+    {
+      "name": "back_lower",
+      "qty": 1,
+      "blank_mm": [
+        12.0,
+        190.55,
+        539.85
+      ],
+      "material": "baltic birch 12 mm",
+      "notes": "open back panel 12 mm birch, 191 mm tall (0.50 x internal height), one piece, the rest of the back open above it, screwed to the cleats; carries the jack plate"
+    }
+  ],
+  "checks": [
+    {
+      "name": "sheet",
+      "level": "pass",
+      "message": "prediction unverified, ears only; no blockers on the sheet"
+    },
+    {
+      "name": "net volume",
+      "level": "pass",
+      "message": "chamber 0 net 55.7 L vs sheet 56.0 L (-0.6 percent); inside parts 0.64 L vs sheet allowance 0.83 L"
+    },
+    {
+      "name": "stereo balance",
+      "level": "pass",
+      "message": "single chamber"
+    },
+    {
+      "name": "cutout",
+      "level": "pass",
+      "message": "1 cutout(s) at the note diameter with 48 mm shell margins"
+    },
+    {
+      "name": "grill opening",
+      "level": "pass",
+      "message": "strip inner edges clear every cutout by 4 mm"
+    },
+    {
+      "name": "port fit",
+      "level": "pass",
+      "message": "no port"
+    },
+    {
+      "name": "port mouth",
+      "level": "pass",
+      "message": "no port"
+    },
+    {
+      "name": "magnet to back",
+      "level": "pass",
+      "message": "open back"
+    },
+    {
+      "name": "handle",
+      "level": "pass",
+      "message": "strap handle 0.0 mm from the center of mass on the width axis"
+    },
+    {
+      "name": "head match",
+      "level": "pass",
+      "message": "no head width given"
+    },
+    {
+      "name": "line",
+      "level": "pass",
+      "message": "hardwood line, walnut"
+    },
+    {
+      "name": "jack plate",
+      "level": "pass",
+      "message": "plates fit above the cleat"
+    },
+    {
+      "name": "stock",
+      "level": "pass",
+      "message": "every blank fits the stock limits"
+    },
+    {
+      "name": "part count",
+      "level": "pass",
+      "message": "15 parts"
+    },
+    {
+      "name": "spans",
+      "level": "pass",
+      "message": "hardwood shell panels take no stiffener: top and bottom span 540 mm"
+    },
+    {
+      "name": "interference",
+      "level": "pass",
+      "message": "40 solids, no pair overlaps by more than 1 mm3"
+    },
+    {
+      "name": "air volume",
+      "level": "pass",
+      "message": "chamber 0 measured 55.67 L vs layout 55.67 L (+0.00 percent)"
+    },
+    {
+      "name": "solid count",
+      "level": "pass",
+      "message": "31 solids for 15 blanks (31 solids expected: accent stripes split some shell panels)"
+    },
+    {
+      "name": "rectangularity",
+      "level": "pass",
+      "message": "blanks below 98 percent of their bounding box (cut list uses the blank dims): side_left_strip0 93%, side_left_strip1 95%, side_left_strip2 95%, side_left_strip3 95%, side_left_strip4 93%, side_right_strip0 93%, side_right_strip1 95%, side_right_strip2 95%, side_right_strip3 95%, side_right_strip4 93%, top_strip0 95%, top_strip1 96%, top_strip2 96%, top_strip3 96%, top_strip4 95%, bottom_strip0 95%, bottom_strip1 96%, bottom_strip2 96%, bottom_strip3 96%, bottom_strip4 95%, baffle 71%, grill_top 92%, grill_bottom 92%, grill_left 89%, grill_right 89%, back_lower 93%"
+    }
+  ],
+  "prediction_status": "unverified, ears only",
+  "files": {
+    "step": "cab.step",
+    "images": [
+      "images/cab-iso.png",
+      "images/cab-front.png",
+      "images/cab-top.png",
+      "images/cab-right.png",
+      "images/cab-exploded.png"
+    ],
+    "cutlist_md": "cutlist.md",
+    "cutlist_csv": "cutlist.csv",
+    "cab_json": "cab.json"
+  }
+}

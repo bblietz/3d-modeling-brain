@@ -1,0 +1,202 @@
+{
+  "name": "Cab-ElShaieb-1x12-hardwood",
+  "mode": "propose",
+  "tone_target": {
+    "low_end": "big",
+    "mids": "neutral",
+    "top": "smooth",
+    "breakup": "moderate",
+    "dispersion": "wide",
+    "placement": "floor",
+    "min_power_w": 75,
+    "impedance_options_ohm": [
+      4,
+      8,
+      16
+    ]
+  },
+  "speakers": [
+    {
+      "slug": "weber-silver-bell-alnico-hemp",
+      "brand": "Weber",
+      "model": "Silver Bell, Alnico, hemp cone, 75 W",
+      "impedance_ohm": 16.0,
+      "power_w": 75,
+      "sensitivity_db": 98,
+      "data_status": "missing",
+      "analog_of": null,
+      "cutout_mm": 273.0,
+      "bolt_circle_mm": 297,
+      "bolt_count": 4,
+      "depth_mm": 146.0,
+      "weight_kg": 3.2,
+      "displacement_l": 1.5,
+      "displacement_estimated": true,
+      "frame_diameter_mm": 308.0,
+      "magnet_diameter_mm": null,
+      "magnet_diameter_estimated": false
+    }
+  ],
+  "enclosure": {
+    "type": "open",
+    "driver_count": 1,
+    "chambers": 1,
+    "jack_config": "mono",
+    "open_fraction": 0.4
+  },
+  "volumes": {
+    "method": "rule-of-thumb",
+    "per_driver_net_l": 56.0,
+    "per_chamber_net_l": 56.0,
+    "net_total_l": 56.0,
+    "displacement_l": 1.5,
+    "brace_l": 0.0,
+    "port_l": 0.0,
+    "divider_l": 0.0,
+    "inside_parts_l": 0.82785888,
+    "gross_l": 58.32785888
+  },
+  "box": {
+    "internal_mm": [
+      541.85,
+      383.1,
+      280.98607950222834
+    ],
+    "external_mm": [
+      577.85,
+      419.1,
+      330.98607950222834
+    ],
+    "internal_in": [
+      21.33,
+      15.08,
+      11.06
+    ],
+    "external_in": [
+      22.75,
+      16.5,
+      13.03
+    ],
+    "chamber_internal_width_mm": 541.85
+  },
+  "port": null,
+  "prediction": {
+    "model": "open-back path estimate",
+    "f_cancel_hz": 310.7384619904293,
+    "path_m": 0.5519110795022284,
+    "panel_height_mm": 114.93,
+    "character": "open, wide dispersion, 6 dB per octave below 311 Hz relative to closed",
+    "response_relative_db": [
+      [
+        20.0,
+        -23.827300323779728
+      ],
+      [
+        25.2,
+        -21.81988942142847
+      ],
+      [
+        31.75,
+        -19.81302564449946
+      ],
+      [
+        40.0,
+        -17.806700410500103
+      ],
+      [
+        50.4,
+        -15.799289508148844
+      ],
+      [
+        63.5,
+        -13.792425731219836
+      ],
+      [
+        80.0,
+        -11.786100497220477
+      ],
+      [
+        100.79,
+        -9.779551333015476
+      ],
+      [
+        126.99,
+        -7.772509773185896
+      ],
+      [
+        160.0,
+        -5.765500583940854
+      ],
+      [
+        201.59,
+        -3.758520539975958
+      ],
+      [
+        253.98,
+        -1.7519098599062728
+      ],
+      [
+        320.0,
+        0.0
+      ],
+      [
+        400.0,
+        0.0
+      ]
+    ]
+  },
+  "wiring": {
+    "jack_config": "mono",
+    "recommended": {
+      "name": "single",
+      "impedance_ohm": 16.0,
+      "matches_tap": true,
+      "jack_text": "Single driver, 16 ohm"
+    },
+    "options": [
+      {
+        "name": "single",
+        "impedance_ohm": 16.0,
+        "matches_tap": true,
+        "jack_text": "Single driver, 16 ohm"
+      }
+    ],
+    "mismatch_accepted": false
+  },
+  "power": {
+    "amp_power_w": 50.0,
+    "total_handling_w": 75.0,
+    "min_power_w": 75.0,
+    "status": "ok",
+    "message": "handling 75 W clears the 75 W target",
+    "per_side": [
+      {
+        "total_handling_w": 75.0,
+        "amp_power_w": 50.0,
+        "min_power_w": 75.0,
+        "status": "ok",
+        "message": "handling 75 W clears the 75 W target"
+      }
+    ]
+  },
+  "construction": {
+    "panel_mm": 18.0,
+    "back_mm": 12.0,
+    "baffle_mm": 18.0,
+    "recess_mm": 20.0,
+    "brace_l": 0.0,
+    "pinned_external_width_mm": 577.85,
+    "pinned_external_height_mm": 419.1,
+    "max_external_mm": null,
+    "port_count": null,
+    "line": "hardwood",
+    "species": "walnut",
+    "wall_material": "walnut"
+  },
+  "warnings": [
+    "driver displacement assumed 1.5 L per driver",
+    "width and depth are within 5 percent of 2:1 (1.93); coincident standing waves"
+  ],
+  "blockers": [],
+  "prediction_status": "unverified, ears only"
+}

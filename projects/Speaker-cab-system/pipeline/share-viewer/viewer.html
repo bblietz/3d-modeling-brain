@@ -207,10 +207,7 @@
           <button type="button" id="view-back" data-view="back" aria-pressed="false">{{back_view_label}}</button>
         </div>
         <div class="toggles">
-          <div class="views" role="group" aria-label="Finish" id="stripe-select" hidden>
-            <button type="button" data-stripe="on" aria-pressed="true">With accent stripe</button>
-            <button type="button" data-stripe="off" aria-pressed="false">Without stripe</button>
-          </div>
+          <div class="views" role="group" aria-label="Finish" id="stripe-select" hidden></div>
           <button type="button" class="grill" id="grill-toggle" aria-pressed="false">{{grill_icon}}<span id="grill-label">Take off the grill</span></button>
         </div>
       </div>
@@ -330,6 +327,23 @@
     return { min, max };
   }
 
+  // Unpacks one tessellated part (quantized int16 positions plus a triangle index) from a
+  // mesh payload's base64 blob into a creased BufferGeometry. Shared by the primary cabinet
+  // mesh and any CAB.stripeOptions "alt" mesh (a differently-designed accent pattern's own
+  // shell parts), so a striped panel's crease angle stays the same in either.
+  function decodeGeometry(meshPayload, blob, part) {
+    const q = new Int16Array(blob.buffer, part.voff, part.vcount * 3);
+    const positions = new Float32Array(q.length);
+    for (let i = 0; i < q.length; i++) positions[i] = q[i] * meshPayload.step;
+    const index = part.i32
+      ? new Uint32Array(blob.buffer, part.ioff, part.icount)
+      : new Uint16Array(blob.buffer, part.ioff, part.icount);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setIndex(new THREE.BufferAttribute(index, 1));
+    return toCreasedNormals(geometry, deg(32));
+  }
+
   function start() {
     let renderer;
     try {
@@ -404,23 +418,16 @@
     const grill = new THREE.Group();
     cad.add(grill);
 
-    // Accent-stripe meshes (an accent_stripes order only): the finish selection wired
-    // below swaps each between its own species (the default) and the shell's base
-    // MAT.shell, which butts against it with a continuous, seamless grain (same parent
-    // seed below).
+    // Shell meshes from the primary build (every order) and, among them, the ones an
+    // accent_stripes order colors in a species (the default pattern): the finish selector
+    // wired below shows or hides the first group whole, and swaps each of the second
+    // between its own species and the shell's base MAT.shell, which butts against it with
+    // a continuous, seamless grain (same parent seed below).
+    const primaryShellMeshes = [];
     const accentMeshes = [];
     const blob = bytesFromBase64(CAB.mesh.data);
     for (const part of CAB.mesh.parts) {
-      const q = new Int16Array(blob.buffer, part.voff, part.vcount * 3);
-      const positions = new Float32Array(q.length);
-      for (let i = 0; i < q.length; i++) positions[i] = q[i] * CAB.mesh.step;
-      const index = part.i32
-        ? new Uint32Array(blob.buffer, part.ioff, part.icount)
-        : new Uint16Array(blob.buffer, part.ioff, part.icount);
-      let geometry = new THREE.BufferGeometry();
-      geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-      geometry.setIndex(new THREE.BufferAttribute(index, 1));
-      geometry = toCreasedNormals(geometry, deg(32));
+      let geometry = decodeGeometry(CAB.mesh, blob, part);
       const kind = kindOf(part.name);
       const parent = shellOf(part.name);
       if (kind === "shell") {
@@ -451,6 +458,7 @@
       const species = kind === "shell" ? CAB.stripSpecies[part.name] : null;
       const accentMat = species && MAT.accent[species];
       const mesh = new THREE.Mesh(geometry, accentMat || MAT[kind]);
+      if (kind === "shell") primaryShellMeshes.push(mesh);
       if (accentMat) accentMeshes.push(mesh);
       mesh.name = part.name;
       mesh.castShadow = true;
@@ -582,15 +590,58 @@
       fade = { from: grillOn ? 0 : 1, to: grillOn ? 1 : 0, t0: performance.now(), duration: 320 };
     });
 
+    // An alternate accent-stripe design (a CAB.stripeOptions "alt" entry): its own shell
+    // parts only, since the rest of the cabinet is identical across every design; hidden
+    // until its selector button is chosen, so it never doubles up on the primary's own.
+    function buildShellGroup(meshPayload, species) {
+      const group = new THREE.Group();
+      const altBlob = bytesFromBase64(meshPayload.data);
+      for (const part of meshPayload.parts) {
+        const geometry = decodeGeometry(meshPayload, altBlob, part);
+        const parent = shellOf(part.name);
+        projectUVs(geometry, hardwood
+          ? { grain: CAB.grain[parent] ?? -1, uMM: 225, vMM: 450, endShade: 0.56, seed: hash(parent) }
+          : { uMM: 160, vMM: 160, seed: hash(parent) });
+        const mat = species[part.name] && MAT.accent[species[part.name]];
+        const mesh = new THREE.Mesh(geometry, mat || MAT.shell);
+        mesh.name = part.name;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        group.add(mesh);
+      }
+      group.visible = false;
+      cad.add(group);
+      return group;
+    }
+
     const stripeSelect = document.getElementById("stripe-select");
-    if (accentMeshes.length) {
+    const STRIPE_OPTIONS = CAB.stripeOptions || [];
+    if (STRIPE_OPTIONS.length > 1) {
       stripeSelect.hidden = false;
-      const stripeButtons = [...stripeSelect.querySelectorAll("[data-stripe]")];
-      const setStripes = (on) => {
-        for (const mesh of accentMeshes) mesh.material = on ? MAT.accent[CAB.stripSpecies[mesh.name]] : MAT.shell;
-        for (const b of stripeButtons) b.setAttribute("aria-pressed", String((b.dataset.stripe === "on") === on));
-      };
-      for (const b of stripeButtons) b.addEventListener("click", () => setStripes(b.dataset.stripe === "on"));
+      const altGroups = STRIPE_OPTIONS.map((opt) => (opt.kind === "alt" ? buildShellGroup(opt.mesh, opt.species) : null));
+      function selectStripe(index) {
+        const opt = STRIPE_OPTIONS[index];
+        for (const mesh of primaryShellMeshes) mesh.visible = opt.kind !== "alt";
+        if (opt.kind === "primary") {
+          for (const mesh of accentMeshes) mesh.material = MAT.accent[CAB.stripSpecies[mesh.name]];
+        } else if (opt.kind === "none") {
+          for (const mesh of accentMeshes) mesh.material = MAT.shell;
+        }
+        for (const grp of altGroups) if (grp) grp.visible = false;
+        if (opt.kind === "alt") altGroups[index].visible = true;
+        stripeButtons.forEach((b, i) => b.setAttribute("aria-pressed", String(i === index)));
+      }
+      const stripeButtons = STRIPE_OPTIONS.map((opt, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = opt.label;
+        b.setAttribute("aria-pressed", "false");
+        b.addEventListener("click", () => selectStripe(i));
+        stripeSelect.appendChild(b);
+        return b;
+      });
+      const initial = STRIPE_OPTIONS.findIndex((o) => o.kind === "primary");
+      selectStripe(initial >= 0 ? initial : 0);
     }
 
     function applyTheme() {
