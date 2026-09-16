@@ -134,6 +134,9 @@ class Aesthetics:
     grill_cloth: str = ""
     finish: str = ""
     roundover_mm: float | None = None   # None takes the line default; 0 is none (sharp edges)
+    accent_stripes: tuple = ()          # hardwood only: ((offset_mm, width_mm, species), ...), offset
+                                         # from the panel's depth center; same pattern on all four
+                                         # shell panels, since they share the same depth
 
     def validate(self) -> list:
         errors = []
@@ -172,6 +175,19 @@ class Aesthetics:
             v = getattr(self, name)
             if len(v) != 2 or not all(x > 0 for x in v):
                 errors.append(f"{name} must be (width, height) in mm, both positive")
+        spans = []
+        for s in self.accent_stripes:
+            if len(s) != 3 or not s[1] > 0:
+                errors.append(f"accent_stripes entry {s!r} must be (offset_mm, width_mm, species), width_mm positive")
+                continue
+            offset, width, _ = s
+            spans.append((offset - width / 2.0, offset + width / 2.0))
+        spans.sort()
+        for i, (a0, a1) in enumerate(spans):
+            for b0, b1 in spans[i + 1:]:
+                if a1 > b0:
+                    errors.append(f"accent_stripes overlap: one spans {a0:g} to {a1:g} mm, "
+                                 f"the next {b0:g} to {b1:g} mm")
         return errors
 
 
@@ -248,6 +264,8 @@ class Blank:
     notes: str = ""
     chamber: int | None = None
     length_axis: str | None = None
+    strips: tuple = ()   # hardwood shell panels with accent_stripes: (y0, y1, material, density)
+                         # segments along the depth (Y) axis, covering 0..D; empty otherwise
 
     @property
     def box(self) -> tuple:
@@ -495,6 +513,11 @@ def order_from(voicing: dict, aesthetics: Aesthetics) -> CabSpec:
         raise ValueError(f"line must be tolex or hardwood, not {line!r}")
     if aesthetics.corner_joint == "dovetail" and line != "hardwood":
         raise ValueError("dovetail corners are a hardwood line option")
+    if aesthetics.accent_stripes and line != "hardwood":
+        raise ValueError("accent_stripes are a hardwood line option")
+    for offset, width, sp in aesthetics.accent_stripes:
+        if species_density(sp) is None:
+            raise ValueError(f"accent_stripes species {sp!r} is not a known species")
     if aesthetics.roundover_mm is None:
         aesthetics = replace(aesthetics, roundover_mm=DEFAULT_ROUNDOVER_MM[line])
     if aesthetics.roundover_mm and aesthetics.roundover_mm >= PANEL_MM[line]:
@@ -666,6 +689,33 @@ def birch(t: float) -> str:
     return f"baltic birch {t:g} mm"
 
 
+def stripe_layout(D: float, stripes: tuple, base_material: str, base_density: float) -> tuple:
+    """(y0, y1, material, density) segments covering the full 0..D depth: the
+    base shell material with each Aesthetics.accent_stripes entry (offset
+    from the depth center, width, species) cut in, base material filling
+    every gap. Raises if a stripe falls outside the panel depth."""
+    if not stripes:
+        return ()
+    center = D / 2.0
+    segs = []
+    for offset, width, sp in stripes:
+        y0, y1 = center + offset - width / 2.0, center + offset + width / 2.0
+        if y0 < 0 or y1 > D:
+            raise ValueError(f"accent_stripes entry at offset {offset:g} mm, width {width:g} mm "
+                             f"falls outside the {D:g} mm panel depth")
+        segs.append((y0, y1, species_name(sp), species_density(sp)))
+    segs.sort()
+    out, y = [], 0.0
+    for y0, y1, mat, dens in segs:
+        if y0 > y:
+            out.append((y, y0, base_material, base_density))
+        out.append((y0, y1, mat, dens))
+        y = y1
+    if y < D:
+        out.append((y, D, base_material, base_density))
+    return tuple(out)
+
+
 def shell_blanks(spec: CabSpec) -> list:
     """Top, bottom, and two sides as full-size blanks with the comb removals
     at the four corner blocks as edge_cuts features."""
@@ -694,23 +744,27 @@ def shell_blanks(spec: CabSpec) -> list:
     if spec.line == "hardwood":
         note += "; " + HARDWOOD_GRAIN_NOTE
     note += roundover_note(a.roundover_mm)
+    strips = stripe_layout(D, a.accent_stripes, material, density)
+    if strips:
+        widths = ", ".join(f"{mat} {y1 - y0:.1f} mm" for y0, y1, mat, _ in strips if mat != material)
+        note += f"; accent stripes (front to back): {widths}, base {material} elsewhere"
     left = (-W / 2, -W / 2 + t)
     right = (W / 2 - t, W / 2)
     parts = [
         Blank("side_left", 1, material, density, pos=(-W / 2, 0.0, 0.0), size=(t, D, H),
-              blank_mm=(t, H, D), length_axis="Y", notes=note,
+              blank_mm=(t, H, D), length_axis="Y", notes=note, strips=strips,
               features=[{"type": "edge_cuts", "x": left, "polys": side_top},
                         {"type": "edge_cuts", "x": left, "polys": side_bot}]),
         Blank("side_right", 1, material, density, pos=(W / 2 - t, 0.0, 0.0), size=(t, D, H),
-              blank_mm=(t, H, D), length_axis="Y", notes=note,
+              blank_mm=(t, H, D), length_axis="Y", notes=note, strips=strips,
               features=[{"type": "edge_cuts", "x": right, "polys": side_top},
                         {"type": "edge_cuts", "x": right, "polys": side_bot}]),
         Blank("top", 1, material, density, pos=(-W / 2, 0.0, H - t), size=(W, D, t),
-              blank_mm=(t, W, D), length_axis="Y", notes=note,
+              blank_mm=(t, W, D), length_axis="Y", notes=note, strips=strips,
               features=[{"type": "edge_cuts", "x": left, "polys": top_polys},
                         {"type": "edge_cuts", "x": right, "polys": top_polys}]),
         Blank("bottom", 1, material, density, pos=(-W / 2, 0.0, 0.0), size=(W, D, t),
-              blank_mm=(t, W, D), length_axis="Y", notes=note,
+              blank_mm=(t, W, D), length_axis="Y", notes=note, strips=strips,
               features=[{"type": "edge_cuts", "x": left, "polys": bot_polys},
                         {"type": "edge_cuts", "x": right, "polys": bot_polys}]),
     ]
@@ -1569,13 +1623,31 @@ def _cutout_x(spec: CabSpec, fr: Frame, i: int) -> float:
     return cutout_centers(spec, fr)[i][0]
 
 
+def blank_mass_kg(p: Blank) -> float:
+    """Mass of a blank: its post-joint volume times density, or for a shell
+    panel with accent_stripes, that same total volume split among each
+    strip's own density, weighted by the strip's share of the panel's
+    depth. An approximation, not the exact per-strip boolean volume the CAD
+    layer (cabmodel.py) actually cuts: the finger or dovetail comb
+    alternates roughly every half the panel thickness across the full
+    depth, fine-grained next to any accent stripe width used so far, so a
+    width-weighted share of the panel's total post-joint volume is within
+    a fraction of a percent of the true per-strip figure."""
+    total_mm3 = blank_volume_mm3(p)
+    if not p.strips:
+        return total_mm3 * p.density / 1e9
+    (_, y0, _), (_, y1, _) = p.box
+    depth = y1 - y0
+    return sum(total_mm3 * (sy1 - sy0) / depth * dens for sy0, sy1, _, dens in p.strips) / 1e9
+
+
 def mass_and_com(spec: CabSpec, fr: Frame, parts: list, cutouts: list) -> tuple:
     """(mass dict, center of mass): blank volumes times density, speakers at
     the baffle at the cutout centers, 1 kg of hardware at the cab center."""
     total, mx, my, mz = 0.0, 0.0, 0.0, 0.0
     parts_kg = 0.0
     for p in parts:
-        m = blank_volume_mm3(p) * p.density / 1e9
+        m = blank_mass_kg(p)
         (x0, y0, z0), (x1, y1, z1) = p.box
         cx, cy, cz = (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2
         parts_kg += m

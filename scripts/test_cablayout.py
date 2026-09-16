@@ -840,7 +840,7 @@ def test_report_carries_the_aesthetics_block():
     rep = L.layout_report(lay, L.check_layout(lay, spec))
     json.dumps(rep)
     block = rep["aesthetics"]
-    assert len(block) == 25
+    assert len(block) == 26
     assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
                                   "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
         "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",
@@ -1275,3 +1275,120 @@ def test_jack_plate_position_closed_is_unchanged_and_a_bad_value_is_rejected():
     assert hw[0].panel == "back" and "back" in feats
     with pytest.raises(ValueError, match="aesthetics: jack_plate_position must be one of top, bottom or None"):
         spec_for(aesthetics=L.Aesthetics(jack_plate_position="middle"))
+
+
+# === accent stripes ===
+def test_stripe_layout_no_stripes_returns_empty_tuple():
+    assert L.stripe_layout(279.4, (), "black walnut 19 mm", 610.0) == ()
+
+
+def test_stripe_layout_orders_segments_and_fills_gaps():
+    # Brian's 2026-09-15 spec: 1 in maple center stripe, two 0.25 in maple stripes each
+    # 0.75 in from the center stripe's edge, all on a 279.4 mm deep walnut panel.
+    stripes = ((0.0, 25.4, "maple"), (34.925, 6.35, "maple"), (-34.925, 6.35, "maple"))
+    segs = L.stripe_layout(279.4, stripes, "black walnut 19 mm", 610.0)
+    assert [(round(y0, 3), round(y1, 3)) for y0, y1, _, _ in segs] == [
+        (0.0, 101.6), (101.6, 107.95), (107.95, 127.0), (127.0, 152.4),
+        (152.4, 171.45), (171.45, 177.8), (177.8, 279.4)]
+    assert [m for _, _, m, _ in segs] == ["black walnut 19 mm", "hard maple", "black walnut 19 mm",
+                                          "hard maple", "black walnut 19 mm", "hard maple",
+                                          "black walnut 19 mm"]
+    assert [d for _, _, _, d in segs] == [610.0, 705.0, 610.0, 705.0, 610.0, 705.0, 610.0]
+
+
+def test_stripe_layout_touching_stripes_produce_no_zero_width_gap():
+    segs = L.stripe_layout(100.0, ((-5.0, 10.0, "maple"), (5.0, 10.0, "maple")),
+                           "black walnut 19 mm", 610.0)
+    assert [(y0, y1) for y0, y1, _, _ in segs] == [
+        (0.0, 40.0), (40.0, 50.0), (50.0, 60.0), (60.0, 100.0)]
+
+
+def test_stripe_layout_raises_when_a_stripe_falls_outside_the_panel_depth():
+    with pytest.raises(ValueError, match="falls outside the 100 mm panel depth"):
+        L.stripe_layout(100.0, ((45.0, 20.0, "maple"),), "black walnut 19 mm", 610.0)
+
+
+def test_aesthetics_validate_accent_stripes_bad_shape_and_overlap():
+    assert L.Aesthetics(accent_stripes=((0.0, 25.4),)).validate() == [
+        "accent_stripes entry (0.0, 25.4) must be (offset_mm, width_mm, species), width_mm positive"]
+    assert L.Aesthetics(accent_stripes=((0.0, 0.0, "maple"),)).validate() == [
+        "accent_stripes entry (0.0, 0.0, 'maple') must be (offset_mm, width_mm, species), width_mm positive"]
+    errors = L.Aesthetics(accent_stripes=((0.0, 25.4, "maple"), (10.0, 10.0, "maple"))).validate()
+    assert len(errors) == 1 and "accent_stripes overlap" in errors[0]
+    ok = L.Aesthetics(accent_stripes=((0.0, 25.4, "maple"), (34.925, 6.35, "maple"),
+                                      (-34.925, 6.35, "maple")))
+    assert ok.validate() == []
+
+
+def test_order_from_accent_stripes_hardwood_only():
+    aest = L.Aesthetics(accent_stripes=((0.0, 25.4, "maple"),))
+    with pytest.raises(ValueError, match="accent_stripes are a hardwood line option"):
+        L.order_from(sheet(port="round"), aest)
+
+
+def test_order_from_accent_stripes_unknown_species_is_a_value_error():
+    aest = L.Aesthetics(accent_stripes=((0.0, 25.4, "oak"),))
+    with pytest.raises(ValueError, match="accent_stripes species 'oak' is not a known species"):
+        L.order_from(sheet(port="round", line="hardwood", species="walnut"), aest)
+
+
+def test_order_from_accent_stripes_hardwood_with_known_species_passes():
+    stripes = ((0.0, 25.4, "maple"), (34.925, 6.35, "maple"), (-34.925, 6.35, "maple"))
+    spec = L.order_from(sheet(port="round", line="hardwood", species="walnut"),
+                        L.Aesthetics(accent_stripes=stripes))
+    assert spec.aesthetics.accent_stripes == stripes
+
+
+def test_order_from_rejects_bad_accent_stripes_shape_via_aesthetics_validate():
+    with pytest.raises(ValueError, match="aesthetics: accent_stripes entry"):
+        spec_for(line="hardwood", species="walnut",
+                aesthetics=L.Aesthetics(accent_stripes=((0.0, -1.0, "maple"),)))
+
+
+def test_shell_blanks_accent_stripes_attach_strips_and_note():
+    stripes = ((0.0, 25.4, "maple"), (34.925, 6.35, "maple"), (-34.925, 6.35, "maple"))
+    spec = spec_for(line="hardwood", species="walnut",
+                    aesthetics=L.Aesthetics(accent_stripes=stripes))
+    parts = L.shell_blanks(spec)
+    expected = L.stripe_layout(279.4, stripes, "black walnut 19 mm", 610.0)
+    for p in parts:
+        assert p.material == "black walnut 19 mm" and p.density == 610.0
+        assert p.strips == expected
+        assert "hard maple 25.4 mm" in p.notes
+        assert p.notes.endswith("base black walnut 19 mm elsewhere")
+
+
+def test_shell_blanks_no_accent_stripes_leaves_strips_empty():
+    assert all(p.strips == () for p in L.shell_blanks(spec_for()))
+
+
+def test_shell_blanks_accent_stripes_outside_panel_depth_is_a_value_error():
+    spec = spec_for(line="hardwood", species="walnut",
+                    aesthetics=L.Aesthetics(accent_stripes=((150.0, 25.4, "maple"),)))
+    with pytest.raises(ValueError, match="falls outside the 279.4 mm panel depth"):
+        L.shell_blanks(spec)
+
+
+def test_blank_mass_kg_no_strips_matches_volume_times_density():
+    p = L.Blank("test", 1, "baltic birch plywood 18 mm", 680.0, pos=(0.0, 0.0, 0.0),
+               size=(18.0, 100.0, 50.0))
+    assert L.blank_mass_kg(p) == pytest.approx(18.0 * 100.0 * 50.0 * 680.0 / 1e9)
+
+
+def test_blank_mass_kg_striped_panel_weights_by_depth_share():
+    strips = ((0.0, 60.0, "hard maple", 705.0), (60.0, 100.0, "black walnut 19 mm", 610.0))
+    p = L.Blank("test", 1, "black walnut 19 mm", 610.0, pos=(0.0, 0.0, 0.0),
+               size=(10.0, 100.0, 50.0), strips=strips)
+    # 50,000 mm^3 total, 60% at maple's 705 kg/m^3, 40% at walnut's 610 kg/m^3
+    assert L.blank_mass_kg(p) == pytest.approx((50000 * 0.6 * 705.0 + 50000 * 0.4 * 610.0) / 1e9)
+    assert L.blank_mass_kg(p) == pytest.approx(0.03335)
+
+
+def test_mass_and_com_with_accent_stripes_increases_mass_over_plain_walnut():
+    stripes = ((0.0, 25.4, "maple"), (34.925, 6.35, "maple"), (-34.925, 6.35, "maple"))
+    plain = L.layout(spec_for(line="hardwood", species="walnut", port="round"))
+    striped = L.layout(spec_for(line="hardwood", species="walnut", port="round",
+                                aesthetics=L.Aesthetics(accent_stripes=stripes)))
+    # maple (705 kg/m^3) is denser than walnut (610); the stripes are a small fraction
+    # of the four shell panels only, so the shift is real but small
+    assert plain.mass_kg["parts"] < striped.mass_kg["parts"] < plain.mass_kg["parts"] * 1.05

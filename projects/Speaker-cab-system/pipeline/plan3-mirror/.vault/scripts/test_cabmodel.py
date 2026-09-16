@@ -661,3 +661,48 @@ def test_hardwood_default_rounds_the_panels_and_zero_leaves_them_sharp():
         if b.name in M.SHELL_NAMES:
             assert abs(e["solid"].volume - L.blank_volume_mm3(b)) < 1.0, b.name
     assert [c.level for c in M.check_build(cab, sharp)] == ["pass"] * 4
+
+
+# === accent stripes ===
+STRIPES = ((0.0, 25.4, "maple"), (34.925, 6.35, "maple"), (-34.925, 6.35, "maple"))
+
+
+def test_strip_part_entries_split_a_shell_panel_and_conserve_volume():
+    spec = spec_for(line="hardwood", species="walnut", aesthetics=L.Aesthetics(accent_stripes=STRIPES))
+    top = next(b for b in L.shell_blanks(spec) if b.name == "top")
+    assert len(top.strips) == 7
+    solid = M.blank_solid(top)
+    entries = M.strip_part_entries(top, solid)
+    assert [e["name"] for e in entries] == [f"top_strip{i}" for i in range(7)]
+    assert [e["material"] for e in entries] == [
+        "black walnut 19 mm", "hard maple 19 mm", "black walnut 19 mm", "hard maple 19 mm",
+        "black walnut 19 mm", "hard maple 19 mm", "black walnut 19 mm"]
+    t, cross, _ = top.blank_mm
+    for e, (y0, y1, _, _) in zip(entries, top.strips):
+        assert e["dims"] == (t, cross, round(y1 - y0, 3))
+        assert e["qty"] == top.qty and e["notes"] == top.notes and e["length_axis"] == "Y"
+        assert len(e["solid"].solids()) == 1 and e["solid"].is_valid and e["solid"].label == e["name"]
+    # the strips exactly tile the panel: no gaps, no overlaps
+    assert abs(sum(e["solid"].volume for e in entries) - solid.volume) < 1.0
+    for a, b in zip(entries, entries[1:]):
+        assert M.assert_no_overlap(a["solid"], b["solid"]) < 1e-6
+
+
+def test_build_with_accent_stripes_emits_one_solid_per_strip():
+    plain_lay = L.layout(spec_for(line="hardwood", species="walnut", port="round"))
+    striped_lay = L.layout(spec_for(line="hardwood", species="walnut", port="round",
+                                    aesthetics=L.Aesthetics(accent_stripes=STRIPES)))
+    plain_cab, cab = M.build(plain_lay), M.build(striped_lay)
+    assert len(cab.parts) == len(plain_cab.parts) + 4 * (7 - 1)   # 4 shell panels, 7 strips each not 1
+    names = {e["name"] for e in cab.parts}
+    for shell in M.SHELL_NAMES:
+        assert {f"{shell}_strip{i}" for i in range(7)} <= names
+        assert shell not in names
+    by = {c.name: c for c in M.check_build(cab, striped_lay)}
+    assert by["solid count"].level == "pass" and "accent stripes" in by["solid count"].message
+    assert by["interference"].level == "pass", by["interference"].message
+    assert by["air volume"].level == "pass", by["air volume"].message
+    # striping a shell panel doesn't touch the internal air space
+    assert abs(cab.air[0].volume - plain_cab.air[0].volume) < 1.0
+    by_plain = {c.name: c for c in M.check_build(plain_cab, plain_lay)}
+    assert "accent stripes" not in by_plain["solid count"].message

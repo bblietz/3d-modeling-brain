@@ -208,6 +208,35 @@ def part_entry(blank, solid):
     return entry
 
 
+def strip_part_entries(blank, solid) -> list:
+    """One furniture PARTS entry per blank.strips segment, in place of the one
+    part_entry a shell panel would otherwise get: solid is the boolean
+    intersection of the panel's finished shell_solid (already joint-cut and
+    roundover-clipped) with that segment's Y-axis slab, so a stripe crossing
+    a finger or dovetail joint shows the true mixed-species teeth rather than
+    an approximation. dims keep the panel's own thickness and wraparound
+    length (blank_mm's first two entries); only the depth-wise slot narrows
+    to the strip's own width, matching how the strip is actually milled and
+    glued into the lamination before the panel outline and joinery are cut."""
+    (bx0, by0, bz0), (bx1, by1, bz1) = blank.box
+    t, cross, _ = blank.blank_mm
+    entries = []
+    for i, (y0, y1, mat, dens) in enumerate(blank.strips):
+        gy0, gy1 = _grown(y0, y1, by0, by1)
+        tool = _box(bx0 - TOOL_EXTRA_MM, gy0, bz0 - TOOL_EXTRA_MM,
+                   bx1 + TOOL_EXTRA_MM, gy1, bz1 + TOOL_EXTRA_MM)
+        piece = _largest_solid(solid & tool)
+        name = f"{blank.name}_strip{i}"
+        piece.label = name
+        material = mat if mat == blank.material else f"{mat} {t:g} mm"
+        entry = {"name": name, "solid": piece, "dims": (t, cross, round(y1 - y0, 3)),
+                "qty": blank.qty, "material": material, "notes": blank.notes}
+        if blank.length_axis:
+            entry["length_axis"] = blank.length_axis
+        entries.append(entry)
+    return entries
+
+
 def compound_of(solids):
     return Compound(children=list(solids))
 
@@ -514,21 +543,27 @@ def _port_air_tool(entry: dict):
 
 def build(layout) -> CabBuild:
     """Every blank as one named solid (the shell panels rounded when
-    Aesthetics.roundover_mm is set), the component placeholders, the
+    Aesthetics.roundover_mm is set; a shell panel with accent_stripes splits
+    into one solid per strip instead), the component placeholders, the
     assembly, and one air shape per chamber (the chamber box minus every
     solid the layout puts inside it minus its port air)."""
     envelope = roundover_envelope(layout)
-    parts = [part_entry(b, shell_solid(b, envelope) if b.name in SHELL_NAMES else blank_solid(b))
-             for b in layout.parts]
+    parts = []
+    owners = []      # (blank, solid) per emitted part, since a striped blank emits several
+    for b in layout.parts:
+        solid = shell_solid(b, envelope) if b.name in SHELL_NAMES else blank_solid(b)
+        entries = strip_part_entries(b, solid) if b.strips else [part_entry(b, solid)]
+        parts.extend(entries)
+        owners.extend((b, e["solid"]) for e in entries)
     components = component_solids(layout)
     assembly = compound_of(e["solid"] for e in parts)
     air = []
     for ch in layout.chambers:
         (x0, y0, z0), (x1, y1, z1) = ch.box
         shape = _box(x0, y0, z0, x1, y1, z1)
-        for entry, blank in zip(parts, layout.parts):
+        for blank, solid in owners:
             if blank.chamber == ch.index:
-                shape = shape - entry["solid"]
+                shape = shape - solid
         for pa in ch.port_air:
             shape = shape - _port_air_tool(pa)
         air.append(shape)
@@ -565,8 +600,11 @@ def check_build(cab: CabBuild, layout) -> list:
             level = "blocker"
     checks.append(L.Check("air volume", level, "; ".join(msgs)))
     n_cad, n_lay = len(cab.parts), len(layout.parts)
-    checks.append(L.Check("solid count", "pass" if n_cad == n_lay else "blocker",
-                          f"{n_cad} solids for {n_lay} blanks"))
+    n_expected = sum(len(b.strips) or 1 for b in layout.parts)
+    msg = f"{n_cad} solids for {n_lay} blanks"
+    if n_expected != n_lay:
+        msg += f" ({n_expected} solids expected: accent stripes split some shell panels)"
+    checks.append(L.Check("solid count", "pass" if n_cad == n_expected else "blocker", msg))
     shaped = []
     for e in cab.parts:
         bb = e["solid"].bounding_box()

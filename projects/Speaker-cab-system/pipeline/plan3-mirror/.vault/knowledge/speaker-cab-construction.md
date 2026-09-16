@@ -4,7 +4,7 @@ description: Construction rules and starting values for MaximoCabs guitar speake
 type: reference
 status: unverified-starting-values
 created: 2026-09-09
-updated: 2026-09-11
+updated: 2026-09-15
 tags: [knowledge, speaker-cab, woodworking, reference]
 ---
 
@@ -43,6 +43,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 - **Hardwood line**: 19 mm resawn, show face out; no book-matching, since the corners join on end grain and book-matching is a long-grain glue-up (Brian, 2026-09-14). A 12.7 mm (1/2 in) roundover on every outside edge by default (see Roundover). Recessed brass jack plate. No metal corners by default. Oil finish.
 - **Joinery survey**: finger joints are the plurality at the top of the market and the vintage-correct choice; the through dovetail is the only structural peer for solid wood; miters and rabbets are styling or budget choices. Details and sources in [[guitar-cab-joinery-survey]].
 - **Roundover**: the hardwood line's default is a 12.7 mm (1/2 in) radius on every outside edge of the shell, routed after the carcass is glued up (Brian, 2026-09-13); the tolex line has none by default. Aesthetics.roundover_mm left at None takes the line default, 0 gives sharp edges, and any other value sets the radius, which must stay under the shell thickness. The internal volume is unchanged either way.
+- **Accent stripes** (hardwood only): `Aesthetics.accent_stripes`, `((offset_mm, width_mm, species), ...)`, each stripe measured across the panel's depth (Y) from the panel's own depth center, positive offset toward the back. The same stripes run on all four shell panels, since they share one depth, so the band wraps all the way around the box, the same way the grain does. Species must be one of the catalog's four (walnut, cherry, maple, sapele) and stripes must not overlap; both checked at intake. A stripe crossing a finger or dovetail joint shows both species in the same finger, since the fingers are cut into the lamination after it is glued up, not before - expected, not a defect. `cabmodel.py` cuts each stripe as its own solid (a boolean intersection of the finished, joint-cut panel with the stripe's Y-axis slab) for the STEP export, renders, and cut list, so the cut list reports each stripe as its own length of stock, milled to the panel's own thickness and run the panel's full wraparound length, narrowed only in its own depth-wise share; `cablayout.py`'s own mass estimate instead splits the panel's total post-joint volume by each stripe's share of the depth, an approximation within a fraction of a percent of the true figure (see `blank_mass_kg`). First used on Cab-ElShaieb-1x12-hardwood, 2026-09-15: a 25.4 mm (1 in) maple stripe centered on the depth, plus a 6.35 mm (0.25 in) maple stripe on each side 19.05 mm (0.75 in) from the center stripe's own edge, walnut elsewhere.
 
 ## Joinery conventions
 

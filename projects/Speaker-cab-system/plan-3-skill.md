@@ -1170,7 +1170,7 @@ def test_report_carries_the_aesthetics_block():
     rep = L.layout_report(lay, L.check_layout(lay, spec))
     json.dumps(rep)
     block = rep["aesthetics"]
-    assert len(block) == 25
+    assert len(block) == 26
     assert {k: block[k] for k in ("corner_joint", "baffle_mount", "handle", "corners", "piping", "feet",
                                   "tolex_roll_in", "tolex_color", "grill_cloth", "head_width_mm")} == {
         "corner_joint": "dovetail", "baffle_mount": "fixed", "handle": "recessed-side", "corners": "none",
@@ -1549,6 +1549,51 @@ def test_hardwood_default_rounds_the_panels_and_zero_leaves_them_sharp():
         if b.name in M.SHELL_NAMES:
             assert abs(e["solid"].volume - L.blank_volume_mm3(b)) < 1.0, b.name
     assert [c.level for c in M.check_build(cab, sharp)] == ["pass"] * 4
+
+
+# === accent stripes ===
+STRIPES = ((0.0, 25.4, "maple"), (34.925, 6.35, "maple"), (-34.925, 6.35, "maple"))
+
+
+def test_strip_part_entries_split_a_shell_panel_and_conserve_volume():
+    spec = spec_for(line="hardwood", species="walnut", aesthetics=L.Aesthetics(accent_stripes=STRIPES))
+    top = next(b for b in L.shell_blanks(spec) if b.name == "top")
+    assert len(top.strips) == 7
+    solid = M.blank_solid(top)
+    entries = M.strip_part_entries(top, solid)
+    assert [e["name"] for e in entries] == [f"top_strip{i}" for i in range(7)]
+    assert [e["material"] for e in entries] == [
+        "black walnut 19 mm", "hard maple 19 mm", "black walnut 19 mm", "hard maple 19 mm",
+        "black walnut 19 mm", "hard maple 19 mm", "black walnut 19 mm"]
+    t, cross, _ = top.blank_mm
+    for e, (y0, y1, _, _) in zip(entries, top.strips):
+        assert e["dims"] == (t, cross, round(y1 - y0, 3))
+        assert e["qty"] == top.qty and e["notes"] == top.notes and e["length_axis"] == "Y"
+        assert len(e["solid"].solids()) == 1 and e["solid"].is_valid and e["solid"].label == e["name"]
+    # the strips exactly tile the panel: no gaps, no overlaps
+    assert abs(sum(e["solid"].volume for e in entries) - solid.volume) < 1.0
+    for a, b in zip(entries, entries[1:]):
+        assert M.assert_no_overlap(a["solid"], b["solid"]) < 1e-6
+
+
+def test_build_with_accent_stripes_emits_one_solid_per_strip():
+    plain_lay = L.layout(spec_for(line="hardwood", species="walnut", port="round"))
+    striped_lay = L.layout(spec_for(line="hardwood", species="walnut", port="round",
+                                    aesthetics=L.Aesthetics(accent_stripes=STRIPES)))
+    plain_cab, cab = M.build(plain_lay), M.build(striped_lay)
+    assert len(cab.parts) == len(plain_cab.parts) + 4 * (7 - 1)   # 4 shell panels, 7 strips each not 1
+    names = {e["name"] for e in cab.parts}
+    for shell in M.SHELL_NAMES:
+        assert {f"{shell}_strip{i}" for i in range(7)} <= names
+        assert shell not in names
+    by = {c.name: c for c in M.check_build(cab, striped_lay)}
+    assert by["solid count"].level == "pass" and "accent stripes" in by["solid count"].message
+    assert by["interference"].level == "pass", by["interference"].message
+    assert by["air volume"].level == "pass", by["air volume"].message
+    # striping a shell panel doesn't touch the internal air space
+    assert abs(cab.air[0].volume - plain_cab.air[0].volume) < 1.0
+    by_plain = {c.name: c for c in M.check_build(plain_cab, plain_lay)}
+    assert "accent stripes" not in by_plain["solid count"].message
 ```
 <!-- /code -->
 
@@ -2271,7 +2316,7 @@ The Key column holds the canonical genre keys: every catalog note's Genres line 
 
 ## Calibration table
 
-Calibration table, every number prediction_status "unverified, ears only". Generated 2026-09-11 with `evaluate` (closed, site box 472 x 421.2 x 229.4 mm internal) and `propose` (closed-ported, low_end balanced), 16 ohm where the note lists it (voiced with the note's 8 ohm T/S set, see Model limits), amp 40 W.
+Calibration table, every number prediction_status "unverified, ears only". Generated 2026-09-15 with `evaluate` (closed, site box 472 x 421.2 x 229.4 mm internal) and `propose` (closed-ported, low_end balanced), 16 ohm where the note lists it (voiced with the note's 8 ohm T/S set, see Model limits), amp 40 W.
 
 | Speaker | Data | Net L in site box | Closed Qtc | Closed character | Closed F3 Hz | Proposed ported net L | Fb Hz | Ported character | Notes |
 |---|---|---|---|---|---|---|---|---|---|
@@ -2292,6 +2337,7 @@ Calibration table, every number prediction_status "unverified, ears only". Gener
 | [[eminence-tonker]] | datasheet | 41.8 | 0.633 | tight | 138 | 34.1 | 71 | flat |  |
 | [[jensen-c12n]] | datasheet | 42.5 | 1.262 | peaky | 102 | 64.3 | 45 | boomy | jensen-c12n: Thiele-Small volume 22.6 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L; ported alignment stays boomy at the practical limits; consider a closed back or a lower-Qts driver |
 | [[jensen-p12n]] | datasheet | 42.5 | 1.037 | big | 95 | 67.4 | 62 | punchy |  |
+| [[weber-silver-bell-alnico-hemp]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 64 | unpredicted (no Thiele-Small data) |  |
 | [[wgs-et65]] | estimated | 42.5 | 1.235 | peaky | 98 | 63.4 | 49 | punchy |  |
 | [[wgs-green-beret]] | estimated | 42.5 | 1.454 | peaky | 109 | 64.3 | 45 | boomy | speaker handling 25 W is below the amp's 40 W; wgs-green-beret: Thiele-Small volume 22.0 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L; ported alignment stays boomy at the practical limits; consider a closed back or a lower-Qts driver |
 | [[wgs-veteran-30]] | estimated | 42.5 | 1.023 | big | 103 | 62.5 | 71 | punchy |  |
@@ -2475,7 +2521,7 @@ description: Construction rules and starting values for MaximoCabs guitar speake
 type: reference
 status: unverified-starting-values
 created: 2026-09-09
-updated: 2026-09-11
+updated: 2026-09-15
 tags: [knowledge, speaker-cab, woodworking, reference]
 ---
 
@@ -2514,6 +2560,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 - **Hardwood line**: 19 mm resawn, show face out; no book-matching, since the corners join on end grain and book-matching is a long-grain glue-up (Brian, 2026-09-14). A 12.7 mm (1/2 in) roundover on every outside edge by default (see Roundover). Recessed brass jack plate. No metal corners by default. Oil finish.
 - **Joinery survey**: finger joints are the plurality at the top of the market and the vintage-correct choice; the through dovetail is the only structural peer for solid wood; miters and rabbets are styling or budget choices. Details and sources in [[guitar-cab-joinery-survey]].
 - **Roundover**: the hardwood line's default is a 12.7 mm (1/2 in) radius on every outside edge of the shell, routed after the carcass is glued up (Brian, 2026-09-13); the tolex line has none by default. Aesthetics.roundover_mm left at None takes the line default, 0 gives sharp edges, and any other value sets the radius, which must stay under the shell thickness. The internal volume is unchanged either way.
+- **Accent stripes** (hardwood only): `Aesthetics.accent_stripes`, `((offset_mm, width_mm, species), ...)`, each stripe measured across the panel's depth (Y) from the panel's own depth center, positive offset toward the back. The same stripes run on all four shell panels, since they share one depth, so the band wraps all the way around the box, the same way the grain does. Species must be one of the catalog's four (walnut, cherry, maple, sapele) and stripes must not overlap; both checked at intake. A stripe crossing a finger or dovetail joint shows both species in the same finger, since the fingers are cut into the lamination after it is glued up, not before - expected, not a defect. `cabmodel.py` cuts each stripe as its own solid (a boolean intersection of the finished, joint-cut panel with the stripe's Y-axis slab) for the STEP export, renders, and cut list, so the cut list reports each stripe as its own length of stock, milled to the panel's own thickness and run the panel's full wraparound length, narrowed only in its own depth-wise share; `cablayout.py`'s own mass estimate instead splits the panel's total post-joint volume by each stripe's share of the depth, an approximation within a fraction of a percent of the true figure (see `blank_mass_kg`). First used on Cab-ElShaieb-1x12-hardwood, 2026-09-15: a 25.4 mm (1 in) maple stripe centered on the depth, plus a 6.35 mm (0.25 in) maple stripe on each side 19.05 mm (0.75 in) from the center stripe's own edge, walnut elsewhere.
 
 ## Joinery conventions
 
