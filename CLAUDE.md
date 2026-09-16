@@ -11,6 +11,15 @@ Agentic OS and second brain for designing and printing 3D models on a Bambu Lab 
 - `memory/` - Claude persistent memory. This is the canonical location; `~/.claude/projects/-home-brian-ClaudeProjects-3d-modeling-brain/memory` is a symlink pointing here so Obsidian indexes every memory file. Do not break this symlink.
 - This folder is an Obsidian vault (`.obsidian/`). Write all notes as Obsidian markdown: YAML frontmatter plus `[[wikilinks]]`.
 
+## Environment (check at the start of every session)
+
+Before using or ruling out any tool, confirm it against this list. Never say a tool is not installed after checking only the system `python3`.
+
+- Python: the vault venv `.venv/bin/python` (3.12) has build123d, trimesh, matplotlib, shapely. The system `python3` does not.
+- Bambu Studio CLI: `~/.local/bin/bambu-studio` (wrapper for `~/Applications/BambuStudio_ubuntu24.04-v02.08.02.61.AppImage`). STL to Bambu 3MF: `--export-3mf <bare name> --outputdir <dir> --arrange 1 <stl>`, as in `projects/Build123d-trial/pipeline/make_print_3mf.py`.
+- FreeCAD: `~/Applications/FreeCAD_1.1.3-Linux-x86_64-py311.appimage`, reached over MCP after `scripts/start-freecad-mcp.sh`. There is no `freecadcmd`, so `execute_code_headless` fails.
+- Before building a new approach, look for an existing script in `scripts/` or `projects/*/pipeline/`.
+
 ## Modeling workflow
 
 - Always use the `/3d-model` skill for 3D-printing work (visual verification per feature, printability check, STL + 3MF export), the `/furniture` skill for furniture/woodworking work (same build discipline; buildability check and cut list via `scripts/cutlist.py` instead of printability and 3MF), and the `/speaker-cab` skill for guitar speaker cabinet orders (voicing engine, generator, check table, and customer proposal, with two stops for Brian).
