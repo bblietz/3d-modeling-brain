@@ -213,7 +213,6 @@ def build(order: Path, customer: str | None, stripe_options: list[str] | None = 
     raw = {
         "spec_rows": spec_rows,
         "finishes": "\n".join(figures),
-        "grill_icon": f'<img src="{cloth_chip}" alt="" width="22" height="22">' if cloth_chip else "",
     }
     data = {
         "label": f"3D model of your {finish.lower() if hardwood else finish} {config} {back_words} speaker cabinet",

@@ -123,7 +123,7 @@
   .controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 14px; }
   .toggles { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
   .views { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: var(--pill); }
-  .views button, .grill {
+  .views button {
     appearance: none;
     font: inherit;
     font-size: 0.86rem;
@@ -138,9 +138,6 @@
   }
   .views button:hover { background: var(--pill-hover); }
   .views button[aria-pressed="true"] { background: var(--pill-on); color: var(--pill-on-ink); }
-  .grill { display: inline-flex; align-items: center; gap: 9px; border: 1px solid var(--line); padding: 6px 15px 6px 7px; }
-  .grill img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
-  .grill:hover { border-color: var(--oak); }
   :focus-visible { outline: 2px solid var(--rust); outline-offset: 2px; }
 
   .sheet { display: grid; gap: 28px; padding-top: 2px; min-width: 0; }
@@ -184,14 +181,14 @@
     .stage { aspect-ratio: 1 / 1; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .views button, .grill { transition: none; }
+    .views button { transition: none; }
   }
 </style>
 
 <div class="page">
   <header class="mast">
     <span class="wordmark display">MaximoCabs</span>
-    <span class="label">Prepared for Shahir ElShaieb &middot; September 15, 2026</span>
+    <span class="label">Prepared for Shahir ElShaieb &middot; September 16, 2026</span>
   </header>
 
   <main class="layout">
@@ -208,7 +205,6 @@
         </div>
         <div class="toggles">
           <div class="views" role="group" aria-label="Finish" id="stripe-select" hidden></div>
-          <button type="button" class="grill" id="grill-toggle" aria-pressed="false"><img src="data:image/jpeg;base64,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" alt="" width="22" height="22"><span id="grill-label">Take off the grill</span></button>
         </div>
       </div>
     </section>
@@ -421,8 +417,6 @@
     const cad = new THREE.Group();
     cad.rotation.x = -Math.PI / 2;
     scene.add(cad);
-    const grill = new THREE.Group();
-    cad.add(grill);
 
     // Shell meshes from the primary build (every order) and, among them, the ones an
     // accent_stripes order colors in a species (the default pattern): the finish selector
@@ -469,7 +463,7 @@
       mesh.name = part.name;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      (kind === "cloth" ? grill : cad).add(mesh);
+      cad.add(mesh);
     }
 
     // Grill cloth across the frame's face (the CAD models the frame, not the cloth).
@@ -481,7 +475,7 @@
       projectUVs(plane, { uMM: 110, vMM: 110 });
       const cloth = new THREE.Mesh(plane, MAT.cloth);
       cloth.receiveShadow = true;
-      grill.add(cloth);
+      cad.add(cloth);
     }
 
     // Speaker face: the CAD speaker is a clearance envelope, so paint a cone on its front.
@@ -578,24 +572,6 @@
     for (const b of viewButtons) b.addEventListener("click", () => goTo(b.dataset.view));
     controls.addEventListener("start", () => { tween = null; setPressed(null); });
 
-    const toggle = document.getElementById("grill-toggle");
-    const toggleLabel = document.getElementById("grill-label");
-    let fade = null;
-    let grillOn = true;
-    toggle.addEventListener("click", () => {
-      grillOn = !grillOn;
-      toggle.setAttribute("aria-pressed", String(!grillOn));
-      toggleLabel.textContent = grillOn ? "Take off the grill" : "Put the grill back";
-      if (reduceMotion) {
-        grill.visible = grillOn;
-        return;
-      }
-      grill.visible = true;
-      MAT.cloth.transparent = true;
-      MAT.cloth.needsUpdate = true;
-      fade = { from: grillOn ? 0 : 1, to: grillOn ? 1 : 0, t0: performance.now(), duration: 320 };
-    });
-
     // An alternate accent-stripe design (a CAB.stripeOptions "alt" entry): its own shell
     // parts only, since the rest of the cabinet is identical across every design; hidden
     // until its selector button is chosen, so it never doubles up on the primary's own.
@@ -683,17 +659,6 @@
         if (t === 1) { tween = null; controls.update(); }
       } else {
         controls.update();
-      }
-      if (fade) {
-        const t = Math.min(1, (now - fade.t0) / fade.duration);
-        MAT.cloth.opacity = fade.from + (fade.to - fade.from) * t;
-        if (t === 1) {
-          if (fade.to === 0) grill.visible = false;
-          MAT.cloth.opacity = 1;
-          MAT.cloth.transparent = false;
-          MAT.cloth.needsUpdate = true;
-          fade = null;
-        }
       }
       renderer.render(scene, camera);
       if (first) {

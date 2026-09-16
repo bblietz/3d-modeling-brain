@@ -123,7 +123,7 @@
   .controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 14px; }
   .toggles { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
   .views { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: var(--pill); }
-  .views button, .grill {
+  .views button {
     appearance: none;
     font: inherit;
     font-size: 0.86rem;
@@ -138,9 +138,6 @@
   }
   .views button:hover { background: var(--pill-hover); }
   .views button[aria-pressed="true"] { background: var(--pill-on); color: var(--pill-on-ink); }
-  .grill { display: inline-flex; align-items: center; gap: 9px; border: 1px solid var(--line); padding: 6px 15px 6px 7px; }
-  .grill img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
-  .grill:hover { border-color: var(--oak); }
   :focus-visible { outline: 2px solid var(--rust); outline-offset: 2px; }
 
   .sheet { display: grid; gap: 28px; padding-top: 2px; min-width: 0; }
@@ -184,7 +181,7 @@
     .stage { aspect-ratio: 1 / 1; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .views button, .grill { transition: none; }
+    .views button { transition: none; }
   }
 </style>
 
@@ -208,7 +205,6 @@
         </div>
         <div class="toggles">
           <div class="views" role="group" aria-label="Finish" id="stripe-select" hidden></div>
-          <button type="button" class="grill" id="grill-toggle" aria-pressed="false">{{grill_icon}}<span id="grill-label">Take off the grill</span></button>
         </div>
       </div>
     </section>
@@ -415,8 +411,6 @@
     const cad = new THREE.Group();
     cad.rotation.x = -Math.PI / 2;
     scene.add(cad);
-    const grill = new THREE.Group();
-    cad.add(grill);
 
     // Shell meshes from the primary build (every order) and, among them, the ones an
     // accent_stripes order colors in a species (the default pattern): the finish selector
@@ -463,7 +457,7 @@
       mesh.name = part.name;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      (kind === "cloth" ? grill : cad).add(mesh);
+      cad.add(mesh);
     }
 
     // Grill cloth across the frame's face (the CAD models the frame, not the cloth).
@@ -475,7 +469,7 @@
       projectUVs(plane, { uMM: 110, vMM: 110 });
       const cloth = new THREE.Mesh(plane, MAT.cloth);
       cloth.receiveShadow = true;
-      grill.add(cloth);
+      cad.add(cloth);
     }
 
     // Speaker face: the CAD speaker is a clearance envelope, so paint a cone on its front.
@@ -572,24 +566,6 @@
     for (const b of viewButtons) b.addEventListener("click", () => goTo(b.dataset.view));
     controls.addEventListener("start", () => { tween = null; setPressed(null); });
 
-    const toggle = document.getElementById("grill-toggle");
-    const toggleLabel = document.getElementById("grill-label");
-    let fade = null;
-    let grillOn = true;
-    toggle.addEventListener("click", () => {
-      grillOn = !grillOn;
-      toggle.setAttribute("aria-pressed", String(!grillOn));
-      toggleLabel.textContent = grillOn ? "Take off the grill" : "Put the grill back";
-      if (reduceMotion) {
-        grill.visible = grillOn;
-        return;
-      }
-      grill.visible = true;
-      MAT.cloth.transparent = true;
-      MAT.cloth.needsUpdate = true;
-      fade = { from: grillOn ? 0 : 1, to: grillOn ? 1 : 0, t0: performance.now(), duration: 320 };
-    });
-
     // An alternate accent-stripe design (a CAB.stripeOptions "alt" entry): its own shell
     // parts only, since the rest of the cabinet is identical across every design; hidden
     // until its selector button is chosen, so it never doubles up on the primary's own.
@@ -677,17 +653,6 @@
         if (t === 1) { tween = null; controls.update(); }
       } else {
         controls.update();
-      }
-      if (fade) {
-        const t = Math.min(1, (now - fade.t0) / fade.duration);
-        MAT.cloth.opacity = fade.from + (fade.to - fade.from) * t;
-        if (t === 1) {
-          if (fade.to === 0) grill.visible = false;
-          MAT.cloth.opacity = 1;
-          MAT.cloth.transparent = false;
-          MAT.cloth.needsUpdate = true;
-          fade = null;
-        }
       }
       renderer.render(scene, camera);
       if (first) {
