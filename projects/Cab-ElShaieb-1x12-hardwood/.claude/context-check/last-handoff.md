@@ -1,7 +1,7 @@
 Continuing the MaximoCabs order Cab-ElShaieb-1x12-hardwood (vault ~/ClaudeProjects/3d-modeling-brain, /speaker-cab skill). Quote received 2026-09-15 from the site wizard.
 
 Order: Shahir ElShaieb, Hardwood 1x12.
-- Cabinet: walnut, oxblood grill cloth (customer's guess, not a matched swatch), open back (single-lower style), Weber Silver Bell Alnico hemp cone 16 ohm 75 W (new catalog note).
+- Cabinet: walnut, Fender Style Oxblood 36" grill cloth (Mojotone, confirmed by Brian and matched to the site's own catalog entry), open back (single-lower style), Weber Silver Bell Alnico hemp cone 16 ohm 75 W (new catalog note).
 - Size: pinned to the Mesa Boogie 1x12 WideBody's own width and height (22.75 x 16.5 in / 577.85 x 419.1 mm external), depth solved for the target net volume - 331 mm (13.03 in), 15.2 kg (33.5 lb).
 - His rig: a Ceriatone Overtone Special 50 (tube, 50 W, 4/8/16 ohm taps, a Dumble Overdrive Special clone) with humbuckers and single coils into a TS808, a Klon, and a germanium fuzz, edge of breakup up to heavy saturation, studio/outdoor at low-to-medium-low volume, mic'd, on the floor.
 
@@ -53,3 +53,5 @@ Open items for Brian (not blocking):
 - Accent striping (purpleheart or maple, per the customer's notes) is not in the CAD model at all - a manual glue-up placement decision, still undecided.
 - Grill cloth "oxblood" is the customer's own guess, not a matched swatch name off the site's list - no swatch image on file for it.
 - Weber Silver Bell wattage (75 W) and magnet (Alnico) were Brian's picks, not the customer's stated answer - worth a line in the sent proposal or a quick confirmation email if that matters to the customer.
+
+Resolved since the first stop-two pass: grill cloth confirmed as Fender Style Oxblood, 36" (Mojotone), matching the site's own catalog entry exactly; swatch copied in, checks.md and proposal.md regenerated and reverified.

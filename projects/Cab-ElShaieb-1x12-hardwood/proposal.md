@@ -54,12 +54,12 @@ You also mentioned the EVM12L - a speaker with serious headroom that a lot of Du
 ## 5. Finishes
 
 - Finish: Walnut
-- Grill cloth: oxblood
+- Grill cloth: Fender Style Oxblood, 36"
 - Hardware: No metal corners, strap handle, recessed brass jack plate, with piping, rubber feet.
 
 <!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. A name prefixed with its folder is the file <folder>/<rest of the name> copied under the prefixed name: images/tolex-fender-black.jpg is tolex/fender-black.jpg. -->
 ![Walnut](images/walnut.jpg)
-no swatch on file
+![Fender Style Oxblood, 36"](images/fender-oxblood.jpg)
 
 ## 6. Lead time and price
 

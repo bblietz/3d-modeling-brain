@@ -34,7 +34,7 @@
     "tolex_roll_in": 54,
     "head_width_mm": null,
     "tolex_color": "",
-    "grill_cloth": "oxblood",
+    "grill_cloth": "Fender Style Oxblood, 36\"",
     "finish": "",
     "roundover_mm": 12.7
   },
@@ -180,7 +180,7 @@
       ],
       "cutout_mm": null,
       "panel": "grill frame",
-      "notes": "oxblood"
+      "notes": "Fender Style Oxblood, 36\""
     }
   ],
   "tolex": null,

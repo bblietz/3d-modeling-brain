@@ -57,7 +57,7 @@ Every field stays in this list even when empty; an empty value means the custome
   - Jack configuration: (not asked) - does not apply on a 1x12
 - **Aesthetics**
   - Wood species or tolex color: walnut (confirmed by Brian, 2026-09-15; the customer's own form answer was "(not asked)", inferred from their grill-cloth pairing comment and now confirmed directly)
-  - Grill cloth: oxblood, customer's guess, not a swatch-list name ("not listed above" per the customer)
+  - Grill cloth: Fender Style Oxblood, 36" (Mojotone) - customer said "probably oxblood?", Brian confirmed the exact product 2026-09-15; matches the site's own catalog entry (hardwood-1x12.md and tolex-1x12.md) exactly
   - Piping: yes; corners: none; logo: none; notes: "handle would be nice, alternate woods for striping e.g. purpleheart or maple" (an accent-stripe hardware detail for Phase 3, not the primary species)
 - **Speaker**
   - Weber Silver Bell, Alnico, hemp cone, 16 ohm, 75 W (customer named two options without picking one - see Speaker ranking below; catalog note knowledge/speakers/weber-silver-bell-alnico-hemp.md, `data_status: missing`)
@@ -148,6 +148,7 @@ open: matches the customer-loved reference cabinet (Mesa Boogie 1x12 WideBody) e
 - 2026-09-15: Weber Silver Bell wattage 75 W and magnet Alnico, chosen by Brian (not specified by the customer)
 - 2026-09-15: both dimension-ratio-advisory and driver-displacement warnings accepted as benign/expected, no re-run needed
 - 2026-09-15: handle strap, corner joint finger, back panel single-lower (all confirmed by Brian; see Trade-offs presented)
+- 2026-09-15: grill cloth confirmed as Fender Style Oxblood, 36" (Mojotone), matching the site's own catalog name exactly; swatch copied in and the proposal verified with it
 - 2026-09-15: CAD package built clean (exit 0, no blockers); checks.md's 8 operator rows judged, all pass (accent striping placement and grill cloth swatch match remain open, noted in their rows/Site-form gaps)
 
 ## Artifacts
@@ -156,7 +157,7 @@ open: matches the customer-loved reference cabinet (Mesa Boogie 1x12 WideBody) e
 - `knowledge/speakers/weber-silver-bell-alnico-hemp.md` (new catalog note, commit 3710c73)
 - `projects/Cab-ElShaieb-1x12-hardwood/cab.py`, `cab.json`, `cab.step` (regenerated, not committed), `cab.stl` (regenerated, not committed)
 - `projects/Cab-ElShaieb-1x12-hardwood/checks.md`, `cutlist.md`, `cutlist.csv` - final, 0 operator rows remaining
-- `projects/Cab-ElShaieb-1x12-hardwood/proposal.md` (verified), `images/` (six renders including a rear view showing the single back panel and jack plate, plus the walnut swatch)
+- `projects/Cab-ElShaieb-1x12-hardwood/proposal.md` (verified), `images/` (six renders including a rear view showing the single back panel and jack plate, plus the walnut and Fender Style Oxblood swatches)
 - Retrospective: `knowledge/learnings/cab-elshaieb-1x12.md` (after the build)
 - Engine changes: `scripts/cabvoice.py` `--pinned-height` (commit 7033c61) and `scripts/cablayout.py` `open_back_style="single-lower"` (commit bd46228), both mirrored to `projects/Speaker-cab-system/pipeline/plan3-mirror/` and `projects/Speaker-cab-system/plan-3-skill.md`
 

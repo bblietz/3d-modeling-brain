@@ -30,7 +30,7 @@ AESTHETICS = L.Aesthetics(
     feet="rubber",
     tolex_roll_in=54,                # unused on the hardwood line
     tolex_color="",                  # unused on the hardwood line
-    grill_cloth="oxblood",           # customer's guess ("probably oxblood?"), not a swatch-list name; resolve at Phase 6
+    grill_cloth="Fender Style Oxblood, 36\"",  # confirmed by Brian, 2026-09-15: Mojotone, matches the site's own catalog name
     head_width_mm=None,              # not matching a head
     roundover_mm=12.7,               # 1/2 in roundover, hardwood default
 )
