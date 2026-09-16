@@ -207,7 +207,10 @@
           <button type="button" id="view-back" data-view="back" aria-pressed="false">{{back_view_label}}</button>
         </div>
         <div class="toggles">
-          <button type="button" class="grill" id="stripe-toggle" aria-pressed="false" hidden>View without the accent stripe</button>
+          <div class="views" role="group" aria-label="Finish" id="stripe-select" hidden>
+            <button type="button" data-stripe="on" aria-pressed="true">With accent stripe</button>
+            <button type="button" data-stripe="off" aria-pressed="false">Without stripe</button>
+          </div>
           <button type="button" class="grill" id="grill-toggle" aria-pressed="false">{{grill_icon}}<span id="grill-label">Take off the grill</span></button>
         </div>
       </div>
@@ -401,11 +404,11 @@
     const grill = new THREE.Group();
     cad.add(grill);
 
-    // Accent-stripe meshes (an accent_stripes order only): the toggle wired below
-    // swaps each between its own species (the default) and the shell's base MAT.shell,
-    // which butts against it with a continuous, seamless grain (same parent seed below).
+    // Accent-stripe meshes (an accent_stripes order only): the finish selection wired
+    // below swaps each between its own species (the default) and the shell's base
+    // MAT.shell, which butts against it with a continuous, seamless grain (same parent
+    // seed below).
     const accentMeshes = [];
-    let stripesOn = true;
     const blob = bytesFromBase64(CAB.mesh.data);
     for (const part of CAB.mesh.parts) {
       const q = new Int16Array(blob.buffer, part.voff, part.vcount * 3);
@@ -579,15 +582,15 @@
       fade = { from: grillOn ? 0 : 1, to: grillOn ? 1 : 0, t0: performance.now(), duration: 320 };
     });
 
-    const stripeToggle = document.getElementById("stripe-toggle");
+    const stripeSelect = document.getElementById("stripe-select");
     if (accentMeshes.length) {
-      stripeToggle.hidden = false;
-      stripeToggle.addEventListener("click", () => {
-        stripesOn = !stripesOn;
-        stripeToggle.setAttribute("aria-pressed", String(!stripesOn));
-        stripeToggle.textContent = stripesOn ? "View without the accent stripe" : "View with the accent stripe";
-        for (const mesh of accentMeshes) mesh.material = stripesOn ? MAT.accent[CAB.stripSpecies[mesh.name]] : MAT.shell;
-      });
+      stripeSelect.hidden = false;
+      const stripeButtons = [...stripeSelect.querySelectorAll("[data-stripe]")];
+      const setStripes = (on) => {
+        for (const mesh of accentMeshes) mesh.material = on ? MAT.accent[CAB.stripSpecies[mesh.name]] : MAT.shell;
+        for (const b of stripeButtons) b.setAttribute("aria-pressed", String((b.dataset.stripe === "on") === on));
+      };
+      for (const b of stripeButtons) b.addEventListener("click", () => setStripes(b.dataset.stripe === "on"));
     }
 
     function applyTheme() {
