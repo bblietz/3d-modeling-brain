@@ -200,7 +200,10 @@ No CAD before Brian approves this phase.
 
    `--speaker` repeats for two drivers; `--jack stereo` splits the box
    into two chambers; `--pinned-width` matches a head (external width =
-   head width + 0 to 10 mm); `--max-external` is the customer's limit;
+   head width + 0 to 10 mm); `--pinned-height` pins external height the
+   same way (matching a reference cabinet's footprint); pinning both
+   leaves depth as the only free axis, solved for the target volume;
+   `--max-external` is the customer's limit;
    `--port-tube` pins one of the 52.0, 77.3, 101.5, 153.2 mm tubes;
    `--fb` overrides the tuning; `--port-count` sets ports per chamber.
    Exit 2 means blockers: present the trade-off the sheet names (a

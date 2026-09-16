@@ -475,12 +475,15 @@ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = Non
                     min_internal_width_mm: float | None = None,
                     max_external_mm: tuple | None = None,
                     min_internal_height_mm: float | None = None, strict: bool = True,
+                    pinned_external_height_mm: float | None = None,
                     **panel_kwargs) -> Box:
     """Internal dimensions for a gross volume, starting from the site box
-    proportions. Fixed axes come from a pinned width, the driver minimum
-    width, the minimum height, or external limits; free axes scale together
-    to hit the volume. When the limits cannot hold the volume, strict raises;
-    otherwise the largest box that fits comes back with a "cannot reach" warning."""
+    proportions. Fixed axes come from a pinned width, a pinned height, the
+    driver minimum width, the minimum height, or external limits; free axes
+    scale together to hit the volume (pinning both width and height leaves
+    depth as the sole free axis, solved for the target volume). When the
+    limits cannot hold the volume, strict raises; otherwise the largest box
+    that fits comes back with a "cannot reach" warning."""
     if gross_l <= 0:
         raise ValueError("gross_l must be positive")
     target = gross_l * 1e6
@@ -499,6 +502,16 @@ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = Non
                 f"{min_internal_width_mm:g} mm internal minimum for the driver count; using the minimum")
         dims[0] = min_internal_width_mm
         fixed[0] = True
+    if pinned_external_height_mm is not None:
+        dims[1] = internal_from_external((0, pinned_external_height_mm, 0), **panel_kwargs)[1]
+        fixed[1] = True
+    if min_internal_height_mm is not None and dims[1] < min_internal_height_mm:
+        if fixed[1]:
+            conflicts.append(
+                f"pinned height {pinned_external_height_mm:g} mm external is below the "
+                f"{min_internal_height_mm:g} mm internal minimum for the port or cutout; using the minimum")
+        dims[1] = min_internal_height_mm
+        fixed[1] = True
     max_internal = None
     if max_external_mm is not None:
         max_internal = internal_from_external(max_external_mm, **panel_kwargs)
@@ -517,7 +530,13 @@ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = Non
                         f"minimum) exceeds the size limit {max_internal[0]:.1f} mm internal")
             dims[0] = min_internal_width_mm
             fixed[0] = True
-        if min_internal_height_mm is not None and min_internal_height_mm > max_internal[1] + 1e-9:
+        if fixed[1] and dims[1] > max_internal[1] + 1e-9:
+            cause = ("the cutout minimum"
+                     if min_internal_height_mm is not None and dims[1] == min_internal_height_mm
+                     else f"pinned height {pinned_external_height_mm:g} mm external")
+            over.append(f"height floor {dims[1]:.1f} mm internal ({cause}) exceeds the size limit "
+                        f"{max_internal[1]:.1f} mm internal")
+        elif min_internal_height_mm is not None and min_internal_height_mm > max_internal[1] + 1e-9:
             over.append(f"height floor {min_internal_height_mm:.1f} mm internal (the cutout minimum) "
                         f"exceeds the size limit {max_internal[1]:.1f} mm internal")
             dims[1] = min_internal_height_mm
@@ -587,6 +606,7 @@ def dims_for_volume(gross_l: float, pinned_external_width_mm: float | None = Non
 @dataclass
 class Constraints:
     pinned_external_width_mm: float | None = None
+    pinned_external_height_mm: float | None = None
     max_external_mm: tuple | None = None
     panel_mm: float = PANEL_MM
     back_mm: float = BACK_MM
@@ -658,7 +678,7 @@ def propose(drivers: list, impedances: list, enclosure: str, tone: dict,
             slot_h = port.slot_h_mm if port is not None else c.port_slot_mm[1]
         box = dims_for_volume(gross, c.pinned_external_width_mm, min_w, c.max_external_mm,
                               min_internal_height_mm=min_internal_height_mm(cutout, slot_h) + floor_extra,
-                              strict=False, **pk)
+                              strict=False, pinned_external_height_mm=c.pinned_external_height_mm, **pk)
         w_int, h_int, d_int = box.internal_mm
         divider_l = _divider_l(chambers, h_int, d_int, c)
         if any(w.startswith("cannot reach") for w in box.warnings):
@@ -874,6 +894,7 @@ def _build_parser():
     pp = sub.add_parser("propose")
     common(pp)
     pp.add_argument("--pinned-width", type=float, help="external width mm")
+    pp.add_argument("--pinned-height", type=float, help="external height mm")
     pp.add_argument("--max-external", type=float, nargs=3, metavar=("W", "H", "D"))
     pp.add_argument("--port-diameter", type=float, default=DEFAULT_PORT_DIAMETER_MM,
                     help="round port start in mm, snapped up to the tube table")
@@ -913,6 +934,7 @@ def main(argv=None) -> int:
                         port_tube_mm=args.port_tube, fb_hz=getattr(args, "fb", None))
         if args.command == "propose":
             c.pinned_external_width_mm = args.pinned_width
+            c.pinned_external_height_mm = args.pinned_height
             c.max_external_mm = tuple(args.max_external) if args.max_external else None
             c.port_diameter_mm = args.port_diameter
             c.port_slot_mm = tuple(args.port_slot) if args.port_slot else None

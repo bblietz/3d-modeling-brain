@@ -475,6 +475,23 @@ def test_dims_for_volume_pinned_width_keeps_h_d_ratio():
     assert box.gross_l == pytest.approx(60.0, abs=0.01)
 
 
+def test_dims_for_volume_pinned_height_keeps_w_d_ratio():
+    box = cabvoice.dims_for_volume(60.0, pinned_external_height_mm=457.2)
+    w, h, d = box.internal_mm
+    assert h == pytest.approx(421.2)
+    assert w / d == pytest.approx(472.0 / 229.4, rel=1e-6)
+    assert box.gross_l == pytest.approx(60.0, abs=0.01)
+
+
+def test_dims_for_volume_pinned_width_and_height_solves_depth():
+    # Both pinned at exactly the site box's own external size: depth must
+    # come back at the site's own depth to reproduce the site's own volume.
+    box = cabvoice.dims_for_volume(45.6, pinned_external_width_mm=508.0,
+                                   pinned_external_height_mm=457.2)
+    assert box.internal_mm == pytest.approx((472.0, 421.2, 229.4), abs=0.5)
+    assert box.gross_l == pytest.approx(45.6, abs=0.01)
+
+
 def test_dims_for_volume_min_width_for_two_drivers():
     min_w = cabvoice.min_internal_width_mm(2, 283.0)
     assert min_w == pytest.approx(730.0)
@@ -519,6 +536,17 @@ def test_dims_for_volume_rejects_fixed_width_over_limit():
         cabvoice.dims_for_volume(90.0, pinned_external_width_mm=700.0, max_external_mm=(600.0, 457.2, 400.0))
     with pytest.raises(ValueError, match="size limit"):
         cabvoice.dims_for_volume(90.0, min_internal_width_mm=641.0, max_external_mm=(600.0, 457.2, 400.0))
+
+
+def test_dims_for_volume_warns_when_pinned_height_below_minimum():
+    box = cabvoice.dims_for_volume(60.0, pinned_external_height_mm=457.2, min_internal_height_mm=500.0)
+    assert box.internal_mm[1] == pytest.approx(500.0)
+    assert any("pinned height" in w for w in box.warnings)
+
+
+def test_dims_for_volume_rejects_fixed_height_over_limit():
+    with pytest.raises(ValueError, match="size limit"):
+        cabvoice.dims_for_volume(90.0, pinned_external_height_mm=500.0, max_external_mm=(600.0, 400.0, 400.0))
 
 
 def test_dims_for_volume_rejects_non_positive_volume():
@@ -663,6 +691,19 @@ def test_propose_honours_pinned_width(drv, tone):
     assert v.box["external_mm"][0] == pytest.approx(660.0)
 
 
+def test_propose_honours_pinned_height(drv, tone):
+    c = cabvoice.Constraints(pinned_external_height_mm=500.0)
+    v = cabvoice.propose([drv], [16], "closed", tone, constraints=c)
+    assert v.box["external_mm"][1] == pytest.approx(500.0)
+
+
+def test_propose_honours_pinned_width_and_height(drv, tone):
+    c = cabvoice.Constraints(pinned_external_width_mm=577.85, pinned_external_height_mm=419.1)
+    v = cabvoice.propose([drv], [16], "open", tone, constraints=c)
+    assert v.box["external_mm"][0] == pytest.approx(577.85)
+    assert v.box["external_mm"][1] == pytest.approx(419.1)
+
+
 def test_propose_impossible_box_presents_tradeoff(drv, tone, speakers_dir, tmp_path):
     tone["low_end"] = "big"                  # 68 L per driver against the site's 45.6 L box
     c = cabvoice.Constraints(max_external_mm=(508.0, 457.2, 279.4))
@@ -779,7 +820,8 @@ def test_voicing_json_has_construction_block(drv, tone, tmp_path):
     json_path, _ = cabvoice.write_voicing(v, tmp_path)
     con = json.loads(json_path.read_text())["construction"]
     assert con == {"panel_mm": 18.0, "back_mm": 12.0, "baffle_mm": 18.0, "recess_mm": 20.0,
-                   "brace_l": 0.3, "pinned_external_width_mm": 660.0, "max_external_mm": None,
+                   "brace_l": 0.3, "pinned_external_width_mm": 660.0,
+                   "pinned_external_height_mm": None, "max_external_mm": None,
                    "port_count": 1, "line": "tolex", "species": None,
                    "wall_material": "baltic birch plywood"}
     closed = cabvoice.propose([drv], [16], "closed", tone)
