@@ -150,6 +150,7 @@ open: matches the customer-loved reference cabinet (Mesa Boogie 1x12 WideBody) e
 - 2026-09-15: handle strap, corner joint finger, back panel single-lower (all confirmed by Brian; see Trade-offs presented)
 - 2026-09-15: grill cloth confirmed as Fender Style Oxblood, 36" (Mojotone), matching the site's own catalog name exactly; swatch copied in and the proposal verified with it
 - 2026-09-15: price line set to "TBD - at cost" (Brian); proposal verified with it, brief status set to `proposed`
+- 2026-09-15: client-shareable 3D model page hosted on the live MaximoCabs site (maximocabs.pages.dev/share/cab-elshaieb-1x12-hardwood/), unlisted, direct-link only - Brian's new standing policy for every order sent to a customer, replacing the first order's claude.ai Artifact approach. Required two fixes to the shared share-viewer template (a CSP-safe JSON data island instead of an executing per-order script, and a hemp-cone detection bug that would have shown this exact speaker with the wrong cone texture) and a CSP/header change on the live site (vault commit c636599; MaximoCabs commits f5fd893, 5a891a6)
 - 2026-09-15: CAD package built clean (exit 0, no blockers); checks.md's 8 operator rows judged, all pass (accent striping placement and grill cloth swatch match remain open, noted in their rows/Site-form gaps)
 
 ## Artifacts
@@ -161,6 +162,7 @@ open: matches the customer-loved reference cabinet (Mesa Boogie 1x12 WideBody) e
 - `projects/Cab-ElShaieb-1x12-hardwood/proposal.md` (verified), `images/` (six renders including a rear view showing the single back panel and jack plate, plus the walnut and Fender Style Oxblood swatches)
 - Retrospective: `knowledge/learnings/cab-elshaieb-1x12.md` (after the build)
 - Engine changes: `scripts/cabvoice.py` `--pinned-height` (commit 7033c61) and `scripts/cablayout.py` `open_back_style="single-lower"` (commit bd46228), both mirrored to `projects/Speaker-cab-system/pipeline/plan3-mirror/` and `projects/Speaker-cab-system/plan-3-skill.md`
+- Client 3D model preview: https://maximocabs.pages.dev/share/cab-elshaieb-1x12-hardwood/ (unlisted; Brian shares the link)
 
 ## Site-form gaps
 
