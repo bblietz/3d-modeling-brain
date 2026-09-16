@@ -121,6 +121,7 @@
   .stage-hint { position: absolute; left: 16px; bottom: 12px; margin: 0; font-size: 0.78rem; color: var(--muted); pointer-events: none; }
 
   .controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 14px; }
+  .toggles { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
   .views { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: var(--pill); }
   .views button, .grill {
     appearance: none;
@@ -205,7 +206,10 @@
           <button type="button" id="view-front" data-view="front" aria-pressed="false">Front</button>
           <button type="button" id="view-back" data-view="back" aria-pressed="false">{{back_view_label}}</button>
         </div>
-        <button type="button" class="grill" id="grill-toggle" aria-pressed="false">{{grill_icon}}<span id="grill-label">Take off the grill</span></button>
+        <div class="toggles">
+          <button type="button" class="grill" id="stripe-toggle" aria-pressed="false" hidden>View without the accent stripe</button>
+          <button type="button" class="grill" id="grill-toggle" aria-pressed="false">{{grill_icon}}<span id="grill-label">Take off the grill</span></button>
+        </div>
       </div>
     </section>
 
@@ -272,6 +276,13 @@
     let h = 2166136261;
     for (const ch of text) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
     return h >>> 0;
+  }
+
+  // A shell part's own panel name: itself, or (an accent_stripes order) the
+  // "top"/"bottom"/"side_left"/"side_right" a "..._stripN" sub-part was cut from.
+  function shellOf(name) {
+    for (const s of CAB.shell) if (name === s || name.startsWith(s + "_strip")) return s;
+    return null;
   }
 
   // Box-projected UVs in CAD millimetres. On a hardwood shell panel the texture's long
@@ -363,9 +374,15 @@
       jackplate: new THREE.MeshStandardMaterial({ map: jackPlateFace(hardwood, maxAniso), color: 0xffffff, roughness: 0.34, metalness: 0.85 }),
       leather: new THREE.MeshStandardMaterial({ color: 0x3b2418, roughness: 0.62 }),
       rubber: new THREE.MeshStandardMaterial({ color: 0x1a1918, roughness: 0.92 }),
+      accent: {},   // {species name: material}, an accent_stripes order only
     };
+    for (const [species, uri] of Object.entries(CAB.textures.accent || {})) {
+      MAT.accent[species] = new THREE.MeshStandardMaterial({
+        map: texture(uri, THREE.MirroredRepeatWrapping), color: 0xffffff, vertexColors: true, roughness: 0.56,
+      });
+    }
     function kindOf(name) {
-      if (CAB.shell.includes(name)) return "shell";
+      if (shellOf(name)) return "shell";
       if (name.startsWith("grill_")) return "cloth";
       if (name.startsWith("speaker_")) return "speaker";
       // Strap-handle end caps: brass on the hardwood line, chrome on tolex (construction note).
@@ -384,6 +401,11 @@
     const grill = new THREE.Group();
     cad.add(grill);
 
+    // Accent-stripe meshes (an accent_stripes order only): the toggle wired below
+    // swaps each between its own species (the default) and the shell's base MAT.shell,
+    // which butts against it with a continuous, seamless grain (same parent seed below).
+    const accentMeshes = [];
+    let stripesOn = true;
     const blob = bytesFromBase64(CAB.mesh.data);
     for (const part of CAB.mesh.parts) {
       const q = new Int16Array(blob.buffer, part.voff, part.vcount * 3);
@@ -397,10 +419,13 @@
       geometry.setIndex(new THREE.BufferAttribute(index, 1));
       geometry = toCreasedNormals(geometry, deg(32));
       const kind = kindOf(part.name);
+      const parent = shellOf(part.name);
       if (kind === "shell") {
+        // Seed from the parent panel, not this sub-part, so a striped panel's own
+        // strips (and the base wood between them) tile as one continuous surface.
         projectUVs(geometry, hardwood
-          ? { grain: CAB.grain[part.name] ?? -1, uMM: 225, vMM: 450, endShade: 0.56, seed: hash(part.name) }
-          : { uMM: 160, vMM: 160, seed: hash(part.name) });
+          ? { grain: CAB.grain[parent] ?? -1, uMM: 225, vMM: 450, endShade: 0.56, seed: hash(parent) }
+          : { uMM: 160, vMM: 160, seed: hash(parent) });
       }
       if (kind === "cloth") projectUVs(geometry, { uMM: 110, vMM: 110 });
       if (kind === "jackplate") {
@@ -420,7 +445,10 @@
         }
         geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
       }
-      const mesh = new THREE.Mesh(geometry, MAT[kind]);
+      const species = kind === "shell" ? CAB.stripSpecies[part.name] : null;
+      const accentMat = species && MAT.accent[species];
+      const mesh = new THREE.Mesh(geometry, accentMat || MAT[kind]);
+      if (accentMat) accentMeshes.push(mesh);
       mesh.name = part.name;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
@@ -449,7 +477,7 @@
       cad.add(new THREE.Mesh(disc, new THREE.MeshStandardMaterial({ map: speakerFace(CAB.speakerCone, maxAniso), roughness: 0.86 })));
     }
 
-    const shellBox = union((n) => CAB.shell.includes(n)) || union(() => true);
+    const shellBox = union((n) => shellOf(n) !== null) || union(() => true);
     const allBox = union(() => true);
     const target = new THREE.Vector3(
       (shellBox.min[0] + shellBox.max[0]) / 2,
@@ -550,6 +578,17 @@
       MAT.cloth.needsUpdate = true;
       fade = { from: grillOn ? 0 : 1, to: grillOn ? 1 : 0, t0: performance.now(), duration: 320 };
     });
+
+    const stripeToggle = document.getElementById("stripe-toggle");
+    if (accentMeshes.length) {
+      stripeToggle.hidden = false;
+      stripeToggle.addEventListener("click", () => {
+        stripesOn = !stripesOn;
+        stripeToggle.setAttribute("aria-pressed", String(!stripesOn));
+        stripeToggle.textContent = stripesOn ? "View without the accent stripe" : "View with the accent stripe";
+        for (const mesh of accentMeshes) mesh.material = stripesOn ? MAT.accent[CAB.stripSpecies[mesh.name]] : MAT.shell;
+      });
+    }
 
     function applyTheme() {
       const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--shadow-strength"));

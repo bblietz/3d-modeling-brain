@@ -22,6 +22,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 VAULT = HERE.parents[3]
 sys.path.insert(0, str(VAULT / "scripts"))
+import cablayout  # noqa: E402
 import cabreport  # noqa: E402
 
 TEMPLATE = HERE / "viewer.html"
@@ -87,6 +88,18 @@ def swatch_path(name: str):
     return MATERIALS / rel if rel else None
 
 
+def accent_strip_species(D: float, stripes) -> dict:
+    """{strip index -> species display name} for the cablayout.stripe_layout
+    segments (shared by all four shell panels, since they're all computed
+    from the same depth D) that are an Aesthetics.accent_stripes species
+    rather than the shell's own base material. Empty when the order carries
+    no accent_stripes."""
+    if not stripes:
+        return {}
+    segs = cablayout.stripe_layout(D, [tuple(s) for s in stripes], "__base__", 0.0)
+    return {i: mat for i, (_, _, mat, _) in enumerate(segs) if mat != "__base__"}
+
+
 def edge_size(mm) -> str:
     """A roundover radius as the shop says it: an eighth-inch fraction when it is one, else millimetres."""
     eighths = mm / 25.4 * 8
@@ -122,7 +135,10 @@ def build(order: Path, customer: str | None) -> Path:
 
     roundover = cab.get("aesthetics", {}).get("roundover_mm")
     edges = f", {edge_size(roundover)} roundover on every outside edge" if roundover else ""
-    shell_text = (f"Solid {finish.lower()}, hand-cut {joint} joints{edges}, grain wrapping around the box"
+    strip_species = accent_strip_species(cab["external_mm"][2], cab.get("aesthetics", {}).get("accent_stripes"))
+    strip_species_names = {sp for sp in strip_species.values()}
+    stripe_words = f", with {' and '.join(sorted(strip_species_names))} accent stripes" if strip_species_names else ""
+    shell_text = (f"Solid {finish.lower()}, hand-cut {joint} joints{edges}{stripe_words}, grain wrapping around the box"
                   if hardwood else f"Baltic birch covered in {finish}, hand-cut finger joints{edges}")
     rows = [("Speaker", f"{f['speaker_label']}, {ohm}"), ("Shell", shell_text), ("Grill cloth", f["grill_cloth"]),
             ("Hardware", ", ".join(h for h in f["hardware"].rstrip(".").split(", ") if not h.lower().startswith("no ")).capitalize()), ("Weight", f"About {f['mass_lb']} lb loaded ({f['mass_kg']} kg)"),
@@ -163,8 +179,14 @@ def build(order: Path, customer: str | None) -> Path:
         "line": cab["line"],
         "grain": GRAIN_AXIS if hardwood else {},
         "shell": list(SHELL),
+        # {"top_strip1": "hard maple", ...}: which shell sub-parts (cabmodel.py splits a
+        # striped shell panel into one solid per accent_stripes segment) are an accent
+        # species, so the viewer's stripe toggle knows which meshes to swap; empty when
+        # this order carries no accent_stripes, since every shell panel is then one part.
+        "stripSpecies": {f"{shell}_strip{i}": sp for shell in SHELL for i, sp in strip_species.items()},
         "speakerCone": "hemp" if any(w in f["speaker_label"].lower() for w in ("hemp", "cannabis")) else "paper",
-        "textures": {"shell": jpeg_uri(swatch_path(finish), 900, 84, crop), "cloth": jpeg_uri(swatch_path(f["grill_cloth"]), 512, 86)},
+        "textures": {"shell": jpeg_uri(swatch_path(finish), 900, 84, crop), "cloth": jpeg_uri(swatch_path(f["grill_cloth"]), 512, 86),
+                     "accent": {sp: jpeg_uri(swatch_path(sp), 900, 84) for sp in strip_species_names}},
         "mesh": mesh_payload(order / "cab.step"),
     }
 
