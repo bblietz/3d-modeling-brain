@@ -1,0 +1,3 @@
+{"low_end": "big", "mids": "neutral", "top": "smooth",
+ "breakup": "moderate", "dispersion": "wide", "placement": "floor",
+ "min_power_w": 75, "impedance_options_ohm": [4, 8, 16]}
