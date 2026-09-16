@@ -43,10 +43,7 @@ Decisions already locked:
 - Back panel single-lower, redirected by Brian past the original jack-plate-position question entirely ("back should be open but only 1 piece... bottom half... see the mesa cab product images") - required the new generator capability above rather than a one-off workaround.
 - Two engine warnings accepted as benign (driver-displacement placeholder; 2:1 width:depth advisory, the same class the site's own default box carries).
 
-Next action: stop two.
-1. Brian reviews `checks.md`, the six renders (the rear view especially, given the back-panel redirect), and `proposal.md`.
-2. He fills `Price:`, then sends the proposal.
-3. Record his edits in Decisions locked, set the brief's status to `proposed`, then commit and push.
+Stop two complete: Brian reviewed `checks.md`, the renders, and `proposal.md`; confirmed the grill cloth and price ("TBD - at cost"). Brief status `proposed`. Next action: Brian sends the proposal to the customer; when there's an outcome (sent, built, delivered), update the brief's Outcome and, after the build, write the listening-notes retrospective (Phase 8).
 
 Open items for Brian (not blocking):
 - Bolt circle (297 mm, 4 bolts) on the Weber note is an assumed common 12 inch pattern, not Weber-published - verify against the physical speaker before drilling the baffle.

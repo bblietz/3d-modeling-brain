@@ -2,7 +2,7 @@
 name: cab-elshaieb-1x12-hardwood
 description: MaximoCabs order brief for Shahir ElShaieb, a 1x12 hardwood cabinet, open, Weber Silver Bell (Alnico, hemp cone)
 type: order
-status: built
+status: proposed
 created: 2026-09-15
 customer: Shahir ElShaieb
 line: hardwood
@@ -149,6 +149,7 @@ open: matches the customer-loved reference cabinet (Mesa Boogie 1x12 WideBody) e
 - 2026-09-15: both dimension-ratio-advisory and driver-displacement warnings accepted as benign/expected, no re-run needed
 - 2026-09-15: handle strap, corner joint finger, back panel single-lower (all confirmed by Brian; see Trade-offs presented)
 - 2026-09-15: grill cloth confirmed as Fender Style Oxblood, 36" (Mojotone), matching the site's own catalog name exactly; swatch copied in and the proposal verified with it
+- 2026-09-15: price line set to "TBD - at cost" (Brian); proposal verified with it, brief status set to `proposed`
 - 2026-09-15: CAD package built clean (exit 0, no blockers); checks.md's 8 operator rows judged, all pass (accent striping placement and grill cloth swatch match remain open, noted in their rows/Site-form gaps)
 
 ## Artifacts
@@ -167,4 +168,4 @@ open: matches the customer-loved reference cabinet (Mesa Boogie 1x12 WideBody) e
 
 ## Outcome
 
-- pending - awaiting Phase 3 plan review with Brian before the build loop starts.
+- 2026-09-15: proposal.md complete (price "TBD - at cost") and verified; ready for Brian to send to the customer. Delivery outcome pending.

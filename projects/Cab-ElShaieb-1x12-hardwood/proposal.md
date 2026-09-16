@@ -64,6 +64,6 @@ You also mentioned the EVM12L - a speaker with serious headroom that a lot of Du
 ## 6. Lead time and price
 
 - Lead time: 10 to 14 weeks from confirmed order
-- Price:
+- Price: TBD - at cost
 
 Every figure in this proposal is a design target, not a measurement. Prediction status: unverified, ears only.
