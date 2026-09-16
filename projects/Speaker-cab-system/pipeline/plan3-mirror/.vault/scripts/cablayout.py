@@ -185,7 +185,7 @@ class Aesthetics:
         spans.sort()
         for i, (a0, a1) in enumerate(spans):
             for b0, b1 in spans[i + 1:]:
-                if a1 > b0:
+                if a1 > b0 + 1e-6:      # a shared edge (touching stripes) is not an overlap
                     errors.append(f"accent_stripes overlap: one spans {a0:g} to {a1:g} mm, "
                                  f"the next {b0:g} to {b1:g} mm")
         return errors
@@ -707,11 +707,11 @@ def stripe_layout(D: float, stripes: tuple, base_material: str, base_density: fl
     segs.sort()
     out, y = [], 0.0
     for y0, y1, mat, dens in segs:
-        if y0 > y:
+        if y0 > y + 1e-6:           # a shared edge (touching stripes) needs no sliver of base
             out.append((y, y0, base_material, base_density))
         out.append((y0, y1, mat, dens))
         y = y1
-    if y < D:
+    if y < D - 1e-6:
         out.append((y, D, base_material, base_density))
     return tuple(out)
 

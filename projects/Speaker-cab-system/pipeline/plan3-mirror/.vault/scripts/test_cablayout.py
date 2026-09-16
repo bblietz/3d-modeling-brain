@@ -1303,6 +1303,18 @@ def test_stripe_layout_touching_stripes_produce_no_zero_width_gap():
         (0.0, 40.0), (40.0, 50.0), (50.0, 60.0), (60.0, 100.0)]
 
 
+def test_stripe_layout_touching_stripes_with_inexact_offsets_produce_no_sliver():
+    # 0.75 in cherry centered, flanked by 1.5 in maple touching its edges: the offsets
+    # (derived from inch fractions) are not exactly representable in binary floating
+    # point, so a strict y0 > y comparison once misread the shared edge as a gap and
+    # inserted a spurious near-zero-width base sliver.
+    segs = L.stripe_layout(330.986, ((0.0, 19.05, "cherry"), (28.575, 38.1, "maple"),
+                                     (-28.575, 38.1, "maple")), "black walnut 19 mm", 610.0)
+    assert len(segs) == 5
+    widths = [round(y1 - y0, 6) for y0, y1, _, _ in segs]
+    assert widths == [117.868, 38.1, 19.05, 38.1, 117.868]
+
+
 def test_stripe_layout_raises_when_a_stripe_falls_outside_the_panel_depth():
     with pytest.raises(ValueError, match="falls outside the 100 mm panel depth"):
         L.stripe_layout(100.0, ((45.0, 20.0, "maple"),), "black walnut 19 mm", 610.0)
@@ -1317,6 +1329,14 @@ def test_aesthetics_validate_accent_stripes_bad_shape_and_overlap():
     assert len(errors) == 1 and "accent_stripes overlap" in errors[0]
     ok = L.Aesthetics(accent_stripes=((0.0, 25.4, "maple"), (34.925, 6.35, "maple"),
                                       (-34.925, 6.35, "maple")))
+    assert ok.validate() == []
+
+
+def test_aesthetics_validate_accent_stripes_touching_with_inexact_offsets_is_not_an_overlap():
+    # Same inexact-float edge as stripe_layout's own touching-stripes test: a shared edge
+    # must not read as an overlap just because 28.575 - 38.1 / 2 lands a hair below 19.05 / 2.
+    ok = L.Aesthetics(accent_stripes=((0.0, 19.05, "cherry"), (28.575, 38.1, "maple"),
+                                      (-28.575, 38.1, "maple")))
     assert ok.validate() == []
 
 
