@@ -154,7 +154,7 @@ open: matches the customer-loved reference cabinet (Mesa Boogie 1x12 WideBody) e
 - 2026-09-15: price line set to "TBD - at cost" (Brian); proposal verified with it, brief status set to `proposed`
 - 2026-09-15: client-shareable 3D model page hosted on the live MaximoCabs site (maximocabs.pages.dev/share/cab-elshaieb-1x12-hardwood/), unlisted, direct-link only - Brian's new standing policy for every order sent to a customer, replacing the first order's claude.ai Artifact approach. Required two fixes to the shared share-viewer template (a CSP-safe JSON data island instead of an executing per-order script, and a hemp-cone detection bug that would have shown this exact speaker with the wrong cone texture) and a CSP/header change on the live site (vault commit c636599; MaximoCabs commits f5fd893, 5a891a6)
 - 2026-09-15: CAD package built clean (exit 0, no blockers); checks.md's 8 operator rows judged, all pass (grill cloth swatch match remains open, noted in their rows/Site-form gaps)
-- 2026-09-15: accent striping added per Brian's exact spec (1 in maple center stripe, two 0.25 in maple stripes each 0.75 in from the center stripe's edge, wrapping all the way around); the pre-stripe build is preserved at `projects/Cab-ElShaieb-1x12-hardwood/original/` (cab.json, cab.step, cutlist, renders - Brian, 2026-09-15, "make sure to save the original version too") and the client 3D preview carries a toggle so the customer can view the cabinet with or without the stripe (Brian, 2026-09-15, "update the webpage to let the customer choose which to view")
+- 2026-09-15: accent striping added per Brian's exact spec (1 in maple center stripe, two 0.25 in maple stripes each 0.75 in from the center stripe's edge, wrapping all the way around); the pre-stripe build is preserved at `projects/Cab-ElShaieb-1x12-hardwood/original/` (cab.json, cab.step, cutlist, renders - Brian, 2026-09-15, "make sure to save the original version too") and the client 3D preview carries a with/without-stripe selector so the customer can view the cabinet either way (Brian, 2026-09-15, "update the webpage to let the customer choose which to view"; changed from an initial single toggle button to a selector button pair per Brian's follow-up, "instead of a toggle, make it a selection")
 
 ## Artifacts
 
@@ -166,7 +166,7 @@ open: matches the customer-loved reference cabinet (Mesa Boogie 1x12 WideBody) e
 - Retrospective: `knowledge/learnings/cab-elshaieb-1x12.md` (after the build)
 - Engine changes: `scripts/cabvoice.py` `--pinned-height` (commit 7033c61), `scripts/cablayout.py` `open_back_style="single-lower"` (commit bd46228), and `scripts/cablayout.py`/`scripts/cabmodel.py` `Aesthetics.accent_stripes` (2026-09-15), all mirrored to `projects/Speaker-cab-system/pipeline/plan3-mirror/` and `projects/Speaker-cab-system/plan-3-skill.md`
 - `projects/Cab-ElShaieb-1x12-hardwood/original/` - the pre-stripe build preserved in full (cab.json, cab.step, cutlist, six renders), at Brian's request, 2026-09-15
-- Client 3D model preview: https://maximocabs.pages.dev/share/cab-elshaieb-1x12-hardwood/ (unlisted; Brian shares the link) - now carries a toggle to view the cabinet with or without the accent stripe
+- Client 3D model preview: https://maximocabs.pages.dev/share/cab-elshaieb-1x12-hardwood/ (unlisted; Brian shares the link) - now carries a "with accent stripe / without stripe" selector
 
 ## Site-form gaps
 
