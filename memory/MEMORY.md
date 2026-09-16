@@ -12,7 +12,7 @@
 - [Vault GitHub repo](reference-vault-github-repo.md) - private bblietz/3d-modeling-brain, remote origin/main; commit and push after milestones; never commit the printer access code
 - [Garmin helm panel](project-garmin-helm-panel.md) - 1/2 in Starboard panel; 943xsv router template printed and FITS 2026-09-11; awaiting opening measurements then the rout
 - [Model dispatch](feedback-model-dispatch.md) - say which model fits each task, flag when Fable 5.1 beats the active model, never switch silently
-- [Speaker cab system](project-speaker-cab-system.md) - MaximoCabs guitar cab capability; plans 1 to 3 built; quote wizard live in production 2026-09-13 (walk and real send passed; wrangler 4 deploy 0dc699b7); first order Cab-Blietz-1x12-hardwood built, at stop two
+- [Speaker cab system](project-speaker-cab-system.md) - MaximoCabs guitar cab capability; quote wizard live; 2 orders done; accent-stripe shell panels + 3D preview toggle added 2026-09-15
 - [Friction fit recipe](feedback-friction-fit-recipe.md) - crush ribs not tighter clearance, plus a designed opening feature; read knowledge/friction-fits-x2d.md first
 - [HTML visuals, no ASCII](feedback-html-visual-companion.md) - show visual options and geometry in an HTML page, never ASCII art previews
 - [Hardwood grain wraps](feedback-hardwood-grain-wraps.md) - never design hardwood cabinet grain front to back; it wraps around the box, and hardwood cab shells get no glued stiffeners
