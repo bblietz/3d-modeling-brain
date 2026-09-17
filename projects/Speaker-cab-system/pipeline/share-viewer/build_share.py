@@ -230,7 +230,7 @@ def build(order: Path, customer: str | None, stripe_options: list[str] | None = 
         "stripeOptions": stripe_opts,
         "speakerCone": "hemp" if any(w in f["speaker_label"].lower() for w in ("hemp", "cannabis")) else "paper",
         "textures": {"shell": jpeg_uri(swatch_path(finish), 900, 84, crop), "cloth": jpeg_uri(swatch_path(f["grill_cloth"]), 512, 86),
-                     "accent": {sp: jpeg_uri(swatch_path(sp), 900, 84) for sp in all_species_names}},
+                     "accent": {sp: jpeg_uri(swatch_path(sp), 900, 84) for sp in sorted(all_species_names)}},
         "mesh": mesh_payload(order / "cab.step"),
     }
 
