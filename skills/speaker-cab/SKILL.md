@@ -464,44 +464,36 @@ predicted frequencies never enter the proposal.
    cd /home/brian/ClaudeProjects/3d-modeling-brain
    /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/cabreport.py projects/Cab-<...>/ --customer "<Customer>" --verify
    ```
-4. Build the client-shareable 3D model page (every order that reaches a customer gets one, Brian, 2026-09-15) and publish it on the live MaximoCabs site, unlisted:
+4. Build the client-shareable 3D model page (every order that reaches a
+   customer gets one, Brian, 2026-09-15) and publish it on the live
+   MaximoCabs site, unlisted. The `cab-share` skill's `publish.py` does
+   the whole thing in one run - build, copy, CSP safety check, test,
+   commit, push, and confirm the Cloudflare Pages deploy succeeded - so
+   this step needs no separate ask each time (Brian, 2026-09-16: "run
+   the skill automatically"):
 
    ```bash
    cd /home/brian/ClaudeProjects/3d-modeling-brain
-   /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python projects/Speaker-cab-system/pipeline/share-viewer/build_share.py projects/Cab-<...> --customer "<Customer>"
-   mkdir -p ~/ClaudeProjects/MaximoCabs/public/share/<order-slug>
-   cp projects/Cab-<...>/share/index.html ~/ClaudeProjects/MaximoCabs/public/share/<order-slug>/index.html
-   cd ~/ClaudeProjects/MaximoCabs
-   git add public/share/<order-slug>/index.html
-   git commit -m "Cab <Customer>: 3D model preview"
-   git push origin main
+   /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python \
+     projects/Speaker-cab-system/pipeline/share-viewer/publish.py \
+     projects/Cab-<...> --customer "<Customer>" \
+     --message "Cab <Customer>: 3D model preview
+
+   <the session's attribution trailers>"
    ```
 
-   `<order-slug>` is the order directory's name, lowercased (matches the
-   brief's frontmatter `name:`), giving
-   `https://maximocabs.pages.dev/share/<order-slug>/`. This is a direct
-   link only: no nav or sitemap references it, `public/robots.txt`
-   disallows `/share/`, and `public/_headers`' `X-Robots-Tag` on that
-   path says `noindex, nofollow`. Brian shares the link himself; nothing
-   here emails or posts it. A push to MaximoCabs main deploys (GitHub
-   Actions, `.github/workflows/deploy.yml`); confirm the run succeeds
-   (`gh run list` in that repo) before calling the link ready.
-
-   The page is self-contained (three.js from jsdelivr, everything else
-   inline or a JSON data island) except for two fixed pieces of the
-   site's CSP in `public/_headers`: the jsdelivr origin and two sha256
-   hashes for `viewer.html`'s two inline `<script>` blocks (the
-   importmap and the main module script), which are byte-identical
-   across every order. Cloudflare Pages merges same-named headers
-   across every matching `_headers` block by concatenating policies
-   with a comma, and a comma-joined CSP is enforced as the intersection
-   of all of them, so these allowances live in the site's one `/*` CSP
-   rule, not a `/share/*` override (which can only narrow, never
-   widen, whatever the broader rule already permits). Only touch these
-   if `viewer.html`'s two static scripts change: reload a share page
-   locally (`npx wrangler pages dev dist`, from a `npm run build`) and
-   read the exact new hash from the browser console's CSP violation
-   message, rather than computing it by hand.
+   Add `--stripe-option "Label=none|primary|PATH"` (repeatable, in
+   display order) only when this order is comparing more than one
+   accent-stripe design; see [[speaker-cab-construction]], "Accent
+   stripes." Report the printed live link
+   (`https://maximocabs.pages.dev/share/<order-slug>/`) to Brian in
+   chat. This is a direct link only: no nav or sitemap references it,
+   `public/robots.txt` disallows `/share/`, and `public/_headers`'
+   `X-Robots-Tag` on that path says `noindex, nofollow`; Brian shares it
+   with the customer himself. Full detail, including what an exit code
+   other than 0 means and how to clear a stale-CSP block (exit 2, a
+   real-browser fix after a `viewer.html` template change - rare, not a
+   per-order thing): the `cab-share` skill.
 
 ## Phase 7 - Handoff
 
