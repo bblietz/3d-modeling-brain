@@ -12,7 +12,7 @@
 - [Vault GitHub repo](reference-vault-github-repo.md) - private bblietz/3d-modeling-brain, remote origin/main; commit and push after milestones; never commit the printer access code
 - [Garmin helm panel](project-garmin-helm-panel.md) - 1/2 in Starboard panel; 943xsv router template printed and FITS 2026-09-11; awaiting opening measurements then the rout
 - [Model dispatch](feedback-model-dispatch.md) - say which model fits each task, flag when Fable 5.1 beats the active model, never switch silently
-- [Speaker cab system](project-speaker-cab-system.md) - MaximoCabs guitar cab capability; quote wizard live; 2 orders done; accent-stripe shell panels + 3D preview selector (2+ designs) added 2026-09-15/16
+- [Speaker cab system](project-speaker-cab-system.md) - MaximoCabs guitar cab capability; quote wizard live; 2 orders done; cab-share skill auto-publishes each order's 3D preview
 - [Friction fit recipe](feedback-friction-fit-recipe.md) - crush ribs not tighter clearance, plus a designed opening feature; read knowledge/friction-fits-x2d.md first
 - [HTML visuals, no ASCII](feedback-html-visual-companion.md) - show visual options and geometry in an HTML page, never ASCII art previews
 - [Check environment first](feedback-stl-to-bambu-3mf.md) - EVERY session: read CLAUDE.md Environment section (.venv python, Bambu CLI) before choosing or ruling out a tool; STL to 3MF via Bambu CLI
