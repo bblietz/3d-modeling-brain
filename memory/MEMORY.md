@@ -17,3 +17,4 @@
 - [HTML visuals, no ASCII](feedback-html-visual-companion.md) - show visual options and geometry in an HTML page, never ASCII art previews
 - [Check environment first](feedback-stl-to-bambu-3mf.md) - EVERY session: read CLAUDE.md Environment section (.venv python, Bambu CLI) before choosing or ruling out a tool; STL to 3MF via Bambu CLI
 - [Hardwood grain wraps](feedback-hardwood-grain-wraps.md) - never design hardwood cabinet grain front to back; it wraps around the box, and hardwood cab shells get no glued stiffeners
+- [OpenSCAD for complex designs](feedback-openscad-for-complex-designs.md) - compound-angle parts go in OpenSCAD with rendered views of the real model; no hand-drawn plans, build123d only for simple prisms
