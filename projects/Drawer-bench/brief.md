@@ -106,6 +106,11 @@ because option (a) leaves 19-1/4 in of interior depth.
   the front-to-back slide-depth fit, still 515.4 mm inside 18 in slides'
   502.9-544.9 mm window. Re-exported and re-pushed to the viewer.
 
+- Drawer-box bottoms: 1/8 in (3 mm) plywood, not 1/2 in (Brian,
+  2026-09-17). Sides, front and back stay 1/2 in ply; the groove that
+  houses the bottom keeps its 1/4 in reach, just sized to the thinner
+  panel now (`T3` in `drawer_bench.py`).
+
 ## Build log (2026-08-24)
 
 - CAD: `projects/Drawer-bench/drawer_bench.py` (build123d, parametric;

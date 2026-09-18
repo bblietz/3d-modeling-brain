@@ -22,6 +22,7 @@ TOP_T = 1.75 * IN          # 44.45  Boos island match, measure
 OH = 1.25 * IN             # 31.75  top overhang past the posts, measure
 T18 = 18.0                 # 3/4 ply actual
 T12 = 12.0                 # 1/2 ply actual
+T3 = 3.0                   # 1/8 ply actual (drawer-box bottoms only; measure at cut time)
 SLIDE_LEN = 18 * IN        # 457.2  drawer length class (Blum 563H4570B); runner = RUNNER_LEN
 
 # --- Locked design values --------------------------------------------------
@@ -349,24 +350,24 @@ def make_drawer(box_h, z0, sfx):
     s = _box(x0, y0, z0, T12, BOX_D, box_h)
     s -= _box(x0 + T12 - DADO, y0 - 1, z0 - 1, DADO + 1, T12 + 1, box_h + 2)
     s -= _box(x0 + T12 - DADO, y_back, z0 - 1, DADO + 1, T12 + 1, box_h + 2)
-    s -= _box(x0 + T12 - DADO, y0 - 1, z0 + UM_RECESS, DADO + 1, BOX_D + 2, T12)
+    s -= _box(x0 + T12 - DADO, y0 - 1, z0 + UM_RECESS, DADO + 1, BOX_D + 2, T3)
 
     front = _box(x0 + T12 - DADO, y0, z0, END_LEN, T12, box_h)
     front -= _box(x0 + T12 - DADO - 1, y0 + T12 - DADO, z0 + UM_RECESS,
-                  END_LEN + 2, DADO + 1, T12)
+                  END_LEN + 2, DADO + 1, T3)
 
     # Back (Blum rear-hook preparation, 563H sheet p.2): bottom groove stopped
     # UM_HOOK_NOTCH_W from each side's inner face so the 10-deep hook bores stay
     # in solid ply; 35 x 13 notches at both bottom corners for the hooks.
     back = _box(x0 + T12 - DADO, y_back, z0, END_LEN, T12, box_h)
     back -= _box(x0 + T12 + UM_HOOK_NOTCH_W, y_back - 1, z0 + UM_RECESS,
-                 BOX_W - 2 * T12 - 2 * UM_HOOK_NOTCH_W, DADO + 1, T12)
+                 BOX_W - 2 * T12 - 2 * UM_HOOK_NOTCH_W, DADO + 1, T3)
     for _nx in (x0 + T12 - DADO - 1, x0 + BOX_W - T12 - UM_HOOK_NOTCH_W):
         back -= _box(_nx, y_back - 1, z0 - 1, UM_HOOK_NOTCH_W + DADO + 1, T12 + 2,
                      UM_HOOK_NOTCH_H + 1)
 
     bot = _box(x0 + T12 - DADO, y0 + T12 - DADO, z0 + UM_RECESS,
-               END_LEN, BOX_D - 2 * (T12 - DADO), T12)
+               END_LEN, BOX_D - 2 * (T12 - DADO), T3)
     for _nx in (x0 + T12 - DADO - 1, x0 + BOX_W - T12 - UM_HOOK_NOTCH_W):   # rear corners
         bot -= _box(_nx, y_back, z0 + UM_RECESS - 1, UM_HOOK_NOTCH_W + DADO + 1,
                     DADO + 1, T12 + 2)
@@ -380,22 +381,22 @@ def make_drawer(box_h, z0, sfx):
 
     PARTS.append({"name": f"drawer_side_{sfx}", "solid": s, "qty": 2, "material": "ply 12mm",
                   "notes": f"end rabbets {DADO:g} deep x {T12:g} (T12); bottom groove {DADO:g} "
-                           f"deep x {T12:g} (T12) with its top at {UM_RECESS + T12:g} above the "
+                           f"deep x {T3:g} (T3) with its top at {UM_RECESS + T3:g} above the "
                            "bottom edge"})
     PARTS.append({"name": f"drawer_front_{sfx}", "solid": front, "qty": 1, "material": "ply 12mm",
-                  "notes": f"box front (sub-front): bottom groove {DADO:g} deep x {T12:g} (T12) with "
-                           f"its top at {UM_RECESS + T12:g} above the bottom edge; locking devices "
+                  "notes": f"box front (sub-front): bottom groove {DADO:g} deep x {T3:g} (T3) with "
+                           f"its top at {UM_RECESS + T3:g} above the bottom edge; locking devices "
                            "bored with the Blum T65.1600.01 template"})
     PARTS.append({"name": f"drawer_back_{sfx}", "solid": back, "qty": 1, "material": "ply 12mm",
                   "notes": f"box back, datums from the blank's ends: bottom groove {DADO:g} deep x "
-                           f"{T12:g} (T12) with its top at {UM_RECESS + T12:g} above the bottom edge, "
+                           f"{T3:g} (T3) with its top at {UM_RECESS + T3:g} above the bottom edge, "
                            f"STOPPED {UM_HOOK_NOTCH_W + DADO:g} from each end (= {UM_HOOK_NOTCH_W:g} from "
                            f"the side's inner face); rear-hook notches {UM_HOOK_NOTCH_W + DADO:g} from "
                            f"each end x {UM_HOOK_NOTCH_H:g} tall at both bottom corners; rear-hook bores "
                            f"{_d:g} dia x {_dep:g} deep from the rear face, centred {_in + DADO:g} from "
                            f"each end (= {_in:g} from the side's inner face) and {_up:g} above the bottom "
                            f"edge (Blum T65.1600.01 template)"})
-    PARTS.append({"name": f"drawer_bottom_{sfx}", "solid": bot, "qty": 1, "material": "ply 12mm",
+    PARTS.append({"name": f"drawer_bottom_{sfx}", "solid": bot, "qty": 1, "material": "ply 3mm",
                   "notes": f"rear corners notched {UM_HOOK_NOTCH_W + DADO:g} (from each end) x {DADO:g} "
                            "deep where the back groove is stopped"})
 
