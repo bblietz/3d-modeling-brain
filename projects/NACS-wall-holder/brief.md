@@ -28,6 +28,18 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
   - Official CAD: `NACS-500V-Connector-and-Inlet.stp`, `NACS-1kV-Connector.stp`, `NACS-1kV-Inlet.stp`
 - How it was retrieved: the Wayback search API was blocked by the archive's bot protections (HTTP 429/503). The archived Oct 2023 `tesla.com/support/charging/product-guides` page still loads and gave the real links. The archive's STEP copies are Common Crawl captures truncated at 1 MiB, but `digitalassets.tesla.com/tesla-contents/raw/upload/v1681681730/<file>.stp` still serves the complete files.
 
+## Connector facts from the Tesla spec (TS = TS-0023666 rev 1.1, DS = 48A AC datasheet)
+
+- Brian's handle is 240 VAC / 500 VDC rated, so the 500V drawings apply. The latch geometry is the same for 500V and 1kV (TS p24).
+- Handle: 41.5 wide x 35.1 tall at the nose x 194.5 long (DS). Cable Ø14.5 mm; lengths 2.6 / 5.5 / 7.3 m (DS). Polycarbonate, IP67.
+- Nose: 32.49 from the front face to datum C (TS p14). Inlet cavity depth 33.25 ±0.2 (TS p21-22). Cross-section only in the 3D model (profile tolerance 0.3, TS p12-13).
+- Lock pocket: on the nose UNDERSIDE (the ground/data-socket side, opposite the HV sockets and the button), centered left to right (TS p25; DS).
+  - Along the nose: centered 20.24 from the front face; base walls at 17.14 and 23.34 (6.2 ±0.2 long).
+  - Size: 9.71 ±0.2 wide, 4 ±0.2 deep, walls drafted up to 3° (mouth about 6.6 x 10.1).
+- Vehicle lock pin: rises up into the pocket, perpendicular to insertion. Base 4 in a 4.8 slot, 2.85 flat tip, 20° flank on the opening side (TS p24-25).
+- Forces: insertion and withdrawal under 90 N (DS). No passive detent: the car's lock is the only retention (TS p7).
+- End caps (TS 9.1) apply only to inlet caps; no rule limits a dock on the connector face.
+
 ## Reference socket measurements (organizer STL, measured only)
 
 - Sideways socket, 40 mm deep to a square stop face; shield cross-section, widest just above center.
@@ -39,6 +51,6 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
 
 ## Open
 
-- Cleat position and size: design it to engage the lock notch on the top of the connector nose (the one the car's charge-port lock pin enters), from the Tesla spec once retrieved. The cleat and the extra opening room both depend on that notch's location and depth.
-- Cable diameter: unknown (Brian 2026-09-16). Working value about 18 mm (0.7 in, owner report on Tesla Motors Club thread 199159, not official). Size the hook generously for 16 to 22 mm cable (lip height and wrap width from a `CABLE_OD` constant set to 22) so an unmeasured cable still fits. Optional check: wrap a paper strip around the cable, mark the overlap, and divide that length by 3.14. The cable is 18 ft (5.5 m), so a hook loop about 300 mm around takes roughly 5 to 6 wraps side by side, about 100 mm of hook width.
+- Cleat position and size: design it to engage the lock notch on the bottom of the connector nose (the one the car's charge-port lock pin enters), from the Tesla spec once retrieved. The cleat and the extra opening room both depend on that notch's location and depth.
+- Cable diameter: Ø14.5 mm per Tesla's 48A datasheet. This replaces the 18 mm forum estimate. The cable is 5.5 m (18 ft). Coiled in loops about 300 mm across (about 0.94 m of cable each), that is about 6 loops, 87 mm side by side at 14.5 mm, so a hook about 100 mm wide. Settle the hook size in the design plan.
 - The Gen 3 handle has a button on top that opens the car's charge port; the holster must not press it.

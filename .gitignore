@@ -32,3 +32,4 @@ projects/Speaker-cab-system/fixtures/**/*.stl
 # preserved prior version's own CAB_OUT snapshot subdirectory, e.g. original/)
 projects/Cab-*/**/*.step
 projects/Cab-*/**/*.stl
+projects/NACS-wall-holder/reference/*.stl
