@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: v5 2026-09-17 (drum 75, Tesla T, cleat 1.25 in from the opening, lean 15); coupon-print.3mf ready to print, 2 h 13 min; awaiting the fit result
+status: v5 2026-09-17 (drum 75, Tesla T, cleat 1.25 in from the opening, lean 15); Brian prints the shallow v4 coupon (coupon-print.3mf, 1 h 32 min); awaiting the fit result, then the full-part print file
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -25,10 +25,12 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
 - Cleat depth (Brian, 2026-09-17): the cleat's holding wall is 1.25 in (31.75 mm) from the opening, measured along the cleat's wall. Tesla's CAD agrees with that number: the notch's holding wall to the end of the glossy housing is 31.2 mm, so the whole housing sits inside and the grip starts at the opening, as in the sample photos. The cavity behind the nose shoulder is lofted from Tesla's own housing sections (`bell_sections.scad`, `pipeline/bell_sections.py`); past the end of that CAD (48.4 mm from the tip) the grip is not modelled, so the cavity gets 1.5 mm extra and flares. The roof relief grows from 4 to 6.5 mm toward the mouth.
 - Lean 15 degrees, down from 20 (my parameter; Brian's two numbers, drum 75 and cleat 1.25 in, were kept). The deeper cavity is 62 mm tall inside the drum at 15 degrees and 69 mm at 20; the 75 mm drum has 62 mm between 3 mm off the wall and the flange blend. At 15 degrees the cavity's deepest corner leaves 3 mm of the 5 mm plate, the mouth top runs 5 mm up the flange blend (6.7 mm under the flange), and the grip clears the wall by 25 / 36 / 52 mm (start / middle / end). 20 degrees would need a drum of about 83 mm. `pipeline/zbudget.py` measures all of this from the real cavity; rerun it after changing lean, cleat depth or drum length.
 
+- Coupon scope (Brian, 2026-09-17): "we will skip the coupon with this change. If the wand fits this coupon, then extending the opening should be trivial." The printed coupon is the v4 shallow-cavity one (commit cb42b65, lean 20, opening 33 mm deep at the centre). It proves the nose profile and clearance, the cleat in the notch, the tight roof over the tip and the lift over the cleat, all unchanged in v5. Not covered by it, first tried on the full part: lifting the handle over the cleat with the housing under the deeper roof, and the grip past the end of Tesla's CAD (the cavity there is 46.6 mm wide at 48 mm from the tip, flaring to 49 mm at 60 mm).
+
 ## Files (2026-09-17)
 
 - `holder.scad` (+ `nose_outline.scad`): the model; `part="coupon"` gives the fit coupon. `render.sh` renders `images/scad/*.png`; `renders_page.py` builds `plan.html` (published as the "NACS Holster Plan" artifact).
-- `coupon.stl`, `coupon-print.3mf`, `coupon-slice.json`: fit coupon, 70 x 68 x 66 mm, the cavity, cleat and mouth with 3 mm walls on a 0.9 mm base under the cavity's deepest corner, print orientation unchanged. Real slice (v5, deep cavity): 2 h 13 min, 74 g (68 g PETG including the prime tower, 6 g support). The v4 shallow-cavity coupon was 1 h 32 min, 53 g.
+- `coupon.stl`, `coupon-print.3mf`, `coupon-slice.json`, `images/scad/coupon-*.png`: the PRINTED fit coupon, frozen at commit cb42b65 (v4, shallow cavity, lean 20): 54 x 55 x 60 mm, 3 mm walls on a 0.9 mm slice of the plate, print orientation unchanged. Real slice: 1 h 32 min, 53 g (49 g PETG including 17 g of prime tower, 4 g support). `part="coupon"` in holder.scad now gives the deep-cavity coupon (70 x 68 x 66 mm, sliced once at 2 h 13 min, 74 g), which is not printed; export it as `coupon-deep.stl` if ever wanted, never over `coupon.stl`.
 - Renders use `--render`, not `--preview`: in preview the docked handle's clip plane paints over the holder's whole cut face in section views. `part="clash"` intersects the docked handle with the holder and must come out empty (checked: 0 mm3).
 - `pipeline/make_coupon_3mf.py`: X2D 0.6 nozzle, 0.30mm Standard, Bambu PETG Basic on nozzle 1, Bambu Support For PLA/PETG on nozzle 2 as the support interface, tree supports with Bambu's recommended parameters for that pairing. Lessons baked in: the CLI writes one extruder variant per filament, so every per-variant filament key is expanded to filaments x 6 variants like a Studio-saved file; flush matrix = filaments^2 x len(flush_multiplier) with one multiplier per extruder; the CLI's default prime tower position (165, 236) is off the bed.
 

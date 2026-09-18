@@ -49,9 +49,9 @@ holder_views = [
     ("section-notch", "Cut across the notch, seen from the grip end. The cleat sits in the connector's own lock notch with room on both sides; the band above the handle is the roof relief."),
 ]
 coupon_views = [
-    ("coupon-iso", "The coupon as it prints, with the handle docked: the cavity, cleat and mouth cut out of the holder with 3 mm of body around them, carried down to a thin base."),
+    ("coupon-iso", "The coupon as it prints, with the nose docked: the cavity, cleat and mouth with 3 mm of body around them, carried down to a thin slice of the plate."),
     ("coupon-mouth", "The mouth end. The outside is the drum's own surface, so the lip the nose slides over is the real one."),
-    ("coupon-section", "Cut along the wand: same cavity, roof relief and cleat as the holder."),
+    ("coupon-section", "Cut along the wand: the same nose cavity, tight roof, roof relief and cleat as the holder, with the shallow opening."),
 ]
 
 html = f"""<title>NACS Holster Plan</title>
@@ -89,7 +89,8 @@ code{{font-size:.9em}}
 </ul>
 
 <h2>Fit coupon</h2>
-<p>Only the cavity and cleat, printed the way the holder prints (plate on the bed, tree supports in the cavity roof with Bambu Support For PLA/PETG on the second nozzle). Print time <span class="k">{coupon_time}</span></p>
+<p>The coupon is the one from before the 1.25 in cleat depth: the nose cavity, cleat and a shallow opening, printed the way the holder prints (plate on the bed, tree supports in the cavity roof with Bambu Support For PLA/PETG on the second nozzle). Print time <span class="k">{coupon_time}</span></p>
+<p>It proves the parts that did not change: the nose profile and its 0.5 mm clearance, the cleat in the lock notch, the tight roof over the tip, and lifting the nose over the cleat. The deeper opening gets no coupon of its own (Brian, 2026-09-17) and is first tried on the full part.</p>
 <div class="grid">{figs(coupon_views)}</div>
 
 <h2>Open</h2>
@@ -97,7 +98,7 @@ code{{font-size:.9em}}
 <li>Lean: 15&#176;, down from 20&#176;. With the cleat 1.25 in deep the cavity is 62 mm tall inside the drum at 15&#176; and 69 mm at 20&#176;, and the 75 mm drum has 62 mm between the plate and the flange. Keeping 20&#176; would need a drum of about 83 mm.</li>
 <li>Past the end of Tesla's housing CAD (48 mm from the tip) the grip is not modelled; the cavity there has 1.5 mm extra room and flares. The coupon will show whether your grip clears it.</li>
 <li>Printing: plate down on the bed. The cavity roof and the ring under the flange need support material (the X2D's support nozzle); everything else prints clean.</li>
-<li>Next: print the coupon, try the handle on it (insertion over the cleat, hanging, lift-off), then the full part.</li>
+<li>Next: print the coupon, try the handle on it (insertion over the cleat, hanging, lift-off), then the full part with the deep opening.</li>
 </ul>
 </main>
 """

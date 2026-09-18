@@ -8,7 +8,9 @@
 // wall, +Y up.
 //
 // Render views: render.sh.  Export: openscad -D display=false -D show_nose=false -o holder.stl holder.scad
-// Coupon:       openscad -D display=false -D show_nose=false -D 'part="coupon"' -o coupon.stl holder.scad
+// Coupon:       coupon.stl / coupon-print.3mf are the PRINTED fit coupon, frozen at commit cb42b65 (shallow cavity, lean 20).
+//               part="coupon" now gives the deep-cavity version, which Brian chose not to print (2026-09-17):
+//               openscad -D display=false -D show_nose=false -D 'part="coupon"' -o coupon-deep.stl holder.scad
 
 include <nose_outline.scad>;
 include <bell_sections.scad>;

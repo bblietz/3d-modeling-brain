@@ -30,9 +30,6 @@ $O -o images/scad/iso.png --camera=0,0,0,60,0,30,500 $C "$@" holder.scad
 $O -o images/scad/below.png --camera=0,0,0,115,0,30,500 $C "$@" holder.scad
 $O -o images/scad/section-cleat.png --projection=o --camera=$CEN,90,0,$ROTZ,250 $S -D section=1 "$@" holder.scad
 $O -o images/scad/section-notch.png --projection=o --camera=$CEN,$DOWN,190 $S -D section=2 "$@" holder.scad
-# coupon views are in print orientation (display=false: bed = XY, +Z up)
-$O -o images/scad/coupon-iso.png --camera=0,0,0,55,0,25,250 --viewall $S -D display=false -D 'part="coupon"' "$@" holder.scad
-$O -o images/scad/coupon-mouth.png --camera=0,0,0,65,0,125,250 --viewall $S -D display=false -D 'part="coupon"' -D show_nose=false "$@" holder.scad
-$O -o images/scad/coupon-top.png --projection=o --camera=0,0,0,0,0,0,250 --viewall $S -D display=false -D 'part="coupon"' -D show_nose=false "$@" holder.scad
-$O -o images/scad/coupon-section.png --projection=o --camera=$CEN,90,0,$ROTZ,260 $S -D 'part="coupon"' -D section=1 "$@" holder.scad
+# The coupon-*.png views are frozen at the printed coupon (commit cb42b65, the shallow cavity from before the 1.25 in cleat depth);
+# they are not re-rendered here because part="coupon" now gives the deep-cavity version.
 ls images/scad/*.png | sed 's#.*/##' | tr '\n' ' '; echo
