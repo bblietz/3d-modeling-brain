@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Tesla "T" emblem. Source: Wikimedia Commons Tesla_Motors.svg
+     https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg
+     The two emblem paths are copied from that file (its TESLA wordmark group removed). All path
+     commands are relative and untouched; only each path's initial moveto is translated by the
+     exact emblem bounding-box origin (-46.34, -64.797) so the viewBox starts at 0 0 with no transforms.
+     Commons licence line: public domain (simple geometric shapes / text, below threshold of originality); the design is a Tesla, Inc. trademark. -->
+<svg width="253.584" height="252.502" version="1.1" viewBox="0 0 253.584 252.502" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#e82127">
+    <path d="m126.806 252.502 35.476-199.519c33.815 0 44.481 3.708 46.021 18.843 0 0 22.684-8.458 34.125-25.636-44.646-20.688-89.505-21.621-89.505-21.621l-26.176 31.882 0.059-4e-3 -26.176-31.883s-44.86 0.934-89.5 21.622c11.431 17.178 34.124 25.636 34.124 25.636 1.549-15.136 12.202-18.844 45.79-18.868l35.762 199.548"/>
+    <path d="m126.792 15.36c36.09-0.276 77.399 5.583 119.687 24.014 5.652-10.173 7.105-14.669 7.105-14.669-46.227-18.289-89.518-24.548-126.797-24.705-37.277 0.157-80.566 6.417-126.787 24.705 0 0 2.062 5.538 7.1 14.669 42.28-18.431 83.596-24.29 119.687-24.014h5e-3"/>
+  </g>
+</svg>

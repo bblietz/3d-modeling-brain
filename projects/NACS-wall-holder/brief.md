@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: OpenSCAD model holder.scad built 2026-09-17 (drum, plate, 45 deg wand, cleat on the lower wall); awaiting Brian's review of the renders, then a fit coupon
+status: v4 2026-09-17 (drum 75, Tesla T recessed in the flange, fit coupon sliced); coupon-print.3mf ready to print, 1 h 32 min; awaiting the fit result
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -19,6 +19,14 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
 - Retention: a FIXED cleat in the connector's lock notch, NO spring tab, and the cleat sits on the DOWNWARD (lower) wall of the cavity so gravity seats the nose on it. Not on the back (wall-side) wall. The notch therefore faces down and the button faces up along the wand. The cavity roof is relieved so the nose can be lifted over the cleat on the way in, but stays tight over the last few mm at the tip so the handle's weight cannot lever the tip up and lift the notch off the cleat.
 - Tooling: Brian asked for OpenSCAD for this design (2026-09-17), not build123d; render views from the real model, do not hand-draw plans.
 - No geometry from the licensed Printables organizer (CC BY-NC-SA, [[NACS-organizer]]); it is a measurement reference only.
+- Drum 75 mm long (Brian, 2026-09-17, down from 120); the wand stays at the far end. The cable hangs in loops over the top of the drum as on the sample (39 mm of straight drum between the blends), it is not wound under the wand.
+- Tesla T recessed 1 mm into the flange face, 70 mm tall, centred on the drum axis: 57% of the round part, as measured on the sample photos. Official emblem artwork (`reference/tesla-t.svg`, Wikimedia `Tesla_Motors.svg` with the wordmark removed, PD-textlogo), never rebuilt from primitives.
+
+## Files (2026-09-17)
+
+- `holder.scad` (+ `nose_outline.scad`): the model; `part="coupon"` gives the fit coupon. `render.sh` renders `images/scad/*.png`; `renders_page.py` builds `plan.html` (published as the "NACS Holster Plan" artifact).
+- `coupon.stl`, `coupon-print.3mf`, `coupon-slice.json`: fit coupon, 54 x 55 x 60 mm, the cavity, cleat and mouth with 3 mm walls on a 0.9 mm slice of the plate, print orientation unchanged. Real slice: 1 h 32 min, 53 g (49 g PETG, 4 g support), 17 g of it prime tower.
+- `pipeline/make_coupon_3mf.py`: X2D 0.6 nozzle, 0.30mm Standard, Bambu PETG Basic on nozzle 1, Bambu Support For PLA/PETG on nozzle 2 as the support interface, tree supports with Bambu's recommended parameters for that pairing. Lessons baked in: the CLI writes one extruder variant per filament, so every per-variant filament key is expanded to filaments x 6 variants like a Studio-saved file; flush matrix = filaments^2 x len(flush_multiplier) with one multiplier per extruder; the CLI's default prime tower position (165, 236) is off the bed.
 
 ## Sources
 

@@ -8,6 +8,7 @@
 // wall, +Y up.
 //
 // Render views: render.sh.  Export: openscad -D display=false -D show_nose=false -o holder.stl holder.scad
+// Coupon:       openscad -D display=false -D show_nose=false -D 'part="coupon"' -o coupon.stl holder.scad
 
 include <nose_outline.scad>;
 
@@ -15,6 +16,8 @@ display = true;       // rotate so +Y is up on screen for renders
 show_nose = true;     // ghost of the connector, docked
 section = 0;          // 1: cut along the wand to show the cleat, 2: cut across the notch
 show_wall = true;     // faint wall plane behind the plate in renders
+part = "holder";      // "coupon": the cavity and cleat with thin walls on a piece of the plate, print orientation unchanged
+show_logo = true;     // Tesla T recessed in the flange face (reference/tesla-t.svg, official artwork)
 $fn = 96;
 
 // connector facts (Tesla TS-0023666, STEP)
@@ -35,11 +38,14 @@ cleat_a = 18.3; cleat_c = 20.3; cleat_b = 22.5;   // load face, crown end, lead-
 undercut = 10;
 mouth = 33;
 plate_w = 120; plate_t = 5; plate_r = 8; hole_in = 10; hole_d = 5; csk_d = 10;
-drum_r = 50; drum_l = 120;                 // plate front to flange front
+drum_r = 50; drum_l = 75;                  // plate front to flange front
 flange_t = 8; flange_point = 84; point_angle = -135;   // teardrop point to the lower left, clear of the wand
 fillet_flange = 12;                        // concave blend from the drum into the flange face
 fillet_plate = 8;                          // concave blend from the drum into the plate
 flange_r = drum_r + fillet_flange;
+logo_h = 70; logo_depth = 1;               // Tesla T height on the flange face (57% of the round part, as on the sample), recess depth
+coupon_wall = 3;                           // wall around the cavity in the fit coupon
+coupon_slab = 0.9;                         // of the 5 mm plate, only this much stays under the coupon (3 layers)
 
 half = nose_h / 2;
 floor_y = -(half + clear);
@@ -105,6 +111,10 @@ module body() {
     }
 }
 
+// official emblem, two paths; the 0.05 mm closing heals a 0.02 mm self-crossing at the top of the stem in Tesla's outline
+module logo() translate([0, 0, total_l - logo_depth]) linear_extrude(logo_depth + 0.01)
+    resize([0, logo_h], auto = true) offset(r = -0.05) offset(r = 0.05) import("reference/tesla-t.svg", center = true);
+
 module holes() {
     for (sx = [-1, 1], sy = [-1, 1]) translate([sx * (plate_w / 2 - hole_in), sy * (plate_w / 2 - hole_in), 0]) {
         translate([0, 0, -1]) cylinder(h = plate_t + 2, d = hole_d);
@@ -117,14 +127,33 @@ module holder() {
         body();
         in_cavity_frame() cavity();
         holes();
+        if (show_logo) logo();
     }
     color("limegreen") in_cavity_frame() cleat();
 }
 
+// Fit coupon: the real cavity, cleat and mouth cut out of the holder with coupon_wall of body around them,
+// carried down to a thin slice of the plate so it prints in the same orientation (plate on the bed) with the
+// same roof supports. Exported sitting on Z=0.
+module coupon() translate([0, 0, coupon_slab - plate_t]) intersection() { coupon_core(); translate([-500, -500, plate_t - coupon_slab]) cube(1000); }
+
+module coupon_core() {
+    // envelope: the largest cavity section plus coupon_wall, along the wand from behind the tip to past the mouth
+    module env() in_cavity_frame() translate([0, 0, -coupon_wall]) linear_extrude(mouth + 30 + coupon_wall)
+        offset(r = coupon_wall) profile(roof_extra + roof_relief);
+    intersection() {
+        holder();
+        hull() { env(); linear_extrude(0.01) projection() env(); }   // carried straight down to the plate
+        cylinder(r = drum_r, h = 2 * total_l);                        // no plate outside the drum
+    }
+}
+
+module part_body() { if (part == "coupon") coupon(); else holder(); }
+
 module model() {
-    if (section == 1) intersection() { holder(); in_cavity_frame() translate([-500, -500, -500]) cube([500, 1000, 1000]); }
-    else if (section == 2) intersection() { holder(); in_cavity_frame() translate([-500, -500, -500]) cube([1000, 1000, 500 + 20.25]); }
-    else holder();
+    if (section == 1) intersection() { part_body(); in_cavity_frame() translate([-500, -500, -500]) cube([500, 1000, 1000]); }
+    else if (section == 2) intersection() { part_body(); in_cavity_frame() translate([-500, -500, -500]) cube([1000, 1000, 500 + 20.25]); }
+    else part_body();
     if (show_nose) color("steelblue", section == 0 ? 0.55 : 0.3) in_cavity_frame() {
         if (section == 1) intersection() { nose(); translate([-500, -500, -500]) cube([500, 1000, 1000]); }
         else if (section == 2) intersection() { nose(); translate([-500, -500, -500]) cube([1000, 1000, 500 + 20.25]); }

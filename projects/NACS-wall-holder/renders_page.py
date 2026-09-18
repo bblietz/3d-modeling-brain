@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Write plan.html: the OpenSCAD renders of holder.scad with captions and the design constants.
 
-    ./render.sh && python3 renders_page.py
+    ./render.sh && python3 renders_page.py      (coupon numbers come from coupon-slice.json, written by pipeline/make_coupon_3mf.py)
 """
 import base64
+import json
 import os
 import re
 
@@ -12,8 +13,6 @@ SCAD = open(os.path.join(HERE, "holder.scad")).read()
 
 
 def const(name):
-    if name == "mouth_z":
-        return const("plate_t") + const("drum_l") - const("flange_t") - const("fillet_flange") - 5 - (35.52 / 2 + const("clear")) * 0.889
     return float(re.search(rf"(?:^|;)\s*{name}\s*=\s*([-0-9.]+)", SCAD, re.M).group(1))
 
 
@@ -22,21 +21,39 @@ def img(name):
     return f'<img src="data:image/png;base64,{data}" alt="{name}">'
 
 
+def figs(views):
+    return "".join(f'<figure>{img(n)}<figcaption>{c}</figcaption></figure>' for n, c in views)
+
+
 plate_w, plate_t, drum_r, drum_l = const("plate_w"), const("plate_t"), const("drum_r"), const("drum_l")
-flange_t, fillet_flange, mouth_z, fillet_plate = const("flange_t"), const("fillet_flange"), const("mouth_z"), const("fillet_plate")
+flange_t, fillet_flange, fillet_plate = const("flange_t"), const("fillet_flange"), const("fillet_plate")
 flange_r = drum_r + fillet_flange
 wand_down, wand_lean, clear = const("wand_down"), const("wand_lean"), const("clear")
 cleat_proud, cleat_w, roof_relief = const("cleat_proud"), const("cleat_w"), const("roof_relief")
+logo_h, logo_depth, coupon_wall = const("logo_h"), const("logo_depth"), const("coupon_wall")
+# mouth centre, out from the wall (same expression as holder.scad; w[2] = 0.889 for the 45/20 degree wand)
+mouth_z = plate_t + drum_l - flange_t - fillet_flange - 8 - (35.52 / 2 + clear) * 0.889
+drum_straight = drum_l - fillet_plate - fillet_flange - flange_t
+try:
+    sl = json.load(open(os.path.join(HERE, "coupon-slice.json")))
+    g = sl["grams_per_filament"]
+    coupon_time = f"{sl['minutes'] // 60} h {sl['minutes'] % 60:02d} min, {sl['grams']:.0f} g in all: {g.get('1', 0):.0f} g PETG and {g.get('2', 0):.0f} g support material, from a real slice of <code>coupon-print.3mf</code>."
+except FileNotFoundError:
+    coupon_time = "not sliced yet."
 
-views = [
-    ("iso", "From the front right. The wand comes out of the drum's right side, 45&#176; down, and leans 20&#176; off the wall."),
+holder_views = [
+    ("iso", "From the front right. The wand comes out of the drum's right side, 45&#176; down, and leans 20&#176; off the wall; the Tesla T is recessed in the flange face."),
     ("front", "Facing the wall. The flange hides the drum; the four screw holes sit outside it."),
     ("right", "From the right. The wand leans away from the wall, so the grip and cable boot clear it."),
     ("below", "From below. The mouth in the drum's side, and the curved blend under the flange."),
     ("section-cleat", "Cut along the wand, seen from the front left. The nose (blue ghost) hangs in the cavity with the notch side down; the roof steps up 4 mm toward the mouth so the nose can be lifted over the cleat on the way in."),
     ("section-notch", "Cut across the notch, seen from the grip end. The cleat sits in the connector's own lock notch with room on both sides."),
 ]
-figs = "".join(f'<figure>{img(n)}<figcaption>{c}</figcaption></figure>' for n, c in views)
+coupon_views = [
+    ("coupon-iso", "The coupon as it prints, with the nose docked: the cavity, cleat and mouth cut out of the holder with 3 mm of body around them, carried down to a thin slice of the plate."),
+    ("coupon-mouth", "The mouth end. The outside is the drum's own surface, so the lip the nose slides over is the real one."),
+    ("coupon-section", "Cut along the wand: same cavity, roof relief and cleat as the holder."),
+]
 
 html = f"""<title>NACS Holster Plan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,27 +71,32 @@ figure{{margin:0;background:var(--card);border:1px solid var(--rule);border-radi
 figure img{{width:100%;height:auto;border-radius:4px;background:#f8f8f8}}
 figcaption{{font-size:.88rem;color:var(--muted);margin-top:6px}}
 ul{{padding-left:20px}} li{{margin:4px 0}} .k{{color:var(--accent);font-weight:500}}
+code{{font-size:.9em}}
 </style>
 <main>
 <h1>NACS Holster Plan</h1>
 <p class="lead">OpenSCAD model of the wall holder for the Tesla Gen 3 Wall Connector handle: a drum on a square plate, the wand out of the drum's right side at {wand_down:.0f}&#176; down, hanging on a fixed cleat in the connector's own lock notch. Rendered from <code>holder.scad</code>; the nose profile is Tesla's, from their NACS STEP file.</p>
-<div class="grid">{figs}</div>
+<div class="grid">{figs(holder_views)}</div>
 
 <h2>What is set</h2>
 <ul>
 <li>Plate <span class="k">{plate_w:.0f} &#215; {plate_w:.0f} &#215; {plate_t:.0f} mm</span>, four countersunk holes for #8 screws, 10 mm in from the corners.</li>
-<li>Drum <span class="k">&#216;{2 * drum_r:.0f}</span>, <span class="k">{drum_l:.0f} mm</span> out from the plate; teardrop flange teardrop flange &#216;{2 * flange_r:.0f} with its point along the wand#216;{2 * flange_r:.0f} with its point to the lower left, blended into the drum with an R{fillet_flange:.0f} curve (R{fillet_plate:.0f} at the plate).</li>
-<li>Wand <span class="k">{wand_down:.0f}&#176; down</span> and <span class="k">{wand_lean:.0f}&#176; off the wall</span>; the wand sits at the far end of the drum, {mouth_z:.0f} mm out from the wall at the mouth, so the cable is wound on the drum behind it and the wand is hooked in last, outside the coil.</li>
+<li>Drum <span class="k">&#216;{2 * drum_r:.0f}</span>, <span class="k">{drum_l:.0f} mm</span> out from the plate; teardrop flange &#216;{2 * flange_r:.0f} with its point to the lower left, blended into the drum with an R{fillet_flange:.0f} curve (R{fillet_plate:.0f} at the plate).</li>
+<li>Tesla T recessed <span class="k">{logo_depth:.0f} mm</span> into the flange face, <span class="k">{logo_h:.0f} mm</span> tall (57% of the round part, as on the sample), centred on the drum axis, from the official emblem artwork.</li>
+<li>Wand <span class="k">{wand_down:.0f}&#176; down</span> and <span class="k">{wand_lean:.0f}&#176; off the wall</span>; the wand sits at the far end of the drum, {mouth_z:.0f} mm out from the wall at the mouth, so it is hooked in last, outside the cable.</li>
 <li>Cavity: the connector profile plus {clear:.1f} mm; notch side down, button side up. Cleat {cleat_w:.0f} mm wide, {cleat_proud:.1f} mm proud, on the lower wall, with a 10&#176; hook face so the hanging weight pulls the nose down onto it. Roof relieved {roof_relief:.0f} mm for insertion, tight over the tip so the handle's weight cannot lever the tip up.</li>
-<li>Cable: wraps the outer {mouth_z - 16 - 2 - 13:.0f} mm of drum between the plate and the wand, about three turns per layer; the rest hangs in a loop off the flange, as on the sample.</li>
+<li>Cable: hangs in loops over the top of the drum, as on the sample; {drum_straight:.0f} mm of straight drum between the two blends, room for three &#216;14.5 loops side by side, so the 18 ft cable (about six loops) stacks two deep.</li>
 </ul>
+
+<h2>Fit coupon</h2>
+<p>Only the cavity and cleat, printed the way the holder prints (plate on the bed, tree supports in the cavity roof with Bambu Support For PLA/PETG on the second nozzle). Print time <span class="k">{coupon_time}</span></p>
+<div class="grid">{figs(coupon_views)}</div>
 
 <h2>Open</h2>
 <ul>
-<li>The 20&#176; lean and the 100 mm drum length are my choices; say if the grip should sit further off the wall or you want more cable on the drum.</li>
-<li>Printing: plate down on the bed. The cavity roof needs support material inside (the X2D's support nozzle); everything else prints clean.</li>
-<li>Logo on the flange: not yet; a recessed Tesla T from the official artwork if you want it.</li>
-<li>Next: a coupon print of the cavity and cleat to check the fit on your handle, then the full part.</li>
+<li>The 20&#176; lean is my choice; say if the grip should sit further off the wall.</li>
+<li>Printing: plate down on the bed. The cavity roof and the ring under the flange need support material (the X2D's support nozzle); everything else prints clean.</li>
+<li>Next: print the coupon, try the handle on it (insertion over the cleat, hanging, lift-off), then the full part.</li>
 </ul>
 </main>
 """
