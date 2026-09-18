@@ -61,10 +61,13 @@ reviewed, not built; update with measured fits after the build.
 - 3 in posts glued from 8/4, 3/8 chamfer, no taper; 3/4 ply sides and
   back 1/2 in behind the post faces in T18 x 3/8 grooves stopped 1-1/2 in
   above the floor; hidden front frame 1 in behind the post faces, rails
-  1 / 1 / 1-1/2 in tall milled to T18, stub-tenoned 3/8 into three
-  stopped mortises per front post; rear top rail 1-1/2 in in the back
-  groove line above a 15-1/4 in back panel; 1/2 ply bottom, top face
-  2-1/4 in above the floor, in 1/4 in grooves (rabbet at the front rail).
+  1 / 1 / 1-1/2 in tall milled to T18, dowel-jointed into the front
+  posts (two 3/8 in dowels per rail, one each end, 1 in deep; was
+  stub-tenoned into three stopped mortises per front post until
+  2026-09-18); rear top rail 1-1/2 in in the back groove line above a
+  15-1/4 in back panel, unaffected (still stub-tenoned); 1/2 ply bottom,
+  top face 2-1/4 in above the floor, in 1/4 in grooves (rabbet at the
+  front rail).
 - Fronts 3/4 in maple, 1/4 in behind the post faces, 5-5/8 over 11-1/8
   (was 5-3/4 / 11-3/8 before the 2026-09-17 height measurement; the
   front zone is re-split ~1:2 by that rule, not scaled, whenever the
@@ -75,6 +78,14 @@ reviewed, not built; update with measured fits after the build.
   and back stay 1/2 in. The housing groove keeps its 1/4 in reach -
   only its height (the `T6` constant) changed to match the thinner
   panel.
+- Front rails are dowel-jointed, not stub-tenoned into post mortises
+  (Brian, 2026-09-18): two 3/8 in dowels per rail, one each end, 1 in
+  deep into post and rail; rails now butt flush at the post face
+  (length = opening exactly). The post's box mortises became round
+  bores at the same rail-centerline heights; the volume-identity asserts
+  moved from box to cylinder volumes and passed clean on the first
+  re-run. The rear top rail is unaffected, still stub-tenoned into the
+  back groove line.
 - 18 in undermount slides (Blum 563H4570B, 471 mm runner), box heights
   computed from the rail-to-rail openings minus Blum's clearances (14 mm
   bottom, 6 mm top) rather than fixed - a hard-coded pair of "Blum

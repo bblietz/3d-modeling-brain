@@ -111,6 +111,11 @@ because option (a) leaves 19-1/4 in of interior depth.
   and back stay 1/2 in ply; the groove that houses the bottom keeps its
   1/4 in reach, just sized to the thinner panel now (`T6` in
   `drawer_bench.py`).
+- Front-rail joinery: 3/8 in dowels, two per rail (one each end, 1 in
+  deep into post and rail), not stub-tenons into post mortises (Brian,
+  2026-09-18). Rails now butt flush at the post faces (length = opening
+  exactly, was opening + 3/4 in); the rear top rail is unaffected, still
+  stub-tenoned into the back groove line.
 
 ## Build log (2026-08-24)
 

@@ -10,6 +10,7 @@ floor). All mm. Every dimension is provisional; see design.md
 """
 
 import os
+from math import pi
 from build123d import *
 
 IN = 25.4
@@ -49,6 +50,8 @@ FRONT_BOT_H = 11.125 * IN  # 282.575  same ~1.98:1 ratio as the original 5-3/4 /
 BOT_GROOVE = 0.25 * IN     # 6.35   bottom-panel groove depth
 BOT_TOP_Z = 2.25 * IN      # 57.15  top face of the bottom panel
 DADO = 0.25 * IN           # 6.35   drawer-box rabbets and bottom grooves
+DOWEL_DIA = 0.375 * IN     # 9.525  front-rail dowel joints (was stub tenons into mortises)
+DOWEL_DEPTH = 1.0 * IN     # 25.4   embedment into post and rail, each side
 
 # --- Undermount slide geometry (Blum TANDEM plus BLUMOTION 563H, from the
 # 563H/563 installation sheet, 2016 ed.; face-frame application, inset fronts,
@@ -93,6 +96,7 @@ BOX_BOT_H = (RAIL_MID_Z0 - (RAIL_BOT_Z0 + RAIL_BOT_H)) - (UM_BOTTOM_CLEAR + UM_T
 BOT_Z0 = BOT_TOP_Z - T12                     # 45.15 bottom panel underside
 BOT_X0 = X0 + SETBACK + T18 - BOT_GROOVE     # into the side-panel groove
 BOT_W = FOOT_W - 2 * (SETBACK + T18 - BOT_GROOVE)   # 802.2
+DOWEL_VOL = pi * (DOWEL_DIA / 2) ** 2 * (DOWEL_DEPTH + 1)   # one dowel bore, post or rail side
 
 PARTS = []   # {"name", "solid", "qty", "material", "notes"}: cut list + assembly
 INST = []    # (name, solid) for every PLACED instance: overlap check
@@ -128,25 +132,33 @@ def mirror_x(solid):
     return mirror(solid, Plane.YZ.offset(TOP_W / 2))
 
 
+def _dowel(xc, yc, zc):
+    """Round dowel-joint bore centered on the joint face at (xc, yc, zc),
+    DOWEL_DEPTH deep into material on each side (the far side is usually
+    open air once the piece is subtracted; the overshoot is harmless)."""
+    length = 2 * (DOWEL_DEPTH + 1)
+    return Pos(xc, yc, zc) * Rot(0, 90, 0) * Cylinder(DOWEL_DIA / 2, length)
+
+
 # --- Parts: posts (qty 4: 2 front, 2 rear; right side mirrored) --------------
 # Chamfer the four vertical edges first, then cut the grooves, so the groove
 # walls are clean. Side-panel groove: on the face toward the other post of
 # that side, SETBACK behind the outer face, stopped at GROOVE_STOP, open at
-# the top. Front posts get three stopped mortises on the inner face
-# (FRAME_SETBACK behind the front face) at the rail heights, so the face is
-# solid between the rails, where the slide's front tab screws in and where a
-# groove would show with a drawer open; rear posts get the back-panel groove
-# on the inner face (SETBACK behind the rear face, stopped at GROOVE_STOP).
+# the top. Front posts get three round dowel bores on the inner face
+# (FRAME_SETBACK behind the front face) at the rail centerlines, so the face
+# is solid between the rails, where the slide's front tab screws in and where
+# a groove would show with a drawer open; rear posts get the back-panel
+# groove on the inner face (SETBACK behind the rear face, stopped at
+# GROOVE_STOP).
 def make_post(x, y, front):
     p = _box(x, y, 0, POST, POST, POST_H)
     p = chamfer(p.edges().filter_by(Axis.Z), CHAMFER)
     gh = POST_H - GROOVE_STOP + 1                      # open at the top
     gy = y + POST - GROOVE_D if front else y - 1
     p -= _box(x + SETBACK, gy, GROOVE_STOP, T18, GROOVE_D + 1, gh)
-    if front:   # three stopped mortises for the rail tenons, 1 in behind the face
+    if front:   # three dowel bores for the rail joints, 1 in behind the face
         for _z, _h in RAIL_ZH:
-            p -= _box(x + POST - GROOVE_D, y + FRAME_SETBACK, _z,
-                      GROOVE_D + 1, T18, _h + (1 if _z + _h >= POST_H else 0))
+            p -= _dowel(x + POST, y + FRAME_SETBACK + RAIL_T / 2, _z + _h / 2)
     else:
         p -= _box(x + POST - GROOVE_D, y + POST - SETBACK - T18, GROOVE_STOP,
                   GROOVE_D + 1, T18, gh)
@@ -164,10 +176,11 @@ PARTS.append({"name": "post_front", "solid": post_fl, "qty": 2, "material": "sof
                        "side groove T18 (measured ply) x 3/8 at 1/2 from the outer face, "
                        "stopped 1-1/2 above the floor, open at top"
                        "; grain vertical, glue-up seam on a side face; "
-                       "three mortises T18 x 3/8 on the inner face 1 in behind the front face at Z "
-                       f"{RAIL_BOT_Z0:.2f}-{RAIL_BOT_Z0 + RAIL_BOT_H:.2f}, "
-                       f"{RAIL_MID_Z0:.2f}-{RAIL_MID_Z0 + RAIL_MID_H:.2f}, "
-                       f"{RAIL_TOP_Z0:.2f}-top for the rail tenons"})
+                       f"three {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel bores on the inner "
+                       "face 1 in behind the front face, centered on the rail joints at Z "
+                       f"{RAIL_BOT_Z0 + RAIL_BOT_H / 2:.2f}, "
+                       f"{RAIL_MID_Z0 + RAIL_MID_H / 2:.2f}, "
+                       f"{RAIL_TOP_Z0 + RAIL_TOP_H / 2:.2f}"})
 PARTS.append({"name": "post_rear", "solid": post_rl, "qty": 2, "material": "soft maple",
               "notes": "one of 2 REAR posts, left/right mirrored, grooves on the inner faces; "
                        "same blank and chamfer as post_front; side groove as post_front; "
@@ -180,9 +193,9 @@ INST += [("post_fl", post_fl), ("post_fr", post_fr), ("post_rl", post_rl), ("pos
 # grooves (proves the chamfers never reach a groove and grooves are stopped)
 _post_box = POST ** 2 * POST_H - 4 * 0.5 * CHAMFER ** 2 * POST_H
 _front_vol = (_post_box - T18 * GROOVE_D * (POST_H - GROOVE_STOP)
-              - T18 * GROOVE_D * (RAIL_BOT_H + RAIL_MID_H + RAIL_TOP_H))
+              - 3 * DOWEL_VOL)
 _rear_vol = _post_box - 2 * T18 * GROOVE_D * (POST_H - GROOVE_STOP)
-assert abs(post_fl.volume - _front_vol) < 1e-3, post_fl.volume
+assert abs(post_fl.volume - _front_vol) < 1e-2, post_fl.volume
 assert abs(post_rl.volume - _rear_vol) < 1e-3, post_rl.volume
 assert CHAMFER < SETBACK and CHAMFER < FRAME_SETBACK
 for _p in (post_fl, post_fr, post_rl, post_rr):
@@ -234,40 +247,57 @@ assert abs(back.bounding_box().max.Z - rail_rear.bounding_box().min.Z) < 1e-6
 assert abs(rail_rear.bounding_box().max.Z - POST_H) < 1e-6
 
 # --- Parts: front frame rails (hidden behind the drawer fronts) ------------
-# Front face FRAME_SETBACK behind the post faces; stub tenons GROOVE_D each
-# end into the front-post grooves. Top rail under the top, mid rail centered
-# on the reveal between the fronts, bottom rail from the floor gap up (its
-# top face is the bottom panel's top face). The bottom rail's rear-top edge is
-# rabbeted for the bottom panel; the rabbet runs THROUGH the tenons (the tenon
-# loses a BOT_GROOVE x T12 corner, the mortise still houses the rest) so the
-# bottom's front tab can slide past the tenons when the rail goes into its
-# mortise at glue-up.
-RAIL_X0 = BACK_X0   # same tenon line as the back groove
+# Front face FRAME_SETBACK behind the post faces; dowel joints, not tenons
+# (Brian, 2026-09-18: was stub-tenoned into post mortises) - rails butt flush
+# against the post inner faces, length = opening exactly. Top rail under the
+# top, mid rail centered on the reveal between the fronts, bottom rail from
+# the floor gap up (its top face is the bottom panel's top face). The bottom
+# rail's rear-top edge is rabbeted for the bottom panel, full length (no
+# tenon to run through any more).
+RAIL_X0 = X0 + POST                  # front post's inner face; dowel butt joint
 RAIL_Y0 = Y0 + FRAME_SETBACK
-rail_top = _box(RAIL_X0, RAIL_Y0, RAIL_TOP_Z0, RAIL_L, RAIL_T, RAIL_TOP_H)
-rail_mid = _box(RAIL_X0, RAIL_Y0, RAIL_MID_Z0, RAIL_L, RAIL_T, RAIL_MID_H)
-rail_bot = _box(RAIL_X0, RAIL_Y0, RAIL_BOT_Z0, RAIL_L, RAIL_T, RAIL_BOT_H)
-rail_bot -= _box(RAIL_X0 - 1, RAIL_Y0 + RAIL_T - BOT_GROOVE, BOT_Z0, RAIL_L + 2, BOT_GROOVE + 1, T12 + 1)
+FRAME_RAIL_L = OPEN_W                # 698.5  opening only (was + 2 * GROOVE_D for the old tenons)
+
+
+def make_front_rail(z0, h):
+    """Front rail: butts flush into the post faces, one dowel each end."""
+    r = _box(RAIL_X0, RAIL_Y0, z0, FRAME_RAIL_L, RAIL_T, h)
+    yc, zc = RAIL_Y0 + RAIL_T / 2, z0 + h / 2
+    r -= _dowel(RAIL_X0, yc, zc)
+    r -= _dowel(RAIL_X0 + FRAME_RAIL_L, yc, zc)
+    return r
+
+
+rail_top = make_front_rail(RAIL_TOP_Z0, RAIL_TOP_H)
+rail_mid = make_front_rail(RAIL_MID_Z0, RAIL_MID_H)
+rail_bot = make_front_rail(RAIL_BOT_Z0, RAIL_BOT_H)
+rail_bot -= _box(RAIL_X0 - 1, RAIL_Y0 + RAIL_T - BOT_GROOVE, BOT_Z0, FRAME_RAIL_L + 2, BOT_GROOVE + 1, T12 + 1)
 
 PARTS.append({"name": "rail_top", "solid": rail_top, "qty": 1, "material": "soft maple",
-              "notes": "FRONT top rail, thickness = measured ply (T18): stub tenons 3/8 each end, "
-                       "full section; figure-8 fasteners on top"})
+              "notes": f"FRONT top rail, thickness = measured ply (T18): butts flush into the post "
+                       f"faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; figure-8 "
+                       "fasteners on top"})
 PARTS.append({"name": "rail_mid", "solid": rail_mid, "qty": 1, "material": "soft maple",
-              "notes": "FRONT mid rail, thickness = measured ply (T18): stub tenons 3/8 each end, "
-                       "full section; carries the top drawer slides"})
+              "notes": f"FRONT mid rail, thickness = measured ply (T18): butts flush into the post "
+                       f"faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; carries the "
+                       "top drawer slides"})
 PARTS.append({"name": "rail_bot", "solid": rail_bot, "qty": 1, "material": "soft maple",
-              "notes": "FRONT bottom rail, thickness = measured ply (T18): stub tenons 3/8 each "
-                       f"end, full section; rabbet {BOT_GROOVE:g} x {T12:g} (T12) on the rear-top "
-                       "edge, run THROUGH the tenons so the bottom can slide past them at "
-                       "glue-up; glue and screw the bottom into it (no lip above)"})
+              "notes": f"FRONT bottom rail, thickness = measured ply (T18): butts flush into the "
+                       f"post faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; rabbet "
+                       f"{BOT_GROOVE:g} x {T12:g} (T12) on the rear-top edge, full length, for the "
+                       "bottom panel; glue and screw the bottom into it (no lip above)"})
 INST += [("rail_top", rail_top), ("rail_mid", rail_mid), ("rail_bot", rail_bot)]
 
-# rail_bot's tenon is the full section minus the through-rabbet corner, so its
-# probe is BOT_GROOVE thinner in Y; the other two tenons are full section.
-for _r, (_z, _h), _t in zip((rail_bot, rail_mid, rail_top), RAIL_ZH,
-                            (RAIL_T - BOT_GROOVE, RAIL_T, RAIL_T)):
-    assert_housed(_r, post_fl, _box(RAIL_X0, RAIL_Y0, _z, GROOVE_D, _t, _h))
-    assert_housed(_r, post_fr, _box(XR - POST, RAIL_Y0, _z, GROOVE_D, _t, _h))
+# Dowel joints: rails butt flush against the post inner faces (no tenon
+# reach); volume identity proves each bore removes exactly one dowel's worth
+# of material, landing once each and not clipped by an edge or another bore.
+assert abs(rail_top.volume - (FRAME_RAIL_L * RAIL_T * RAIL_TOP_H - 2 * DOWEL_VOL)) < 1e-2, rail_top.volume
+assert abs(rail_mid.volume - (FRAME_RAIL_L * RAIL_T * RAIL_MID_H - 2 * DOWEL_VOL)) < 1e-2, rail_mid.volume
+assert abs(rail_bot.volume - (FRAME_RAIL_L * RAIL_T * RAIL_BOT_H - 2 * DOWEL_VOL
+                               - FRAME_RAIL_L * BOT_GROOVE * T12)) < 1e-2, rail_bot.volume
+for _r in (rail_top, rail_mid, rail_bot):
+    assert abs(_r.bounding_box().min.X - RAIL_X0) < 1e-6
+    assert abs(_r.bounding_box().max.X - (RAIL_X0 + FRAME_RAIL_L)) < 1e-6
 assert abs(rail_bot.bounding_box().max.Z - BOT_TOP_Z) < 1e-6
 assert abs(rail_top.bounding_box().max.Z - POST_H) < 1e-6
 assert abs(rail_top.bounding_box().min.Y - Y0 - FRAME_SETBACK) < 1e-6

@@ -46,14 +46,18 @@ not).
   Provisional blanks: sides 16-1/4 x 16-3/4 in, back 28-1/4 x 16-3/4 in
   (each includes 3/8 in per housed edge; height runs from the groove
   stop to the top of the posts).
-- **Front frame (hidden)**: soft maple 3/4 in thick, stub-tenoned 3/8 in
-  into post mortises set 1 in + 1.5 mm behind the post front face (behind
-  the drawer fronts, which occupy 1/4 to 1 in, plus the Blum front gap;
-  see resolution 8). Top rail 1 in tall under the
-  top, mid rail 1 in tall centered on the reveal between the fronts,
-  bottom rail 1-1/2 in tall from the floor gap up. A rear top rail in the
-  back groove line stiffens the top edge and takes figure-8 fasteners.
-  Rail length = opening + 3/4 in.
+- **Front frame (hidden)**: soft maple 3/4 in thick, dowel-jointed into
+  the front posts (two 3/8 in dowels per rail, one at each end, 1 in
+  deep into post and rail; Brian, 2026-09-18, was stub-tenoned 3/8 in
+  into post mortises) set 1 in + 1.5 mm behind the post front face
+  (behind the drawer fronts, which occupy 1/4 to 1 in, plus the Blum
+  front gap; see resolution 8). Top rail 1 in tall under the top, mid
+  rail 1 in tall centered on the reveal between the fronts, bottom rail
+  1-1/2 in tall from the floor gap up; rail length = opening exactly
+  (was opening + 3/4 in for the old tenon reach). A rear top rail in the
+  back groove line stiffens the top edge and takes figure-8 fasteners,
+  unaffected by the front-rail change: it keeps its stub-tenon into the
+  back groove line, rail length = opening + 3/4 in.
 - **Bottom**: 1/2 in plywood in 1/4 in deep grooves in the side and back
   panels and the front bottom rail; top face 2-1/4 in above the floor.
   Dust panel and slide-bracket landing, not structural.
@@ -173,6 +177,22 @@ open for Brian's review (change the constant, re-run the file).
   visible with a drawer open and exactly where the undermount slide's
   front tab screws into the "stile". Same router setup as the panel
   grooves, three short passes with stops. Post blanks unchanged.
+  SUPERSEDED 2026-09-18: the front rails changed from stub-tenons to
+  dowel joints (Brian); see the next resolution. The stile stays solid
+  between the rails either way.
+- **Front rails are dowel-jointed, not stub-tenoned into mortises**
+  (Brian, 2026-09-18): two 3/8 in (9.525 mm) dowels per rail, one at
+  each end, 1 in (25.4 mm) deep into both the post and the rail. Rails
+  now butt flush against the post inner face (length = opening exactly,
+  was opening + 3/4 in for the tenon reach). The post's three stopped
+  box mortises become three round bores at the same rail-centerline
+  heights, on the same inner face, 1 in behind the front face - solid
+  post stays between the rails either way, so the slide's front-tab
+  screw-zone probe (already checked against solid post) is unaffected.
+  The rear top rail is untouched: it keeps its stub-tenon into the back
+  groove line. `drawer_bench.py`'s volume-identity asserts were updated
+  to subtract cylinder volumes instead of box-mortise volumes, which
+  passed cleanly on the first re-run - no other constant moved.
 - **The rear top rail (1-1/2 in tall) is tenoned into the back groove
   line** and the back panel runs from the groove stop to the rail's
   underside (15-1/4 in tall, not 16-3/4).
