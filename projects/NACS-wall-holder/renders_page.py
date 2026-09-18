@@ -31,8 +31,7 @@ flange_r = drum_r + fillet_flange
 wand_down, wand_lean, clear = const("wand_down"), const("wand_lean"), const("clear")
 cleat_proud, cleat_w, roof_relief = const("cleat_proud"), const("cleat_w"), const("roof_relief")
 logo_h, logo_depth, coupon_wall = const("logo_h"), const("logo_depth"), const("coupon_wall")
-# mouth centre, out from the wall (same expression as holder.scad; w[2] = 0.889 for the 45/20 degree wand)
-mouth_z = plate_t + drum_l - flange_t - fillet_flange - 8 - (35.52 / 2 + clear) * 0.889
+mouth_z, cleat_depth, behind = const("mouth_z"), const("cleat_depth"), const("behind")
 drum_straight = drum_l - fillet_plate - fillet_flange - flange_t
 try:
     sl = json.load(open(os.path.join(HERE, "coupon-slice.json")))
@@ -42,15 +41,15 @@ except FileNotFoundError:
     coupon_time = "not sliced yet."
 
 holder_views = [
-    ("iso", "From the front right. The wand comes out of the drum's right side, 45&#176; down, and leans 20&#176; off the wall; the Tesla T is recessed in the flange face."),
+    ("iso", f"From the front right. The wand comes out of the drum's right side, 45&#176; down, and leans {wand_lean:.0f}&#176; off the wall; the Tesla T is recessed in the flange face."),
     ("front", "Facing the wall. The flange hides the drum; the four screw holes sit outside it."),
     ("right", "From the right. The wand leans away from the wall, so the grip and cable boot clear it."),
     ("below", "From below. The mouth in the drum's side, and the curved blend under the flange."),
-    ("section-cleat", "Cut along the wand, seen from the front left. The nose (blue ghost) hangs in the cavity with the notch side down; the roof steps up 4 mm toward the mouth so the nose can be lifted over the cleat on the way in."),
-    ("section-notch", "Cut across the notch, seen from the grip end. The cleat sits in the connector's own lock notch with room on both sides."),
+    ("section-cleat", f"Cut along the wand, seen from the front. The handle (grey) hangs with its lock notch on the cleat, whose holding wall is {cleat_depth:.2f} mm (1.25 in) in from the opening along the lower wall. The housing behind the nose sits inside too, in a cavity cut to Tesla's own sections. The roof steps up so the nose can be lifted over the cleat on the way in."),
+    ("section-notch", "Cut across the notch, seen from the grip end. The cleat sits in the connector's own lock notch with room on both sides; the band above the handle is the roof relief."),
 ]
 coupon_views = [
-    ("coupon-iso", "The coupon as it prints, with the nose docked: the cavity, cleat and mouth cut out of the holder with 3 mm of body around them, carried down to a thin slice of the plate."),
+    ("coupon-iso", "The coupon as it prints, with the handle docked: the cavity, cleat and mouth cut out of the holder with 3 mm of body around them, carried down to a thin base."),
     ("coupon-mouth", "The mouth end. The outside is the drum's own surface, so the lip the nose slides over is the real one."),
     ("coupon-section", "Cut along the wand: same cavity, roof relief and cleat as the holder."),
 ]
@@ -83,7 +82,8 @@ code{{font-size:.9em}}
 <li>Plate <span class="k">{plate_w:.0f} &#215; {plate_w:.0f} &#215; {plate_t:.0f} mm</span>, four countersunk holes for #8 screws, 10 mm in from the corners.</li>
 <li>Drum <span class="k">&#216;{2 * drum_r:.0f}</span>, <span class="k">{drum_l:.0f} mm</span> out from the plate; teardrop flange &#216;{2 * flange_r:.0f} with its point to the lower left, blended into the drum with an R{fillet_flange:.0f} curve (R{fillet_plate:.0f} at the plate).</li>
 <li>Tesla T recessed <span class="k">{logo_depth:.0f} mm</span> into the flange face, <span class="k">{logo_h:.0f} mm</span> tall (57% of the round part, as on the sample), centred on the drum axis, from the official emblem artwork.</li>
-<li>Wand <span class="k">{wand_down:.0f}&#176; down</span> and <span class="k">{wand_lean:.0f}&#176; off the wall</span>; the wand sits at the far end of the drum, {mouth_z:.0f} mm out from the wall at the mouth, so it is hooked in last, outside the cable.</li>
+<li>Wand <span class="k">{wand_down:.0f}&#176; down</span> and <span class="k">{wand_lean:.0f}&#176; off the wall</span>; the mouth is {mouth_z:.0f} mm out from the wall, so the wand is hooked in last, outside the cable. The grip clears the wall by about 25 mm where it starts, 36 mm at its middle and 52 mm at its end.</li>
+<li>Cleat depth: the cleat's holding wall is <span class="k">{cleat_depth:.2f} mm (1.25 in)</span> from the opening, measured along the cleat's wall. That seats the whole nose and the glossy housing behind it inside the drum; the cavity's deepest corner comes within {behind:.0f} mm of the wall, into the {plate_t:.0f} mm plate, and the top of the mouth runs about 5 mm up the blend under the flange.</li>
 <li>Cavity: the connector profile plus {clear:.1f} mm; notch side down, button side up. Cleat {cleat_w:.0f} mm wide, {cleat_proud:.1f} mm proud, on the lower wall, with a 10&#176; hook face so the hanging weight pulls the nose down onto it. Roof relieved {roof_relief:.0f} mm for insertion, tight over the tip so the handle's weight cannot lever the tip up.</li>
 <li>Cable: hangs in loops over the top of the drum, as on the sample; {drum_straight:.0f} mm of straight drum between the two blends, room for three &#216;14.5 loops side by side, so the 18 ft cable (about six loops) stacks two deep.</li>
 </ul>
@@ -94,7 +94,8 @@ code{{font-size:.9em}}
 
 <h2>Open</h2>
 <ul>
-<li>The 20&#176; lean is my choice; say if the grip should sit further off the wall.</li>
+<li>Lean: 15&#176;, down from 20&#176;. With the cleat 1.25 in deep the cavity is 62 mm tall inside the drum at 15&#176; and 69 mm at 20&#176;, and the 75 mm drum has 62 mm between the plate and the flange. Keeping 20&#176; would need a drum of about 83 mm.</li>
+<li>Past the end of Tesla's housing CAD (48 mm from the tip) the grip is not modelled; the cavity there has 1.5 mm extra room and flares. The coupon will show whether your grip clears it.</li>
 <li>Printing: plate down on the bed. The cavity roof and the ring under the flange need support material (the X2D's support nozzle); everything else prints clean.</li>
 <li>Next: print the coupon, try the handle on it (insertion over the cleat, hanging, lift-off), then the full part.</li>
 </ul>

@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: v4 2026-09-17 (drum 75, Tesla T recessed in the flange, fit coupon sliced); coupon-print.3mf ready to print, 1 h 32 min; awaiting the fit result
+status: v5 2026-09-17 (drum 75, Tesla T, cleat 1.25 in from the opening, lean 15); coupon-print.3mf ready to print, 2 h 13 min; awaiting the fit result
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -14,7 +14,7 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
 
 - Handle: Tesla Wall Connector Gen 3 (AC, 48A), 18 ft (5.5 m) cable.
 - Form, to mimic Brian's sample (photos in `images/`): a cylinder (drum) perpendicular to the wall on a square backing plate with four screw holes; a teardrop front flange; the cable wraps around the drum.
-- The charge wand comes out of the drum's RIGHT side, angled 45 degrees DOWN (front view). It must also lean AWAY from the wall so the grip and cable boot clear the wall (Brian: "the charge wand would hit the wall"); working value 20 degrees out, adjustable.
+- The charge wand comes out of the drum's RIGHT side, angled 45 degrees DOWN (front view). It must also lean AWAY from the wall so the grip and cable boot clear the wall (Brian: "the charge wand would hit the wall"); working value 20 degrees out, adjustable; 15 degrees since v5, see the cleat depth decision below.
 - The nose cavity is cut to Tesla's connector profile plus 0.5 mm; the sample's opening was "much too large for the adapter".
 - Retention: a FIXED cleat in the connector's lock notch, NO spring tab, and the cleat sits on the DOWNWARD (lower) wall of the cavity so gravity seats the nose on it. Not on the back (wall-side) wall. The notch therefore faces down and the button faces up along the wand. The cavity roof is relieved so the nose can be lifted over the cleat on the way in, but stays tight over the last few mm at the tip so the handle's weight cannot lever the tip up and lift the notch off the cleat.
 - Tooling: Brian asked for OpenSCAD for this design (2026-09-17), not build123d; render views from the real model, do not hand-draw plans.
@@ -22,10 +22,14 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
 - Drum 75 mm long (Brian, 2026-09-17, down from 120); the wand stays at the far end. The cable hangs in loops over the top of the drum as on the sample (39 mm of straight drum between the blends), it is not wound under the wand.
 - Tesla T recessed 1 mm into the flange face, 70 mm tall, centred on the drum axis: 57% of the round part, as measured on the sample photos. Official emblem artwork (`reference/tesla-t.svg`, Wikimedia `Tesla_Motors.svg` with the wordmark removed, PD-textlogo), never rebuilt from primitives.
 
+- Cleat depth (Brian, 2026-09-17): the cleat's holding wall is 1.25 in (31.75 mm) from the opening, measured along the cleat's wall. Tesla's CAD agrees with that number: the notch's holding wall to the end of the glossy housing is 31.2 mm, so the whole housing sits inside and the grip starts at the opening, as in the sample photos. The cavity behind the nose shoulder is lofted from Tesla's own housing sections (`bell_sections.scad`, `pipeline/bell_sections.py`); past the end of that CAD (48.4 mm from the tip) the grip is not modelled, so the cavity gets 1.5 mm extra and flares. The roof relief grows from 4 to 6.5 mm toward the mouth.
+- Lean 15 degrees, down from 20 (my parameter; Brian's two numbers, drum 75 and cleat 1.25 in, were kept). The deeper cavity is 62 mm tall inside the drum at 15 degrees and 69 mm at 20; the 75 mm drum has 62 mm between 3 mm off the wall and the flange blend. At 15 degrees the cavity's deepest corner leaves 3 mm of the 5 mm plate, the mouth top runs 5 mm up the flange blend (6.7 mm under the flange), and the grip clears the wall by 25 / 36 / 52 mm (start / middle / end). 20 degrees would need a drum of about 83 mm. `pipeline/zbudget.py` measures all of this from the real cavity; rerun it after changing lean, cleat depth or drum length.
+
 ## Files (2026-09-17)
 
 - `holder.scad` (+ `nose_outline.scad`): the model; `part="coupon"` gives the fit coupon. `render.sh` renders `images/scad/*.png`; `renders_page.py` builds `plan.html` (published as the "NACS Holster Plan" artifact).
-- `coupon.stl`, `coupon-print.3mf`, `coupon-slice.json`: fit coupon, 54 x 55 x 60 mm, the cavity, cleat and mouth with 3 mm walls on a 0.9 mm slice of the plate, print orientation unchanged. Real slice: 1 h 32 min, 53 g (49 g PETG, 4 g support), 17 g of it prime tower.
+- `coupon.stl`, `coupon-print.3mf`, `coupon-slice.json`: fit coupon, 70 x 68 x 66 mm, the cavity, cleat and mouth with 3 mm walls on a 0.9 mm base under the cavity's deepest corner, print orientation unchanged. Real slice (v5, deep cavity): 2 h 13 min, 74 g (68 g PETG including the prime tower, 6 g support). The v4 shallow-cavity coupon was 1 h 32 min, 53 g.
+- Renders use `--render`, not `--preview`: in preview the docked handle's clip plane paints over the holder's whole cut face in section views. `part="clash"` intersects the docked handle with the holder and must come out empty (checked: 0 mm3).
 - `pipeline/make_coupon_3mf.py`: X2D 0.6 nozzle, 0.30mm Standard, Bambu PETG Basic on nozzle 1, Bambu Support For PLA/PETG on nozzle 2 as the support interface, tree supports with Bambu's recommended parameters for that pairing. Lessons baked in: the CLI writes one extruder variant per filament, so every per-variant filament key is expanded to filaments x 6 variants like a Studio-saved file; flush matrix = filaments^2 x len(flush_multiplier) with one multiplier per extruder; the CLI's default prime tower position (165, 236) is off the bed.
 
 ## Sources
