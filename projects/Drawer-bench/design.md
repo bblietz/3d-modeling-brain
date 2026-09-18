@@ -1,6 +1,6 @@
 ---
 name: drawer-bench-design
-description: Approved design for the maple post-and-panel drawer bench (kitchen bench), provisional dimensions pending site and Boos island measurements
+description: Approved design for the maple post-and-panel drawer bench (kitchen bench); overall footprint and height measured 2026-09-17, top thickness/overhang/profile still pending the Boos island measurement
 created: 2026-08-24
 status: cad-built, provisional dimensions, resolutions pending Brian's review
 ---
@@ -16,8 +16,8 @@ with the family's John Boos block island.
 
 | Input | Provisional value | Becomes final when |
 |---|---|---|
-| Overall top size | 36 x 24 in (914.4 x 609.6 mm) | the space is measured |
-| Overall height | 20 in (508 mm) | same |
+| Overall top size | **40 x 24 in (1016 x 609.6 mm), measured (Brian, 2026-09-17)** | done |
+| Overall height (floor to top surface) | **19-5/8 in (498.475 mm), measured (Brian, 2026-09-17)** | done |
 | Top thickness | 1-3/4 in (44.45 mm) | the Boos island is measured |
 | Top overhang past the posts | 1-1/4 in (31.75 mm) per side | same |
 | Top edge profile | unknown (square / eased / bullnose / chamfer) | same |
@@ -25,9 +25,12 @@ with the family's John Boos block island.
 | 1/2 ply actual thickness | 12.0 mm | measured at cut time |
 | Undermount slide | 18 in drawer class, Blum 563H4570B (471 mm runner) | purchased slide's sheet |
 
-Convention locked: 36 x 24 is the TOP; the posts sit inside the top by
-the overhang (footprint 33-1/2 x 21-1/2 in, drawer opening between posts
-27-1/2 in at the provisional numbers).
+Convention locked: 40 x 24 is the TOP; the posts sit inside the top by
+the overhang (footprint 37-1/2 x 21-1/2 in, drawer opening between posts
+31-1/2 in at the current numbers; top thickness and overhang are still
+provisional, so the footprint and opening will move slightly once the
+Boos island is measured, but the overall 40 x 24 x 19-5/8 envelope will
+not).
 
 ## Structure (load path: top -> posts -> floor)
 
@@ -61,9 +64,13 @@ the overhang (footprint 33-1/2 x 21-1/2 in, drawer opening between posts
   behind the post faces, 1/8 in reveal to each post, 1/4 in reveal
   between them, 3/4 in shadow gap at the floor.
 - Front zone = post height minus 1/8 in under the top minus the floor
-  gap = 17-3/8 in provisional; split 1:2 after the mid reveal: top front
-  5-3/4 in, bottom front 11-3/8 in. Width = opening minus 1/4 in
-  (27-1/4 in provisional). Grain along the length.
+  gap = 17 in exactly at the measured 19-5/8 in overall height (was
+  17-3/8 in at the original 20 in); split ~1:2 after the mid reveal:
+  top front 5-5/8 in, bottom front 11-1/8 in (was 5-3/4 / 11-3/8 - same
+  ~1.98:1 ratio, re-rounded to the nearest 1/8 in for the smaller zone;
+  see "Resolutions from the CAD," 2026-09-17). Width = opening minus
+  1/4 in (31-1/4 in at the measured 40 in top width, was 27-1/4 in).
+  Grain along the length.
 - Pulls undecided; fronts are modeled blank (routed finger pull or
   hardware later, no other part changes).
 
@@ -188,6 +195,18 @@ open for Brian's review (change the constant, re-run the file).
   ply): supported only at the post ends, fine as a dust-panel detail but
   fragile to machine. Lowering the groove stop to 1 in would give a
   20 mm lip; owner's call.
+- **`BOX_TOP_H`/`BOX_BOT_H` were hard-coded, not derived** (2026-09-17,
+  found when the measured overall height shrank the front zone and, with
+  it, both drawer-box openings): their own comments already claimed
+  "Blum maximum (opening minus 20 mm)," but the values were locked
+  constants computed once for the original 20 in height, not a formula.
+  Re-running after the height change left only 0.29 mm of the required
+  6 mm top clearance on the bottom box - the model's own assert caught
+  it immediately. Fixed by computing both from the rail positions
+  (`RAIL_TOP_Z0`/`RAIL_MID_Z0`/`RAIL_BOT_Z0`, already derived above them)
+  minus `UM_BOTTOM_CLEAR + UM_TOP_CLEAR`, so any future change to the
+  overall height or the front-zone split keeps the box heights correct
+  automatically instead of needing a matching manual fix every time.
 
 ## Assembly order (walked in the CAD; every part enters by a straight sideways move)
 

@@ -53,8 +53,11 @@ reviewed, not built; update with measured fits after the build.
 
 ## Decisions locked (promoted from the handoff and design.md)
 
-- 36 x 24 is the TOP; posts inset by the 1-1/4 in overhang (footprint
-  33-1/2 x 21-1/2, opening 27-1/2).
+- 40 x 24 is the TOP (measured, Brian 2026-09-17; was 36 x 24
+  provisional), floor to top surface 19-5/8 in (was 20 in); posts inset
+  by the 1-1/4 in overhang, itself still provisional pending the Boos
+  island (footprint 37-1/2 x 21-1/2, opening 31-1/2 at the current
+  numbers).
 - 3 in posts glued from 8/4, 3/8 chamfer, no taper; 3/4 ply sides and
   back 1/2 in behind the post faces in T18 x 3/8 grooves stopped 1-1/2 in
   above the floor; hidden front frame 1 in behind the post faces, rails
@@ -62,13 +65,20 @@ reviewed, not built; update with measured fits after the build.
   stopped mortises per front post; rear top rail 1-1/2 in in the back
   groove line above a 15-1/4 in back panel; 1/2 ply bottom, top face
   2-1/4 in above the floor, in 1/4 in grooves (rabbet at the front rail).
-- Fronts 3/4 in maple, 1/4 in behind the post faces, 5-3/4 over 11-3/8
-  with 1/8 side, 1/4 mid, 1/8 top reveals and a 3/4 in floor gap.
-- 18 in undermount slides (Blum 563H4570B, 471 mm runner), boxes
-  3-11/16 and 8-11/16 in tall at Blum's maximum, outer width opening
-  minus 18 mm (inside = opening minus 42), 14 mm bottom clearance, 6 mm
-  top clearance, 12.7 mm bottom recess, runner front screws into the
-  posts between the mortises, rear brackets on the back panel.
+- Fronts 3/4 in maple, 1/4 in behind the post faces, 5-5/8 over 11-1/8
+  (was 5-3/4 / 11-3/8 before the 2026-09-17 height measurement; the
+  front zone is re-split ~1:2 by that rule, not scaled, whenever the
+  overall height changes) with 1/8 side, 1/4 mid, 1/8 top reveals and a
+  3/4 in floor gap.
+- 18 in undermount slides (Blum 563H4570B, 471 mm runner), box heights
+  computed from the rail-to-rail openings minus Blum's clearances (14 mm
+  bottom, 6 mm top) rather than fixed - a hard-coded pair of "Blum
+  maximum" constants left over from the original opening sizes silently
+  went stale the first time the front-zone split changed (see
+  drawer-bench-design's "Resolutions from the CAD", 2026-09-17); outer
+  width opening minus 18 mm (inside = opening minus 42), 12.7 mm bottom
+  recess, runner front screws into the posts between the mortises, rear
+  brackets on the back panel.
 - Butcherblock top matched to the Boos island, figure-8 fasteners, no glue.
 - Pulls and finish out of scope until the build.
 

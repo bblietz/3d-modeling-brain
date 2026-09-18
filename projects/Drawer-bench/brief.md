@@ -25,8 +25,9 @@ Face-frame bench with drawers. Furniture-grade sibling of
 ## Open questions
 
 - Leg/corner style (visual companion session in progress).
-- Final dimensions and the space the bench must fit (user calls it the
-  kitchen bench; sits with the Boos island; measure when home).
+- Top thickness, overhang and edge profile: still pending the Boos
+  island measurement (overall top footprint and height are now locked,
+  see Decisions locked 2026-09-17).
 - Drawer count/layout, slide hardware.
 - Seating load, what the drawers hold.
 
@@ -81,6 +82,29 @@ because option (a) leaves 19-1/4 in of interior depth.
   (user picked option B, 2026-08-24). Contents/location not stated;
   assuming general household storage, bench is sat on (~300 lb),
   undermount soft-close slides per [[cabinet-bench-brief]].
+- Overall size measured (Brian, 2026-09-17): top 40 x 24 in (was the
+  36 x 24 provisional footprint), top surface 19-5/8 in above the floor
+  (was 20 in overall height). Top thickness/overhang stay provisional
+  (1-3/4 in / 1-1/4 in) until the Boos island is measured, so post
+  height is still `H - TOP_T`, not yet independently fixed.
+  Consequences worked through in the CAD, not just scaled: the front
+  zone (post height minus the 1/8 in top reveal minus the 3/4 in floor
+  gap) shrank from 17-3/8 to 17 in exactly; re-split ~1:2 the same way
+  as the original design (design.md, "Front") gives drawer fronts
+  5-5/8 in (top) and 11-1/8 in (bottom), the same ~1.98:1 ratio as the
+  original 5-3/4 / 11-3/8. That re-split moves the mid rail, which
+  shrinks both drawer-box openings slightly; `BOX_TOP_H`/`BOX_BOT_H`
+  were hard-coded "Blum maximum" constants left over from the old
+  opening sizes, so the first re-run failed a clearance assert (0.29 mm
+  of the required 6 mm left above the bottom box) - fixed by turning
+  them into a formula (opening minus the 14 mm/6 mm Blum clearances),
+  the same rule their own comments already claimed. New box heights:
+  3.588 in (top), 8.463 in (bottom) - not rounded to a nice fraction,
+  since (unlike the fronts) these were never a show-face/aesthetic
+  dimension, just whatever the opening allows. Width change (36 to
+  40 in) only widens everything between the posts; it does not touch
+  the front-to-back slide-depth fit, still 515.4 mm inside 18 in slides'
+  502.9-544.9 mm window. Re-exported and re-pushed to the viewer.
 
 ## Build log (2026-08-24)
 

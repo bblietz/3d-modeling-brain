@@ -15,9 +15,9 @@ from build123d import *
 IN = 25.4
 
 # --- Provisional inputs (design.md table; MEASURE before cutting) ----------
-TOP_W = 36 * IN            # 914.4  the TOP is 36 x 24 (locked convention)
+TOP_W = 40 * IN            # 1016.0  the TOP is 40 x 24 (locked convention; measured, Brian 2026-09-17)
 TOP_D = 24 * IN            # 609.6
-H = 20 * IN                # 508.0  overall height
+H = (19 + 5 / 8) * IN      # 498.475  overall height, top surface to floor (measured, Brian 2026-09-17)
 TOP_T = 1.75 * IN          # 44.45  Boos island match, measure
 OH = 1.25 * IN             # 31.75  top overhang past the posts, measure
 T18 = 18.0                 # 3/4 ply actual
@@ -43,8 +43,8 @@ FLOOR_GAP = 0.75 * IN      # 19.05  shadow gap under the bottom front
 REV_TOP = 0.125 * IN       # 3.175  under the top
 REV_MID = 0.25 * IN        # 6.35   between the fronts
 REV_SIDE = 0.125 * IN      # 3.175  front to post
-FRONT_TOP_H = 5.75 * IN    # 146.05
-FRONT_BOT_H = 11.375 * IN  # 288.925
+FRONT_TOP_H = 5.625 * IN   # 142.875  front zone re-split ~1:2 for the new height (design.md rule)
+FRONT_BOT_H = 11.125 * IN  # 282.575  same ~1.98:1 ratio as the original 5-3/4 / 11-3/8
 BOT_GROOVE = 0.25 * IN     # 6.35   bottom-panel groove depth
 BOT_TOP_Z = 2.25 * IN      # 57.15  top face of the bottom panel
 DADO = 0.25 * IN           # 6.35   drawer-box rabbets and bottom grooves
@@ -67,8 +67,6 @@ UM_SCREW_LEN = 16.0        # #6 x 5/8 screws into the post's inner face
 UM_FRONT_GAP = 1.5         # between the fronts' back faces and the frame; the runner stop closes the drawer
 UM_HOOK_NOTCH_W, UM_HOOK_NOTCH_H = 35.0, 13.0   # rear-hook notches in the back's bottom corners
 UM_HOOK_BORE = (6.0, 10.0, 7.0, 24.0)   # dia, depth from the rear face, from the side's inner face, above the back's bottom edge
-BOX_TOP_H = 3.6875 * IN    # 93.66  Blum maximum (4-1/2 in opening minus 20 mm)
-BOX_BOT_H = 8.6875 * IN    # 220.66 Blum maximum (9-1/2 in opening minus 20 mm)
 FRAME_SETBACK = FRONT_SETBACK + FRONT_T + UM_FRONT_GAP   # 26.9 front frame face behind the post face
 
 # --- Derived ---------------------------------------------------------------
@@ -86,6 +84,11 @@ RAIL_BOT_Z0 = FLOOR_GAP                                   # 19.05
 RAIL_MID_Z0 = REV_MID_Z0 + REV_MID / 2 - RAIL_MID_H / 2   # 298.45 centered on the reveal
 RAIL_TOP_Z0 = POST_H - RAIL_TOP_H                         # 438.15
 RAIL_ZH = ((RAIL_BOT_Z0, RAIL_BOT_H), (RAIL_MID_Z0, RAIL_MID_H), (RAIL_TOP_Z0, RAIL_TOP_H))
+# Blum's maximum box height is each rail-to-rail opening minus the bottom and
+# top clearances; computed here (not a locked constant) since it depends on
+# the rail positions just derived above, which move with FRONT_BOT_H/FRONT_TOP_H.
+BOX_TOP_H = (RAIL_TOP_Z0 - (RAIL_MID_Z0 + RAIL_MID_H)) - (UM_BOTTOM_CLEAR + UM_TOP_CLEAR)
+BOX_BOT_H = (RAIL_MID_Z0 - (RAIL_BOT_Z0 + RAIL_BOT_H)) - (UM_BOTTOM_CLEAR + UM_TOP_CLEAR)
 BOT_Z0 = BOT_TOP_Z - T12                     # 45.15 bottom panel underside
 BOT_X0 = X0 + SETBACK + T18 - BOT_GROOVE     # into the side-panel groove
 BOT_W = FOOT_W - 2 * (SETBACK + T18 - BOT_GROOVE)   # 802.2
@@ -478,7 +481,7 @@ if os.environ.get("EXPORT"):
 
     PROJ = "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Drawer-bench"
     write_cut_list(PARTS, f"{PROJ}/cutlist.md", csv_path=f"{PROJ}/cutlist.csv",
-                   title="Drawer Bench 36x24x20 (provisional)")
+                   title="Drawer Bench 40x24x19-5/8 (provisional)")
     export_step(assembly, f"{PROJ}/drawer_bench.step")
     print("exported cutlist + step")
 
