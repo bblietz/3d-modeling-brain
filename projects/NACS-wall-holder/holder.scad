@@ -35,9 +35,11 @@ cleat_a = 18.3; cleat_c = 20.3; cleat_b = 22.5;   // load face, crown end, lead-
 undercut = 10;
 mouth = 33;
 plate_w = 120; plate_t = 5; plate_r = 8; hole_in = 10; hole_d = 5; csk_d = 10;
-drum_r = 50; drum_l = 100;                 // plate front to flange front
-flange_t = 8; flange_r = 62; flange_point = 84; flare_h = 15;
-mouth_z = 41;                              // mouth centre out from the wall
+drum_r = 50; drum_l = 120;                 // plate front to flange front
+flange_t = 8; flange_point = 84; point_angle = -135;   // teardrop point to the lower left, clear of the wand
+fillet_flange = 12;                        // concave blend from the drum into the flange face
+fillet_plate = 8;                          // concave blend from the drum into the plate
+flange_r = drum_r + fillet_flange;
 
 half = nose_h / 2;
 floor_y = -(half + clear);
@@ -46,6 +48,8 @@ d = [cos(wand_lean) * cos(-wand_down), cos(wand_lean) * sin(-wand_down), sin(wan
 v0 = [0, 1, 0] - ([0, 1, 0] * d) * d;
 v = v0 / norm(v0);                         // button side, up along the wand
 w = cross(d, v);                           // across the wand, toward the flange
+// the wand sits as far from the wall as the drum allows, so the cable is wound first and the wand hooked in outside the coil
+mouth_z = total_l - flange_t - fillet_flange - 8 - (half + clear) * w[2];   // 8 mm keeps the grip clear of the flange rim
 M = [drum_r * cos(-wand_down), drum_r * sin(-wand_down), mouth_z];   // mouth centre, on the drum surface
 T = M - mouth * d;                                                     // cavity floor centre
 
@@ -85,13 +89,19 @@ module nose() {
     }
 }
 
+module drum_profile() {
+    zf = total_l - flange_t;
+    a = [for (t = [0 : 5 : 90]) [drum_r + fillet_plate - fillet_plate * sin(t), plate_t + fillet_plate - fillet_plate * cos(t)]];
+    b = [for (t = [0 : 5 : 90]) [drum_r + fillet_flange - fillet_flange * cos(t), zf - fillet_flange + fillet_flange * sin(t)]];
+    polygon(concat([[0, plate_t - 0.01]], a, b, [[drum_r + fillet_flange, zf + 0.01], [0, zf + 0.01]]));
+}
+
 module body() {
     linear_extrude(plate_t) offset(r = plate_r) offset(delta = -plate_r) square(plate_w, center = true);
-    translate([0, 0, plate_t - 0.01]) cylinder(h = total_l - flange_t - flare_h - plate_t + 0.02, r = drum_r);
-    translate([0, 0, total_l - flange_t - flare_h]) cylinder(h = flare_h + 0.01, r1 = drum_r, r2 = flange_r);
+    rotate_extrude() drum_profile();
     translate([0, 0, total_l - flange_t]) linear_extrude(flange_t) hull() {
         circle(r = flange_r);
-        translate(flange_point * [cos(-wand_down), sin(-wand_down)]) circle(r = 6);
+        translate(flange_point * [cos(point_angle), sin(point_angle)]) circle(r = 6);
     }
 }
 

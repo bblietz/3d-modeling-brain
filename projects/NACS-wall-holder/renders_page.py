@@ -12,6 +12,8 @@ SCAD = open(os.path.join(HERE, "holder.scad")).read()
 
 
 def const(name):
+    if name == "mouth_z":
+        return const("plate_t") + const("drum_l") - const("flange_t") - const("fillet_flange") - 5 - (35.52 / 2 + const("clear")) * 0.889
     return float(re.search(rf"(?:^|;)\s*{name}\s*=\s*([-0-9.]+)", SCAD, re.M).group(1))
 
 
@@ -21,7 +23,8 @@ def img(name):
 
 
 plate_w, plate_t, drum_r, drum_l = const("plate_w"), const("plate_t"), const("drum_r"), const("drum_l")
-flange_r, flange_t, flare_h, mouth_z = const("flange_r"), const("flange_t"), const("flare_h"), const("mouth_z")
+flange_t, fillet_flange, mouth_z, fillet_plate = const("flange_t"), const("fillet_flange"), const("mouth_z"), const("fillet_plate")
+flange_r = drum_r + fillet_flange
 wand_down, wand_lean, clear = const("wand_down"), const("wand_lean"), const("clear")
 cleat_proud, cleat_w, roof_relief = const("cleat_proud"), const("cleat_w"), const("roof_relief")
 
@@ -29,7 +32,7 @@ views = [
     ("iso", "From the front right. The wand comes out of the drum's right side, 45&#176; down, and leans 20&#176; off the wall."),
     ("front", "Facing the wall. The flange hides the drum; the four screw holes sit outside it."),
     ("right", "From the right. The wand leans away from the wall, so the grip and cable boot clear it."),
-    ("below", "From below. The mouth in the drum's side, and the flange's 45&#176; flare underneath (prints without support)."),
+    ("below", "From below. The mouth in the drum's side, and the curved blend under the flange."),
     ("section-cleat", "Cut along the wand, seen from the front left. The nose (blue ghost) hangs in the cavity with the notch side down; the roof steps up 4 mm toward the mouth so the nose can be lifted over the cleat on the way in."),
     ("section-notch", "Cut across the notch, seen from the grip end. The cleat sits in the connector's own lock notch with room on both sides."),
 ]
@@ -60,10 +63,10 @@ ul{{padding-left:20px}} li{{margin:4px 0}} .k{{color:var(--accent);font-weight:5
 <h2>What is set</h2>
 <ul>
 <li>Plate <span class="k">{plate_w:.0f} &#215; {plate_w:.0f} &#215; {plate_t:.0f} mm</span>, four countersunk holes for #8 screws, 10 mm in from the corners.</li>
-<li>Drum <span class="k">&#216;{2 * drum_r:.0f}</span>, <span class="k">{drum_l:.0f} mm</span> out from the plate; teardrop flange &#216;{2 * flange_r:.0f} with its point along the wand, on a {flare_h:.0f} mm 45&#176; flare.</li>
-<li>Wand <span class="k">{wand_down:.0f}&#176; down</span> and <span class="k">{wand_lean:.0f}&#176; off the wall</span>; the mouth is {mouth_z:.0f} mm out from the wall, so the grip end is about 65 mm off the wall.</li>
+<li>Drum <span class="k">&#216;{2 * drum_r:.0f}</span>, <span class="k">{drum_l:.0f} mm</span> out from the plate; teardrop flange teardrop flange &#216;{2 * flange_r:.0f} with its point along the wand#216;{2 * flange_r:.0f} with its point to the lower left, blended into the drum with an R{fillet_flange:.0f} curve (R{fillet_plate:.0f} at the plate).</li>
+<li>Wand <span class="k">{wand_down:.0f}&#176; down</span> and <span class="k">{wand_lean:.0f}&#176; off the wall</span>; the wand sits at the far end of the drum, {mouth_z:.0f} mm out from the wall at the mouth, so the cable is wound on the drum behind it and the wand is hooked in last, outside the coil.</li>
 <li>Cavity: the connector profile plus {clear:.1f} mm; notch side down, button side up. Cleat {cleat_w:.0f} mm wide, {cleat_proud:.1f} mm proud, on the lower wall, with a 10&#176; hook face so the hanging weight pulls the nose down onto it. Roof relieved {roof_relief:.0f} mm for insertion, tight over the tip so the handle's weight cannot lever the tip up.</li>
-<li>Cable: wraps the outer {drum_l - flange_t - flare_h - 57:.0f} mm of drum beside the wand, one turn per layer; the rest hangs in a loop off the flange, as on the sample.</li>
+<li>Cable: wraps the outer {mouth_z - 16 - 2 - 13:.0f} mm of drum between the plate and the wand, about three turns per layer; the rest hangs in a loop off the flange, as on the sample.</li>
 </ul>
 
 <h2>Open</h2>
