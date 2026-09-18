@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: brief - spec and CAD retrieved; next, extract nose and lock-notch geometry, then the design plan
+status: OpenSCAD model holder.scad built 2026-09-17 (drum, plate, 45 deg wand, cleat on the lower wall); awaiting Brian's review of the renders, then a fit coupon
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -10,12 +10,14 @@ tags: [x2d, nacs, tesla, wall-mount]
 
 Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector handle, with a cable wrap hook.
 
-## Decisions already locked (2026-09-16)
+## Decisions already locked (2026-09-17, supersedes the nose-down socket of 09-16)
 
-- Handle: Tesla Wall Connector Gen 3 (AC, 48A).
-- Docking: the handle goes in nose-down, angled, like a gas pump holster.
-- Retention: a FIXED cleat (rigid tab) inside the socket, NO spring tab. The opening is oversized so the plug nose can pass over the cleat on the way in, then settle so the cleat holds it; the nose-down angle lets gravity keep it seated. Brian 2026-09-16: "do not use a spring tab... the tab should be fixed and the opening should be big enough to fit over the tab".
-- Cable: include a cable wrap hook, sized for the 18 ft (5.5 m) Gen 3 cable.
+- Handle: Tesla Wall Connector Gen 3 (AC, 48A), 18 ft (5.5 m) cable.
+- Form, to mimic Brian's sample (photos in `images/`): a cylinder (drum) perpendicular to the wall on a square backing plate with four screw holes; a teardrop front flange; the cable wraps around the drum.
+- The charge wand comes out of the drum's RIGHT side, angled 45 degrees DOWN (front view). It must also lean AWAY from the wall so the grip and cable boot clear the wall (Brian: "the charge wand would hit the wall"); working value 20 degrees out, adjustable.
+- The nose cavity is cut to Tesla's connector profile plus 0.5 mm; the sample's opening was "much too large for the adapter".
+- Retention: a FIXED cleat in the connector's lock notch, NO spring tab, and the cleat sits on the DOWNWARD (lower) wall of the cavity so gravity seats the nose on it. Not on the back (wall-side) wall. The notch therefore faces down and the button faces up along the wand. The cavity roof is relieved so the nose can be lifted over the cleat on the way in, but stays tight over the last few mm at the tip so the handle's weight cannot lever the tip up and lift the notch off the cleat.
+- Tooling: Brian asked for OpenSCAD for this design (2026-09-17), not build123d; render views from the real model, do not hand-draw plans.
 - No geometry from the licensed Printables organizer (CC BY-NC-SA, [[NACS-organizer]]); it is a measurement reference only.
 
 ## Sources

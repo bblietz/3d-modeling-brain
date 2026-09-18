@@ -17,6 +17,7 @@ Before using or ruling out any tool, confirm it against this list. Never say a t
 
 - Python: the vault venv `.venv/bin/python` (3.12) has build123d, trimesh, matplotlib, shapely. The system `python3` does not.
 - Bambu Studio CLI: `~/.local/bin/bambu-studio` (wrapper for `~/Applications/BambuStudio_ubuntu24.04-v02.08.02.61.AppImage`). STL to Bambu 3MF: `--export-3mf <bare name> --outputdir <dir> --arrange 1 <stl>`, as in `projects/Build123d-trial/pipeline/make_print_3mf.py`.
+- OpenSCAD: `~/.local/bin/openscad` (AppImage 2026.01 nightly in `~/Applications`, Manifold backend). Headless: `openscad --backend=Manifold --preview --viewall --camera=ex,ey,ez,cx,cy,cz -o out.png file.scad`; STL with `-o out.stl`.
 - FreeCAD: `~/Applications/FreeCAD_1.1.3-Linux-x86_64-py311.appimage`, reached over MCP after `scripts/start-freecad-mcp.sh`. There is no `freecadcmd`, so `execute_code_headless` fails.
 - Before building a new approach, look for an existing script in `scripts/` or `projects/*/pipeline/`.
 
