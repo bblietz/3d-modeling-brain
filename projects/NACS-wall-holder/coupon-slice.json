@@ -1,9 +1,9 @@
 {
- "minutes": 91,
- "grams": 53.4,
+ "minutes": 89,
+ "grams": 53.7,
  "grams_per_filament": {
-  "1": 49.1,
-  "2": 4.2
+  "1": 50.2,
+  "2": 3.5
  },
- "layers": 199
+ "layers": 182
 }

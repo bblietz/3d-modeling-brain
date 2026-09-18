@@ -29,7 +29,9 @@ plate_w, plate_t, drum_r, drum_l = const("plate_w"), const("plate_t"), const("dr
 flange_t, fillet_flange, fillet_plate = const("flange_t"), const("fillet_flange"), const("fillet_plate")
 flange_r = drum_r + fillet_flange
 wand_down, wand_lean, clear = const("wand_down"), const("wand_lean"), const("clear")
-cleat_proud, cleat_w, roof_relief = const("cleat_proud"), const("cleat_w"), const("roof_relief")
+roof_relief, pocket_h, cleat_clear, undercut, tip_gap = const("roof_relief"), const("pocket_h"), const("cleat_clear"), const("undercut"), const("tip_gap")
+cleat_h = pocket_h - cleat_clear
+cleat_w_base, cleat_w_top = 2 * (5.78 - cleat_clear / 0.951), 2 * (5.10 - cleat_clear / 0.951)   # pocket half widths at the mouth and 3 mm up, less the clearance square to its 18 degree walls
 logo_h, logo_depth, coupon_wall = const("logo_h"), const("logo_depth"), const("coupon_wall")
 mouth_z, cleat_depth, behind = const("mouth_z"), const("cleat_depth"), const("behind")
 drum_straight = drum_l - fillet_plate - fillet_flange - flange_t
@@ -46,12 +48,13 @@ holder_views = [
     ("right", "From the right. The wand leans away from the wall, so the grip and cable boot clear it."),
     ("below", "From below. The mouth in the drum's side, and the curved blend under the flange."),
     ("section-cleat", f"Cut along the wand, seen from the front. The handle (grey) hangs with its lock notch on the cleat, whose holding wall is {cleat_depth:.2f} mm (1.25 in) in from the opening along the lower wall. The housing behind the nose sits inside too, in a cavity cut to Tesla's own sections. The roof steps up so the nose can be lifted over the cleat on the way in."),
-    ("section-notch", "Cut across the notch, seen from the grip end. The cleat sits in the connector's own lock notch with room on both sides; the band above the handle is the roof relief."),
+    ("cleat-detail", f"The cleat, close up, in the same cut. A ramp rises from the mouth side (lower right) to a sharp edge at the back, {cleat_h:.2f} mm above the floor, and the back face overhangs by {undercut:.0f}&#176;. The lock pocket's wall hangs on that edge, up near the pocket's base, so the pull of the hanging handle cannot ride it up and off."),
+    ("section-notch", f"Cut across the cleat, seen from the grip end. The cleat (green) is the lock pocket's own shape less {cleat_clear:.2f} mm: {cleat_w_base:.1f} mm wide at the floor, leaning in with the pocket's walls, domed on top like the pocket's base. The band above the handle is the roof relief."),
 ]
 coupon_views = [
-    ("coupon-iso", "The coupon as it prints, with the nose docked: the cavity, cleat and mouth with 3 mm of body around them, carried down to a thin slice of the plate."),
-    ("coupon-mouth", "The mouth end. The outside is the drum's own surface, so the lip the nose slides over is the real one."),
-    ("coupon-section", "Cut along the wand: the same nose cavity, tight roof, roof relief and cleat as the holder, with the shallow opening."),
+    ("coupon-iso", "The coupon as it prints, with the handle docked: the nose cavity and cleat with 3 mm of body around them, carried down to a thin base."),
+    ("coupon-mouth", "The open end is a flat cut just past the nose shoulder."),
+    ("coupon-section", "Cut along the wand: the same nose cavity, tight roof, roof relief and cleat as the holder, ending past the shoulder."),
 ]
 
 html = f"""<title>NACS Holster Plan</title>
@@ -84,13 +87,14 @@ code{{font-size:.9em}}
 <li>Tesla T recessed <span class="k">{logo_depth:.0f} mm</span> into the flange face, <span class="k">{logo_h:.0f} mm</span> tall (57% of the round part, as on the sample), centred on the drum axis, from the official emblem artwork.</li>
 <li>Wand <span class="k">{wand_down:.0f}&#176; down</span> and <span class="k">{wand_lean:.0f}&#176; off the wall</span>; the mouth is {mouth_z:.0f} mm out from the wall, so the wand is hooked in last, outside the cable. The grip clears the wall by about 25 mm where it starts, 36 mm at its middle and 52 mm at its end.</li>
 <li>Cleat depth: the cleat's holding wall is <span class="k">{cleat_depth:.2f} mm (1.25 in)</span> from the opening, measured along the cleat's wall. That seats the whole nose and the glossy housing behind it inside the drum; the cavity's deepest corner comes within {behind:.0f} mm of the wall, into the {plate_t:.0f} mm plate, and the top of the mouth runs about 5 mm up the blend under the flange.</li>
-<li>Cavity: the connector profile plus {clear:.1f} mm; notch side down, button side up. Cleat {cleat_w:.0f} mm wide, {cleat_proud:.1f} mm proud, on the lower wall, with a 10&#176; hook face so the hanging weight pulls the nose down onto it. Roof relieved {roof_relief:.0f} mm for insertion, tight over the tip so the handle's weight cannot lever the tip up.</li>
+<li>Cavity: the connector profile plus {clear:.1f} mm; notch side down, button side up. Roof relieved {roof_relief:.0f} mm for insertion, tight over the tip so the handle's weight cannot lever the tip up.</li>
+<li>Cleat: a wedge cut to Tesla's lock pocket (spec: 9.71 &#177;0.2 wide and 6.2 &#177;0.2 long at its base, 4 &#177;0.2 deep; in Tesla's CAD it opens to 11.6 wide at the mouth and has a domed base). <span class="k">{cleat_w_base:.1f} mm wide</span> at the floor narrowing to {cleat_w_top:.1f}, <span class="k">{cleat_h:.2f} mm tall</span>, ramp at 31&#176; from the mouth side up to a sharp edge at the back, back face overhanging {undercut:.0f}&#176;. The nose stops {tip_gap:.1f} mm short of the cavity's end wall when hanging; that is the travel for pushing the pocket past the edge so the nose drops onto the cleat.</li>
 <li>Cable: hangs in loops over the top of the drum, as on the sample; {drum_straight:.0f} mm of straight drum between the two blends, room for three &#216;14.5 loops side by side, so the 18 ft cable (about six loops) stacks two deep.</li>
 </ul>
 
 <h2>Fit coupon</h2>
-<p>The coupon is the one from before the 1.25 in cleat depth: the nose cavity, cleat and a shallow opening, printed the way the holder prints (plate on the bed, tree supports in the cavity roof with Bambu Support For PLA/PETG on the second nozzle). Print time <span class="k">{coupon_time}</span></p>
-<p>It proves the parts that did not change: the nose profile and its 0.5 mm clearance, the cleat in the lock notch, the tight roof over the tip, and lifting the nose over the cleat. The deeper opening gets no coupon of its own (Brian, 2026-09-17) and is first tried on the full part.</p>
+<p>The coupon is the holder's nose cavity and the new cleat, cut off just past the nose shoulder, printed the way the holder prints (plate on the bed, tree supports in the cavity roof with Bambu Support For PLA/PETG on the second nozzle). Print time <span class="k">{coupon_time}</span></p>
+<p>It proves the nose profile and its 0.5 mm clearance, the cleat in the lock pocket, the tight roof over the tip, and lifting the nose over the cleat. The deeper opening gets no coupon of its own (Brian, 2026-09-17) and is first tried on the full part.</p>
 <div class="grid">{figs(coupon_views)}</div>
 
 <h2>Open</h2>

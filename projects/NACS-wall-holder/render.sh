@@ -10,7 +10,7 @@ C="--backend=Manifold --colorscheme=Tomorrow --imgsize=1100,850 --render --viewa
 # true renders (--render): in preview the docked handle's clip plane paints over the holder's whole cut face
 # section cameras come from the model: centred mid-cavity, square to the cut along the wand, and straight down the wand from the grip end
 $O -o images/scad/.cam.echo "$@" holder.scad >/dev/null 2>&1
-read -r CEN ROTZ DOWN <<<"$(python3 - <<'PY'
+read -r CEN ROTZ DOWN CLEAT <<<"$(python3 - <<'PY'
 import math, re
 e = open("images/scad/.cam.echo").read()
 vec = lambda k: [float(x) for x in re.search(k + r"=\[([^\]]*)\]", e).group(1).split(",")]
@@ -19,7 +19,9 @@ mouth = float(re.search(r"mouth depth=([-0-9.]+)", e).group(1))
 c = [T[i] + 0.5 * mouth * d[i] for i in range(3)]
 dd = (d[0], -d[2], d[1])                                   # display frame: (x, -z, y)
 rx = math.degrees(math.acos(dd[2])); rz = math.degrees(math.atan2(dd[0], -dd[1]))
-print(f"{c[0]:.0f},{-c[2]:.0f},{c[1]:.0f}", f"{-math.degrees(math.atan2(-w[0], w[2])):.1f}", f"{rx:.1f},0,{rz:.1f}")
+v = vec(" v"); ca, fy = float(re.search(r"edge at ([-0-9.]+)", e).group(1)) + 2.5, -(35.52 / 2 + 0.5) + 2
+k = [T[i] + ca * d[i] + fy * v[i] for i in range(3)]
+print(f"{c[0]:.0f},{-c[2]:.0f},{c[1]:.0f}", f"{-math.degrees(math.atan2(-w[0], w[2])):.1f}", f"{rx:.1f},0,{rz:.1f}", f"{k[0]:.1f},{-k[2]:.1f},{k[1]:.1f}")
 PY
 )"
 rm -f images/scad/.cam.echo
@@ -30,6 +32,9 @@ $O -o images/scad/iso.png --camera=0,0,0,60,0,30,500 $C "$@" holder.scad
 $O -o images/scad/below.png --camera=0,0,0,115,0,30,500 $C "$@" holder.scad
 $O -o images/scad/section-cleat.png --projection=o --camera=$CEN,90,0,$ROTZ,250 $S -D section=1 "$@" holder.scad
 $O -o images/scad/section-notch.png --projection=o --camera=$CEN,$DOWN,190 $S -D section=2 "$@" holder.scad
-# The coupon-*.png views are frozen at the printed coupon (commit cb42b65, the shallow cavity from before the 1.25 in cleat depth);
-# they are not re-rendered here because part="coupon" now gives the deep-cavity version.
+$O -o images/scad/cleat-detail.png --projection=o --camera=$CLEAT,90,0,$ROTZ,48 $S -D section=1 "$@" holder.scad
+# coupon views are in print orientation (display=false: bed = XY, +Z up)
+$O -o images/scad/coupon-iso.png --camera=0,0,0,55,0,25,250 --viewall $S -D display=false -D 'part="coupon"' "$@" holder.scad
+$O -o images/scad/coupon-mouth.png --camera=0,0,0,65,0,125,250 --viewall $S -D display=false -D 'part="coupon"' -D show_nose=false "$@" holder.scad
+$O -o images/scad/coupon-section.png --projection=o --camera=$CEN,90,0,$ROTZ,260 $S -D 'part="coupon"' -D section=1 "$@" holder.scad
 ls images/scad/*.png | sed 's#.*/##' | tr '\n' ' '; echo
