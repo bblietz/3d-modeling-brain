@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: v6 2026-09-17 (wedge cleat cut to the lock pocket, drum 75, Tesla T, cleat 1.25 in from the opening, lean 15); new coupon-print.3mf ready, 1 h 29 min; awaiting the fit result, then the full-part print file
+status: v6 2026-09-18 (wedge cleat cut to the lock pocket; cleat_scale 1.5 variant built on Brian's request but it does not fit Tesla's CAD pocket); coupon-print.3mf (fits) and coupon-long-print.3mf (50% longer) both ready; awaiting Brian's pocket measurement or fit result
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -30,6 +30,8 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
 - Cleat v6 (Brian, 2026-09-17, after the first coupon): "the cleat is too small": wider, taller, and "it should angle upward more and act like a wedge with a sharp edge on the top of the back so it can catch the wand better". Now a wedge cut to the lock pocket: the pocket's own cross-section from Tesla's CAD less 0.45 mm (10.6 mm wide at the floor narrowing to 9.3 at 3 mm up, domed top), 3.57 mm tall at the edge (pocket 4.02 at the centre), a 31 degree ramp from the mouth side up to a sharp edge at the back, and a back face that overhangs 15 degrees so the pocket's wall bears on the edge near the pocket's base. Spec p25: pocket 9.71 +-0.2 wide and 6.2 +-0.2 long AT THE BASE, 4 +-0.2 deep, 3 degree max draft; Tesla's CAD shows 11.56 wide at the mouth with 18 degree side walls across the wand, and a domed base (4.02 at the centre, 3.6 at 4 mm off centre).
 - Flaw found in the v1 to v5 cleat: its "10 degree undercut" was built leaning the wrong way (top set back 0.39 mm toward the mouth), a draft, not a hook, so the pocket's mouth edge bore on the cleat's base and the pull tended to cam the nose up. Small (8 x 2.2 mm) and drafted: it did not catch. Fixed in v6; check the sign of any hook angle in the close-up section render (`images/scad/cleat-detail.png`).
 - With the taller cleat: nose tip stops 2.5 mm short of the end wall when hanging (was 1.17), which is the over-travel needed to get the pocket past the edge; roof relief 5 mm (was 4) and 3 mm more by the housing end, so the nose can ride over a 3.57 mm edge with its tip already under the tight roof (about 7 degrees of grip-up tilt). Lever-off check: pivoting on the floor lip the tip can rise 1.8 mm before the tight roof stops it, which lifts the pocket 1.2 mm, leaving 2.3 mm of engagement. mouth_z 36.65.
+
+- Cleat length (Brian, 2026-09-18): "the cleat is still too small. The width is fine, but it needs to be 50% longer, keeping the same angle." Same angle means 50% taller too: 8.8 mm long x 5.36 mm tall, against a pocket that Tesla's drawing and CAD give as 6.5 long at the mouth and 4.02 deep. Built as asked behind `cleat_scale = 1.5` (default 1; roof relief scales with it) and shipped as its own coupon, `coupon-long-print.3mf` (1 h 34 min, 56 g), next to the fitting one. In Tesla's CAD it overlaps the wand by 31 mm3 in two places: the tip goes 1.3 mm through the pocket's base and the ramp runs 2.4 mm past the pocket's mouth-side wall (`images/scad/cleat-detail-long.png`). OPEN: Brian to caliper the pocket on his wand (length at the mouth, depth); if it is near 6.5 x 4, scale 1 is the largest cleat that fits and the reason it does not catch is elsewhere. Note for the full holder: a 5.4 mm cleat needs about 13 degrees of tilt to get over with the tip under the tight roof, which the deep opening's roof does not allow as modelled.
 
 ## Files (2026-09-17)
 

@@ -32,7 +32,8 @@ $O -o images/scad/iso.png --camera=0,0,0,60,0,30,500 $C "$@" holder.scad
 $O -o images/scad/below.png --camera=0,0,0,115,0,30,500 $C "$@" holder.scad
 $O -o images/scad/section-cleat.png --projection=o --camera=$CEN,90,0,$ROTZ,250 $S -D section=1 "$@" holder.scad
 $O -o images/scad/section-notch.png --projection=o --camera=$CEN,$DOWN,190 $S -D section=2 "$@" holder.scad
-$O -o images/scad/cleat-detail.png --projection=o --camera=$CLEAT,90,0,$ROTZ,48 $S -D section=1 "$@" holder.scad
+$O -o images/scad/cleat-detail.png --projection=o --camera=$CLEAT,90,0,$ROTZ,62 $S -D section=1 "$@" holder.scad
+$O -o images/scad/cleat-detail-long.png --projection=o --camera=$CLEAT,90,0,$ROTZ,62 $S -D section=1 -D cleat_scale=1.5 "$@" holder.scad
 # coupon views are in print orientation (display=false: bed = XY, +Z up)
 $O -o images/scad/coupon-iso.png --camera=0,0,0,55,0,25,250 --viewall $S -D display=false -D 'part="coupon"' "$@" holder.scad
 $O -o images/scad/coupon-mouth.png --camera=0,0,0,65,0,125,250 --viewall $S -D display=false -D 'part="coupon"' -D show_nose=false "$@" holder.scad

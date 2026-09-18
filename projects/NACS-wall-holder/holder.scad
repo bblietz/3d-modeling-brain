@@ -37,15 +37,16 @@ wand_down = 45;       // below horizontal, to the right, seen from the front
 wand_lean = 15;       // away from the wall; 20 no longer fits between the plate and the flange with the deeper cavity (pipeline/zbudget.py)
 clear = 0.5;
 roof_extra = 0.5;     // roof clearance over the tip zone is clear + roof_extra
-roof_relief = 5;      // room over the nose to lift it over the cleat (3.6 high) with the tip already under the tight roof
+cleat_scale = 1;      // 1.5 = the wedge 50% longer at the same angle, so 50% taller too (Brian, 2026-09-18). Tesla's CAD pocket only takes 1.
+roof_relief = 5 * cleat_scale;   // room over the nose to lift it over the cleat (3.6 high at scale 1) with the tip already under the tight roof
 tight_len = 5;        // the roof stays tight this far from the cavity floor
 // The cleat is a wedge that fills the lock pocket: a ramp rising from the mouth side to a sharp edge at the back,
 // and an overhanging back face, so the pocket's wall hangs on that edge, up near the pocket's base.
 cleat_clear = 0.45;   // between the cleat and the pocket, sides and top
 tip_gap = 2.5;        // nose tip to the cavity end wall when hanging: the travel left to push the pocket past the edge so the nose can drop
 cleat_a = notch_a + tip_gap;                       // the holding edge, from the cavity end wall
-cleat_h = pocket_h - cleat_clear;                  // edge height above the floor
-cleat_b = cleat_a + pocket_len_mouth - 0.11 - cleat_clear - 0.1;   // foot of the ramp, inside the pocket's mouth-side wall
+cleat_h = (pocket_h - cleat_clear) * cleat_scale;  // edge height above the floor
+cleat_b = cleat_a + (pocket_len_mouth - 0.11 - cleat_clear - 0.1) * cleat_scale;   // foot of the ramp; at scale 1 just inside the pocket's mouth-side wall
 undercut = 15;        // the back face overhangs by this much, so the contact is at the edge
 cleat_depth = 31.75;  // the cleat's holding wall to the opening, along the cleat's wall (Brian: 1.25 in)
 bell_extra = 3;       // more roof relief toward the mouth: a lifted handle swings higher the further out it is
@@ -120,7 +121,7 @@ module cleat() intersection() {
         linear_extrude(height = 14, center = true)
             polygon([[cleat_a + (cleat_h + 1.5) * tan(undercut), floor_y - 1.5], [cleat_b, floor_y - 1.5], [cleat_b, floor_y], [cleat_a, floor_y + cleat_h]]);
     // and across it: the pocket's own section, less the clearance
-    translate([0, floor_y, cleat_a - 1]) linear_extrude(cleat_b - cleat_a + 2) offset(delta = -cleat_clear) pocket_section();
+    translate([0, floor_y, cleat_a - 1]) linear_extrude(cleat_b - cleat_a + 2) scale([1, cleat_scale]) offset(delta = -cleat_clear) pocket_section();   // same widths, stretched in height with the wedge
 }
 
 module handle() {

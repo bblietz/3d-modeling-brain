@@ -51,6 +51,11 @@ holder_views = [
     ("cleat-detail", f"The cleat, close up, in the same cut. A ramp rises from the mouth side (lower right) to a sharp edge at the back, {cleat_h:.2f} mm above the floor, and the back face overhangs by {undercut:.0f}&#176;. The lock pocket's wall hangs on that edge, up near the pocket's base, so the pull of the hanging handle cannot ride it up and off."),
     ("section-notch", f"Cut across the cleat, seen from the grip end. The cleat (green) is the lock pocket's own shape less {cleat_clear:.2f} mm: {cleat_w_base:.1f} mm wide at the floor, leaning in with the pocket's walls, domed on top like the pocket's base. The band above the handle is the roof relief."),
 ]
+long = json.load(open(os.path.join(HERE, "coupon-long-slice.json")))
+cleat_views = [
+    ("cleat-detail", f"As modelled: {(6.54 - 0.11 - cleat_clear - 0.1):.1f} mm long, {cleat_h:.2f} mm tall. The wedge sits inside the lock pocket with a gap at each end and under the pocket's base (dark band). Overlap with the wand: none."),
+    ("cleat-detail-long", f"50% longer at the same 31&#176; angle: {1.5 * (6.54 - 0.11 - cleat_clear - 0.1):.1f} mm long, {1.5 * cleat_h:.2f} mm tall. The tip goes {1.5 * cleat_h - pocket_h:.1f} mm through the pocket's base and the ramp runs 2.4 mm past the pocket's far wall, under the wand. Overlap with the wand: 31 mm&#179;."),
+]
 coupon_views = [
     ("coupon-iso", "The coupon as it prints, with the handle docked: the nose cavity and cleat with 3 mm of body around them, carried down to a thin base."),
     ("coupon-mouth", "The open end is a flat cut just past the nose shoulder."),
@@ -91,6 +96,11 @@ code{{font-size:.9em}}
 <li>Cleat: a wedge cut to Tesla's lock pocket (spec: 9.71 &#177;0.2 wide and 6.2 &#177;0.2 long at its base, 4 &#177;0.2 deep; in Tesla's CAD it opens to 11.6 wide at the mouth and has a domed base). <span class="k">{cleat_w_base:.1f} mm wide</span> at the floor narrowing to {cleat_w_top:.1f}, <span class="k">{cleat_h:.2f} mm tall</span>, ramp at 31&#176; from the mouth side up to a sharp edge at the back, back face overhanging {undercut:.0f}&#176;. The nose stops {tip_gap:.1f} mm short of the cavity's end wall when hanging; that is the travel for pushing the pocket past the edge so the nose drops onto the cleat.</li>
 <li>Cable: hangs in loops over the top of the drum, as on the sample; {drum_straight:.0f} mm of straight drum between the two blends, room for three &#216;14.5 loops side by side, so the 18 ft cable (about six loops) stacks two deep.</li>
 </ul>
+
+<h2>Cleat size: 50% longer, asked 2026-09-18</h2>
+<p>Tesla's drawing and CAD give a lock pocket <span class="k">6.5 mm long at its mouth and 4.0 mm deep</span>. The cleat as modelled already fills it to within {cleat_clear:.2f} mm. Half as long again at the same angle is also half as tall again, and that does not go into the pocket in Tesla's CAD: the wand would sit on top of the wedge and not latch.</p>
+<div class="grid">{figs(cleat_views)}</div>
+<p>Both are ready to print. <code>coupon-print.3mf</code> has the cleat that fits Tesla's pocket. <code>coupon-long-print.3mf</code> has the 50% longer one, {long['minutes'] // 60} h {long['minutes'] % 60:02d} min and {long['grams']:.0f} g. A caliper on the wand's pocket settles which: if it measures near 6.5 long and 4 deep, only the first can work.</p>
 
 <h2>Fit coupon</h2>
 <p>The coupon is the holder's nose cavity and the new cleat, cut off just past the nose shoulder, printed the way the holder prints (plate on the bed, tree supports in the cavity roof with Bambu Support For PLA/PETG on the second nozzle). Print time <span class="k">{coupon_time}</span></p>

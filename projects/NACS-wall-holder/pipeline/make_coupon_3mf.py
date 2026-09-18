@@ -6,8 +6,8 @@ for the cavity roof: tree supports with Bambu Support For PLA/PETG as the
 interface material on the X2D's second (Bowden) nozzle, using Bambu's own
 recommended parameters for that pairing (support_recommended_params.json).
 
-Usage:  .venv/bin/python projects/NACS-wall-holder/pipeline/make_coupon_3mf.py
-Writes: projects/NACS-wall-holder/coupon-print.3mf and prints real minutes and grams per filament.
+Usage:  .venv/bin/python projects/NACS-wall-holder/pipeline/make_coupon_3mf.py [stem]      (default stem: coupon)
+Reads <stem>.stl; writes <stem>-print.3mf and <stem>-slice.json, and prints real minutes and grams per filament.
 """
 import json
 import os
@@ -51,8 +51,8 @@ PER_VARIANT_KEYS = [
     "slow_down_min_speed", "volumetric_speed_coefficients",
 ]
 
-STEM = "coupon"
-OUT = "coupon-print.3mf"
+STEM = sys.argv[1] if len(sys.argv) > 1 else "coupon"
+OUT = f"{STEM}-print.3mf"
 LABEL = "NACS holder fit coupon"
 BED_CENTRE = (128.0, 128.0)
 PRIME_TOWER_XY = ("175", "100")   # beside the coupon; the CLI default (165, 236) puts the 35 mm tower off the bed
@@ -228,7 +228,7 @@ def main():
         final = f"{PROJECT}/{OUT}"
         patch(f"{tmp}/raw.3mf", final)
         result = verify(final, tmp)
-    with open(f"{PROJECT}/coupon-slice.json", "w") as f:
+    with open(f"{PROJECT}/{STEM}-slice.json", "w") as f:
         json.dump(result, f, indent=1)
     print(final, result)
     return 0
