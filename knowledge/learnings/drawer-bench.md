@@ -70,10 +70,11 @@ reviewed, not built; update with measured fits after the build.
   front zone is re-split ~1:2 by that rule, not scaled, whenever the
   overall height changes) with 1/8 side, 1/4 mid, 1/8 top reveals and a
   3/4 in floor gap.
-- Drawer-box bottoms are 1/8 in (3 mm) ply, not 1/2 in (Brian,
-  2026-09-17); sides, front and back stay 1/2 in. The housing groove
-  keeps its 1/4 in reach - only its height (the new `T3` constant)
-  changed to match the thinner panel.
+- Drawer-box bottoms are 1/4 in (6 mm) ply, not 1/2 in (Brian,
+  2026-09-17; landed here after briefly trying 1/8 in); sides, front
+  and back stay 1/2 in. The housing groove keeps its 1/4 in reach -
+  only its height (the `T6` constant) changed to match the thinner
+  panel.
 - 18 in undermount slides (Blum 563H4570B, 471 mm runner), box heights
   computed from the rail-to-rail openings minus Blum's clearances (14 mm
   bottom, 6 mm top) rather than fixed - a hard-coded pair of "Blum

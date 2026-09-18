@@ -77,9 +77,10 @@ not).
 ## Drawers
 
 - **Boxes (2)**: 1/2 in plywood sides, front and back, rabbeted corners;
-  1/8 in (3 mm) plywood bottom in a 1/4 in groove (Brian, 2026-09-17; was
-  1/2 in); bottom underside recessed 1/2 in (12.7 mm) above the side
-  bottom edge for the undermount slide, as in [[cabinet-bench-brief]].
+  1/4 in (6 mm) plywood bottom in a 1/4 in groove (Brian, 2026-09-17;
+  was 1/2 in, briefly 1/8 in); bottom underside recessed 1/2 in
+  (12.7 mm) above the side bottom edge for the undermount slide, as in
+  [[cabinet-bench-brief]].
 - **Slides**: undermount soft-close, Blum TANDEM plus BLUMOTION 563H,
   face-frame application (563H/563 installation sheet, 2016 ed.): the
   runner's front section screws sideways into the post's inner face (the
@@ -195,14 +196,15 @@ open for Brian's review (change the constant, re-run the file).
   ply): supported only at the post ends, fine as a dust-panel detail but
   fragile to machine. Lowering the groove stop to 1 in would give a
   20 mm lip; owner's call.
-- **Drawer-box bottoms are 1/8 in (3 mm) plywood, not 1/2 in** (Brian,
-  2026-09-17): only the bottom panel's own thickness changed. The groove
-  that houses it in the sides, front and back keeps the same 1/4 in
-  reach (`DADO`, unchanged router setup) - it just now holds a thinner
-  panel, sized by the new constant `T3`. `UM_RECESS` (12.7 mm, the
-  Blum-specified rise from the bottom's underside to the box side's
-  bottom edge) is a hardware distance, not tied to the bottom's own
-  thickness, so it is unaffected. Sides, front and back stay 1/2 in ply.
+- **Drawer-box bottoms are 1/4 in (6 mm) plywood, not 1/2 in** (Brian,
+  2026-09-17; landed on 1/4 in after a brief 1/8 in): only the bottom
+  panel's own thickness changed. The groove that houses it in the
+  sides, front and back keeps the same 1/4 in reach (`DADO`, unchanged
+  router setup) - it just now holds a thinner panel, sized by the
+  constant `T6`. `UM_RECESS` (12.7 mm, the Blum-specified rise from the
+  bottom's underside to the box side's bottom edge) is a hardware
+  distance, not tied to the bottom's own thickness, so it is
+  unaffected. Sides, front and back stay 1/2 in ply.
 - **`BOX_TOP_H`/`BOX_BOT_H` were hard-coded, not derived** (2026-09-17,
   found when the measured overall height shrank the front zone and, with
   it, both drawer-box openings): their own comments already claimed
