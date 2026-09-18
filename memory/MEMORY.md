@@ -19,3 +19,4 @@
 - [Hardwood grain wraps](feedback-hardwood-grain-wraps.md) - never design hardwood cabinet grain front to back; it wraps around the box, and hardwood cab shells get no glued stiffeners
 - [OpenSCAD for complex designs](feedback-openscad-for-complex-designs.md) - compound-angle parts go in OpenSCAD with rendered views of the real model; no hand-drawn plans, build123d only for simple prisms
 - [Verify retention features close up](feedback-verify-retention-features-closeup.md) - hooks, cleats, snap lips: close-up section render with the mating part before any print; a sign error made a hook a draft for five versions
+- [Check docking and hold kinematics](feedback-check-docking-and-hold-kinematics.md) - fixed hooks and cleats: prove a way in and a hold under the hanging load with the real mating mesh; if docking is the load's motion reversed it cannot hold

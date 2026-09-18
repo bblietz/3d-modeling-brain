@@ -2,13 +2,17 @@
 // A drum on a square backing plate; the wand comes out of the drum's right side
 // 45 degrees down and leans away from the wall; the nose hangs on a fixed cleat
 // in the connector's own lock notch, on the lower wall of the cavity.
+// Docking: nose in with the grip raised dock_tilt, push to the stop, lower the grip; the nose pivots on its tip and
+// the lock pocket comes down over the cleat. The roof is the snug size over the tip and opens only as far as that
+// pivot needs. The hanging load turns the wand the other way (tip up), which the roof over the tip stops, so the
+// load cannot undo the docking motion (pipeline/insertion.py checks both the way in and the hold).
 //
 // World frame (also the print orientation): the plate lies in XY with its back
 // face on the wall at Z=0, +Z out from the wall, +X to the right as you face the
 // wall, +Y up.
 //
-// Render views: render.sh.  Export: openscad -D display=false -D show_nose=false -o holder.stl holder.scad
-// Coupon:       openscad -D display=false -D show_nose=false -D 'part="coupon"' -o coupon.stl holder.scad
+// Render views: render.sh.  Export: openscad -D display=false -D show_nose=false -D show_wall=false -o holder.stl holder.scad
+// Coupon:       openscad -D display=false -D show_nose=false -D show_wall=false -D 'part="coupon"' -o coupon.stl holder.scad
 //               (the nose cavity and cleat only, cut off just past the nose shoulder: coupon_cut)
 
 include <nose_outline.scad>;
@@ -17,6 +21,8 @@ include <bell_sections.scad>;
 display = true;       // rotate so +Y is up on screen for renders
 show_nose = true;     // ghost of the connector, docked
 section = 0;          // 1: cut along the wand to show the cleat, 2: cut across the notch
+pose_tilt = 0;        // ghost wand only: tilted up about its tip by this much, and pose_out further out along the tilted wand
+pose_out = 0;
 show_wall = true;     // faint wall plane behind the plate in renders
 part = "holder";      // "coupon": the cavity and cleat with thin walls on a piece of the plate, print orientation unchanged
 show_logo = true;     // Tesla T recessed in the flange face (reference/tesla-t.svg, official artwork)
@@ -36,20 +42,17 @@ handle_len = 194.5;
 wand_down = 45;       // below horizontal, to the right, seen from the front
 wand_lean = 15;       // away from the wall; 20 no longer fits between the plate and the flange with the deeper cavity (pipeline/zbudget.py)
 clear = 0.5;
-roof_extra = 0.5;     // roof clearance over the tip zone is clear + roof_extra
-cleat_scale = 1;      // 1.5 = the wedge 50% longer at the same angle, so 50% taller too (Brian, 2026-09-18). Tesla's CAD pocket only takes 1.
-roof_relief = 5 * cleat_scale;   // room over the nose to lift it over the cleat (3.6 high at scale 1) with the tip already under the tight roof
-tight_len = 5;        // the roof stays tight this far from the cavity floor
+dock_tilt = 12;       // the roof opens this far for the wand coming in grip-up and pivoting down on its tip; at 10 there is no way in (pipeline/insertion.py)
+dock_top = 0.1;       // roof clearance over the tilted nose (Tesla's nose tapers toward its tip, which adds about 0.5 there)
 // The cleat is a wedge that fills the lock pocket: a ramp rising from the mouth side to a sharp edge at the back,
 // and an overhanging back face, so the pocket's wall hangs on that edge, up near the pocket's base.
 cleat_clear = 0.45;   // between the cleat and the pocket, sides and top
 tip_gap = 2.5;        // nose tip to the cavity end wall when hanging: the travel left to push the pocket past the edge so the nose can drop
 cleat_a = notch_a + tip_gap;                       // the holding edge, from the cavity end wall
-cleat_h = (pocket_h - cleat_clear) * cleat_scale;  // edge height above the floor
-cleat_b = cleat_a + (pocket_len_mouth - 0.11 - cleat_clear - 0.1) * cleat_scale;   // foot of the ramp; at scale 1 just inside the pocket's mouth-side wall
+cleat_h = pocket_h - cleat_clear;                  // edge height above the floor
+cleat_b = cleat_a + pocket_len_mouth - 0.11 - cleat_clear - 0.1;   // foot of the ramp, just inside the pocket's mouth-side wall
 undercut = 15;        // the back face overhangs by this much, so the contact is at the edge
 cleat_depth = 31.75;  // the cleat's holding wall to the opening, along the cleat's wall (Brian: 1.25 in)
-bell_extra = 3;       // more roof relief toward the mouth: a lifted handle swings higher the further out it is
 grip_clear = 1.5;     // extra room past the end of Tesla's housing CAD (48.4 from the tip), where the grip is not modelled
 grip_flare = 0.1;     // and this much more per mm beyond it
 plate_w = 120; plate_t = 5; plate_r = 8; hole_in = 10; hole_d = 5; csk_d = 10;
@@ -77,7 +80,7 @@ function lip_q(b, c) = let(p = M0 + b * [v[0], v[1]] + c * [w[0], w[1]], dxy = [
     (-B + sqrt(B * B - 4 * A * C)) / (2 * A);
 mouth = cleat_a + cleat_depth - lip_q(floor_y, 0);   // cavity end wall to the mouth centre, so the lip on the cleat's wall is cleat_depth from the holding wall
 behind = 3;                                          // solid left between the wall and the cavity's deepest corner, which dips into the 5 mm plate
-mouth_z = 36.65;                                     // mouth centre out from the wall that gives `behind` (pipeline/zbudget.py)
+mouth_z = 37.68;                                     // mouth centre out from the wall that gives `behind` (pipeline/zbudget.py)
 M = [M0[0], M0[1], mouth_z];                         // mouth centre, on the drum surface
 T = M - mouth * d;                                                     // cavity floor centre
 
@@ -85,28 +88,41 @@ module in_cavity_frame() multmatrix([[w[0], v[0], d[0], T[0]], [w[1], v[1], d[1]
 
 nb = len(bell_sections);
 function bell_a(i) = bell_sections[i][0] + tip_gap;
-function bell_up(i) = roof_extra + roof_relief + bell_extra * (bell_sections[i][0] - bell_sections[0][0]) / (bell_sections[nb - 1][0] - bell_sections[0][0]);
 far_a = mouth + 45;                       // well outside the drum
 
-module profile(up = 0, grow = 0) hull() { offset(r = clear + grow) polygon(nose_outline); translate([0, up]) offset(r = clear + grow) polygon(nose_outline); }
+module profile(grow = 0) offset(r = clear + grow) polygon(nose_outline);
 module bell_profile(i, grow = 0, more = 0) hull() {
     offset(r = clear + grow + more) polygon(bell_sections[i][1]);
-    translate([0, bell_up(i) + more]) offset(r = clear + grow + more) polygon(bell_sections[i][1]);
+    translate([0, more]) offset(r = clear + grow + more) polygon(bell_sections[i][1]);
 }
+// the nose profile for the tilted wand: dock_top over its top line instead of clear
+module tilt_profile(grow = 0) intersection() { profile(grow); translate([-50, -50]) square([100, 50 + half + dock_top + grow]); }
 module slice(a) translate([0, 0, a]) linear_extrude(0.01) children();
 
-// The cavity as convex segments along the wand (grow > 0 gives the same shape with a wall around it, for the coupon).
-cavity_segs = nb + 2;
-module cavity_seg(i, grow = 0) {
-    if (i == 0) translate([0, 0, -0.01 - grow]) linear_extrude(bell_a(0) + 0.01 + grow) profile(roof_extra, grow);      // the nose; roof tight over the tip
-    else if (i == 1) hull() {                                                                                            // roof relief to lift the nose over the cleat
-        slice(tight_len) profile(roof_extra, grow);
-        translate([0, 0, tight_len + roof_relief]) linear_extrude(bell_a(0) - tight_len - roof_relief) profile(roof_extra + roof_relief, grow);
+// The cavity as convex pieces along the wand (grow > 0 gives the same shape with a wall around it, for the coupon).
+// Each piece is the docked wand's room hulled with the same piece of the wand tilted up about its tip, so the union is
+// what the docking pivot sweeps: snug roof over the tip, opening at dock_tilt toward the mouth, end wall leaning back.
+nose_step = 2.5;                                          // short pieces keep the roof from being bridged flat over the tip
+nose_pieces = ceil((nose_len + tip_gap) / nose_step);
+cavity_segs = nose_pieces + nb;
+module piece(i, grow, tilted) {
+    if (i < nose_pieces) {                                                                                               // the nose
+        a0 = i == 0 ? -0.01 - grow : i * nose_step; a1 = min((i + 1) * nose_step, bell_a(0));
+        translate([0, 0, a0]) linear_extrude(a1 - a0) if (tilted) tilt_profile(grow); else profile(grow);
     }
-    else if (i <= nb) hull() { slice(bell_a(i - 2)) bell_profile(i - 2, grow); slice(bell_a(i - 1)) bell_profile(i - 1, grow); }   // Tesla's housing behind the shoulder
+    else if (i < nose_pieces + nb - 1) { j = i - nose_pieces; hull() {                                                   // Tesla's housing behind the shoulder
+        slice(bell_a(j)) bell_profile(j, grow); slice(bell_a(j + 1)) bell_profile(j + 1, grow); } }
     else hull() {                                                                                                        // the grip beyond Tesla's CAD
         slice(bell_a(nb - 1)) bell_profile(nb - 1, grow, grip_clear);
         slice(far_a) bell_profile(nb - 1, grow, grip_clear + grip_flare * (far_a - bell_a(nb - 1)));
+    }
+}
+module tilt_about_tip(t) translate([0, floor_y, tip_gap]) rotate([-t, 0, 0]) translate([0, -floor_y, -tip_gap]) children();   // grip toward the roof by t
+module cavity_seg(i, grow = 0) hull() {
+    piece(i, grow, false);
+    for (t = [dock_tilt / 2, dock_tilt]) intersection() {
+        tilt_about_tip(t) piece(i, grow, true);
+        translate([-500, floor_y - grow, -500]) cube(1000);                                                              // never below the floor
     }
 }
 module cavity(grow = 0) for (i = [0 : cavity_segs - 1]) cavity_seg(i, grow);
@@ -121,7 +137,7 @@ module cleat() intersection() {
         linear_extrude(height = 14, center = true)
             polygon([[cleat_a + (cleat_h + 1.5) * tan(undercut), floor_y - 1.5], [cleat_b, floor_y - 1.5], [cleat_b, floor_y], [cleat_a, floor_y + cleat_h]]);
     // and across it: the pocket's own section, less the clearance
-    translate([0, floor_y, cleat_a - 1]) linear_extrude(cleat_b - cleat_a + 2) scale([1, cleat_scale]) offset(delta = -cleat_clear) pocket_section();   // same widths, stretched in height with the wedge
+    translate([0, floor_y, cleat_a - 1]) linear_extrude(cleat_b - cleat_a + 2) offset(delta = -cleat_clear) pocket_section();
 }
 
 module handle() {
@@ -206,7 +222,7 @@ module model() {
     else if (section == 2) intersection() { part_body(); in_cavity_frame() translate([-500, -500, -500]) cube([1000, 1000, 500 + cleat_a + 1.5]); }
     else part_body();
     if (show_nose) color(section == 0 ? "steelblue" : "gainsboro", section == 0 ? 0.55 : 0.85) in_cavity_frame() {
-        if (section == 1) intersection() { handle(); translate([-500, -500, -500]) cube([500, 1000, 1000]); }
+        if (section == 1) intersection() { tilt_about_tip(pose_tilt) translate([0, 0, pose_out]) handle(); translate([-500, -500, -500]) cube([500, 1000, 1000]); }
         else if (section == 2) intersection() { handle(); translate([-500, -500, -500]) cube([1000, 1000, 500 + cleat_a + 1.5]); }
         else handle();
     }
@@ -217,5 +233,5 @@ if (display) rotate([90, 0, 0]) model(); else model();
 
 echo(str("wand direction d=", d, " up v=", v, " across w=", w, " mouth M=", M, " tip T=", T, " mouth depth=", mouth));
 echo(str("cleat: edge at ", cleat_a, " height ", cleat_h, " ramp foot ", cleat_b, " ramp angle ", atan(cleat_h / (cleat_b - cleat_a))));
-echo(str("lips from the cavity end wall: cleat wall ", mouth + lip_q(floor_y, 0), " roof ", mouth + lip_q(half + clear + bell_up(nb - 1), 0),
+echo(str("lips from the cavity end wall: cleat wall ", mouth + lip_q(floor_y, 0), " roof ", mouth + lip_q(half + clear + (mouth - tip_gap) * tan(dock_tilt), 0),
          " flange side ", mouth + lip_q(0, 21.8), " wall side ", mouth + lip_q(0, -21.8)));
