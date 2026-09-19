@@ -42,6 +42,8 @@ try:
     coupon_time = f"{sl['minutes'] // 60} h {sl['minutes'] % 60:02d} min, {sl['grams']:.0f} g in all: {g.get('1', 0):.0f} g PETG and {g.get('2', 0):.0f} g support material, from a real slice of <code>coupon-print.3mf</code>."
 except FileNotFoundError:
     coupon_time = "not sliced yet."
+hs = json.load(open(os.path.join(HERE, "holder-slice.json")))
+hg = hs["grams_per_filament"]
 
 holder_views = [
     ("iso", f"From the front right. The wand comes out of the drum's right side, 45&#176; down, and leans {wand_lean:.0f}&#176; off the wall; the Tesla T is recessed in the flange face."),
@@ -86,6 +88,18 @@ code{{font-size:.9em}}
 <p class="lead">OpenSCAD model of the wall holder for the Tesla Gen 3 Wall Connector handle: a drum on a square plate, the wand out of the drum's right side at {wand_down:.0f}&#176; down, hanging on a fixed cleat in the connector's own lock notch. Rendered from <code>holder.scad</code>; the nose profile is Tesla's, from their NACS STEP file.</p>
 <div class="grid">{figs(holder_views)}</div>
 
+<h2>The full part: ready to print</h2>
+<p>The v7 fit coupon printed and the wand docks and holds on it (Brian, 2026-09-18: "the last coupon printed great. This is the one."). The full holder is the same cavity and cleat in the whole drum, exported and sliced: <code>holder.stl</code> and <code>holder-print.3mf</code>.</p>
+<ul>
+<li>Print: <span class="k">{hs['minutes'] // 60} h {hs['minutes'] % 60:02d} min, {hs['grams']:.0f} g</span> ({hg.get('1', 0):.0f} g PETG, {hg.get('2', 0):.0f} g support interface), {hs['layers']} layers, from a real slice. Same recipe as the coupon (X2D 0.6 nozzle, 0.30 mm, Bambu PETG Basic, textured PEI, tree supports with Support For PLA/PETG on the second nozzle), plus <span class="k">3 walls and 20% gyroid</span> because it hangs a wand and an 18 ft cable off the wall.</li>
+<li>Orientation: plate down on the bed, flange and Tesla T up, as the coupon printed. Supports go in the cavity and under the flange ring; the T is a recess in the top face and needs none.</li>
+<li>Size on the bed: {plate_w:.0f} &#215; {plate_w:.0f} &#215; 80 mm; the part sits left of centre and the prime tower to its right. The two nozzles only share the bed from x = 20 mm, so the part is placed clear of that.</li>
+<li>Base: <span class="k">{plate_w:.0f} mm square</span>, up from 120 (Brian, 2026-09-18: 125%). <span class="k">Solid around every screw hole</span>: a &#216;25 region through the plate at each hole prints at 100% infill. Measured in the sliced G-code between the plate's skins: {min(v for k, v in hs['screw_pads'].items() if k.startswith('pad')) * 100:.0f}% plastic in the pads, {hs['screw_pads']['plain plate'] * 100:.0f}% in the plain plate.</li>
+<li>Mounting: four #8 countersunk screws, all four visible from the front on the wider base (on the 120 mm base the lower-left one was hidden behind the flange's point). The lower-left hole's centre is 1.9 mm outside the point, so a slim screwdriver shaft goes straight on and a 1/4 in bit holder comes in at a slight angle. The lower-right one is behind the docked wand: mount the holder with the wand off.</li>
+<li>Not covered by the coupon, first tried on this part: the housing and the start of the grip inside the deep opening. The housing room is cut from Tesla's CAD like the nose was; the grip past the end of that CAD has 1.5 mm extra room and flares.</li>
+<li>The flange stays whole: the docking room's top corner would have nicked 1.7 mm into its underside at the rim, so the cut stops at the flange. The docking and hold check is unchanged by that.</li>
+</ul>
+
 <h2>What is set</h2>
 <ul>
 <li>Plate <span class="k">{plate_w:.0f} &#215; {plate_w:.0f} &#215; {plate_t:.0f} mm</span>, four countersunk holes for #8 screws, 10 mm in from the corners.</li>
@@ -107,7 +121,7 @@ code{{font-size:.9em}}
 
 <h2>Fit coupon</h2>
 <p>The coupon is the holder's nose cavity and the new cleat, cut off just past the nose shoulder, printed the way the holder prints (plate on the bed, tree supports in the cavity roof with Bambu Support For PLA/PETG on the second nozzle). Print time <span class="k">{coupon_time}</span></p>
-<p>It proves the nose profile and its 0.5 mm clearance, the cleat in the lock pocket, docking grip-up over the cleat, and the hold: once docked, pulling the wand straight out or pressing the grip down should not free it; only raising the grip does. The deeper opening gets no coupon of its own (Brian, 2026-09-17) and is first tried on the full part.</p>
+<p><span class="k">Result: it fits and holds.</span> It proves the nose profile and its 0.5 mm clearance, the cleat in the lock pocket, docking grip-up over the cleat, and the hold: once docked, pulling the wand straight out or pressing the grip down should not free it; only raising the grip does. The deeper opening gets no coupon of its own (Brian, 2026-09-17) and is first tried on the full part.</p>
 <div class="grid">{figs(coupon_views)}</div>
 
 <h2>Open</h2>
@@ -115,7 +129,7 @@ code{{font-size:.9em}}
 <li>Lean: 15&#176;, down from 20&#176;. With the cleat 1.25 in deep the cavity is 65 mm tall inside the drum at 15&#176; and 73 mm at 20&#176;; at 20&#176; its top would come out through the flange of the 75 mm drum.</li>
 <li>Past the end of Tesla's housing CAD (48 mm from the tip) the grip is not modelled; the cavity there has 1.5 mm extra room and flares. The coupon will show whether your grip clears it.</li>
 <li>Printing: plate down on the bed. The cavity roof and the ring under the flange need support material (the X2D's support nozzle); everything else prints clean.</li>
-<li>Next: print the coupon, try the handle on it (grip up, in, grip down; then pull and press the grip to see that it stays), then the full part with the deep opening.</li>
+<li>Next: print the full part (<code>holder-print.3mf</code>), mount it, and try the wand in the deep opening with the cable on the drum.</li>
 </ul>
 </main>
 """

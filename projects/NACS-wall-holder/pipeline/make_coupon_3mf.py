@@ -1,4 +1,4 @@
-"""Bambu Studio print 3MF for the NACS holder fit coupon (coupon.stl) in PETG, verified by a real slice.
+"""Bambu Studio print 3MF for the NACS holder (holder.stl) or its fit coupon (coupon.stl) in PETG, verified by a real slice.
 
 Adapted from projects/NACS-organizer/make_plate.py (same X2D 0.6 nozzle, 0.30mm
 Standard, Bambu PETG Basic, Textured PEI, Sharks PETG lessons), plus supports
@@ -6,8 +6,11 @@ for the cavity roof: tree supports with Bambu Support For PLA/PETG as the
 interface material on the X2D's second (Bowden) nozzle, using Bambu's own
 recommended parameters for that pairing (support_recommended_params.json).
 
-Usage:  .venv/bin/python projects/NACS-wall-holder/pipeline/make_coupon_3mf.py [stem]      (default stem: coupon)
+Usage:  .venv/bin/python projects/NACS-wall-holder/pipeline/make_coupon_3mf.py [coupon|holder]      (default: coupon)
 Reads <stem>.stl; writes <stem>-print.3mf and <stem>-slice.json, and prints real minutes and grams per filament.
+The holder gets 3 walls and 20% gyroid (it hangs a wand and an 18 ft cable off a wall), sits left of centre so the
+prime tower fits beside it, and gets a modifier part that makes the plate solid for PAD_R around each screw hole
+(Brian, 2026-09-18); the slice check reads the G-code to confirm the pads print solid.
 """
 import json
 import os
@@ -53,9 +56,14 @@ PER_VARIANT_KEYS = [
 
 STEM = sys.argv[1] if len(sys.argv) > 1 else "coupon"
 OUT = f"{STEM}-print.3mf"
-LABEL = "NACS holder fit coupon"
-BED_CENTRE = (128.0, 128.0)
-PRIME_TOWER_XY = ("175", "100")   # beside the coupon; the CLI default (165, 236) puts the 35 mm tower off the bed
+JOBS = {   # label, bed centre of the part, prime tower corner (the CLI default (165, 236) puts the 35 mm tower off the bed), extra process settings
+    "coupon": ("NACS holder fit coupon", (128.0, 128.0), ("175", "100"), {}),
+    # the two nozzles share x 20..256 only (CLI log: shared_printable_size 236, centre 138): the 150 mm plate spans 33..183, skirt included it stays clear of 20
+    "holder": ("NACS wall holder", (108.0, 128.0), ("192", "180"), {"wall_loops": "3", "sparse_infill_density": "20%", "sparse_infill_pattern": "gyroid"}),
+}
+LABEL, BED_CENTRE, PRIME_TOWER_XY, EXTRA = JOBS[STEM]
+PAD_R = 12.5          # holder only: solid infill this far around each screw hole
+PAD_NAME = "MOD screw pads: solid infill"
 BED_TYPE = "Textured PEI Plate"
 SCALARS = {
     "curr_bed_type": BED_TYPE,
@@ -78,6 +86,7 @@ SCALARS = {
     "tree_support_branch_diameter_angle": "7",
     "support_interface_filament": "2",
     "support_filament": "0",
+    **EXTRA,
 }
 LISTS = {
     "top_surface_speed": "60",
@@ -181,6 +190,87 @@ def patch(src, dst):
     zin.close()
 
 
+def scad_const(name):
+    scad = open(f"{PROJECT}/holder.scad").read()
+    return float(re.search(rf"(?:^|;)\s*{name}\s*=\s*([-0-9.]+)", scad, re.M).group(1))
+
+
+def hole_centres():
+    off = scad_const("plate_w") / 2 - scad_const("hole_in")
+    return [(sx * off, sy * off) for sx in (-1, 1) for sy in (-1, 1)]
+
+
+def add_screw_pads(path):
+    """One modifier part, four cylinders through the plate at the screw holes, sparse_infill_density 100%."""
+    import trimesh
+    from fillcore_mod import centered, inject_modifier, next_object_id, object_pos
+    # clipped to the plate: a modifier that sticks out past the part grows the object's outline, and the skirt with it
+    w, r, t = scad_const("plate_w"), scad_const("plate_r"), scad_const("plate_t")
+    cyls = " ".join(f"translate([{x}, {y}, 0]) cylinder(r = {PAD_R}, h = {t}, $fn = 64);" for x, y in hole_centres())
+    scad = (f"intersection() {{\n  linear_extrude({t}) offset(r = {r}) offset(delta = -{r}) square({w}, center = true);\n"
+            f"  union() {{ {cyls} }}\n}}\n")
+    with tempfile.TemporaryDirectory() as d:
+        with open(f"{d}/pads.scad", "w") as f:
+            f.write(scad)
+        subprocess.run([os.path.expanduser("~/.local/bin/openscad"), "--backend=Manifold", "-o", f"{d}/pads.stl", f"{d}/pads.scad"],
+                       capture_output=True, text=True, check=True)
+        pads = trimesh.load(f"{d}/pads.stl")
+    assert len(pads.split()) == 4 and pads.is_watertight, "expected four closed pads"
+    mesh_c, mc = centered(pads)
+    b = trimesh.load(f"{PROJECT}/{STEM}.stl").bounds
+    zin = zipfile.ZipFile(path)
+    files = {i.filename: zin.read(i.filename) for i in zin.infolist()}
+    zin.close()
+    model3d = files["3D/3dmodel.model"].decode()
+    objfiles = {n: files[n].decode() for n in files if n.startswith("3D/Objects/")}
+    settings = files["Metadata/model_settings.config"].decode()
+    oid = re.search(r'<object id="(\d+)"', settings).group(1)
+    block = re.search(rf'<object id="{oid}">.*?</object>', settings, re.S).group(0)
+    pos = object_pos(model3d, oid, (b[0] + b[1]) / 2)
+    pid = next_object_id(model3d, objfiles)
+    new_block, model3d = inject_modifier(block, model3d, objfiles, oid, pid, PAD_NAME, "screw-pads.stl", mesh_c, mc, pos,
+                                         {"sparse_infill_density": "100%"})
+    files["Metadata/model_settings.config"] = settings.replace(block, new_block).encode()
+    files["3D/3dmodel.model"] = model3d.encode()
+    for n, v in objfiles.items():
+        files[n] = v.encode()
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as zout:
+        for n, v in files.items():
+            zout.writestr(n, v)
+
+
+def check_pads_solid(sliced, gcode_name):
+    """Plastic per volume between the plate's skins, from the G-code: each pad must be solid, the plain plate must not be.
+    (Bambu keeps the "Sparse infill" label at 100% density, so the label says nothing; gyroid comes as G2/G3 arcs.)"""
+    import math
+    g = zipfile.ZipFile(sliced).read(gcode_name).decode(errors="replace")
+    t = scad_const("plate_t")
+    off = scad_const("plate_w") / 2 - scad_const("hole_in")
+    windows = {f"pad {i + 1}": (BED_CENTRE[0] + x, BED_CENTRE[1] + y, PAD_R - 3.5, math.pi * (scad_const("hole_d") / 2) ** 2)
+               for i, (x, y) in enumerate(hole_centres())}
+    windows["plain plate"] = (BED_CENTRE[0] - off, BED_CENTRE[1], 7.0, 0.0)      # midway between two holes, clear of the edge walls
+    used, layers = {k: 0.0 for k in windows}, set()
+    z, x, y = 0.0, 0.0, 0.0
+    for line in g.splitlines():
+        if line.startswith("; Z_HEIGHT:"):
+            z = float(line.split(":")[1])
+        elif line[:3] in ("G0 ", "G1 ", "G2 ", "G3 "):
+            mx, my, me = re.search(r" X([-0-9.]+)", line), re.search(r" Y([-0-9.]+)", line), re.search(r" E([-0-9.]+)", line)
+            nx, ny = (float(mx.group(1)) if mx else x), (float(my.group(1)) if my else y)
+            if me and float(me.group(1)) > 0 and (mx or my) and 1.2 <= z <= t - 1.2:
+                layers.add(z)
+                for k, (cx, cy, r, _) in windows.items():
+                    if ((x + nx) / 2 - cx) ** 2 + ((y + ny) / 2 - cy) ** 2 < r * r:
+                        used[k] += float(me.group(1))
+            x, y = nx, ny
+    zs = sorted(layers)
+    height = (zs[1] - zs[0]) * len(zs)
+    fill = {k: round(used[k] * math.pi * (1.75 / 2) ** 2 / ((math.pi * r * r - hole) * height), 2) for k, (_, _, r, hole) in windows.items()}
+    assert all(v >= 0.8 for k, v in fill.items() if k.startswith("pad")), f"screw pads are not solid: {fill}"
+    assert fill["plain plate"] <= 0.4, f"the plain plate is not sparse, the modifier leaked: {fill}"
+    return fill
+
+
 def verify(path, tmp):
     z = zipfile.ZipFile(path)
     cfg = json.loads(z.read("Metadata/project_settings.config"))
@@ -209,8 +299,12 @@ def verify(path, tmp):
     info = zipfile.ZipFile(out).read("Metadata/slice_info.config").decode()
     grab = lambda k: re.search(rf'key="{k}" value="([^"]*)"', info).group(1)
     per = re.findall(r'<filament id="(\d+)"[^>]*used_g="([^"]*)"', info)
-    return {"minutes": round(int(grab("prediction")) / 60), "grams": round(float(grab("weight")), 1),
-            "grams_per_filament": {i: round(float(g), 1) for i, g in per}, "layers": res.get("layers")}
+    result = {"minutes": round(int(grab("prediction")) / 60), "grams": round(float(grab("weight")), 1),
+              "grams_per_filament": {i: round(float(g), 1) for i, g in per}, "layers": res.get("layers")}
+    if STEM == "holder":
+        assert PAD_NAME in z.read("Metadata/model_settings.config").decode()
+        result["screw_pads"] = check_pads_solid(out, res["gcode"])
+    return result
 
 
 def main():
@@ -227,6 +321,8 @@ def main():
         assert os.path.exists(f"{tmp}/raw.3mf"), f"CLI export failed rc={r.returncode}\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
         final = f"{PROJECT}/{OUT}"
         patch(f"{tmp}/raw.3mf", final)
+        if STEM == "holder":
+            add_screw_pads(final)
         result = verify(final, tmp)
     with open(f"{PROJECT}/{STEM}-slice.json", "w") as f:
         json.dump(result, f, indent=1)

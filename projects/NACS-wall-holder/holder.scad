@@ -55,7 +55,7 @@ undercut = 15;        // the back face overhangs by this much, so the contact is
 cleat_depth = 31.75;  // the cleat's holding wall to the opening, along the cleat's wall (Brian: 1.25 in)
 grip_clear = 1.5;     // extra room past the end of Tesla's housing CAD (48.4 from the tip), where the grip is not modelled
 grip_flare = 0.1;     // and this much more per mm beyond it
-plate_w = 120; plate_t = 5; plate_r = 8; hole_in = 10; hole_d = 5; csk_d = 10;
+plate_w = 150; plate_t = 5; plate_r = 8; hole_in = 10; hole_d = 5; csk_d = 10;
 drum_r = 50; drum_l = 75;                  // plate front to flange front
 flange_t = 8; flange_point = 84; point_angle = -135;   // teardrop point to the lower left, clear of the wand
 fillet_flange = 12;                        // concave blend from the drum into the flange face
@@ -184,7 +184,7 @@ module holes() {
 module holder() {
     difference() {
         body();
-        in_cavity_frame() cavity();
+        intersection() { in_cavity_frame() cavity(); translate([-500, -500, -500]) cube([1000, 1000, 500 + total_l - flange_t]); }   // the flange stays whole: the docking room's top corner would nick 1.7 mm into its underside at the rim
         holes();
         if (show_logo) logo();
     }

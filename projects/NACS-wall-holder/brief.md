@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: v7 2026-09-18 (cavity reshaped for grip-up docking: snug roof over the tip opening 12 degrees, leaning end wall; the step roof could not both admit and hold the wand); coupon-print.3mf regenerated, 1 h 36 min; awaiting Brian's print and fit test
+status: v7 VALIDATED 2026-09-18 (Brian: "the last coupon printed great. This is the one."); full part exported and sliced with the 150 mm base and solid screw pads (holder.stl, holder-print.3mf: 7 h 47 min, 366 g); awaiting the full print
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -40,12 +40,19 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
   - Tried and dropped: a floor that falls away past the cleat so the wand rocks next to it (engaged edge 2.25 mm, but a 7.5 degree droop and more shape for 0.4 mm).
   - Cost in the drum: cavity 65.4 mm tall (was 62), `mouth_z` 37.68 (was 36.65) to keep 3 mm behind the deepest corner, mouth top 8.4 mm up the flange blend and 3.6 mm under the flange; grip to wall 26 / 38 / 53 mm. Docked clash 0.000 mm3.
   - Nose geometry note: Tesla's nose is not a prism. At the centre plane its top is 17.0 at 1 mm from the tip against 17.76 at 30 mm, and its underside tapers the same way over the first 16 mm. `handle()` in holder.scad is still the straight 30 mm outline (the safe side for clash checks); the tool uses the real mesh.
-  - Not verified by test: Brian has not reported a fit of any v6 or v7 coupon. If a printed v6 coupon did admit the wand, print slop covered the 1.1 mm and it would also have let the wand lever off.
+  - RESULT (Brian, 2026-09-18, after printing the v7 coupon): "ok the last coupon printed great. This is the one. Now lets create the whole design". The v7 cavity, cleat and grip-up docking are LOCKED.
+- Full part (2026-09-18): `holder.stl` (150 x 150 x 80 mm, one watertight body, 663 cm3 solid) and `holder-print.3mf`, same recipe as the coupon plus 3 walls and 20% gyroid: real slice 7 h 47 min, 366 g (356 g PETG, 10 g support interface), 267 layers; part at bed (108, 128), prime tower at (192, 180). Plate down, flange and T up.
+  - Base 150 mm square (Brian, 2026-09-18: "increase the width of the base by 125%", read as to 125% of 120; 270 mm would not fit the bed; kept square, holes still 10 mm in from the edges). All four screw holes are now visible from the front; the lower-left hole's centre is 1.9 mm outside the flange's point.
+  - Solid screw pads (Brian, 2026-09-18: "the area round the screw holes in the base should be solid infill"): one modifier part in the 3MF, four diameter 25 cylinders through the plate clipped to the plate's outline, `sparse_infill_density` 100%. Verified in the sliced G-code between the skins: 91 to 92% plastic in the pads, 18% in the plain plate. Bambu keeps the "Sparse infill" label at 100%, and gyroid comes as G2/G3 arcs, so the check measures plastic per volume, not labels.
+  - Dual-nozzle bed fact: the CLI log gives `shared_printable_size {236, 256, 256}, shared_center {138, 128}`, so both nozzles reach x 20 to 256 only. A modifier that sticks out past the part grows the object's outline and the skirt with it; at part centre x = 100 that put the skirt past x = 20 and the slice failed (rc 152, error_code 4).
+  - The cavity cut now stops at the flange's underside (z = 72): the docking room's top corner nicked 1.7 mm into the flange at the rim near the mouth (49 mm2 at z = 72.2). WAY IN and HOLD are unchanged (9 degrees, 19.6 mm, 1.87 mm).
+  - First tried on the full part, not covered by the coupon: the housing and the start of the grip in the deep opening.
 
 ## Files (2026-09-17)
 
 - `holder.scad` (+ `nose_outline.scad`): the model; `part="coupon"` gives the fit coupon. `render.sh` renders `images/scad/*.png`; `renders_page.py` builds `plan.html` (published as the "NACS Holster Plan" artifact).
 - `coupon.stl`, `coupon-print.3mf`, `coupon-slice.json`, `images/scad/coupon-*.png`: the fit coupon, generated from holder.scad (`part="coupon"`, export needs `-D show_wall=false` or the render's wall plane comes along): the v7 nose cavity and the cleat, cut off 1 mm past the nose shoulder (`coupon_cut`), 3 mm walls, 0.9 mm base, print orientation unchanged: 72 x 67 x 57 mm. Real slice: 1 h 36 min, 59 g (55 g PETG including the prime tower, 3.8 g support). The first printed coupon (v4, commit cb42b65) had the small drafted cleat and the step roof. Set `coupon_cut` past the mouth to get the whole opening.
+- `holder.stl`, `holder-print.3mf`, `holder-slice.json`: the full part, built by `pipeline/make_coupon_3mf.py holder` (the same script builds the coupon with no argument). Retrospective: `knowledge/learnings/nacs-wall-holder.md`.
 - `pipeline/insertion.py`: the docking and hold check (WAY IN, HOLD) for the model as built or with `name=value` overrides; `--png` draws the path and the hanging pose (`images/docking/docking-path.png`). Run it after any change to the cavity, the cleat or the wand angles. `render.sh` also renders the docking poses (`dock-1-in`, `dock-2-stop`; ghost pose via `pose_tilt`, `pose_out`).
 - Renders use `--render`, not `--preview`: in preview the docked handle's clip plane paints over the holder's whole cut face in section views. `part="clash"` intersects the docked handle with the holder and must come out empty (checked: 0 mm3).
 - `pipeline/make_coupon_3mf.py`: X2D 0.6 nozzle, 0.30mm Standard, Bambu PETG Basic on nozzle 1, Bambu Support For PLA/PETG on nozzle 2 as the support interface, tree supports with Bambu's recommended parameters for that pairing. Lessons baked in: the CLI writes one extruder variant per filament, so every per-variant filament key is expanded to filaments x 6 variants like a Studio-saved file; flush matrix = filaments^2 x len(flush_multiplier) with one multiplier per extruder; the CLI's default prime tower position (165, 236) is off the bed.
