@@ -1,6 +1,6 @@
 {
   "name": "Cab-Blietz-1x12-hardwood",
-  "generated": "2026-09-14",
+  "generated": "2026-09-19",
   "line": "hardwood",
   "species": "walnut",
   "corner_joint": "finger",
@@ -14,6 +14,7 @@
     "baffle_mount": "floating",
     "baffle_cleat_edges": "top-bottom",
     "jack_plate_position": "top",
+    "open_back_style": "split",
     "handle": "strap",
     "handle_screw_spacing_mm": 228.6,
     "recessed_handle_cutout_mm": [
@@ -35,7 +36,8 @@
     "tolex_color": "",
     "grill_cloth": "Salt and Pepper, 32\"",
     "finish": "",
-    "roundover_mm": 12.7
+    "roundover_mm": 12.7,
+    "accent_stripes": []
   },
   "external_mm": [
     508.0,
@@ -50,7 +52,7 @@
   "internal_mm": [
     470.0,
     419.2,
-    229.4
+    235.4
   ],
   "enclosure": {
     "type": "open",
@@ -64,29 +66,29 @@
   ],
   "volumes": {
     "gross_l": [
-      45.197
+      46.379
     ],
     "net_l": [
-      42.449
+      43.631
     ],
     "sheet_net_l": [
-      42.854
+      44.047
     ],
     "delta_pct": [
-      -0.946
+      -0.945
     ],
     "inside_parts_l": 0.749,
     "sheet_inside_parts_l": 0.752
   },
   "mass": {
-    "total_kg": 14.28,
-    "parts_kg": 9.56,
+    "total_kg": 13.738,
+    "parts_kg": 9.018,
     "speakers_kg": 3.72,
     "hardware_kg": 1.0,
     "com_mm": [
       0.0,
-      103.125,
-      227.954
+      104.91,
+      227.929
     ]
   },
   "hardware": [
@@ -221,11 +223,11 @@
       "name": "baffle",
       "qty": 1,
       "blank_mm": [
-        18.0,
+        12.0,
         417.2,
         468.0
       ],
-      "material": "baltic birch 18 mm",
+      "material": "baltic birch 12 mm",
       "notes": "floating baffle: 1 mm clearance per side, felt strips on the cleats, screwed through the cleats, removable; speakers front-mounted on T-nuts, 8 bolts on a 294.4 mm circle"
     },
     {
@@ -392,7 +394,7 @@
     {
       "name": "net volume",
       "level": "pass",
-      "message": "chamber 0 net 42.4 L vs sheet 42.9 L (-0.9 percent); inside parts 0.75 L vs sheet allowance 0.75 L"
+      "message": "chamber 0 net 43.6 L vs sheet 44.0 L (-0.9 percent); inside parts 0.75 L vs sheet allowance 0.75 L"
     },
     {
       "name": "stereo balance",
@@ -467,7 +469,7 @@
     {
       "name": "air volume",
       "level": "pass",
-      "message": "chamber 0 measured 42.45 L vs layout 42.45 L (-0.00 percent)"
+      "message": "chamber 0 measured 43.63 L vs layout 43.63 L (+0.00 percent)"
     },
     {
       "name": "solid count",

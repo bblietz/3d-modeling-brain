@@ -1,6 +1,6 @@
 {
   "name": "rex-roots-1x12",
-  "generated": "2026-09-14",
+  "generated": "2026-09-19",
   "line": "tolex",
   "species": null,
   "corner_joint": "finger",
@@ -14,6 +14,7 @@
     "baffle_mount": "floating",
     "baffle_cleat_edges": "all",
     "jack_plate_position": "bottom",
+    "open_back_style": "split",
     "handle": "strap",
     "handle_screw_spacing_mm": 228.6,
     "recessed_handle_cutout_mm": [
@@ -35,22 +36,23 @@
     "tolex_color": "Fender Style Black",
     "grill_cloth": "Salt-and-pepper",
     "finish": "",
-    "roundover_mm": null
+    "roundover_mm": null,
+    "accent_stripes": []
   },
   "external_mm": [
     474.9,
     471.2,
-    248.556
+    243.356
   ],
   "external_in": [
     18.7,
     18.55,
-    9.79
+    9.58
   ],
   "internal_mm": [
     438.9,
     435.2,
-    198.556
+    199.356
   ],
   "enclosure": {
     "type": "closed-ported",
@@ -64,7 +66,7 @@
   ],
   "volumes": {
     "gross_l": [
-      37.926
+      38.079
     ],
     "net_l": [
       33.352
@@ -73,20 +75,20 @@
       33.352
     ],
     "delta_pct": [
-      0.0
+      -0.0
     ],
-    "inside_parts_l": 1.432,
-    "sheet_inside_parts_l": 1.432
+    "inside_parts_l": 1.479,
+    "sheet_inside_parts_l": 1.479
   },
   "mass": {
-    "total_kg": 14.542,
-    "parts_kg": 9.822,
+    "total_kg": 14.01,
+    "parts_kg": 9.29,
     "speakers_kg": 3.72,
     "hardware_kg": 1.0,
     "com_mm": [
       0.0,
-      99.509,
-      242.834
+      98.43,
+      242.262
     ]
   },
   "hardware": [
@@ -94,7 +96,7 @@
       "item": "jack plate",
       "position_mm": [
         0.0,
-        248.556,
+        243.356,
         96.0
       ],
       "cutout_mm": [
@@ -108,7 +110,7 @@
       "item": "strap handle",
       "position_mm": [
         0.0,
-        124.278,
+        121.678,
         471.2
       ],
       "cutout_mm": null,
@@ -130,7 +132,7 @@
       "item": "foot",
       "position_mm": [
         -185.45,
-        196.556,
+        191.356,
         0.0
       ],
       "cutout_mm": null,
@@ -152,7 +154,7 @@
       "item": "foot",
       "position_mm": [
         185.45,
-        196.556,
+        191.356,
         0.0
       ],
       "cutout_mm": null,
@@ -185,7 +187,7 @@
       "item": "corner",
       "position_mm": [
         -237.45,
-        248.556,
+        243.356,
         0.0
       ],
       "cutout_mm": null,
@@ -196,7 +198,7 @@
       "item": "corner",
       "position_mm": [
         -237.45,
-        248.556,
+        243.356,
         471.2
       ],
       "cutout_mm": null,
@@ -229,7 +231,7 @@
       "item": "corner",
       "position_mm": [
         237.45,
-        248.556,
+        243.356,
         0.0
       ],
       "cutout_mm": null,
@@ -240,7 +242,7 @@
       "item": "corner",
       "position_mm": [
         237.45,
-        248.556,
+        243.356,
         471.2
       ],
       "cutout_mm": null,
@@ -262,19 +264,19 @@
       "item": "tolex",
       "position_mm": [
         0.0,
-        124.278,
+        121.678,
         235.6
       ],
       "cutout_mm": null,
       "panel": "",
-      "notes": "Fender Style Black, 54 in roll: 0.77 m (0.84 yd), six faces x 1.15"
+      "notes": "Fender Style Black, 54 in roll: 0.76 m (0.83 yd), six faces x 1.15"
     }
   ],
   "tolex": {
     "roll_in": 54,
-    "area_m2": 0.918,
-    "length_m": 0.77,
-    "length_yd": 0.842
+    "area_m2": 0.908,
+    "length_m": 0.761,
+    "length_yd": 0.833
   },
   "parts": [
     {
@@ -283,10 +285,10 @@
       "blank_mm": [
         18.0,
         471.2,
-        248.556
+        243.356
       ],
       "material": "baltic birch 18 mm",
-      "notes": "finger joint, 27 fingers of 9.2 mm, both ends full, front finger on top and bottom"
+      "notes": "finger joint, 27 fingers of 9.0 mm, both ends full, front finger on top and bottom"
     },
     {
       "name": "side_right",
@@ -294,10 +296,10 @@
       "blank_mm": [
         18.0,
         471.2,
-        248.556
+        243.356
       ],
       "material": "baltic birch 18 mm",
-      "notes": "finger joint, 27 fingers of 9.2 mm, both ends full, front finger on top and bottom"
+      "notes": "finger joint, 27 fingers of 9.0 mm, both ends full, front finger on top and bottom"
     },
     {
       "name": "top",
@@ -305,10 +307,10 @@
       "blank_mm": [
         18.0,
         474.9,
-        248.556
+        243.356
       ],
       "material": "baltic birch 18 mm",
-      "notes": "finger joint, 27 fingers of 9.2 mm, both ends full, front finger on top and bottom"
+      "notes": "finger joint, 27 fingers of 9.0 mm, both ends full, front finger on top and bottom"
     },
     {
       "name": "bottom",
@@ -316,20 +318,20 @@
       "blank_mm": [
         18.0,
         474.9,
-        248.556
+        243.356
       ],
       "material": "baltic birch 18 mm",
-      "notes": "finger joint, 27 fingers of 9.2 mm, both ends full, front finger on top and bottom"
+      "notes": "finger joint, 27 fingers of 9.0 mm, both ends full, front finger on top and bottom"
     },
     {
       "name": "baffle",
       "qty": 1,
       "blank_mm": [
-        18.0,
+        12.0,
         376.2,
         436.9
       ],
-      "material": "baltic birch 18 mm",
+      "material": "baltic birch 12 mm",
       "notes": "floating baffle: 1 mm clearance per side, felt strips on the cleats, screwed through the cleats, removable; bottom edge rests on the slot port shelf; speakers front-mounted on T-nuts, 8 bolts on a 294.4 mm circle"
     },
     {
@@ -485,7 +487,7 @@
     {
       "name": "net volume",
       "level": "pass",
-      "message": "chamber 0 net 33.4 L vs sheet 33.4 L (+0.0 percent); inside parts 1.43 L vs sheet allowance 1.43 L"
+      "message": "chamber 0 net 33.4 L vs sheet 33.4 L (-0.0 percent); inside parts 1.48 L vs sheet allowance 1.48 L"
     },
     {
       "name": "stereo balance",
@@ -510,12 +512,12 @@
     {
       "name": "port mouth",
       "level": "warn",
-      "message": "chamber 0 port 0: mouth 116 mm from the cleat back bottom (46 percent of the mouth), under one diameter (149.5 mm)"
+      "message": "chamber 0 port 0: mouth 110 mm from the cleat back bottom (46 percent of the mouth), under one diameter (149.5 mm)"
     },
     {
       "name": "magnet to back",
       "level": "pass",
-      "message": "at least 87.1 mm behind every magnet"
+      "message": "at least 81.9 mm behind every magnet"
     },
     {
       "name": "handle",

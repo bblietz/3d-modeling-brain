@@ -2,7 +2,7 @@
 type: proposal
 customer: Pat Player
 order: rex-roots-1x12
-generated: 2026-09-11
+generated: 2026-09-19
 ---
 <!--
 MaximoCabs voice, from the site on 2026-09-11. Write the four slots in this register:
@@ -32,8 +32,8 @@ You play a 1965 Fender Deluxe Reverb reissue, roots and alt-country, at low-volu
 - Configuration: 1x12
 - Speaker: Eminence Cannabis Rex 12
 - Impedance and wiring: Single driver, 8 ohm
-- External size, width x height x depth: 18.7 x 18.2 x 9.9 in (475 x 463 x 252 mm)
-- Estimated weight, loaded: 32.0 lb (14.5 kg)
+- External size, width x height x depth: 18.7 x 18.6 x 9.6 in (475 x 471 x 243 mm)
+- Estimated weight, loaded: 30.9 lb (14.0 kg)
 
 <!-- slot: why_this_cabinet -->
 - Speaker: the Eminence Cannabis Rex at 8 ohm is your pick, and it is the one we would have reached for: a hemp-cone driver with neutral mids and a smooth, rounded top that takes the edge off a bright blackface amp without going dull, with 50 W of handling for a 22 W combo that is sharing its output with its own speaker.
@@ -62,7 +62,7 @@ This cabinet is designed for a tight, dry low end under a blackface combo on a c
 - Grill cloth: Salt-and-pepper
 - Hardware: Black corners, strap handle, recessed metal jack plate, no piping, rubber feet.
 
-<!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. -->
+<!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. A name prefixed with its folder is the file <folder>/<rest of the name> copied under the prefixed name: images/tolex-fender-black.jpg is tolex/fender-black.jpg. -->
 ![Fender Style Black](images/tolex-fender-black.jpg)
 no swatch on file
 

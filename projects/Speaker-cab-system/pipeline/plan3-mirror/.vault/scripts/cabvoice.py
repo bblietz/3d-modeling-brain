@@ -655,8 +655,9 @@ def power_check(handling_w: list, amp_power_w: float, breakup: str = "moderate",
 MM_PER_INCH = 25.4
 PANEL_MM = 18.0
 BACK_MM = 12.0
-BAFFLE_MM = 18.0
+BAFFLE_MM = 12.0           # 1/2 in void-free 9-ply baltic birch (Brian, 2026-09-19)
 RECESS_MM = 20.0
+SLOT_SHELF_MM = 18.0       # the front slot's shelf is not a baffle: still 18 mm birch
 CUTOUT_MARGIN_MM = 25.0    # cutout edge to brace or divider
 SHELL_MARGIN_MM = 48.0     # cutout edge to shell inner face: grill strip 40 + 2 x 4 mm grill clearance
 CUTOUT_GAP_MM = 68.0       # between the two cutouts of a 2x12: brace or divider 18 + 2 x 25
@@ -740,7 +741,7 @@ def min_internal_width_mm(driver_count: int, cutout_mm: float) -> float:
 def min_internal_height_mm(cutout_mm: float, slot_h_mm: float | None = None) -> float:
     """Cutout plus 44 mm top and bottom; a front slot port adds its height and
     the 18 mm shelf under the baffle."""
-    extra = (slot_h_mm + BAFFLE_MM) if slot_h_mm else 0.0
+    extra = (slot_h_mm + SLOT_SHELF_MM) if slot_h_mm else 0.0
     return cutout_mm + 2 * SHELL_MARGIN_MM + extra
 
 
@@ -915,7 +916,7 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
     if not slot:
         total += chambers * w_c * c2
     if DEFAULT_BAFFLE_CLEAT_EDGES[enclosure] == "all":
-        side_len = h - CLEAT_MM - ((slot_h + BAFFLE_MM) if slot else CLEAT_MM)
+        side_len = h - CLEAT_MM - ((slot_h + SLOT_SHELF_MM) if slot else CLEAT_MM)
         total += 2 * side_len * c2
     # back cleats
     total += 2 * chambers * w_c * c2
@@ -926,7 +927,7 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
         total += 4 * (h_p - CLEAT_MM) * c2
     # center brace, bottom end on the shelf with a slot
     if driver_count == 2 and chambers == 1:
-        total += BRACE_MM[0] * BRACE_MM[1] * (h - ((slot_h + BAFFLE_MM) if slot else 0.0))
+        total += BRACE_MM[0] * BRACE_MM[1] * (h - ((slot_h + SLOT_SHELF_MM) if slot else 0.0))
     # stiffeners
     sw, sd = STIFFENER_MM
     if chambers == 2:
@@ -948,7 +949,7 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
         back_len = h - CLEAT_MM - (CLEAT_MM + JACK_CLEAR_MM + JACK_PLATE_H_MM + CUTOUT_MARGIN_MM)
         if w_c > SPAN_MAX_MM and back_len > 50.0:
             total += chambers * sw * sd * back_len
-    side_span = max(slot_h, h - slot_h - BAFFLE_MM) if slot else h
+    side_span = max(slot_h, h - slot_h - SLOT_SHELF_MM) if slot else h
     if shell and side_span > SPAN_MAX_MM:
         total += 2 * sw * sd * top_len
     # slot shelf, end cheeks, center cheeks
@@ -956,7 +957,7 @@ def inside_parts_l(internal_mm, enclosure: str, driver_count: int, chambers: int
         avail = w_c - (count - 1) * PANEL_MM
         cheek = (avail - count * port.slot_w_mm) / 2.0
         inside = max(shelf - BAFFLE_MM, 0.0)      # the shelf's run through the baffle is outside
-        per_chamber_parts = w_c * inside * BAFFLE_MM + (count - 1) * PANEL_MM * inside * slot_h
+        per_chamber_parts = w_c * inside * SLOT_SHELF_MM + (count - 1) * PANEL_MM * inside * slot_h
         if cheek > 0.5:
             per_chamber_parts += 2 * cheek * inside * slot_h
         total += chambers * per_chamber_parts

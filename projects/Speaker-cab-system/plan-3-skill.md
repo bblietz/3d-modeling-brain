@@ -1389,11 +1389,11 @@ def test_fixture_order_runs_clean_with_every_deliverable(name, tmp_path):
 
 # ---- shell roundover option ----
 ROUNDOVER_MM = 12.7
-SITE_INTERNAL_MM = (472.0, 421.2, 229.4)
+SITE_INTERNAL_MM = (472.0, 421.2, 235.4)
 
 
 def _site_box(enclosure, line, species, roundover_mm, joint="finger"):
-    """Layout of the site box voiced live from internal 472 x 421.2 x 229.4 mm on the matrix speaker."""
+    """Layout of the site box voiced live from internal 472 x 421.2 x 235.4 mm on the matrix speaker."""
     drv = cabvoice.load_speaker(MATRIX_SPEAKER)
     c = cabvoice.Constraints(line=line, species=species)
     v = cabvoice.evaluate([drv], [drv.impedance_ohm[0]], enclosure, TONE, SITE_INTERNAL_MM, constraints=c).to_dict()
@@ -1731,7 +1731,7 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
                         f"under the {max(CLEARANCE_MM, s_h):.0f} mm the slot needs to breathe; {hint}; "
                         "lower the slot height or use a round port")
         return slots, blanks, blockers
-    mat18 = birch(BAFFLE_MM)
+    mat18 = birch(SLOT_SHELF_MM)
     for c, (xa, xb) in enumerate(fr.chambers):
         n = port.count
         avail = (xb - xa) - (n - 1) * DIVIDER_MM
@@ -1745,7 +1745,7 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
         cheek = max((avail - n * w) / 2.0, 0.0)
         sfx = _suffix(spec, c)
         blanks.append(Blank(f"shelf{sfx}", 1, mat18, BIRCH_DENSITY, pos=(xa, fr.y_bf, fr.z0 + s_h),
-                            size=(xb - xa, L, BAFFLE_MM), blank_mm=(BAFFLE_MM, L, xb - xa),
+                            size=(xb - xa, L, SLOT_SHELF_MM), blank_mm=(SLOT_SHELF_MM, L, xb - xa),
                             chamber=c, length_axis="X",
                             notes="slot port shelf 18 mm birch: front edge flush with the baffle face, "
                                   f"depth {L:.0f} mm equals the port length, doubles as the bottom "
@@ -2187,7 +2187,7 @@ description: How a customer's rig and tonal goals become a tone target, a speake
 type: reference
 status: unverified-starting-values
 created: 2026-09-09
-updated: 2026-09-11
+updated: 2026-09-19
 tags: [knowledge, speaker-cab, acoustics, reference]
 ---
 
@@ -2223,7 +2223,7 @@ The customer's own tonal words (the email's `Notes:`) are read before the genre 
 - **semi-open**: between the two: more low end than open, still wide. Open fraction 0.25 versus 0.40.
 - Choice rule: dispersion wide plus low_end not tight leads to open or semi-open; dispersion focused or low_end tight or approach high gain leads to closed-ported. Mic'd cabs prefer closed-ported. Drivers with Qts above 0.9 (the Jensen C12N at 1.02, the WGS ET65 at 0.91, and the WGS Green Beret at 1.18, as printed; the Jensen P12N sits at 0.77) prefer open or semi-open because any practical closed box makes them peaky.
 - Precedence when the rules disagree: a tight low end beats wide dispersion (closed or closed-ported over open-back); a low-end shifter (baritone, 7-string, drop tunings, bass VI) beats wide and takes closed-ported at the lowest tuning in range, applied with the engine's `--fb` flag. The override may take any value in the engine's own tuning range, 45 to 90 Hz (`FB_MIN_HZ` to `FB_MAX_HZ`, the range every proposed Fb is clamped to); the engine does not check the flag, so the skill keeps it in that range. The low-end-shifter rule starts at 45 Hz, the bottom of the range, and raises it in 5 Hz steps while the port does not fit the box (a higher tuning needs a shorter port). Raising Fb does not cure a boomy sheet, and a low-end-shifter sheet needs no cure: the shifter sets `low_end` big, and boomy serves a big target whether the customer asked for big or a shifter set it (the bridge table below), so judge that sheet by its character word, which should read boomy or punchy, not by a warning. For any other target the engine's own remedy grows the box in 10 percent steps to 68 L, then lowers Fb in 5 Hz steps to 45 Hz, and the sheet warns when it still reads boomy; that warning is what step 4 of the ranking reacts to. Starting values; listening notes decide.
-- Evaluate first: a standard-size order (the site's 20 x 18 x 11 in box, one driver, no size limit, no head to match) is evaluated before anything is proposed, with the site port on a ported box: `cabvoice.py evaluate --internal 472 421.2 229.4 --port-diameter 101.5 --port-length 40` (the site port of the calibration table; box and port fix Fb, the speaker sets the character) plus the order's speaker, impedance, enclosure, tone, and line. The site box is accepted when the sheet's character is the bridge word for the target's `low_end` in the table below; otherwise, or when a size limit, a pinned width, a second driver, or a low-end shifter applies, the skill runs `propose`. Open and semi-open boxes carry no character word (the estimate reports the cancellation frequency, about 370 Hz for any box near the site depth), so an open-back site box is accepted whenever the rules above chose open or semi-open; only a size limit, a pinned width, or a second driver makes it propose.
+- Evaluate first: a standard-size order (the site's 20 x 18 x 11 in box, one driver, no size limit, no head to match) is evaluated before anything is proposed, with the site port on a ported box: `cabvoice.py evaluate --internal 472 421.2 235.4 --port-diameter 101.5 --port-length 40` (the site port of the calibration table; box and port fix Fb, the speaker sets the character) plus the order's speaker, impedance, enclosure, tone, and line. The site box is accepted when the sheet's character is the bridge word for the target's `low_end` in the table below; otherwise, or when a size limit, a pinned width, a second driver, or a low-end shifter applies, the skill runs `propose`. Open and semi-open boxes carry no character word (the estimate reports the cancellation frequency, about 364 Hz for any box near the site depth), so an open-back site box is accepted whenever the rules above chose open or semi-open; only a size limit, a pinned width, or a second driver makes it propose.
 
 | Predicted character | Enclosure | Serves `low_end` |
 |---|---|---|
@@ -2316,31 +2316,31 @@ The Key column holds the canonical genre keys: every catalog note's Genres line 
 
 ## Calibration table
 
-Calibration table, every number prediction_status "unverified, ears only". Generated 2026-09-15 with `evaluate` (closed, site box 472 x 421.2 x 229.4 mm internal) and `propose` (closed-ported, low_end balanced), 16 ohm where the note lists it (voiced with the note's 8 ohm T/S set, see Model limits), amp 40 W.
+Calibration table, every number prediction_status "unverified, ears only". Generated 2026-09-19 with `evaluate` (closed, site box 472 x 421.2 x 235.4 mm internal) and `propose` (closed-ported, low_end balanced), 16 ohm where the note lists it (voiced with the note's 8 ohm T/S set, see Model limits), amp 40 W.
 
 | Speaker | Data | Net L in site box | Closed Qtc | Closed character | Closed F3 Hz | Proposed ported net L | Fb Hz | Ported character | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| [[celestion-blue]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) | speaker handling 15 W is below the amp's 40 W |
-| [[celestion-cream]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
-| [[celestion-g12-65-heritage]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 68 | unpredicted (no Thiele-Small data) |  |
-| [[celestion-g12h-30-anniversary]] | analog | 42.5 | 0.755 | tight | 105 | 30.0 | 68 | punchy | speaker handling 30 W is below the amp's 40 W; celestion-g12h-30-anniversary: Thiele-Small volume 29.5 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L |
-| [[celestion-g12h-75-creamback]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
-| [[celestion-g12m-25-greenback]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) | speaker handling 25 W is below the amp's 40 W |
-| [[celestion-g12m-65-creamback]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
-| [[celestion-gold]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
-| [[celestion-heritage-g12h55]] | third-party | 42.5 | 0.605 | tight | 109 | 68.0 | 45 | flat | speaker handling 30 W is below the amp's 40 W; celestion-heritage-g12h55: Thiele-Small volume 71.3 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 68.0 L |
-| [[celestion-vintage-30]] | analog | 42.5 | 0.701 | tight | 105 | 37.9 | 60 | flat |  |
-| [[eminence-cannabis-rex]] | datasheet | 42.0 | 0.924 | balanced | 115 | 45.5 | 77 | punchy |  |
-| [[eminence-red-white-and-blues]] | datasheet | 42.0 | 1.040 | big | 114 | 66.0 | 73 | punchy | port too short (6.5 mm) for Fb 78 Hz in 66.0 L; clamped to 24 mm; a larger port, a lower Fb, or a smaller box lengthens it; port clamped at the size cap: tuned 73.5 Hz, target 78.0 Hz; lower Fb or use a smaller box |
-| [[eminence-swamp-thang]] | datasheet | 41.8 | 0.747 | tight | 131 | 41.3 | 78 | flat |  |
-| [[eminence-texas-heat]] | datasheet | 42.0 | 0.967 | balanced | 95 | 50.9 | 63 | punchy |  |
-| [[eminence-tonker]] | datasheet | 41.8 | 0.633 | tight | 138 | 34.1 | 71 | flat |  |
-| [[jensen-c12n]] | datasheet | 42.5 | 1.262 | peaky | 102 | 64.3 | 45 | boomy | jensen-c12n: Thiele-Small volume 22.6 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L; ported alignment stays boomy at the practical limits; consider a closed back or a lower-Qts driver |
-| [[jensen-p12n]] | datasheet | 42.5 | 1.037 | big | 95 | 67.4 | 62 | punchy |  |
-| [[weber-silver-bell-alnico-hemp]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 64 | unpredicted (no Thiele-Small data) |  |
-| [[wgs-et65]] | estimated | 42.5 | 1.235 | peaky | 98 | 63.4 | 49 | punchy |  |
-| [[wgs-green-beret]] | estimated | 42.5 | 1.454 | peaky | 109 | 64.3 | 45 | boomy | speaker handling 25 W is below the amp's 40 W; wgs-green-beret: Thiele-Small volume 22.0 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L; ported alignment stays boomy at the practical limits; consider a closed back or a lower-Qts driver |
-| [[wgs-veteran-30]] | estimated | 42.5 | 1.023 | big | 103 | 62.5 | 71 | punchy |  |
+| [[celestion-blue]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) | speaker handling 15 W is below the amp's 40 W |
+| [[celestion-cream]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
+| [[celestion-g12-65-heritage]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 68 | unpredicted (no Thiele-Small data) |  |
+| [[celestion-g12h-30-anniversary]] | analog | 43.7 | 0.751 | tight | 105 | 30.0 | 68 | punchy | speaker handling 30 W is below the amp's 40 W; celestion-g12h-30-anniversary: Thiele-Small volume 29.5 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L |
+| [[celestion-g12h-75-creamback]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
+| [[celestion-g12m-25-greenback]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) | speaker handling 25 W is below the amp's 40 W |
+| [[celestion-g12m-65-creamback]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
+| [[celestion-gold]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
+| [[celestion-heritage-g12h55]] | third-party | 43.7 | 0.600 | tight | 109 | 68.0 | 45 | flat | speaker handling 30 W is below the amp's 40 W; celestion-heritage-g12h55: Thiele-Small volume 71.3 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 68.0 L |
+| [[celestion-vintage-30]] | analog | 43.7 | 0.697 | tight | 105 | 37.9 | 60 | flat |  |
+| [[eminence-cannabis-rex]] | datasheet | 43.2 | 0.917 | balanced | 115 | 45.5 | 77 | punchy |  |
+| [[eminence-red-white-and-blues]] | datasheet | 43.2 | 1.034 | big | 113 | 66.0 | 73 | punchy | port too short (6.5 mm) for Fb 78 Hz in 66.0 L; clamped to 24 mm; a larger port, a lower Fb, or a smaller box lengthens it; port clamped at the size cap: tuned 73.5 Hz, target 78.0 Hz; lower Fb or use a smaller box |
+| [[eminence-swamp-thang]] | datasheet | 43.0 | 0.742 | tight | 131 | 41.3 | 78 | flat |  |
+| [[eminence-texas-heat]] | datasheet | 43.2 | 0.959 | balanced | 95 | 50.9 | 63 | punchy |  |
+| [[eminence-tonker]] | datasheet | 43.0 | 0.629 | tight | 138 | 34.1 | 71 | flat |  |
+| [[jensen-c12n]] | datasheet | 43.7 | 1.256 | peaky | 101 | 64.3 | 45 | boomy | jensen-c12n: Thiele-Small volume 22.6 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L; ported alignment stays boomy at the practical limits; consider a closed back or a lower-Qts driver |
+| [[jensen-p12n]] | datasheet | 43.7 | 1.031 | big | 95 | 67.4 | 62 | punchy |  |
+| [[weber-silver-bell-alnico-hemp]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 64 | unpredicted (no Thiele-Small data) |  |
+| [[wgs-et65]] | estimated | 43.7 | 1.227 | peaky | 98 | 63.4 | 49 | punchy |  |
+| [[wgs-green-beret]] | estimated | 43.7 | 1.447 | peaky | 109 | 64.3 | 45 | boomy | speaker handling 25 W is below the amp's 40 W; wgs-green-beret: Thiele-Small volume 22.0 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L; ported alignment stays boomy at the practical limits; consider a closed back or a lower-Qts driver |
+| [[wgs-veteran-30]] | estimated | 43.7 | 1.017 | big | 102 | 62.5 | 71 | punchy |  |
 
 ## Sources
 
@@ -2521,7 +2521,7 @@ description: Construction rules and starting values for MaximoCabs guitar speake
 type: reference
 status: unverified-starting-values
 created: 2026-09-09
-updated: 2026-09-16
+updated: 2026-09-19
 tags: [knowledge, speaker-cab, woodworking, reference]
 ---
 
@@ -2543,8 +2543,8 @@ remedy order of the skill's port loop.
 
 | Material | Use | Thickness | Density | Source |
 |---|---|---|---|---|
-| Baltic birch plywood, 13-ply | Tolex line shell, baffle, cleats, brace, divider, shelf | 18 mm (3/4 in nominal) | 680 kg/m3 | site content; density is the common trade figure, unverified |
-| Baltic birch plywood | Back panels, open-back panels, grill frame strips, port flange rings | 12 mm (1/2 in nominal) | 680 kg/m3 | starting value |
+| Baltic birch plywood, 13-ply | Tolex line shell, cleats, brace, divider, slot shelf | 18 mm (3/4 in nominal) | 680 kg/m3 | site content; density is the common trade figure, unverified |
+| Baltic birch plywood, 9-ply, void-free | Baffles (both lines), back panels, open-back panels, grill frame strips, port flange rings | 12 mm (1/2 in nominal) | 680 kg/m3 | site content; baffle set here by Brian, 2026-09-19 |
 | Black walnut, resawn | Hardwood line shell | 19 mm | 610 kg/m3 | https://www.wood-database.com/black-walnut/ |
 | Black cherry, resawn | Hardwood line shell | 19 mm | 560 kg/m3 | https://www.wood-database.com/black-cherry/ |
 | Hard maple, resawn | Hardwood line shell | 19 mm | 705 kg/m3 | https://www.wood-database.com/hard-maple/ |
@@ -2570,8 +2570,8 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 ## Baffle
 
-- 18 mm birch on both lines. Front face 20 mm behind the front edge of the shell (the recess that holds the grill frame). Driver mounts from the front of the baffle onto T-nuts fitted from the back. Bolts M6 or 1/4-20, 6.5 mm holes on the note's bolt circle, first hole at twelve o'clock.
-- **Floating (default)**: 1 mm clearance to each side, on 18 x 18 mm cleats glued to the shell, felt strip between cleat and baffle, held with screws through the cleats, removable. Site: "floating 3/4 in birch with felt isolation". Which edges carry cleats is the Aesthetics.baffle_cleat_edges option, and None takes the enclosure default: all four on a closed or closed-ported box, where the perimeter cleats hold the seal the volume model assumes, and top and bottom only on an open or semi-open box, which has no sealed volume to protect, so it takes fewer parts and leaves the baffle free at its sides. Unverified starting value pending listening notes (Brian, 2026-09-13).
+- 12 mm (1/2 in) void-free 9-ply birch on both lines (Brian, 2026-09-19; the site has advertised this baffle since 2026-09-14). Front face 20 mm behind the front edge of the shell (the recess that holds the grill frame). Driver mounts from the front of the baffle onto T-nuts fitted from the back. Bolts M6 or 1/4-20, 6.5 mm holes on the note's bolt circle, first hole at twelve o'clock. The T-nut barrel must be shorter than the 12 mm baffle, so it cannot stand proud of the front face under the speaker flange.
+- **Floating (default)**: 1 mm clearance to each side, on 18 x 18 mm cleats glued to the shell, felt strip between cleat and baffle, held with screws through the cleats, removable. Site: "floating 1/2 in void-free 9-ply Baltic birch with felt isolation". Which edges carry cleats is the Aesthetics.baffle_cleat_edges option, and None takes the enclosure default: all four on a closed or closed-ported box, where the perimeter cleats hold the seal the volume model assumes, and top and bottom only on an open or semi-open box, which has no sealed volume to protect, so it takes fewer parts and leaves the baffle free at its sides. Unverified starting value pending listening notes (Brian, 2026-09-13).
 - **Fixed (option)**: glued into a 6 mm deep dado in all four shell panels (three with a front slot port, where the shelf carries the baffle's bottom edge), blank 12 mm larger in width and height, no baffle cleats. On hardwood it is glued along the full dado too, since the dados run with the grain (see Wood movement).
 - Driver cutout, bolt circle, bolt count, frame diameter, and magnet diameter come from the speaker note. Typical: Celestion 283 mm cutout on a 297 mm circle, Eminence 281 mm on 294 mm, Jensen 277 mm on 293.5 mm; frames 306 to 310 mm, so the flange overhangs the cutout by 11 to 15 mm; flange thickness 5 mm starting value.
 - **Margins**: at least 48 mm from a cutout edge to any shell panel (grill strip 40 plus 2 x the 4 mm grill clearance below), 25 mm from a cutout edge to the brace or divider, so the two cutouts of a 2x12 sit 68 mm apart (18 plus 2 x 25). Minimum internal width = n x cutout + (n - 1) x 68 + 2 x 48, the same for mono and stereo since the divider replaces the brace (2x12 with 283 mm cutouts: 730 mm internal, 766 mm external, 30.2 in). Minimum internal height = cutout + 96, plus slot height + 18 with a front slot port.
@@ -2619,7 +2619,7 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 ## Site defaults (calibration)
 
 - External 20 x 18 x 11 in (508 x 457.2 x 279.4 mm), 1x12 closed-ported.
-- Internal with the rules above: 472 x 421.2 x 229.4 mm, gross 45.6 L, net about 42.5 L closed and 42.1 L ported after one driver and the inside parts.
+- Internal with the rules above: 472 x 421.2 x 235.4 mm, gross 46.8 L, net about 43.7 L closed and 43.3 L ported after one driver and the inside parts. The external size is the fixed promise, so the 12 mm baffle (from 18 mm) gave the inside 6 mm more depth.
 - The engine voices both lines with the tolex line's 18 mm walls; the hardwood line's 19 mm panels take about 1 percent more of the same external size, inside the model's error, so no separate voicing. The line and species travel in voicing.json's construction block so the generator picks the density and joinery.
 - A slot-ported 1x12 on the site box grows from 18.0 to 18.6 in tall through the engine's height floor; a 2x12 starts at 30.2 in wide.
 ````
@@ -2794,15 +2794,15 @@ def test_site_default_rows_are_the_expected_verdicts(tmp_path):
     assert rows["power"].verdict == "warn"
     assert rows["port air speed"].value == "2.0 m/s against the 17 m/s limit"
     assert rows["port air speed"].verdict == "pass"
-    assert rows["alignment"].value == "punchy; Fb 67 Hz, F3 69 Hz"
-    assert rows["stock thickness"].value == "tolex line: shell 18 mm, baffle 18 mm, back 12 mm"
+    assert rows["alignment"].value == "punchy; Fb 66 Hz, F3 68 Hz"
+    assert rows["stock thickness"].value == "tolex line: shell 18 mm, baffle 12 mm, back 12 mm"
     assert (rows["grain and show face"].value, rows["grain and show face"].verdict) == ("n/a, tolex line", "pass")
     assert rows["joinery fit"].value == "finger corners, floating baffle"
     assert rows["stock yield"].value.startswith("22 blanks, ")
     assert "sheets of 2440 x 1220 mm at 100 percent without nesting" in rows["stock yield"].value
     assert rows["wood movement"].value == "n/a; the climate comes from the brief"
-    assert rows["transport"].value == "20 x 18 x 11 in W x H x D, 37.5 lb; the vehicle and doorway come from the brief"
-    assert rows["weight vs limit"].value == "17.0 kg (37.5 lb); the limit comes from the brief"
+    assert rows["transport"].value == "20 x 18 x 11 in W x H x D, 36.3 lb; the vehicle and doorway come from the brief"
+    assert rows["weight vs limit"].value == "16.5 kg (36.3 lb); the limit comes from the brief"
     assert rows["size vs limit"].value == "508 x 457 x 279 mm (20 x 18 x 11 in) W x H x D; the limits come from the brief"
     assert sum(1 for r in rows.values() if r.verdict == cabreport.OPERATOR) == 7
 
@@ -2820,7 +2820,7 @@ def test_site_default_facts(tmp_path):
     assert f["wiring"] == "Single driver, 16 ohm"
     assert f["external_in"] == "20 x 18 x 11 in"
     assert f["external_mm"] == "508 x 457 x 279 mm"
-    assert (f["mass_kg"], f["mass_lb"]) == ("17.0", "37.5")
+    assert (f["mass_kg"], f["mass_lb"]) == ("16.5", "36.3")
     assert f["finish"] == "Fender Style Black"
     assert f["grill_cloth"] == "British Small Weave Cane"
     assert f["hardware"] == "Black corners, strap handle, recessed metal jack plate, no piping, rubber feet."
@@ -3754,7 +3754,7 @@ No CAD before Brian approves this phase.
    cd /home/brian/ClaudeProjects/3d-modeling-brain
    /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/cabvoice.py evaluate --speaker <slug> --impedance <ohm> \
      --enclosure closed-ported --tone projects/Cab-<...>/tone.json --line <line> [--species <species>] \
-     --internal 472 421.2 229.4 --port-diameter 101.5 --port-length 40 \
+     --internal 472 421.2 235.4 --port-diameter 101.5 --port-length 40 \
      --name Cab-<...> --out projects/Cab-<...>/ [--accept-impedance-mismatch]
    ```
 

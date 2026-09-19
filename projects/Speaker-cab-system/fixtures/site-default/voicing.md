@@ -2,7 +2,7 @@
 name: site-default-voicing
 type: voicing-sheet
 project: site-default
-created: 2026-09-11
+created: 2026-09-19
 status: unverified-prediction
 tags: [speaker-cab, voicing]
 ---
@@ -34,19 +34,19 @@ Mode: evaluate. Every number here is a prediction: unverified, ears only.
 
 | Quantity | Value |
 |---|---|
-| Net per driver | 42.1 L (1.49 cu ft) |
-| Net per chamber | 42.1 L (1.49 cu ft) |
-| Net total | 42.1 L (1.49 cu ft) |
+| Net per driver | 43.3 L (1.53 cu ft) |
+| Net per chamber | 43.3 L (1.53 cu ft) |
+| Net total | 43.3 L (1.53 cu ft) |
 | Driver displacement | 1.50 L |
 | Brace | 0.00 L |
 | Port air inside the box | 0.23 L |
 | Divider | 0.00 L |
-| Inside parts (cleats, stiffeners, shelf, ring) | 1.80 L |
-| Gross internal | 45.6 L (1.61 cu ft) |
+| Inside parts (cleats, stiffeners, shelf, ring) | 1.81 L |
+| Gross internal | 46.8 L (1.65 cu ft) |
 
 ## Dimensions
 
-- Internal: 472 x 421 x 229 mm (18.58 x 16.58 x 9.03 in, W x H x D)
+- Internal: 472 x 421 x 235 mm (18.58 x 16.58 x 9.27 in, W x H x D)
 - External: 508 x 457 x 279 mm (20.00 x 18.00 x 11.00 in, W x H x D)
 - Chamber internal width: 472 mm
 - Construction: tolex line, walls baltic birch plywood; voiced with 18 mm walls
@@ -60,21 +60,21 @@ Mode: evaluate. Every number here is a prediction: unverified, ears only.
 
 - Model: thiele-small vented
 - Character: punchy
-- Fb: 67.37 Hz
-- F3: 69.23 Hz
-- Peak: 1.26 dB
+- Fb: 66.44 Hz
+- F3: 68.34 Hz
+- Peak: 1.18 dB
 
 | Hz | dB (relative to passband) |
 |---|---|
-| 50 | -9.1 |
-| 64 | -3.9 |
-| 80 | -1.4 |
-| 101 | +0.4 |
-| 127 | +1.2 |
-| 160 | +1.3 |
-| 202 | +1.0 |
+| 50 | -8.7 |
+| 64 | -3.7 |
+| 80 | -1.3 |
+| 101 | +0.3 |
+| 127 | +1.1 |
+| 160 | +1.2 |
+| 202 | +0.9 |
 | 254 | +0.7 |
-| 320 | +0.5 |
+| 320 | +0.4 |
 | 400 | +0.3 |
 
 ## Wiring
@@ -88,7 +88,7 @@ Mode: evaluate. Every number here is a prediction: unverified, ears only.
 
 ## Warnings
 
-- width and depth are within 5 percent of 2:1 (2.06); coincident standing waves
+- width and depth are within 5 percent of 2:1 (2.01); coincident standing waves
 - driver displacement assumed 1.5 L per driver
 - handling 30 W is under the 45 W target (1.5 x amp power)
 

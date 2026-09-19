@@ -32,8 +32,9 @@ import cabvoice  # noqa: E402  (sibling module: constants and port_dims)
 MM_PER_INCH = 25.4
 PANEL_MM = {"tolex": 18.0, "hardwood": 19.0}   # shell thickness per line
 BACK_MM = 12.0
-BAFFLE_MM = 18.0
+BAFFLE_MM = 12.0          # 1/2 in void-free 9-ply baltic birch (Brian, 2026-09-19)
 RECESS_MM = 20.0          # baffle front face behind the front edge (locked)
+SLOT_SHELF_MM = 18.0      # the front slot's shelf is not a baffle: still 18 mm birch
 CLEAT_MM = 18.0
 GRILL_STRIP_T_MM = 12.0
 GRILL_STRIP_W_MM = 40.0
@@ -82,6 +83,7 @@ YARD_M = 0.9144
 
 assert RECESS_MM == cabvoice.RECESS_MM
 assert BAFFLE_MM == cabvoice.BAFFLE_MM
+assert SLOT_SHELF_MM == cabvoice.SLOT_SHELF_MM
 assert BACK_MM == cabvoice.BACK_MM
 assert CUTOUT_MARGIN_MM == cabvoice.CUTOUT_MARGIN_MM
 assert SHELL_MARGIN_MM == cabvoice.SHELL_MARGIN_MM
@@ -418,7 +420,7 @@ class Frame:
 
     @property
     def shelf_top(self) -> float:
-        return self.z0 + self.slot_h + BAFFLE_MM
+        return self.z0 + self.slot_h + SLOT_SHELF_MM
 
 
 def species_density(name) -> float | None:
@@ -566,7 +568,7 @@ def frame(spec: CabSpec) -> Frame:
         chambers = [(x0, -DIVIDER_MM / 2), (DIVIDER_MM / 2, x1)]
     else:
         chambers = [(x0, x1)]
-    z_vis0 = z0 + slot_h + BAFFLE_MM if slot_h else z0
+    z_vis0 = z0 + slot_h + SLOT_SHELF_MM if slot_h else z0
     if spec.aesthetics.baffle_mount == "floating":
         x_b0, x_b1 = x0 + BAFFLE_CLEARANCE_MM, x1 - BAFFLE_CLEARANCE_MM
         z_b0 = z_vis0 if slot_h else z0 + BAFFLE_CLEARANCE_MM
@@ -1405,7 +1407,7 @@ def round_ports(spec: CabSpec, fr: Frame, envelopes: list, obstacles: list) -> t
 
 def _glue_up(t: float) -> str:
     """Cheeks thicker than one 18 mm sheet are laminated."""
-    return "; glued up from 18 mm birch" if t > BAFFLE_MM + 1e-6 else ""
+    return "; glued up from 18 mm birch" if t > SLOT_SHELF_MM + 1e-6 else ""
 
 
 def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
@@ -1426,7 +1428,7 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
                         f"under the {max(CLEARANCE_MM, s_h):.0f} mm the slot needs to breathe; {hint}; "
                         "lower the slot height or use a round port")
         return slots, blanks, blockers
-    mat18 = birch(BAFFLE_MM)
+    mat18 = birch(SLOT_SHELF_MM)
     for c, (xa, xb) in enumerate(fr.chambers):
         n = port.count
         avail = (xb - xa) - (n - 1) * DIVIDER_MM
@@ -1440,7 +1442,7 @@ def slot_ports(spec: CabSpec, fr: Frame) -> tuple:
         cheek = max((avail - n * w) / 2.0, 0.0)
         sfx = _suffix(spec, c)
         blanks.append(Blank(f"shelf{sfx}", 1, mat18, BIRCH_DENSITY, pos=(xa, fr.y_bf, fr.z0 + s_h),
-                            size=(xb - xa, L, BAFFLE_MM), blank_mm=(BAFFLE_MM, L, xb - xa),
+                            size=(xb - xa, L, SLOT_SHELF_MM), blank_mm=(SLOT_SHELF_MM, L, xb - xa),
                             chamber=c, length_axis="X",
                             notes="slot port shelf 18 mm birch: front edge flush with the baffle face, "
                                   f"depth {L:.0f} mm equals the port length, doubles as the bottom "

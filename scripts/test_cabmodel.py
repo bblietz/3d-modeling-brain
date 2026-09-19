@@ -34,7 +34,7 @@ SPEAKER = {"slug": "celestion-g12h-30-anniversary", "cutout_mm": 283, "bolt_circ
 def sheet(external=(508.0, 457.2, 279.4), enclosure="closed-ported", drivers=1, chambers=1,
           jack="mono", line="tolex", species=None, port=None, net=43.5, open_fraction=None):
     W, H, D = external
-    internal = [W - 36.0, H - 36.0, D - 50.0]
+    internal = [W - 36.0, H - 36.0, D - 44.0]
     if port == "round":
         port = {"shape": "round", "diameter_mm": 77.3, "slot_w_mm": None, "slot_h_mm": None,
                 "length_mm": 40.0, "location": "rear", "count": drivers // chambers}
@@ -45,7 +45,7 @@ def sheet(external=(508.0, 457.2, 279.4), enclosure="closed-ported", drivers=1, 
             "enclosure": {"type": enclosure, "driver_count": drivers, "chambers": chambers,
                           "jack_config": jack, "open_fraction": open_fraction},
             "box": {"external_mm": list(external), "internal_mm": internal},
-            "construction": {"panel_mm": 18.0, "back_mm": 12.0, "baffle_mm": 18.0, "recess_mm": 20.0,
+            "construction": {"panel_mm": 18.0, "back_mm": 12.0, "baffle_mm": 12.0, "recess_mm": 20.0,
                              "line": line, "species": species,
                              "wall_material": "baltic birch plywood" if line == "tolex" else species},
             "volumes": {"net_total_l": net, "per_chamber_net_l": net / chambers},
@@ -501,11 +501,11 @@ def test_fixture_order_runs_clean_with_every_deliverable(name, tmp_path):
 
 # ---- shell roundover option ----
 ROUNDOVER_MM = 12.7
-SITE_INTERNAL_MM = (472.0, 421.2, 229.4)
+SITE_INTERNAL_MM = (472.0, 421.2, 235.4)
 
 
 def _site_box(enclosure, line, species, roundover_mm, joint="finger"):
-    """Layout of the site box voiced live from internal 472 x 421.2 x 229.4 mm on the matrix speaker."""
+    """Layout of the site box voiced live from internal 472 x 421.2 x 235.4 mm on the matrix speaker."""
     drv = cabvoice.load_speaker(MATRIX_SPEAKER)
     c = cabvoice.Constraints(line=line, species=species)
     v = cabvoice.evaluate([drv], [drv.impedance_ohm[0]], enclosure, TONE, SITE_INTERNAL_MM, constraints=c).to_dict()

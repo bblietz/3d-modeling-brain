@@ -1,6 +1,6 @@
 {
   "name": "sample-roots-1x12",
-  "generated": "2026-09-14",
+  "generated": "2026-09-19",
   "line": "tolex",
   "species": null,
   "corner_joint": "finger",
@@ -14,6 +14,7 @@
     "baffle_mount": "floating",
     "baffle_cleat_edges": "all",
     "jack_plate_position": "bottom",
+    "open_back_style": "split",
     "handle": "strap",
     "handle_screw_spacing_mm": 228.6,
     "recessed_handle_cutout_mm": [
@@ -35,22 +36,23 @@
     "tolex_color": "Fender Style Black",
     "grill_cloth": "Salt-and-pepper",
     "finish": "",
-    "roundover_mm": null
+    "roundover_mm": null,
+    "accent_stripes": []
   },
   "external_mm": [
-    459.634,
+    454.155,
     415.0,
-    255.893
+    252.546
   ],
   "external_in": [
-    18.1,
+    17.88,
     16.34,
-    10.07
+    9.94
   ],
   "internal_mm": [
-    423.634,
+    418.155,
     379.0,
-    205.893
+    208.546
   ],
   "enclosure": {
     "type": "closed-ported",
@@ -64,7 +66,7 @@
   ],
   "volumes": {
     "gross_l": [
-      33.058
+      33.051
     ],
     "net_l": [
       30.0
@@ -75,17 +77,17 @@
     "delta_pct": [
       -0.0
     ],
-    "inside_parts_l": 1.242,
-    "sheet_inside_parts_l": 1.242
+    "inside_parts_l": 1.234,
+    "sheet_inside_parts_l": 1.234
   },
   "mass": {
-    "total_kg": 14.694,
-    "parts_kg": 8.994,
+    "total_kg": 14.158,
+    "parts_kg": 8.458,
     "speakers_kg": 4.7,
     "hardware_kg": 1.0,
     "com_mm": [
-      1.759,
-      96.824,
+      1.826,
+      95.937,
       207.5
     ]
   },
@@ -94,7 +96,7 @@
       "item": "jack plate",
       "position_mm": [
         0.0,
-        255.893,
+        252.546,
         96.0
       ],
       "cutout_mm": [
@@ -108,7 +110,7 @@
       "item": "strap handle",
       "position_mm": [
         0.0,
-        127.947,
+        126.273,
         415.0
       ],
       "cutout_mm": null,
@@ -118,7 +120,7 @@
     {
       "item": "foot",
       "position_mm": [
-        -177.817,
+        -175.078,
         52.0,
         0.0
       ],
@@ -129,8 +131,8 @@
     {
       "item": "foot",
       "position_mm": [
-        -177.817,
-        203.893,
+        -175.078,
+        200.546,
         0.0
       ],
       "cutout_mm": null,
@@ -140,7 +142,7 @@
     {
       "item": "foot",
       "position_mm": [
-        177.817,
+        175.078,
         52.0,
         0.0
       ],
@@ -151,8 +153,8 @@
     {
       "item": "foot",
       "position_mm": [
-        177.817,
-        203.893,
+        175.078,
+        200.546,
         0.0
       ],
       "cutout_mm": null,
@@ -162,7 +164,7 @@
     {
       "item": "corner",
       "position_mm": [
-        -229.817,
+        -227.078,
         0.0,
         0.0
       ],
@@ -173,51 +175,7 @@
     {
       "item": "corner",
       "position_mm": [
-        -229.817,
-        0.0,
-        415.0
-      ],
-      "cutout_mm": null,
-      "panel": "",
-      "notes": "metal corner, black; keep-out 50 mm for every cutout"
-    },
-    {
-      "item": "corner",
-      "position_mm": [
-        -229.817,
-        255.893,
-        0.0
-      ],
-      "cutout_mm": null,
-      "panel": "",
-      "notes": "metal corner, black; keep-out 50 mm for every cutout"
-    },
-    {
-      "item": "corner",
-      "position_mm": [
-        -229.817,
-        255.893,
-        415.0
-      ],
-      "cutout_mm": null,
-      "panel": "",
-      "notes": "metal corner, black; keep-out 50 mm for every cutout"
-    },
-    {
-      "item": "corner",
-      "position_mm": [
-        229.817,
-        0.0,
-        0.0
-      ],
-      "cutout_mm": null,
-      "panel": "",
-      "notes": "metal corner, black; keep-out 50 mm for every cutout"
-    },
-    {
-      "item": "corner",
-      "position_mm": [
-        229.817,
+        -227.078,
         0.0,
         415.0
       ],
@@ -228,8 +186,8 @@
     {
       "item": "corner",
       "position_mm": [
-        229.817,
-        255.893,
+        -227.078,
+        252.546,
         0.0
       ],
       "cutout_mm": null,
@@ -239,8 +197,52 @@
     {
       "item": "corner",
       "position_mm": [
-        229.817,
-        255.893,
+        -227.078,
+        252.546,
+        415.0
+      ],
+      "cutout_mm": null,
+      "panel": "",
+      "notes": "metal corner, black; keep-out 50 mm for every cutout"
+    },
+    {
+      "item": "corner",
+      "position_mm": [
+        227.078,
+        0.0,
+        0.0
+      ],
+      "cutout_mm": null,
+      "panel": "",
+      "notes": "metal corner, black; keep-out 50 mm for every cutout"
+    },
+    {
+      "item": "corner",
+      "position_mm": [
+        227.078,
+        0.0,
+        415.0
+      ],
+      "cutout_mm": null,
+      "panel": "",
+      "notes": "metal corner, black; keep-out 50 mm for every cutout"
+    },
+    {
+      "item": "corner",
+      "position_mm": [
+        227.078,
+        252.546,
+        0.0
+      ],
+      "cutout_mm": null,
+      "panel": "",
+      "notes": "metal corner, black; keep-out 50 mm for every cutout"
+    },
+    {
+      "item": "corner",
+      "position_mm": [
+        227.078,
+        252.546,
         415.0
       ],
       "cutout_mm": null,
@@ -262,19 +264,19 @@
       "item": "tolex",
       "position_mm": [
         0.0,
-        127.947,
+        126.273,
         207.5
       ],
       "cutout_mm": null,
       "panel": "",
-      "notes": "Fender Style Black, 54 in roll: 0.70 m (0.76 yd), six faces x 1.15"
+      "notes": "Fender Style Black, 54 in roll: 0.68 m (0.75 yd), six faces x 1.15"
     }
   ],
   "tolex": {
     "roll_in": 54,
-    "area_m2": 0.829,
-    "length_m": 0.695,
-    "length_yd": 0.76
+    "area_m2": 0.816,
+    "length_m": 0.684,
+    "length_yd": 0.748
   },
   "parts": [
     {
@@ -283,10 +285,10 @@
       "blank_mm": [
         18.0,
         415.0,
-        255.893
+        252.546
       ],
       "material": "baltic birch 18 mm",
-      "notes": "finger joint, 29 fingers of 8.8 mm, both ends full, front finger on top and bottom"
+      "notes": "finger joint, 29 fingers of 8.7 mm, both ends full, front finger on top and bottom"
     },
     {
       "name": "side_right",
@@ -294,42 +296,42 @@
       "blank_mm": [
         18.0,
         415.0,
-        255.893
+        252.546
       ],
       "material": "baltic birch 18 mm",
-      "notes": "finger joint, 29 fingers of 8.8 mm, both ends full, front finger on top and bottom"
+      "notes": "finger joint, 29 fingers of 8.7 mm, both ends full, front finger on top and bottom"
     },
     {
       "name": "top",
       "qty": 1,
       "blank_mm": [
         18.0,
-        459.634,
-        255.893
+        454.155,
+        252.546
       ],
       "material": "baltic birch 18 mm",
-      "notes": "finger joint, 29 fingers of 8.8 mm, both ends full, front finger on top and bottom"
+      "notes": "finger joint, 29 fingers of 8.7 mm, both ends full, front finger on top and bottom"
     },
     {
       "name": "bottom",
       "qty": 1,
       "blank_mm": [
         18.0,
-        459.634,
-        255.893
+        454.155,
+        252.546
       ],
       "material": "baltic birch 18 mm",
-      "notes": "finger joint, 29 fingers of 8.8 mm, both ends full, front finger on top and bottom"
+      "notes": "finger joint, 29 fingers of 8.7 mm, both ends full, front finger on top and bottom"
     },
     {
       "name": "baffle",
       "qty": 1,
       "blank_mm": [
-        18.0,
+        12.0,
         377.0,
-        421.634
+        416.155
       ],
-      "material": "baltic birch 18 mm",
+      "material": "baltic birch 12 mm",
       "notes": "floating baffle: 1 mm clearance per side, felt strips on the cleats, screwed through the cleats, removable; speakers front-mounted on T-nuts, 4 bolts on a 297 mm circle"
     },
     {
@@ -338,7 +340,7 @@
       "blank_mm": [
         18.0,
         18.0,
-        423.634
+        418.155
       ],
       "material": "baltic birch 18 mm",
       "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
@@ -349,7 +351,7 @@
       "blank_mm": [
         18.0,
         18.0,
-        423.634
+        418.155
       ],
       "material": "baltic birch 18 mm",
       "notes": "18 x 18 birch cleat, screws every 150 mm; felt strip between cleat and baffle"
@@ -382,7 +384,7 @@
       "blank_mm": [
         18.0,
         18.0,
-        423.634
+        418.155
       ],
       "material": "baltic birch 18 mm",
       "notes": "18 x 18 birch cleat, screws every 150 mm"
@@ -393,7 +395,7 @@
       "blank_mm": [
         18.0,
         18.0,
-        423.634
+        418.155
       ],
       "material": "baltic birch 18 mm",
       "notes": "18 x 18 birch cleat, screws every 150 mm"
@@ -426,7 +428,7 @@
       "blank_mm": [
         12.0,
         40.0,
-        415.634
+        410.155
       ],
       "material": "baltic birch 12 mm",
       "notes": "grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
@@ -437,7 +439,7 @@
       "blank_mm": [
         12.0,
         40.0,
-        415.634
+        410.155
       ],
       "material": "baltic birch 12 mm",
       "notes": "grill frame strip 12 x 40 birch, half-lap corners, cloth wrapped and stapled at the back, rests on the speaker flanges and 5 mm felt corner spacers, hook and loop to the baffle"
@@ -470,7 +472,7 @@
       "blank_mm": [
         12.0,
         379.0,
-        423.634
+        418.155
       ],
       "material": "baltic birch 12 mm",
       "notes": "12 mm birch back, removable, screwed to the cleats every 150 mm"
@@ -507,7 +509,7 @@
     {
       "name": "net volume",
       "level": "pass",
-      "message": "chamber 0 net 30.0 L vs sheet 30.0 L (-0.0 percent); inside parts 1.24 L vs sheet allowance 1.24 L"
+      "message": "chamber 0 net 30.0 L vs sheet 30.0 L (-0.0 percent); inside parts 1.23 L vs sheet allowance 1.23 L"
     },
     {
       "name": "stereo balance",
@@ -532,12 +534,12 @@
     {
       "name": "port mouth",
       "level": "warn",
-      "message": "chamber 0 port 0: mouth 50 mm from the speaker 0 magnet (28 percent of the mouth), under one diameter (101.5 mm)"
+      "message": "chamber 0 port 0: mouth 46 mm from the speaker 0 magnet (28 percent of the mouth), under one diameter (101.5 mm)"
     },
     {
       "name": "magnet to back",
       "level": "pass",
-      "message": "at least 88.9 mm behind every magnet"
+      "message": "at least 85.5 mm behind every magnet"
     },
     {
       "name": "handle",

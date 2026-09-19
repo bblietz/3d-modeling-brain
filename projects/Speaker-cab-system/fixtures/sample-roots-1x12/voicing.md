@@ -2,7 +2,7 @@
 name: sample-roots-1x12-voicing
 type: voicing-sheet
 project: sample-roots-1x12
-created: 2026-09-14
+created: 2026-09-19
 status: unverified-prediction
 tags: [speaker-cab, voicing]
 ---
@@ -41,14 +41,14 @@ Mode: propose. Every number here is a prediction: unverified, ears only.
 | Brace | 0.00 L |
 | Port air inside the box | 0.32 L |
 | Divider | 0.00 L |
-| Inside parts (cleats, stiffeners, shelf, ring) | 1.24 L |
+| Inside parts (cleats, stiffeners, shelf, ring) | 1.23 L |
 | Gross internal | 33.1 L (1.17 cu ft) |
 
 ## Dimensions
 
-- Internal: 424 x 379 x 206 mm (16.68 x 14.92 x 8.11 in, W x H x D)
-- External: 460 x 415 x 256 mm (18.10 x 16.34 x 10.07 in, W x H x D)
-- Chamber internal width: 424 mm
+- Internal: 418 x 379 x 209 mm (16.46 x 14.92 x 8.21 in, W x H x D)
+- External: 454 x 415 x 253 mm (17.88 x 16.34 x 9.94 in, W x H x D)
+- Chamber internal width: 418 mm
 - Construction: tolex line, walls baltic birch plywood; voiced with 18 mm walls
 
 ## Port
@@ -90,7 +90,7 @@ Mode: propose. Every number here is a prediction: unverified, ears only.
 
 - celestion-g12h-30-anniversary: Thiele-Small volume 19.7 L for 'tight' is outside the practical range 30 to 68 L; started from the clamped 30.0 L
 - driver displacement assumed 1.5 L per driver
-- width and depth are within 5 percent of 2:1 (2.06); coincident standing waves
+- width and depth are within 5 percent of 2:1 (2.01); coincident standing waves
 - port diameter snapped to the 101.5 mm tube (from 85.0 mm)
 - no wiring option matches amp taps [8]
 - impedance mismatch accepted: 16 ohm cabinet on amp taps [8]

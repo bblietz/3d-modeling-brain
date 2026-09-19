@@ -2,7 +2,7 @@
 type: proposal
 customer: Cecilia Blietz
 order: Cab-Blietz-1x12-hardwood
-generated: 2026-09-13
+generated: 2026-09-19
 ---
 <!--
 MaximoCabs voice, from the site on 2026-09-11. Write the four slots in this register:
@@ -33,7 +33,7 @@ You play a Dr. Z MAZ 38, a 38 W amp with four EL84 power tubes, with humbuckers 
 - Speaker: Eminence Cannabis Rex 12
 - Impedance and wiring: Single driver, 8 ohm
 - External size, width x height x depth: 20 x 18 x 11 in (508 x 457 x 279 mm)
-- Estimated weight, loaded: 31.5 lb (14.3 kg)
+- Estimated weight, loaded: 30.3 lb (13.7 kg)
 
 <!-- slot: why_this_cabinet -->
 - Speaker: the Eminence Cannabis Rex, 8 ohm. Its balanced low end, neutral mids, and smooth top suit a bright EL84 amp: the neutral mids leave room for what two Tube Screamers already add, and the smooth top is chosen for the warm, rounded high notes you describe. At 50 W it is comfortable under a 38 W amp at practice volume.
@@ -61,7 +61,7 @@ This cabinet is designed to fill a practice room from the floor at low volume, w
 - Grill cloth: Salt and Pepper, 32"
 - Hardware: No metal corners, strap handle, recessed brass jack plate, no piping, rubber feet.
 
-<!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. -->
+<!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. A name prefixed with its folder is the file <folder>/<rest of the name> copied under the prefixed name: images/tolex-fender-black.jpg is tolex/fender-black.jpg. -->
 ![Walnut](images/walnut.jpg)
 ![Salt and Pepper, 32"](images/salt-and-pepper.jpg)
 

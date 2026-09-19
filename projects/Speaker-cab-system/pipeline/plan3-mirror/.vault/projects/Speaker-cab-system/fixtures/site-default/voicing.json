@@ -45,21 +45,21 @@
   },
   "volumes": {
     "method": "evaluate",
-    "per_driver_net_l": 42.075314364183036,
-    "per_chamber_net_l": 42.075314364183036,
-    "net_total_l": 42.075314364183036,
+    "per_driver_net_l": 43.25951276418304,
+    "per_chamber_net_l": 43.25951276418304,
+    "net_total_l": 43.25951276418304,
     "displacement_l": 1.5,
     "brace_l": 0.0,
     "port_l": 0.22655831040811814,
     "divider_l": 0.0,
-    "inside_parts_l": 1.8043154854088457,
-    "gross_l": 45.606188159999995
+    "inside_parts_l": 1.8129554854088457,
+    "gross_l": 46.79902656
   },
   "box": {
     "internal_mm": [
       472.0,
       421.2,
-      229.4
+      235.4
     ],
     "external_mm": [
       508.0,
@@ -69,7 +69,7 @@
     "internal_in": [
       18.58,
       16.58,
-      9.03
+      9.27
     ],
     "external_in": [
       20.0,
@@ -86,76 +86,78 @@
     "area_cm2": 80.91368228861361,
     "length_mm": 40.0,
     "volume_l": 0.3236547291544545,
-    "air_speed_ms": 1.9884223380513366,
+    "air_speed_ms": 1.9610176670823962,
     "warnings": [],
+    "pinned": false,
+    "fb_override_hz": null,
     "location": "rear",
     "per_chamber": true,
     "count": 1
   },
   "prediction": {
     "model": "thiele-small vented",
-    "fb_hz": 67.36787698036497,
-    "alpha": 0.7011236979636716,
-    "h": 0.7925632585925291,
-    "f3_hz": 69.22774351260722,
-    "peak_db": 1.2566951183428277,
+    "fb_hz": 66.43940496152202,
+    "alpha": 0.6819309353022739,
+    "h": 0.7816400583708473,
+    "f3_hz": 68.3447331242783,
+    "peak_db": 1.1832821162741864,
     "character": "punchy",
     "response_db": [
       [
         20.0,
-        -45.15457994691853
+        -44.8889220422372
       ],
       [
         25.2,
-        -36.4821242790575
+        -36.19874371830976
       ],
       [
         31.75,
-        -27.446840897094326
+        -27.130392252967084
       ],
       [
         40.0,
-        -18.005526025264903
+        -17.6319375100192
       ],
       [
         50.4,
-        -9.124654984178282
+        -8.7401808590619
       ],
       [
         63.5,
-        -3.870159500515183
+        -3.6905790714686946
       ],
       [
         80.0,
-        -1.36347746649983
+        -1.3386322486123048
       ],
       [
         100.79,
-        0.35996594963506495
+        0.3065998740269187
       ],
       [
         126.99,
-        1.198557452001518
+        1.1157222189552911
       ],
       [
         160.0,
-        1.2566951183428277
+        1.1832821162741864
       ],
       [
         201.59,
-        0.9943385711796817
+        0.9419012475644818
       ],
       [
         253.98,
-        0.7017958729870184
+        0.6672681698757263
       ],
       [
         320.0,
-        0.4699074699417357
+        0.44782863971426196
       ],
       [
         400.0,
-        0.3110429814405386
+        0.2968466008723155
       ]
     ]
   },
@@ -174,7 +176,8 @@
         "matches_tap": true,
         "jack_text": "Single driver, 16 ohm"
       }
-    ]
+    ],
+    "mismatch_accepted": false
   },
   "power": {
     "amp_power_w": 30.0,
@@ -195,10 +198,11 @@
   "construction": {
     "panel_mm": 18.0,
     "back_mm": 12.0,
-    "baffle_mm": 18.0,
+    "baffle_mm": 12.0,
     "recess_mm": 20.0,
     "brace_l": 0.0,
     "pinned_external_width_mm": null,
+    "pinned_external_height_mm": null,
     "max_external_mm": null,
     "port_count": 1,
     "line": "tolex",
@@ -206,7 +210,7 @@
     "wall_material": "baltic birch plywood"
   },
   "warnings": [
-    "width and depth are within 5 percent of 2:1 (2.06); coincident standing waves",
+    "width and depth are within 5 percent of 2:1 (2.01); coincident standing waves",
     "driver displacement assumed 1.5 L per driver",
     "handling 30 W is under the 45 W target (1.5 x amp power)"
   ],

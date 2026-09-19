@@ -4,7 +4,7 @@ description: Construction rules and starting values for MaximoCabs guitar speake
 type: reference
 status: unverified-starting-values
 created: 2026-09-09
-updated: 2026-09-16
+updated: 2026-09-19
 tags: [knowledge, speaker-cab, woodworking, reference]
 ---
 
@@ -26,8 +26,8 @@ remedy order of the skill's port loop.
 
 | Material | Use | Thickness | Density | Source |
 |---|---|---|---|---|
-| Baltic birch plywood, 13-ply | Tolex line shell, baffle, cleats, brace, divider, shelf | 18 mm (3/4 in nominal) | 680 kg/m3 | site content; density is the common trade figure, unverified |
-| Baltic birch plywood | Back panels, open-back panels, grill frame strips, port flange rings | 12 mm (1/2 in nominal) | 680 kg/m3 | starting value |
+| Baltic birch plywood, 13-ply | Tolex line shell, cleats, brace, divider, slot shelf | 18 mm (3/4 in nominal) | 680 kg/m3 | site content; density is the common trade figure, unverified |
+| Baltic birch plywood, 9-ply, void-free | Baffles (both lines), back panels, open-back panels, grill frame strips, port flange rings | 12 mm (1/2 in nominal) | 680 kg/m3 | site content; baffle set here by Brian, 2026-09-19 |
 | Black walnut, resawn | Hardwood line shell | 19 mm | 610 kg/m3 | https://www.wood-database.com/black-walnut/ |
 | Black cherry, resawn | Hardwood line shell | 19 mm | 560 kg/m3 | https://www.wood-database.com/black-cherry/ |
 | Hard maple, resawn | Hardwood line shell | 19 mm | 705 kg/m3 | https://www.wood-database.com/hard-maple/ |
@@ -53,8 +53,8 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 
 ## Baffle
 
-- 18 mm birch on both lines. Front face 20 mm behind the front edge of the shell (the recess that holds the grill frame). Driver mounts from the front of the baffle onto T-nuts fitted from the back. Bolts M6 or 1/4-20, 6.5 mm holes on the note's bolt circle, first hole at twelve o'clock.
-- **Floating (default)**: 1 mm clearance to each side, on 18 x 18 mm cleats glued to the shell, felt strip between cleat and baffle, held with screws through the cleats, removable. Site: "floating 3/4 in birch with felt isolation". Which edges carry cleats is the Aesthetics.baffle_cleat_edges option, and None takes the enclosure default: all four on a closed or closed-ported box, where the perimeter cleats hold the seal the volume model assumes, and top and bottom only on an open or semi-open box, which has no sealed volume to protect, so it takes fewer parts and leaves the baffle free at its sides. Unverified starting value pending listening notes (Brian, 2026-09-13).
+- 12 mm (1/2 in) void-free 9-ply birch on both lines (Brian, 2026-09-19; the site has advertised this baffle since 2026-09-14). Front face 20 mm behind the front edge of the shell (the recess that holds the grill frame). Driver mounts from the front of the baffle onto T-nuts fitted from the back. Bolts M6 or 1/4-20, 6.5 mm holes on the note's bolt circle, first hole at twelve o'clock. The T-nut barrel must be shorter than the 12 mm baffle, so it cannot stand proud of the front face under the speaker flange.
+- **Floating (default)**: 1 mm clearance to each side, on 18 x 18 mm cleats glued to the shell, felt strip between cleat and baffle, held with screws through the cleats, removable. Site: "floating 1/2 in void-free 9-ply Baltic birch with felt isolation". Which edges carry cleats is the Aesthetics.baffle_cleat_edges option, and None takes the enclosure default: all four on a closed or closed-ported box, where the perimeter cleats hold the seal the volume model assumes, and top and bottom only on an open or semi-open box, which has no sealed volume to protect, so it takes fewer parts and leaves the baffle free at its sides. Unverified starting value pending listening notes (Brian, 2026-09-13).
 - **Fixed (option)**: glued into a 6 mm deep dado in all four shell panels (three with a front slot port, where the shelf carries the baffle's bottom edge), blank 12 mm larger in width and height, no baffle cleats. On hardwood it is glued along the full dado too, since the dados run with the grain (see Wood movement).
 - Driver cutout, bolt circle, bolt count, frame diameter, and magnet diameter come from the speaker note. Typical: Celestion 283 mm cutout on a 297 mm circle, Eminence 281 mm on 294 mm, Jensen 277 mm on 293.5 mm; frames 306 to 310 mm, so the flange overhangs the cutout by 11 to 15 mm; flange thickness 5 mm starting value.
 - **Margins**: at least 48 mm from a cutout edge to any shell panel (grill strip 40 plus 2 x the 4 mm grill clearance below), 25 mm from a cutout edge to the brace or divider, so the two cutouts of a 2x12 sit 68 mm apart (18 plus 2 x 25). Minimum internal width = n x cutout + (n - 1) x 68 + 2 x 48, the same for mono and stereo since the divider replaces the brace (2x12 with 283 mm cutouts: 730 mm internal, 766 mm external, 30.2 in). Minimum internal height = cutout + 96, plus slot height + 18 with a front slot port.
@@ -102,6 +102,6 @@ Sheet stock is 2440 x 1220 mm with a 3 mm kerf for yield, as in [[woodworking-st
 ## Site defaults (calibration)
 
 - External 20 x 18 x 11 in (508 x 457.2 x 279.4 mm), 1x12 closed-ported.
-- Internal with the rules above: 472 x 421.2 x 229.4 mm, gross 45.6 L, net about 42.5 L closed and 42.1 L ported after one driver and the inside parts.
+- Internal with the rules above: 472 x 421.2 x 235.4 mm, gross 46.8 L, net about 43.7 L closed and 43.3 L ported after one driver and the inside parts. The external size is the fixed promise, so the 12 mm baffle (from 18 mm) gave the inside 6 mm more depth.
 - The engine voices both lines with the tolex line's 18 mm walls; the hardwood line's 19 mm panels take about 1 percent more of the same external size, inside the model's error, so no separate voicing. The line and species travel in voicing.json's construction block so the generator picks the density and joinery.
 - A slot-ported 1x12 on the site box grows from 18.0 to 18.6 in tall through the engine's height floor; a 2x12 starts at 30.2 in wide.

@@ -163,7 +163,7 @@ No CAD before Brian approves this phase.
    cd /home/brian/ClaudeProjects/3d-modeling-brain
    /home/brian/ClaudeProjects/3d-modeling-brain/.venv/bin/python scripts/cabvoice.py evaluate --speaker <slug> --impedance <ohm> \
      --enclosure closed-ported --tone projects/Cab-<...>/tone.json --line <line> [--species <species>] \
-     --internal 472 421.2 229.4 --port-diameter 101.5 --port-length 40 \
+     --internal 472 421.2 235.4 --port-diameter 101.5 --port-length 40 \
      --name Cab-<...> --out projects/Cab-<...>/ [--accept-impedance-mismatch]
    ```
 

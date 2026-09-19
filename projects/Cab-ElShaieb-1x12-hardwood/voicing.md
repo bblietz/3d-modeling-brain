@@ -2,7 +2,7 @@
 name: cab-elshaieb-1x12-hardwood-voicing
 type: voicing-sheet
 project: Cab-ElShaieb-1x12-hardwood
-created: 2026-09-15
+created: 2026-09-19
 status: unverified-prediction
 tags: [speaker-cab, voicing]
 ---
@@ -47,7 +47,7 @@ Mode: propose. Every number here is a prediction: unverified, ears only.
 ## Dimensions
 
 - Internal: 542 x 383 x 281 mm (21.33 x 15.08 x 11.06 in, W x H x D)
-- External: 578 x 419 x 331 mm (22.75 x 16.50 x 13.03 in, W x H x D)
+- External: 578 x 419 x 325 mm (22.75 x 16.50 x 12.79 in, W x H x D)
 - Chamber internal width: 542 mm
 - Construction: hardwood line, walls walnut; voiced with 18 mm walls
 - Open-back panels: two, top and bottom, each 115 mm tall

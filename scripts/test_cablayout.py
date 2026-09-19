@@ -31,7 +31,7 @@ SPEAKER = {"slug": "celestion-g12h-30-anniversary", "cutout_mm": 283, "bolt_circ
 def sheet(external=(508.0, 457.2, 279.4), enclosure="closed-ported", drivers=1, chambers=1,
           jack="mono", line="tolex", species=None, port=None, net=43.5, open_fraction=None):
     W, H, D = external
-    internal = [W - 36.0, H - 36.0, D - 50.0]
+    internal = [W - 36.0, H - 36.0, D - 44.0]
     if port == "round":
         port = {"shape": "round", "diameter_mm": 77.3, "slot_w_mm": None, "slot_h_mm": None,
                 "length_mm": 40.0, "location": "rear", "count": drivers // chambers}
@@ -42,7 +42,7 @@ def sheet(external=(508.0, 457.2, 279.4), enclosure="closed-ported", drivers=1, 
             "enclosure": {"type": enclosure, "driver_count": drivers, "chambers": chambers,
                           "jack_config": jack, "open_fraction": open_fraction},
             "box": {"external_mm": list(external), "internal_mm": internal},
-            "construction": {"panel_mm": 18.0, "back_mm": 12.0, "baffle_mm": 18.0, "recess_mm": 20.0,
+            "construction": {"panel_mm": 18.0, "back_mm": 12.0, "baffle_mm": 12.0, "recess_mm": 20.0,
                              "line": line, "species": species,
                              "wall_material": "baltic birch plywood" if line == "tolex" else species},
             "volumes": {"net_total_l": net, "per_chamber_net_l": net / chambers},
@@ -56,7 +56,8 @@ def spec_for(**kw):
 
 def test_constants_match_engine():
     assert L.RECESS_MM == cabvoice.RECESS_MM == 20.0
-    assert L.BAFFLE_MM == cabvoice.BAFFLE_MM == 18.0
+    assert L.BAFFLE_MM == cabvoice.BAFFLE_MM == 12.0
+    assert L.SLOT_SHELF_MM == cabvoice.SLOT_SHELF_MM == 18.0
     assert L.BACK_MM == cabvoice.BACK_MM == 12.0
     assert L.CUTOUT_MARGIN_MM == cabvoice.CUTOUT_MARGIN_MM == 25.0
     assert L.MM_PER_INCH == cabvoice.MM_PER_INCH == 25.4
@@ -182,7 +183,7 @@ def test_baffle_floating_dims_and_bolts():
     spec = spec_for()
     fr = L.frame(spec)
     baffle, cutouts, dados = L.baffle_and_cutouts(spec, fr)
-    assert baffle.pos == (-235.0, 20.0, 19.0) and baffle.size == (470.0, 18.0, 419.2)
+    assert baffle.pos == (-235.0, 20.0, 19.0) and baffle.size == (470.0, 12.0, 419.2)
     assert dados == {}
     co = cutouts[0]
     assert co.center == (0.0, 228.6) and co.diameter == 283 and co.chamber == 0
@@ -196,14 +197,14 @@ def test_baffle_fixed_dados():
     spec = spec_for(aesthetics=L.Aesthetics(baffle_mount="fixed"))
     fr = L.frame(spec)
     baffle, _, dados = L.baffle_and_cutouts(spec, fr)
-    assert baffle.size == (484.0, 18.0, 433.2) and baffle.pos == (-242.0, 20.0, 12.0)
+    assert baffle.size == (484.0, 12.0, 433.2) and baffle.pos == (-242.0, 20.0, 12.0)
     assert set(dados) == {"side_left", "side_right", "top", "bottom"}
-    assert dados["side_left"]["box"] == ((-242.0, 20.0, 12.0), (-236.0, 38.0, 445.2))
+    assert dados["side_left"]["box"] == ((-242.0, 20.0, 12.0), (-236.0, 32.0, 445.2))
     slot = spec_for(port="slot", aesthetics=L.Aesthetics(baffle_mount="fixed"))
     _, _, dados = L.baffle_and_cutouts(slot, L.frame(slot))
     assert "bottom" not in dados
     # layout() notes the dado on every shell row it cuts, the same on hardwood
-    dado = "; 6 mm deep x 18 mm dado for the baffle, front face 20 mm behind the front edge"
+    dado = "; 6 mm deep x 12 mm dado for the baffle, front face 20 mm behind the front edge"
     shell = ("side_left", "side_right", "top", "bottom")
     notes = {p.name: p.notes for p in L.layout(spec).parts if p.name in shell}
     assert len(notes) == 4 and all(n.endswith(dado) for n in notes.values())
@@ -239,7 +240,7 @@ def test_cleats_by_mount_port_and_chambers():
     assert names == ["cleat_baffle_top", "cleat_baffle_bottom", "cleat_baffle_left", "cleat_baffle_right",
                      "cleat_back_top", "cleat_back_bottom", "cleat_back_left", "cleat_back_right"]
     top = L.cleat_blanks(spec, L.frame(spec))[0]
-    assert top.pos == (-236.0, 38.0, 421.2) and top.size == (472.0, 18.0, 18.0) and top.chamber == 0
+    assert top.pos == (-236.0, 32.0, 421.2) and top.size == (472.0, 18.0, 18.0) and top.chamber == 0
     slot = spec_for(port="slot")
     assert "cleat_baffle_bottom" not in [p.name for p in L.cleat_blanks(slot, L.frame(slot))]
     fixed = spec_for(aesthetics=L.Aesthetics(baffle_mount="fixed"))
@@ -276,8 +277,8 @@ def test_brace_and_divider():
     assert L.brace_blank(spec_for(), L.frame(spec_for())) == []
     two = spec_for(drivers=2)
     (brace,) = L.brace_blank(two, L.frame(two))
-    assert brace.pos == (-9.0, 40.0, 18.0) and brace.size == (18.0, 60.0, 421.2)
-    assert len(brace.features) == 2 and brace.features[0]["box"] == ((-9.0, 40.0, 421.2), (9.0, 56.0, 439.2))
+    assert brace.pos == (-9.0, 34.0, 18.0) and brace.size == (18.0, 60.0, 421.2)
+    assert len(brace.features) == 2 and brace.features[0]["box"] == ((-9.0, 34.0, 421.2), (9.0, 50.0, 439.2))
     fixed = spec_for(drivers=2, aesthetics=L.Aesthetics(baffle_mount="fixed"))
     assert L.brace_blank(fixed, L.frame(fixed))[0].features == []
     slot = spec_for(drivers=2, port="slot")
@@ -287,7 +288,7 @@ def test_brace_and_divider():
     st = spec_for(external=(800.0, 457.2, 279.4), drivers=2, chambers=2, jack="stereo")
     assert L.brace_blank(st, L.frame(st)) == []
     (div,) = L.divider_blank(st, L.frame(st))
-    assert div.pos == (-9.0, 38.0, 18.0) and div.size == pytest.approx((18.0, 229.4, 421.2)) and div.chamber is None
+    assert div.pos == (-9.0, 32.0, 18.0) and div.size == pytest.approx((18.0, 235.4, 421.2)) and div.chamber is None
     assert L.divider_blank(two, L.frame(two)) == []
 
 
@@ -296,7 +297,7 @@ def test_stiffeners_follow_the_span_rule():
     parts, notes = L.stiffener_blanks(spec, L.frame(spec))
     assert [p.name for p in parts] == ["stiffener_top", "stiffener_bottom", "stiffener_back"]
     top = parts[0]
-    assert top.pos == pytest.approx((-20.0, 56.0, 421.2)) and top.size == pytest.approx((40.0, 193.4, 18.0))
+    assert top.pos == pytest.approx((-20.0, 50.0, 421.2)) and top.size == pytest.approx((40.0, 199.4, 18.0))
     back = parts[2]
     assert back.pos[2] == pytest.approx(18.0 + 18.0 + 25.0 + 70.0 + 25.0)
     narrow = spec_for(external=(470.0, 457.2, 279.4))
@@ -541,7 +542,7 @@ def test_handle_strap_and_recessed():
     rec = spec_for(aesthetics=L.Aesthetics(handle="recessed-side"))
     hw, feats, warn = L.handle_hardware(rec, fr, (0.0, 108.0, 229.0))
     assert [h.item for h in hw] == ["recessed handle", "recessed handle"] and warn == []
-    assert hw[0].position == pytest.approx((-254.0, 151.0, 298.8)) and feats["side_left"][0]["axis"] == "x"
+    assert hw[0].position == pytest.approx((-254.0, 145.0, 298.8)) and feats["side_left"][0]["axis"] == "x"
     shallow = spec_for(external=(508.0, 457.2, 200.0), aesthetics=L.Aesthetics(handle="recessed-side"))
     _, _, warn = L.handle_hardware(shallow, L.frame(shallow), (0.0, 80.0, 229.0))
     assert warn and "use a strap handle" in warn[0]
@@ -562,7 +563,7 @@ def test_trim_hardware():
 def test_site_box_volumes_hand_computed():
     spec = spec_for(external=(476.0, 457.2, 279.4), enclosure="closed", net=40.0)
     lay = L.layout(spec)
-    gross = 440.0 * 421.2 * 229.4 / 1e6
+    gross = 440.0 * 421.2 * 235.4 / 1e6
     cleats = (4 * 440.0 * 18.0 * 18.0 + 4 * (421.2 - 36.0) * 18.0 * 18.0) / 1e6
     assert lay.gross_l == pytest.approx(gross)
     assert lay.net_l[0] == pytest.approx(gross - cleats - 1.5, abs=1e-6)
@@ -669,7 +670,7 @@ def test_report_and_to_dict_are_json():
     rep = L.layout_report(lay, checks)
     json.dumps(rep)
     json.dumps(lay.to_dict())
-    assert rep["external_in"] == [20.0, 18.0, 11.0] and rep["internal_mm"] == [472.0, 421.2, 229.4]
+    assert rep["external_in"] == [20.0, 18.0, 11.0] and rep["internal_mm"] == [472.0, 421.2, 235.4]
     assert rep["volumes"]["gross_l"] == [round(lay.chambers[0].gross_l, 3)]
     assert rep["mass"]["com_mm"] == [round(v, 3) for v in lay.com_mm]
     assert rep["speakers"] == ["celestion-g12h-30-anniversary"] and rep["tolex"]["roll_in"] == 54

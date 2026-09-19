@@ -4,7 +4,7 @@ description: How a customer's rig and tonal goals become a tone target, a speake
 type: reference
 status: unverified-starting-values
 created: 2026-09-09
-updated: 2026-09-11
+updated: 2026-09-19
 tags: [knowledge, speaker-cab, acoustics, reference]
 ---
 
@@ -40,7 +40,7 @@ The customer's own tonal words (the email's `Notes:`) are read before the genre 
 - **semi-open**: between the two: more low end than open, still wide. Open fraction 0.25 versus 0.40.
 - Choice rule: dispersion wide plus low_end not tight leads to open or semi-open; dispersion focused or low_end tight or approach high gain leads to closed-ported. Mic'd cabs prefer closed-ported. Drivers with Qts above 0.9 (the Jensen C12N at 1.02, the WGS ET65 at 0.91, and the WGS Green Beret at 1.18, as printed; the Jensen P12N sits at 0.77) prefer open or semi-open because any practical closed box makes them peaky.
 - Precedence when the rules disagree: a tight low end beats wide dispersion (closed or closed-ported over open-back); a low-end shifter (baritone, 7-string, drop tunings, bass VI) beats wide and takes closed-ported at the lowest tuning in range, applied with the engine's `--fb` flag. The override may take any value in the engine's own tuning range, 45 to 90 Hz (`FB_MIN_HZ` to `FB_MAX_HZ`, the range every proposed Fb is clamped to); the engine does not check the flag, so the skill keeps it in that range. The low-end-shifter rule starts at 45 Hz, the bottom of the range, and raises it in 5 Hz steps while the port does not fit the box (a higher tuning needs a shorter port). Raising Fb does not cure a boomy sheet, and a low-end-shifter sheet needs no cure: the shifter sets `low_end` big, and boomy serves a big target whether the customer asked for big or a shifter set it (the bridge table below), so judge that sheet by its character word, which should read boomy or punchy, not by a warning. For any other target the engine's own remedy grows the box in 10 percent steps to 68 L, then lowers Fb in 5 Hz steps to 45 Hz, and the sheet warns when it still reads boomy; that warning is what step 4 of the ranking reacts to. Starting values; listening notes decide.
-- Evaluate first: a standard-size order (the site's 20 x 18 x 11 in box, one driver, no size limit, no head to match) is evaluated before anything is proposed, with the site port on a ported box: `cabvoice.py evaluate --internal 472 421.2 229.4 --port-diameter 101.5 --port-length 40` (the site port of the calibration table; box and port fix Fb, the speaker sets the character) plus the order's speaker, impedance, enclosure, tone, and line. The site box is accepted when the sheet's character is the bridge word for the target's `low_end` in the table below; otherwise, or when a size limit, a pinned width, a second driver, or a low-end shifter applies, the skill runs `propose`. Open and semi-open boxes carry no character word (the estimate reports the cancellation frequency, about 370 Hz for any box near the site depth), so an open-back site box is accepted whenever the rules above chose open or semi-open; only a size limit, a pinned width, or a second driver makes it propose.
+- Evaluate first: a standard-size order (the site's 20 x 18 x 11 in box, one driver, no size limit, no head to match) is evaluated before anything is proposed, with the site port on a ported box: `cabvoice.py evaluate --internal 472 421.2 235.4 --port-diameter 101.5 --port-length 40` (the site port of the calibration table; box and port fix Fb, the speaker sets the character) plus the order's speaker, impedance, enclosure, tone, and line. The site box is accepted when the sheet's character is the bridge word for the target's `low_end` in the table below; otherwise, or when a size limit, a pinned width, a second driver, or a low-end shifter applies, the skill runs `propose`. Open and semi-open boxes carry no character word (the estimate reports the cancellation frequency, about 364 Hz for any box near the site depth), so an open-back site box is accepted whenever the rules above chose open or semi-open; only a size limit, a pinned width, or a second driver makes it propose.
 
 | Predicted character | Enclosure | Serves `low_end` |
 |---|---|---|
@@ -133,31 +133,31 @@ The Key column holds the canonical genre keys: every catalog note's Genres line 
 
 ## Calibration table
 
-Calibration table, every number prediction_status "unverified, ears only". Generated 2026-09-15 with `evaluate` (closed, site box 472 x 421.2 x 229.4 mm internal) and `propose` (closed-ported, low_end balanced), 16 ohm where the note lists it (voiced with the note's 8 ohm T/S set, see Model limits), amp 40 W.
+Calibration table, every number prediction_status "unverified, ears only". Generated 2026-09-19 with `evaluate` (closed, site box 472 x 421.2 x 235.4 mm internal) and `propose` (closed-ported, low_end balanced), 16 ohm where the note lists it (voiced with the note's 8 ohm T/S set, see Model limits), amp 40 W.
 
 | Speaker | Data | Net L in site box | Closed Qtc | Closed character | Closed F3 Hz | Proposed ported net L | Fb Hz | Ported character | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| [[celestion-blue]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) | speaker handling 15 W is below the amp's 40 W |
-| [[celestion-cream]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
-| [[celestion-g12-65-heritage]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 68 | unpredicted (no Thiele-Small data) |  |
-| [[celestion-g12h-30-anniversary]] | analog | 42.5 | 0.755 | tight | 105 | 30.0 | 68 | punchy | speaker handling 30 W is below the amp's 40 W; celestion-g12h-30-anniversary: Thiele-Small volume 29.5 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L |
-| [[celestion-g12h-75-creamback]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
-| [[celestion-g12m-25-greenback]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) | speaker handling 25 W is below the amp's 40 W |
-| [[celestion-g12m-65-creamback]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
-| [[celestion-gold]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
-| [[celestion-heritage-g12h55]] | third-party | 42.5 | 0.605 | tight | 109 | 68.0 | 45 | flat | speaker handling 30 W is below the amp's 40 W; celestion-heritage-g12h55: Thiele-Small volume 71.3 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 68.0 L |
-| [[celestion-vintage-30]] | analog | 42.5 | 0.701 | tight | 105 | 37.9 | 60 | flat |  |
-| [[eminence-cannabis-rex]] | datasheet | 42.0 | 0.924 | balanced | 115 | 45.5 | 77 | punchy |  |
-| [[eminence-red-white-and-blues]] | datasheet | 42.0 | 1.040 | big | 114 | 66.0 | 73 | punchy | port too short (6.5 mm) for Fb 78 Hz in 66.0 L; clamped to 24 mm; a larger port, a lower Fb, or a smaller box lengthens it; port clamped at the size cap: tuned 73.5 Hz, target 78.0 Hz; lower Fb or use a smaller box |
-| [[eminence-swamp-thang]] | datasheet | 41.8 | 0.747 | tight | 131 | 41.3 | 78 | flat |  |
-| [[eminence-texas-heat]] | datasheet | 42.0 | 0.967 | balanced | 95 | 50.9 | 63 | punchy |  |
-| [[eminence-tonker]] | datasheet | 41.8 | 0.633 | tight | 138 | 34.1 | 71 | flat |  |
-| [[jensen-c12n]] | datasheet | 42.5 | 1.262 | peaky | 102 | 64.3 | 45 | boomy | jensen-c12n: Thiele-Small volume 22.6 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L; ported alignment stays boomy at the practical limits; consider a closed back or a lower-Qts driver |
-| [[jensen-p12n]] | datasheet | 42.5 | 1.037 | big | 95 | 67.4 | 62 | punchy |  |
-| [[weber-silver-bell-alnico-hemp]] | missing | 42.5 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 64 | unpredicted (no Thiele-Small data) |  |
-| [[wgs-et65]] | estimated | 42.5 | 1.235 | peaky | 98 | 63.4 | 49 | punchy |  |
-| [[wgs-green-beret]] | estimated | 42.5 | 1.454 | peaky | 109 | 64.3 | 45 | boomy | speaker handling 25 W is below the amp's 40 W; wgs-green-beret: Thiele-Small volume 22.0 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L; ported alignment stays boomy at the practical limits; consider a closed back or a lower-Qts driver |
-| [[wgs-veteran-30]] | estimated | 42.5 | 1.023 | big | 103 | 62.5 | 71 | punchy |  |
+| [[celestion-blue]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) | speaker handling 15 W is below the amp's 40 W |
+| [[celestion-cream]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
+| [[celestion-g12-65-heritage]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 68 | unpredicted (no Thiele-Small data) |  |
+| [[celestion-g12h-30-anniversary]] | analog | 43.7 | 0.751 | tight | 105 | 30.0 | 68 | punchy | speaker handling 30 W is below the amp's 40 W; celestion-g12h-30-anniversary: Thiele-Small volume 29.5 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L |
+| [[celestion-g12h-75-creamback]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
+| [[celestion-g12m-25-greenback]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) | speaker handling 25 W is below the amp's 40 W |
+| [[celestion-g12m-65-creamback]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
+| [[celestion-gold]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 60 | unpredicted (no Thiele-Small data) |  |
+| [[celestion-heritage-g12h55]] | third-party | 43.7 | 0.600 | tight | 109 | 68.0 | 45 | flat | speaker handling 30 W is below the amp's 40 W; celestion-heritage-g12h55: Thiele-Small volume 71.3 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 68.0 L |
+| [[celestion-vintage-30]] | analog | 43.7 | 0.697 | tight | 105 | 37.9 | 60 | flat |  |
+| [[eminence-cannabis-rex]] | datasheet | 43.2 | 0.917 | balanced | 115 | 45.5 | 77 | punchy |  |
+| [[eminence-red-white-and-blues]] | datasheet | 43.2 | 1.034 | big | 113 | 66.0 | 73 | punchy | port too short (6.5 mm) for Fb 78 Hz in 66.0 L; clamped to 24 mm; a larger port, a lower Fb, or a smaller box lengthens it; port clamped at the size cap: tuned 73.5 Hz, target 78.0 Hz; lower Fb or use a smaller box |
+| [[eminence-swamp-thang]] | datasheet | 43.0 | 0.742 | tight | 131 | 41.3 | 78 | flat |  |
+| [[eminence-texas-heat]] | datasheet | 43.2 | 0.959 | balanced | 95 | 50.9 | 63 | punchy |  |
+| [[eminence-tonker]] | datasheet | 43.0 | 0.629 | tight | 138 | 34.1 | 71 | flat |  |
+| [[jensen-c12n]] | datasheet | 43.7 | 1.256 | peaky | 101 | 64.3 | 45 | boomy | jensen-c12n: Thiele-Small volume 22.6 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L; ported alignment stays boomy at the practical limits; consider a closed back or a lower-Qts driver |
+| [[jensen-p12n]] | datasheet | 43.7 | 1.031 | big | 95 | 67.4 | 62 | punchy |  |
+| [[weber-silver-bell-alnico-hemp]] | missing | 43.7 |  | unpredicted (no Thiele-Small data) |  | 44.0 | 64 | unpredicted (no Thiele-Small data) |  |
+| [[wgs-et65]] | estimated | 43.7 | 1.227 | peaky | 98 | 63.4 | 49 | punchy |  |
+| [[wgs-green-beret]] | estimated | 43.7 | 1.447 | peaky | 109 | 64.3 | 45 | boomy | speaker handling 25 W is below the amp's 40 W; wgs-green-beret: Thiele-Small volume 22.0 L for 'balanced' is outside the practical range 30 to 68 L; started from the clamped 30.0 L; ported alignment stays boomy at the practical limits; consider a closed back or a lower-Qts driver |
+| [[wgs-veteran-30]] | estimated | 43.7 | 1.017 | big | 102 | 62.5 | 71 | punchy |  |
 
 ## Sources
 

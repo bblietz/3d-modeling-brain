@@ -73,15 +73,15 @@ def test_site_default_rows_are_the_expected_verdicts(tmp_path):
     assert rows["power"].verdict == "warn"
     assert rows["port air speed"].value == "2.0 m/s against the 17 m/s limit"
     assert rows["port air speed"].verdict == "pass"
-    assert rows["alignment"].value == "punchy; Fb 67 Hz, F3 69 Hz"
-    assert rows["stock thickness"].value == "tolex line: shell 18 mm, baffle 18 mm, back 12 mm"
+    assert rows["alignment"].value == "punchy; Fb 66 Hz, F3 68 Hz"
+    assert rows["stock thickness"].value == "tolex line: shell 18 mm, baffle 12 mm, back 12 mm"
     assert (rows["grain and show face"].value, rows["grain and show face"].verdict) == ("n/a, tolex line", "pass")
     assert rows["joinery fit"].value == "finger corners, floating baffle"
     assert rows["stock yield"].value.startswith("22 blanks, ")
     assert "sheets of 2440 x 1220 mm at 100 percent without nesting" in rows["stock yield"].value
     assert rows["wood movement"].value == "n/a; the climate comes from the brief"
-    assert rows["transport"].value == "20 x 18 x 11 in W x H x D, 37.5 lb; the vehicle and doorway come from the brief"
-    assert rows["weight vs limit"].value == "17.0 kg (37.5 lb); the limit comes from the brief"
+    assert rows["transport"].value == "20 x 18 x 11 in W x H x D, 36.3 lb; the vehicle and doorway come from the brief"
+    assert rows["weight vs limit"].value == "16.5 kg (36.3 lb); the limit comes from the brief"
     assert rows["size vs limit"].value == "508 x 457 x 279 mm (20 x 18 x 11 in) W x H x D; the limits come from the brief"
     assert sum(1 for r in rows.values() if r.verdict == cabreport.OPERATOR) == 7
 
@@ -99,7 +99,7 @@ def test_site_default_facts(tmp_path):
     assert f["wiring"] == "Single driver, 16 ohm"
     assert f["external_in"] == "20 x 18 x 11 in"
     assert f["external_mm"] == "508 x 457 x 279 mm"
-    assert (f["mass_kg"], f["mass_lb"]) == ("17.0", "37.5")
+    assert (f["mass_kg"], f["mass_lb"]) == ("16.5", "36.3")
     assert f["finish"] == "Fender Style Black"
     assert f["grill_cloth"] == "British Small Weave Cane"
     assert f["hardware"] == "Black corners, strap handle, recessed metal jack plate, no piping, rubber feet."

@@ -18,7 +18,7 @@
       "slug": "celestion-g12h-30-anniversary",
       "brand": "Celestion",
       "model": "G12H Anniversary",
-      "impedance_ohm": 16,
+      "impedance_ohm": 16.0,
       "power_w": 30,
       "sensitivity_db": 100,
       "data_status": "analog",
@@ -51,31 +51,31 @@
     "brace_l": 0.0,
     "port_l": 0.31611309980491736,
     "divider_l": 0.0,
-    "inside_parts_l": 1.241513012895314,
-    "gross_l": 33.05762521738632
+    "inside_parts_l": 1.2344126662928263,
+    "gross_l": 33.05052490840064
   },
   "box": {
     "internal_mm": [
-      423.6337121972976,
+      418.1550496953782,
       379.0,
-      205.89316436029677
+      208.54597181841527
     ],
     "external_mm": [
-      459.6337121972976,
+      454.1550496953782,
       415.0,
-      255.89316436029677
+      252.54597181841527
     ],
     "internal_in": [
-      16.68,
+      16.46,
       14.92,
-      8.11
+      8.21
     ],
     "external_in": [
-      18.1,
+      17.88,
       16.34,
-      10.07
+      9.94
     ],
-    "chamber_internal_width_mm": 423.6337121972976
+    "chamber_internal_width_mm": 418.1550496953782
   },
   "port": {
     "shape": "round",
@@ -194,10 +194,11 @@
   "construction": {
     "panel_mm": 18.0,
     "back_mm": 12.0,
-    "baffle_mm": 18.0,
+    "baffle_mm": 12.0,
     "recess_mm": 20.0,
     "brace_l": 0.0,
     "pinned_external_width_mm": null,
+    "pinned_external_height_mm": null,
     "max_external_mm": null,
     "port_count": 1,
     "line": "tolex",
@@ -207,7 +208,7 @@
   "warnings": [
     "celestion-g12h-30-anniversary: Thiele-Small volume 19.7 L for 'tight' is outside the practical range 30 to 68 L; started from the clamped 30.0 L",
     "driver displacement assumed 1.5 L per driver",
-    "width and depth are within 5 percent of 2:1 (2.06); coincident standing waves",
+    "width and depth are within 5 percent of 2:1 (2.01); coincident standing waves",
     "port diameter snapped to the 101.5 mm tube (from 85.0 mm)",
     "no wiring option matches amp taps [8]",
     "impedance mismatch accepted: 16 ohm cabinet on amp taps [8]",

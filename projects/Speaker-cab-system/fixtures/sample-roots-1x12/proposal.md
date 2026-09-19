@@ -2,7 +2,7 @@
 type: proposal
 customer: Pat Player
 order: sample-roots-1x12
-generated: 2026-09-11
+generated: 2026-09-19
 ---
 <!--
 MaximoCabs voice, from the site on 2026-09-11. Write the four slots in this register:
@@ -32,8 +32,8 @@ You play a 1965 Fender Deluxe Reverb reissue, roots and alt-country, at low-volu
 - Configuration: 1x12
 - Speaker: Celestion G12H Anniversary
 - Impedance and wiring: Single driver, 16 ohm
-- External size, width x height x depth: 18.1 x 16.3 x 10.1 in (460 x 414 x 256 mm)
-- Estimated weight, loaded: 32.4 lb (14.7 kg)
+- External size, width x height x depth: 17.9 x 16.3 x 9.9 in (454 x 415 x 253 mm)
+- Estimated weight, loaded: 31.2 lb (14.2 kg)
 
 <!-- slot: why_this_cabinet -->
 - Speaker: the Celestion G12H Anniversary at 16 ohm is your pick, and it fits the brief: a ceramic-magnet driver with strong low-mids and a controlled top that keeps a bright blackface amp from turning thin, with the handling for a 22 W combo that is sharing its output with its own speaker.
@@ -61,7 +61,7 @@ This cabinet is designed for a tight, dry low end under a blackface combo on a c
 - Grill cloth: Salt-and-pepper
 - Hardware: Black corners, strap handle, recessed metal jack plate, no piping, rubber feet.
 
-<!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. -->
+<!-- Swatches: copy the files named below from ~/ClaudeProjects/MaximoCabs/public/materials/ (tolex/, grill-cloth/, wood/) into this order's images/ folder. A name prefixed with its folder is the file <folder>/<rest of the name> copied under the prefixed name: images/tolex-fender-black.jpg is tolex/fender-black.jpg. -->
 ![Fender Style Black](images/tolex-fender-black.jpg)
 no swatch on file
 

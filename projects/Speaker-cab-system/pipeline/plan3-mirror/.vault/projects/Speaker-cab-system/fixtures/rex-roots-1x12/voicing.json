@@ -18,7 +18,7 @@
       "slug": "eminence-cannabis-rex",
       "brand": "Eminence",
       "model": "Cannabis Rex 12",
-      "impedance_ohm": 8,
+      "impedance_ohm": 8.0,
       "power_w": 50,
       "sensitivity_db": 101.8,
       "data_status": "datasheet",
@@ -49,31 +49,31 @@
     "net_total_l": 33.352,
     "displacement_l": 2.0,
     "brace_l": 0.0,
-    "port_l": 1.1421100791775265,
+    "port_l": 1.2474460791775264,
     "divider_l": 0.0,
-    "inside_parts_l": 1.4320035356298868,
-    "gross_l": 37.92611361480741
+    "inside_parts_l": 1.479404735629887,
+    "gross_l": 38.07885081480741
   },
   "box": {
     "internal_mm": [
       438.9,
       435.2,
-      198.55639273027683
+      199.356025083218
     ],
     "external_mm": [
       474.9,
       471.2,
-      248.55639273027683
+      243.356025083218
     ],
     "internal_in": [
       17.28,
       17.13,
-      7.82
+      7.85
     ],
     "external_in": [
       18.7,
       18.55,
-      9.79
+      9.58
     ],
     "chamber_internal_width_mm": 438.9
   },
@@ -197,10 +197,11 @@
   "construction": {
     "panel_mm": 18.0,
     "back_mm": 12.0,
-    "baffle_mm": 18.0,
+    "baffle_mm": 12.0,
     "recess_mm": 20.0,
     "brace_l": 0.0,
     "pinned_external_width_mm": 474.9,
+    "pinned_external_height_mm": null,
     "max_external_mm": null,
     "port_count": 1,
     "line": "tolex",

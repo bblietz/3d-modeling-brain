@@ -15,7 +15,7 @@ import cabvoice as cv  # noqa: E402
 
 NOTE = VAULT / "knowledge/speaker-cab-voicing.md"
 TONE = VAULT / "projects/Speaker-cab-system/fixtures/tone-roots.json"
-SITE_INTERNAL = (472.0, 421.2, 229.4)
+SITE_INTERNAL = cv.site_default_box().internal_mm   # from the engine, so a panel change cannot leave this stale
 COLUMNS = ("| Speaker | Data | Net L in site box | Closed Qtc | Closed character | Closed F3 Hz | "
            "Proposed ported net L | Fb Hz | Ported character | Notes |")
 RULE = "|---|---|---|---|---|---|---|---|---|---|"
@@ -23,7 +23,8 @@ RULE = "|---|---|---|---|---|---|---|---|---|---|"
 
 def header(date: str) -> str:
     return (f'Calibration table, every number prediction_status "{cv.PREDICTION_STATUS}". '
-            f"Generated {date} with `evaluate` (closed, site box 472 x 421.2 x 229.4 mm internal) "
+            f"Generated {date} with `evaluate` (closed, site box "
+           f"{SITE_INTERNAL[0]:g} x {SITE_INTERNAL[1]:g} x {SITE_INTERNAL[2]:g} mm internal) "
             "and `propose` (closed-ported, low_end balanced), 16 ohm where the note lists it "
             "(voiced with the note's 8 ohm T/S set, see Model limits), amp 40 W.")
 

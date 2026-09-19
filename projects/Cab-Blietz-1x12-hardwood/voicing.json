@@ -46,21 +46,21 @@
   },
   "volumes": {
     "method": "evaluate",
-    "per_driver_net_l": 42.854041599999995,
-    "per_chamber_net_l": 42.854041599999995,
-    "net_total_l": 42.854041599999995,
+    "per_driver_net_l": 44.04688,
+    "per_chamber_net_l": 44.04688,
+    "net_total_l": 44.04688,
     "displacement_l": 2.0,
     "brace_l": 0.0,
     "port_l": 0.0,
     "divider_l": 0.0,
     "inside_parts_l": 0.7521465599999999,
-    "gross_l": 45.606188159999995
+    "gross_l": 46.79902656
   },
   "box": {
     "internal_mm": [
       472.0,
       421.2,
-      229.4
+      235.4
     ],
     "external_mm": [
       508.0,
@@ -70,7 +70,7 @@
     "internal_in": [
       18.58,
       16.58,
-      9.03
+      9.27
     ],
     "external_in": [
       20.0,
@@ -82,62 +82,62 @@
   "port": null,
   "prediction": {
     "model": "open-back path estimate",
-    "f_cancel_hz": 368.50021486892996,
-    "path_m": 0.4654,
+    "f_cancel_hz": 363.80992787441664,
+    "path_m": 0.4714,
     "panel_height_mm": 126.35999999999999,
-    "character": "open, wide dispersion, 6 dB per octave below 369 Hz relative to closed",
+    "character": "open, wide dispersion, 6 dB per octave below 364 Hz relative to closed",
     "response_relative_db": [
       [
         20.0,
-        -25.30815499528194
+        -25.196891010530067
       ],
       [
         25.2,
-        -23.30074409293068
+        -23.189480108178806
       ],
       [
         31.75,
-        -21.293880316001676
+        -21.182616331249797
       ],
       [
         40.0,
-        -19.287555082002314
+        -19.17629109725044
       ],
       [
         50.4,
-        -17.280144179651057
+        -17.16888019489918
       ],
       [
         63.5,
-        -15.27328040272205
+        -15.162016417970175
       ],
       [
         80.0,
-        -13.266955168722692
+        -13.155691183970815
       ],
       [
         100.79,
-        -11.260406004517689
+        -11.149142019765815
       ],
       [
         126.99,
-        -9.25336444468811
+        -9.142100459936234
       ],
       [
         160.0,
-        -7.246355255443068
+        -7.13509127069119
       ],
       [
         201.59,
-        -5.23937521147817
+        -5.128111226726293
       ],
       [
         253.98,
-        -3.232764531408485
+        -3.121500546656609
       ],
       [
         320.0,
-        -1.2257553421634435
+        -1.1144913574115671
       ],
       [
         400.0,
@@ -182,10 +182,11 @@
   "construction": {
     "panel_mm": 18.0,
     "back_mm": 12.0,
-    "baffle_mm": 18.0,
+    "baffle_mm": 12.0,
     "recess_mm": 20.0,
     "brace_l": 0.0,
     "pinned_external_width_mm": null,
+    "pinned_external_height_mm": null,
     "max_external_mm": null,
     "port_count": null,
     "line": "hardwood",
@@ -193,7 +194,7 @@
     "wall_material": "walnut"
   },
   "warnings": [
-    "width and depth are within 5 percent of 2:1 (2.06); coincident standing waves",
+    "width and depth are within 5 percent of 2:1 (2.01); coincident standing waves",
     "handling 50 W is under the 57 W target (1.5 x amp power)"
   ],
   "blockers": [],
