@@ -53,15 +53,16 @@ cleat_h = pocket_h - cleat_clear;                  // edge height above the floo
 cleat_b = cleat_a + pocket_len_mouth - 0.11 - cleat_clear - 0.1;   // foot of the ramp, just inside the pocket's mouth-side wall
 undercut = 15;        // the back face overhangs by this much, so the contact is at the edge
 cleat_depth = 31.75;  // the cleat's holding wall to the opening, along the cleat's wall (Brian: 1.25 in)
-grip_clear = 1.5;     // extra room past the end of Tesla's housing CAD (48.4 from the tip), where the grip is not modelled
-grip_flare = 0.1;     // and this much more per mm beyond it
-plate_w = 150; plate_t = 5; plate_r = 8; hole_in = 10; hole_d = 5; csk_d = 10;
-drum_r = 50; drum_l = 75;                  // plate front to flange front
-flange_t = 8; flange_point = 84; point_angle = -135;   // teardrop point to the lower left, clear of the wand
+grip_flare = 0.1;     // the sides and roof open by this much per mm from the nose shoulder to the outer edge, with no step: 1.6 by the end
+                      // of Tesla's housing CAD (48.2 from the tip), where the grip is not modelled, and on at the same rate
+floor_knee = 4;       // the floor carries the hanging wand, so it keeps Tesla's line to the end of that CAD, then falls to the flare over this length
+plate_w = 101.6; plate_t = 5; plate_r = 8; hole_in = 10; hole_d = 5; csk_d = 10;
+drum_r = 40; drum_l = 75;                  // plate front to flange front; drum 80 across for the 4 in base (Brian, 2026-09-18), the cavity keeps its size
+flange_t = 8; flange_point = 70; point_angle = -135;   // teardrop point to the lower left, clear of the wand
 fillet_flange = 12;                        // concave blend from the drum into the flange face
 fillet_plate = 8;                          // concave blend from the drum into the plate
 flange_r = drum_r + fillet_flange;
-logo_h = 70; logo_depth = 1;               // Tesla T height on the flange face (57% of the round part, as on the sample), recess depth
+logo_h = 59; logo_depth = 1;               // Tesla T height on the flange face (57% of the round part, as on the sample), recess depth
 coupon_wall = 3;                           // wall around the cavity in the fit coupon
 coupon_slab = 0.9;                         // the coupon keeps only this much under the cavity's deepest corner (3 layers)
 coupon_cut = tip_gap + nose_len + 1;       // the coupon ends here, just past the nose shoulder: the deeper opening gets no coupon (Brian, 2026-09-17)
@@ -80,7 +81,7 @@ function lip_q(b, c) = let(p = M0 + b * [v[0], v[1]] + c * [w[0], w[1]], dxy = [
     (-B + sqrt(B * B - 4 * A * C)) / (2 * A);
 mouth = cleat_a + cleat_depth - lip_q(floor_y, 0);   // cavity end wall to the mouth centre, so the lip on the cleat's wall is cleat_depth from the holding wall
 behind = 3;                                          // solid left between the wall and the cavity's deepest corner, which dips into the 5 mm plate
-mouth_z = 37.68;                                     // mouth centre out from the wall that gives `behind` (pipeline/zbudget.py)
+mouth_z = 37.92;                                     // mouth centre out from the wall that gives `behind` (pipeline/zbudget.py)
 M = [M0[0], M0[1], mouth_z];                         // mouth centre, on the drum surface
 T = M - mouth * d;                                                     // cavity floor centre
 
@@ -89,11 +90,15 @@ module in_cavity_frame() multmatrix([[w[0], v[0], d[0], T[0]], [w[1], v[1], d[1]
 nb = len(bell_sections);
 function bell_a(i) = bell_sections[i][0] + tip_gap;
 far_a = mouth + 45;                       // well outside the drum
+function flare(a) = grip_flare * max(0, a - bell_a(0));
 
 module profile(grow = 0) offset(r = clear + grow) polygon(nose_outline);
-module bell_profile(i, grow = 0, more = 0) hull() {
-    offset(r = clear + grow + more) polygon(bell_sections[i][1]);
-    translate([0, more]) offset(r = clear + grow + more) polygon(bell_sections[i][1]);
+module bell_profile(i, grow = 0, more = 0, drop = 0) intersection() {
+    hull() {
+        offset(r = clear + grow + more) polygon(bell_sections[i][1]);
+        translate([0, more]) offset(r = clear + grow + more) polygon(bell_sections[i][1]);
+    }
+    translate([-100, min([for (q = bell_sections[i][1]) q[1]]) - clear - grow - drop]) square(200);   // the floor, lower by drop only
 }
 // the nose profile for the tilted wand: dock_top over its top line instead of clear
 module tilt_profile(grow = 0) intersection() { profile(grow); translate([-50, -50]) square([100, 50 + half + dock_top + grow]); }
@@ -104,18 +109,18 @@ module slice(a) translate([0, 0, a]) linear_extrude(0.01) children();
 // what the docking pivot sweeps: snug roof over the tip, opening at dock_tilt toward the mouth, end wall leaning back.
 nose_step = 2.5;                                          // short pieces keep the roof from being bridged flat over the tip
 nose_pieces = ceil((nose_len + tip_gap) / nose_step);
-cavity_segs = nose_pieces + nb;
+cavity_segs = nose_pieces + nb + 1;
 module piece(i, grow, tilted) {
     if (i < nose_pieces) {                                                                                               // the nose
         a0 = i == 0 ? -0.01 - grow : i * nose_step; a1 = min((i + 1) * nose_step, bell_a(0));
         translate([0, 0, a0]) linear_extrude(a1 - a0) if (tilted) tilt_profile(grow); else profile(grow);
     }
     else if (i < nose_pieces + nb - 1) { j = i - nose_pieces; hull() {                                                   // Tesla's housing behind the shoulder
-        slice(bell_a(j)) bell_profile(j, grow); slice(bell_a(j + 1)) bell_profile(j + 1, grow); } }
-    else hull() {                                                                                                        // the grip beyond Tesla's CAD
-        slice(bell_a(nb - 1)) bell_profile(nb - 1, grow, grip_clear);
-        slice(far_a) bell_profile(nb - 1, grow, grip_clear + grip_flare * (far_a - bell_a(nb - 1)));
-    }
+        slice(bell_a(j)) bell_profile(j, grow, flare(bell_a(j))); slice(bell_a(j + 1)) bell_profile(j + 1, grow, flare(bell_a(j + 1))); } }
+    else if (i == nose_pieces + nb - 1) { a0 = bell_a(nb - 1); a1 = a0 + floor_knee; hull() {                            // the grip beyond Tesla's CAD: the floor joins the flare
+        slice(a0) bell_profile(nb - 1, grow, flare(a0)); slice(a1) bell_profile(nb - 1, grow, flare(a1), flare(a1)); } }
+    else { a1 = bell_a(nb - 1) + floor_knee; hull() {                                                                    // and on out of the drum
+        slice(a1) bell_profile(nb - 1, grow, flare(a1), flare(a1)); slice(far_a) bell_profile(nb - 1, grow, flare(far_a), flare(far_a)); } }
 }
 module tilt_about_tip(t) translate([0, floor_y, tip_gap]) rotate([-t, 0, 0]) translate([0, -floor_y, -tip_gap]) children();   // grip toward the roof by t
 module cavity_seg(i, grow = 0) hull() {
@@ -186,6 +191,8 @@ module holder() {
         body();
         intersection() { in_cavity_frame() cavity(); translate([-500, -500, -500]) cube([1000, 1000, 500 + total_l - flange_t]); }   // the flange stays whole: the docking room's top corner would nick 1.7 mm into its underside at the rim
         holes();
+        // the flange's point covers the lower-left screw: a way through it for the screw and the driver
+        translate([-(plate_w / 2 - hole_in), -(plate_w / 2 - hole_in), total_l - flange_t - 1]) cylinder(h = flange_t + 2, d = csk_d + 1);
         if (show_logo) logo();
     }
     color("limegreen") in_cavity_frame() cleat();

@@ -12,7 +12,8 @@ Wall dock for the Tesla Gen 3 Wall Connector handle: a drum on a square plate, t
 out of the drum's side at 45 degrees down and 15 degrees off the wall, hanging on a FIXED
 cleat in the connector's own lock pocket. Status 2026-09-18: **v7 fit coupon printed, the
 wand docks and holds** (Brian: "the last coupon printed great. This is the one."). The full
-part is exported and sliced, not printed yet. Project notes: [[NACS-wall-holder/brief]].
+part is exported and sliced on a 4 in base with a step-free entry, not printed yet. Project
+notes: [[NACS-wall-holder/brief]].
 
 ## What worked
 
@@ -45,6 +46,17 @@ part is exported and sliced, not printed yet. Project notes: [[NACS-wall-holder/
   Bambu keeps the "Sparse infill" label at 100% and writes gyroid as G2/G3 arcs, so verify by
   plastic per volume in a window (pads 0.92, plain plate 0.18), not by feature labels.
 
+- **Smoothing the entry without touching the hang.** The ledge inside the mouth became a steady
+  0.1 per mm flare on the sides and roof from the nose shoulder to the rim. The floor was left on
+  Tesla's line: flaring it too moved the hanging pose from 3.0 to 5.5 degrees of droop in
+  `insertion.py`, while the floor-kept version reproduced the validated numbers exactly. A
+  volume diff of new against old cavity (room added 2678 mm3, room lost 29 mm3, all in one known
+  place) is a quick proof that a "cosmetic" cavity edit only adds room.
+- **Shrinking the body round a fixed cavity.** Every body number (plate, drum radius, flange,
+  logo) is a parameter and the cavity is placed from the drum surface inward by `cleat_depth`,
+  so the 150 mm to 4 in change was five numbers plus `zbudget.py` for `mouth_z`, and the docking
+  check came back identical.
+
 ## What failed
 
 - **Six cavity versions that could not work.** The nose was to be lifted over the cleat under
@@ -69,6 +81,16 @@ part is exported and sliced, not printed yet. Project notes: [[NACS-wall-holder/
   outline, the skirt crossed x = 20 mm, and the dual-nozzle slice failed (rc 152). On the X2D the
   two nozzles share x 20 to 256 only; clip modifiers to the part and keep skirts inside that.
 
+- **A clearance step just inside the mouth.** Extra room for the unmodelled grip was added as a
+  1.5 mm jump where Tesla's CAD ends, which landed a visible ledge right at the opening (Brian:
+  "the entry is rough. It steps in."). Add unknown-shape allowance as a taper from the last known
+  section, never as a step, and look at the mouth from the user's side before exporting.
+- **A prime tower that only the GUI complained about.** The 150 mm file sliced clean in the CLI
+  with the tower's box 9.4 mm from the plate; Brian's Studio session showed "Prime Tower is too
+  close to others" and a G-code path conflict at layer 17. His session had been changed (four
+  filaments, unsaved edits), so the cause is not proven, but the pipeline now measures the gap from
+  the G-code and the holder job wants 15 mm or more (the 4 in part has 22.5).
+
 ## Measured fits
 
 | Feature | Modelled | Result |
@@ -83,13 +105,15 @@ part is exported and sliced, not printed yet. Project notes: [[NACS-wall-holder/
 X2D, 0.6 nozzle, `0.30mm Standard @BBL X2D 0.6 nozzle`, Bambu PETG Basic, textured PEI,
 plate down. Tree supports (hybrid, 35 degree threshold, top Z distance 0, interlaced
 rectilinear interface, spacing 0) with Bambu Support For PLA/PETG as the interface filament on
-the second nozzle. Full part (150 mm base) adds 3 walls, 20% gyroid and a modifier part that makes
-the plate solid for 12.5 mm around each screw hole: 7 h 47 min, 366 g (356 g PETG, 10 g support
-interface), 267 layers.
+the second nozzle. Full part adds 3 walls, 20% gyroid and a modifier part that makes the plate
+solid for 12.5 mm around each screw hole. 4 in base, drum 80: 6 h 07 min, 275 g (265 g PETG, 10 g
+support interface), 267 layers. The earlier 150 mm base, drum 100 version was 7 h 47 min, 366 g.
 
 ## Open
 
 - Full part not printed. First tried on it: the housing and the start of the grip in the deep
-  opening (the grip past 48 mm from the tip is not in Tesla's CAD; the cavity has 1.5 mm extra
-  room there and flares).
-- Base is 150 mm square (Brian, 125% of 120); all four screws are reachable from the front.
+  opening (the grip past 48 mm from the tip is not in Tesla's CAD; sides and roof have 1.6 mm
+  extra room there and keep flaring, the floor has 0.5 mm and ramps down within 4 mm).
+- Base is 4 in square (Brian, 2026-09-18), drum 80, flange 104. Three screws sit outside the round
+  flange; the lower-left one is reached through a diameter 11 hole in the flange's point, which
+  Brian has not reviewed yet.

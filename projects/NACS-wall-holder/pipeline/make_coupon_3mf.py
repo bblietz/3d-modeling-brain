@@ -58,7 +58,7 @@ STEM = sys.argv[1] if len(sys.argv) > 1 else "coupon"
 OUT = f"{STEM}-print.3mf"
 JOBS = {   # label, bed centre of the part, prime tower corner (the CLI default (165, 236) puts the 35 mm tower off the bed), extra process settings
     "coupon": ("NACS holder fit coupon", (128.0, 128.0), ("175", "100"), {}),
-    # the two nozzles share x 20..256 only (CLI log: shared_printable_size 236, centre 138): the 150 mm plate spans 33..183, skirt included it stays clear of 20
+    # the two nozzles share x 20..256 only (CLI log: shared_printable_size 236, centre 138): the 4 in holder, flange point included, spans 52..160, well clear of 20 and 28 mm from the tower
     "holder": ("NACS wall holder", (108.0, 128.0), ("192", "180"), {"wall_loops": "3", "sparse_infill_density": "20%", "sparse_infill_pattern": "gyroid"}),
 }
 LABEL, BED_CENTRE, PRIME_TOWER_XY, EXTRA = JOBS[STEM]
@@ -271,6 +271,29 @@ def check_pads_solid(sliced, gcode_name):
     return fill
 
 
+def tower_gap(sliced, gcode_name):
+    """Smallest distance between the prime tower's box and the part or its supports on the same layer, from the G-code
+    (the skirt runs round both and is left out). Studio's GUI called 9 mm "too close" on the 150 mm holder."""
+    g = zipfile.ZipFile(sliced).read(gcode_name).decode(errors="replace")
+    feat, z, x, y, pts = "", 0.0, 0.0, 0.0, {}
+    for line in g.splitlines():
+        if line.startswith("; FEATURE:"):
+            feat = line.split(":", 1)[1].strip()
+        elif line.startswith("; Z_HEIGHT:"):
+            z = float(line.split(":")[1])
+        elif line[:3] in ("G0 ", "G1 ", "G2 ", "G3 "):
+            mx, my, me = re.search(r" X([-0-9.]+)", line), re.search(r" Y([-0-9.]+)", line), re.search(r" E([-0-9.]+)", line)
+            x, y = (float(mx.group(1)) if mx else x), (float(my.group(1)) if my else y)
+            if me and float(me.group(1)) > 0 and (mx or my) and feat != "Skirt":
+                pts.setdefault(z, ([], []))[0 if feat == "Prime tower" else 1].append((x, y))
+    gaps = []
+    for tower, other in pts.values():
+        if tower and other:
+            x0, x1, y0, y1 = min(q[0] for q in tower), max(q[0] for q in tower), min(q[1] for q in tower), max(q[1] for q in tower)
+            gaps.append(min(max(x0 - px, px - x1, y0 - py, py - y1) for px, py in other))
+    return round(min(gaps), 1)
+
+
 def verify(path, tmp):
     z = zipfile.ZipFile(path)
     cfg = json.loads(z.read("Metadata/project_settings.config"))
@@ -301,7 +324,9 @@ def verify(path, tmp):
     per = re.findall(r'<filament id="(\d+)"[^>]*used_g="([^"]*)"', info)
     result = {"minutes": round(int(grab("prediction")) / 60), "grams": round(float(grab("weight")), 1),
               "grams_per_filament": {i: round(float(g), 1) for i, g in per}, "layers": res.get("layers")}
+    result["tower_gap_mm"] = tower_gap(out, res["gcode"])
     if STEM == "holder":
+        assert result["tower_gap_mm"] >= 15, f"the prime tower is {result['tower_gap_mm']} mm from the part"
         assert PAD_NAME in z.read("Metadata/model_settings.config").decode()
         result["screw_pads"] = check_pads_solid(out, res["gcode"])
     return result
