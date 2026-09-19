@@ -58,8 +58,8 @@ STEM = sys.argv[1] if len(sys.argv) > 1 else "coupon"
 OUT = f"{STEM}-print.3mf"
 JOBS = {   # label, bed centre of the part, prime tower corner (the CLI default (165, 236) puts the 35 mm tower off the bed), extra process settings
     "coupon": ("NACS holder fit coupon", (128.0, 128.0), ("175", "100"), {}),
-    # the two nozzles share x 20..256 only (CLI log: shared_printable_size 236, centre 138): the 4 in holder, flange point included, spans 52..160, well clear of 20 and 28 mm from the tower
-    "holder": ("NACS wall holder", (108.0, 128.0), ("192", "180"), {"wall_loops": "3", "sparse_infill_density": "20%", "sparse_infill_pattern": "gyroid"}),
+    # the two nozzles share x 20..256 only (CLI log: shared_printable_size 236, centre 138): the 4 in holder spans 56..160, well clear of 20; its tree supports root up to 20 mm outside it, so the tower stands 50 mm off
+    "holder": ("NACS wall holder", (108.0, 128.0), ("212", "180"), {"wall_loops": "3", "sparse_infill_density": "20%", "sparse_infill_pattern": "gyroid"}),
 }
 LABEL, BED_CENTRE, PRIME_TOWER_XY, EXTRA = JOBS[STEM]
 PAD_R = 12.5          # holder only: solid infill this far around each screw hole

@@ -58,7 +58,7 @@ grip_flare = 0.1;     // the sides and roof open by this much per mm from the no
 floor_knee = 4;       // the floor carries the hanging wand, so it keeps Tesla's line to the end of that CAD, then falls to the flare over this length
 plate_w = 101.6; plate_t = 5; plate_r = 8; hole_in = 10; hole_d = 5; csk_d = 10;
 drum_r = 40; drum_l = 75;                  // plate front to flange front; drum 80 across for the 4 in base (Brian, 2026-09-18), the cavity keeps its size
-flange_t = 8; flange_point = 70; point_angle = -135;   // teardrop point to the lower left, clear of the wand
+flange_t = 8;                              // the flange is round (Brian, 2026-09-18: no point at the lower left)
 fillet_flange = 12;                        // concave blend from the drum into the flange face
 fillet_plate = 8;                          // concave blend from the drum into the plate
 flange_r = drum_r + fillet_flange;
@@ -169,10 +169,7 @@ module drum_profile() {
 module body() {
     linear_extrude(plate_t) offset(r = plate_r) offset(delta = -plate_r) square(plate_w, center = true);
     rotate_extrude() drum_profile();
-    translate([0, 0, total_l - flange_t]) linear_extrude(flange_t) hull() {
-        circle(r = flange_r);
-        translate(flange_point * [cos(point_angle), sin(point_angle)]) circle(r = 6);
-    }
+    translate([0, 0, total_l - flange_t]) linear_extrude(flange_t) circle(r = flange_r);
 }
 
 // official emblem, two paths; the 0.05 mm closing heals a 0.02 mm self-crossing at the top of the stem in Tesla's outline
@@ -191,8 +188,6 @@ module holder() {
         body();
         intersection() { in_cavity_frame() cavity(); translate([-500, -500, -500]) cube([1000, 1000, 500 + total_l - flange_t]); }   // the flange stays whole: the docking room's top corner would nick 1.7 mm into its underside at the rim
         holes();
-        // the flange's point covers the lower-left screw: a way through it for the screw and the driver
-        translate([-(plate_w / 2 - hole_in), -(plate_w / 2 - hole_in), total_l - flange_t - 1]) cylinder(h = flange_t + 2, d = csk_d + 1);
         if (show_logo) logo();
     }
     color("limegreen") in_cavity_frame() cleat();

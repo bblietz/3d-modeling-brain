@@ -89,7 +89,9 @@ notes: [[NACS-wall-holder/brief]].
   with the tower's box 9.4 mm from the plate; Brian's Studio session showed "Prime Tower is too
   close to others" and a G-code path conflict at layer 17. His session had been changed (four
   filaments, unsaved edits), so the cause is not proven, but the pipeline now measures the gap from
-  the G-code and the holder job wants 15 mm or more (the 4 in part has 22.5).
+  the G-code and the holder job wants 15 mm or more. It paid off one change later: with the
+  round flange a tree support trunk rooted 20 mm outside the part, 9.3 mm from the tower's base.
+  Tree supports roam, so place the tower by the measured gap, not by the part's outline.
 
 ## Measured fits
 
@@ -106,14 +108,13 @@ X2D, 0.6 nozzle, `0.30mm Standard @BBL X2D 0.6 nozzle`, Bambu PETG Basic, textur
 plate down. Tree supports (hybrid, 35 degree threshold, top Z distance 0, interlaced
 rectilinear interface, spacing 0) with Bambu Support For PLA/PETG as the interface filament on
 the second nozzle. Full part adds 3 walls, 20% gyroid and a modifier part that makes the plate
-solid for 12.5 mm around each screw hole. 4 in base, drum 80: 6 h 07 min, 275 g (265 g PETG, 10 g
-support interface), 267 layers. The earlier 150 mm base, drum 100 version was 7 h 47 min, 366 g.
+solid for 12.5 mm around each screw hole. 4 in base, drum 80, round flange 104: 5 h 47 min, 252 g
+(243 g PETG, 9 g support interface), 267 layers, prime tower at (212, 180). The earlier 150 mm base, drum 100 version was 7 h 47 min, 366 g.
 
 ## Open
 
 - Full part not printed. First tried on it: the housing and the start of the grip in the deep
   opening (the grip past 48 mm from the tip is not in Tesla's CAD; sides and roof have 1.6 mm
   extra room there and keep flaring, the floor has 0.5 mm and ramps down within 4 mm).
-- Base is 4 in square (Brian, 2026-09-18), drum 80, flange 104. Three screws sit outside the round
-  flange; the lower-left one is reached through a diameter 11 hole in the flange's point, which
-  Brian has not reviewed yet.
+- Base is 4 in square (Brian, 2026-09-18), drum 80, round flange 104 (the teardrop point was
+  removed on his word the same day); all four screw heads clear the flange's edge by 0.7 mm.

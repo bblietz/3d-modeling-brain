@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: v7 VALIDATED 2026-09-18 (Brian: "the last coupon printed great. This is the one."); full part resized to a 4 in base with a step-free entry, exported and sliced (holder.stl, holder-print.3mf: 6 h 07 min, 275 g); awaiting the full print
+status: v7 VALIDATED 2026-09-18 (Brian: "the last coupon printed great. This is the one."); full part resized to a 4 in base with a step-free entry, a round flange, exported and sliced (holder.stl, holder-print.3mf: 5 h 47 min, 252 g); awaiting the full print
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -13,7 +13,7 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
 ## Decisions already locked (2026-09-17, supersedes the nose-down socket of 09-16)
 
 - Handle: Tesla Wall Connector Gen 3 (AC, 48A), 18 ft (5.5 m) cable.
-- Form, to mimic Brian's sample (photos in `images/`): a cylinder (drum) perpendicular to the wall on a square backing plate with four screw holes; a teardrop front flange; the cable wraps around the drum.
+- Form, to mimic Brian's sample (photos in `images/`): a cylinder (drum) perpendicular to the wall on a square backing plate with four screw holes; a teardrop front flange (round since 2026-09-18, see Round flange below); the cable wraps around the drum.
 - The charge wand comes out of the drum's RIGHT side, angled 45 degrees DOWN (front view). It must also lean AWAY from the wall so the grip and cable boot clear the wall (Brian: "the charge wand would hit the wall"); working value 20 degrees out, adjustable; 15 degrees since v5, see the cleat depth decision below.
 - The nose cavity is cut to Tesla's connector profile plus 0.5 mm; the sample's opening was "much too large for the adapter".
 - Retention: a FIXED cleat in the connector's lock notch, NO spring tab, and the cleat sits on the DOWNWARD (lower) wall of the cavity so gravity seats the nose on it. Not on the back (wall-side) wall. The notch therefore faces down and the button faces up along the wand. Docking and roof: see the v7 decision below (2026-09-18); the v1 to v6 step roof, lifted-over-the-cleat docking, is superseded.
@@ -54,6 +54,8 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
   - How small the drum can go: the cavity's far roof corner is 10.5 mm from the surface at radius 40 (wall profile, scratch check), 7.3 at 38, 3.2 at 36. Radius 40 also puts the three uncovered screw heads 0.7 mm outside the round flange (hole centres 57.7 mm from the axis).
   - The flange's point covers the lower-left screw on any base this size (the round part alone reaches 52 of the 52.7 mm the head needs), so a diameter 11 hole through the point lets the screw and driver through. Brian has not seen this yet.
   - Print: 108 x 108 x 80 mm on the bed, 6 h 07 min, 275 g (265 g PETG, 10 g support interface), 267 layers; pads 89 to 90% plastic, plain plate 18%.
+  - Round flange (Brian, 2026-09-18: "make the face round, removing the pointed bottom left corner"): the flange is a plain circle, diameter 104; `flange_point`, `point_angle` and the driver hole through the point are gone. All four screw heads now clear the flange's edge by 0.7 mm. This supersedes the teardrop flange in the locked decisions above. Cavity untouched, so `insertion.py` was not rerun. Print: 104 x 104 x 80 mm, 5 h 47 min, 252 g (243 g PETG, 9 g support interface), pads 85 to 89%, plain plate 19%.
+  - The round flange's tree supports root up to 20 mm outside the part, and one trunk landed 9.3 mm from the prime tower's base, which the new gap check caught. Tower moved from x 192 to 212: gap 26.6 mm.
   - Prime tower: Brian had the 150 mm file open in Studio, which warned "Prime Tower is too close to others" and "Conflicts of gcode paths ... layer 17 (WipeTower <-> NACS wall holder)". In that file's CLI slice the tower's box was 9.4 mm from the plate. `make_coupon_3mf.py` now measures that gap from the G-code (`tower_gap_mm`, skirt left out) and the holder job asserts 15 mm; the 4 in part has 22.5 mm.
 
 ## Files (2026-09-17)
