@@ -17,6 +17,7 @@
 
 include <nose_outline.scad>;
 include <bell_sections.scad>;
+include <rim_round.scad>;
 
 display = true;       // rotate so +Y is up on screen for renders
 show_nose = true;     // ghost of the connector, docked
@@ -56,7 +57,9 @@ cleat_depth = 31.75;  // the cleat's holding wall to the opening, along the clea
 grip_flare = 0.1;     // the sides and roof open by this much per mm from the nose shoulder to the outer edge, with no step: 1.6 by the end
                       // of Tesla's housing CAD (48.2 from the tip), where the grip is not modelled, and on at the same rate
 floor_knee = 4;       // the floor carries the hanging wand, so it keeps Tesla's line to the end of that CAD, then falls to the flare over this length
-plate_w = 101.6; plate_t = 5; plate_r = 8; hole_in = 10; hole_d = 5; csk_d = 10;
+plate_w = 101.6; plate_t = 5; plate_r = 10; hole_in = 10; hole_d = 5; csk_d = 10;   // corner radius = hole_in, so each countersink sits centred in its rounded corner
+edge_r = 25.4 / 16;  // every outside edge is rounded at least 1/16 in (Brian, 2026-09-18), except the plate's back edge and the screw holes;
+                     // the cleat keeps its sharp holding edge and the T its crisp outline. The mouth's rim: rim_round.scad, from pipeline/rim_round.py
 drum_r = 40; drum_l = 75;                  // plate front to flange front; drum 80 across for the 4 in base (Brian, 2026-09-18), the cavity keeps its size
 flange_t = 8;                              // the flange is round (Brian, 2026-09-18: no point at the lower left)
 fillet_flange = 12;                        // concave blend from the drum into the flange face
@@ -159,17 +162,25 @@ module handle() {
     }
 }
 
+// drum and flange in one turned profile. The flange's underside is all blend, so its lower rim is an arc tangent to the blend and to the flange's edge.
 module drum_profile() {
     zf = total_l - flange_t;
     a = [for (t = [0 : 5 : 90]) [drum_r + fillet_plate - fillet_plate * sin(t), plate_t + fillet_plate - fillet_plate * cos(t)]];
-    b = [for (t = [0 : 5 : 90]) [drum_r + fillet_flange - fillet_flange * cos(t), zf - fillet_flange + fillet_flange * sin(t)]];
-    polygon(concat([[0, plate_t - 0.01]], a, b, [[drum_r + fillet_flange, zf + 0.01], [0, zf + 0.01]]));
+    tt = acos(edge_r / (fillet_flange + edge_r));                                       // where the blend hands over to the rim's arc
+    zc = zf - fillet_flange + sqrt(fillet_flange * (fillet_flange + 2 * edge_r));       // that arc's centre height
+    b = [for (t = concat([for (q = [0 : 5 : tt]) q], [tt])) [flange_r - fillet_flange * cos(t), zf - fillet_flange + fillet_flange * sin(t)]];
+    c = [for (t = concat([for (q = [-tt + 10 : 10 : -1]) q], [0])) [flange_r - edge_r + edge_r * cos(t), zc + edge_r * sin(t)]];
+    e = [for (t = [0 : 10 : 90]) [flange_r - edge_r + edge_r * cos(t), total_l - edge_r + edge_r * sin(t)]];
+    polygon(concat([[0, plate_t - 0.01]], a, b, c, e, [[0, total_l]]));
 }
 
+// the plate: four turned corner posts with a rounded top edge, hulled
+module plate() hull() for (sx = [-1, 1], sy = [-1, 1]) translate([sx, sy] * (plate_w / 2 - plate_r))
+    rotate_extrude() polygon(concat([[0, 0], [plate_r, 0]], [for (t = [0 : 10 : 90]) [plate_r - edge_r + edge_r * cos(t), plate_t - edge_r + edge_r * sin(t)]], [[0, plate_t]]));
+
 module body() {
-    linear_extrude(plate_t) offset(r = plate_r) offset(delta = -plate_r) square(plate_w, center = true);
+    plate();
     rotate_extrude() drum_profile();
-    translate([0, 0, total_l - flange_t]) linear_extrude(flange_t) circle(r = flange_r);
 }
 
 // official emblem, two paths; the 0.05 mm closing heals a 0.02 mm self-crossing at the top of the stem in Tesla's outline
@@ -183,13 +194,25 @@ module holes() {
     }
 }
 
+// the cavity as cut from the body. It stops at cut_top, the height its top reaches inside the drum (pipeline/zbudget.py, mouth top). Above that the
+// docking room's flared top corner ran on outside the drum as a narrow groove up the blend to the flange's rim, where no wand goes (insertion.py)
+cut_top = 68.4;
+module cavity_cut(grow = 0) intersection() { in_cavity_frame() cavity(grow); translate([-500, -500, -500]) cube([1000, 1000, 500 + cut_top + grow]); }
+
+// the mouth's rim, rounded by a rolling ball of edge_r: between stations the sharp wedge is cut away back to where the ball touches, and the balls go back in
+module dot(p) translate(p) cube(0.01, center = true);
+module rim_cut() for (i = [0 : 1 : len(rim_O) - 1]) if (rim_next[i] >= 0) hull() for (k = [i, rim_next[i]]) { dot(rim_E[k]); dot(rim_TB[k]); dot(rim_O[k]); dot(rim_TC[k]); }
+module rim_fill() for (i = [0 : 1 : len(rim_O) - 1]) if (rim_next[i] >= 0) hull() for (k = [i, rim_next[i]]) translate(rim_O[k]) sphere(r = edge_r, $fn = 20);
+
 module holder() {
     difference() {
         body();
-        intersection() { in_cavity_frame() cavity(); translate([-500, -500, -500]) cube([1000, 1000, 500 + total_l - flange_t]); }   // the flange stays whole: the docking room's top corner would nick 1.7 mm into its underside at the rim
+        cavity_cut();
+        rim_cut();
         holes();
         if (show_logo) logo();
     }
+    intersection() { rim_fill(); difference() { body(); cavity_cut(); } }
     color("limegreen") in_cavity_frame() cleat();
 }
 
@@ -233,7 +256,7 @@ module model() {
 
 if (display) rotate([90, 0, 0]) model(); else model();
 
-echo(str("wand direction d=", d, " up v=", v, " across w=", w, " mouth M=", M, " tip T=", T, " mouth depth=", mouth));
+echo(str("wand direction d=", d, " up v=", v, " across w=", w, " mouth M=", M, " tip T=", T, " mouth depth=", mouth, " edge_r=", edge_r));
 echo(str("cleat: edge at ", cleat_a, " height ", cleat_h, " ramp foot ", cleat_b, " ramp angle ", atan(cleat_h / (cleat_b - cleat_a))));
 echo(str("lips from the cavity end wall: cleat wall ", mouth + lip_q(floor_y, 0), " roof ", mouth + lip_q(half + clear + (mouth - tip_gap) * tan(dock_tilt), 0),
          " flange side ", mouth + lip_q(0, 21.8), " wall side ", mouth + lip_q(0, -21.8)));

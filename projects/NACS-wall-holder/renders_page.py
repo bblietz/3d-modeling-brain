@@ -36,6 +36,7 @@ cleat_w_base, cleat_w_top = 2 * (5.78 - cleat_clear / 0.951), 2 * (5.10 - cleat_
 logo_h, logo_depth, coupon_wall = const("logo_h"), const("logo_depth"), const("coupon_wall")
 mouth_z, cleat_depth, behind = const("mouth_z"), const("cleat_depth"), const("behind")
 grip_flare, floor_knee, hole_in = const("grip_flare"), const("floor_knee"), const("hole_in")
+cut_top, plate_r, edge_r = const("cut_top"), const("plate_r"), 25.4 / 16
 drum_straight = drum_l - fillet_plate - fillet_flange - flange_t
 try:
     sl = json.load(open(os.path.join(HERE, "coupon-slice.json")))
@@ -58,6 +59,9 @@ holder_views = [
 entry_views = [
     ("entry-before", "Before: looking into the mouth from the grip end. Past the end of Tesla's housing CAD the cavity jumped 1.5 mm wider (3 mm at the roof) in one step, which showed as a ledge running round the opening."),
     ("entry", f"Now: the sides and roof open steadily from the nose shoulder to the outer edge, {grip_flare * 100:.0f} mm per 100 mm on each side, and reach the same size at the rim as before. No ledge."),
+]
+edge_views = [
+    ("edges", f"The mouth's rim, the flange's two rims and the plate's top edge, all rounded {edge_r:.1f} mm (1/16 in). The rim's roundover is a rolling ball, so it keeps that radius from the thin roof lip to the blunt floor lip."),
 ]
 dock_views = [
     ("dock-1-in", f"1. Nose in with the grip raised about {dock_tilt:.0f}&#176;. The nose's lower front edge rides up the cleat's ramp and over its edge."),
@@ -103,7 +107,7 @@ code{{font-size:.9em}}
 <li><span class="k">Solid around every screw hole</span>: a &#216;25 region through the plate at each hole prints at 100% infill. Measured in the sliced G-code between the plate's skins: {min(v for k, v in hs['screw_pads'].items() if k.startswith('pad')) * 100:.0f}% plastic in the pads, {hs['screw_pads']['plain plate'] * 100:.0f}% in the plain plate.</li>
 <li>Mounting: four #8 countersunk screws, {hole_in:.0f} mm in from the corners. All four sit just outside the round flange: the screw heads clear its edge by 0.7 mm, so a driver goes straight on. The lower-right screw is behind the docked wand: mount the holder with the wand off.</li>
 <li>Not covered by the coupon: the housing and the start of the grip inside the deep opening. The housing room is cut from Tesla's CAD like the nose was; past the end of that CAD the grip is not modelled, and the opening there is as large at the rim as it was on the 150 mm version.</li>
-<li>The flange stays whole: the docking room's top corner would have nicked 1.7 mm into its underside at the rim, so the cut stops at the flange. The docking and hold check is unchanged by that.</li>
+<li>The flange and the blend under it stay whole: the cavity cut stops {cut_top:.1f} mm out from the wall, the height its top reaches inside the drum. Above that the docking room's flared top corner used to run on outside the drum as a narrow groove up to the flange's rim, where no wand goes. The way in is unchanged by that.</li>
 </ul>
 
 <h2>A smooth entry (2026-09-18)</h2>
@@ -111,7 +115,18 @@ code{{font-size:.9em}}
 <div class="grid">{figs(entry_views)}</div>
 <ul>
 <li>The floor is the one wall left alone. The hanging wand rests on it, and letting it fall away with the others changed how the wand hangs in the check (5.5&#176; of droop instead of 3&#176;). It keeps Tesla's line to the end of the housing CAD, exactly as printed, and the old ledge beyond that, right at the lip, is now a {floor_knee:.0f} mm ramp.</li>
-<li>Against the cavity you called perfect, the new one only adds room, except for that ramp filling the ledge's corner (29 mm&#179;, under the start of the grip). Docking and hold check: same way in with the wand grown 0.2 mm, same hanging pose (tip up 3&#176;, 1.9 mm of the edge engaged), same 20 mm lift to come off. Docked clash: 0 mm&#179;.</li>
+<li>Against the cavity you called perfect, the new one only adds room, except for that ramp filling the ledge's corner (29 mm&#179;, under the start of the grip). Docking and hold check: same way in with the wand grown 0.2 mm, same hanging pose (tip up 3&#176;, 1.9 mm of the edge engaged), same 20 mm lift to come off. The rounded floor lip, below, then shifts the hang slightly. Docked clash: 0 mm&#179;.</li>
+</ul>
+
+<h2>Rounded edges (2026-09-18)</h2>
+<p>You asked for at least 1/16 in of roundover on every edge except the back of the wall plate and the screw holes.</p>
+<div class="grid">{figs(edge_views)}</div>
+<ul>
+<li><span class="k">Plate</span>: top edge rounded all round. The corner radius went from 8 to {plate_r:.0f} mm, so each countersink sits centred in its corner; at 8 the countersink would have broken through the rounded edge.</li>
+<li><span class="k">Flange</span>: front and back rims rounded. The back rim's arc runs tangent into the blend under the flange.</li>
+<li><span class="k">Mouth</span>: a rolling-ball roundover right round the opening (<code>pipeline/rim_round.py</code>). Measured on the finished mesh, the rounded surface sits within 0.04 mm of a {edge_r:.2f} mm ball all the way round, with no sharp remnant.</li>
+<li><span class="k">Effect on the hang</span>: rounding the floor lip moves the point the hanging wand rests on about 1.7 mm inward. In the check the wand now hangs tip-up 3.5&#176; instead of 3.0&#176;, with 1.75 mm of the cleat's edge engaged instead of 1.87, and the lift needed to come off goes from 19.6 to 20.4 mm. The way in is unchanged.</li>
+<li><span class="k">Left sharp on purpose</span>: the cleat's holding edge (it is what catches the wand) and the Tesla T's outline (a 1 mm recess; rounding it would blur the emblem). Edges inside the cavity are inside corners, not outside edges.</li>
 </ul>
 
 <h2>What is set</h2>
@@ -128,7 +143,7 @@ code{{font-size:.9em}}
 
 <h2>How it docks, and why it now holds (2026-09-18)</h2>
 <p>You asked for the snug size at the end of the cavity to run further out. Checking that against Tesla's CAD turned up the reason the cleat has not been catching. The old roof was snug for 5 mm and then stepped up 5 mm so the nose could be lifted over the cleat. The hanging weight acts far out on the grip, so it levers the wand about the mouth's lower lip: tip up, pocket up. That is the same motion as lifting the nose over the cleat, run backwards. A path search over slide, lift and tilt (<code>pipeline/insertion.py</code>) gave: with the snug roof shorter than <span class="k">3.9 mm</span> the wand gets in, and its own weight takes it back out (the load has to rise only 0.2 mm); longer than that it holds, and cannot get in. At 5 mm the cavity was on the wrong side by 1.1 mm: it would have held, but the wand could not get in. No length of step roof does both.</p>
-<p>So the snug part does have to reach further, as you said, and the wand has to dock by a motion the weight cannot undo: <span class="k">grip up, nose in, grip down</span>. The roof is now the connector's size over the tip and opens only as far as that pivot sweeps. Compared with the old step it is closer to the wand for the first 25 mm (0.5 mm over the tip, 1.6 at 10 mm, 3.7 at 20 mm, where the step was 5.5 throughout) and wider beyond. With the wand grown 0.2 mm all round there is still a way in. Hanging, the weight turns the tip up 3&#176; into the roof and stops: <span class="k">1.9 mm of the 3.6 mm edge</span> stays engaged, and the load would have to be raised <span class="k">20 mm</span> against gravity before the wand could come off.</p>
+<p>So the snug part does have to reach further, as you said, and the wand has to dock by a motion the weight cannot undo: <span class="k">grip up, nose in, grip down</span>. The roof is now the connector's size over the tip and opens only as far as that pivot sweeps. Compared with the old step it is closer to the wand for the first 25 mm (0.5 mm over the tip, 1.6 at 10 mm, 3.7 at 20 mm, where the step was 5.5 throughout) and wider beyond. With the wand grown 0.2 mm all round there is still a way in. Hanging, the weight turns the tip up 3.5&#176; into the roof and stops: <span class="k">1.75 mm of the 3.6 mm edge</span> stays engaged, and the load would have to be raised <span class="k">20 mm</span> against gravity before the wand could come off.</p>
 <div class="grid">{figs(dock_views)}</div>
 <figure style="margin-top:16px">{img("docking/docking-path")}<figcaption>The check itself: Tesla's real connector section (grey) against the holder's section (teal) at the centre plane, eight poses from outside to docked along the path the search found, then the pose it settles into under load. The search also runs six more sections across the wand.</figcaption></figure>
 <p>The 50% longer cleat is retired: it is in the repository's history (commit f0ea071) and its files are removed. Tesla's pocket only takes the present cleat, and the catching problem was the roof, not the cleat's size.</p>

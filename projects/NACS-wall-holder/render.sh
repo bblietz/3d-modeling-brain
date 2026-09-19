@@ -35,6 +35,8 @@ $O -o images/scad/section-notch.png --projection=o --camera=$CEN,$DOWN,190 $S -D
 $O -o images/scad/cleat-detail.png --projection=o --camera=$CLEAT,90,0,$ROTZ,62 $S -D section=1 "$@" holder.scad
 # the entry, looking down the wand from the grip end with no handle in it (entry-before.png is a one-off: the stepped entry of commit 4e9f8d9 on this body)
 $O -o images/scad/entry.png --projection=o --camera=$CEN,$DOWN,190 $S -D show_nose=false "$@" holder.scad
+# the rounded edges close up: the mouth's rim, the flange's rims and a plate corner
+$O -o images/scad/edges.png --camera=20,-20,-25,75,0,60,260 $S -D show_nose=false "$@" holder.scad
 # docking: the wand coming in grip-up over the cleat, then at the stop just before the grip is lowered
 $O -o images/scad/dock-1-in.png --projection=o --camera=$CEN,90,0,$ROTZ,250 $S -D section=1 -D pose_tilt=12 -D pose_out=22 "$@" holder.scad
 $O -o images/scad/dock-2-stop.png --projection=o --camera=$CEN,90,0,$ROTZ,250 $S -D section=1 -D pose_tilt=12 -D pose_out=0.5 "$@" holder.scad

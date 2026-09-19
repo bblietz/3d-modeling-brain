@@ -57,6 +57,14 @@ notes: [[NACS-wall-holder/brief]].
   so the 150 mm to 4 in change was five numbers plus `zbudget.py` for `mouth_z`, and the docking
   check came back identical.
 
+- **A rolling-ball roundover on a 3D rim, in OpenSCAD.** The mouth's rim crosses a cylinder and a
+  torus and its wedge angle runs from 56 to 157 degrees, so offset tricks give the wrong radius.
+  `pipeline/rim_round.py` lets OpenSCAD cut "body shrunk by r minus cavity grown by r", takes that
+  solid's rim as the ball-centre curve, settles each centre at exactly r from both real surfaces,
+  and writes stations; the model cuts a convex kite (edge, touch, centre, touch) between stations
+  and unions the balls back, clipped to the sharp part. Check it on the finished mesh: every new
+  surface sample should sit at r from the centre curve (it did, within 0.04 mm).
+
 ## What failed
 
 - **Six cavity versions that could not work.** The nose was to be lifted over the cleat under
@@ -93,6 +101,15 @@ notes: [[NACS-wall-holder/brief]].
   round flange a tree support trunk rooted 20 mm outside the part, 9.3 mm from the tower's base.
   Tree supports roam, so place the tower by the measured gap, not by the part's outline.
 
+- **Two traps in the roundover work.** `use <file.scad>` does not carry the file's `$fn`, so
+  helper exports had coarse facets until the scratch file set `$fn` itself. And creased walls put
+  the real edge up to 1 mm from where two flat faces would meet, which left a detached sliver;
+  pushing the cut's edge corner 3 mm out into the air fixed it (count the bodies after every build).
+- **Rounding a load-bearing lip moves the load.** The floor lip is a 67 degree wedge, so a 1/16 in
+  ball touches the floor 2.4 mm in from the lip and the hanging wand's rest point moved with it:
+  3.0 to 3.5 degrees of droop, 1.87 to 1.75 mm of cleat engaged. Small, but it was only visible
+  because the docking check was rerun after a "cosmetic" change.
+
 ## Measured fits
 
 | Feature | Modelled | Result |
@@ -108,8 +125,9 @@ X2D, 0.6 nozzle, `0.30mm Standard @BBL X2D 0.6 nozzle`, Bambu PETG Basic, textur
 plate down. Tree supports (hybrid, 35 degree threshold, top Z distance 0, interlaced
 rectilinear interface, spacing 0) with Bambu Support For PLA/PETG as the interface filament on
 the second nozzle. Full part adds 3 walls, 20% gyroid and a modifier part that makes the plate
-solid for 12.5 mm around each screw hole. 4 in base, drum 80, round flange 104: 5 h 47 min, 252 g
-(243 g PETG, 9 g support interface), 267 layers, prime tower at (212, 180). The earlier 150 mm base, drum 100 version was 7 h 47 min, 366 g.
+solid for 12.5 mm around each screw hole. 4 in base, drum 80, round flange 104, 1/16 in
+roundovers: 5 h 32 min, 241 g (233 g PETG, 9 g support interface), 267 layers, prime tower at
+(212, 180). The earlier 150 mm base, drum 100 version was 7 h 47 min, 366 g.
 
 ## Open
 

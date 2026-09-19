@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: v7 VALIDATED 2026-09-18 (Brian: "the last coupon printed great. This is the one."); full part resized to a 4 in base with a step-free entry, a round flange, exported and sliced (holder.stl, holder-print.3mf: 5 h 47 min, 252 g); awaiting the full print
+status: v7 VALIDATED 2026-09-18 (Brian: "the last coupon printed great. This is the one."); full part resized to a 4 in base with a step-free entry, a round flange and 1/16 in roundovers, exported and sliced (holder.stl, holder-print.3mf: 5 h 32 min, 241 g); awaiting the full print
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -56,13 +56,22 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
   - Print: 108 x 108 x 80 mm on the bed, 6 h 07 min, 275 g (265 g PETG, 10 g support interface), 267 layers; pads 89 to 90% plastic, plain plate 18%.
   - Round flange (Brian, 2026-09-18: "make the face round, removing the pointed bottom left corner"): the flange is a plain circle, diameter 104; `flange_point`, `point_angle` and the driver hole through the point are gone. All four screw heads now clear the flange's edge by 0.7 mm. This supersedes the teardrop flange in the locked decisions above. Cavity untouched, so `insertion.py` was not rerun. Print: 104 x 104 x 80 mm, 5 h 47 min, 252 g (243 g PETG, 9 g support interface), pads 85 to 89%, plain plate 19%.
   - The round flange's tree supports root up to 20 mm outside the part, and one trunk landed 9.3 mm from the prime tower's base, which the new gap check caught. Tower moved from x 192 to 212: gap 26.6 mm.
+  - Rounded edges (Brian, 2026-09-18: "all edges should have a minimum of a 1/16 in of a roundover except for the back of the wall plate and the screw holes"). `edge_r = 25.4 / 16`.
+    - Plate: top edge rounded (four turned corner posts, hulled). `plate_r` 8 to 10 = `hole_in`, so each countersink is centred in its corner; at 8 the countersink broke through the rounded edge for the top 0.35 mm.
+    - Flange: both rims rounded inside `drum_profile()`, which now turns the drum and flange as one profile; the back rim's arc is tangent to the blend (the underside is all blend, no flat).
+    - Mouth rim: rolling-ball roundover from `pipeline/rim_round.py`, which writes `rim_round.scad` (251 stations at 0.8 mm; wedge angle 56 to 157 degrees). The ball-centre curve is the rim of "body shrunk by edge_r minus cavity grown by edge_r", cut by OpenSCAD; each centre is then settled at exactly edge_r from both real surfaces. `holder()` cuts the kite edge, touch, centre, touch between stations and puts the balls back. Measured on the finished mesh: the new surface is 1.549 to 1.587 mm from the centre curve all round (ball 1.5875, 20-gon spheres), one body, watertight. RERUN `rim_round.py` after any change to the cavity, the drum, the blends or `edge_r` (order: `zbudget.py`, `rim_round.py`, `insertion.py`).
+    - `cut_top = 68.4`: the cavity cut stops where its top reaches inside the drum (was the flange's underside, 72). Above that the docking room's flared top corner ran on outside the drum as a 2 mm wide groove up the blend to the flange's rim; no wand goes there and it could not be rounded cleanly. WAY IN unchanged.
+    - Hang with the rounded floor lip (a 67 degree wedge, so the ball touches the floor 2.4 mm in from the lip): tip 3.37 mm from the end wall (was 3.20), tilt -3.5 degrees (was -3.0), 1.75 of 3.57 mm engaged (was 1.87), HOLD 20.4 mm (was 19.6); WAY IN the same (0 to +9 degrees, 3.88 mm). Docked clash 0.000 mm3. Brian has been told this number moved.
+    - Left sharp on purpose: the cleat (its holding edge is the function) and the T's outline (1 mm recess, artwork). Trap found on the way: `use <holder.scad>` does not bring `$fn` along, so a scratch file that exports `body()` gets coarse facets unless it sets `$fn` itself.
+    - Print: 5 h 32 min, 241 g (233 g PETG, 9 g support interface), pads 89 to 90%, plain plate 19%, tower gap 26.6 mm.
   - Prime tower: Brian had the 150 mm file open in Studio, which warned "Prime Tower is too close to others" and "Conflicts of gcode paths ... layer 17 (WipeTower <-> NACS wall holder)". In that file's CLI slice the tower's box was 9.4 mm from the plate. `make_coupon_3mf.py` now measures that gap from the G-code (`tower_gap_mm`, skirt left out) and the holder job asserts 15 mm; the 4 in part has 22.5 mm.
 
 ## Files (2026-09-17)
 
 - `holder.scad` (+ `nose_outline.scad`): the model; `part="coupon"` gives the fit coupon. `render.sh` renders `images/scad/*.png`; `renders_page.py` builds `plan.html` (published as the "NACS Holster Plan" artifact).
 - `coupon.stl`, `coupon-print.3mf`, `coupon-slice.json`, `images/scad/coupon-*.png`: the fit coupon, generated from holder.scad (`part="coupon"`, export needs `-D show_wall=false` or the render's wall plane comes along): the v7 nose cavity and the cleat, cut off 1 mm past the nose shoulder (`coupon_cut`), 3 mm walls, 0.9 mm base, print orientation unchanged: 72 x 67 x 57 mm. Real slice: 1 h 36 min, 59 g (55 g PETG including the prime tower, 3.8 g support). The first printed coupon (v4, commit cb42b65) had the small drafted cleat and the step roof. Set `coupon_cut` past the mouth to get the whole opening.
-- `images/scad/entry.png` (from `render.sh`) and `entry-before.png` (one-off: the stepped entry of commit 4e9f8d9 on the 4 in body).
+- `rim_round.scad`: GENERATED by `pipeline/rim_round.py` (the mouth rim's roundover stations), included by `holder.scad`; never edit by hand.
+- `images/scad/entry.png` and `edges.png` (from `render.sh`) and `entry-before.png` (one-off: the stepped entry of commit 4e9f8d9 on the 4 in body).
 - `holder.stl`, `holder-print.3mf`, `holder-slice.json`: the full part, built by `pipeline/make_coupon_3mf.py holder` (the same script builds the coupon with no argument). Retrospective: `knowledge/learnings/nacs-wall-holder.md`.
 - `pipeline/insertion.py`: the docking and hold check (WAY IN, HOLD) for the model as built or with `name=value` overrides; `--png` draws the path and the hanging pose (`images/docking/docking-path.png`). Run it after any change to the cavity, the cleat or the wand angles. `render.sh` also renders the docking poses (`dock-1-in`, `dock-2-stop`; ghost pose via `pose_tilt`, `pose_out`).
 - Renders use `--render`, not `--preview`: in preview the docked handle's clip plane paints over the holder's whole cut face in section views. `part="clash"` intersects the docked handle with the holder and must come out empty (checked: 0 mm3).
