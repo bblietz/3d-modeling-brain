@@ -434,7 +434,7 @@ the file is absent and never overwrites one. To regenerate it after a
 re-run, delete `proposal.md` and run `cabreport.py` again; that run
 rewrites `checks.md` too, so the operator rows are judged again. The
 module fills the facts (customer, line, configuration, back type,
-speaker, wiring, external size in inches and mm, mass in kg and lb,
+speaker, wiring, external size in inches, mass in kg and lb,
 finish, grill cloth, hardware, swatches, lead time, status line);
 predicted frequencies never enter the proposal.
 

@@ -31,7 +31,7 @@ Prepared for {{customer}}.
 - Configuration: {{configuration}}
 - Speaker: {{speaker_label}}
 - Impedance and wiring: {{wiring}}
-- External size, width x height x depth: {{external_in}} ({{external_mm}})
+- External size, width x height x depth: {{external_in}}
 - Estimated weight, loaded: {{mass_lb}} lb ({{mass_kg}} kg)
 
 <!-- slot: why_this_cabinet -->

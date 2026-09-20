@@ -202,7 +202,6 @@ def build(order: Path, customer: str | None, stripe_options: list[str] | None = 
         "eyebrow": f"{f['line_label']} · {back_words}",
         "headline": f"Your {finish.lower()} {config}" if hardwood else f"Your {config} in {finish}",
         "size_in": f["external_in"].replace(" x ", " × "),
-        "size_mm": f["external_mm"].replace(" x ", " × "),
         "back_view_label": "Open back" if cab["enclosure"]["type"] in ("open", "semi-open") else "Back",
         "designed": slot(proposal, "designed_to_do"),
         "model_note": ("A design model drawn from your cabinet's plans. The speaker and hardware are simplified"

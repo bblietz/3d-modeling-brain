@@ -45,6 +45,6 @@ generated: 2026-09-19
 | wood movement | n/a; the climate comes from the brief | n/a: tolex line, Baltic birch plywood; the house climate from the brief does not bind |
 | transport | 17-7/8 x 16-5/16 x 9-15/16 in W x H x D, 31.2 lb; the vehicle and doorway come from the brief | pass: no vehicle stated; at 31.2 lb with a strap handle it is a one-hand carry, and 17-7/8 x 16-5/16 x 9-15/16 in clears any doorway |
 | weight vs limit | 14.2 kg (31.2 lb); the limit comes from the brief | pass: no limit stated; 14.2 kg (31.2 lb) |
-| size vs limit | 454.155 x 415 x 252.546 mm (17-7/8 x 16-5/16 x 9-15/16 in) W x H x D; the limits come from the brief | pass: no limit stated and no head to match; 454.155 x 415 x 252.546 mm (17-7/8 x 16-5/16 x 9-15/16 in) |
+| size vs limit | 17-7/8 x 16-5/16 x 9-15/16 in W x H x D; the limits come from the brief | pass: no limit stated and no head to match; 17-7/8 x 16-5/16 x 9-15/16 in |
 
 0 row(s) still read `operator`: every operator row judged against the brief on 2026-09-19; the file is final.

@@ -94,7 +94,7 @@ CONFIGURATION = {"mono": "2x12 mono", "mono-parallel-out": "2x12 with parallel o
                  "stereo": "2x12 stereo"}
 SLOTS = ("rig_and_goals", "why_this_cabinet", "designed_to_do", "alternatives")
 FACT_KEYS = ("customer", "line_label", "configuration", "back_type", "speaker_label", "wiring",
-             "external_in", "external_mm", "mass_kg", "mass_lb", "finish", "grill_cloth",
+             "external_in", "mass_kg", "mass_lb", "finish", "grill_cloth",
              "hardware", "swatch_finish", "swatch_cloth", "lead_time", "status_line")
 SLOT_RE = re.compile(r"<!-- slot: (\w+) -->(.*?)<!-- /slot -->", re.S)
 TOKEN_RE = re.compile(r"\{\{(\w+)\}\}")
@@ -122,17 +122,10 @@ def load_order(order_dir) -> tuple:
     return out[0], out[1]
 
 
-def _fmt_mm(x: float) -> str:
-    """The stored figure as it is, never rounded to a whole mm (Brian, 2026-09-19)."""
-    return f"{x:.10g}"
-
-
-def _external(cab: dict) -> tuple:
-    """('20 x 18 x 11 in', '508 x 457.2 x 279.4 mm') for W x H x D: shop fractions in
-    inches (the cut list's own nearest-16th format), exact mm, no decimal inches."""
-    inches = " x ".join(cutlist.inch_frac(v) for v in cab["external_mm"]) + " in"
-    mm = " x ".join(_fmt_mm(v) for v in cab["external_mm"]) + " mm"
-    return inches, mm
+def _external(cab: dict) -> str:
+    """'20 x 18 x 11 in' for W x H x D, in the cut list's own nearest-16th shop
+    fractions. Inches only: the paired millimetres came out (Brian, 2026-09-19)."""
+    return " x ".join(cutlist.inch_frac(v) for v in cab["external_mm"]) + " in"
 
 
 def _mass(cab: dict) -> tuple:
@@ -200,7 +193,7 @@ def check_rows(voicing: dict, cab: dict) -> list:
         rows.append(Row("engine warning", w, "warn"))
     line, species = cab["line"], cab.get("species")
     parts, aes = cab["parts"], cab["aesthetics"]
-    inches, mm = _external(cab)
+    inches = _external(cab)
     kg, lb = _mass(cab)
     rows.append(Row("stock thickness", f"{line} line: shell {_thickness(parts, ('side_left', 'side_right', 'top', 'bottom'))}, "
                     f"baffle {_thickness(parts, ('baffle',))}, back {_thickness(parts, ('back',))}", OPERATOR))
@@ -214,7 +207,7 @@ def check_rows(voicing: dict, cab: dict) -> list:
     rows.append(Row("wood movement", f"{species if species else 'n/a'}; the climate comes from the brief", OPERATOR))
     rows.append(Row("transport", f"{inches} W x H x D, {lb:.1f} lb; the vehicle and doorway come from the brief", OPERATOR))
     rows.append(Row("weight vs limit", f"{kg:.1f} kg ({lb:.1f} lb); the limit comes from the brief", OPERATOR))
-    rows.append(Row("size vs limit", f"{mm} ({inches}) W x H x D; the limits come from the brief", OPERATOR))
+    rows.append(Row("size vs limit", f"{inches} W x H x D; the limits come from the brief", OPERATOR))
     return rows
 
 
@@ -277,7 +270,7 @@ def facts(voicing: dict, cab: dict, customer: str) -> dict:
     """Every fact the proposal template carries, as strings."""
     enc = cab["enclosure"]
     line = cab["line"]
-    inches, mm = _external(cab)
+    inches = _external(cab)
     kg, lb = _mass(cab)
     finish = (cab["aesthetics"]["tolex_color"] if line == "tolex"
               else (cab.get("species") or "").title()) or "finish to be confirmed"
@@ -296,7 +289,6 @@ def facts(voicing: dict, cab: dict, customer: str) -> dict:
         "speaker_label": _speaker_label(voicing),
         "wiring": rec["jack_text"] if rec else "wiring to be confirmed",
         "external_in": inches,
-        "external_mm": mm,
         "mass_kg": f"{kg:.1f}",
         "mass_lb": f"{lb:.1f}",
         "finish": finish,

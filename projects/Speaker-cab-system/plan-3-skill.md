@@ -2803,7 +2803,7 @@ def test_site_default_rows_are_the_expected_verdicts(tmp_path):
     assert rows["wood movement"].value == "n/a; the climate comes from the brief"
     assert rows["transport"].value == "20 x 18 x 11 in W x H x D, 36.3 lb; the vehicle and doorway come from the brief"
     assert rows["weight vs limit"].value == "16.5 kg (36.3 lb); the limit comes from the brief"
-    assert rows["size vs limit"].value == "508 x 457.2 x 279.4 mm (20 x 18 x 11 in) W x H x D; the limits come from the brief"
+    assert rows["size vs limit"].value == "20 x 18 x 11 in W x H x D; the limits come from the brief"
     assert sum(1 for r in rows.values() if r.verdict == cabreport.OPERATOR) == 7
 
 
@@ -2819,7 +2819,7 @@ def test_site_default_facts(tmp_path):
     assert f["speaker_label"] == "Celestion G12H Anniversary"
     assert f["wiring"] == "Single driver, 16 ohm"
     assert f["external_in"] == "20 x 18 x 11 in"
-    assert f["external_mm"] == "508 x 457.2 x 279.4 mm"
+    assert "external_mm" not in f      # the paired millimetres came out (Brian, 2026-09-19)
     assert (f["mass_kg"], f["mass_lb"]) == ("16.5", "36.3")
     assert f["finish"] == "Fender Style Black"
     assert f["grill_cloth"] == "British Small Weave Cane"
@@ -3107,7 +3107,7 @@ Prepared for {{customer}}.
 - Configuration: {{configuration}}
 - Speaker: {{speaker_label}}
 - Impedance and wiring: {{wiring}}
-- External size, width x height x depth: {{external_in}} ({{external_mm}})
+- External size, width x height x depth: {{external_in}}
 - Estimated weight, loaded: {{mass_lb}} lb ({{mass_kg}} kg)
 
 <!-- slot: why_this_cabinet -->
@@ -3244,7 +3244,7 @@ CONFIGURATION = {"mono": "2x12 mono", "mono-parallel-out": "2x12 with parallel o
                  "stereo": "2x12 stereo"}
 SLOTS = ("rig_and_goals", "why_this_cabinet", "designed_to_do", "alternatives")
 FACT_KEYS = ("customer", "line_label", "configuration", "back_type", "speaker_label", "wiring",
-             "external_in", "external_mm", "mass_kg", "mass_lb", "finish", "grill_cloth",
+             "external_in", "mass_kg", "mass_lb", "finish", "grill_cloth",
              "hardware", "swatch_finish", "swatch_cloth", "lead_time", "status_line")
 SLOT_RE = re.compile(r"<!-- slot: (\w+) -->(.*?)<!-- /slot -->", re.S)
 TOKEN_RE = re.compile(r"\{\{(\w+)\}\}")
@@ -3272,17 +3272,10 @@ def load_order(order_dir) -> tuple:
     return out[0], out[1]
 
 
-def _fmt_mm(x: float) -> str:
-    """The stored figure as it is, never rounded to a whole mm (Brian, 2026-09-19)."""
-    return f"{x:.10g}"
-
-
-def _external(cab: dict) -> tuple:
-    """('20 x 18 x 11 in', '508 x 457.2 x 279.4 mm') for W x H x D: shop fractions in
-    inches (the cut list's own nearest-16th format), exact mm, no decimal inches."""
-    inches = " x ".join(cutlist.inch_frac(v) for v in cab["external_mm"]) + " in"
-    mm = " x ".join(_fmt_mm(v) for v in cab["external_mm"]) + " mm"
-    return inches, mm
+def _external(cab: dict) -> str:
+    """'20 x 18 x 11 in' for W x H x D, in the cut list's own nearest-16th shop
+    fractions. Inches only: the paired millimetres came out (Brian, 2026-09-19)."""
+    return " x ".join(cutlist.inch_frac(v) for v in cab["external_mm"]) + " in"
 
 
 def _mass(cab: dict) -> tuple:
@@ -3350,7 +3343,7 @@ def check_rows(voicing: dict, cab: dict) -> list:
         rows.append(Row("engine warning", w, "warn"))
     line, species = cab["line"], cab.get("species")
     parts, aes = cab["parts"], cab["aesthetics"]
-    inches, mm = _external(cab)
+    inches = _external(cab)
     kg, lb = _mass(cab)
     rows.append(Row("stock thickness", f"{line} line: shell {_thickness(parts, ('side_left', 'side_right', 'top', 'bottom'))}, "
                     f"baffle {_thickness(parts, ('baffle',))}, back {_thickness(parts, ('back',))}", OPERATOR))
@@ -3364,7 +3357,7 @@ def check_rows(voicing: dict, cab: dict) -> list:
     rows.append(Row("wood movement", f"{species if species else 'n/a'}; the climate comes from the brief", OPERATOR))
     rows.append(Row("transport", f"{inches} W x H x D, {lb:.1f} lb; the vehicle and doorway come from the brief", OPERATOR))
     rows.append(Row("weight vs limit", f"{kg:.1f} kg ({lb:.1f} lb); the limit comes from the brief", OPERATOR))
-    rows.append(Row("size vs limit", f"{mm} ({inches}) W x H x D; the limits come from the brief", OPERATOR))
+    rows.append(Row("size vs limit", f"{inches} W x H x D; the limits come from the brief", OPERATOR))
     return rows
 
 
@@ -3427,7 +3420,7 @@ def facts(voicing: dict, cab: dict, customer: str) -> dict:
     """Every fact the proposal template carries, as strings."""
     enc = cab["enclosure"]
     line = cab["line"]
-    inches, mm = _external(cab)
+    inches = _external(cab)
     kg, lb = _mass(cab)
     finish = (cab["aesthetics"]["tolex_color"] if line == "tolex"
               else (cab.get("species") or "").title()) or "finish to be confirmed"
@@ -3446,7 +3439,6 @@ def facts(voicing: dict, cab: dict, customer: str) -> dict:
         "speaker_label": _speaker_label(voicing),
         "wiring": rec["jack_text"] if rec else "wiring to be confirmed",
         "external_in": inches,
-        "external_mm": mm,
         "mass_kg": f"{kg:.1f}",
         "mass_lb": f"{lb:.1f}",
         "finish": finish,
@@ -4024,7 +4016,7 @@ the file is absent and never overwrites one. To regenerate it after a
 re-run, delete `proposal.md` and run `cabreport.py` again; that run
 rewrites `checks.md` too, so the operator rows are judged again. The
 module fills the facts (customer, line, configuration, back type,
-speaker, wiring, external size in inches and mm, mass in kg and lb,
+speaker, wiring, external size in inches, mass in kg and lb,
 finish, grill cloth, hardware, swatches, lead time, status line);
 predicted frequencies never enter the proposal.
 

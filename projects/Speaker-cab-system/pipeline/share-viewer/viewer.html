@@ -155,7 +155,6 @@
   }
   .dims { display: grid; gap: 3px; }
   .dims .in { font-size: 2.05rem; font-weight: 500; line-height: 1.05; font-variant-numeric: lining-nums tabular-nums; }
-  .dims .mm { font-size: 0.84rem; color: var(--muted); font-variant-numeric: tabular-nums; }
   .specs { display: grid; grid-template-columns: 6.6rem minmax(0, 1fr); gap: 12px 18px; margin: 0; }
   .specs dt { padding-top: 0.28em; }
   .specs dd { margin: 0; }
@@ -220,7 +219,6 @@
       <div class="dims">
         <span class="label">Size, width &times; height &times; depth</span>
         <span class="in display">{{size_in}}</span>
-        <span class="mm">{{size_mm}}</span>
       </div>
       <dl class="specs">
 {{spec_rows}}

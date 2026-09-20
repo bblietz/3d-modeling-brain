@@ -82,7 +82,7 @@ def test_site_default_rows_are_the_expected_verdicts(tmp_path):
     assert rows["wood movement"].value == "n/a; the climate comes from the brief"
     assert rows["transport"].value == "20 x 18 x 11 in W x H x D, 36.3 lb; the vehicle and doorway come from the brief"
     assert rows["weight vs limit"].value == "16.5 kg (36.3 lb); the limit comes from the brief"
-    assert rows["size vs limit"].value == "508 x 457.2 x 279.4 mm (20 x 18 x 11 in) W x H x D; the limits come from the brief"
+    assert rows["size vs limit"].value == "20 x 18 x 11 in W x H x D; the limits come from the brief"
     assert sum(1 for r in rows.values() if r.verdict == cabreport.OPERATOR) == 7
 
 
@@ -98,7 +98,7 @@ def test_site_default_facts(tmp_path):
     assert f["speaker_label"] == "Celestion G12H Anniversary"
     assert f["wiring"] == "Single driver, 16 ohm"
     assert f["external_in"] == "20 x 18 x 11 in"
-    assert f["external_mm"] == "508 x 457.2 x 279.4 mm"
+    assert "external_mm" not in f      # the paired millimetres came out (Brian, 2026-09-19)
     assert (f["mass_kg"], f["mass_lb"]) == ("16.5", "36.3")
     assert f["finish"] == "Fender Style Black"
     assert f["grill_cloth"] == "British Small Weave Cane"
