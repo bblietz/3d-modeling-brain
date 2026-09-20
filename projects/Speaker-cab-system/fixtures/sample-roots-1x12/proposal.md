@@ -32,7 +32,7 @@ You play a 1965 Fender Deluxe Reverb reissue, roots and alt-country, at low-volu
 - Configuration: 1x12
 - Speaker: Celestion G12H Anniversary
 - Impedance and wiring: Single driver, 16 ohm
-- External size, width x height x depth: 17.9 x 16.3 x 9.9 in (454 x 415 x 253 mm)
+- External size, width x height x depth: 17-7/8 x 16-5/16 x 9-15/16 in (454.155 x 415 x 252.546 mm)
 - Estimated weight, loaded: 31.2 lb (14.2 kg)
 
 <!-- slot: why_this_cabinet -->

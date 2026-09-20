@@ -32,7 +32,7 @@ Your Ceriatone Overtone Special 50 carries a Les Paul's humbuckers and a Strat's
 - Configuration: 1x12
 - Speaker: Weber Silver Bell, Alnico, hemp cone, 75 W
 - Impedance and wiring: Single driver, 16 ohm
-- External size, width x height x depth: 22.8 x 16.5 x 12.8 in (578 x 419 x 325 mm)
+- External size, width x height x depth: 22-3/4 x 16-1/2 x 12-13/16 in (577.85 x 419.1 x 324.986 mm)
 - Estimated weight, loaded: 31.9 lb (14.5 kg)
 
 <!-- slot: why_this_cabinet -->

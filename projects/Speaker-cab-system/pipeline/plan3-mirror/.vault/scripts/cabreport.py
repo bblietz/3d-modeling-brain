@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import cabvoice
+import cutlist
 
 SCRIPTS = Path(__file__).resolve().parent
 VAULT = SCRIPTS.parent
@@ -121,15 +122,16 @@ def load_order(order_dir) -> tuple:
     return out[0], out[1]
 
 
-def _fmt_in(x: float) -> str:
-    s = f"{x:.1f}"
-    return s[:-2] if s.endswith(".0") else s
+def _fmt_mm(x: float) -> str:
+    """The stored figure as it is, never rounded to a whole mm (Brian, 2026-09-19)."""
+    return f"{x:.10g}"
 
 
 def _external(cab: dict) -> tuple:
-    """('20 x 18 x 11 in', '508 x 457 x 279 mm') for W x H x D."""
-    inches = " x ".join(_fmt_in(v) for v in cab["external_in"]) + " in"
-    mm = " x ".join(f"{v:.0f}" for v in cab["external_mm"]) + " mm"
+    """('20 x 18 x 11 in', '508 x 457.2 x 279.4 mm') for W x H x D: shop fractions in
+    inches (the cut list's own nearest-16th format), exact mm, no decimal inches."""
+    inches = " x ".join(cutlist.inch_frac(v) for v in cab["external_mm"]) + " in"
+    mm = " x ".join(_fmt_mm(v) for v in cab["external_mm"]) + " mm"
     return inches, mm
 
 

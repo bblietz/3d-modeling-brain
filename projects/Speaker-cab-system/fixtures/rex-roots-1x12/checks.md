@@ -37,8 +37,8 @@ generated: 2026-09-19
 | joinery fit | finger corners, floating baffle | pass: the construction note's defaults, finger joints on the tolex line (27 fingers of 9.0 mm per the cut list) and the felt-isolated floating baffle with 1 mm clearance per side, its bottom edge resting on the 83 mm slot shelf that doubles as the bottom cleat; fingers cut to the measured thickness after a test cut |
 | stock yield | 18 blanks, 0.97 m2 of blanks, 0.3 sheets of 2440 x 1220 mm at 100 percent without nesting | pass: 0.3 sheets in total (0.55 m2 of 18 mm and 0.42 m2 of 12 mm blanks against 2.98 m2 per 2440 x 1220 mm sheet), so one sheet of each thickness covers the order with a 3 mm kerf and no nesting; no port tube to buy, the slot is cut from the 18 mm sheet |
 | wood movement | n/a; the climate comes from the brief | n/a: tolex line, Baltic birch plywood; the house climate from the brief does not bind |
-| transport | 18.7 x 18.6 x 9.6 in W x H x D, 30.9 lb; the vehicle and doorway come from the brief | pass: no vehicle stated; at 30.9 lb with a strap handle it is a one-hand carry, and 18.7 x 18.6 x 9.6 in clears any doorway |
+| transport | 18-11/16 x 18-9/16 x 9-9/16 in W x H x D, 30.9 lb; the vehicle and doorway come from the brief | pass: no vehicle stated; at 30.9 lb with a strap handle it is a one-hand carry, and 18-11/16 x 18-9/16 x 9-9/16 in clears any doorway |
 | weight vs limit | 14.0 kg (30.9 lb); the limit comes from the brief | pass: no limit stated; 14.0 kg (30.9 lb) |
-| size vs limit | 475 x 471 x 243 mm (18.7 x 18.6 x 9.6 in) W x H x D; the limits come from the brief | pass: no limit stated and no head to match; 475 x 471 x 243 mm (18.7 x 18.6 x 9.6 in) |
+| size vs limit | 474.9 x 471.2 x 243.356 mm (18-11/16 x 18-9/16 x 9-9/16 in) W x H x D; the limits come from the brief | pass: no limit stated and no head to match; 474.9 x 471.2 x 243.356 mm (18-11/16 x 18-9/16 x 9-9/16 in) |
 
 0 row(s) still read `operator`: every operator row judged against the brief on 2026-09-19; the file is final.

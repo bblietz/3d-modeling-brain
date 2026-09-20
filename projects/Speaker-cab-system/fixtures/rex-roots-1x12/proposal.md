@@ -32,7 +32,7 @@ You play a 1965 Fender Deluxe Reverb reissue, roots and alt-country, at low-volu
 - Configuration: 1x12
 - Speaker: Eminence Cannabis Rex 12
 - Impedance and wiring: Single driver, 8 ohm
-- External size, width x height x depth: 18.7 x 18.6 x 9.6 in (475 x 471 x 243 mm)
+- External size, width x height x depth: 18-11/16 x 18-9/16 x 9-9/16 in (474.9 x 471.2 x 243.356 mm)
 - Estimated weight, loaded: 30.9 lb (14.0 kg)
 
 <!-- slot: why_this_cabinet -->

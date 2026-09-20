@@ -32,7 +32,7 @@ You play a Dr. Z MAZ 38, a 38 W amp with four EL84 power tubes, with humbuckers 
 - Configuration: 1x12
 - Speaker: Eminence Cannabis Rex 12
 - Impedance and wiring: Single driver, 8 ohm
-- External size, width x height x depth: 20 x 18 x 11 in (508 x 457 x 279 mm)
+- External size, width x height x depth: 20 x 18 x 11 in (508 x 457.2 x 279.4 mm)
 - Estimated weight, loaded: 30.3 lb (13.7 kg)
 
 <!-- slot: why_this_cabinet -->

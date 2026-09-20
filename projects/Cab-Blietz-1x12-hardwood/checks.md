@@ -40,6 +40,6 @@ generated: 2026-09-19
 | wood movement | walnut; the climate comes from the brief | pass: walnut in a home, assumed a heated house (climate not stated); the grain wraps around the box so all four panels move along the depth axis together, about 2.9 mm per 4-point moisture swing flatsawn; every cleat runs with the grain and is glued and screwed full length (Brian relaxed the old slotted-cleat rule on 2026-09-13), and the baffle floats on the top and bottom cleats |
 | transport | 20 x 18 x 11 in W x H x D, 30.3 lb; the vehicle and doorway come from the brief | pass: no vehicle or doorway stated; at 30.3 lb with a strap handle it is a one-hand carry, and 20 x 18 x 11 in clears any doorway |
 | weight vs limit | 13.7 kg (30.3 lb); the limit comes from the brief | pass: no limit stated (not asked); 13.738 kg (30.3 lb) |
-| size vs limit | 508 x 457 x 279 mm (20 x 18 x 11 in) W x H x D; the limits come from the brief | pass: no size limit and no head to match stated (not asked); 508 x 457 x 279 mm (20 x 18 x 11 in) |
+| size vs limit | 508 x 457.2 x 279.4 mm (20 x 18 x 11 in) W x H x D; the limits come from the brief | pass: no size limit and no head to match stated (not asked); 508 x 457.2 x 279.4 mm (20 x 18 x 11 in) |
 
 0 row(s) still read `operator`: every operator row judged against the brief on 2026-09-19; the file is final.

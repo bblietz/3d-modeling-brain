@@ -43,8 +43,8 @@ generated: 2026-09-19
 | joinery fit | finger corners, floating baffle | pass: the construction note's defaults, finger joints on the tolex line (29 fingers of 8.7 mm per the cut list) and the felt-isolated floating baffle with 1 mm clearance per side; fingers cut to the measured thickness after a test cut |
 | stock yield | 19 blanks, 0.90 m2 of blanks, 0.3 sheets of 2440 x 1220 mm at 100 percent without nesting | pass: 0.3 sheets in total (0.49 m2 of 18 mm and 0.41 m2 of 12 mm blanks against 2.98 m2 per 2440 x 1220 mm sheet), so one sheet of each thickness covers the order with a 3 mm kerf and no nesting, plus one 51 mm cut of 4 in Schedule 40 tube |
 | wood movement | n/a; the climate comes from the brief | n/a: tolex line, Baltic birch plywood; the house climate from the brief does not bind |
-| transport | 17.9 x 16.3 x 9.9 in W x H x D, 31.2 lb; the vehicle and doorway come from the brief | pass: no vehicle stated; at 31.2 lb with a strap handle it is a one-hand carry, and 17.9 x 16.3 x 9.9 in clears any doorway |
+| transport | 17-7/8 x 16-5/16 x 9-15/16 in W x H x D, 31.2 lb; the vehicle and doorway come from the brief | pass: no vehicle stated; at 31.2 lb with a strap handle it is a one-hand carry, and 17-7/8 x 16-5/16 x 9-15/16 in clears any doorway |
 | weight vs limit | 14.2 kg (31.2 lb); the limit comes from the brief | pass: no limit stated; 14.2 kg (31.2 lb) |
-| size vs limit | 454 x 415 x 253 mm (17.9 x 16.3 x 9.9 in) W x H x D; the limits come from the brief | pass: no limit stated and no head to match; 454 x 415 x 253 mm (17.9 x 16.3 x 9.9 in) |
+| size vs limit | 454.155 x 415 x 252.546 mm (17-7/8 x 16-5/16 x 9-15/16 in) W x H x D; the limits come from the brief | pass: no limit stated and no head to match; 454.155 x 415 x 252.546 mm (17-7/8 x 16-5/16 x 9-15/16 in) |
 
 0 row(s) still read `operator`: every operator row judged against the brief on 2026-09-19; the file is final.
