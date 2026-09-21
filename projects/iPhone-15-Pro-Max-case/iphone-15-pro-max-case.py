@@ -6,7 +6,7 @@ reference/iphone-15-pro-max-dimensions.md (A = printed on the drawing, V = measu
 Frame: looking at the screen, x to the right, y to the top of the phone, z toward the viewer.
 Origin at the product centre in x and y; z = 0 is the print bed = the outside of the case back.
 So the Action and volume buttons are at -x, the side button and the camera at +x.
-The guard ring is modelled where it is glued (z from 0 down to -RING_H) and exported turned over, glue face on the bed.
+The guard ring is modelled where it is glued (rim from z = 0 down to -RING_H, plug up into the cutout) and exported just lifted onto the bed.
 
 Every rounded edge is a ruled loft through outlines generated at explicit insets (squircle()): OCCT's own 2D offset turns
 the 8-edge spline outline into 44 edges, which will not loft, and fillets on spline edges are slow and fragile.
@@ -60,35 +60,41 @@ WIN_H, WIN_FLARE = 5.0, 0.75      # button windows: height at the inside of the 
 WIN_END = 1.0         # window runs this far past each end of its button(s)
 USB_W, USB_H = 13.0, 7.0          # Apple: at least 12.35 x 6.50, should be 12.45 x 6.60 plus margin
 PORT_OFFSET = 2.0     # ADG 5.2.3 thin case: acoustic openings at least this far from the edge of any port
-CAM_CLR = 0.4         # horizontal clearance between the case floor and the camera's glass ramp (straight-ramp proxy, which errs large)
-FLOOR_EDGE_T = 0.2    # the floor runs in over the ramp, its phone side sloped parallel to the ramp, until it is this thin (1 layer; the ring backs it)
+CAM_CLR = 0.4         # horizontal clearance between the case and the camera's glass ramp (straight-ramp proxy, which errs large)
 # ---- guard ring ----
 # Brian, 2026-09-20, on the first ring (on the plateau's OUTER boundary, the base of the glass ramp, 4 mm off the raised island):
 # "the guard around it is too big. It should be snug around the camera." On the second (snug, 5.1 mm wide, Apple's flash and
-# rear-sensor cones cut out of it): "the ring is too thick and there are cutouts in the top right and bottom right. Not good".
-# So: slim, snug, plain. Its inside wall is the camera opening's own edge, which also locates it for gluing.
+# rear-sensor cones cut out of it): "the ring is too thick and there are cutouts in the top right and bottom right. Not good", then
+# "the guard should also be a bevel on the inside". On the third (the case floor sloped in over the glass ramp to carry it):
+# "the inside of the case, around the camera should not have a bevel, only the guard has a bevel".
+# So: the case has a plain square cutout at the base of the glass ramp, and the ring is slim, snug, plain, bevelled on the inside of
+# its rim only, with a square plug underneath that drops into the cutout (it locates the ring and carries the snug part over the ramp).
 RING_TOP = 5.0        # ring top above the back glass: lens glass at 4.07, so 0.93 clear
-RING_W = 2.5          # ring width
-RING_CH = 1.5         # 45 degree bevel on the inside, all round (Brian: "the guard should also be a bevel on the inside"): the most a
-                      # 2.5 mm ring allows with a flat rim left on top, and the most a slim ring can do for the flash and lens cones
-RING_R = 0.5          # round on the ring's outside top edge
+RING_GAP = 1.56       # the rim's inside wall stands this far outside the plateau's top flat
+RING_LAND = 0.5       # the rim overlaps the case's back by this all round the cutout: the stop that sets its height, and glue land
+RING_CH = 1.5         # 45 degree bevel on the inside of the rim, all round
+RING_EDGE = 0.5       # 45 degree chamfer on the rim's outside top edge (the rim prints face down, so a chamfer, not a round)
+PLUG_H = 0.6          # the plug reaches this far into the 1.6 mm cutout (3 layers)
+PLUG_FIT = 0.15       # plug smaller than the cutout by this all round
 
 # ---- MagSafe pocket ----
 # Brian, 2026-09-20: "add a magsafe ring so I can insert the metal pieces". Apple's case array (ADG R30 Fig 42-2 to 42-4, note section 16):
 # a closed ring and a "clocking" magnet below it, centred on the product centre (the model origin) within 0.30.
 MAG_RING_OD, MAG_RING_ID = 54.10, 46.00
 MAG_BAR_W, MAG_BAR_NEAR, MAG_BAR_FAR = 6.00, 31.18, 50.49      # clocking magnet: width; near and far end from the ring centre, toward the bottom edge
-MAG_T = 0.55          # Apple's magnet thickness. Brian's own pieces are NOT measured yet: change these five numbers to match them
+MAG_T = 0.40          # Brian, 2026-09-20: "the ring is the standard size. .4mm thick" (Apple's own magnets are 0.55)
+MAG_OD_MAX = 56.5     # "standard" metal rings on sale run 54 to 56 OD, all with the 46 ID: the pocket locates the ring by its
+                      # inside edge and takes any outside diameter up to this
 MAG_CLR = 0.25        # the pocket is larger than the pieces by this all round
-MAG_DEPTH = 0.8       # 4 layers, open to the phone side so the phone holds the pieces in; takes pieces up to about 0.7 thick and
-                      # leaves 0.8 mm (4 layers) of back behind them (Apple allows at most 0.85 between the magnets and the outside)
+MAG_DEPTH = 0.8       # 4 layers, open to the phone side so the phone holds the pieces in. Deeper than the ring needs, on purpose:
+                      # it leaves 0.8 mm (4 layers) of back between the ring and the accessory (Apple allows at most 0.85 there)
 
 ZG = BACK_T + PH_T                 # front glass plane
 ZMID = BACK_T + BTN_Z              # centreline of every button and bottom port
 RING_H = RING_TOP - BACK_T
 RAMP_W = CAM_TOP_XR[0] - CAM_XR[0]                                   # 3.66: the glass ramp between the plateau's outer boundary and its top flat
-FLOOR_EDGE = (BACK_T - FLOOR_EDGE_T) * RAMP_W / CAM_H - CAM_CLR      # how far in from the outer boundary the floor's edge reaches
-RING_IN = FLOOR_EDGE                                                 # the ring's inside wall: flush with the floor's edge
+RING_IN = RAMP_W - RING_GAP                                          # the rim's inside wall, in from the plateau's outer boundary
+PLUG_IN = (BACK_T - PLUG_H) * RAMP_W / CAM_H - CAM_CLR               # the plug's inside wall: CAM_CLR off the ramp at the plug's lower face
 N_ARC = 6                          # sections per quarter round
 
 
@@ -206,8 +212,8 @@ cavity = body([(BACK_T + FLOOR_R * c, -CLR + FLOOR_R * (1 - s)) for s, c in quar
 screen = body([(Z1 - 0.5, LIP_IN)] + [(CASE_H - LIP_R + LIP_R * s, LIP_IN - LIP_R * c) for s, c in quarter()] + [(CASE_H + 1, LIP_IN - LIP_R - 1)])
 shell = outside - cavity - screen
 
-# ---- camera opening: the floor's phone side slopes up over the glass ramp, CAM_CLR off it; the outer FLOOR_EDGE_T is a plain edge ----
-cam_open = stack(*CAM_SIZE, CAM_CORNER, [(-1, FLOOR_EDGE), (FLOOR_EDGE_T, FLOOR_EDGE), (BACK_T, -CAM_CLR), (BACK_T + 1, -CAM_CLR)], CAM_AT)
+# ---- camera opening: a plain square-edged cutout, CAM_CLR outside the base of the glass ramp ----
+cam_open = stack(*CAM_SIZE, CAM_CORNER, [(-1, -CAM_CLR), (BACK_T + 1, -CAM_CLR)], CAM_AT)
 
 
 # ---- windows ----
@@ -253,16 +259,16 @@ WINDOWS = {   # name: (length, cutter)
 
 
 # ---- MagSafe pocket, in the phone side of the back ----
-def magsafe(grow, z0, z1):
-    """Apple's ring and clocking magnet, grown by grow all round, from z0 to z1."""
+def magsafe(od, grow, z0, z1):
+    """A ring of outside diameter od and Apple's clocking magnet, grown by grow all round, from z0 to z1."""
     up = (Align.CENTER, Align.CENTER, Align.MIN)
-    ring_ = Cylinder(MAG_RING_OD / 2 + grow, z1 - z0, align=up) - Cylinder(MAG_RING_ID / 2 - grow, z1 - z0, align=up)
+    ring_ = Cylinder(od / 2 + grow, z1 - z0, align=up) - Cylinder(MAG_RING_ID / 2 - grow, z1 - z0, align=up)
     bar = Pos(0, -(MAG_BAR_NEAR + MAG_BAR_FAR) / 2, 0) * Box(MAG_BAR_W + 2 * grow, MAG_BAR_FAR - MAG_BAR_NEAR + 2 * grow, z1 - z0, align=up)
     return Pos(0, 0, z0) * (ring_ + bar)
 
 
-mag_pocket = magsafe(MAG_CLR, BACK_T - MAG_DEPTH, BACK_T + 1)
-mag_pieces = magsafe(0.0, BACK_T - MAG_DEPTH, BACK_T - MAG_DEPTH + MAG_T)       # the pieces in place, for the viewer and the sections
+mag_pocket = magsafe(MAG_OD_MAX, MAG_CLR, BACK_T - MAG_DEPTH, BACK_T + 1)
+mag_pieces = magsafe(MAG_RING_OD, 0.0, BACK_T - MAG_DEPTH, BACK_T - MAG_DEPTH + MAG_T)       # the pieces in place, for the viewer and the sections
 
 with_camera = shell - cam_open
 case = with_camera - [w for _, w in WINDOWS.values()] - mag_pocket
@@ -285,12 +291,14 @@ KEEPOUTS = {
 }
 RING_MAY_CROSS = ("flash outer", "rear sensor")     # Brian's call: a snug plain ring cannot clear these two (no cutaways wanted)
 
-# ---- guard ring (as glued: z from 0 down to -RING_H) ----
-_ring_levels = [(-RING_H + RING_R - RING_R * s, RING_R * c) for s, c in quarter()][::-1] + [(0.0, 0.0)]      # rounded top edge, from the top down to the glue face
-ring_blank = stack(*CAM_SIZE, CAM_CORNER, [(z, RING_IN - RING_W + i) for z, i in _ring_levels], CAM_AT)
-ring_bore = stack(*CAM_SIZE, CAM_CORNER, [(-RING_H - 1, RING_IN - RING_CH - 1), (-RING_H + RING_CH, RING_IN), (1, RING_IN)], CAM_AT)
-ring = ring_blank - ring_bore
-ring_print = Rot(0, 180, 0) * ring                                          # turned over (a rotation, not a mirror): glue face on the bed
+# ---- guard ring (as glued: rim from z = 0 down to -RING_H, plug from 0 up into the cutout) ----
+_out = -(CAM_CLR + RING_LAND)
+rim = stack(*CAM_SIZE, CAM_CORNER, [(-RING_H, _out + RING_EDGE), (-RING_H + RING_EDGE, _out), (0.0, _out)], CAM_AT)
+plug = stack(*CAM_SIZE, CAM_CORNER, [(0.0, -CAM_CLR + PLUG_FIT), (PLUG_H, -CAM_CLR + PLUG_FIT)], CAM_AT)
+rim_bore = stack(*CAM_SIZE, CAM_CORNER, [(-RING_H - 1, RING_IN - RING_CH - 1), (-RING_H + RING_CH, RING_IN), (0.0, RING_IN)], CAM_AT)
+plug_bore = stack(*CAM_SIZE, CAM_CORNER, [(0.0, PLUG_IN), (PLUG_H + 1, PLUG_IN)], CAM_AT)
+ring = (rim - rim_bore) + (plug - plug_bore)
+ring_print = Pos(0, 0, RING_H) * ring              # prints as it is glued: rim face on the bed, plug on top; the only overhangs are the two 45s
 
 
 # ---- checks ----
@@ -305,7 +313,7 @@ if __name__ == "__main__":
     bb = case.bounding_box()
     want = (PH_W + 2 * OUT, PH_L + 2 * OUT, CASE_H)
     assert all(abs(g - w) < 0.02 for g, w in zip((bb.size.X, bb.size.Y, bb.size.Z), want)), (bb.size, want)
-    assert abs(bb.min.Z) < 1e-4 and abs(ring_print.bounding_box().min.Z) < 1e-4 and abs(ring_print.bounding_box().size.Z - RING_H) < 1e-4
+    assert abs(bb.min.Z) < 1e-4 and abs(ring_print.bounding_box().min.Z) < 1e-4 and abs(ring_print.bounding_box().size.Z - RING_H - PLUG_H) < 1e-4
     report["case size"] = [round(v, 2) for v in (bb.size.X, bb.size.Y, bb.size.Z)]
     report["case cm3"], report["ring cm3"] = round(case.volume / 1000, 2), round(ring.volume / 1000, 2)
     # the phone, buttons and camera included, touches nothing
@@ -315,7 +323,8 @@ if __name__ == "__main__":
     report["ring to phone, nearest"] = round(ring.distance_to(phone), 3)
     report["case floor to camera ramp, nearest"] = round((case & Pos(*CAM_AT, 0) * Box(60, 60, 2 * BACK_T - 0.02)).distance_to(camera()), 3)
     assert report["ring to phone, nearest"] >= 0.15 and report["case floor to camera ramp, nearest"] >= 0.15, report
-    report["ring: inside wall to the camera's raised flat / width = glue land"] = [round(RAMP_W - RING_IN, 2), RING_W]
+    report["ring: rim inside wall to the camera's raised flat / rim width / plug wall x height"] = [RING_GAP, round(RING_IN + CAM_CLR + RING_LAND, 2), [round(PLUG_IN + CAM_CLR - PLUG_FIT, 2), PLUG_H]]
+    assert PLUG_IN + CAM_CLR - PLUG_FIT >= 0.84, "the plug's wall is under two 0.4 nozzle lines"
     # the ring sits on the back; the case clears every Apple keepout cone, the ring every cone but the two Brian accepted
     assert vol(ring & case) < 0.01, vol(ring & case)
     for name, k in KEEPOUTS.items():
@@ -329,7 +338,8 @@ if __name__ == "__main__":
     # MagSafe: the pieces drop into the pocket without touching it, sit below the floor's surface (off the phone's glass), and leave a real skin
     assert vol(mag_pieces & case) < 0.001 and MAG_T < MAG_DEPTH and BACK_T - MAG_DEPTH >= 0.6, (vol(mag_pieces & case), MAG_T, MAG_DEPTH)
     report["magsafe pocket: depth / back left behind it / pieces below the floor surface"] = [MAG_DEPTH, round(BACK_T - MAG_DEPTH, 2), round(MAG_DEPTH - MAG_T, 2)]
-    report["magsafe pocket to the guard ring, nearest"] = round((ty(CAM_Y[1]) + RING_IN - RING_W) - (MAG_RING_OD / 2 + MAG_CLR), 2)
+    report["magsafe pocket to the guard ring, nearest"] = round((ty(CAM_Y[1]) - CAM_CLR - RING_LAND) - (MAG_OD_MAX / 2 + MAG_CLR), 2)
+    assert report["magsafe pocket to the guard ring, nearest"] >= 3.0
     # Apple's USB-C connector keepout passes through the wall untouched
     usb = bottom_plane(0) * extrude(Pos(0, 0, -0.5) * SlotOverall(USB_KEEPOUT[0], USB_KEEPOUT[1]), USB_KEEPOUT[2])
     assert vol(usb & case) < 0.001, vol(usb & case)
@@ -367,6 +377,6 @@ if __name__ == "__main__":
 
     if os.environ.get("SHOW"):
         from ocp_vscode import Camera, show
-        show(case, ring, mag_pieces, phone, names=["case", "guard ring (as glued)", "MagSafe pieces (Apple nominal)", "phone (Apple drawing)"],
+        show(case, ring, mag_pieces, phone, names=["case", "guard ring (as glued)", "MagSafe ring 0.4 thick + alignment piece", "phone (Apple drawing)"],
              colors=["#2f6f4f", "#c9772b", "#3b6ea8", "#9aa0a6"],
              reset_camera=Camera.RESET if os.environ["SHOW"] == "reset" else Camera.KEEP)

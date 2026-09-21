@@ -37,7 +37,7 @@ MACHINE = "Bambu Lab X2D 0.4 nozzle"
 PROCESS = "0.20mm Standard @BBL X2D"          # the unsuffixed X2D process presets are the 0.4 nozzle ones
 FILAMENT = "Bambu TPU 95A HF @BBL X2D 0.4 nozzle"
 PARTS = {"case.stl": ("iphone-15-pro-max-case.stl", "iPhone 15 Pro Max case"),          # name on the plate: (source STL, label in Studio)
-         "guard-ring.stl": ("camera-guard-ring.stl", "Camera guard ring (glue face down)")}
+         "guard-ring.stl": ("camera-guard-ring.stl", "Camera guard ring (rim down, plug up)")}
 OUT = "iphone-15-pro-max-case-print.3mf"
 BED_CENTRE = (128.0, 128.0)
 

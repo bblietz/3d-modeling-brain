@@ -21,7 +21,7 @@ PH_W, PH_L, BACK_T, PH_T = 76.73, 159.86, 1.6, 8.25
 ZG = BACK_T + PH_T
 PARTS = [("case", f"{PROJECT}/iphone-15-pro-max-case.stl", "#2f6f4f"),
          ("guard ring", f"{PROJECT}/build/ring-as-glued.stl", "#c9772b"),
-         ("MagSafe pieces (Apple nominal)", f"{PROJECT}/build/magsafe-pieces.stl", "#3b6ea8"),
+         ("MagSafe ring 0.4 thick + alignment piece", f"{PROJECT}/build/magsafe-pieces.stl", "#3b6ea8"),
          ("phone (Apple drawing)", f"{PROJECT}/build/phone-proxy.stl", "#b9bec5")]
 MESHES = [(n, trimesh.load(p), c) for n, p, c in PARTS]
 
@@ -103,12 +103,12 @@ if __name__ == "__main__":
     yb = -(PH_L / 2)
     figure("section-usb", "USB-C window, cut on the centreline (x = 0)", 0, 0.0, (yb - 2.6, yb + 5.0), (-0.4, 11.4),
            lines=[((yb - 2.6, 5.725 + 3.3, yb + 0.5, 5.725 + 3.3), "#d62728", "Apple connector keepout 12.45 x 6.60"), ((yb - 2.6, 5.725 - 3.3, yb + 0.5, 5.725 - 3.3), "#d62728", None)])
-    figure("section-magsafe", "MagSafe pocket close-up, cut on the centreline where it crosses the ring (phone docked)", 0, 0.0, (-29.5, -20.5), (-0.3, 3.0), size=(11, 4.6),
-           notes=[((-25.0, 1.08), (-24.2, 2.55), "ring piece 0.55 thick (Apple nominal), 0.25 below the floor's surface:\noff the phone's glass, held in by the phone"),
+    figure("section-magsafe", "MagSafe pocket close-up, cut on the centreline where it crosses the ring (phone docked)", 0, 0.0, (-30.5, -20.5), (-0.3, 3.0), size=(11, 4.4),
+           notes=[((-25.0, 1.0), (-24.2, 2.55), "ring 0.40 thick, 0.40 below the floor's surface:\noff the phone's glass, held in by the phone"),
                   ((-27.2, 0.4), (-29.3, 0.12), "0.8 mm of back (4 layers) behind the pocket"),
-                  ((-22.85, 1.2), (-22.6, 0.45), "0.25 clear all round")])
+                  ((-22.85, 1.2), (-22.6, 0.45), "located by its inside edge, 0.25 clear")])
     figure("plan-magsafe", "Looking into the empty case from the screen side, cut through the pocket (z = 1.2)", 2, 1.2, (-42, 42), (-84, 84), size=(6.2, 11.5), ylabel="y (mm), top of the phone up",
-           notes=[((0, 27.2), (-38, 38), "ring pocket: 54.10 / 46.00 + 0.25,\ncentred on the phone's centre"),
+           notes=[((0, 27.2), (-38, 38), "ring pocket 57.0 / 45.5, centred on the phone's centre:\ntakes 46 ID rings from 54 to 56.5 OD"),
                   ((0, -41), (-38, -62), "clocking magnet pocket:\n6.00 x 19.31 + 0.25, toward the bottom edge"),
                   ((15, 56), (-38, 74), "camera opening")])
     print("wrote", sorted(f for f in os.listdir(f"{PROJECT}/images") if f.startswith(("section-", "plan-"))))

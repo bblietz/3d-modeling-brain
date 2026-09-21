@@ -35,19 +35,20 @@ fit = [
     ("section-usb", "USB-C window on the centreline, 13.0 x 7.0 mm. Apple's recommended connector keepout (12.45 x 6.60, red) passes through untouched."),
 ]
 guard = [
-    ("section-camera", "Cut through the flash, camera 3 and the rear sensor (LiDAR), guard ring glued on. The ring is 2.5 mm wide with a 1.5 mm 45&#176; bevel on the inside, "
-     "and hugs the raised camera island, 1.56 mm off its flat top. Its inside wall is flush with the case's camera opening, which locates it for gluing; the whole 2.5 mm width is glue land. "
-     "The case floor runs in over the glass ramp, its phone side sloped to clear the glass. "
-     "The ring's top is 5.0 mm above the back glass; the lens glass is at 4.07, so the lenses sit 0.93 mm off a table (Apple: 0.85 minimum, 1.00 ideal). "
+    ("section-camera", "Cut through the flash, camera 3 and the rear sensor (LiDAR), guard ring glued on. The case has a plain square-edged cutout at the base of the glass ramp "
+     "that surrounds the camera island; nothing inside the case is bevelled. The guard ring's rim is 3.0 mm wide with a 1.5 mm 45&#176; bevel on its inside, and hugs the raised island, "
+     "1.56 mm off its flat top. A square plug under the rim (1.6 mm wall, 0.6 mm tall) drops into the cutout: it locates the ring for gluing and carries the snug rim over the glass ramp. "
+     "The rim's top is 5.0 mm above the back glass; the lens glass is at 4.07, so the lenses sit 0.93 mm off a table (Apple: 0.85 minimum, 1.00 ideal). "
      "Dashed: Apple's flash and LiDAR keepout cones. A snug plain ring crosses both, as most commercial cases do (Brian's call: no cutaways); the bevel keeps the crossing small."),
     ("render-assembly-back", "From the back. Camera top-left seen from the back, side button on the same side, Action and volume opposite: as on the phone."),
-    ("render-ring-print", "The guard ring as it prints: glue face on the bed, bevel up, no overhangs at all."),
+    ("render-ring-print", "The guard ring as it prints: rim face on the bed, plug on top. The only overhangs are the rim's two 45&#176; faces; no supports."),
 ]
 magsafe = [
-    ("section-magsafe", "MagSafe pocket in the phone side of the back, to Apple's case-array geometry: a 54.10 / 46.00 ring centred on the phone's centre, and the clocking magnet "
-     "6.00 x 19.31 below it toward the bottom edge. The pocket is 0.8 mm deep with 0.25 mm clearance all round, so pieces up to about 0.7 mm thick sit below the floor's surface, "
-     "off the phone's glass; the phone holds them in. 0.8 mm (4 layers) of back is left behind them. The blue pieces are Apple's nominal sizes, NOT Brian's measured parts yet."),
-    ("plan-magsafe", "Plan view, looking into the empty case from the screen side. The pocket clears the camera guard by 5.7 mm."),
+    ("section-magsafe", "MagSafe pocket in the phone side of the back, centred on the phone's centre (Apple's position, within 0.30). Brian's ring is the standard size, 0.4 mm thick. "
+     "The pocket locates the ring by its 46 mm inside edge and takes any outside diameter from 54 to 56.5 mm. It is 0.8 mm deep, so the ring sits below the floor's surface, "
+     "off the phone's glass, held in by the phone, with 0.8 mm (4 layers) of back between it and a MagSafe accessory (Apple allows at most 0.85)."),
+    ("plan-magsafe", "Plan view, looking into the empty case from the screen side. The alignment-piece pocket is at Apple's position, 6.00 x 19.31 toward the bottom edge; "
+     "leave it empty if the kit has no alignment piece. The pocket clears the camera guard by 4.5 mm."),
 ]
 whole = [("render-assembly-phone", "Case, ring and the phone proxy built from Apple's drawing (grey in the viewer).")]
 
@@ -85,16 +86,16 @@ html = f"""<!doctype html>
 <h2>Whole assembly</h2>{figs(whole)}
 <h2>Print</h2>
 <ul>
-  <li><code>iphone-15-pro-max-case-print.3mf</code>: X2D 0.4 nozzle, 0.20 mm Standard, Bambu TPU 95A HF, Textured PEI, both parts on one plate, back of the case and glue face of the ring on the bed.</li>
+  <li><code>iphone-15-pro-max-case-print.3mf</code>: X2D 0.4 nozzle, 0.20 mm Standard, Bambu TPU 95A HF, Textured PEI, both parts on one plate, back of the case and rim face of the ring on the bed.</li>
   <li>Changed from the stock profile: Arachne walls (the 1.5 mm walls print as solid lines, no gap fill), 4 wall loops (the ring and wall roots print solid, no sparse core), avoid crossing walls (less stringing across the open cavity).</li>
   <li>Feed the TPU from the external spool, not the AMS, and dry it first.</li>
   <li>Known risk on the first print: the volume window's roof is a 22 mm TPU bridge (side button 15 mm, speaker slot 11 mm). Some sag there is cosmetic and inside the wall.</li>
 </ul>
 <h2>Gluing the ring</h2>
 <ul>
-  <li>Flexible (rubber-toughened) CA glue. Take the phone out first, and keep glue away from the opening's edge.</li>
-  <li>Textured face of the ring against the back of the case, bevel facing out.</li>
-  <li>The ring's inside wall is the same outline as the case's camera opening: line the two up flush all the way round (run a fingertip inside the opening). It is 1.3 mm taller than wide, like the opening, so it only fits one way.</li>
+  <li>Flexible (rubber-toughened) CA glue, gel if you have it. Take the phone out first.</li>
+  <li>The plug under the ring drops into the case's camera cutout from the outside, so the ring locates itself; the cutout is 1.3 mm taller than wide, so it only goes in one way.</li>
+  <li>Glue on the underside of the rim's overlap and on the plug's outside wall. Press the rim down flat against the back of the case.</li>
 </ul>
 </main></body></html>
 """
