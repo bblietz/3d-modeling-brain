@@ -33,3 +33,8 @@ projects/Speaker-cab-system/fixtures/**/*.stl
 projects/Cab-*/**/*.step
 projects/Cab-*/**/*.stl
 projects/NACS-wall-holder/reference/*.stl
+
+# iPhone case: Apple's drawings and guidelines are proprietary (title block: do not reproduce) and re-downloadable; build/ is regenerated
+projects/iPhone-15-Pro-Max-case/reference/*.pdf
+projects/iPhone-15-Pro-Max-case/reference/adg-*.png
+projects/iPhone-15-Pro-Max-case/build/

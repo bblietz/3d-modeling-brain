@@ -21,3 +21,6 @@
 - [OpenSCAD for complex designs](feedback-openscad-for-complex-designs.md) - compound-angle parts go in OpenSCAD with rendered views of the real model; no hand-drawn plans, build123d only for simple prisms
 - [Verify retention features close up](feedback-verify-retention-features-closeup.md) - hooks, cleats, snap lips: close-up section render with the mating part before any print; a sign error made a hook a draft for five versions
 - [Check docking and hold kinematics](feedback-check-docking-and-hold-kinematics.md) - fixed hooks and cleats: prove a way in and a hold under the hanging load with the real mating mesh; if docking is the load's motion reversed it cannot hold
+- [iPhone 15 Pro Max case](project-iphone-case.md) - TPU 95A HF slim case, glue-on slim bevelled camera guard, CAD complete 2026-09-20; MagSafe pocket being added; not printed yet
+- [Cosmetic parts: viewer first](feedback-cosmetic-parts-viewer-first.md) - push to the viewer early, size visible features to what the eye reads, offer guideline tradeoffs before building them, ask follow-ups in plain text
+- [X2D preset includes](reference-x2d-preset-includes.md) - X2D machine presets keep all G-code in include templates; flatteners must merge includes; fixed copy in the iPhone case pipeline

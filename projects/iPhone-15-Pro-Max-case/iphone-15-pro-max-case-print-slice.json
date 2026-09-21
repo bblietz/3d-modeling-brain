@@ -1,0 +1,21 @@
+{
+ "minutes": 52,
+ "grams": 30.2,
+ "grams_if_solid": 30.5,
+ "layers": 54,
+ "plate_bbox": [
+  64.5,
+  191.5,
+  46.5,
+  209.5
+ ],
+ "feature_mm": {
+  "Internal solid infill": 5080.0,
+  "Inner wall": 2020.0,
+  "Outer wall": 1492.6,
+  "Top surface": 881.7,
+  "Bottom surface": 828.0,
+  "Overhang wall": 6.7,
+  "Gap infill": 0.3
+ }
+}
