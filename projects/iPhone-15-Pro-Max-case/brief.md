@@ -2,7 +2,7 @@
 type: project
 project: iPhone-15-Pro-Max-case
 date: 2026-09-20
-status: CAD COMPLETE 2026-09-20 (guard ring v3: slim, snug, bevelled inside). Awaiting Brian's sign-off in the viewer, then the first print. Not printed yet.
+status: CAD COMPLETE 2026-09-20 (guard ring v3: slim, snug, bevelled inside; MagSafe pocket to Apple's nominal array). Awaiting the size of Brian's MagSafe pieces and his sign-off in the viewer, then the first print. Not printed yet.
 tags: [x2d, tpu, phone-case, iphone]
 ---
 
@@ -20,6 +20,7 @@ A slim, form-fitting case for Brian's iPhone 15 Pro Max with open button windows
 - Camera guard: REQUIRED ("make sure it has a camera guard built in"). The lenses stand 4.07 mm above the back glass, so the guard stands 3.4 mm proud of the 1.6 mm back; with the back on the bed that would be below the bed plane. Brian chose, from three options: TWO PIECES, a guard ring printed flat and bonded on with flexible CA glue. Rejected: one piece printed screen-side down on TPU supports (double time, rough inside floor); one piece back-down with the whole outside back on supports (rough visible back). Printing on edge is out: a 160 mm tall 1.5 mm TPU channel deflects about 15 mm under nozzle drag.
 - Guard fit: SNUG around the camera. Brian, on seeing the first ring in the viewer: "the camera on the phone is correct, but the guard around it is too big. It should be snug around the camera." The first ring followed Apple's "plateau outer boundary", which is the base of the glass ramp, 4 mm off the raised island.
 - Guard shape: SLIM, PLAIN, BEVELLED INSIDE. On the second ring (snug, 5.1 mm wide, with Apple's flash and LiDAR keepout cones cut out of it as two dished cutaways): "the ring is too thick and there are cutouts in the top right and bottom right. Not good", then "the guard should also be a bevel on the inside". So no cutaways: the ring crosses Apple's flash-outer and rear-sensor cones, as most commercial cases do (told to Brian: possible slight flash haze with light TPU; dark TPU avoids it).
+- MagSafe: "add a magsafe ring so I can insert the metal pieces". A pocket for a ring and an alignment piece. OPEN: the size of Brian's own pieces (asked 2026-09-20, not answered yet); the pocket is built to Apple's nominal case-array geometry until then.
 
 ## Design as built (mine unless marked; all numbers are constants at the top of the source)
 
@@ -29,6 +30,7 @@ A slim, form-fitting case for Brian's iPhone 15 Pro Max with open button windows
 - Windows, all centred on the band's mid plane: Action 8.04 long, volume up and down share one 27.4 long window (the buttons are only 3.0 apart), side button 19.7 long; each 5.0 tall inside, flaring 45 degrees to 6.5 outside, top and bottom only. Bottom: USB-C 13.0 x 7.0 (Apple asks 12.45 x 6.60 plus margin) and two acoustic slots 2.0 mm clear of the outermost holes (Apple's thin-case rule). Posts: 2.93 between Action and volume, 2.02 each side of USB-C.
 - Camera opening: the floor runs in over the glass ramp, its phone side sloped parallel to the ramp 0.4 mm off it, down to a one-layer edge 2.10 mm inside Apple's outer boundary.
 - Guard ring (third version): 2.5 mm wide, 3.4 mm tall (17 layers), 1.5 mm 45 degree bevel on the inside, 0.5 round on the outside top edge. Top 5.0 mm above the back glass, so the lens glass (4.07) is 0.93 mm off a table. Inside wall flush with the camera opening's edge, 1.56 mm off the island's flat top: that locates it for gluing, and the whole 2.5 mm width is glue land. The model still asserts Apple's three camera cones and the flash inner cone against the ring, and reports the accepted crossings (flash outer 2.9 mm3, rear sensor 54.7 mm3).
+- MagSafe pocket: in the phone side of the back, so the phone holds the pieces in and nothing shows. Apple's case array (ADG R30 Fig 42-2 to 42-4; `reference/iphone-15-pro-max-dimensions.md` section 16): ring 54.10 OD / 46.00 ID x 0.55, centred on the product centre (the model origin) within 0.30; clocking magnet 6.00 x 19.31 x 0.55, from 31.18 to 50.49 below the ring centre toward the bottom edge. Pocket 0.25 larger all round and 0.8 deep (4 layers): pieces up to about 0.7 thick sit below the floor's surface, off the phone's glass (Apple: no metal contact with the product), and 0.8 mm (4 layers) of back stays behind them (Apple allows at most 0.85 between magnets and the outside). 5.7 mm clear of the guard ring. Apple's own stack buries the magnets 0.55 under the inside surface of a 1.95 mm back; an open pocket in a 1.6 mm back is the insert-after-printing version of that. Constants `MAG_*` at the top of the source.
 - Print orientation: case back on the bed, ring glue face on the bed, no supports. Only overhangs: the six window roofs (68 mm2 of bridge in all) and the rounded window ends.
 
 ## Open risks for the first print
@@ -36,13 +38,14 @@ A slim, form-fitting case for Brian's iPhone 15 Pro Max with open button windows
 - The volume window's roof is a 22 mm TPU bridge (side button 15 mm, speaker slot 11 mm). The wall lines run along the bridge, the best case, but some sag is likely; it is cosmetic.
 - Fit is unproven: cavity clearance 0.10 per side and the lip's 0.05 gap are my first guesses for TPU 95A HF.
 - The floor's sloped edge is 0.2 mm (normal) off my straight-ramp proxy of the camera glass; the ring is 0.37 off. The real ramp is a concave fillet (not dimensioned by Apple) and sits lower.
+- MagSafe pocket is sized to Apple's nominal array, not to Brian's actual pieces. Pieces thicker than about 0.7 mm need a deeper pocket, and past 1.0 mm a thicker back (Apple's limit is 2.1). A steel attach ring instead of magnets is outside Apple's rules (permeability 1.05 max) but common on DIY cases; functional risk only (charging heat, compass).
 - The ring crosses Apple's flash-outer and LiDAR cones (Brian's call). Watch for haze in flash photos on the first print; a dark TPU is the fix.
 
 ## Files
 
 - `iphone-15-pro-max-case.py`: the model, its checks, STL export, viewer push (`SHOW=reset` first, `SHOW=1` after).
 - `iphone-15-pro-max-case.stl`, `camera-guard-ring.stl`: both in print orientation.
-- `iphone-15-pro-max-case-print.3mf`: Bambu project, both parts on one plate, X2D 0.4 nozzle, 0.20 mm Standard, Bambu TPU 95A HF, Textured PEI; Arachne, 4 wall loops, 100% infill, avoid crossing walls. Real slice: 52 min, 30.2 g (30.5 g if perfectly solid), 54 layers (`iphone-15-pro-max-case-print-slice.json`).
+- `iphone-15-pro-max-case-print.3mf`: Bambu project, both parts on one plate, X2D 0.4 nozzle, 0.20 mm Standard, Bambu TPU 95A HF, Textured PEI; Arachne, 4 wall loops, 100% infill, avoid crossing walls. Real slice: 53 min, 29.4 g (29.7 g if perfectly solid), 54 layers (`iphone-15-pro-max-case-print-slice.json`).
 - `pipeline/make_print_3mf.py`: builds and slice-verifies the 3MF. `pipeline/sections.py`: section close-ups from the real meshes. `review_page.py` writes `review.html`.
 - `images/`: section close-ups and renders. `build/` (gitignored): staged STLs, phone proxy, assembly meshes.
 - `reference/iphone-15-pro-max-dimensions.md`: the dimension table. Apple's two PDFs and the `adg-*.png` sheet renders stay local (gitignored): Apple's title block says do not reproduce; re-download from the URLs in that note.

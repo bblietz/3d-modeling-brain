@@ -16,12 +16,15 @@ Project: `projects/iPhone-15-Pro-Max-case/` (brief, source, 3MF). Materials note
 - Camera guard required; two pieces: ring printed flat and bonded with flexible CA (Brian chose this over printing screen-side down on supports).
 - Guard SNUG around the raised camera island, not around Apple's plateau outer boundary; SLIM (2.5 mm), PLAIN (no cutaways), with a 1.5 mm 45 degree bevel on the inside.
 
+- MagSafe pocket in the phone side of the back, to Apple's case-array geometry until Brian's own pieces are measured.
+
 ## What worked
 
 - **Apple publishes dimensioned drawings.** developer.apple.com/accessories/dimensional-drawings/ has a PDF per iPhone (since ADG R30 they are no longer inside the guidelines PDF). Corners and the edge profile are splines given as ordinate points; buttons, ports, camera plateau, lens heights and keepout cones are all dimensioned. A research subagent read sheet 1 (no text layer) at 600 to 2400 dpi and cross-checked every value against the PDF's vector geometry (agreed within 0.02 mm).
 - **Phone proxy solid first.** Building the phone from the drawing (body, buttons, plateau, lenses) and asserting `phone & case == 0` and `phone & ring == 0` on every run caught real errors and makes every later change safe.
 - **Apple's keepout cones as solids.** Asserting the six camera, flash and rear-sensor cones against the ring caught a 0.03 mm3 violation I had reasoned away: the plateau's corner curve comes within 8.25 mm of the rear-sensor axis, not the straight run's 8.32. For the snug ring the same cone solids became the cutters (grown 0.15 mm).
 - **Section close-ups from the real meshes** (`pipeline/sections.py`, trimesh section + shapely even-odd fill + matplotlib): crisp, to scale, annotated. Far better than shaded matplotlib 3D views for lips, windows and clearances. Reusable for any project.
+- **Apple's MagSafe case array is fully dimensioned** in ADG chapter 42 (Fig 42-2 to 42-4): ring 54.10 / 46.00 x 0.55, clocking magnet 6.00 x 19.31 from 31.18 to 50.49 below the ring centre (toward the bottom edge), centred on the product centre within 0.30, at most 0.85 of case between magnets and the outside, back 2.1 max. Apple buries the magnets 0.55 under the inside surface; for insert-after-printing, an open pocket on the phone side with the pieces 0.25 below the surface does the same job.
 - **A real slice as the last check.** It caught two things the geometry could not: the ring's sparse core, and the wrong plate centring.
 
 ## What failed, and the fix
@@ -37,12 +40,12 @@ Project: `projects/iPhone-15-Pro-Max-case/` (brief, source, 3MF). Materials note
 
 - **X2D machine presets keep ALL their G-code in `include` templates** (`Bambu Lab X2D 0.4 nozzle template machine_start_gcode.json` and four more), and X2D filament presets `include` the six-variant filament template. The vault's older `flatten()` (Garmin, NACS, Leader-cards, NACS-organizer `make_plate.py`) follows only `inherits`, so their verification slices ran with a generic fallback start G-code (prime lines, M109 S205) and under-report time (7 min 39 s vs 12 min on a small probe). The shipped 3MFs were fine because Studio's GUI re-resolves the system preset on open. `projects/iPhone-15-Pro-Max-case/pipeline/make_print_3mf.py` merges includes: includes first, then the preset's own keys, base of the chain first. Assert `"X2D start gcode" in gcode`.
 - **The CLI does not re-centre meshes on `--export-3mf`**: a part's place on the bed is item transform + the STL's own bounds. Centring by the item transforms alone put the plate 28 mm off in y. The slicer's output does re-centre, so its transforms are the real part centres (useful for a check).
-- **Bambu keeps the "Sparse infill" label at 100% density.** Check solidity by weight: sliced grams vs mesh volume x `filament_density` (got 30.2 vs 30.5 g).
+- **Bambu keeps the "Sparse infill" label at 100% density.** Check solidity by weight: sliced grams vs mesh volume x `filament_density` (got 29.4 vs 29.7 g).
 - Two TPU parts on one plate, `--arrange 1`, land 2 to 3 mm apart: short travel between them.
 
 ## Settings used (unvalidated until printed)
 
-X2D 0.4 nozzle, `0.20mm Standard @BBL X2D`, `Bambu TPU 95A HF @BBL X2D 0.4 nozzle` (230 C, textured plate 35 C, 12 mm3/s), Textured PEI, Arachne, 4 wall loops, 100% zig-zag infill, avoid crossing walls. 52 min, 30.2 g, 54 layers.
+X2D 0.4 nozzle, `0.20mm Standard @BBL X2D`, `Bambu TPU 95A HF @BBL X2D 0.4 nozzle` (230 C, textured plate 35 C, 12 mm3/s), Textured PEI, Arachne, 4 wall loops, 100% zig-zag infill, avoid crossing walls. 53 min, 29.4 g, 54 layers.
 
 ## Still to measure on the first print
 

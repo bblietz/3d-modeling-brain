@@ -1,7 +1,7 @@
 """Section close-ups of the case with the phone docked and the guard ring glued on, cut from the real exported meshes.
 
 Usage:  .venv/bin/python projects/iPhone-15-Pro-Max-case/pipeline/sections.py
-Reads iphone-15-pro-max-case.stl, build/phone-proxy.stl, build/ring-as-glued.stl; writes images/section-*.png.
+Reads iphone-15-pro-max-case.stl and build/{phone-proxy,ring-as-glued,magsafe-pieces}.stl; writes images/section-*.png.
 """
 import os
 
@@ -21,6 +21,7 @@ PH_W, PH_L, BACK_T, PH_T = 76.73, 159.86, 1.6, 8.25
 ZG = BACK_T + PH_T
 PARTS = [("case", f"{PROJECT}/iphone-15-pro-max-case.stl", "#2f6f4f"),
          ("guard ring", f"{PROJECT}/build/ring-as-glued.stl", "#c9772b"),
+         ("MagSafe pieces (Apple nominal)", f"{PROJECT}/build/magsafe-pieces.stl", "#3b6ea8"),
          ("phone (Apple drawing)", f"{PROJECT}/build/phone-proxy.stl", "#b9bec5")]
 MESHES = [(n, trimesh.load(p), c) for n, p, c in PARTS]
 
@@ -54,7 +55,7 @@ def draw(ax, geom, colour, label):
         ax.add_patch(PathPatch(Path(verts, codes), facecolor=colour, edgecolor="black", linewidth=0.6, label=label if k == 0 else None))
 
 
-def figure(name, title, axis, at, xlim, ylim, notes=(), lines=(), size=(11, 7)):
+def figure(name, title, axis, at, xlim, ylim, notes=(), lines=(), size=(11, 7), ylabel="z (mm), bed at 0"):
     fig, ax = plt.subplots(figsize=size)
     for label, mesh, colour in MESHES:
         g = cut(mesh, axis, at)
@@ -65,7 +66,7 @@ def figure(name, title, axis, at, xlim, ylim, notes=(), lines=(), size=(11, 7)):
     for (x, y), (tx, ty_), text in notes:
         ax.annotate(text, xy=(x, y), xytext=(tx, ty_), fontsize=9, arrowprops=dict(arrowstyle="->", linewidth=0.7))
     ax.set_xlim(*xlim); ax.set_ylim(*ylim); ax.set_aspect("equal")
-    ax.set_xlabel("xyz"[[i for i in range(3) if i != axis][0]] + " (mm)"); ax.set_ylabel("z (mm), bed at 0")
+    ax.set_xlabel("xyz"[[i for i in range(3) if i != axis][0]] + " (mm)"); ax.set_ylabel(ylabel)
     ax.set_title(title, fontsize=11); ax.grid(True, linewidth=0.3)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=3, fontsize=8, frameon=False)
     os.makedirs(f"{PROJECT}/images", exist_ok=True)
@@ -102,4 +103,12 @@ if __name__ == "__main__":
     yb = -(PH_L / 2)
     figure("section-usb", "USB-C window, cut on the centreline (x = 0)", 0, 0.0, (yb - 2.6, yb + 5.0), (-0.4, 11.4),
            lines=[((yb - 2.6, 5.725 + 3.3, yb + 0.5, 5.725 + 3.3), "#d62728", "Apple connector keepout 12.45 x 6.60"), ((yb - 2.6, 5.725 - 3.3, yb + 0.5, 5.725 - 3.3), "#d62728", None)])
-    print("wrote", sorted(f for f in os.listdir(f"{PROJECT}/images") if f.startswith("section-")))
+    figure("section-magsafe", "MagSafe pocket close-up, cut on the centreline where it crosses the ring (phone docked)", 0, 0.0, (-29.5, -20.5), (-0.3, 3.0), size=(11, 4.6),
+           notes=[((-25.0, 1.08), (-24.2, 2.55), "ring piece 0.55 thick (Apple nominal), 0.25 below the floor's surface:\noff the phone's glass, held in by the phone"),
+                  ((-27.2, 0.4), (-29.3, 0.12), "0.8 mm of back (4 layers) behind the pocket"),
+                  ((-22.85, 1.2), (-22.6, 0.45), "0.25 clear all round")])
+    figure("plan-magsafe", "Looking into the empty case from the screen side, cut through the pocket (z = 1.2)", 2, 1.2, (-42, 42), (-84, 84), size=(6.2, 11.5), ylabel="y (mm), top of the phone up",
+           notes=[((0, 27.2), (-38, 38), "ring pocket: 54.10 / 46.00 + 0.25,\ncentred on the phone's centre"),
+                  ((0, -41), (-38, -62), "clocking magnet pocket:\n6.00 x 19.31 + 0.25, toward the bottom edge"),
+                  ((15, 56), (-38, 74), "camera opening")])
+    print("wrote", sorted(f for f in os.listdir(f"{PROJECT}/images") if f.startswith(("section-", "plan-"))))

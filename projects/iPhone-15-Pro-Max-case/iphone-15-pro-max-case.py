@@ -73,6 +73,16 @@ RING_CH = 1.5         # 45 degree bevel on the inside, all round (Brian: "the gu
                       # 2.5 mm ring allows with a flat rim left on top, and the most a slim ring can do for the flash and lens cones
 RING_R = 0.5          # round on the ring's outside top edge
 
+# ---- MagSafe pocket ----
+# Brian, 2026-09-20: "add a magsafe ring so I can insert the metal pieces". Apple's case array (ADG R30 Fig 42-2 to 42-4, note section 16):
+# a closed ring and a "clocking" magnet below it, centred on the product centre (the model origin) within 0.30.
+MAG_RING_OD, MAG_RING_ID = 54.10, 46.00
+MAG_BAR_W, MAG_BAR_NEAR, MAG_BAR_FAR = 6.00, 31.18, 50.49      # clocking magnet: width; near and far end from the ring centre, toward the bottom edge
+MAG_T = 0.55          # Apple's magnet thickness. Brian's own pieces are NOT measured yet: change these five numbers to match them
+MAG_CLR = 0.25        # the pocket is larger than the pieces by this all round
+MAG_DEPTH = 0.8       # 4 layers, open to the phone side so the phone holds the pieces in; takes pieces up to about 0.7 thick and
+                      # leaves 0.8 mm (4 layers) of back behind them (Apple allows at most 0.85 between the magnets and the outside)
+
 ZG = BACK_T + PH_T                 # front glass plane
 ZMID = BACK_T + BTN_Z              # centreline of every button and bottom port
 RING_H = RING_TOP - BACK_T
@@ -240,8 +250,22 @@ WINDOWS = {   # name: (length, cutter)
     "speaker slot": (slot_x(HOLES_R)[1], window(slot_x(HOLES_R)[1], HOLE_D + 2 * PORT_OFFSET, bottom_plane(slot_x(HOLES_R)[0]))),
 }
 
+
+
+# ---- MagSafe pocket, in the phone side of the back ----
+def magsafe(grow, z0, z1):
+    """Apple's ring and clocking magnet, grown by grow all round, from z0 to z1."""
+    up = (Align.CENTER, Align.CENTER, Align.MIN)
+    ring_ = Cylinder(MAG_RING_OD / 2 + grow, z1 - z0, align=up) - Cylinder(MAG_RING_ID / 2 - grow, z1 - z0, align=up)
+    bar = Pos(0, -(MAG_BAR_NEAR + MAG_BAR_FAR) / 2, 0) * Box(MAG_BAR_W + 2 * grow, MAG_BAR_FAR - MAG_BAR_NEAR + 2 * grow, z1 - z0, align=up)
+    return Pos(0, 0, z0) * (ring_ + bar)
+
+
+mag_pocket = magsafe(MAG_CLR, BACK_T - MAG_DEPTH, BACK_T + 1)
+mag_pieces = magsafe(0.0, BACK_T - MAG_DEPTH, BACK_T - MAG_DEPTH + MAG_T)       # the pieces in place, for the viewer and the sections
+
 with_camera = shell - cam_open
-case = with_camera - [w for _, w in WINDOWS.values()]
+case = with_camera - [w for _, w in WINDOWS.values()] - mag_pocket
 
 # ---- Apple's keepout cones (sheet 2; r(h) from the note) ----
 def cone(at, r0, r1, h0, h1):
@@ -302,6 +326,10 @@ if __name__ == "__main__":
             assert vol(k & ring) < 0.001, f"{name} keepout cone is blocked by the ring: {vol(k & ring):.3f} mm3"
     assert RING_TOP - LENS_H >= LENS_CLEAR_MIN, RING_TOP - LENS_H
     report["lens glass to a flat surface"] = round(RING_TOP - LENS_H, 2)
+    # MagSafe: the pieces drop into the pocket without touching it, sit below the floor's surface (off the phone's glass), and leave a real skin
+    assert vol(mag_pieces & case) < 0.001 and MAG_T < MAG_DEPTH and BACK_T - MAG_DEPTH >= 0.6, (vol(mag_pieces & case), MAG_T, MAG_DEPTH)
+    report["magsafe pocket: depth / back left behind it / pieces below the floor surface"] = [MAG_DEPTH, round(BACK_T - MAG_DEPTH, 2), round(MAG_DEPTH - MAG_T, 2)]
+    report["magsafe pocket to the guard ring, nearest"] = round((ty(CAM_Y[1]) + RING_IN - RING_W) - (MAG_RING_OD / 2 + MAG_CLR), 2)
     # Apple's USB-C connector keepout passes through the wall untouched
     usb = bottom_plane(0) * extrude(Pos(0, 0, -0.5) * SlotOverall(USB_KEEPOUT[0], USB_KEEPOUT[1]), USB_KEEPOUT[2])
     assert vol(usb & case) < 0.001, vol(usb & case)
@@ -314,7 +342,7 @@ if __name__ == "__main__":
     report["post between action and volume windows"] = round((_v[0] - _v[1] / 2) - (_a[0] + _a[1] / 2), 2)
     report["posts beside usb-c"] = [round(-USB_W / 2 - (slot_x(HOLES_L)[0] + slot_x(HOLES_L)[1] / 2), 2), round(slot_x(HOLES_R)[0] - slot_x(HOLES_R)[1] / 2 - USB_W / 2, 2)]
 
-    for name, shape in (("stage1-shell", shell), ("stage2-camera", with_camera), ("phone-proxy", phone)):
+    for name, shape in (("stage1-shell", shell), ("stage2-camera", with_camera), ("phone-proxy", phone), ("magsafe-pieces", mag_pieces)):
         export_stl(shape, f"{BUILD}/{name}.stl", tolerance=0.01, angular_tolerance=0.2)
     export_stl(case, f"{HERE}/iphone-15-pro-max-case.stl", tolerance=0.01, angular_tolerance=0.2)
     export_stl(ring_print, f"{HERE}/camera-guard-ring.stl", tolerance=0.01, angular_tolerance=0.2)
@@ -339,5 +367,6 @@ if __name__ == "__main__":
 
     if os.environ.get("SHOW"):
         from ocp_vscode import Camera, show
-        show(case, ring, phone, names=["case", "guard ring (as glued)", "phone (Apple drawing)"], colors=["#2f6f4f", "#c9772b", "#9aa0a6"],
+        show(case, ring, mag_pieces, phone, names=["case", "guard ring (as glued)", "MagSafe pieces (Apple nominal)", "phone (Apple drawing)"],
+             colors=["#2f6f4f", "#c9772b", "#3b6ea8", "#9aa0a6"],
              reset_camera=Camera.RESET if os.environ["SHOW"] == "reset" else Camera.KEEP)

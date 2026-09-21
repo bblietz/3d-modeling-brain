@@ -270,3 +270,141 @@ Magnet-free MagSafe pass-through: the ADG gives NO thickness figure for a case w
 ## 15. Handling
 
 Apple's title block carries a proprietary notice: keep in confidence, do not reproduce, copy, or publish in whole or part. The PDFs are free public downloads for accessory design, which is this use. Keep the two PDFs and the `adg-*.png` renders local: do not commit them to the GitHub remote and do not embed them in published pages or artifacts. They can be re-downloaded from the source URLs in the frontmatter. The 39 MB ADG PDF would also bloat the repo.
+
+## 16. MagSafe case magnet array (ADG R30 chapter 42)
+
+Added 2026-09-20 for the MagSafe ring pocket. Sources: ADG R30 chapter 42, p268 to 287 (case array figures on p269, p271, p272; accessory-side cross-checks p274 to 282; verification p283 to 285), general rules on p26, p29, p39, p42, p49 to 50, p76 to 77, plus drawing sheet 2 (PDF p3) and the sheet 1 notes. These ADG pages are in addition to the `adg_pages_used` list in the frontmatter. ADG PDF page index equals the printed page number.
+
+Confidence labels as defined at the top of this note, with two additions for this section:
+
+- **A** also covers numbers printed inside the ADG figures. Those figures are stroked CAD text with no text layer, so each was rendered at 400 to 1200 dpi, and every value closes arithmetically against its neighbors (for example 2.900 + 1.150 = 4.05 = (54.10 - 46.00) / 2, and 50.49 - 31.18 = 19.31).
+- **I** = my inference. Not Apple's words.
+- **V** values here come from the sheet 2 vector paths. Scale 1.3828 pt/mm, agreeing three ways (product width, product length, the dia 57.50 circle) within 0.02 percent.
+
+Apple calls the ring the "ARRAY MAGNET" and the orientation magnet the "CLOCKING MAGNET".
+
+### 16.1 Ring, Fig 42-2 "MagSafe magnet array dimensions" p271 and Fig 42-3 "Section C-C" p272
+
+| Item | Value | Conf | Source |
+|---|---|---|---|
+| Outer diameter | dia 54.10 (this surface is datum B) | A | Fig 42-2 p271 |
+| Inner diameter | dia 46.00, with control frame "single circle symbol, 0.05, B" | A | Fig 42-2 p271 |
+| Radial width | 4.05 | A | Fig 42-3 p272 |
+| Mean diameter | 50.05 | D | |
+| Magnet thickness | 0.55, no tolerance printed | A | Fig 42-3 p272 |
+| Gap in the ring | none. Drawn as a complete closed annulus in both Fig 42-1 (p269, isometric) and Fig 42-2 | A, by absence | |
+| Number and shape of segments | not given. No segment lines, count, or arc angles are drawn for the case ring | unknown | |
+| Radial pole layout, outer edge to inner edge | outer pole 1.150, then a non-magnetized zone "abs(Bz) < 80 mT" 1.750 wide (D, 2.900 - 1.150), then inner pole "(1.150)" reference. Apple prints 1.150, 2.900, 4.05 | A | Fig 42-3 p272 |
+| Pole radii from the ring center | outer pole r 25.90 to 27.05, dead zone r 24.15 to 25.90, inner pole r 23.00 to 24.15 | D | |
+| Polarity | outer pole: N faces the device, S faces the accessory. Inner pole: S faces the device, N faces the accessory | A | Fig 42-3 p272 |
+
+- Control frame reading (I): a single circle is the circularity symbol, which takes no datum. Because datum B is referenced, the intent is probably concentricity of the inner diameter to the outer diameter within 0.05.
+- Do not confuse this with the ACCESSORY ring (Fig 42-7 and 42-8, p276 to 277): same dia 54.10 and 46.00, but with a gap (2X 10.00 deg max array magnet gap, 8.25 max opening), magnets 1.10 thick, and a 0.70 low carbon steel DC shield behind them. The gap and the steel shield belong to chargers and wallets, not to cases.
+
+### 16.2 Orientation magnet, Fig 42-2 p271 and Fig 42-4 "Section D-D" p272
+
+Coordinates are from the ring center (boxed basic 0.00 / 0.00 origin at the center of datum B).
+
+| Item | Value | Conf |
+|---|---|---|
+| Width | X -3.00 to 3.00, "(6.00)" reference. 6.00 is printed again in Fig 42-4 | A |
+| Length | Y -31.18 to -50.49, "(19.31)" reference | A |
+| Thickness | 0.55, no tolerance printed | A, Fig 42-4 |
+| Corner radii | none given. Drawn as a sharp-cornered rectangle in Fig 42-1 and Fig 42-2 | unknown |
+| Center distance from the ring center | 40.835 along the long axis, 0.00 sideways | D, (31.18 + 50.49) / 2 |
+| Gap from the ring OD to the magnet's near end | 4.13 | D, 31.18 - 27.05 |
+| Farthest corner from the ring center | 50.58 | D |
+| Pole layout across the 6.00 width | three stripes of 1.167 separated by two non-magnetized zones "abs(Bz) < 80 mT" of 1.250 (D). Apple prints 1.167, 2.417, 3.583, 4.833, 6.00 measured from one long edge | A |
+| Polarity | the two outer stripes: N faces the device. Center stripe: S faces the device | A |
+| Cross-check on the accessory side | Fig 42-11 p280 prints the identical -31.18, -50.49, -3.00, 3.00, (19.31) | A |
+
+**Direction: toward the BOTTOM edge of the phone, along the long axis (D, high confidence).** Apple never writes this in words anywhere in chapter 42. It follows from three independent facts:
+
+1. Fig 42-2 places the magnet at negative Y, and Apple's device drawing uses negative Y ordinates running down from the top edge (-79.93, -114.87, -153.94).
+2. On sheet 2 the only zone whose callout says "EXCEPT MAGSAFE MAGNETS" extends below the product center out to R 51.89. That encloses the magnet's farthest corner (50.58) with 1.31 to spare. The same magnet placed above the center would reach Y 29.44, inside the camera zone, which has no MagSafe exception.
+3. ADG 42.2.2.1 p274 limits an oriented accessory to 30 mm from the ring center "towards the top edge of the device", so oriented accessories hang downward.
+
+The stripes run along the 19.31 length (I). The Section D-D cut line is not drawn on Fig 42-2, but its 6.00 total equals the magnet width, and the accessory's equivalent Section G-G (p280) is drawn across the width.
+
+### 16.3 Position on the iPhone 15 Pro Max
+
+| Item | Value | Conf |
+|---|---|---|
+| Ring center requirement | "DATUM B CENTER TO BE PLACED WITHIN +/-0.30MM TO INTEGRATED PRODUCT CENTER" | A, Fig 42-2 p271 |
+| Product center | X 38.37 from the side edge, Y 79.93 from the top edge. Both are labeled "PRODUCT CENTER" on the MagSafe view | A, sheet 2 |
+| dia 57.50 zone | fitted center X 38.364, Y 79.933, fitted dia 57.51. Section 10 is confirmed: centered on the product center | V |
+| R 51.89 arc | fitted center X 38.362, Y 79.956, fitted R 51.87. Arc exists on the lower side only and bulges toward the bottom edge; lowest point Y 131.82 (D) | V |
+| Arc meets the side edges | Y 114.86 by arithmetic from R 51.89 about the product center, vs Apple's "2X 114.87" | D |
+| Top of the MagSafe band = bottom of the camera no-magnetic zone | Y 46.76, full width. Apple does not label it. Same method returns 45.217 for the printed 45.22 | V |
+| Ring footprint on the phone | X 11.32 to 65.42, Y 52.88 to 106.98 | D |
+| Orientation magnet footprint | X 35.37 to 41.37 (FRONT and REAR frames agree within 0.01), Y 111.11 to 130.42, center Y 120.77 | D |
+| Self alignment | accessories shall "magnetically self align within a 1.55 mm radial maximum" | A, 42.1.2 p270 |
+| Coplanarity | "Magnets in the MagSafe case magnet array shall be positioned in the same plane" | A, 42.1.2 p270 |
+
+"Integrated product center" is read as the phone's product center with the case fitted (I, supported by sheet 2 centering every MagSafe zone on the labeled product center).
+
+### 16.4 Through-thickness stack, Fig 42-3 and Fig 42-4 p272 (both print the same three numbers)
+
+| Layer, from the phone outward | Value | Conf |
+|---|---|---|
+| Case inner surface ("SURFACE TOWARD DEVICE - MEASUREMENT PLANE") to the magnet's device-side face | 0.55 +/-0.05 | A |
+| Magnet | 0.55 | A |
+| Magnet's accessory-side face to the case outer surface ("SURFACE TOWARD ACCESSORY - MEASUREMENT PLANE") | "0.85MM MAXIMUM" | A |
+| Sum | 1.95 at maximum outer cover; 1.90 to 2.00 across the +/-0.05 | D |
+| Back thickness | "uniform thickness no greater than 2.1 mm; Apple recommends 2.0 mm" | A, 42.1.1 p269; drawing note 8 also says 2.1 mm MAX |
+| Thickness check | 2.1 or less at four points along the ring and two points along the orientation magnet, digital thickness gauge | A, 42.4.1.1 p283 |
+
+- Apple does NOT put the magnet against the phone. 0.50 to 0.60 of case material sits between the back glass and the magnet, and at most 0.85 sits between the magnet and the accessory.
+- No minimum outer cover is given. No adhesive layer, pocket clearance, or magnet thickness tolerance is shown for the case array (the accessory figures show a "(0.05)" adhesive layer; the case figures show none).
+- Status of the figures: 42.1.2.2 p270 says the magnets "shall be positioned in the case following the dimensions and polarity shown in" Fig 42-2, 42-3, 42-4. 42.1.2.1 p270 also calls Fig 42-3 "a reference design ... for how to achieve the desired retention force".
+
+### 16.5 Magnet material and force (A)
+
+- N45SH NdFeB with an 8 to 16 um epoxy coating "(or similar non-metallic coating)". Table 42-1 p270: Br 13.2 to 13.6 kGs, Hcb 12.75 kOe min, Hcj 20.50 kOe min, BHmax 43 to 46 MGOe.
+- Surface field shall not exceed 0.215 T on either the interior or the exterior surface of the case (p270).
+- Pull-off normal to the back: "nominal target between 1000 gf and 1300 gf" with the case on the device (42.1.2.3 p272). The verification procedure (42.4.1.3.3 p285) instead requires the average of 5 pulls on an Apple MagSafe Charger to be 800 gf to 1100 gf "when removing the mass of the Apple MagSafe Charger and eyelet assembly". Apple prints both ranges; section 11 row 11 above quotes only the first.
+- Must work with the Apple MagSafe Charger and the iPhone FineWoven Wallet (wallet animation appears; low coercivity stripe cards survive 10 s), and an Apple MagSafe Battery Pack must seat with "only the mating surface" in contact (p269, p283 to 286).
+- Shall not interfere with inductive charging (42.1.3 p273).
+- Apple's recommended array vendors (p269): Baotou INST Magnetic New Materials, Ningbo Sanhuan Magsound, Quadrant Solutions.
+
+### 16.6 Cases without magnets, and steel attach rings
+
+What Apple prints (A, verbatim):
+
+- ADG 5.1.4 p39: cases "claiming compatibility with MagSafe or Qi wireless power 2.0 or later ... shall: Integrate a MagSafe Case Magnet Array" and shall not have rear pockets or holders for cards.
+- ADG 42.1.1 p269: shall "Firmly attach to the device without relying on the magnets" and "Not integrate magnets on the back of the case other than the MagSafe magnets".
+- ADG 4.8 p26: "Unless otherwise specified, Apple recommends avoiding the use of magnets and metal components in accessories."
+- Drawing note 1: "NO METAL CONTACT WITH PRODUCT."
+- Drawing note 5: "RELATIVE MAGNETIC PERMEABILITY OF ANY METAL USED ON CASE: 1.05 MAX, PER ASTM A342/A342M-14."
+- Drawing note 7: "NO MAGNETS ON REAR OF PRODUCT EXCEPT MAGSAFE MAGNETS."
+- Sheet 2, dia 57.50 disc, flag 5: "DO NOT OBSTRUCT THIS AREA WITH METAL, CONDUCTIVE MATERIAL, OR MAGNETIC MATERIAL".
+- Sheet 2, band down to R 51.89, flags 5 and 7: "DO NOT OBSTRUCT THIS AREA WITH MAGNETIC OR PERMEABLE MATERIAL EXCEPT MAGSAFE MAGNETS".
+- Sheet 2, camera zone out to X_r 45.22: "DO NOT OBSTRUCT THIS AREA WITH MAGNETIC OR PERMEABLE MATERIAL (FULL PRODUCT VOLUME INCLUDING SIDE WALLS)".
+
+What Apple does NOT print: any guidance for a magnet-free MagSafe pass-through case; any thickness figure for one beyond the general 2.1 mm MAX of note 8; any mention of steel or ferrous attach rings in a case. In chapter 42 the word steel appears only for the ACCESSORY DC shield ("low carbon steel (1010, DT4 or similar)", 42.2.2.7 p281). Chapter 37 (inductive power, p257 to 258) has no case guidance either.
+
+Reading (I): Apple's documents do not permit a steel attach ring. The only exception written into the MagSafe zones is for "MAGSAFE MAGNETS", and a steel ring is metal, conductive, and permeable, sitting inside the dia 57.50 disc. Note 5's 1.05 ceiling excludes carbon steel and 400 series stainless, whose relative permeability runs to the hundreds or more (general engineering knowledge, not from Apple). This binds only a case sold as compliant. For a personal print it is a functional risk call: a metal ring over the charging coil (heating, charging efficiency) and the compass.
+
+Inconsistency to be aware of (facts A, conclusion I): the Apple-spec ring (dia 46.00 to 54.10) lies entirely INSIDE the dia 57.50 disc, and that disc's own callout carries only flag 5 with no "except MagSafe magnets" wording. Only the orientation magnet (31.18 to 50.49 out) sits in the band that carries the exception. Note 7 and ADG 42.1 make clear the MagSafe magnets belong there, so I read the disc callout as "nothing else in this area".
+
+### 16.7 Keepouts near the pocket, for a plain TPU pocket
+
+- Plain non-conductive TPU is unrestricted by every magnetic and metal zone above. Avoid carbon filled, glass filled, or conductive TPU (section 11 rule 12).
+- NFC: no NFC antenna location or NFC keepout is drawn for this phone. ADG 4.9.5 p29 says only that accessories shall not degrade NFC and that risk rises if they intrude on the antenna keep-out zones. The pocket clears both antenna zones (D): the top zone ends at Y 16.89 (side strips to 33.62 and 28.55) vs ring top Y 52.88; the bottom zone starts at Y 138.68 between X_r 4.89 and 71.46 vs the magnet's far end at Y 130.42, a margin of 8.26. The R 51.89 arc itself stops 6.86 short of that band.
+- Compass: X_r 58.06, Y 153.94 (A). Marker dia 6.40 (V; not dimensioned, may be symbolic). Distances (D): 76.58 from the ring center, 49.53 from the ring OD, 28.84 from the nearest corner of the orientation magnet. Apple gives no numeric compass keepout. ADG 5.5 p42: cases shall not interfere with the magnetic compass. The compass test (5.10.8 p77) is NOT in the iPhone 15 Pro Max case testing matrix (Table 5-12, p49 to 50), which lists NFC (p76) and "MagSafe Case Magnet Array (page 283) ... Cases supporting MagSafe only".
+- Camera: no magnetic or permeable material in the camera zone (X_r 0 to 45.22, Y 0 to 46.76 V). The ring's top edge is 6.12 below that zone and 6.34 below the plateau outer boundary at Y 46.54 (D). ADG 4.8 p26 and 5.5 p42: no effect on autofocus or OIS.
+- Side clearance (D): the ring OD is 11.32 from each side edge; the dia 57.50 disc is 9.62 from each side edge.
+- Uniform back: 42.1.1 requires uniform thickness, and the 2.1 max is checked ON the ring and ON the orientation magnet, so a pocket must not raise a bump over 2.1 there.
+- Accessory seating, accessory-side rules that shape the case back (A for the numbers, I for applying them to a case): accessory faces are flat only out to 27.20 from the array center and fall away by 0.92 at radius 30.00 (42.3 p282). Accessories may reach 30 mm from the ring center toward the top edge and need 6 mm clearance beyond that (42.2.2.1 p274). 30 mm above the center is Y 49.93, which is 3.39 below the plateau outer boundary (D). So keep the case back flat out to at least 30 mm radius, and keep any raised camera guard above Y 49.93.
+
+### 16.8 Not found in either source
+
+- Ring segment count, segment shape, and segment joint gaps for the CASE array.
+- Orientation magnet corner radii.
+- Tolerances on magnet thickness (0.55), ring diameters (beyond the 0.05 control frame), and orientation magnet length and width (given only as basic ordinates with reference sizes).
+- A minimum for the outer cover over the magnet (only "0.85MM MAXIMUM").
+- Adhesive thickness, pocket clearance, or retention method for the case array.
+- The words "toward the bottom" or any stated direction for the orientation magnet (derived in 16.2).
+- Any rule or number for a magnet-free case or for a steel or ferrous attach ring.
+- Any NFC antenna location or numeric NFC or compass keepout distance.
+- The Section C-C and Section D-D cut lines on Fig 42-2 (only datum flags B and C are drawn).

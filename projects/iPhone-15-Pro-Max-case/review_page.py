@@ -43,6 +43,12 @@ guard = [
     ("render-assembly-back", "From the back. Camera top-left seen from the back, side button on the same side, Action and volume opposite: as on the phone."),
     ("render-ring-print", "The guard ring as it prints: glue face on the bed, bevel up, no overhangs at all."),
 ]
+magsafe = [
+    ("section-magsafe", "MagSafe pocket in the phone side of the back, to Apple's case-array geometry: a 54.10 / 46.00 ring centred on the phone's centre, and the clocking magnet "
+     "6.00 x 19.31 below it toward the bottom edge. The pocket is 0.8 mm deep with 0.25 mm clearance all round, so pieces up to about 0.7 mm thick sit below the floor's surface, "
+     "off the phone's glass; the phone holds them in. 0.8 mm (4 layers) of back is left behind them. The blue pieces are Apple's nominal sizes, NOT Brian's measured parts yet."),
+    ("plan-magsafe", "Plan view, looking into the empty case from the screen side. The pocket clears the camera guard by 5.7 mm."),
+]
 whole = [("render-assembly-phone", "Case, ring and the phone proxy built from Apple's drawing (grey in the viewer).")]
 
 html = f"""<!doctype html>
@@ -75,6 +81,7 @@ html = f"""<!doctype html>
 </div>
 <h2>Fit and hold</h2>{figs(fit)}
 <h2>Camera guard</h2>{figs(guard)}
+<h2>MagSafe pocket</h2>{figs(magsafe)}
 <h2>Whole assembly</h2>{figs(whole)}
 <h2>Print</h2>
 <ul>
