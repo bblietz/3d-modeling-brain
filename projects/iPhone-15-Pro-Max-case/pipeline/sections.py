@@ -1,7 +1,7 @@
-"""Section close-ups of the case with the phone docked and the guard ring glued on, cut from the real exported meshes.
+"""Section close-ups of the case with the phone docked and the guard ring snapped in, cut from the real exported meshes.
 
 Usage:  .venv/bin/python projects/iPhone-15-Pro-Max-case/pipeline/sections.py
-Reads iphone-15-pro-max-case.stl and build/{phone-proxy,ring-as-glued,magsafe-pieces}.stl; writes images/section-*.png.
+Reads iphone-15-pro-max-case.stl and build/{phone-proxy,ring-seated,magsafe-pieces}.stl; writes images/section-*.png.
 """
 import os
 
@@ -19,8 +19,8 @@ PROJECT = os.path.dirname(HERE)
 
 PH_W, PH_L, BACK_T, PH_T = 76.73, 159.86, 1.6, 8.25
 ZG = BACK_T + PH_T
-PARTS = [("case", f"{PROJECT}/iphone-15-pro-max-case.stl", "#2f6f4f"),
-         ("guard ring", f"{PROJECT}/build/ring-as-glued.stl", "#c9772b"),
+PARTS = [("case (TPU 95A HF)", f"{PROJECT}/iphone-15-pro-max-case.stl", "#2f6f4f"),
+         ("guard ring (PETG)", f"{PROJECT}/build/ring-seated.stl", "#c9772b"),
          ("MagSafe ring 0.4 thick + alignment piece", f"{PROJECT}/build/magsafe-pieces.stl", "#3b6ea8"),
          ("phone (Apple drawing)", f"{PROJECT}/build/phone-proxy.stl", "#b9bec5")]
 MESHES = [(n, trimesh.load(p), c) for n, p, c in PARTS]
@@ -95,11 +95,25 @@ if __name__ == "__main__":
                   ((xw - 1.3, 8.6), (xw + 0.9, 10.6), "45 degree flare top and bottom:\nfinger room, and only the inner 0.75 mm of the roof is a bridge")])
     xs = PH_W / 2 - 32.16                        # the plane through the flash, camera 3 and the rear sensor
     yf, ys = PH_L / 2 - 10.22, PH_L / 2 - 38.22
-    figure("section-camera", "Camera guard, cut through the flash, camera 3 and the rear sensor (guard ring glued on)", 0, xs, (26, 84), (-5.2, 11.6), size=(14, 5.5),
+    figure("section-camera", "Camera guard, cut through the flash, camera 3 and the rear sensor (guard ring snapped in)", 0, xs, (26, 84), (-5.2, 11.6), size=(14, 5.5),
            lines=cone_lines(yf, 5.95, 4.11, 4.915, 5.3, "flash outer keepout cone (Apple)", "#d62728")
            + cone_lines(ys, 7.31, 2.05, 0.850, 5.3, "rear sensor keepout cone (Apple)", "#1f77b4")
            + [((26, BACK_T - 5.0 - 0.0, 84, BACK_T - 5.0), "#555555", "table, case lying on its back")],
            notes=[((PH_L / 2 - 23.79, BACK_T - 4.07), (44, -1.0), "lens glass 4.07 above the back glass:\n0.93 mm off the table (Apple: 0.85 min)")])
+    xm = PH_W / 2 - (1.04 + 45.22) / 2           # the middle of the camera cutout: square to its top and bottom edges, between the lenses
+    y0 = PH_L / 2 - 46.54                        # the base of the camera's glass ramp, bottom side; insets run toward +y from here
+    figure("section-snap", "The snap, bottom edge of the camera cutout, ring seated and phone docked (cut at mid width of the camera)", 0, xm, (y0 - 5.2, y0 + 3.0), (-3.7, 2.5), size=(12.5, 8.5),
+           notes=[((y0 - 0.62, 1.38), (y0 - 5.0, 2.15), "the groove's 45 degree roof covers the barb:\nfrom inside the case, a plain square-edged hole"),
+                  ((y0 - 0.45, 1.12), (y0 + 0.2, 2.15), "45 degree lead-in"),
+                  ((y0 + 1.2, 0.95), (y0 + 1.3, 1.75), "camera glass ramp (straight proxy;\nthe real ramp is concave and sits lower)"),
+                  ((y0 - 0.68, 0.80), (y0 - 5.0, -0.75), "barb's holding face: flat, square to the pull, 0.40 mm over the flap.\nPulled out, it lands on the flap after 0.2 mm"),
+                  ((y0 - 0.70, 0.30), (y0 - 5.0, -1.65), "the flap: 0.6 mm of back left under the groove. It stretches over\nthe barb on the way in, then closes behind it and sits captive\nin the ring's own groove, between the rim's land and the barb"),
+                  ((y0 - 0.70, 0.0), (y0 - 5.0, -2.75), "rim's land, on the outside of the back:\nthe stop when the ring is pushed toward the phone"),
+                  ((y0 + 2.2, -2.2), (y0 + 1.0, -3.4), "rim: 1.5 mm bevel inside, as before")])
+    y1 = PH_L / 2 - 1.04                         # the same, top side: the cutout runs 0.64 mm from the phone's top edge, so the groove sits in the root of the top wall
+    figure("section-snap-top", "The snap, top edge of the camera cutout, by the case's top wall", 0, xm, (y1 - 3.4, y1 + 3.0), (-3.7, 4.2), size=(10, 11),
+           notes=[((y1 + 0.62, 0.30), (y1 + 1.25, -1.6), "same flap, barb and groove;\nhere the groove is cut into\nthe root of the top wall"),
+                  ((y1 + 1.9, 2.6), (y1 + 0.2, 3.6), "top wall of the case, 1.5 mm")])
     yb = -(PH_L / 2)
     figure("section-usb", "USB-C window, cut on the centreline (x = 0)", 0, 0.0, (yb - 2.6, yb + 5.0), (-0.4, 11.4),
            lines=[((yb - 2.6, 5.725 + 3.3, yb + 0.5, 5.725 + 3.3), "#d62728", "Apple connector keepout 12.45 x 6.60"), ((yb - 2.6, 5.725 - 3.3, yb + 0.5, 5.725 - 3.3), "#d62728", None)])

@@ -1,4 +1,4 @@
-"""iPhone 15 Pro Max slim case + glue-on camera guard ring, Bambu TPU 95A HF, X2D 0.4 nozzle. Canonical CAD source (build123d).
+"""iPhone 15 Pro Max slim case (Bambu TPU 95A HF) + snap-in camera guard ring (PETG), X2D 0.4 nozzle. Canonical CAD source (build123d).
 
 Every phone dimension is from Apple's dimensional drawing, transcribed in
 reference/iphone-15-pro-max-dimensions.md (A = printed on the drawing, V = measured from its vectors).
@@ -6,13 +6,14 @@ reference/iphone-15-pro-max-dimensions.md (A = printed on the drawing, V = measu
 Frame: looking at the screen, x to the right, y to the top of the phone, z toward the viewer.
 Origin at the product centre in x and y; z = 0 is the print bed = the outside of the case back.
 So the Action and volume buttons are at -x, the side button and the camera at +x.
-The guard ring is modelled where it is glued (rim from z = 0 down to -RING_H, plug up into the cutout) and exported just lifted onto the bed.
+The guard ring is modelled where it seats (rim from z = 0 down to -RING_H, plug up into the cutout) and exported just lifted onto the bed.
 
 Every rounded edge is a ruled loft through outlines generated at explicit insets (squircle()): OCCT's own 2D offset turns
 the 8-edge spline outline into 44 edges, which will not loft, and fillets on spline edges are slow and fragile.
 
 Run:  .venv/bin/python projects/iPhone-15-Pro-Max-case/iphone-15-pro-max-case.py      (SHOW=1 or SHOW=reset pushes to the viewer)
 """
+import copy
 import math
 import os
 
@@ -68,14 +69,26 @@ CAM_CLR = 0.4         # horizontal clearance between the case and the camera's g
 # "the guard should also be a bevel on the inside". On the third (the case floor sloped in over the glass ramp to carry it):
 # "the inside of the case, around the camera should not have a bevel, only the guard has a bevel".
 # So: the case has a plain square cutout at the base of the glass ramp, and the ring is slim, snug, plain, bevelled on the inside of
-# its rim only, with a square plug underneath that drops into the cutout (it locates the ring and carries the snug part over the ramp).
+# its rim only, with a plug underneath that goes into the cutout (it locates the ring and carries the snug part over the ramp).
 RING_TOP = 5.0        # ring top above the back glass: lens glass at 4.07, so 0.93 clear
 RING_GAP = 1.56       # the rim's inside wall stands this far outside the plateau's top flat
-RING_LAND = 0.5       # the rim overlaps the case's back by this all round the cutout: the stop that sets its height, and glue land
+RING_LAND = 0.5       # the rim overlaps the case's back by this all round the cutout: the stop that sets its height
 RING_CH = 1.5         # 45 degree bevel on the inside of the rim, all round
 RING_EDGE = 0.5       # 45 degree chamfer on the rim's outside top edge (the rim prints face down, so a chamfer, not a round)
-PLUG_H = 0.6          # the plug reaches this far into the 1.6 mm cutout (3 layers)
-PLUG_FIT = 0.15       # plug smaller than the cutout by this all round
+# Brian, 2026-09-20, on the glued TPU ring: "the guard should be petg and snap into place". The ring is rigid PETG, so the case does
+# the flexing: the plug carries a barb all round, the cutout's wall has a buried groove for it, and the 0.6 mm of back under the groove
+# (the flap) stretches over the barb and closes behind it, trapped between the barb and the rim. From inside the case the cutout still
+# reads as a plain square-edged hole (no bevel in sight: the groove's roof covers the barb).
+SNAP_WEB = 0.6        # the flap: the back left under the groove, 3 layers; it is what the barb holds
+SNAP_FIT = 0.05       # the plug's neck is smaller than the cutout by this all round (TPU holes print small: a light squeeze, no rattle)
+SNAP_BARB = 0.45      # the barb stands this far out of the neck, so it hooks 0.40 over the flap
+SNAP_ROOT = 0.2       # square step at the barb's root, one layer tall. The ring prints rim down, so the barb's holding face is an
+                      # overhang: it is built as two steps on two layers, 0.2 then 0.25, so each wall line is half carried by the layer
+                      # below and PETG prints it without support (the slicer cuts at mid layer: a 45 degree root would print as 0.10 then 0.35)
+SNAP_ROOT_CLR = 0.05  # the root step starts this far above the flap (in the print it sits on the flap: the layer starts at the flap's top)
+SNAP_TIP = 0.2        # vertical land at the barb's tip; above it a 45 degree lead-in up to the plug's top
+SNAP_CLR = 0.10       # the groove's back wall stands this far off the barb's tip, and its 45 degree roof this far above the lead-in
+PLUG_H = 1.2          # the plug reaches this far into the 1.6 mm back (6 layers)
 
 # ---- MagSafe pocket ----
 # Brian, 2026-09-20: "add a magsafe ring so I can insert the metal pieces". Apple's case array (ADG R30 Fig 42-2 to 42-4, note section 16):
@@ -94,7 +107,11 @@ ZMID = BACK_T + BTN_Z              # centreline of every button and bottom port
 RING_H = RING_TOP - BACK_T
 RAMP_W = CAM_TOP_XR[0] - CAM_XR[0]                                   # 3.66: the glass ramp between the plateau's outer boundary and its top flat
 RING_IN = RAMP_W - RING_GAP                                          # the rim's inside wall, in from the plateau's outer boundary
-PLUG_IN = (BACK_T - PLUG_H) * RAMP_W / CAM_H - CAM_CLR               # the plug's inside wall: CAM_CLR off the ramp at the plug's lower face
+NECK = -CAM_CLR + SNAP_FIT                                           # the plug's neck, the barb's tip and the groove's back wall,
+BARB = NECK - SNAP_BARB                                              # all as insets from the plateau's outer boundary (negative = outward)
+GROOVE = BARB - SNAP_CLR
+Z_BARB = SNAP_WEB + SNAP_ROOT                                        # the barb's main holding face, one layer above the flap's top
+Z_TIP = Z_BARB + SNAP_TIP                                            # top of the barb's vertical land, where the lead-in starts
 N_ARC = 6                          # sections per quarter round
 
 
@@ -212,8 +229,12 @@ cavity = body([(BACK_T + FLOOR_R * c, -CLR + FLOOR_R * (1 - s)) for s, c in quar
 screen = body([(Z1 - 0.5, LIP_IN)] + [(CASE_H - LIP_R + LIP_R * s, LIP_IN - LIP_R * c) for s, c in quarter()] + [(CASE_H + 1, LIP_IN - LIP_R - 1)])
 shell = outside - cavity - screen
 
-# ---- camera opening: a plain square-edged cutout, CAM_CLR outside the base of the glass ramp ----
-cam_open = stack(*CAM_SIZE, CAM_CORNER, [(-1, -CAM_CLR), (BACK_T + 1, -CAM_CLR)], CAM_AT)
+# ---- camera opening: a plain square-edged cutout, CAM_CLR outside the base of the glass ramp, with the barb's groove buried in its wall ----
+# the groove: flat floor on top of the flap, vertical back wall, 45 degree roof (the case prints back down, so the roof must not be flat)
+_roof = Z_TIP                                          # with equal clearances the roof leaves the back wall level with the top of the barb's land
+cam_open = (stack(*CAM_SIZE, CAM_CORNER, [(-1, -CAM_CLR), (BACK_T + 1, -CAM_CLR)], CAM_AT)
+            + stack(*CAM_SIZE, CAM_CORNER, [(SNAP_WEB, GROOVE), (_roof, GROOVE), (_roof + 0.8, GROOVE + 0.8)], CAM_AT))
+assert _roof + (-CAM_CLR - GROOVE) <= BACK_T - 0.1 + 1e-9, "the groove's roof breaks through the floor: the cutout would not read as a plain hole"
 
 
 # ---- windows ----
@@ -291,14 +312,22 @@ KEEPOUTS = {
 }
 RING_MAY_CROSS = ("flash outer", "rear sensor")     # Brian's call: a snug plain ring cannot clear these two (no cutaways wanted)
 
-# ---- guard ring (as glued: rim from z = 0 down to -RING_H, plug from 0 up into the cutout) ----
+# ---- guard ring (as seated: rim from z = 0 down to -RING_H, plug from 0 up into the cutout) ----
+def ramp_in(z):
+    """The plug's inside wall at height z: CAM_CLR (horizontal) off the camera's glass ramp, straight-ramp proxy."""
+    return (BACK_T - z) * RAMP_W / CAM_H - CAM_CLR
+
+
 _out = -(CAM_CLR + RING_LAND)
 rim = stack(*CAM_SIZE, CAM_CORNER, [(-RING_H, _out + RING_EDGE), (-RING_H + RING_EDGE, _out), (0.0, _out)], CAM_AT)
-plug = stack(*CAM_SIZE, CAM_CORNER, [(0.0, -CAM_CLR + PLUG_FIT), (PLUG_H, -CAM_CLR + PLUG_FIT)], CAM_AT)
+neck = (stack(*CAM_SIZE, CAM_CORNER, [(0.0, NECK), (PLUG_H, NECK)], CAM_AT)
+        + stack(*CAM_SIZE, CAM_CORNER, [(SNAP_WEB + SNAP_ROOT_CLR, NECK - SNAP_ROOT), (PLUG_H, NECK - SNAP_ROOT)], CAM_AT))
+barb = stack(*CAM_SIZE, CAM_CORNER, [(Z_BARB, BARB), (Z_TIP, BARB), (PLUG_H, BARB + PLUG_H - Z_TIP)], CAM_AT)
 rim_bore = stack(*CAM_SIZE, CAM_CORNER, [(-RING_H - 1, RING_IN - RING_CH - 1), (-RING_H + RING_CH, RING_IN), (0.0, RING_IN)], CAM_AT)
-plug_bore = stack(*CAM_SIZE, CAM_CORNER, [(0.0, PLUG_IN), (PLUG_H + 1, PLUG_IN)], CAM_AT)
-ring = (rim - rim_bore) + (plug - plug_bore)
-ring_print = Pos(0, 0, RING_H) * ring              # prints as it is glued: rim face on the bed, plug on top; the only overhangs are the two 45s
+_knee = BACK_T - (RING_IN + CAM_CLR) * CAM_H / RAMP_W            # below this the rim's own bore is the tighter limit; above it the plug's inside follows the ramp
+plug_bore = stack(*CAM_SIZE, CAM_CORNER, [(0.0, RING_IN), (_knee, RING_IN), (PLUG_H + 1, ramp_in(PLUG_H + 1))], CAM_AT)
+ring = (rim - rim_bore) + (neck + barb - plug_bore)
+ring_print = Pos(0, 0, RING_H) * ring              # prints as it seats: rim face on the bed, plug on top; overhangs: the rim's two 45s and the barb's two steps
 
 
 # ---- checks ----
@@ -319,14 +348,36 @@ if __name__ == "__main__":
     # the phone, buttons and camera included, touches nothing
     report["phone x case mm3"], report["phone x ring mm3"] = round(vol(phone & case), 3), round(vol(phone & ring), 3)
     assert report["phone x case mm3"] < 0.01 and report["phone x ring mm3"] < 0.01, report
-    # measured on the solids: the snug ring and the floor's sloped edge both stay off the camera's glass (straight-ramp proxy)
+    # measured on the solids: the snug ring and the edge of the cutout both stay off the camera's glass (straight-ramp proxy)
     report["ring to phone, nearest"] = round(ring.distance_to(phone), 3)
     report["case floor to camera ramp, nearest"] = round((case & Pos(*CAM_AT, 0) * Box(60, 60, 2 * BACK_T - 0.02)).distance_to(camera()), 3)
     assert report["ring to phone, nearest"] >= 0.15 and report["case floor to camera ramp, nearest"] >= 0.15, report
-    report["ring: rim inside wall to the camera's raised flat / rim width / plug wall x height"] = [RING_GAP, round(RING_IN + CAM_CLR + RING_LAND, 2), [round(PLUG_IN + CAM_CLR - PLUG_FIT, 2), PLUG_H]]
-    assert PLUG_IN + CAM_CLR - PLUG_FIT >= 0.84, "the plug's wall is under two 0.4 nozzle lines"
-    # the ring sits on the back; the case clears every Apple keepout cone, the ring every cone but the two Brian accepted
+    _nose = ramp_in(PLUG_H) - (BARB + PLUG_H - Z_TIP)
+    report["ring: rim inside wall to the camera's raised flat / rim width / plug height / plug top width"] = [RING_GAP, round(RING_IN + CAM_CLR + RING_LAND, 2), PLUG_H, round(_nose, 2)]
+    assert _nose >= 0.84, "the plug's top is under two 0.4 nozzle lines"
+    # the snap, on the real solids. Seated, the ring touches nothing.
     assert vol(ring & case) < 0.01, vol(ring & case)
+    report["snap: barb hooks over the flap / on the root step + on the main face / flap thickness x length"] = [
+        round(-CAM_CLR - BARB, 2), [round(SNAP_ROOT - SNAP_FIT, 2), round(SNAP_BARB - SNAP_ROOT, 2)], [SNAP_WEB, round(-CAM_CLR - GROOVE, 2)]]
+    def meets(dz):
+        """(mm3, top z) of the case in the way of the ring moved dz along z. On copies: where faces nearly coincide OCCT's
+        booleans grow the tolerances of their inputs, and every later boolean on the same solids then returns rubbish."""
+        hit = (Pos(0, 0, dz) * copy.deepcopy(ring)) & copy.deepcopy(case)
+        return (round(vol(hit), 1), round(hit.bounding_box().max.Z, 3)) if vol(hit) else (0.0, None)
+
+    # hold: both holding faces are flat and square to the pull. Pulled straight out of the back, the root step lands on the flap at once
+    # and the main face after SNAP_ROOT of travel; the flap is captive in the ring's own groove, between the rim's land and the barb.
+    # Pushed toward the phone, the rim's land is already on the back.
+    _pull, _push = {d: meets(-d)[0] for d in (0.03, 0.3, 0.5)}, meets(0.1)[0]
+    report["snap: mm3 of case in the way of the ring pulled out by 0.03 / 0.3 / 0.5, and pushed in by 0.1"] = [*_pull.values(), _push]
+    assert _pull[0.03] < 0.5 and _pull[0.3] > 5 and _pull[0.5] > _pull[0.3] + 5 and _push > 5, (_pull, _push)
+    # way in: on its way into the cutout the ring meets the flap and nothing above it (the flap is the one part made to give).
+    # Nothing of the ring reaches past the groove's back wall, so whatever it meets below the flap's top face is the flap.
+    _way_in = {d: meets(-d) for d in (1.15, 0.95, 0.75, 0.55, 0.35, 0.15)}
+    assert all(top is None or top <= SNAP_WEB + 1e-3 for _, top in _way_in.values()), _way_in
+    report["snap: mm3 of flap the ring displaces on its way in, by mm short of seated"] = {d: v for d, (v, _) in _way_in.items()}
+    assert 15 < max(v for v, _ in _way_in.values()) < 40 and _way_in[1.15][0] < 3 and _way_in[0.15][0] < 3, _way_in
+    # the case clears every Apple keepout cone, the ring every cone but the two Brian accepted
     for name, k in KEEPOUTS.items():
         assert vol(k & case) < 0.001, f"{name} keepout cone is blocked by the case: {vol(k & case):.3f} mm3"
         if name in RING_MAY_CROSS:
@@ -356,7 +407,7 @@ if __name__ == "__main__":
         export_stl(shape, f"{BUILD}/{name}.stl", tolerance=0.01, angular_tolerance=0.2)
     export_stl(case, f"{HERE}/iphone-15-pro-max-case.stl", tolerance=0.01, angular_tolerance=0.2)
     export_stl(ring_print, f"{HERE}/camera-guard-ring.stl", tolerance=0.01, angular_tolerance=0.2)
-    export_stl(ring, f"{BUILD}/ring-as-glued.stl", tolerance=0.01, angular_tolerance=0.2)
+    export_stl(ring, f"{BUILD}/ring-seated.stl", tolerance=0.01, angular_tolerance=0.2)
 
     import trimesh
     for f in ("iphone-15-pro-max-case.stl", "camera-guard-ring.stl"):
@@ -364,7 +415,7 @@ if __name__ == "__main__":
         assert m.is_watertight and len(m.split()) == 1, f"{f}: watertight {m.is_watertight}, bodies {len(m.split())}"
         report[f] = f"{len(m.faces)} triangles, watertight"
         # printability: faces off the bed that face down more than 47 degrees from vertical (45 plus facet margin).
-        # Flat ones are the window roofs (bridges); anything else steep is the rounded ends of the windows.
+        # Flat ones are the window roofs (bridges) and, on the ring, the barb's two holding steps (0.2 and 0.25 wide); anything else steep is the rounded ends of the windows.
         down = (m.face_normals[:, 2] < -math.sin(math.radians(47))) & (m.triangles_center[:, 2] > 0.01)
         flat = down & (m.face_normals[:, 2] < -0.999)
         roofs = {}
@@ -377,6 +428,6 @@ if __name__ == "__main__":
 
     if os.environ.get("SHOW"):
         from ocp_vscode import Camera, show
-        show(case, ring, mag_pieces, phone, names=["case", "guard ring (as glued)", "MagSafe ring 0.4 thick + alignment piece", "phone (Apple drawing)"],
+        show(case, ring, mag_pieces, phone, names=["case (TPU)", "guard ring (PETG, snapped in)", "MagSafe ring 0.4 thick + alignment piece", "phone (Apple drawing)"],
              colors=["#2f6f4f", "#c9772b", "#3b6ea8", "#9aa0a6"],
              reset_camera=Camera.RESET if os.environ["SHOW"] == "reset" else Camera.KEEP)

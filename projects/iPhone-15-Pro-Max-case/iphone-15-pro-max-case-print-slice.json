@@ -1,21 +1,39 @@
 {
- "minutes": 51,
- "grams": 29.3,
- "grams_if_solid": 29.5,
- "layers": 54,
- "plate_bbox": [
-  64.0,
-  192.0,
-  46.5,
-  209.5
- ],
- "feature_mm": {
-  "Internal solid infill": 4412.6,
-  "Inner wall": 2232.1,
-  "Outer wall": 1571.1,
-  "Top surface": 955.2,
-  "Bottom surface": 806.4,
-  "Overhang wall": 6.7,
-  "Gap infill": 0.9
- }
+ "plate 1": {
+  "part": "iPhone 15 Pro Max case (TPU 95A HF)",
+  "filament": "Bambu TPU 95A HF @BBL X2D 0.4 nozzle",
+  "nozzle_C": 230,
+  "bed_C": 35,
+  "minutes": 54,
+  "grams": 27.53,
+  "grams_if_solid": 27.63,
+  "layers": 54,
+  "feature_mm": {
+   "Internal solid infill": 4399.4,
+   "Inner wall": 1810.1,
+   "Outer wall": 1377.2,
+   "Top surface": 945.1,
+   "Bottom surface": 806.4,
+   "Skirt": 36.6,
+   "Overhang wall": 6.7,
+   "Gap infill": 0.8
+  }
+ },
+ "plate 2": {
+  "part": "Camera guard ring (PETG, rim down, barb up)",
+  "filament": "Bambu PETG Basic @BBL X2D 0.4 nozzle",
+  "nozzle_C": 250,
+  "bed_C": 70,
+  "minutes": 11,
+  "grams": 2.03,
+  "grams_if_solid": 2.03,
+  "layers": 23,
+  "feature_mm": {
+   "Inner wall": 445.8,
+   "Outer wall": 217.1,
+   "Skirt": 13.1
+  }
+ },
+ "minutes": 65,
+ "grams": 29.6
 }

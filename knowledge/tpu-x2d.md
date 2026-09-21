@@ -33,7 +33,7 @@ First TPU work in the vault: `projects/iPhone-15-Pro-Max-case/` (2026-09-20). Pr
 
 ## Design rules used (to be confirmed by the print)
 
-- No supports in TPU if the design can avoid them: supports fuse, and the supported face comes out rough. A feature that must stand proud of the bed face (a phone case's camera guard) is better printed as a second flat part and bonded with flexible CA.
+- No supports in TPU if the design can avoid them: supports fuse, and the supported face comes out rough. A feature that must stand proud of the bed face (a phone case's camera guard) is better printed as a second flat part: bonded with flexible CA if it is TPU, or, if it is a rigid material, snapped in with the TPU doing the flexing (barb on the rigid part, groove buried in the TPU's thickness, a 0.6 mm flap of TPU as the spring; [[iphone-15-pro-max-case]], result pending).
 - Tall thin TPU prints are out: a 160 mm tall channel of 1.5 mm walls deflects about 15 mm under 0.5 N of nozzle drag (E about 50 MPa).
 - Window roofs in a vertical TPU wall: keep the wall lines running along the bridge, flare the outer part of the roof at 45 degrees so only the inner 0.75 mm is a true bridge. Longest tried: 22 mm (result pending).
 - Cavity for a gripping fit: phone + 0.10 mm per side (result pending).
