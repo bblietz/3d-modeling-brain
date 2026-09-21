@@ -14,9 +14,10 @@ Project: `projects/iPhone-15-Pro-Max-case/` (brief, source, 3MF). Materials note
 
 - iPhone 15 Pro Max, 1.5 mm walls, open cutout windows (no button covers), 0.4 nozzle, Bambu TPU 95A HF.
 - Camera guard required; two pieces: ring printed flat and bonded with flexible CA (Brian chose this over printing screen-side down on supports).
-- Guard SNUG around the raised camera island, not around Apple's plateau outer boundary; SLIM (2.5 mm), PLAIN (no cutaways), with a 1.5 mm 45 degree bevel on the inside.
+- Guard SNUG around the raised camera island, not around Apple's plateau outer boundary; SLIM (rim 3.0 mm), PLAIN (no cutaways), with a 1.5 mm 45 degree bevel on the inside of the rim.
+- NO bevel inside the case around the camera: plain square cutout; the ring carries a square plug that drops into it.
 
-- MagSafe pocket in the phone side of the back, to Apple's case-array geometry until Brian's own pieces are measured.
+- MagSafe pocket in the phone side of the back for Brian's standard 0.4 mm ring; locates by the 46 ID, takes 54 to 56.5 OD.
 
 ## What worked
 
@@ -33,6 +34,7 @@ Project: `projects/iPhone-15-Pro-Max-case/` (brief, source, 3MF). Materials note
 - **A spline through sparse profile points overshoots.** Apple's edge profile has a long shallow last span; the spline dipped past the glass plane. Added three eased points on that span and asserted monotonic and non-negative.
 - **The first guard ring was sized to the wrong feature.** I used Apple's "plateau outer boundary" (the base of the glass ramp). Brian: "the guard around it is too big. It should be snug around the camera." People see the raised island, not the ramp's base. Rule: fit guards and openings to the feature the eye reads; use the drawing's outer keepouts only as clearance limits.
 - **The second ring over-served the guideline and under-served the eye.** Snug but 5.1 mm wide (flush to the case edge for glue land and alignment), with Apple's flash and LiDAR cones cut out as dished cutaways. Brian: "the ring is too thick and there are cutouts in the top right and bottom right. Not good", then "the guard should also be a bevel on the inside". Third ring: 2.5 mm, plain, bevelled, its inside wall flush with the camera opening (which gives the alignment and the glue land back without the width). Rule: on a cosmetic part, state a guideline tradeoff in one line and let Brian choose BEFORE building the compliant-but-ugly version; and show the viewer early, all three corrections came within minutes of him seeing the model.
+- **The third ring hid its cost inside the case.** To carry a slim snug ring I sloped the case floor in over the glass ramp, down to a one-layer feather edge. Brian: "the inside of the case, around the camera should not have a bevel, only the guard has a bevel". Fourth ring: plain square cutout in the case, and a square plug under the ring's rim that drops into it. Better in every way: no feather edge, the ring locates itself for gluing, it bonds in shear on the plug's wall, and it prints as glued (rim face down, plug up) with only two 45 degree overhangs. Rule: when a mating part needs relief around an awkward feature, put the relief on the small add-on part, not on the main body.
 - **A cone cut alone left a 0.45 mm tongue** under the rear-sensor cone's base (the cone starts at the plateau's height with a 7.31 radius). Carried the cutaway straight down through the glue face. Found only in the section render.
 - **`pkill -f <script>` killed its own shell** (the pattern matched the command line running it). Use a PID, or `pkill -f` from a command line that does not contain the pattern.
 
@@ -40,12 +42,12 @@ Project: `projects/iPhone-15-Pro-Max-case/` (brief, source, 3MF). Materials note
 
 - **X2D machine presets keep ALL their G-code in `include` templates** (`Bambu Lab X2D 0.4 nozzle template machine_start_gcode.json` and four more), and X2D filament presets `include` the six-variant filament template. The vault's older `flatten()` (Garmin, NACS, Leader-cards, NACS-organizer `make_plate.py`) follows only `inherits`, so their verification slices ran with a generic fallback start G-code (prime lines, M109 S205) and under-report time (7 min 39 s vs 12 min on a small probe). The shipped 3MFs were fine because Studio's GUI re-resolves the system preset on open. `projects/iPhone-15-Pro-Max-case/pipeline/make_print_3mf.py` merges includes: includes first, then the preset's own keys, base of the chain first. Assert `"X2D start gcode" in gcode`.
 - **The CLI does not re-centre meshes on `--export-3mf`**: a part's place on the bed is item transform + the STL's own bounds. Centring by the item transforms alone put the plate 28 mm off in y. The slicer's output does re-centre, so its transforms are the real part centres (useful for a check).
-- **Bambu keeps the "Sparse infill" label at 100% density.** Check solidity by weight: sliced grams vs mesh volume x `filament_density` (got 29.4 vs 29.7 g).
+- **Bambu keeps the "Sparse infill" label at 100% density.** Check solidity by weight: sliced grams vs mesh volume x `filament_density` (got 29.3 vs 29.5 g).
 - Two TPU parts on one plate, `--arrange 1`, land 2 to 3 mm apart: short travel between them.
 
 ## Settings used (unvalidated until printed)
 
-X2D 0.4 nozzle, `0.20mm Standard @BBL X2D`, `Bambu TPU 95A HF @BBL X2D 0.4 nozzle` (230 C, textured plate 35 C, 12 mm3/s), Textured PEI, Arachne, 4 wall loops, 100% zig-zag infill, avoid crossing walls. 53 min, 29.4 g, 54 layers.
+X2D 0.4 nozzle, `0.20mm Standard @BBL X2D`, `Bambu TPU 95A HF @BBL X2D 0.4 nozzle` (230 C, textured plate 35 C, 12 mm3/s), Textured PEI, Arachne, 4 wall loops, 100% zig-zag infill, avoid crossing walls. 51 min, 29.3 g, 54 layers.
 
 ## Still to measure on the first print
 
