@@ -10,7 +10,7 @@
 - [Keep tools in the vault](project-keep-tools-in-vault.md) - scratchpad is wiped on restarts; pipeline tools and monitors belong in projects/<Name>/pipeline or scripts/
 - [Raised letters recipe](feedback-raised-letters-recipe.md) - VALIDATED by the 14-tag batch: one-wall fill-core modifier + object key + parity check; dead ends not to retry; read knowledge/lettering-x2d.md before any lettering job
 - [Vault GitHub repo](reference-vault-github-repo.md) - private bblietz/3d-modeling-brain, remote origin/main; commit and push after milestones; never commit the printer access code
-- [Garmin helm panel](project-garmin-helm-panel.md) - 1/2 in Starboard panel; 943xsv router template printed and FITS 2026-09-11; awaiting opening measurements then the rout
+- [Garmin helm panel](project-garmin-helm-panel.md) - switched 2026-09-26 to PRINTING four ASA tiles at 3/8 in; 4-plate 3MF verified; router template fits; outline still a guess
 - [NACS wall holder](project-nacs-wall-holder.md) - Tesla Wall Connector dock, DONE 2026-09-19: printed, mounted, working great
 - [Model dispatch](feedback-model-dispatch.md) - say which model fits each task, flag when Fable 5.1 beats the active model, never switch silently
 - [Speaker cab system](project-speaker-cab-system.md) - MaximoCabs guitar cab capability; quote wizard live; 2 orders done; baffles are 1/2 in 9-ply void-free; cab-share auto-publishes each preview

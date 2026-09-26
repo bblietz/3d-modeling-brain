@@ -1,9 +1,9 @@
 ---
 title: Garmin 943xsv helm panel
 type: project-brief
-status: template PRINTED and fits (2026-09-11). 1/2 in Starboard decided. Awaiting Brian's opening measurements, then the rout
+status: PRINTING IN ASA at 3/8 in, set up 2026-09-26. Four-plate 3MF rebuilt and verified. Template printed and fits. Panel OUTLINE still provisional, pending Brian's measurements
 created: 2026-09-08
-tags: [boat, helm, garmin, starboard, router-template]
+tags: [boat, helm, garmin, starboard, asa, router-template]
 ---
 
 # Garmin GPSMAP 943xsv helm panel
@@ -196,7 +196,7 @@ Brian asked for the panel printed rather than routed, which means splitting it t
 
 | Item | Value |
 |---|---|
-| Tiles | 4, each 234.95 x 146.05 x 12.7 mm |
+| Tiles | 4, each 234.95 x 146.05 x 9.525 mm |
 | Bed margin per tile | 10.5 mm in X, 55 mm in Y |
 | Keys | 10 identical bowties, 36 x 20 mm, 12 mm waist, 5.8 mm thick |
 | Keys per seam | 2 in the top web, 2 in the bottom, 3 in each side web |
@@ -404,3 +404,86 @@ print presets was actually used. Worth recording if the template is ever
 reprinted.
 
 Next: opening measurements and photos, then rout the panel.
+
+## Printing in ASA, set up 2026-09-26
+
+Brian chose to print the panel in ASA rather than rout Starboard. Both paths
+stay in the repo; the printed one is now the active build.
+
+> [!warning] The outline is still a guess
+> `PANEL_W` and `PANEL_H` are Brian's 2026-09-09 estimate of 18.5 x 11.5 in.
+> The router template was safe to print against that estimate because it only
+> locates the cutout and never touched the outline. A printed PANEL bakes the
+> estimate in, and this one is 8 hours and 376 g of ASA. Measure the opening
+> before starting, or accept that a wrong outline is a full reprint.
+
+**Thickness is 3/8 in (9.525 mm), not 1/2 in.** The 1/2 in was a Starboard
+allowance: HDPE is softer than printed ASA and creeps, so it needed one size up
+to reach the same deflection. Printed ASA reaches it at 3/8 in. Carrying 1/2 in
+across to the print would have cost about a third more time and filament for
+stiffness the analysis says is not needed.
+
+`helm-panel.py` now derives thickness from the build instead of hard-coding one,
+so neither path can silently inherit the other's number:
+
+| Build | Thickness | Pilot depth | Command |
+|---|---|---|---|
+| Routed Starboard, one piece | 12.7 mm | 10 mm | `helm-panel.py` |
+| Printed ASA, four tiles | 9.525 mm | 7 mm | `TILES=1 helm-panel.py` |
+
+`TILES=1` no longer overwrites `helm-panel.stl` or `helm-panel.step`; the routed
+one-piece owns those. Regenerating the tiles reproduced all five print meshes
+byte for byte against the 2026-09-09 versions, so the geometry Studio already
+accepted is unchanged.
+
+### Deflection with real infill
+
+The 0.21 mm in the thickness study assumed a solid section. The slicer fills at
+15 percent, so the panel is really two roughly 1.2 mm solid skins over a sparse
+core. Second moment drops to about 64 percent of solid, putting deflection near
+0.33 mm under the 1.6 kg unit plus a 30 N screen press. Still imperceptible, and
+raising infill barely moves it, because the skins at the extremes carry the
+bending. Default infill is correct here; do not raise it.
+
+### Files, rebuilt and verified 2026-09-26
+
+| File | Contents | Time | Filament |
+|---|---|---|---|
+| `helm-panel-all-plates.3mf` | all four plates, print this one | 7 h 55 min | 376 g |
+| `helm-panel-tile-{TL,TR,BL,BR}.3mf` | one tile each, for reprints | about 1 h 50 min | 89 g |
+| `helm-panel-keys.3mf` | all ten bowtie keys | 30 min | 19 g |
+
+Verified on Bambu Studio 02.08.02.61: every plate slices for real, and Studio's
+own reader reports 1, 1, 1 and 11 objects across the four plates. That last
+check is the one that matters, because a mis-authored plate round trips cleanly
+and then renders blank in the GUI.
+
+### Before starting the print
+
+- **Install the 0.6 mm high-flow nozzle.** The files are built for it, and the
+  0.4 has been in since 2026-08-06 for the Sharks nametag. If Studio's machine
+  matches the installed nozzle but not the file it silently re-slices to that
+  profile, with no warning anywhere. See [[printer-x2d]].
+- Load black or charcoal ASA, dry. 376 g total, so one spool covers it easily.
+- Textured PEI at 100 C with a 5 mm outer brim, already set in the file. Large
+  flat ASA lifts at the corners without one.
+- Keep the chamber shut for the whole run. ASA warps and cracks in a draft.
+- Print plate 1 first and check its corners before committing the other three.
+  Finding a lift on the first tile costs 1 h 50 min; finding it on the fourth
+  costs the afternoon.
+
+### Finish
+
+Each tile prints front face up, so the visible face is a top surface. Leave
+ironing off. A satin ASA top reads as matte at the helm, while a glossy ironed
+face would throw sun glare straight at the seat. The textured plate molds its
+own matte texture into the back face, which nobody sees.
+
+### Assembly
+
+Lay the four tiles face down on a flat surface, drop the ten keys into the
+pockets from the back, and bond. ASA solvent welds with acetone, which gives a
+stronger joint than epoxy on this material. The keys align and carry the joint;
+the acetone fixes it.
+
+Print-pose render: `images/helm-panel-tile-TL-print-pose.png`.

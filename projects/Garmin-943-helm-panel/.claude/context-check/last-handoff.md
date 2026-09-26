@@ -1,31 +1,55 @@
-# Handoff: Garmin 943xsv helm panel, 2026-09-09 (revision C: Starboard chosen)
+# Handoff: Garmin 943xsv helm panel, 2026-09-26 (revision D: printing in ASA)
 
 ## State
-TEMPLATE PRINTED AND FITS (2026-09-11, Brian confirmed). Retrospective at knowledge/learnings/garmin-943-helm-panel.md.
+BUILD SWITCHED TO PRINTED ASA. Brian chose to print the panel rather than rout Starboard.
+Router template printed and FITS (2026-09-11, Brian confirmed), which validated the whole
+cutout chain. Retrospective at knowledge/learnings/garmin-943-helm-panel.md.
 
-Router template designed, verified, and exported. Nothing printed yet. The full panel is now modeled too, at Brian's provisional 18.5 x 11.5 in; he will send exact measurements and photos later.
+Print files rebuilt and re-verified 2026-09-26 on Bambu Studio 02.08.02.61. Every plate
+slices for real; Studio's own reader reports 1, 1, 1 and 11 objects across four plates.
 
-Files in `projects/Garmin-943-helm-panel/`: `brief.md` (spec, Garmin numbers, build results, print settings), `router-template.py` (build123d source with self-checks), `router-template.stl`, `router-template.3mf`, `images/router-template-4view.png`.
+Nothing of the panel is printed yet. The panel OUTLINE is still Brian's 18.5 x 11.5 in
+estimate.
+
+Files in `projects/Garmin-943-helm-panel/`: `brief.md`, `helm-panel.py`, `garmin_9x3.py`,
+`make_plate.py`, `make_multiplate.py`, `helm-panel-all-plates.3mf` (THE print file),
+five per-part 3MFs, tile and key STLs, `router-template.*`, `images/`.
 
 ## Decisions already locked
-- Black King Starboard panel, 3/8" unless the span exceeds 450 mm, replaces the hinged cover and is fixed in place.
-- Garmin flush mount, screws through the bezel edge into the HDPE. No printed bezel frame.
-- Panel outline and perimeter fastening come from the old cover. Out of scope.
-- One printed PLA router template, window exactly 222.4 x 139.0 mm, bearing-guided bit, 12 mm thick, 252.4 x 189.0 mm outside.
-- Drill guides 2.8 mm modeled with 6 x 6 mm counterbores, shifted 1.24 mm toward the unit's bottom as Garmin's template draws them (rows at +74.0 and -76.5 from the window center). TOP debossed on the counterbored face. Two optional 4 mm fixing holes on the vertical centerline, four V notches for registration.
-- Garmin's drawn cutout corners are R3.7, so a 1/4 in bit needs no corner squaring.
-- Vertical cutout placement decided by Brian at layout (`CUTOUT_DY` in helm-panel.py, currently 0).
-- Panel modeled at 469.9 x 292.1 x 12.7 mm, R12.7 corners, 1/8 in roundover on the outside face, blind 2.3 mm pilots. 1/2 in stock because the span exceeds the 450 mm rule.
+- DECIDED 2026-09-26: the panel is PRINTED IN ASA as four interlocking tiles. The routed
+  1/2 in Starboard one-piece stays in the repo as the alternative, not the plan.
+- ASA thickness is 3/8 in (9.525 mm), NOT the 1/2 in from the Starboard decision. 1/2 in
+  was an HDPE allowance for softness and creep; printed ASA reaches the same deflection at
+  3/8 in. helm-panel.py now derives thickness from the build so neither path inherits the
+  other's number, and TILES=1 no longer overwrites the one-piece STL/STEP.
+- Real deflection with 15 percent infill is about 0.33 mm, not the 0.21 mm solid-section
+  figure. Still imperceptible. Do NOT raise infill; the solid skins carry the bending.
+- Four tiles 234.95 x 146.05 x 9.525 mm, split at x=0 and y=0, joined by 10 loose bowtie
+  keys dropped in from the back. Integral dovetails cannot work on a 2x2 grid.
+- ASA, not PLA. Textured PEI 100 C, 0.6 nozzle, 0.30 mm layers, 5 mm outer brim, each tile
+  FRONT FACE UP. 7 h 55 min and 376 g across four plates.
+- Ironing stays OFF. Satin ASA reads matte at the helm; an ironed face would glare.
+- helm-panel-all-plates.3mf is THE print file. Two plates is impossible; two tiles fit only
+  as diagonal pairs at 248 x 247 with no brim room.
+- Studio's plate grid is two columns running in negative Y, not one row along X.
 - Garmin dimensions live in garmin_9x3.py, imported by both models. Do not re-inline them.
-- DECIDED 2026-09-09: the panel is ONE PIECE of 1/2 in black King Starboard, routed using the printed template. The printed path below is the kept alternative, not the plan.
-- Printed alternative (TILES=1): split into four 234.95 x 146.05 x 9.525 mm tiles (3/8 in, set 2026-09-09; 1/2 in was an HDPE-sheet rule that should not have carried over to printing) at x=0 and y=0, joined by 10 loose bowtie keys dropped in from the back (integral dovetails cannot work on a 2x2 grid).
-- ASA, not PLA. Textured PEI 100 C, 0.6 nozzle, 0.30 mm, 5 mm outer brim, each tile FRONT FACE UP. 7 h 54 min and 376 g total across four plates.
-- helm-panel-all-plates.3mf is THE print file: one project, four plates (three tiles, then tile BR plus all ten keys). Two plates is impossible; two tiles only fit as diagonal pairs at 248x247 with no brim room.
-- Studio's plate grid is two columns running in negative Y, not one row along X. Recorded in knowledge/printer-x2d.md.
-- make_plate.py builds the per-tile 3MFs and make_multiplate.py the combined one; it slices them via Sharks-nametag/pipeline/graft_slice.py because the CLI cannot slice its own project files.
+- Garmin's drawn cutout corners are R3.7, and the four screw holes sit 1.24 mm toward the
+  unit's bottom (rows at +74.0 and -76.5 from the window center).
+- Vertical cutout placement is Brian's at layout (`CUTOUT_DY`, currently 0).
+- Panel outline and perimeter fastening come from the old cover.
+
+## Open, and blocking a good print
+1. OUTLINE IS UNCONFIRMED. 18.5 x 11.5 in is an estimate. The template was safe to print
+   against it because it only locates the cutout; a printed PANEL bakes it in at a cost of
+   8 hours and 376 g. Get the opening measured before starting.
+2. NOZZLE. Files are built for the 0.6 high-flow; the 0.4 has been installed since
+   2026-08-06. Studio silently re-slices to the installed profile with no warning.
+3. Unrecorded from the template print: caliper reading of the window (expect
+   222.4 x 139.0 within 0.3 mm) and which of the two presets was actually run.
 
 ## Next steps
-1. Brian prints the template (0.30mm Standard, 0.6 nozzle, brim off, centered on plate, counterbored face up, about 1 h 28 min).
-2. Measure the window with calipers; expected 222.4 x 139.0 within 0.3 mm. If off, adjust slicer XY compensation, never rescale.
-3. Rout, test fit the 943xsv, install.
-4. Write `knowledge/learnings/garmin-943-helm-panel.md` with measured window, fit result, and screw hold in the HDPE.
+1. Brian measures the opening and sends photos; update PANEL_W, PANEL_H, CORNER_R.
+2. Re-run `TILES=1 helm-panel.py`, then `make_multiplate.py`, then reprint the files.
+3. Install the 0.6 high-flow nozzle, load dry black ASA, print plate 1 and check corners.
+4. Print the rest, assemble face down with the ten keys, acetone weld.
+5. Update the retrospective with measured fit and screw hold in printed ASA.

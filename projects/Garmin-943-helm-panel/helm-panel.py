@@ -1,4 +1,8 @@
-"""Helm panel for the Garmin GPSMAP 943xsv, routed from 1/2 in King Starboard.
+"""Helm panel for the Garmin GPSMAP 943xsv.
+
+Two builds from one source, differing ONLY in thickness:
+  default   one piece routed from 1/2 in (12.7 mm) black King Starboard
+  TILES=1   four interlocking tiles printed in 3/8 in (9.525 mm) ASA
 
 Replaces the hinged clear cover behind the wheel. The 943xsv flush mounts
 through the window; the window and its pilot holes come from garmin_9x3.py,
@@ -21,8 +25,9 @@ ASA, not PLA: a dark panel at a helm passes the PLA softening point.
 
 Run:  .venv/bin/python projects/Garmin-943-helm-panel/helm-panel.py
 Env:  STAGE=n builds only the first n panel features (1..5). SHOW=1|reset
-      pushes to the OCP viewer. TILES=1 also builds the printed ASA
-      alternative: four interlocking tiles plus bowtie keys.
+      pushes to the OCP viewer. TILES=1 builds the printed ASA panel at
+      3/8 in: four interlocking tiles plus ten bowtie keys. TILES=1 never
+      overwrites the routed one-piece STL/STEP.
 """
 import os
 import sys
@@ -42,19 +47,25 @@ from garmin_9x3 import (
 
 IN = 25.4
 
+# Which build. TILES=1 is the printed ASA panel, anything else the routed
+# Starboard one-piece. Thickness is the only geometric difference.
+ASA = os.environ.get("TILES") == "1"
+
 # ---- Panel, provisional until Brian measures ----
 PANEL_W = 18.5 * IN  # 469.9
 PANEL_H = 11.5 * IN  # 292.1
-PANEL_T = 0.5 * IN  # 12.7. Brian chose 1/2 in King Starboard 2026-09-09.
-# HDPE is softer than printed ASA AND creeps, so it needs one size up: 1/2 in
-# Starboard lands where 3/8 in printed ASA does. See brief.md for the numbers.
+# HDPE is softer than printed ASA AND creeps, so Starboard needs one size up to
+# reach the same deflection: 1/2 in Starboard lands where 3/8 in printed ASA
+# does. Printing that extra 3.2 mm would cost a third more time and filament
+# for stiffness the analysis says is not needed. See brief.md for the numbers.
+PANEL_T = (0.375 if ASA else 0.5) * IN  # 9.525 ASA / 12.7 Starboard
 CORNER_R = 0.5 * IN  # 12.7, ASSUMPTION: confirm against the old cover
 EDGE_ROUND = 0.125 * IN  # 3.175, 1/8 in roundover on the front face only
 
 # ---- Window ----
 CUTOUT_R = 0.25 * IN / 2  # 3.175
 CUTOUT_DY = 0.0  # positive moves the window toward the panel top
-PILOT_DEPTH = 10.0  # blind in 12.7 stock, leaving 2.7 mm behind the screw
+PILOT_DEPTH = 7.0 if ASA else 10.0  # blind, ~2.5 mm of stock left behind it
 
 # ---- Split and interlock ----
 BED = 256.0
@@ -64,7 +75,7 @@ SEAM_CHAMFER = 0.5  # front-face seam edges, so the joint reads as a panel line
 KEY_L = 36.0  # bowtie length, across the seam
 KEY_WAIST = 12.0  # width at the seam
 KEY_END = 20.0  # width at the ends
-KEY_DEPTH = 6.0  # pocket depth from the BACK face; leaves 3.5 mm of front skin
+KEY_DEPTH = 6.0  # pocket depth from the BACK face; 3.5 mm front skin at 3/8 in
 KEY_CLEAR = 0.2  # per face, the vault's snug fit
 KEY_T = KEY_DEPTH - 0.2  # key sits 0.2 mm below the back face
 
@@ -334,15 +345,16 @@ if __name__ == "__main__":
 
     margins = check_panel(panel)
     panel_volume = panel.volume
-    export_step(panel, f"{PROJECT}/{NAME}.step")
-    export(panel, NAME)
-    print("panel ok  %.1f x %.1f x %.2f mm  %.0f cm3" % (PANEL_W, PANEL_H, PANEL_T, panel_volume / 1000))
+    print("panel ok  %.1f x %.1f x %.2f mm  %.0f cm3  (%s)"
+          % (PANEL_W, PANEL_H, PANEL_T, panel_volume / 1000, "ASA tiles" if ASA else "Starboard"))
     print("  bezel margin mm:", {k: round(v, 1) for k, v in margins.items()})
 
-    # The part is routed from one piece of 1/2 in Starboard, so the one-piece
-    # panel is the deliverable. TILES=1 builds the printed-in-ASA alternative,
-    # which is kept for the case where features a router cannot cut are wanted.
-    if os.environ.get("TILES") != "1":
+    # The routed Starboard one-piece is the deliverable, so it alone owns
+    # helm-panel.stl/.step. Under TILES=1 the one-piece is only an intermediate
+    # at ASA thickness and must NOT overwrite those files.
+    if not ASA:
+        export_step(panel, f"{PROJECT}/{NAME}.step")
+        export(panel, NAME)
         raise SystemExit
 
     pocketed = cut_pockets(panel)
