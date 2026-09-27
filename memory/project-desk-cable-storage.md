@@ -27,5 +27,5 @@ through the plywood. Every dimension in the model is photo-derived at about plus
 10 percent and NOTHING has been tape-measured; the six measurements are the gating item.
 
 **How to apply:** read `projects/Desk-cable-storage/.claude/context-check/last-handoff.md` first. Next input expected from Brian is a line like "M1 26.5, M2 3/4, ..." from the phone sheet; feed it into `pipeline/concept.scad`, re-render, then enter the /3d-model skill.
-The project folder is untracked in git; do not commit it unasked. Related:
+Committed and pushed 2026-09-26 (6834113) at Brian's request; commit later milestones the same way. Related:
 [[feedback-html-visual-companion]], [[feedback-openscad-for-complex-designs]], [[project-garmin-helm-panel]].
