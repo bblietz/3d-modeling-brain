@@ -1,7 +1,7 @@
 """Wall trough for the cord slack under the closet desk (concept D, decided 2026-09-26).
 
 One piece across the X2D bed: 254 mm (10.00 in) wide, 6 in front to back, 6 in deep,
-front wall 4.5 in, one full-width cavity, two screw holes near the top of the back wall.
+front and side walls 4.5 in, back wall 6 in, one full-width cavity, two screw holes near the top of the back wall.
 Printed floor down, open top up, no supports.
 
 Run:  .venv/bin/python projects/Desk-cable-storage/trough.py            (exports STL, self-checks)
@@ -21,8 +21,8 @@ IN = 25.4
 # ---------------- dimensions, mm ----------------
 L = 254.0                 # width across the bed, 10.00 in (bed is 256; no exclusion zone on the X2D)
 DEPTH = 6 * IN            # front to back, 152.4
-H = 6 * IN                # side and back walls, 152.4
-H_FRONT = 4.5 * IN        # front wall, 114.3 (75 percent of H)
+H = 6 * IN                # back wall, 152.4
+H_FRONT = 4.5 * IN        # front and side walls, 114.3 (75 percent of H; Brian: sides the same height as the face)
 T = 2.4                   # floor, front and side walls
 T_BACK = 3.2              # back wall, carries the screws
 R_OUT = 6.0               # vertical outer corner radius
@@ -46,8 +46,8 @@ cav = Pos(0, (T - T_BACK) / 2, T) * cav
 part = outer - cav
 stages["2-cavity"] = part
 
-# 3. front wall down to 4.5 in; the cut runs back to the corner radius so the side walls end square
-front_cut = Pos(0, -DEPTH / 2 - 1 + (R_OUT + 1) / 2, H_FRONT) * Box(L + 2, R_OUT + 1, H, align=MIN)
+# 3. front and side walls down to 4.5 in; only the back wall keeps the full height
+front_cut = Pos(0, (-1 - T_BACK) / 2, H_FRONT) * Box(L + 2, DEPTH + 1 - T_BACK, H, align=MIN)
 part = part - front_cut
 stages["3-front-wall"] = part
 
@@ -76,6 +76,9 @@ assert (part & probe).volume < 1.0, (part & probe).volume
 # the front wall really stops at H_FRONT and the back wall reaches H
 front_probe = Pos(0, -DEPTH / 2 + T / 2, H_FRONT + 0.05) * Box(L - 2 * R_OUT - 2, T - 0.2, H - H_FRONT - 0.1, align=MIN)
 assert (part & front_probe).volume < 1.0, "front wall not cut down"
+for sx in (-(L / 2 - T / 2), L / 2 - T / 2):   # side walls stop at the front wall height too
+    side_probe = Pos(sx, (T - T_BACK) / 2, H_FRONT + 0.05) * Box(T - 0.2, DEPTH - 2 * R_OUT - T_BACK - 2, H - H_FRONT - 0.1, align=MIN)
+    assert (part & side_probe).volume < 1.0, "side wall not cut down"
 back_probe = Pos(0, DEPTH / 2 - T_BACK / 2, H - 1) * Box(L - 2 * R_OUT - 2, T_BACK - 0.2, 0.9, align=MIN)
 assert abs((part & back_probe).volume - back_probe.volume) < 5, "back wall not full height"
 # both holes go through

@@ -8,7 +8,7 @@ tags: [x2d, petg, cable-management, closet-desk, build123d, visual-companion]
 
 # Desk cable storage: wall trough under the printer bench
 
-**CAD complete 2026-09-26.** Not printed yet. Brief: [[brief]] in `projects/Desk-cable-storage/`. One-piece PETG trough, 254 x 152.4 x 152.4 mm, screwed to the back wall under the power strip's plug heads.
+**CAD complete 2026-09-26.** Not printed yet. Brief: [[brief]] in `projects/Desk-cable-storage/`. One-piece PETG trough, 254 x 152.4 x 152.4 mm, front and side walls 4.5 in, screwed to the back wall under the power strip's plug heads.
 
 ## What worked
 
@@ -22,6 +22,7 @@ tags: [x2d, petg, cable-management, closet-desk, build123d, visual-companion]
 ## What failed
 
 - **The measurement sheet was wasted.** Ten tape-measure callouts and a fill-in phone sheet were built before Brian said to ignore all of them. The part is free-standing geometry; the closet numbers only affect the install height, which is set by eye. Ask whether a dimension changes the part before asking for it.
+- **Two viewer rounds after "done".** Holes moved in from the ends, then the side walls dropped to the front wall height; both came within minutes of the part appearing in the OCP viewer. Push to the viewer before calling anything complete.
 - **My recommendation (D+) lost to the pictures.** Brian chose the visible-from-10-ft position because loading from above matters more to him than the sliver that shows. State the tradeoff once, then build what he picks.
 - **Two sessions, one folder.** The phone session and this one both wrote to the project; brief.md was nearly overwritten. Read the handoff before writing anything when a project may have moved elsewhere.
 
@@ -34,7 +35,7 @@ tags: [x2d, petg, cable-management, closet-desk, build123d, visual-companion]
 
 ## Settings used
 
-Bambu Lab X2D 0.6 nozzle (assumed installed; printer unreachable), 0.30mm Standard, Bambu PETG Basic black, Textured PEI at 70 C, no brim, no skirt, floor down. Slice: 8 h 42 m, 417 g, 508 layers.
+Bambu Lab X2D 0.6 nozzle (assumed installed; printer unreachable), 0.30mm Standard, Bambu PETG Basic black, Textured PEI at 70 C, no brim, no skirt, floor down. Slice: 7 h 59 m, 387 g, 508 layers.
 
 ## Open
 

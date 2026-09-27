@@ -2,7 +2,7 @@
 
 ## Evening update 3: CAD COMPLETE
 - Brian waived every measurement and fixed the spec: wall trough, max bed width, 6 in deep, 4.5 in front wall,
-  full-width cavity, two screw holes in the top of the back wall (16 in apart wished; 9 in was too close to the ends, now 7 in).
+  full-width cavity, two screw holes in the top of the back wall (16 in apart wished; 9 in was too close to the ends, now 7 in). Side walls then cut to 4.5 in like the front; back wall alone at 6 in. Slice 7 h 59 m, 387 g..
 - `trough.py` (build123d, self-checking) -> `trough.stl` 254 x 152.4 x 152.4 mm, 385 cm3.
 - `pipeline/make_print_3mf.py` (subagent, adapted from NACS-organizer/make_plate.py + iPhone flattener) ->
   `trough-print.3mf`, `trough-slice.json`: 8 h 42 m, 417 g, 508 layers, no brim/skirt, x 1..255 on the bed.

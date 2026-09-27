@@ -2,7 +2,7 @@
 type: project
 project: Desk-cable-storage
 date: 2026-09-26
-status: CAD COMPLETE 2026-09-26 evening. trough.py built, sliced (8 h 42 m, 417 g PETG, fits the bed at 254 mm), trough-print.3mf ready. Measurements waived by Brian. Waiting on his sign-off in the viewer, then print.
+status: CAD COMPLETE 2026-09-26 evening, revised twice in the viewer (holes to 7 in apart, side walls to 4.5 in). Sliced 7 h 59 m, 387 g PETG, fits the bed at 254 mm; trough-print.3mf ready. Measurements waived by Brian. Waiting on his sign-off in the viewer, then print.
 tags: [x2d, cable-management, closet-desk, petg]
 ---
 
@@ -50,12 +50,12 @@ Hidden, reach-in storage for the cord slack under Brian's closet desk: a 3/4 in 
 | Item | Value |
 |---|---|
 | Outside | 254.0 x 152.4 x 152.4 mm (10.00 x 6 x 6 in) |
-| Front wall | 114.3 mm (4.5 in), 75 percent of the height; cut runs back 6 mm so the side walls end square |
+| Front and side walls | 114.3 mm (4.5 in), 75 percent of the height; only the back wall is 152.4 (Brian, 2026-09-26: "make the sidewalls the same height as the face") |
 | Walls | 2.4 mm floor, front and sides; 3.2 mm back wall |
 | Corners | R6 outside, R3.6 inside; 0.8 mm chamfer on the bed edge |
 | Screw holes | two, 5.0 mm, 7 in (177.8 mm) apart so 1.5 in from each end, 3/4 in below the top edge, through the back wall; #8 screws in drywall anchors, heads inside |
-| Print | floor down, open top up, no supports, no brim, no skirt; X2D 0.6 nozzle, 0.30mm Standard, Bambu PETG Basic, Textured PEI; 508 layers, 8 h 42 m, 417 g |
-| Volume | 385 cm3 |
+| Print | floor down, open top up, no supports, no brim, no skirt; X2D 0.6 nozzle, 0.30mm Standard, Bambu PETG Basic, Textured PEI; 508 layers, 7 h 59 m, 387 g |
+| Volume | 358 cm3 |
 
 ## Open before printing
 
