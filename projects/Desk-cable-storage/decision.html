@@ -1,0 +1,148 @@
+<title>Closet Desk Trough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#EFF1F3; --surface:#FFFFFF; --sunk:#F5F6F8;
+  --ink:#14171A; --muted:#5B6169; --line:#DCE0E4;
+  --accent:#D96A12; --accent-soft:#FBEEE2;
+  --good:#1F6B47; --good-bg:#E4F0EA;
+  --warn:#8A5A12; --warn-bg:#F7EEDC;
+  --bad:#9E3517; --bad-bg:#F8E7E1;
+  --radius:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#121417; --surface:#1B1E22; --sunk:#232730;
+    --ink:#ECEEF1; --muted:#98A0A9; --line:#2C3139;
+    --accent:#F08A33; --accent-soft:#33231480;
+    --good:#7FD3A8; --good-bg:#16311F;
+    --warn:#E8BB6B; --warn-bg:#332713;
+    --bad:#F0A08A; --bad-bg:#3A1E16;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121417; --surface:#1B1E22; --sunk:#232730;
+  --ink:#ECEEF1; --muted:#98A0A9; --line:#2C3139;
+  --accent:#F08A33; --accent-soft:#33231480;
+  --good:#7FD3A8; --good-bg:#16311F;
+  --warn:#E8BB6B; --warn-bg:#332713;
+  --bad:#F0A08A; --bad-bg:#3A1E16;
+}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink);
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif; line-height:1.55;
+  -webkit-text-size-adjust:100%;}
+.wrap{max-width:780px; margin:0 auto; padding-inline:16px; padding-block:28px 64px;
+  display:flex; flex-direction:column; gap:22px;}
+h1{font-size:clamp(26px,7vw,40px); line-height:1.08; margin:0; font-weight:700;
+  letter-spacing:-0.02em; text-wrap:balance;}
+h2{font-size:19px; margin:0 0 6px; font-weight:600; letter-spacing:-0.01em; text-wrap:balance;}
+h3{font-size:13px; margin:0 0 10px; font-weight:600; text-transform:uppercase;
+  letter-spacing:.09em; color:var(--muted);}
+p{margin:0 0 10px}
+p:last-child{margin-bottom:0}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 10px;}
+.sub{color:var(--muted); font-size:15.5px; max-width:60ch;}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:18px;}
+.flag{background:var(--accent-soft); border-radius:var(--radius); padding:14px 16px;}
+.flag p{font-size:14.5px}
+.flag strong{color:var(--accent)}
+.opt-head{display:flex; gap:13px; align-items:flex-start; margin-bottom:10px;}
+.badge{flex:none; min-width:38px; height:38px; padding-inline:8px; border-radius:10px; background:var(--accent);
+  color:#fff; font-weight:700; font-size:19px; display:grid; place-items:center;}
+.chip{display:inline-block; font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11.5px;
+  padding:3px 9px; border-radius:999px; letter-spacing:.03em;}
+.chip.good{background:var(--good-bg); color:var(--good)}
+.chip.warn{background:var(--warn-bg); color:var(--warn)}
+.chip.pick{background:var(--accent); color:#fff}
+.lede{font-size:15px; color:var(--ink); margin-bottom:14px;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+@media (max-width:480px){.grid2{grid-template-columns:1fr}}
+figure{margin:0}
+figure img{width:100%; max-width:100%; display:block; border-radius:9px; background:var(--sunk);
+  border:1px solid var(--line); cursor:zoom-in;}
+figcaption{font-size:12.5px; color:var(--muted); margin-top:7px;}
+.specs{display:grid; grid-template-columns:auto 1fr; gap:6px 14px; margin:15px 0 0;
+  font-size:14px; align-items:baseline;}
+.specs .k{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11.5px;
+  text-transform:uppercase; letter-spacing:.07em; color:var(--muted); white-space:nowrap;}
+.specs .v{margin:0}
+.specs code{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12.5px; word-break:break-all;}
+.note{margin-top:14px; padding-top:13px; border-top:1px solid var(--line); font-size:14px; color:var(--muted);}
+.lb{position:fixed; inset:0; background:#0B0D0FF2; display:grid; place-items:center; padding:16px; z-index:50;}
+.lb img{max-width:100%; max-height:88vh; border-radius:8px}
+.lb-close{position:absolute; top:calc(12px + env(safe-area-inset-top,0px)); right:14px;
+  background:#FFFFFF1F; color:#fff; border:0; border-radius:999px; width:40px; height:40px; font-size:21px; cursor:pointer;}
+.lb-close:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Desk cable storage · step 3 of 3</p>
+    <h1>The trough, built</h1>
+    <p class="sub">Position D on the back wall, one piece as wide as the X2D bed prints, 6 in deep with a 4.5 in front wall, one full-width cavity, two screw holes near the top of the back wall. Modelled, self-checked and sliced. Tap any picture to zoom.</p>
+  </header>
+
+  <section class="card">
+    <div class="opt-head">
+      <div class="badge">D</div>
+      <div>
+        <h2>254 x 152.4 x 152.4 mm, front wall 114.3 mm</h2>
+        <span class="chip pick">built</span> <span class="chip good">fits the bed</span> <span class="chip good">no supports</span>
+      </div>
+    </div>
+    <figure><img src="trough-views.png" alt="iso, front, top and right views of the trough"><figcaption>Iso, front, top and right views of the exported STL. The two tabs at the top corners of the front view are the 6 in side walls; the front wall between them stops at 4.5 in.</figcaption></figure>
+    <div class="specs">
+      <div class="k">Outside</div><p class="v">10.00 x 6 x 6 in</p>
+      <div class="k">Front wall</div><p class="v">4.5 in, 75 percent of the height</p>
+      <div class="k">Walls</div><p class="v">2.4 mm; back wall 3.2 mm; R6 corners; 0.8 mm chamfer on the bed edge</p>
+      <div class="k">Holes</div><p class="v">Two, 5 mm, 7 in apart (1.5 in from each end), 3/4 in below the top edge, through the back wall. Sixteen inches would need separate wing brackets.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>In the closet</h3>
+    <div class="grid2">
+      <figure><img src="D-crouch.png" alt="crouched at the front"><figcaption>Crouched at the front: the real STL under the strip. Orange is the part.</figcaption></figure>
+      <figure><img src="D-section.png" alt="side section"><figcaption>Side section: cord over the front wall, into the open top.</figcaption></figure>
+      <figure><img src="D-stand5-black.png" alt="from 5 ft"><figcaption>Standing 5 ft away, black as printed: hidden.</figcaption></figure>
+      <figure><img src="D-stand10-black.png" alt="from 10 ft"><figcaption>10 ft away: the front face shows, as accepted.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>Print plan</h3>
+    <div class="specs">
+      <div class="k">Orientation</div><p class="v">Floor on the plate, open top up. No overhangs, no supports.</p>
+      <div class="k">Bed</div><p class="v">Placed at x 1 to 255 of the 256 mm bed, unrotated. Brim and skirt off; either would run off the edge. The slicer accepted it.</p>
+      <div class="k">Presets</div><p class="v">Bambu Lab X2D 0.6 nozzle, 0.30mm Standard, Bambu PETG Basic, Textured PEI plate, black. The file assumes the 0.6 nozzle is installed.</p>
+      <div class="k">Estimate</div><p class="v">8 h 42 m, 417 g, 138.7 m of filament, 508 layers</p>
+      <div class="k">File</div><p class="v"><code>projects/Desk-cable-storage/trough-print.3mf</code>, ready to open in Bambu Studio</p>
+    </div>
+  </section>
+
+  <div class="flag">
+    <p><strong>Mounting.</strong> Two #8 screws in drywall anchors through the back wall, 7 in apart, heads inside the box. Hold the trough with its top edge about half an inch under the plug heads, mark the two holes through the back wall, drill for the anchors, screw it up.</p>
+  </div>
+</div>
+
+<div id="lb" class="lb" hidden><button class="lb-close" type="button" aria-label="close">&times;</button><img id="lbimg" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt=""></div>
+
+<script>
+(function(){
+  var lb = document.getElementById("lb"), lbimg = document.getElementById("lbimg");
+  document.querySelectorAll("figure img").forEach(function(img){
+    img.addEventListener("click", function(){ lbimg.src = img.src; lbimg.alt = img.alt; lb.hidden = false; });
+  });
+  function close(){ lb.hidden = true; }
+  lb.addEventListener("click", function(e){ if (e.target !== lbimg) close(); });
+  document.querySelector(".lb-close").addEventListener("click", close);
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") close(); });
+})();
+</script>

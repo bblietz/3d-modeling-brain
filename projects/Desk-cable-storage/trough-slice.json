@@ -1,0 +1,41 @@
+{
+ "placement_mm": {
+  "min": [
+   1.0,
+   51.8,
+   0.0
+  ],
+  "max": [
+   255.0,
+   204.2,
+   152.4
+  ]
+ },
+ "roundtrip": "settings and placement survive bambu-studio --arrange 0 --export-3mf",
+ "time": "8h 41m 48s",
+ "minutes": 522,
+ "grams": 417.0,
+ "metres": 138.68,
+ "used_g_per_filament": 417.0,
+ "layers": 508,
+ "nozzle_C": 250,
+ "bed_C": 70,
+ "toolpath_xy_mm": [
+  1.31,
+  52.11,
+  254.69,
+  203.89
+ ],
+ "feature_mm": {
+  "Outer wall": 48414.4,
+  "Inner wall": 48366.1,
+  "Internal solid infill": 13408.8,
+  "Sparse infill": 9485.6,
+  "Bridge": 6504.9,
+  "Top surface": 4472.4,
+  "Bottom surface": 4407.3,
+  "Gap infill": 3550.1,
+  "Floating vertical shell": 71.2,
+  "Overhang wall": 1.1
+ }
+}

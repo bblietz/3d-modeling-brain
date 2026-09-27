@@ -38,3 +38,6 @@ projects/NACS-wall-holder/reference/*.stl
 projects/iPhone-15-Pro-Max-case/reference/*.pdf
 projects/iPhone-15-Pro-Max-case/reference/adg-*.png
 projects/iPhone-15-Pro-Max-case/build/
+
+# brainstorming visual companion sessions (transient mockups)
+.superpowers/

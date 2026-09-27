@@ -11,11 +11,12 @@
 - [Raised letters recipe](feedback-raised-letters-recipe.md) - VALIDATED by the 14-tag batch: one-wall fill-core modifier + object key + parity check; dead ends not to retry; read knowledge/lettering-x2d.md before any lettering job
 - [Vault GitHub repo](reference-vault-github-repo.md) - private bblietz/3d-modeling-brain, remote origin/main; commit and push after milestones; never commit the printer access code
 - [Garmin helm panel](project-garmin-helm-panel.md) - switched 2026-09-26 to PRINTING four ASA tiles at 3/8 in; 4-plate 3MF verified; router template fits; outline still a guess
+- [Desk cable storage](project-desk-cable-storage.md) - closet printer bench; CAD complete 2026-09-26: wall trough D, 254 x 152 x 152 mm, front wall 4.5 in, two holes 7 in apart, sliced 8 h 42 m / 417 g PETG; measurements waived; awaiting sign-off and print; project untracked
 - [NACS wall holder](project-nacs-wall-holder.md) - Tesla Wall Connector dock, DONE 2026-09-19: printed, mounted, working great
 - [Model dispatch](feedback-model-dispatch.md) - say which model fits each task, flag when Fable 5.1 beats the active model, never switch silently
 - [Speaker cab system](project-speaker-cab-system.md) - MaximoCabs guitar cab capability; quote wizard live; 2 orders done; baffles are 1/2 in 9-ply void-free; cab-share auto-publishes each preview
 - [Friction fit recipe](feedback-friction-fit-recipe.md) - crush ribs not tighter clearance, plus a designed opening feature; read knowledge/friction-fits-x2d.md first
-- [HTML visuals, no ASCII](feedback-html-visual-companion.md) - show visual options and geometry in an HTML page, never ASCII art previews
+- [HTML visuals, no ASCII](feedback-html-visual-companion.md) - Brian is visual: at most one or two text questions, then draw the options in an HTML page and ask against the pictures; never ASCII art
 - [Check environment first](feedback-stl-to-bambu-3mf.md) - EVERY session: read CLAUDE.md Environment section (.venv python, Bambu CLI) before choosing or ruling out a tool; STL to 3MF via Bambu CLI
 - [Hardwood grain wraps](feedback-hardwood-grain-wraps.md) - never design hardwood cabinet grain front to back; it wraps around the box, and hardwood cab shells get no glued stiffeners
 - [OpenSCAD for complex designs](feedback-openscad-for-complex-designs.md) - compound-angle parts go in OpenSCAD with rendered views of the real model; no hand-drawn plans, build123d only for simple prisms
