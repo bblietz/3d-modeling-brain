@@ -93,24 +93,28 @@ def _fmt(mm):
     return f"{_r1(mm):g}"
 
 
-def write_cut_list(parts, md_path, csv_path=None, title="Cut list", extra_lines=None):
+def write_cut_list(parts, md_path, csv_path=None, title="Cut list", extra_lines=None,
+                   units="both", denom=16):
     """Write the cut list markdown (and optional CSV); return the rows.
 
     extra_lines: optional materials that are not cut parts (tolex yardage,
     grill cloth), each {"part", "qty", "unit", "material", "notes"}; they
     appear under "Materials not cut" in the markdown and as CSV rows with
-    empty dimensions."""
+    empty dimensions.
+    units: "both" prints mm and inch columns, "in" inches only (the CSV
+    always carries mm); denom is the inch fraction (16 or 32)."""
     rows = cut_list_rows(parts)
+    mm_col = "" if units == "in" else " T x W x L (mm) |"
     lines = ["---", "type: cutlist", f"project: {title}", "---", "",
              f"# Cut list - {title}", "",
-             "| Qty | Part | T x W x L (mm) | T x W x L (in) | Material | Notes |",
-             "|---|---|---|---|---|---|"]
+             f"| Qty | Part |{mm_col} T x W x L (in) | Material | Notes |",
+             "|---|---|---|---|---|" + ("" if units == "in" else "---|")]
     for r in rows:
-        mm = f"{_fmt(r['t'])} x {_fmt(r['w'])} x {_fmt(r['l'])}"
-        inch = f"{inch_frac(r['t'])} x {inch_frac(r['w'])} x {inch_frac(r['l'])}"
-        lines.append(f"| {r['qty']} | {r['name']} | {mm} | {inch} "
+        mm = "" if units == "in" else f" {_fmt(r['t'])} x {_fmt(r['w'])} x {_fmt(r['l'])} |"
+        inch = " x ".join(inch_frac(r[k], denom) for k in ("t", "w", "l"))
+        lines.append(f"| {r['qty']} | {r['name']} |{mm} {inch} "
                      f"| {r['material']} | {r['notes']} |")
-    lines += ["", "Inches rounded to the nearest 1/16.", "",
+    lines += ["", f"Inches rounded to the nearest 1/{denom}.", "",
               "## Totals by material", ""]
     totals = {}
     for r in rows:
@@ -119,7 +123,8 @@ def write_cut_list(parts, md_path, csv_path=None, title="Cut list", extra_lines=
         totals[mat] = (qty + r["qty"], area + r["qty"] * r["w"] * r["l"] / 1e6)
     for mat, (qty, area) in sorted(totals.items()):
         unit = "part" if qty == 1 else "parts"
-        lines.append(f"- {mat}: {qty} {unit}, {area:.2f} m2 face area "
+        face = f"{area * 10.7639:.1f} sq ft" if units == "in" else f"{area:.2f} m2"
+        lines.append(f"- {mat}: {qty} {unit}, {face} face area "
                      "(no kerf/waste allowance)")
     if extra_lines:
         lines += ["", "## Materials not cut", ""]

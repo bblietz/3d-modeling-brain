@@ -124,14 +124,16 @@ because option (a) leaves 19-1/4 in of interior depth.
   page): keep E1, the 3/8 in chamfer full length with the posts straight
   to the floor, and bring the side and back panels down to the same line
   as the bottom drawer front, 3/4 in off the floor (was 1-1/2 in). In the
-  CAD `GROOVE_STOP = FLOOR_GAP`, so the post grooves and the panels stop
-  3/4 in up; the panels grow 3/4 in and the ply lip under the bottom
+  CAD `GROOVE_STOP = FLOOR_GAP` (since 2026-09-28 `PANEL_Z0 =
+  FLOOR_GAP`, with the post grooves stopping higher, below), so the
+  panels stop 3/4 in up; the panels grow 3/4 in and the ply lip under the bottom
   groove in the sides and back becomes 26 mm (was 7 mm), which closes
   that review item.
 - Bottom-panel grooves in the sides and back run through, full length
   (Brian, 2026-09-27; were stopped 3/8 in from each end at the posts).
-  The ends sit inside the post grooves above their 3/4 in stop, so
-  nothing shows; one saw or router pass per panel. The CAD's housed-edge
+  The ends ran out inside the post grooves (since 2026-09-28, through
+  the panels' notched corners), so nothing shows; one saw or router
+  pass per panel. The CAD's housed-edge
   probes now expect the notch and a volume identity proves each groove
   runs the whole length.
 - No rear rail (Brian, 2026-09-27: "isn't the plywood back sufficient?"
@@ -165,6 +167,18 @@ because option (a) leaves 19-1/4 in of interior depth.
   (`TOP_T`, `POST`), so no geometry changed; `TOP_T` is no longer
   provisional. Overhang (1-1/4 in) and edge profile are still the
   provisional guesses until the island is measured for them.
+- Post grooves stop 1-1/2 in above the floor and the side/back panels
+  are notched 3/8 x 1-1/2 in at both bottom corners to meet them (Brian,
+  2026-09-28: easier to build if the groove's end need not be perfectly
+  clean). The housed tongue starts 2-1/4 in up, 3/4 in above the
+  groove's end; the panel's bottom 1-1/2 in butts the post face and
+  hides the end, which may round or ramp out anywhere between 3/4 and
+  2-1/4 in. The notch height and the clearance are my numbers.
+- Cut list, shop page and drawings in inches only, to the nearest 1/32
+  (Brian, 2026-09-28: "get rid of the metric numbers in the cutlist").
+  Cuts sized to plywood say "3/4 ply (measure)" instead of a fraction,
+  the materials are 3/4 / 1/2 / 1/4 ply, areas are in sq ft. The CSV
+  keeps mm as the page builder's data.
 
 ## Build log (2026-08-24)
 
@@ -183,7 +197,8 @@ because option (a) leaves 19-1/4 in of interior depth.
   plywood are measured and the file is re-run.
 - Shop page (2026-09-27): `cutlist.html`, built from `cutlist.csv` by
   `make_cutlist_page.py` (case section, then a drawer section, each by
-  material in cutting order; inches and mm, notes, hardware list,
+  material in cutting order; inches only to 1/32 (since 2026-09-28),
+  notes, hardware list,
   per-phone tick boxes, a shop drawing per row with tap-to-zoom) and
   published as a private Artifact at
   https://claude.ai/artifact/B63kzPtAP56TSzAk8JG1ha. The drawings come

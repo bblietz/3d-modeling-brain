@@ -10,10 +10,20 @@ floor). All mm. Every dimension is provisional; see design.md
 """
 
 import os
+import sys
 from math import acos, pi, sqrt
 from build123d import *
 
+sys.path.insert(0, "/home/brian/ClaudeProjects/3d-modeling-brain/scripts")
+from cutlist import inch_frac, write_cut_list  # noqa: E402
+
 IN = 25.4
+
+
+def inch(mm):
+    """Inches to the nearest 1/32 for the cut-list notes (Brian's shop works in
+    inches; no metric on the cut list, 2026-09-28)."""
+    return inch_frac(mm, 32)
 
 # --- Provisional inputs (design.md table; MEASURE before cutting) ----------
 TOP_W = 40 * IN            # 1016.0  the TOP is 40 x 24 (locked convention; measured, Brian 2026-09-17)
@@ -31,8 +41,8 @@ POST = 3 * IN              # 76.2   post square
 CHAMFER = 0.375 * IN       # 9.525  post vertical edges, full length
 SETBACK = 0.5 * IN         # 12.7   panel outer face behind the post face
 GROOVE_D = 0.375 * IN      # 9.525  groove depth in the posts
-# GROOVE_STOP (where the panel grooves and the panels stop above the floor) is
-# tied to FLOOR_GAP below
+# PANEL_Z0 (the side/back bottom edges) and GROOVE_STOP (the post groove ends)
+# are tied to FLOOR_GAP below
 # FRAME_SETBACK (front frame plane) is derived below the slide block: fronts + Blum front gap
 FRONT_SETBACK = 0.25 * IN  # 6.35   drawer fronts behind the post face
 FRONT_T = 0.75 * IN        # 19.05  drawer front thickness (solid maple)
@@ -43,7 +53,11 @@ RAIL_MID_H = 1.0 * IN      # 25.4
 RAIL_BOT_H = 1.5 * IN      # 38.1
 CLEAT_H = 1.5 * IN         # 38.1   rear top cleat inside the back, figure-8 landing (replaces the tenoned rear rail, 2026-09-27)
 FLOOR_GAP = 0.75 * IN      # 19.05  shadow gap under the bottom front
-GROOVE_STOP = FLOOR_GAP    # 19.05  side/back bottoms on the drawer-front line (Brian 2026-09-27; was 1-1/2 in)
+PANEL_Z0 = FLOOR_GAP       # 19.05  side/back bottom edges on the drawer-front line (Brian 2026-09-27; was 1-1/2 in)
+NOTCH_H = 1.5 * IN         # 38.1   side/back bottom corners notched GROOVE_D x this: the housed tongue starts this
+                           #        far above the bottom edge (Brian 2026-09-28: no squaring of the groove ends)
+GROOVE_CLR = 0.75 * IN     # 19.05  post groove end below the tongue start; the end stays as the tool leaves it
+GROOVE_STOP = PANEL_Z0 + NOTCH_H - GROOVE_CLR   # 38.1  post grooves stop here (= PANEL_Z0 until 2026-09-28)
 REV_TOP = 0.125 * IN       # 3.175  under the top
 REV_MID = 0.25 * IN        # 6.35   between the fronts
 REV_SIDE = 0.125 * IN      # 3.175  front to post
@@ -87,7 +101,8 @@ POST_H = H - TOP_T                  # 463.55
 OPEN_W = FOOT_W - 2 * POST          # 698.5  between the posts
 X0, Y0 = OH, OH                     # front-left post min corner
 XR, YB = OH + FOOT_W, OH + FOOT_D   # right post outer face, rear post outer face
-PANEL_H = POST_H - GROOVE_STOP      # 425.45 side panels, groove stop to top
+PANEL_H = POST_H - PANEL_Z0         # 434.975  side panels, bottom edge to the post tops
+TONGUE_Z0 = PANEL_Z0 + NOTCH_H      # 57.15  where the housed tongue starts (above the notch)
 BACK_H = PANEL_H                    # back panel full height, like the sides (no rear rail since 2026-09-27)
 RAIL_L = OPEN_W + 2 * GROOVE_D      # 819.15 back panel length: opening + two housed ends (named for the old rear rail)
 REV_MID_Z0 = FLOOR_GAP + FRONT_BOT_H                      # 307.975 reveal bottom
@@ -102,6 +117,13 @@ BOX_TOP_H = (RAIL_TOP_Z0 - (RAIL_MID_Z0 + RAIL_MID_H)) - (UM_BOTTOM_CLEAR + UM_T
 BOX_BOT_H = (RAIL_MID_Z0 - (RAIL_BOT_Z0 + RAIL_BOT_H)) - (UM_BOTTOM_CLEAR + UM_TOP_CLEAR)
 BOT_Z0 = BOT_TOP_Z - T12                     # 45.15 bottom panel underside
 BOT_X0 = X0 + SETBACK + T18 - BOT_GROOVE     # into the side-panel groove
+# The post groove's end hides behind the panel's un-housed bottom: it must not
+# run below the panel's bottom edge, and the tongue must start clear of it
+# (room for a round-ended groove plus 1/4 in of slop). The tongue's start must
+# not fall inside the bottom-groove band, or a sliver of tongue is left there.
+assert PANEL_Z0 <= GROOVE_STOP < TONGUE_Z0
+assert GROOVE_CLR >= T18 / 2 + 0.25 * IN
+assert TONGUE_Z0 <= BOT_Z0 + 1e-6 or TONGUE_Z0 >= BOT_TOP_Z - 1e-6, "tongue starts inside the bottom-groove band"
 BOT_W = FOOT_W - 2 * (SETBACK + T18 - BOT_GROOVE)   # 802.2
 DOWEL_VOL = pi * (DOWEL_DIA / 2) ** 2 * DOWEL_DEPTH   # one dowel bore, post or rail side
 _r, _d = FIG8_DIA / 2, FIG8_OFFSET
@@ -161,7 +183,9 @@ def _fig8(xc, yc, ztop):
 # Chamfer the four vertical edges first, then cut the grooves, so the groove
 # walls are clean. Side-panel groove: on the face toward the other post of
 # that side, SETBACK behind the outer face, stopped at GROOVE_STOP, open at
-# the top. Front posts get three round dowel bores on the inner face
+# the top. The stop needs no squaring: the panel's housed tongue starts
+# GROOVE_CLR above it and the panel's notched bottom butts the post face over
+# the groove's end (Brian, 2026-09-28). Front posts get three round dowel bores on the inner face
 # (FRAME_SETBACK behind the front face) at the rail centerlines, so the face
 # is solid between the rails, where the slide's front tab screws in and where
 # a groove would show with a drawer open; rear posts get the back-panel
@@ -182,6 +206,10 @@ def make_post(x, y, front):
     return p
 
 
+_GROOVE_END_NOTE = (f"leave each groove's end as the tool cuts it (rounded or ramped is fine): the panel's "
+                    f"housed tongue starts {inch(TONGUE_Z0)} above the floor, {inch(GROOVE_CLR)} above the "
+                    f"stop, and the panel's notched bottom covers the end; nothing below "
+                    f"{inch(PANEL_Z0)} (the panel's bottom edge)")
 post_fl = make_post(X0, Y0, True)
 post_rl = make_post(X0, YB - POST, False)
 post_fr = mirror_x(post_fl)
@@ -190,19 +218,21 @@ PARTS.append({"name": "post_front", "solid": post_fl, "qty": 2, "material": "sof
               "notes": "one of 2 FRONT posts, left/right mirrored, grooves on the inner faces; "
                        "glue-up of two 8/4 pieces milled to 1-1/2; "
                        "3/8 chamfer x4 edges full length; "
-                       "side groove T18 (measured ply) x 3/8 at 1/2 from the outer face, "
-                       f"stopped {GROOVE_STOP / IN:g} above the floor, open at top"
+                       "side groove 3/4 ply (measure) wide x 3/8 deep at 1/2 from the outer face, "
+                       f"stopped {inch(GROOVE_STOP)} above the floor, open at top"
+                       "; " + _GROOVE_END_NOTE +
                        "; grain vertical, glue-up seam on a side face; "
-                       f"three {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel bores on the inner "
-                       "face 1 in behind the front face, centered on the rail joints at Z "
-                       f"{RAIL_BOT_Z0 + RAIL_BOT_H / 2:.2f}, "
-                       f"{RAIL_MID_Z0 + RAIL_MID_H / 2:.2f}, "
-                       f"{RAIL_TOP_Z0 + RAIL_TOP_H / 2:.2f}"})
+                       f"three {inch(DOWEL_DIA)} dia x {inch(DOWEL_DEPTH)} deep dowel bores on the inner "
+                       "face 1 in behind the front face, centered on the rail joints "
+                       f"{inch(RAIL_BOT_Z0 + RAIL_BOT_H / 2)}, "
+                       f"{inch(RAIL_MID_Z0 + RAIL_MID_H / 2)} and "
+                       f"{inch(RAIL_TOP_Z0 + RAIL_TOP_H / 2)} above the floor"})
 PARTS.append({"name": "post_rear", "solid": post_rl, "qty": 2, "material": "soft maple",
               "notes": "one of 2 REAR posts, left/right mirrored, grooves on the inner faces; "
                        "same blank and chamfer as post_front; side groove as post_front; "
-                       "back groove T18 x 3/8 on the inner face at 1/2 from the rear face, "
-                       f"stopped {GROOVE_STOP / IN:g} above the floor, open at top; no mortises"
+                       "back groove 3/4 ply (measure) wide x 3/8 deep on the inner face at 1/2 from the rear face, "
+                       f"stopped {inch(GROOVE_STOP)} above the floor, open at top; no mortises"
+                       "; " + _GROOVE_END_NOTE +
                        "; grain vertical"})
 INST += [("post_fl", post_fl), ("post_fr", post_fr), ("post_rl", post_rl), ("post_rr", post_rr)]
 
@@ -223,57 +253,68 @@ assert abs(post_rl.bounding_box().max.Y - YB) < 1e-6
 
 # --- Parts: side panels (qty 2), back panel, rear top cleat ----------------
 # Sides: outer face SETBACK behind the post face, housed GROOVE_D in each
-# post, bottom edge on the groove stop, top edge flush with the post tops.
+# post, bottom edge on the drawer-front line, top edge flush with the post
+# tops. Both bottom corners are notched GROOVE_D x NOTCH_H (Brian,
+# 2026-09-28): the housed tongue starts at TONGUE_Z0, GROOVE_CLR above the
+# post groove's end, so that end needs no squaring, and below the tongue the
+# panel butts the post face and hides it.
 # Back: the same, full height. A maple cleat glued and screwed inside its
 # top edge, between the posts, takes the figure-8 fasteners for the top
 # (Brian dropped the tenoned rear rail on 2026-09-27: the ply back is the
 # structure; the rail only ever gave the fasteners solid wood).
 SIDE_Y0 = Y0 + POST - GROOVE_D
 SIDE_L = FOOT_D - 2 * POST + 2 * GROOVE_D            # 412.75
-side_l = _box(X0 + SETBACK, SIDE_Y0, GROOVE_STOP, T18, SIDE_L, PANEL_H)
+side_l = _box(X0 + SETBACK, SIDE_Y0, PANEL_Z0, T18, SIDE_L, PANEL_H)
 # Bottom-panel groove run THROUGH, full length (Brian, 2026-09-27; was stopped
-# at the posts): its ends sit inside the post grooves, above their stop.
+# at the posts): its ends run out through the notched corners.
 side_l -= _box(BOT_X0, SIDE_Y0 - 1, BOT_Z0, BOT_GROOVE + 1, SIDE_L + 2, T12)
+for _y in (SIDE_Y0 - 1, SIDE_Y0 + SIDE_L - GROOVE_D):   # bottom-corner notches
+    side_l -= _box(X0 + SETBACK - 1, _y, PANEL_Z0 - 1, T18 + 2, GROOVE_D + 1, NOTCH_H + 1)
 BACK_X0 = X0 + POST - GROOVE_D
 BACK_Y0 = YB - SETBACK - T18
-back = _box(BACK_X0, BACK_Y0, GROOVE_STOP, RAIL_L, T18, BACK_H)
+back = _box(BACK_X0, BACK_Y0, PANEL_Z0, RAIL_L, T18, BACK_H)
 back -= _box(BACK_X0 - 1, BACK_Y0 - 1, BOT_Z0, RAIL_L + 2, BOT_GROOVE + 1, T12)
+for _x in (BACK_X0 - 1, BACK_X0 + RAIL_L - GROOVE_D):   # bottom-corner notches
+    back -= _box(_x, BACK_Y0 - 1, PANEL_Z0 - 1, GROOVE_D + 1, T18 + 2, NOTCH_H + 1)
 cleat = _box(X0 + POST, BACK_Y0 - RAIL_T, POST_H - CLEAT_H, OPEN_W, RAIL_T, CLEAT_H)
 for _x in FIG8_XS:
     cleat -= _fig8(_x, BACK_Y0 - RAIL_T + FIG8_OFFSET, POST_H)   # opens through the cleat's front (inner) face
 
 side_r = mirror_x(side_l)
-_BOT_GROOVE_NOTE = (f"through groove {BOT_GROOVE:g} deep x {T12:g} (T12) on the inner face for the bottom, "
-                    f"full length, lower wall {BOT_Z0 - GROOVE_STOP:.2f} above the bottom edge")
-PARTS.append({"name": "side", "solid": side_l, "qty": 2, "material": "ply 18mm",
-              "notes": "face grain vertical on the show face; housed 3/8 in each post"
-                       "; " + _BOT_GROOVE_NOTE})
-PARTS.append({"name": "back", "solid": back, "qty": 1, "material": "ply 18mm",
-              "notes": "housed 3/8 in each post; full height, top edge flush with the post tops; "
-                       "cleat_rear glued and screwed inside along the top edge"
-                       "; " + _BOT_GROOVE_NOTE})
+_BOT_GROOVE_NOTE = (f"through groove {inch(BOT_GROOVE)} deep x 1/2 ply (measure) tall on the inner face for "
+                    f"the bottom, full length, top wall {inch(BOT_TOP_Z - PANEL_Z0)} above the bottom edge")
+_NOTCH_NOTE = (f"both bottom corners notched {inch(GROOVE_D)} (from each end) x {inch(NOTCH_H)} tall: the "
+               f"housed tongue starts {inch(GROOVE_CLR)} above the post groove's end and the panel's bottom "
+               f"{inch(NOTCH_H)} butts the post face")
+PARTS.append({"name": "side", "solid": side_l, "qty": 2, "material": "3/4 ply",
+              "notes": "face grain vertical on the show face; housed 3/8 in each post above the notches"
+                       "; " + _NOTCH_NOTE + "; " + _BOT_GROOVE_NOTE})
+PARTS.append({"name": "back", "solid": back, "qty": 1, "material": "3/4 ply",
+              "notes": "housed 3/8 in each post above the notches; full height, top edge flush with the "
+                       "post tops; cleat_rear glued and screwed inside along the top edge"
+                       "; " + _NOTCH_NOTE + "; " + _BOT_GROOVE_NOTE})
 PARTS.append({"name": "cleat_rear", "solid": cleat, "qty": 1, "material": "soft maple",
-              "notes": f"REAR top cleat, 3/4 rail stock x {CLEAT_H / IN:g} tall, between the "
+              "notes": f"REAR top cleat, 3/4 rail stock x {inch(CLEAT_H)} tall, between the "
                        "posts; glued to the inside face of the back and clamped with #8 x 1-1/4 "
                        "screws countersunk from the cleat's inside face (nothing through the back), "
                        "top edge flush with the post tops; three figure-8 fasteners on top: "
-                       f"{FIG8_DIA / IN:g} dia x {FIG8_DEPTH / IN:g} deep forstner recesses centered "
-                       f"{FIG8_OFFSET / IN:g} from the front (inner) face, so each opens through it and "
-                       f"the fastener hangs over into the cabinet, at {FIG8_INSET / IN:g}, "
-                       f"{OPEN_W / 2 / IN:g} and {(OPEN_W - FIG8_INSET) / IN:g} from either end (blank "
+                       f"{inch(FIG8_DIA)} dia x {inch(FIG8_DEPTH)} deep forstner recesses centered "
+                       f"{inch(FIG8_OFFSET)} from the front (inner) face, so each opens through it and "
+                       f"the fastener hangs over into the cabinet, at {inch(FIG8_INSET)}, "
+                       f"{inch(OPEN_W / 2)} and {inch((OPEN_W - FIG8_INSET))} from either end (blank "
                        "datums), #8 x 5/8 screws into the cleat and into the top (replaces the tenoned "
                        "rear rail)"})
 INST += [("side_l", side_l), ("side_r", side_r), ("back", back), ("cleat_rear", cleat)]
 
-# Housed edges probed from the solids. The panel probes leave out the through
-# groove for the bottom, which runs out of the panel ends inside the posts.
+# Housed edges probed from the solids: the tongue above the notch. The probes
+# leave out the through groove for the bottom in case the tongue ever spans it.
 def _side_probe(y):
-    p = _box(X0 + SETBACK, y, GROOVE_STOP, T18, GROOVE_D, PANEL_H)
+    p = _box(X0 + SETBACK, y, TONGUE_Z0, T18, GROOVE_D, POST_H - TONGUE_Z0)
     return p - _box(BOT_X0, y - 1, BOT_Z0, BOT_GROOVE + 1, GROOVE_D + 2, T12)
 
 
 def _back_probe(x):
-    p = _box(x, BACK_Y0, GROOVE_STOP, GROOVE_D, T18, BACK_H)
+    p = _box(x, BACK_Y0, TONGUE_Z0, GROOVE_D, T18, POST_H - TONGUE_Z0)
     return p - _box(x - 1, BACK_Y0 - 1, BOT_Z0, GROOVE_D + 2, BOT_GROOVE + 1, T12)
 
 
@@ -281,13 +322,35 @@ assert_housed(side_l, post_fl, _side_probe(SIDE_Y0))
 assert_housed(side_l, post_rl, _side_probe(YB - POST))
 assert_housed(back, post_rl, _back_probe(BACK_X0))
 assert_housed(back, post_rr, _back_probe(XR - POST))
-# The bottom grooves run the full panel length (volume identity)
-assert abs(side_l.volume - (T18 * SIDE_L * PANEL_H - BOT_GROOVE * T12 * SIDE_L)) < 1e-3, side_l.volume
-assert abs(back.volume - (T18 * RAIL_L * BACK_H - BOT_GROOVE * T12 * RAIL_L)) < 1e-3, back.volume
+# Below the tongue, at every housed end: the clearance zone (groove end may be
+# rough here) is air on both sides, the post is solid below the groove stop,
+# and the panel's un-housed bottom reaches exactly to the post faces.
+for _y, _post in ((SIDE_Y0, post_fl), (YB - POST, post_rl)):
+    _gap = _box(X0 + SETBACK, _y, GROOVE_STOP, T18, GROOVE_D, TONGUE_Z0 - GROOVE_STOP)
+    _below = _box(X0 + SETBACK, _y, PANEL_Z0, T18, GROOVE_D, GROOVE_STOP - PANEL_Z0)
+    assert vol(_gap & _post) < 1e-3 and vol(_gap & side_l) < 1e-3, "groove clearance zone is not air"
+    assert abs(vol(_below & _post) - _below.volume) < 1e-3, "post not solid below the groove stop"
+for _x, _post in ((BACK_X0, post_rl), (XR - POST, post_rr)):
+    _gap = _box(_x, BACK_Y0, GROOVE_STOP, GROOVE_D, T18, TONGUE_Z0 - GROOVE_STOP)
+    _below = _box(_x, BACK_Y0, PANEL_Z0, GROOVE_D, T18, GROOVE_STOP - PANEL_Z0)
+    assert vol(_gap & _post) < 1e-3 and vol(_gap & back) < 1e-3, "groove clearance zone is not air"
+    assert abs(vol(_below & _post) - _below.volume) < 1e-3, "post not solid below the groove stop"
+_butt = (side_l & _box(X0 + SETBACK - 1, SIDE_Y0 - 1, PANEL_Z0, T18 + 2, SIDE_L + 2, NOTCH_H)).bounding_box()
+assert abs(_butt.min.Y - (Y0 + POST)) < 1e-6 and abs(_butt.max.Y - (YB - POST)) < 1e-6, "side's bottom not on the post faces"
+_butt = (back & _box(BACK_X0 - 1, BACK_Y0 - 1, PANEL_Z0, RAIL_L + 2, T18 + 2, NOTCH_H)).bounding_box()
+assert abs(_butt.min.X - (X0 + POST)) < 1e-6 and abs(_butt.max.X - (XR - POST)) < 1e-6, "back's bottom not on the post faces"
+# The bottom grooves run the full panel length and each corner notch takes
+# exactly GROOVE_D x T18 x NOTCH_H less whatever the groove already removed
+# there (volume identities)
+_oz = max(0.0, min(BOT_TOP_Z, TONGUE_Z0) - max(BOT_Z0, PANEL_Z0))   # notch height shared with the groove band
+_NOTCH_VOL = GROOVE_D * (T18 * NOTCH_H - BOT_GROOVE * _oz)
+assert abs(side_l.volume - (T18 * SIDE_L * PANEL_H - BOT_GROOVE * T12 * SIDE_L - 2 * _NOTCH_VOL)) < 1e-3, side_l.volume
+assert abs(back.volume - (T18 * RAIL_L * BACK_H - BOT_GROOVE * T12 * RAIL_L - 2 * _NOTCH_VOL)) < 1e-3, back.volume
 assert abs(side_l.bounding_box().min.X - X0 - SETBACK) < 1e-6
 assert abs(YB - back.bounding_box().max.Y - SETBACK) < 1e-6
-assert abs(side_l.bounding_box().max.Z - POST_H) < 1e-6
-assert abs(back.bounding_box().max.Z - POST_H) < 1e-6
+for _pnl in (side_l, back):
+    assert abs(_pnl.bounding_box().min.Z - PANEL_Z0) < 1e-6
+    assert abs(_pnl.bounding_box().max.Z - POST_H) < 1e-6
 _cb = cleat.bounding_box()
 assert abs(_cb.max.Y - BACK_Y0) < 1e-6 and abs(_cb.max.Z - POST_H) < 1e-6   # on the back's inner face, flush with the post tops
 assert abs(_cb.min.X - (X0 + POST)) < 1e-6 and abs(_cb.max.X - (XR - POST)) < 1e-6   # between the posts
@@ -326,21 +389,21 @@ rail_bot -= _box(RAIL_X0 - 1, RAIL_Y0 + RAIL_T - BOT_GROOVE, BOT_Z0, FRAME_RAIL_
 
 PARTS.append({"name": "rail_top", "solid": rail_top, "qty": 1, "material": "soft maple",
               "notes": f"FRONT top rail, 3/4 stock: butts flush into the post "
-                       f"faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; three "
-                       f"figure-8 fasteners on top: {FIG8_DIA / IN:g} dia x {FIG8_DEPTH / IN:g} deep "
-                       f"forstner recesses centered {FIG8_OFFSET / IN:g} from the rear (inner) face, so "
+                       f"faces, {inch(DOWEL_DIA)} dia x {inch(DOWEL_DEPTH)} deep dowel each end; three "
+                       f"figure-8 fasteners on top: {inch(FIG8_DIA)} dia x {inch(FIG8_DEPTH)} deep "
+                       f"forstner recesses centered {inch(FIG8_OFFSET)} from the rear (inner) face, so "
                        "each opens through it and the fastener hangs over into the cabinet, at "
-                       f"{FIG8_INSET / IN:g}, {OPEN_W / 2 / IN:g} and {(OPEN_W - FIG8_INSET) / IN:g} from "
+                       f"{inch(FIG8_INSET)}, {inch(OPEN_W / 2)} and {inch((OPEN_W - FIG8_INSET))} from "
                        "either end (blank datums), #8 x 5/8 screws into the rail and into the top"})
 PARTS.append({"name": "rail_mid", "solid": rail_mid, "qty": 1, "material": "soft maple",
               "notes": f"FRONT mid rail, 3/4 stock: butts flush into the post "
-                       f"faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; carries the "
+                       f"faces, {inch(DOWEL_DIA)} dia x {inch(DOWEL_DEPTH)} deep dowel each end; carries the "
                        "top drawer slides"})
 PARTS.append({"name": "rail_bot", "solid": rail_bot, "qty": 1, "material": "soft maple",
               "notes": f"FRONT bottom rail, 3/4 stock: butts flush into the "
-                       f"post faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; rabbet "
-                       f"{BOT_GROOVE:g} x {T12:g} (T12) on the rear-top edge, full length, for the "
-                       "bottom panel; glue and screw the bottom into it (no lip above)"})
+                       f"post faces, {inch(DOWEL_DIA)} dia x {inch(DOWEL_DEPTH)} deep dowel each end; rabbet "
+                       f"{inch(BOT_GROOVE)} deep x 1/2 ply (measure) tall on the rear-top edge, full length, "
+                       "for the bottom panel; glue and screw the bottom into it (no lip above)"})
 INST += [("rail_top", rail_top), ("rail_mid", rail_mid), ("rail_bot", rail_bot)]
 
 # Dowel joints: rails butt flush against the post inner faces (no tenon
@@ -369,9 +432,9 @@ BOT_Y1 = BACK_Y0 + BOT_GROOVE                # into the back groove
 bottom = _box(BOT_X0, Y0 + POST, BOT_Z0, BOT_W, FOOT_D - 2 * POST, T12)
 bottom += _box(X0 + POST, BOT_Y0, BOT_Z0, OPEN_W, Y0 + POST - BOT_Y0, T12)
 bottom += _box(X0 + POST, YB - POST, BOT_Z0, OPEN_W, BOT_Y1 - (YB - POST), T12)
-PARTS.append({"name": "bottom", "solid": bottom, "qty": 1, "material": "ply 12mm",
-              "notes": f"notch the four corners {X0 + POST - BOT_X0:.2f} wide x "
-                       f"{Y0 + POST - BOT_Y0:.2f} (front) / {BOT_Y1 - (YB - POST):.2f} (rear) "
+PARTS.append({"name": "bottom", "solid": bottom, "qty": 1, "material": "1/2 ply",
+              "notes": f"notch the four corners {inch(X0 + POST - BOT_X0)} wide x "
+                       f"{inch(Y0 + POST - BOT_Y0)} (front) / {inch(BOT_Y1 - (YB - POST))} (rear) "
                        "for the posts; edges in the side/back grooves and the rail_bot rabbet "
                        "(glue and screw the front edge)"})
 INST.append(("bottom", bottom))
@@ -396,11 +459,11 @@ front_bot = _box(FRONT_X0, FRONT_Y0, FLOOR_GAP, FRONT_W, FRONT_T, FRONT_BOT_H)
 front_top = _box(FRONT_X0, FRONT_Y0, FRONT_TOP_Z0, FRONT_W, FRONT_T, FRONT_TOP_H)
 PARTS.append({"name": "front_bot", "solid": front_bot, "qty": 1, "material": "soft maple",
               "notes": "grain along the length; screwed to the box from inside through "
-                       "slotted holes (cross-grain 11-3/8 wide); pull undecided; "
-                       "leave about 1.5 mm between the back face and the rails (Blum front gap)"})
+                       f"slotted holes (cross-grain {inch(FRONT_BOT_H)} wide); pull undecided; "
+                       f"leave about {inch(UM_FRONT_GAP)} between the back face and the rails (Blum front gap)"})
 PARTS.append({"name": "front_top", "solid": front_top, "qty": 1, "material": "soft maple",
               "notes": "grain along the length; screwed to the box from inside; pull undecided; "
-                       "leave about 1.5 mm between the back face and the rails (Blum front gap), "
+                       f"leave about {inch(UM_FRONT_GAP)} between the back face and the rails (Blum front gap), "
                        "the runner setback sets the closed position"})
 INST += [("front_bot", front_bot), ("front_top", front_top)]
 
@@ -464,25 +527,23 @@ def make_drawer(box_h, z0, sfx):
         assert abs(vol(_bp & back) - _bp.volume) < 1e-3, (sfx, "hook bore breaks out of the back")
         assert vol(_bp & bot) < 1e-3, (sfx, "hook bore hits the drawer bottom")
 
-    PARTS.append({"name": f"drawer_side_{sfx}", "solid": s, "qty": 2, "material": "ply 12mm",
-                  "notes": f"end rabbets {DADO:g} deep x {T12:g} (T12); bottom groove {DADO:g} "
-                           f"deep x {T6:g} (T6) with its top at {UM_RECESS + T6:g} above the "
-                           "bottom edge"})
-    PARTS.append({"name": f"drawer_front_{sfx}", "solid": front, "qty": 1, "material": "ply 12mm",
-                  "notes": f"box front (sub-front): bottom groove {DADO:g} deep x {T6:g} (T6) with "
-                           f"its top at {UM_RECESS + T6:g} above the bottom edge; locking devices "
+    _groove = (f"bottom groove {inch(DADO)} deep x 1/4 ply (measure) tall with its underside "
+               f"{inch(UM_RECESS)} above the bottom edge")
+    PARTS.append({"name": f"drawer_side_{sfx}", "solid": s, "qty": 2, "material": "1/2 ply",
+                  "notes": f"end rabbets {inch(DADO)} deep x 1/2 ply (measure) wide; " + _groove})
+    PARTS.append({"name": f"drawer_front_{sfx}", "solid": front, "qty": 1, "material": "1/2 ply",
+                  "notes": "box front (sub-front): " + _groove + "; locking devices "
                            "bored with the Blum T65.1600.01 template"})
-    PARTS.append({"name": f"drawer_back_{sfx}", "solid": back, "qty": 1, "material": "ply 12mm",
-                  "notes": f"box back, datums from the blank's ends: bottom groove {DADO:g} deep x "
-                           f"{T6:g} (T6) with its top at {UM_RECESS + T6:g} above the bottom edge, "
-                           f"STOPPED {UM_HOOK_NOTCH_W + DADO:g} from each end (= {UM_HOOK_NOTCH_W:g} from "
-                           f"the side's inner face); rear-hook notches {UM_HOOK_NOTCH_W + DADO:g} from "
-                           f"each end x {UM_HOOK_NOTCH_H:g} tall at both bottom corners; rear-hook bores "
-                           f"{_d:g} dia x {_dep:g} deep from the rear face, centred {_in + DADO:g} from "
-                           f"each end (= {_in:g} from the side's inner face) and {_up:g} above the bottom "
+    PARTS.append({"name": f"drawer_back_{sfx}", "solid": back, "qty": 1, "material": "1/2 ply",
+                  "notes": "box back, datums from the blank's ends: " + _groove + ", "
+                           f"STOPPED {inch(UM_HOOK_NOTCH_W + DADO)} from each end (= {inch(UM_HOOK_NOTCH_W)} from "
+                           f"the side's inner face); rear-hook notches {inch(UM_HOOK_NOTCH_W + DADO)} from "
+                           f"each end x {inch(UM_HOOK_NOTCH_H)} tall at both bottom corners; rear-hook bores "
+                           f"{inch(_d)} dia x {inch(_dep)} deep from the rear face, centered {inch(_in + DADO)} from "
+                           f"each end (= {inch(_in)} from the side's inner face) and {inch(_up)} above the bottom "
                            f"edge (Blum T65.1600.01 template)"})
-    PARTS.append({"name": f"drawer_bottom_{sfx}", "solid": bot, "qty": 1, "material": "ply 6mm",
-                  "notes": f"rear corners notched {UM_HOOK_NOTCH_W + DADO:g} (from each end) x {DADO:g} "
+    PARTS.append({"name": f"drawer_bottom_{sfx}", "solid": bot, "qty": 1, "material": "1/4 ply",
+                  "notes": f"rear corners notched {inch(UM_HOOK_NOTCH_W + DADO)} (from each end) x {inch(DADO)} "
                            "deep where the back groove is stopped"})
 
     s_r = mirror_x(s)
@@ -562,13 +623,9 @@ if TMP:
     export_stl(assembly, TMP)
 
 if os.environ.get("EXPORT"):
-    import sys
-    sys.path.insert(0, "/home/brian/ClaudeProjects/3d-modeling-brain/scripts")
-    from cutlist import write_cut_list
-
     PROJ = "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Drawer-bench"
     write_cut_list(PARTS, f"{PROJ}/cutlist.md", csv_path=f"{PROJ}/cutlist.csv",
-                   title="Drawer Bench 40x24x19-5/8 (provisional)")
+                   title="Drawer Bench 40x24x19-5/8 (provisional)", units="in", denom=32)
     export_step(assembly, f"{PROJ}/drawer_bench.step")
     print("exported cutlist + step")
 

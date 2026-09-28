@@ -64,9 +64,9 @@ EDGES = {
 # and whether the edge treatment stops above the foot.
 FEET = {
     "F1": ("Straight to the floor", "current CAD: panels 1-1/2 in and fronts 3/4 in off the floor",
-           dict(floor_gap=FLOOR_GAP, groove_stop=GROOVE_STOP, stopped=False)),
+           dict(floor_gap=FLOOR_GAP, groove_stop=PANEL_Z0, stopped=False)),
     "F2": ("Stopped edge, square foot", "edge treatment stops at the panel line, 1-1/2 in up; square block below",
-           dict(floor_gap=FLOOR_GAP, groove_stop=GROOVE_STOP, stopped=True)),
+           dict(floor_gap=FLOOR_GAP, groove_stop=PANEL_Z0, stopped=True)),
     "F3": ("3 in of leg showing", "panels and fronts both stop 3 in above the floor",
            dict(floor_gap=3 * IN, groove_stop=3 * IN, stopped=False)),
     "F4": ("4-1/2 in of leg showing", "panels and fronts both stop 4-1/2 in above the floor",

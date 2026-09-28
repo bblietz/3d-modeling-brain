@@ -8,8 +8,9 @@ must be air, a box just past its floor must be wood; a "through" cut is
 probed at the blank's end, a "stopped" one just beyond its stop). So a
 drawing cannot show a cut the model does not have, or in another place.
 
-Dimensions read inches to the nearest 1/16 with mm in parentheses, from
-the blank's own edges and ends. Faces are drawn as the machining face
+Dimensions read inches to the nearest 1/32 (no metric on the cut list,
+Brian 2026-09-28), from the blank's own edges and ends; a cut sized to
+plywood says so and is cut to the measured sheet. Faces are drawn as the machining face
 seen from inside the cabinet or drawer box; long parts lie lengthwise.
 
 Usage: .venv/bin/python projects/Drawer-bench/part_drawings.py
@@ -40,8 +41,11 @@ ROW = 16   # mm between callout rows above a blank (scaled with the view)
 
 
 def dt(mm):
-    """Dimension text: inches to 1/16, mm in parentheses."""
-    return f"{inch_frac(mm)}  ({mm:.1f})"
+    """Dimension text: inches to the nearest 1/32."""
+    return inch_frac(mm, 32)
+
+
+PLY18, PLY12, PLY6 = "3/4 ply (measure)", "1/2 ply (measure)", "1/4 ply (measure)"
 
 
 # --- drawing model ------------------------------------------------------------
@@ -245,12 +249,17 @@ def post(front):
     v.groove(GROOVE_STOP, SETBACK, POST_H - GROOVE_STOP, T18)
     v.mark(0, CHAMFER, POST_H, CHAMFER)
     v.mark(0, POST - CHAMFER, POST_H, POST - CHAMFER)
-    v.callout(POST_H * 0.55, SETBACK + T18 / 2, f"side-panel groove: {dt(T18)} wide (measured ply) x {dt(GROOVE_D)} deep, "
+    v.mark(PANEL_Z0, 0, PANEL_Z0, POST)
+    v.mark(TONGUE_Z0, 0, TONGUE_Z0, POST)
+    v.callout(POST_H * 0.55, SETBACK + T18 / 2, f"side-panel groove: {PLY18} wide x {dt(GROOVE_D)} deep, "
                                                  f"stopped {dt(GROOVE_STOP)} from the floor end, runs out the top end")
-    v.callout(POST_H * 0.2, CHAMFER, f"dashed: where the {inch_frac(CHAMFER)} chamfers start (all four long edges)")
+    v.callout(TONGUE_Z0, SETBACK + T18 * 0.8, f"dashed lines across: the panel's bottom edge ({dt(PANEL_Z0)}) and where its housed tongue starts ({dt(TONGUE_Z0)})")
+    v.callout(GROOVE_STOP, SETBACK + T18 * 0.2, f"leave the groove's end as the tool cuts it: full depth from {dt(TONGUE_Z0)} up, nothing below {dt(PANEL_Z0)}")
+    v.callout(POST_H * 0.2, CHAMFER, f"dashed along: where the {dt(CHAMFER)} chamfers start (all four long edges)")
     v.dim_v(0, SETBACK, -22)
-    v.dim_v(SETBACK, SETBACK + T18, -50)
+    v.dim_v(SETBACK, SETBACK + T18, -50, PLY18)
     v.dim_h(0, GROOVE_STOP, -22)
+    v.dim_h(0, TONGUE_Z0, -50)
     v.dim_h(0, POST_H, v.top_y())
     v.edge("left", "floor end")
     v.edge("right", "top end")
@@ -268,7 +277,7 @@ def post(front):
         for zc in zs:
             v.bore(zc, yc, DOWEL_DIA / 2)
             probes += cut_probes(X0 + POST - DOWEL_DEPTH, Y0 + yc - 2, zc - 2, DOWEL_DEPTH, 4, 4, "-x")
-        v.callout(zs[1], yc, f"dowel bores x3 for the rails: {inch_frac(DOWEL_DIA)} dia x {inch_frac(DOWEL_DEPTH)} deep, "
+        v.callout(zs[1], yc, f"dowel bores x3 for the rails: {dt(DOWEL_DIA)} dia x {dt(DOWEL_DEPTH)} deep, "
                              f"{dt(yc)} from the front face")
         for i, zc in enumerate(zs):
             v.dim_h(0, zc, -22 - 26 * i)
@@ -281,10 +290,13 @@ def post(front):
         v = View(POST_H, POST, "B  face toward the other rear post; floor end at left, REAR face along the top")
         gx = POST - SETBACK - T18
         v.groove(GROOVE_STOP, gx, POST_H - GROOVE_STOP, T18)
-        v.callout(POST_H * 0.55, gx + T18 / 2, f"back-panel groove: {dt(T18)} wide x {dt(GROOVE_D)} deep, "
+        v.mark(PANEL_Z0, 0, PANEL_Z0, POST)
+        v.mark(TONGUE_Z0, 0, TONGUE_Z0, POST)
+        v.callout(POST_H * 0.55, gx + T18 / 2, f"back-panel groove: {PLY18} wide x {dt(GROOVE_D)} deep, "
                                                 f"{dt(SETBACK)} from the REAR face, stopped {dt(GROOVE_STOP)} from the floor end")
+        v.callout(TONGUE_Z0, gx + T18 * 0.3, f"dashed lines and the groove's end: as in view A ({dt(PANEL_Z0)} and {dt(TONGUE_Z0)})")
         v.dim_v(gx + T18, POST, -22)
-        v.dim_v(gx, gx + T18, -50)
+        v.dim_v(gx, gx + T18, -50, PLY18)
         v.dim_h(0, GROOVE_STOP, -22)
         v.dim_h(0, POST_H, v.top_y())
         v.edge("left", "floor end")
@@ -305,14 +317,15 @@ def post(front):
         v.groove(SETBACK, 0, T18, GROOVE_D)
         v.groove(POST - GROOVE_D, POST - SETBACK - T18, GROOVE_D, T18)
         v.note(c + 2, POST - c - 4, "outside corner")
-    v.callout(c / 2, c / 2, f"{inch_frac(c)} chamfer x4")
+    v.callout(c / 2, c / 2, f"{dt(c)} chamfer x4")
     v.dim_v(0, POST, POST + 14)
     v.dim_h(0, POST, -12)
     v.edge("left", "OUTER face")
     views.append(v)
 
-    sheet(name, f"{name}  x2, left post shown, right post is the mirror image  |  3 x 3 x {inch_frac(POST_H)} soft maple, glued from two 8/4 pieces",
-          views, "Datums: outer face and floor end. Chamfer all four long edges first, then cut the grooves so the walls stay clean.",
+    sheet(name, f"{name}  x2, left post shown, right post is the mirror image  |  3 x 3 x {dt(POST_H)} soft maple, glued from two 8/4 pieces",
+          views, "Datums: outer face and floor end. Chamfer all four long edges first, then cut the grooves so the walls stay clean. "
+                 "The groove ends need no squaring: the panels are notched to clear them.",
           stack=True)
     check(name, solid, probes)
 
@@ -321,40 +334,57 @@ def panel(name):
     solid = part(name)
     is_side = name == "side"
     L, H = (SIDE_L, PANEL_H) if is_side else (RAIL_L, BACK_H)
-    gb = BOT_Z0 - GROOVE_STOP                      # groove bottom above the panel's bottom edge
+    gb = BOT_Z0 - PANEL_Z0                         # groove's lower wall above the panel's bottom edge
+    to_wall = abs(NOTCH_H - (gb + T12)) < 1e-6     # notch top on the groove's top wall (the shop datum)
     v = View(L, H, "inner face (toward the cabinet); bottom edge along the bottom")
     v.groove(0, gb, L, T12)
-    v.mark(GROOVE_D, 0, GROOVE_D, H)
-    v.mark(L - GROOVE_D, 0, L - GROOVE_D, H)
-    v.callout(L * 0.5, gb + T12 / 2, f"groove for the bottom panel, runs out both ends: {dt(T12)} tall (measured ply) x {dt(BOT_GROOVE)} deep")
-    v.callout(GROOVE_D, H * 0.75, f"dashed: {inch_frac(GROOVE_D)} at each end sits in a post groove")
+    for x in (0, L - GROOVE_D):
+        v.notch(x, 0, GROOVE_D, NOTCH_H)
+    v.mark(GROOVE_D, NOTCH_H, GROOVE_D, H)
+    v.mark(L - GROOVE_D, NOTCH_H, L - GROOVE_D, H)
+    v.callout(L * 0.5, gb + T12 / 2, f"groove for the bottom panel, runs out both ends: {PLY12} tall x {dt(BOT_GROOVE)} deep, top wall {dt(gb + T12)} up")
+    v.callout(GROOVE_D / 2, NOTCH_H / 2, f"bottom corners notched {dt(GROOVE_D)} x {dt(NOTCH_H)}{', up to the groove' + chr(39) + 's top wall' if to_wall else ''}; "
+                                         "the tongue above clears the post groove's end")
+    v.callout(GROOVE_D, H * 0.75, f"dashed: {dt(GROOVE_D)} at each end, above the notch, sits in a post groove")
     if not is_side:
         v.hidden(GROOVE_D, H - CLEAT_H, L - 2 * GROOVE_D, CLEAT_H)
-        v.callout(L * 0.75, H - CLEAT_H / 2, f"cleat_rear ({inch_frac(CLEAT_H)} tall) glued and screwed here, top edge flush")
-    v.dim_v(0, gb, -22)
-    v.dim_v(gb, gb + T12, -50)
+        v.callout(L * 0.75, H - CLEAT_H / 2, f"cleat_rear ({dt(CLEAT_H)} tall) glued and screwed here, top edge flush")
+    v.dim_v(0, gb + T12, -22)
+    v.dim_v(gb, gb + T12, -50, PLY12)
     v.dim_h(0, GROOVE_D, -22)
     v.dim_h(0, L, v.top_y())
-    v.dim_v(0, H, L + 26)
-    v.edge("bottom", f"bottom edge ({inch_frac(GROOVE_STOP)} off the floor)")
+    v.dim_v(0, NOTCH_H, L + 26)
+    v.dim_v(0, H, L + 54)
+    v.edge("bottom", f"bottom edge ({dt(PANEL_Z0)} off the floor)")
     v.edge("left", "front end" if is_side else "left end")
-    e = View(T18, 70, "section, lower 70 mm", size="small")
+    e = View(T18, 70, "section, bottom edge", size="small")
     e.groove(T18 - BOT_GROOVE, gb, BOT_GROOVE, T12)
     e.callout(T18 - BOT_GROOVE / 2, gb + T12 / 2, f"{dt(BOT_GROOVE)} deep")
-    e.dim_h(0, T18, -12, f"{T18:g} ply")
+    e.dim_h(0, T18, -12, PLY18)
     e.edge("left", "show face")
     e.edge("right", "inner face")
-    sheet(name, f"{name}  {'x2, left shown, right is the mirror image' if is_side else 'x1'}  |  {dt(T18)} ply, {inch_frac(L)} long x {inch_frac(H)} tall, face grain vertical",
-          [v, e], "The groove runs out both ends; the ends sit 3/8 in deep in the post grooves, above their stop, so nothing shows.")
+    sheet(name, f"{name}  {'x2, left shown, right is the mirror image' if is_side else 'x1'}  |  {PLY18}, {dt(L)} long x {dt(H)} tall, face grain vertical",
+          [v, e], "The groove runs out both ends. Above the notches the ends sit 3/8 deep in the post grooves; below them the panel "
+                  "butts the post face and covers the groove's end, so nothing shows.")
+    # The groove's floor is probed between the notches; at each end a box
+    # straddling the notch boundary proves the groove runs into the notch.
     if is_side:
         x_in = X0 + SETBACK + T18 - BOT_GROOVE
-        probes = cut_probes(x_in, SIDE_Y0, BOT_Z0, BOT_GROOVE, SIDE_L, T12, "-x")
-        probes.append((_box(x_in + 1, SIDE_Y0 - 2, BOT_Z0 + 1, BOT_GROOVE - 2, 3, T12 - 2), "empty"))
-        probes.append((_box(x_in + 1, SIDE_Y0 + SIDE_L - 1, BOT_Z0 + 1, BOT_GROOVE - 2, 3, T12 - 2), "empty"))
+        probes = cut_probes(x_in, SIDE_Y0 + GROOVE_D, BOT_Z0, BOT_GROOVE, SIDE_L - 2 * GROOVE_D, T12, "-x")
+        probes.append((_box(x_in + 1, SIDE_Y0 + GROOVE_D - 1, BOT_Z0 + 1, BOT_GROOVE - 2, 3, T12 - 2), "empty"))
+        probes.append((_box(x_in + 1, SIDE_Y0 + SIDE_L - GROOVE_D - 2, BOT_Z0 + 1, BOT_GROOVE - 2, 3, T12 - 2), "empty"))
+        for y, beside in ((SIDE_Y0, SIDE_Y0 + GROOVE_D + 0.5), (SIDE_Y0 + SIDE_L - GROOVE_D, SIDE_Y0 + SIDE_L - GROOVE_D - 1.5)):
+            probes.append((_box(X0 + SETBACK + 1, y + 1, PANEL_Z0 + 1, T18 - 2, GROOVE_D - 2, NOTCH_H - 2), "empty"))          # notch
+            probes.append((_box(X0 + SETBACK + 1, y + 1, PANEL_Z0 + NOTCH_H + 0.5, T18 - 2, GROOVE_D - 2, 1), "solid"))       # tongue above it
+            probes.append((_box(X0 + SETBACK + 1, beside, PANEL_Z0 + 1, T18 - BOT_GROOVE - 2, 1, NOTCH_H - 2), "solid"))      # panel beside it
     else:
-        probes = cut_probes(BACK_X0, BACK_Y0, BOT_Z0, RAIL_L, BOT_GROOVE, T12, "+y")
-        probes.append((_box(BACK_X0 - 2, BACK_Y0 + 1, BOT_Z0 + 1, 3, BOT_GROOVE - 2, T12 - 2), "empty"))
-        probes.append((_box(BACK_X0 + RAIL_L - 1, BACK_Y0 + 1, BOT_Z0 + 1, 3, BOT_GROOVE - 2, T12 - 2), "empty"))
+        probes = cut_probes(BACK_X0 + GROOVE_D, BACK_Y0, BOT_Z0, RAIL_L - 2 * GROOVE_D, BOT_GROOVE, T12, "+y")
+        probes.append((_box(BACK_X0 + GROOVE_D - 1, BACK_Y0 + 1, BOT_Z0 + 1, 3, BOT_GROOVE - 2, T12 - 2), "empty"))
+        probes.append((_box(BACK_X0 + RAIL_L - GROOVE_D - 2, BACK_Y0 + 1, BOT_Z0 + 1, 3, BOT_GROOVE - 2, T12 - 2), "empty"))
+        for x, beside in ((BACK_X0, BACK_X0 + GROOVE_D + 0.5), (BACK_X0 + RAIL_L - GROOVE_D, BACK_X0 + RAIL_L - GROOVE_D - 1.5)):
+            probes.append((_box(x + 1, BACK_Y0 + 1, PANEL_Z0 + 1, GROOVE_D - 2, T18 - 2, NOTCH_H - 2), "empty"))
+            probes.append((_box(x + 1, BACK_Y0 + 1, PANEL_Z0 + NOTCH_H + 0.5, GROOVE_D - 2, T18 - 2, 1), "solid"))
+            probes.append((_box(beside, BACK_Y0 + BOT_GROOVE + 1, PANEL_Z0 + 1, 1, T18 - BOT_GROOVE - 2, NOTCH_H - 2), "solid"))
     check(name, solid, probes)
 
 
@@ -372,14 +402,14 @@ def rail(name):
     if has_dowels:
         for x in (0, L - DOWEL_DEPTH):
             v.hidden(x, h / 2 - DOWEL_DIA / 2, DOWEL_DEPTH, DOWEL_DIA)
-        v.callout(DOWEL_DEPTH / 2, h / 2, f"dowel bore in each end, centered on the end: {inch_frac(DOWEL_DIA)} dia x {inch_frac(DOWEL_DEPTH)} deep")
+        v.callout(DOWEL_DEPTH / 2, h / 2, f"dowel bore in each end, centered on the end: {dt(DOWEL_DIA)} dia x {dt(DOWEL_DEPTH)} deep")
         yc, zc = RAIL_Y0 + RAIL_T / 2, z0 + h / 2
         probes += cut_probes(RAIL_X0, yc - 2, zc - 2, DOWEL_DEPTH, 4, 4, "+x")
         probes += cut_probes(RAIL_X0 + L - DOWEL_DEPTH, yc - 2, zc - 2, DOWEL_DEPTH, 4, 4, "-x")
     if name == "rail_bot":
         v.groove(0, h - T12, L, T12)
-        v.callout(L * 0.6, h - T12 / 2, f"rabbet on the rear-top edge, full length: {dt(T12)} tall x {dt(BOT_GROOVE)} deep; the bottom panel sits in it")
-        v.dim_v(h - T12, h, L + 26)
+        v.callout(L * 0.6, h - T12 / 2, f"rabbet on the rear-top edge, full length: {PLY12} tall x {dt(BOT_GROOVE)} deep; the bottom panel sits in it")
+        v.dim_v(h - T12, h, L + 26, PLY12)
         yr = RAIL_Y0 + RAIL_T - BOT_GROOVE
         probes += cut_probes(RAIL_X0, yr, BOT_Z0, L, BOT_GROOVE, T12, "-y")
         probes.append((_box(RAIL_X0 - 2, yr + 1, BOT_Z0 + 1, 3, BOT_GROOVE - 2, T12 - 2), "empty"))
@@ -394,7 +424,7 @@ def rail(name):
         xs = [x - RAIL_X0 for x in FIG8_XS]
         for x in xs:
             t.bore(x, FIG8_OFFSET, FIG8_DIA / 2)
-        t.callout(xs[1], FIG8_OFFSET, f"figure-8 recess x3: {inch_frac(FIG8_DIA)} forstner, {inch_frac(FIG8_DEPTH)} deep, "
+        t.callout(xs[1], FIG8_OFFSET, f"figure-8 recess x3: {dt(FIG8_DIA)} forstner, {dt(FIG8_DEPTH)} deep, "
                                       f"center {dt(FIG8_OFFSET)} from the {inner} face so it opens through it")
         for i, x in enumerate(xs):
             t.dim_h(0, x, -22 - 26 * i)
@@ -425,7 +455,7 @@ def rail(name):
     views.append(e)
 
     what = {"rail_top": "FRONT top rail", "rail_mid": "FRONT mid rail", "rail_bot": "FRONT bottom rail", "cleat_rear": "REAR top cleat"}[name]
-    sheet(name, f"{name}  x1  |  {what}, {dt(RAIL_T)} soft maple, {inch_frac(h)} tall x {inch_frac(L)} long",
+    sheet(name, f"{name}  x1  |  {what}, {dt(RAIL_T)} soft maple, {dt(h)} tall x {dt(L)} long",
           views, "Rails butt flush into the front posts on the dowels; the mid rail carries the top drawer's slides."
           if has_dowels else "Glued to the inside face of the back, top edge flush with the post tops; clamp with #8 x 1-1/4 screws from this face.",
           stack=has_fig8)
@@ -451,7 +481,7 @@ def bottom_panel():
     v.dim_v(0, D, W + 26)
     v.edge("bottom", "FRONT edge")
     v.edge("left", "left edge, into the side groove")
-    sheet("bottom", f"bottom  x1  |  {dt(T12)} ply, {inch_frac(W)} x {inch_frac(D)} overall, four corners notched around the posts",
+    sheet("bottom", f"bottom  x1  |  {PLY12}, {dt(W)} x {dt(D)} overall, four corners notched around the posts",
           [v], "Notch datums are the blank's edges. Pre-join to the back off the bench (see design.md, assembly order).")
     probes = []
     for x, beside in ((BOT_X0, BOT_X0 + nw + 0.5), (BOT_X0 + W - nw, BOT_X0 + W - nw - 1.5)):
@@ -468,7 +498,7 @@ def plain(name, L, H, T, note):
     v.dim_h(0, L, v.top_y())
     v.dim_v(0, H, L + 26)
     v.edge("bottom", "bottom edge")
-    sheet(name, f"{name}  x1  |  {dt(T)} soft maple, {inch_frac(H)} tall x {inch_frac(L)} long", [v])
+    sheet(name, f"{name}  x1  |  {dt(T)} soft maple, {dt(H)} tall x {dt(L)} long", [v])
 
 
 def drawer_side(sfx):
@@ -480,21 +510,21 @@ def drawer_side(sfx):
     v.groove(0, 0, T12, box_h)
     v.groove(BOX_D - T12, 0, T12, box_h)
     v.groove(T12, UM_RECESS, BOX_D - 2 * T12, T6)
-    v.callout(T12 / 2, box_h * 0.7, f"end rabbets, both ends: {dt(T12)} wide x {dt(DADO)} deep; the box front and back sit in them")
-    v.callout(BOX_D / 2, UM_RECESS + T6 / 2, f"bottom groove, runs out both ends: {dt(T6)} tall x {dt(DADO)} deep")
-    v.dim_h(0, T12, -22)
+    v.callout(T12 / 2, box_h * 0.7, f"end rabbets, both ends: {PLY12} wide x {dt(DADO)} deep; the box front and back sit in them")
+    v.callout(BOX_D / 2, UM_RECESS + T6 / 2, f"bottom groove, runs out both ends: {PLY6} tall x {dt(DADO)} deep, underside {dt(UM_RECESS)} up")
+    v.dim_h(0, T12, -22, PLY12)
     v.dim_v(0, UM_RECESS, -22)
-    v.dim_v(UM_RECESS, UM_RECESS + T6, -50)
+    v.dim_v(UM_RECESS, UM_RECESS + T6, -50, PLY6)
     v.dim_h(0, BOX_D, v.top_y())
     v.dim_v(0, box_h, BOX_D + 26)
     v.edge("bottom", "bottom edge")
     v.edge("left", "FRONT end")
-    e = View(T12, min(box_h, 60), "section, lower 60 mm", size="small")
+    e = View(T12, min(box_h, 60), "section, bottom edge", size="small")
     e.groove(T12 - DADO, UM_RECESS, DADO, T6)
     e.callout(T12 - DADO / 2, UM_RECESS + T6 / 2, f"{dt(DADO)} deep")
     e.edge("right", "inner face")
-    e.dim_h(0, T12, -12, f"{T12:g} ply")
-    sheet(name, f"{name}  x2, left shown, right is the mirror image  |  {dt(T12)} ply, {inch_frac(box_h)} tall x {inch_frac(BOX_D)} long",
+    e.dim_h(0, T12, -12, PLY12)
+    sheet(name, f"{name}  x2, left shown, right is the mirror image  |  {PLY12}, {dt(box_h)} tall x {dt(BOX_D)} long",
           [v, e], "Undermount box: the bottom groove sits 1/2 in up so the Blum runner clears under the bottom.")
     xg = BOX_X0 + T12 - DADO
     probes = cut_probes(xg, BOX_Y0, z0, DADO, T12, box_h, "-x")
@@ -519,27 +549,27 @@ def drawer_end(sfx, back):
         d, dep, inset, up = UM_HOOK_BORE
         for x in (inset + DADO, L - inset - DADO):
             v.bore(x, up, d / 2, hidden=True)
-        v.callout(L / 2, UM_RECESS + T6 / 2, f"bottom groove, STOPPED {dt(stop)} from each end: {dt(T6)} tall x {dt(DADO)} deep")
+        v.callout(L / 2, UM_RECESS + T6 / 2, f"bottom groove, STOPPED {dt(stop)} from each end: {PLY6} tall x {dt(DADO)} deep, underside {dt(UM_RECESS)} up")
         v.callout(stop / 2, UM_HOOK_NOTCH_H / 2, f"rear-hook notches, both bottom corners: {dt(stop)} wide x {dt(UM_HOOK_NOTCH_H)} tall")
-        v.callout(L - inset - DADO, up, f"rear-hook bores (dashed, from the REAR face): {d:g} dia x {dep:g} deep, Blum T65.1600.01 template")
+        v.callout(L - inset - DADO, up, f"rear-hook bores (dashed, from the REAR face): {dt(d)} dia x {dt(dep)} deep, Blum T65.1600.01 template")
         v.dim_h(0, stop, -22)
         v.dim_v(0, UM_HOOK_NOTCH_H, -22)
         v.dim_h(L - inset - DADO, L, -22)
         v.dim_v(0, UM_RECESS, L + 26)
-        v.dim_v(UM_RECESS, UM_RECESS + T6, L + 54)
+        v.dim_v(UM_RECESS, UM_RECESS + T6, L + 54, PLY6)
         v.dim_v(0, up, L + 82)
         v.dim_v(0, box_h, L + 110)
     else:
         v.groove(0, UM_RECESS, L, T6)
-        v.callout(L / 2, UM_RECESS + T6 / 2, f"bottom groove, runs out both ends: {dt(T6)} tall x {dt(DADO)} deep")
+        v.callout(L / 2, UM_RECESS + T6 / 2, f"bottom groove, runs out both ends: {PLY6} tall x {dt(DADO)} deep, underside {dt(UM_RECESS)} up")
         v.callout(L * 0.25, box_h * 0.7, "Blum locking devices: bore with the T65.1600.01 template")
         v.dim_v(0, UM_RECESS, -22)
-        v.dim_v(UM_RECESS, UM_RECESS + T6, -50)
+        v.dim_v(UM_RECESS, UM_RECESS + T6, -50, PLY6)
         v.dim_v(0, box_h, L + 26)
     v.dim_h(0, L, v.top_y())
     v.edge("bottom", "bottom edge")
     v.edge("left", "left end, into the side's rabbet")
-    sheet(name, f"{name}  x1  |  {dt(T12)} ply, {inch_frac(box_h)} tall x {inch_frac(L)} long  ({'box back' if back else 'box front, behind the maple front'})",
+    sheet(name, f"{name}  x1  |  {PLY12}, {dt(box_h)} tall x {dt(L)} long  ({'box back' if back else 'box front, behind the maple front'})",
           [v], "Both ends sit in the sides' end rabbets. Datums: the blank's own ends and bottom edge.")
     y_face = BOX_Y0 + BOX_D - T12 if back else BOX_Y0 + T12 - DADO
     if back:
@@ -569,7 +599,7 @@ def drawer_bottom(sfx):
     v.dim_h(0, L, v.top_y())
     v.dim_v(0, D, L + 26)
     v.edge("bottom", "FRONT edge")
-    sheet(name, f"{name}  x1  |  {dt(T6)} ply, {inch_frac(D)} x {inch_frac(L)}", [v],
+    sheet(name, f"{name}  x1  |  {PLY6}, {dt(D)} x {dt(L)}", [v],
           "Sits in the 1/4 in grooves of the sides, front and back, 1/2 in above the box's bottom edges.")
     x_blank = BOX_X0 + T12 - DADO
     y_back = BOX_Y0 + BOX_D - T12
@@ -591,7 +621,7 @@ def top_slab():
     v.dim_h(0, TOP_W, v.top_y())
     v.dim_v(0, TOP_D, TOP_W + 26)
     v.edge("bottom", "FRONT edge")
-    sheet("top", f"top  x1  |  butcherblock {dt(TOP_T)} thick, {inch_frac(TOP_D)} x {inch_frac(TOP_W)}", [v],
+    sheet("top", f"top  x1  |  butcherblock {dt(TOP_T)} thick, {dt(TOP_D)} x {dt(TOP_W)}", [v],
           "Purchased to match the Boos island; edge profile and overhang still to be measured there.")
 
 

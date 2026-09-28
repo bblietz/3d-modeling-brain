@@ -44,11 +44,15 @@ confirmed against the locked `POST` constant.
 - **Side panels (2) and back panel (1)**: 3/4 in plywood, housed in
   grooves in the posts, outer face 1/2 in behind the post face
   (frame-and-panel shadow). Grooves 3/4 in wide (cut to measured ply),
-  3/8 in deep, stopped 3/4 in above the floor (the same line as the
-  bottom drawer front; Brian, 2026-09-27, was 1-1/2 in), open at the
-  top. Provisional blanks: sides 16-1/4 x 17-1/8 in, back 32-1/4 x
-  17-1/8 in (each includes 3/8 in per housed edge; height runs from the
-  groove stop to the top of the posts).
+  3/8 in deep, stopped 1-1/2 in above the floor, open at the top; the
+  stop needs no squaring (Brian, 2026-09-28): both bottom corners of
+  each panel are notched 3/8 x 1-1/2 in, so the housed tongue starts
+  2-1/4 in above the floor, 3/4 in above the groove's end, and the
+  panel's bottom 1-1/2 in butts the post face and covers that end.
+  Panel bottoms on the drawer-front line, 3/4 in above the floor
+  (Brian, 2026-09-27, was 1-1/2 in). Provisional blanks: sides 16-1/4 x
+  17-1/8 in, back 32-1/4 x 17-1/8 in (each includes 3/8 in per housed
+  edge; height runs from the panel bottom to the top of the posts).
 - **Front frame (hidden)**: soft maple 3/4 in thick, dowel-jointed into
   the front posts (two 3/8 in dowels per rail, one at each end, 1 in
   deep into post and rail; Brian, 2026-09-18, was stub-tenoned 3/8 in
@@ -136,7 +140,9 @@ confirmed against the locked `POST` constant.
 
 - Overall envelope equals the overall constants.
 - Every panel and rail edge sits inside its groove, measured from the
-  solids (probe booleans), including the stopped groove height.
+  solids (probe booleans): the housed tongue above each corner notch;
+  below it the groove's clearance zone is air on both sides, the post is
+  solid below the stop, and the panel's bottom reaches the post faces.
 - Opening between posts; box outer width = opening minus (42 minus two
   side thicknesses); runner + inset setback + 6..48 mm equals the inside
   depth from the post face; the runner's front screw zone (7 to 34 mm
@@ -155,7 +161,8 @@ confirmed against the locked `POST` constant.
 - `projects/Drawer-bench/drawer_bench.py` (build123d, parametric;
   env `EXPORT=1` regenerates cut list + STEP, `TMP_STL` for renders,
   `SHOW=1` pushes to the OCP viewer).
-- `cutlist.md` and `cutlist.csv` (mm and inches), `drawer_bench.step`,
+- `cutlist.md` (inches only, to 1/32; Brian, 2026-09-28) and
+  `cutlist.csv` (mm, the page builder's data), `drawer_bench.step`,
   `images/final-4view.png`, viewer sign-off before the cut list is final.
 - Re-run after measuring: overall size, top thickness/overhang/edge,
   plywood actuals, purchased slide spec.
@@ -259,6 +266,23 @@ open for Brian's review (change the constant, re-run the file).
   passed on: square, 3/8 roundover, 3/4 outer-corner chamfer or
   roundover, a stopped edge with a square foot, and 3 or 4-1/2 in of
   leg showing (`leg_options.py`, `leg-options.html`).
+- **Post grooves stop 1-1/2 in above the floor and the panels are
+  notched to meet them** (Brian, 2026-09-28: "stop the dado before and
+  put a notch in the panel to fit", so the groove's end need not be
+  cleaned square). Each side and back panel loses a 3/8 x 1-1/2 in
+  corner at both bottom ends; the housed tongue starts 2-1/4 in above
+  the floor (on the bottom panel's top face, so the notch runs up to the
+  bottom groove's top wall and the tongue is full thickness its whole
+  length), 3/4 in above the groove's nominal end, and the panel's bottom
+  1-1/2 in butts the post face and hides that end. The groove may round
+  or ramp out anywhere between 3/4 in (the panel's bottom edge; nothing
+  below it) and 2-1/4 in (full depth from there up). CAD: `PANEL_Z0 =
+  FLOOR_GAP`, `NOTCH_H = 1-1/2 in`, `GROOVE_CLR = 3/4 in`, `GROOVE_STOP =
+  PANEL_Z0 + NOTCH_H - GROOVE_CLR`; asserts keep the stop between the
+  panel bottom and the tongue, the clearance at least half a ply width
+  plus 1/4 in (a round-ended router groove), and the tongue's start
+  outside the bottom-groove band (no sliver). The 1-1/2 in notch and the
+  3/4 in clearance are my numbers; the request set the principle.
 - **Drawer-box bottoms are 1/4 in (6 mm) plywood, not 1/2 in** (Brian,
   2026-09-17; landed on 1/4 in after a brief 1/8 in): only the bottom
   panel's own thickness changed. The groove that houses it in the

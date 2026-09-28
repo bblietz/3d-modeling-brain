@@ -36,7 +36,8 @@ reviewed, not built; update with measured fits after the build.
 - Registry notes are the cut list: the emitter prints bounding-box blanks
   and merges identical rows, so every note must be self-identifying
   (FRONT/REAR, left/right mirrored) and every number in a note must be an
-  f-string of the constants or it goes stale on the measured re-run.
+  f-string of the constants (through `inch()`, since 2026-09-28) or it
+  goes stale on the measured re-run.
 - Cut-list rows must be machining-specific: the emitter used to merge
   parts with identical blanks and materials (drawer front with drawer
   back, plain rail with rabbeted rail), hiding which one gets the Blum
@@ -54,6 +55,22 @@ reviewed, not built; update with measured fits after the build.
   volume asserts had absorbed: the dowel helper bored 1 mm deeper than
   the documented 1 in on both sides. Draw from constants, verify against
   solids; the two disagree exactly where the model is wrong.
+- Stopped groove plus notched panel (Brian, 2026-09-28): a stopped
+  groove whose end must be squared to seat a panel is chisel work at
+  every post; notching the panel's corner instead puts the tolerance in
+  the notch, so the groove may round or ramp out anywhere in a window
+  (here 3/4 to 2-1/4 in from the floor end) and the panel's un-housed
+  bottom covers it. Model the window as a clearance constant and assert
+  it (at least the bit radius plus 1/4 in), keep the tongue's start out
+  of any other groove band (a 0.7 mm sliver otherwise), and probe the
+  clearance zone as air on both sides with the post solid below it.
+- Cut list in inches only, 1/32 (Brian, 2026-09-28): once the mm column
+  goes, the fraction carries all the precision, and 1/16 is too coarse
+  for blanks derived from metric ply (a drawer end came out 0.67 mm
+  long at 1/16, 0.12 mm at 1/32). Cuts sized to plywood print "3/4 ply
+  (measure)" rather than a fraction: 18 mm prints as 23/32, which reads
+  as a number to hit. Give the datum that is a clean inch (the bottom
+  groove's top wall at 1-1/2, not its lower wall at 1-1/32).
 - Subagent-driven build: one implementer per task with the complete code
   in the brief, one reviewer per task that mutation-tests the asserts, a
   whole-file review at the end. The per-task reviews found only Minor
@@ -68,11 +85,16 @@ reviewed, not built; update with measured fits after the build.
   island (footprint 37-1/2 x 21-1/2, opening 31-1/2 at the current
   numbers).
 - 3 in posts glued from 8/4, 3/8 chamfer, no taper; 3/4 ply sides and
-  back 1/2 in behind the post faces in T18 x 3/8 grooves stopped 3/4 in
-  above the floor, the bottom drawer front's line (was 1-1/2 in until
-  2026-09-27, when Brian revisited the legs against a rendered options
-  page and kept the 3/8 chamfer, E1, but wanted the panels to end on the
-  same line as the drawer); hidden front frame 1 in behind the post faces, rails
+  back 1/2 in behind the post faces in T18 x 3/8 grooves stopped 1-1/2
+  in above the floor with their ends left as the tool cuts them: the
+  panels' bottom corners are notched 3/8 x 1-1/2 in, so the housed
+  tongue starts 2-1/4 in up, 3/4 in clear of the groove's end, and the
+  panel's bottom 1-1/2 in butts the post face over it (Brian,
+  2026-09-28). Panel bottoms on the bottom drawer front's line, 3/4 in
+  above the floor (was 1-1/2 in until 2026-09-27, when Brian revisited
+  the legs against a rendered options page and kept the 3/8 chamfer,
+  E1, but wanted the panels to end on the same line as the drawer);
+  hidden front frame 1 in behind the post faces, rails
   1 / 1 / 1-1/2 in tall from plain 3/4 in stock (milled to T18 for the
   tenons until 2026-09-27), dowel-jointed into the front
   posts (two 3/8 in dowels per rail, one each end, 1 in deep; was

@@ -4,8 +4,8 @@
 Re-run after every `EXPORT=1 drawer_bench.py` and `part_drawings.py`, then
 republish the page (same URL). The page has a case section and a drawer
 section, each grouped by material in cutting order; every row shows inches
-large with mm beside, the machining notes, its shop drawing (tap to zoom),
-and a tick box (per device, localStorage).
+to the nearest 1/32 (no metric: Brian, 2026-09-28), the machining notes,
+its shop drawing (tap to zoom), and a tick box (per device, localStorage).
 
 Usage: .venv/bin/python projects/Drawer-bench/make_cutlist_page.py
 """
@@ -20,21 +20,21 @@ PROJ = f"{VAULT}/projects/Drawer-bench"
 sys.path.insert(0, f"{VAULT}/scripts")
 from cutlist import inch_frac  # noqa: E402
 
-ORDER = ["soft maple", "ply 18mm", "ply 12mm", "ply 6mm", "maple butcherblock (Boos match)"]
+ORDER = ["soft maple", "3/4 ply", "1/2 ply", "1/4 ply", "maple butcherblock (Boos match)"]
 CASE_LABEL = {
     "soft maple": "Soft maple: posts, rails, cleat",
-    "ply 18mm": "3/4 in plywood (18 mm nominal, measure): sides and back",
-    "ply 12mm": "1/2 in plywood (12 mm nominal, measure): case bottom",
+    "3/4 ply": "3/4 in plywood (measure the sheet): sides and back",
+    "1/2 ply": "1/2 in plywood (measure the sheet): case bottom",
     "maple butcherblock (Boos match)": "Butcherblock top (purchased, Boos match)",
 }
 DRAWER_LABEL = {
     "soft maple": "Drawer fronts, soft maple",
-    "ply 12mm": "Drawer boxes, 1/2 in plywood (12 mm nominal, measure)",
-    "ply 6mm": "Drawer bottoms, 1/4 in plywood (6 mm nominal, measure)",
+    "1/2 ply": "Drawer boxes, 1/2 in plywood (measure the sheet)",
+    "1/4 ply": "Drawer bottoms, 1/4 in plywood (measure the sheet)",
 }
 TEMPLATE_TAG = "not a plain rectangular blank"
 HARDWARE = [
-    ("2 pairs", "Blum TANDEM plus BLUMOTION 563H4570B undermount slides, 18 in class (471 mm runner)",
+    ("2 pairs", "Blum TANDEM plus BLUMOTION 563H4570B undermount slides, 18 in class",
      "confirm the purchased spec against the 563H sheet before boring the boxes"),
     ("2 pairs", "Blum rear mounting brackets 295.3750.02", "on the back panel, at runner height"),
     ("2 sets", "Blum locking devices for the box fronts", "bored with the T65.1600.01 template"),
@@ -68,13 +68,12 @@ def load_rows():
 
 
 def dims(r):
-    t, w, l = r["thickness_mm"], r["width_mm"], r["length_mm"]
-    return (f"{inch_frac(t)} x {inch_frac(w)} x {inch_frac(l)}", f"{t:g} x {w:g} x {l:g} mm")
+    return " x ".join(inch_frac(r[k], 32) for k in ("thickness_mm", "width_mm", "length_mm"))
 
 
 def part_li(r):
     pid = "cut-" + r["part"].replace("/", "-")
-    din, dmm = dims(r)
+    din = dims(r)
     chip = '<span class="chip warn">see drawing: not a plain rectangle</span>' if r["template"] else ""
     fig = (f'<figure class="dwg" tabindex="0"><img src="{r["drawing"]}" alt="shop drawing of {html.escape(r["part"])}" loading="lazy">'
            f'<figcaption>tap to zoom</figcaption></figure>') if r["has_drawing"] else ""
@@ -84,7 +83,7 @@ def part_li(r):
         <div class="body">
           <label for="{pid}">
             <div class="line1"><span class="qty mono">{r['qty']}&times;</span><span class="name mono">{html.escape(r['part'])}</span>{chip}</div>
-            <div class="dims mono"><b>{html.escape(din)}</b><span class="mm">{html.escape(dmm)}</span></div>
+            <div class="dims mono"><b>{html.escape(din)}</b></div>
             <p class="note">{html.escape(r['note'])}</p>
           </label>{fig}
         </div>
@@ -93,13 +92,13 @@ def part_li(r):
 
 def group_section(label, rows):
     n_parts = sum(r["qty"] for r in rows)
-    area = sum(r["qty"] * r["width_mm"] * r["length_mm"] for r in rows) / 1e6
+    area = sum(r["qty"] * r["width_mm"] * r["length_mm"] for r in rows) / 1e6 * 10.7639
     items = "".join(part_li(r) for r in rows)
     return f"""
     <section class="group">
       <div class="ghead">
         <h3>{html.escape(label)}</h3>
-        <span class="gsum mono">{n_parts} pieces &middot; {area:.2f} m&sup2; face, no kerf or waste</span>
+        <span class="gsum mono">{n_parts} pieces &middot; {area:.1f} sq ft face, no kerf or waste</span>
       </div>
       <ul class="parts">{items}
       </ul>
@@ -181,14 +180,13 @@ PAGE = """<title>Drawer Bench Cut List</title>
   .chip.warn {{ background: var(--warn-bg); color: var(--warn-ink); }}
   .dims {{ display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }}
   .dims b {{ font-size: 21px; font-weight: 600; letter-spacing: -.01em; }}
-  .dims .mm {{ font-size: 12.5px; color: var(--muted); }}
   .note {{ margin: 0; font-size: 13.5px; color: var(--note-ink); overflow-wrap: anywhere; }}
   .dwg {{ margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px; cursor: zoom-in; display: flex; flex-direction: column; gap: 4px; }}
   .dwg img {{ width: 100%; height: auto; display: block; }}
   .dwg figcaption {{ font-size: 11.5px; color: var(--muted); text-align: right; }}
   .tick:checked + .body {{ color: var(--done); }}
   .tick:checked + .body .name, .tick:checked + .body .dims b {{ text-decoration: line-through; text-decoration-thickness: 2px; }}
-  .tick:checked + .body .qty, .tick:checked + .body .note, .tick:checked + .body .mm {{ color: var(--done); }}
+  .tick:checked + .body .qty, .tick:checked + .body .note {{ color: var(--done); }}
   .tick:checked + .body .dwg {{ opacity: .55; }}
   .hw {{ list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }}
   .hw li {{ display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }}
@@ -206,11 +204,11 @@ PAGE = """<title>Drawer Bench Cut List</title>
   <header>
     <p class="eyebrow">Drawer bench &middot; 40 x 24 x 19-5/8 in</p>
     <h1>Drawer Bench Cut List</h1>
-    <p>{total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/16, mm exact from the CAD. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges; tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</p>
+    <p>{total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges; tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</p>
     <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
   </header>
 
-  <div class="flag"><b>Provisional.</b> Every groove, rabbet and dado is sized to 18 / 12 / 6 mm plywood. Measure the sheets you bought and re-run the model before cutting joinery. The top's overhang and edge profile still wait on the island; the slide numbers wait on the purchased sheet.</div>
+  <div class="flag"><b>Provisional.</b> Every groove, rabbet and dado that takes plywood is sized to the sheet's real thickness and says "measure". Measure the sheets you bought, put the numbers in the model and re-run it before cutting joinery. The top's overhang and edge profile still wait on the island; the slide numbers wait on the purchased sheet.</div>
 
   <div class="big">
     <h2>Case<small>{n_case} pieces</small></h2>{case}
