@@ -103,7 +103,7 @@ BOX_BOT_H = (RAIL_MID_Z0 - (RAIL_BOT_Z0 + RAIL_BOT_H)) - (UM_BOTTOM_CLEAR + UM_T
 BOT_Z0 = BOT_TOP_Z - T12                     # 45.15 bottom panel underside
 BOT_X0 = X0 + SETBACK + T18 - BOT_GROOVE     # into the side-panel groove
 BOT_W = FOOT_W - 2 * (SETBACK + T18 - BOT_GROOVE)   # 802.2
-DOWEL_VOL = pi * (DOWEL_DIA / 2) ** 2 * (DOWEL_DEPTH + 1)   # one dowel bore, post or rail side
+DOWEL_VOL = pi * (DOWEL_DIA / 2) ** 2 * DOWEL_DEPTH   # one dowel bore, post or rail side
 _r, _d = FIG8_DIA / 2, FIG8_OFFSET
 _seg = _r ** 2 * acos(_d / _r) - _d * sqrt(_r ** 2 - _d ** 2)   # bore area past the inner face (open side)
 FIG8_VOL = (pi * _r ** 2 - _seg) * FIG8_DEPTH                  # one figure-8 recess, what stays in the wood
@@ -145,9 +145,9 @@ def mirror_x(solid):
 
 def _dowel(xc, yc, zc):
     """Round dowel-joint bore centered on the joint face at (xc, yc, zc),
-    DOWEL_DEPTH deep into material on each side (the far side is usually
-    open air once the piece is subtracted; the overshoot is harmless)."""
-    length = 2 * (DOWEL_DEPTH + 1)
+    exactly DOWEL_DEPTH deep into material on each side (the far side is
+    open air once the piece is subtracted, so no overshoot is needed)."""
+    length = 2 * DOWEL_DEPTH
     return Pos(xc, yc, zc) * Rot(0, 90, 0) * Cylinder(DOWEL_DIA / 2, length)
 
 

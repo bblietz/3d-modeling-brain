@@ -45,6 +45,15 @@ reviewed, not built; update with measured fits after the build.
   back's notches are 41.35 from each end), not from the assembled side
   face (35 from the side's inner face); give both when the sheet uses the
   assembled one.
+- Shop drawings that cannot lie (2026-09-27, `part_drawings.py`): each
+  part's sheet is laid out from the same constants that build the solid,
+  and before a sheet is written every drawn groove, rabbet, notch and
+  bore is probed against the real solid (a box 1 mm inside the cut must
+  be air, a 1 mm slab past its floor must be wood, plus "runs out the
+  end" and "stopped" probes). The first run caught a real defect the
+  volume asserts had absorbed: the dowel helper bored 1 mm deeper than
+  the documented 1 in on both sides. Draw from constants, verify against
+  solids; the two disagree exactly where the model is wrong.
 - Subagent-driven build: one implementer per task with the complete code
   in the brief, one reviewer per task that mutation-tests the asserts, a
   whole-file review at the end. The per-task reviews found only Minor

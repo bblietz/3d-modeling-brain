@@ -5,7 +5,7 @@
     --bg: #f7f4ee; --surface: #fffdf9; --ink: #24201b; --muted: #6d655a; --line: #e3dccf;
     --accent: #d96a12; --accent-ink: #8a4108;
     --warn-bg: #fbe9d7; --warn-ink: #8a4108; --note-bg: #ece7dd; --note-ink: #4d463c;
-    --done: #9a9184;
+    --done: #9a9184; --paper: #f6f1e8;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -26,7 +26,7 @@
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: Archivo, "Helvetica Neue", Arial, sans-serif;
          font-size: 16px; line-height: 1.45; padding-inline: 16px; padding-block: 24px 72px; }
-  .wrap { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+  .wrap { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; }
   .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
   .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-ink); font-weight: 600; margin: 0 0 6px; }
   h1 { font-size: clamp(28px, 5vw, 38px); line-height: 1.08; margin: 0 0 10px; letter-spacing: -.01em; text-wrap: balance; }
@@ -34,16 +34,20 @@
   .status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 14px; font-size: 14px; }
   .status .count { font-weight: 600; }
   button.reset { font: inherit; font-size: 13px; color: var(--accent-ink); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
-  button.reset:focus-visible, .tick:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.reset:focus-visible, .tick:focus-visible + .body, .dwg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .flag { background: var(--warn-bg); color: var(--warn-ink); border-radius: 8px; padding: 10px 14px; font-size: 14.5px; max-width: 72ch; }
   .flag b { font-weight: 600; }
+  .big { display: flex; flex-direction: column; gap: 18px; }
+  .big > h2 { font-size: 24px; margin: 0; padding-bottom: 8px; border-bottom: 3px solid var(--accent); }
+  .big > h2 small { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 10px; }
   .group { display: flex; flex-direction: column; gap: 4px; }
   .ghead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
-  h2 { font-size: 19px; margin: 0; }
+  h3 { font-size: 18px; margin: 0; }
   .gsum { font-size: 12.5px; color: var(--muted); }
   ul.parts { list-style: none; margin: 0; padding: 0; }
-  .part { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); align-items: start; }
+  .part { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); align-items: start; }
   .tick { width: 22px; height: 22px; margin: 4px 0 0 2px; accent-color: var(--accent); cursor: pointer; }
+  .body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
   .part label { display: flex; flex-direction: column; gap: 4px; cursor: pointer; min-width: 0; }
   .line1 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .qty { font-weight: 600; color: var(--accent-ink); }
@@ -54,15 +58,22 @@
   .dims b { font-size: 21px; font-weight: 600; letter-spacing: -.01em; }
   .dims .mm { font-size: 12.5px; color: var(--muted); }
   .note { margin: 0; font-size: 13.5px; color: var(--note-ink); overflow-wrap: anywhere; }
-  .tick:checked + label { color: var(--done); }
-  .tick:checked + label .name, .tick:checked + label .dims b { text-decoration: line-through; text-decoration-thickness: 2px; }
-  .tick:checked + label .qty, .tick:checked + label .note, .tick:checked + label .mm { color: var(--done); }
+  .dwg { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px; cursor: zoom-in; display: flex; flex-direction: column; gap: 4px; }
+  .dwg img { width: 100%; height: auto; display: block; }
+  .dwg figcaption { font-size: 11.5px; color: var(--muted); text-align: right; }
+  .tick:checked + .body { color: var(--done); }
+  .tick:checked + .body .name, .tick:checked + .body .dims b { text-decoration: line-through; text-decoration-thickness: 2px; }
+  .tick:checked + .body .qty, .tick:checked + .body .note, .tick:checked + .body .mm { color: var(--done); }
+  .tick:checked + .body .dwg { opacity: .55; }
   .hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
   .hw li { display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
   .hw li div { display: flex; flex-direction: column; gap: 2px; }
   .hqty { font-weight: 600; color: var(--accent-ink); }
   .hnote { font-size: 13px; color: var(--muted); }
   .foot { font-size: 13px; color: var(--muted); max-width: 72ch; }
+  #lightbox { position: fixed; inset: 0; background: rgba(15, 12, 8, .9); display: none; place-items: center; padding: 12px; z-index: 10; cursor: zoom-out; overflow: auto; }
+  #lightbox.open { display: grid; }
+  #lightbox img { max-width: 100%; max-height: 94vh; background: var(--paper); border-radius: 6px; }
   @media (max-width: 420px) { .dims b { font-size: 19px; } .hw li { grid-template-columns: 60px 1fr; } }
 </style>
 
@@ -70,212 +81,275 @@
   <header>
     <p class="eyebrow">Drawer bench &middot; 40 x 24 x 19-5/8 in</p>
     <h1>Drawer Bench Cut List</h1>
-    <p>25 pieces, grouped by material in cutting order. Inches to the nearest 1/16, mm exact from the CAD. Tap a row to tick it off; ticks stay on this phone only.</p>
+    <p>25 pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/16, mm exact from the CAD. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges; tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</p>
     <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
   </header>
 
   <div class="flag"><b>Provisional.</b> Every groove, rabbet and dado is sized to 18 / 12 / 6 mm plywood. Measure the sheets you bought and re-run the model before cutting joinery. The top's overhang and edge profile still wait on the island; the slide numbers wait on the purchased sheet.</div>
 
-  <section class="group">
-    <div class="ghead">
-      <h2>Soft maple</h2>
-      <span class="gsum mono">10 pieces &middot; 0.58 m&sup2; face, no kerf or waste</span>
-    </div>
-    <ul class="parts">
+  <div class="big">
+    <h2>Case<small>13 pieces</small></h2>
+    <section class="group">
+      <div class="ghead">
+        <h3>Soft maple: posts, rails, cleat</h3>
+        <span class="gsum mono">8 pieces &middot; 0.24 m&sup2; face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-cleat_rear" class="tick">
-        <label for="cut-cleat_rear">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">cleat_rear</span></div>
-          <div class="dims mono"><b>3/4 x 1-1/2 x 31-1/2</b><span class="mm">19.1 x 38.1 x 800.1 mm</span></div>
-          <p class="note">REAR top cleat, 3/4 rail stock x 1.5 tall, between the posts; glued to the inside face of the back and clamped with #8 x 1-1/4 screws countersunk from the cleat&#x27;s inside face (nothing through the back), top edge flush with the post tops; three figure-8 fasteners on top: 0.625 dia x 0.125 deep forstner recesses centered 0.25 from the front (inner) face, so each opens through it and the fastener hangs over into the cabinet, at 4, 15.75 and 27.5 from either end (blank datums), #8 x 5/8 screws into the cleat and into the top (replaces the tenoned rear rail)</p>
-        </label>
+        <div class="body">
+          <label for="cut-cleat_rear">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">cleat_rear</span></div>
+            <div class="dims mono"><b>3/4 x 1-1/2 x 31-1/2</b><span class="mm">19.1 x 38.1 x 800.1 mm</span></div>
+            <p class="note">REAR top cleat, 3/4 rail stock x 1.5 tall, between the posts; glued to the inside face of the back and clamped with #8 x 1-1/4 screws countersunk from the cleat&#x27;s inside face (nothing through the back), top edge flush with the post tops; three figure-8 fasteners on top: 0.625 dia x 0.125 deep forstner recesses centered 0.25 from the front (inner) face, so each opens through it and the fastener hangs over into the cabinet, at 4, 15.75 and 27.5 from either end (blank datums), #8 x 5/8 screws into the cleat and into the top (replaces the tenoned rear rail)</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/cleat_rear.png" alt="shop drawing of cleat_rear" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
         <input type="checkbox" id="cut-rail_bot" class="tick">
-        <label for="cut-rail_bot">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">rail_bot</span><span class="chip warn">drawing or template</span></div>
-          <div class="dims mono"><b>3/4 x 1-1/2 x 31-1/2</b><span class="mm">19.1 x 38.1 x 800.1 mm</span></div>
-          <p class="note">FRONT bottom rail, 3/4 stock: butts flush into the post faces, 9.525 dia x 25.4 deep dowel each end; rabbet 6.35 x 12 (T12) on the rear-top edge, full length, for the bottom panel; glue and screw the bottom into it (no lip above)</p>
-        </label>
+        <div class="body">
+          <label for="cut-rail_bot">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">rail_bot</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>3/4 x 1-1/2 x 31-1/2</b><span class="mm">19.1 x 38.1 x 800.1 mm</span></div>
+            <p class="note">FRONT bottom rail, 3/4 stock: butts flush into the post faces, 9.525 dia x 25.4 deep dowel each end; rabbet 6.35 x 12 (T12) on the rear-top edge, full length, for the bottom panel; glue and screw the bottom into it (no lip above)</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/rail_bot.png" alt="shop drawing of rail_bot" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
         <input type="checkbox" id="cut-rail_top" class="tick">
-        <label for="cut-rail_top">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">rail_top</span></div>
-          <div class="dims mono"><b>3/4 x 1 x 31-1/2</b><span class="mm">19.1 x 25.4 x 800.1 mm</span></div>
-          <p class="note">FRONT top rail, 3/4 stock: butts flush into the post faces, 9.525 dia x 25.4 deep dowel each end; three figure-8 fasteners on top: 0.625 dia x 0.125 deep forstner recesses centered 0.25 from the rear (inner) face, so each opens through it and the fastener hangs over into the cabinet, at 4, 15.75 and 27.5 from either end (blank datums), #8 x 5/8 screws into the rail and into the top</p>
-        </label>
+        <div class="body">
+          <label for="cut-rail_top">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">rail_top</span></div>
+            <div class="dims mono"><b>3/4 x 1 x 31-1/2</b><span class="mm">19.1 x 25.4 x 800.1 mm</span></div>
+            <p class="note">FRONT top rail, 3/4 stock: butts flush into the post faces, 9.525 dia x 25.4 deep dowel each end; three figure-8 fasteners on top: 0.625 dia x 0.125 deep forstner recesses centered 0.25 from the rear (inner) face, so each opens through it and the fastener hangs over into the cabinet, at 4, 15.75 and 27.5 from either end (blank datums), #8 x 5/8 screws into the rail and into the top</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/rail_top.png" alt="shop drawing of rail_top" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
         <input type="checkbox" id="cut-rail_mid" class="tick">
-        <label for="cut-rail_mid">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">rail_mid</span></div>
-          <div class="dims mono"><b>3/4 x 1 x 31-1/2</b><span class="mm">19.1 x 25.4 x 800.1 mm</span></div>
-          <p class="note">FRONT mid rail, 3/4 stock: butts flush into the post faces, 9.525 dia x 25.4 deep dowel each end; carries the top drawer slides</p>
-        </label>
-      </li>
-      <li class="part">
-        <input type="checkbox" id="cut-front_bot" class="tick">
-        <label for="cut-front_bot">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">front_bot</span></div>
-          <div class="dims mono"><b>3/4 x 11-1/8 x 31-1/4</b><span class="mm">19.1 x 282.6 x 793.8 mm</span></div>
-          <p class="note">grain along the length; screwed to the box from inside through slotted holes (cross-grain 11-3/8 wide); pull undecided; leave about 1.5 mm between the back face and the rails (Blum front gap)</p>
-        </label>
-      </li>
-      <li class="part">
-        <input type="checkbox" id="cut-front_top" class="tick">
-        <label for="cut-front_top">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">front_top</span></div>
-          <div class="dims mono"><b>3/4 x 5-5/8 x 31-1/4</b><span class="mm">19.1 x 142.9 x 793.8 mm</span></div>
-          <p class="note">grain along the length; screwed to the box from inside; pull undecided; leave about 1.5 mm between the back face and the rails (Blum front gap), the runner setback sets the closed position</p>
-        </label>
+        <div class="body">
+          <label for="cut-rail_mid">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">rail_mid</span></div>
+            <div class="dims mono"><b>3/4 x 1 x 31-1/2</b><span class="mm">19.1 x 25.4 x 800.1 mm</span></div>
+            <p class="note">FRONT mid rail, 3/4 stock: butts flush into the post faces, 9.525 dia x 25.4 deep dowel each end; carries the top drawer slides</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/rail_mid.png" alt="shop drawing of rail_mid" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
         <input type="checkbox" id="cut-post_front" class="tick">
-        <label for="cut-post_front">
-          <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">post_front</span><span class="chip warn">drawing or template</span></div>
-          <div class="dims mono"><b>3 x 3 x 17-7/8</b><span class="mm">76.2 x 76.2 x 454 mm</span></div>
-          <p class="note">one of 2 FRONT posts, left/right mirrored, grooves on the inner faces; glue-up of two 8/4 pieces milled to 1-1/2; 3/8 chamfer x4 edges full length; side groove T18 (measured ply) x 3/8 at 1/2 from the outer face, stopped 0.75 above the floor, open at top; grain vertical, glue-up seam on a side face; three 9.525 dia x 25.4 deep dowel bores on the inner face 1 in behind the front face, centered on the rail joints at Z 38.10, 304.80, 441.32</p>
-        </label>
+        <div class="body">
+          <label for="cut-post_front">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">post_front</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>3 x 3 x 17-7/8</b><span class="mm">76.2 x 76.2 x 454 mm</span></div>
+            <p class="note">one of 2 FRONT posts, left/right mirrored, grooves on the inner faces; glue-up of two 8/4 pieces milled to 1-1/2; 3/8 chamfer x4 edges full length; side groove T18 (measured ply) x 3/8 at 1/2 from the outer face, stopped 0.75 above the floor, open at top; grain vertical, glue-up seam on a side face; three 9.525 dia x 25.4 deep dowel bores on the inner face 1 in behind the front face, centered on the rail joints at Z 38.10, 304.80, 441.32</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/post_front.png" alt="shop drawing of post_front" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
         <input type="checkbox" id="cut-post_rear" class="tick">
-        <label for="cut-post_rear">
-          <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">post_rear</span><span class="chip warn">drawing or template</span></div>
-          <div class="dims mono"><b>3 x 3 x 17-7/8</b><span class="mm">76.2 x 76.2 x 454 mm</span></div>
-          <p class="note">one of 2 REAR posts, left/right mirrored, grooves on the inner faces; same blank and chamfer as post_front; side groove as post_front; back groove T18 x 3/8 on the inner face at 1/2 from the rear face, stopped 0.75 above the floor, open at top; no mortises; grain vertical</p>
-        </label>
+        <div class="body">
+          <label for="cut-post_rear">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">post_rear</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>3 x 3 x 17-7/8</b><span class="mm">76.2 x 76.2 x 454 mm</span></div>
+            <p class="note">one of 2 REAR posts, left/right mirrored, grooves on the inner faces; same blank and chamfer as post_front; side groove as post_front; back groove T18 x 3/8 on the inner face at 1/2 from the rear face, stopped 0.75 above the floor, open at top; no mortises; grain vertical</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/post_rear.png" alt="shop drawing of post_rear" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
-    </ul>
-  </section>
-  <section class="group">
-    <div class="ghead">
-      <h2>3/4 in plywood (18 mm nominal, measure)</h2>
-      <span class="gsum mono">3 pieces &middot; 0.72 m&sup2; face, no kerf or waste</span>
-    </div>
-    <ul class="parts">
+      </ul>
+    </section>
+    <section class="group">
+      <div class="ghead">
+        <h3>3/4 in plywood (18 mm nominal, measure): sides and back</h3>
+        <span class="gsum mono">3 pieces &middot; 0.72 m&sup2; face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-back" class="tick">
-        <label for="cut-back">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">back</span></div>
-          <div class="dims mono"><b>11/16 x 17-1/8 x 32-1/4</b><span class="mm">18 x 435 x 819.2 mm</span></div>
-          <p class="note">housed 3/8 in each post; full height, top edge flush with the post tops; cleat_rear glued and screwed inside along the top edge; through groove 6.35 deep x 12 (T12) on the inner face for the bottom, full length, lower wall 26.10 above the bottom edge</p>
-        </label>
+        <div class="body">
+          <label for="cut-back">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">back</span></div>
+            <div class="dims mono"><b>11/16 x 17-1/8 x 32-1/4</b><span class="mm">18 x 435 x 819.2 mm</span></div>
+            <p class="note">housed 3/8 in each post; full height, top edge flush with the post tops; cleat_rear glued and screwed inside along the top edge; through groove 6.35 deep x 12 (T12) on the inner face for the bottom, full length, lower wall 26.10 above the bottom edge</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/back.png" alt="shop drawing of back" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
         <input type="checkbox" id="cut-side" class="tick">
-        <label for="cut-side">
-          <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">side</span></div>
-          <div class="dims mono"><b>11/16 x 16-1/4 x 17-1/8</b><span class="mm">18 x 412.8 x 435 mm</span></div>
-          <p class="note">face grain vertical on the show face; housed 3/8 in each post; through groove 6.35 deep x 12 (T12) on the inner face for the bottom, full length, lower wall 26.10 above the bottom edge</p>
-        </label>
+        <div class="body">
+          <label for="cut-side">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">side</span></div>
+            <div class="dims mono"><b>11/16 x 16-1/4 x 17-1/8</b><span class="mm">18 x 412.8 x 435 mm</span></div>
+            <p class="note">face grain vertical on the show face; housed 3/8 in each post; through groove 6.35 deep x 12 (T12) on the inner face for the bottom, full length, lower wall 26.10 above the bottom edge</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/side.png" alt="shop drawing of side" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
-    </ul>
-  </section>
-  <section class="group">
-    <div class="ghead">
-      <h2>1/2 in plywood (12 mm nominal, measure)</h2>
-      <span class="gsum mono">9 pieces &middot; 1.19 m&sup2; face, no kerf or waste</span>
-    </div>
-    <ul class="parts">
+      </ul>
+    </section>
+    <section class="group">
+      <div class="ghead">
+        <h3>1/2 in plywood (12 mm nominal, measure): case bottom</h3>
+        <span class="gsum mono">1 pieces &middot; 0.44 m&sup2; face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-bottom" class="tick">
-        <label for="cut-bottom">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">bottom</span><span class="chip warn">drawing or template</span></div>
-          <div class="dims mono"><b>1/2 x 19 x 35-9/16</b><span class="mm">12 x 482.2 x 903.8 mm</span></div>
-          <p class="note">notch the four corners 51.85 wide x 36.60 (front) / 51.85 (rear) for the posts; edges in the side/back grooves and the rail_bot rabbet (glue and screw the front edge)</p>
-        </label>
+        <div class="body">
+          <label for="cut-bottom">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">bottom</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>1/2 x 19 x 35-9/16</b><span class="mm">12 x 482.2 x 903.8 mm</span></div>
+            <p class="note">notch the four corners 51.85 wide x 36.60 (front) / 51.85 (rear) for the posts; edges in the side/back grooves and the rail_bot rabbet (glue and screw the front edge)</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/bottom.png" alt="shop drawing of bottom" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      </ul>
+    </section>
+    <section class="group">
+      <div class="ghead">
+        <h3>Butcherblock top (purchased, Boos match)</h3>
+        <span class="gsum mono">1 pieces &middot; 0.62 m&sup2; face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-top" class="tick">
+        <div class="body">
+          <label for="cut-top">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">top</span></div>
+            <div class="dims mono"><b>1-3/4 x 24 x 40</b><span class="mm">44.5 x 609.6 x 1016 mm</span></div>
+            <p class="note">provisional 1-3/4 thick, 1-1/4 overhang all round; edge profile to match the island; six figure-8 fasteners (three into rail_top, three into cleat_rear, #8 x 5/8 screws both ends), no glue</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/top.png" alt="shop drawing of top" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="big">
+    <h2>Drawers<small>12 pieces</small></h2>
+    <section class="group">
+      <div class="ghead">
+        <h3>Drawer fronts, soft maple</h3>
+        <span class="gsum mono">2 pieces &middot; 0.34 m&sup2; face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-front_bot" class="tick">
+        <div class="body">
+          <label for="cut-front_bot">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">front_bot</span></div>
+            <div class="dims mono"><b>3/4 x 11-1/8 x 31-1/4</b><span class="mm">19.1 x 282.6 x 793.8 mm</span></div>
+            <p class="note">grain along the length; screwed to the box from inside through slotted holes (cross-grain 11-3/8 wide); pull undecided; leave about 1.5 mm between the back face and the rails (Blum front gap)</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/front_bot.png" alt="shop drawing of front_bot" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
+        <input type="checkbox" id="cut-front_top" class="tick">
+        <div class="body">
+          <label for="cut-front_top">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">front_top</span></div>
+            <div class="dims mono"><b>3/4 x 5-5/8 x 31-1/4</b><span class="mm">19.1 x 142.9 x 793.8 mm</span></div>
+            <p class="note">grain along the length; screwed to the box from inside; pull undecided; leave about 1.5 mm between the back face and the rails (Blum front gap), the runner setback sets the closed position</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/front_top.png" alt="shop drawing of front_top" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      </ul>
+    </section>
+    <section class="group">
+      <div class="ghead">
+        <h3>Drawer boxes, 1/2 in plywood (12 mm nominal, measure)</h3>
+        <span class="gsum mono">8 pieces &middot; 0.75 m&sup2; face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
+      <li class="part">
         <input type="checkbox" id="cut-drawer_front_bot" class="tick">
-        <label for="cut-drawer_front_bot">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">drawer_front_bot</span></div>
-          <div class="dims mono"><b>1/2 x 8-7/16 x 30-3/8</b><span class="mm">12 x 215 x 770.8 mm</span></div>
-          <p class="note">box front (sub-front): bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge; locking devices bored with the Blum T65.1600.01 template</p>
-        </label>
+        <div class="body">
+          <label for="cut-drawer_front_bot">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">drawer_front_bot</span></div>
+            <div class="dims mono"><b>1/2 x 8-7/16 x 30-3/8</b><span class="mm">12 x 215 x 770.8 mm</span></div>
+            <p class="note">box front (sub-front): bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge; locking devices bored with the Blum T65.1600.01 template</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_front_bot.png" alt="shop drawing of drawer_front_bot" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
         <input type="checkbox" id="cut-drawer_back_bot" class="tick">
-        <label for="cut-drawer_back_bot">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">drawer_back_bot</span></div>
-          <div class="dims mono"><b>1/2 x 8-7/16 x 30-3/8</b><span class="mm">12 x 215 x 770.8 mm</span></div>
-          <p class="note">box back, datums from the blank&#x27;s ends: bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge, STOPPED 41.35 from each end (= 35 from the side&#x27;s inner face); rear-hook notches 41.35 from each end x 13 tall at both bottom corners; rear-hook bores 6 dia x 10 deep from the rear face, centred 13.35 from each end (= 7 from the side&#x27;s inner face) and 24 above the bottom edge (Blum T65.1600.01 template)</p>
-        </label>
+        <div class="body">
+          <label for="cut-drawer_back_bot">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">drawer_back_bot</span></div>
+            <div class="dims mono"><b>1/2 x 8-7/16 x 30-3/8</b><span class="mm">12 x 215 x 770.8 mm</span></div>
+            <p class="note">box back, datums from the blank&#x27;s ends: bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge, STOPPED 41.35 from each end (= 35 from the side&#x27;s inner face); rear-hook notches 41.35 from each end x 13 tall at both bottom corners; rear-hook bores 6 dia x 10 deep from the rear face, centred 13.35 from each end (= 7 from the side&#x27;s inner face) and 24 above the bottom edge (Blum T65.1600.01 template)</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_back_bot.png" alt="shop drawing of drawer_back_bot" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
         <input type="checkbox" id="cut-drawer_front_top" class="tick">
-        <label for="cut-drawer_front_top">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">drawer_front_top</span><span class="chip warn">drawing or template</span></div>
-          <div class="dims mono"><b>1/2 x 3-9/16 x 30-3/8</b><span class="mm">12 x 91.1 x 770.8 mm</span></div>
-          <p class="note">box front (sub-front): bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge; locking devices bored with the Blum T65.1600.01 template</p>
-        </label>
+        <div class="body">
+          <label for="cut-drawer_front_top">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">drawer_front_top</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>1/2 x 3-9/16 x 30-3/8</b><span class="mm">12 x 91.1 x 770.8 mm</span></div>
+            <p class="note">box front (sub-front): bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge; locking devices bored with the Blum T65.1600.01 template</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_front_top.png" alt="shop drawing of drawer_front_top" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
         <input type="checkbox" id="cut-drawer_back_top" class="tick">
-        <label for="cut-drawer_back_top">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">drawer_back_top</span><span class="chip warn">drawing or template</span></div>
-          <div class="dims mono"><b>1/2 x 3-9/16 x 30-3/8</b><span class="mm">12 x 91.1 x 770.8 mm</span></div>
-          <p class="note">box back, datums from the blank&#x27;s ends: bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge, STOPPED 41.35 from each end (= 35 from the side&#x27;s inner face); rear-hook notches 41.35 from each end x 13 tall at both bottom corners; rear-hook bores 6 dia x 10 deep from the rear face, centred 13.35 from each end (= 7 from the side&#x27;s inner face) and 24 above the bottom edge (Blum T65.1600.01 template)</p>
-        </label>
+        <div class="body">
+          <label for="cut-drawer_back_top">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">drawer_back_top</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>1/2 x 3-9/16 x 30-3/8</b><span class="mm">12 x 91.1 x 770.8 mm</span></div>
+            <p class="note">box back, datums from the blank&#x27;s ends: bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge, STOPPED 41.35 from each end (= 35 from the side&#x27;s inner face); rear-hook notches 41.35 from each end x 13 tall at both bottom corners; rear-hook bores 6 dia x 10 deep from the rear face, centred 13.35 from each end (= 7 from the side&#x27;s inner face) and 24 above the bottom edge (Blum T65.1600.01 template)</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_back_top.png" alt="shop drawing of drawer_back_top" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
         <input type="checkbox" id="cut-drawer_side_bot" class="tick">
-        <label for="cut-drawer_side_bot">
-          <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_side_bot</span><span class="chip warn">drawing or template</span></div>
-          <div class="dims mono"><b>1/2 x 8-7/16 x 18</b><span class="mm">12 x 215 x 457.2 mm</span></div>
-          <p class="note">end rabbets 6.35 deep x 12 (T12); bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge</p>
-        </label>
+        <div class="body">
+          <label for="cut-drawer_side_bot">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_side_bot</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>1/2 x 8-7/16 x 18</b><span class="mm">12 x 215 x 457.2 mm</span></div>
+            <p class="note">end rabbets 6.35 deep x 12 (T12); bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_side_bot.png" alt="shop drawing of drawer_side_bot" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
       <li class="part">
         <input type="checkbox" id="cut-drawer_side_top" class="tick">
-        <label for="cut-drawer_side_top">
-          <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_side_top</span><span class="chip warn">drawing or template</span></div>
-          <div class="dims mono"><b>1/2 x 3-9/16 x 18</b><span class="mm">12 x 91.1 x 457.2 mm</span></div>
-          <p class="note">end rabbets 6.35 deep x 12 (T12); bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge</p>
-        </label>
+        <div class="body">
+          <label for="cut-drawer_side_top">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_side_top</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>1/2 x 3-9/16 x 18</b><span class="mm">12 x 91.1 x 457.2 mm</span></div>
+            <p class="note">end rabbets 6.35 deep x 12 (T12); bottom groove 6.35 deep x 6 (T6) with its top at 18.7 above the bottom edge</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_side_top.png" alt="shop drawing of drawer_side_top" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
-    </ul>
-  </section>
-  <section class="group">
-    <div class="ghead">
-      <h2>1/4 in plywood (6 mm nominal, measure)</h2>
-      <span class="gsum mono">2 pieces &middot; 0.69 m&sup2; face, no kerf or waste</span>
-    </div>
-    <ul class="parts">
+      </ul>
+    </section>
+    <section class="group">
+      <div class="ghead">
+        <h3>Drawer bottoms, 1/4 in plywood (6 mm nominal, measure)</h3>
+        <span class="gsum mono">2 pieces &middot; 0.69 m&sup2; face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-drawer_bottom_bot-drawer_bottom_top" class="tick">
-        <label for="cut-drawer_bottom_bot-drawer_bottom_top">
-          <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_bottom_bot/drawer_bottom_top</span></div>
-          <div class="dims mono"><b>1/4 x 17-9/16 x 30-3/8</b><span class="mm">6 x 445.9 x 770.8 mm</span></div>
-          <p class="note">rear corners notched 41.35 (from each end) x 6.35 deep where the back groove is stopped</p>
-        </label>
+        <div class="body">
+          <label for="cut-drawer_bottom_bot-drawer_bottom_top">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_bottom_bot/drawer_bottom_top</span></div>
+            <div class="dims mono"><b>1/4 x 17-9/16 x 30-3/8</b><span class="mm">6 x 445.9 x 770.8 mm</span></div>
+            <p class="note">rear corners notched 41.35 (from each end) x 6.35 deep where the back groove is stopped</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_bottom_bot.png" alt="shop drawing of drawer_bottom_bot/drawer_bottom_top" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
       </li>
-    </ul>
-  </section>
-  <section class="group">
-    <div class="ghead">
-      <h2>Butcherblock top (purchased, Boos match)</h2>
-      <span class="gsum mono">1 pieces &middot; 0.62 m&sup2; face, no kerf or waste</span>
-    </div>
-    <ul class="parts">
-      <li class="part">
-        <input type="checkbox" id="cut-top" class="tick">
-        <label for="cut-top">
-          <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">top</span></div>
-          <div class="dims mono"><b>1-3/4 x 24 x 40</b><span class="mm">44.5 x 609.6 x 1016 mm</span></div>
-          <p class="note">provisional 1-3/4 thick, 1-1/4 overhang all round; edge profile to match the island; six figure-8 fasteners (three into rail_top, three into cleat_rear, #8 x 5/8 screws both ends), no glue</p>
-        </label>
-      </li>
-    </ul>
-  </section>
+      </ul>
+    </section>
+  </div>
 
-  <section class="group">
-    <div class="ghead"><h2>Hardware</h2><span class="gsum mono">from the design; not in the cut list</span></div>
+  <div class="big">
+    <h2>Hardware<small>from the design; not in the cut list</small></h2>
     <ul class="hw"><li><span class="hqty mono">2 pairs</span><div><b>Blum TANDEM plus BLUMOTION 563H4570B undermount slides, 18 in class (471 mm runner)</b><span class="hnote">confirm the purchased spec against the 563H sheet before boring the boxes</span></div></li><li><span class="hqty mono">2 pairs</span><div><b>Blum rear mounting brackets 295.3750.02</b><span class="hnote">on the back panel, at runner height</span></div></li><li><span class="hqty mono">2 sets</span><div><b>Blum locking devices for the box fronts</b><span class="hnote">bored with the T65.1600.01 template</span></div></li><li><span class="hqty mono">6</span><div><b>3/8 in dowels, 2 in long</b><span class="hnote">front rails to front posts, one each end, 1 in into each part</span></div></li><li><span class="hqty mono">6</span><div><b>figure-8 desktop fasteners with #8 x 5/8 in screws (12)</b><span class="hnote">three on rail_top, three on cleat_rear, in the offset 5/8 in recesses</span></div></li><li><span class="hqty mono">4 to 5</span><div><b>#8 x 1-1/4 in screws, countersunk</b><span class="hnote">cleat_rear to the inside of the back, from the cleat side</span></div></li><li><span class="hqty mono">as needed</span><div><b>screws for the drawer fronts, through slotted holes from inside the boxes</b><span class="hnote">pulls undecided</span></div></li></ul>
-  </section>
+  </div>
 
-  <p class="foot">Generated 2026-09-27 from <span class="mono">projects/Drawer-bench/cutlist.csv</span>, which <span class="mono">drawer_bench.py</span> writes on every export. Part names match the CAD viewer.</p>
+  <p class="foot">Generated 2026-09-27 from <span class="mono">projects/Drawer-bench/cutlist.csv</span> and <span class="mono">images/parts/</span>, which <span class="mono">drawer_bench.py</span> and <span class="mono">part_drawings.py</span> write on every export; every drawn cut is probed against the CAD solid before its sheet is written. Part names match the CAD viewer.</p>
 </div>
+
+<div id="lightbox" role="dialog" aria-label="Enlarged drawing" aria-hidden="true"><img id="lightbox-img" alt=""></div>
 
 <script>
   (function () {
@@ -300,5 +374,20 @@
       update();
     });
     update();
+
+    var box = document.getElementById('lightbox');
+    var img = document.getElementById('lightbox-img');
+    function open(fig) {
+      var src = fig.querySelector('img');
+      img.src = src.src; img.alt = src.alt;
+      box.classList.add('open'); box.setAttribute('aria-hidden', 'false');
+    }
+    function close() { box.classList.remove('open'); box.setAttribute('aria-hidden', 'true'); img.removeAttribute('src'); }
+    document.querySelectorAll('.dwg').forEach(function (fig) {
+      fig.addEventListener('click', function (e) { e.preventDefault(); open(fig); });
+      fig.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(fig); } });
+    });
+    box.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && box.classList.contains('open')) close(); });
   })();
 </script>

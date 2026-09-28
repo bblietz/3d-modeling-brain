@@ -182,11 +182,16 @@ because option (a) leaves 19-1/4 in of interior depth.
   PROVISIONAL: nothing is cut until the space, the Boos island and the
   plywood are measured and the file is re-run.
 - Shop page (2026-09-27): `cutlist.html`, built from `cutlist.csv` by
-  `make_cutlist_page.py` (parts by material in cutting order, inches and
-  mm, notes, hardware list, per-phone tick boxes) and published as a
-  private Artifact at https://claude.ai/artifact/B63kzPtAP56TSzAk8JG1ha.
-  After every `EXPORT=1` run: re-run the generator and republish to the
-  same URL.
+  `make_cutlist_page.py` (case section, then a drawer section, each by
+  material in cutting order; inches and mm, notes, hardware list,
+  per-phone tick boxes, a shop drawing per row with tap-to-zoom) and
+  published as a private Artifact at
+  https://claude.ai/artifact/B63kzPtAP56TSzAk8JG1ha. The drawings come
+  from `part_drawings.py` (`images/parts/<part>.png`): each sheet is laid
+  out from the model's constants and every groove, rabbet, notch and bore
+  drawn is probed against the real solid before the sheet is written, so
+  a drawing cannot disagree with the CAD. After every `EXPORT=1` run:
+  `part_drawings.py`, `make_cutlist_page.py`, republish to the same URL.
 - Self-checks in the file: 46 asserts and 12 housed-edge probes from the
   solids (both ends), 300 pairwise no-overlap intersections, post volume
   identity (chamfers vs grooves vs mortises). Mutation-tested during
