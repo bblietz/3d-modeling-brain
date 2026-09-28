@@ -214,16 +214,18 @@ assert abs(post_rl.bounding_box().max.Y - YB) < 1e-6
 SIDE_Y0 = Y0 + POST - GROOVE_D
 SIDE_L = FOOT_D - 2 * POST + 2 * GROOVE_D            # 412.75
 side_l = _box(X0 + SETBACK, SIDE_Y0, GROOVE_STOP, T18, SIDE_L, PANEL_H)
-side_l -= _box(BOT_X0, Y0 + POST, BOT_Z0, BOT_GROOVE + 1, FOOT_D - 2 * POST, T12)
+# Bottom-panel groove run THROUGH, full length (Brian, 2026-09-27; was stopped
+# at the posts): its ends sit inside the post grooves, above their stop.
+side_l -= _box(BOT_X0, SIDE_Y0 - 1, BOT_Z0, BOT_GROOVE + 1, SIDE_L + 2, T12)
 BACK_X0 = X0 + POST - GROOVE_D
 BACK_Y0 = YB - SETBACK - T18
 back = _box(BACK_X0, BACK_Y0, GROOVE_STOP, RAIL_L, T18, BACK_H)
-back -= _box(X0 + POST, BACK_Y0 - 1, BOT_Z0, OPEN_W, BOT_GROOVE + 1, T12)
+back -= _box(BACK_X0 - 1, BACK_Y0 - 1, BOT_Z0, RAIL_L + 2, BOT_GROOVE + 1, T12)
 rail_rear = _box(BACK_X0, BACK_Y0, POST_H - RAIL_REAR_H, RAIL_L, RAIL_T, RAIL_REAR_H)
 
 side_r = mirror_x(side_l)
-_BOT_GROOVE_NOTE = (f"stopped groove {BOT_GROOVE:g} deep x {T12:g} (T12) on the inner face for the bottom, "
-                    f"lower wall {BOT_Z0 - GROOVE_STOP:.2f} above the bottom edge, stopped {GROOVE_D:.3f} from each end")
+_BOT_GROOVE_NOTE = (f"through groove {BOT_GROOVE:g} deep x {T12:g} (T12) on the inner face for the bottom, "
+                    f"full length, lower wall {BOT_Z0 - GROOVE_STOP:.2f} above the bottom edge")
 PARTS.append({"name": "side", "solid": side_l, "qty": 2, "material": "ply 18mm",
               "notes": "face grain vertical on the show face; housed 3/8 in each post"
                        "; " + _BOT_GROOVE_NOTE})
@@ -235,13 +237,27 @@ PARTS.append({"name": "rail_rear", "solid": rail_rear, "qty": 1, "material": "so
                        "full section; figure-8 fasteners on top"})
 INST += [("side_l", side_l), ("side_r", side_r), ("back", back), ("rail_rear", rail_rear)]
 
-# Housed edges probed from the solids
-assert_housed(side_l, post_fl, _box(X0 + SETBACK, SIDE_Y0, GROOVE_STOP, T18, GROOVE_D, PANEL_H))
-assert_housed(side_l, post_rl, _box(X0 + SETBACK, YB - POST, GROOVE_STOP, T18, GROOVE_D, PANEL_H))
-assert_housed(back, post_rl, _box(BACK_X0, BACK_Y0, GROOVE_STOP, GROOVE_D, T18, BACK_H))
+# Housed edges probed from the solids. The panel probes leave out the through
+# groove for the bottom, which runs out of the panel ends inside the posts.
+def _side_probe(y):
+    p = _box(X0 + SETBACK, y, GROOVE_STOP, T18, GROOVE_D, PANEL_H)
+    return p - _box(BOT_X0, y - 1, BOT_Z0, BOT_GROOVE + 1, GROOVE_D + 2, T12)
+
+
+def _back_probe(x):
+    p = _box(x, BACK_Y0, GROOVE_STOP, GROOVE_D, T18, BACK_H)
+    return p - _box(x - 1, BACK_Y0 - 1, BOT_Z0, GROOVE_D + 2, BOT_GROOVE + 1, T12)
+
+
+assert_housed(side_l, post_fl, _side_probe(SIDE_Y0))
+assert_housed(side_l, post_rl, _side_probe(YB - POST))
+assert_housed(back, post_rl, _back_probe(BACK_X0))
 assert_housed(rail_rear, post_rl, _box(BACK_X0, BACK_Y0, POST_H - RAIL_REAR_H, GROOVE_D, RAIL_T, RAIL_REAR_H))
-assert_housed(back, post_rr, _box(XR - POST, BACK_Y0, GROOVE_STOP, GROOVE_D, T18, BACK_H))
+assert_housed(back, post_rr, _back_probe(XR - POST))
 assert_housed(rail_rear, post_rr, _box(XR - POST, BACK_Y0, POST_H - RAIL_REAR_H, GROOVE_D, RAIL_T, RAIL_REAR_H))
+# The bottom grooves run the full panel length (volume identity)
+assert abs(side_l.volume - (T18 * SIDE_L * PANEL_H - BOT_GROOVE * T12 * SIDE_L)) < 1e-3, side_l.volume
+assert abs(back.volume - (T18 * RAIL_L * BACK_H - BOT_GROOVE * T12 * RAIL_L)) < 1e-3, back.volume
 assert abs(side_l.bounding_box().min.X - X0 - SETBACK) < 1e-6
 assert abs(YB - back.bounding_box().max.Y - SETBACK) < 1e-6
 assert abs(side_l.bounding_box().max.Z - POST_H) < 1e-6

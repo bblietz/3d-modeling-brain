@@ -68,9 +68,11 @@ reviewed, not built; update with measured fits after the build.
   posts (two 3/8 in dowels per rail, one each end, 1 in deep; was
   stub-tenoned into three stopped mortises per front post until
   2026-09-18); rear top rail 1-1/2 in in the back groove line above a
-  15-1/4 in back panel, unaffected (still stub-tenoned); 1/2 ply bottom,
-  top face 2-1/4 in above the floor, in 1/4 in grooves (rabbet at the
-  front rail).
+  15-5/8 in back panel (15-1/4 before the panels came down), unaffected
+  (still stub-tenoned); 1/2 ply bottom, top face 2-1/4 in above the
+  floor, in 1/4 in grooves run through the sides and back full length
+  (Brian, 2026-09-27; were stopped at the posts) and a rabbet at the
+  front rail.
 - Fronts 3/4 in maple, 1/4 in behind the post faces, 5-5/8 over 11-1/8
   (was 5-3/4 / 11-3/8 before the 2026-09-17 height measurement; the
   front zone is re-split ~1:2 by that rule, not scaled, whenever the

@@ -128,6 +128,12 @@ because option (a) leaves 19-1/4 in of interior depth.
   3/4 in up; the panels grow 3/4 in and the ply lip under the bottom
   groove in the sides and back becomes 26 mm (was 7 mm), which closes
   that review item.
+- Bottom-panel grooves in the sides and back run through, full length
+  (Brian, 2026-09-27; were stopped 3/8 in from each end at the posts).
+  The ends sit inside the post grooves above their 3/4 in stop, so
+  nothing shows; one saw or router pass per panel. The CAD's housed-edge
+  probes now expect the notch and a volume identity proves each groove
+  runs the whole length.
 - Top thickness confirmed at 1-3/4 in and leg (post) width at 3 in
   (Brian, 2026-09-27). Both match the values already in the CAD
   (`TOP_T`, `POST`), so no geometry changed; `TOP_T` is no longer

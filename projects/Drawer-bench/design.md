@@ -210,11 +210,12 @@ open for Brian's review (change the constant, re-run the file).
   the tenons (a stopped rabbet makes the rail's full-section tenon sweep
   through the bottom's front tab at glue-up; the tenon corner it loses
   is 1/4 x 1/2). Glue and screw the bottom's front edge down (no lip
-  above it). Sides and back carry a stopped 1/4 x 1/2 groove on the
-  inner face; the panel is notched 51.85 x 39.15 (front) / 51.85 x 51.85
-  (rear) around the posts. The side grooves may be run through in the
-  shop (their ends are hidden inside the post grooves); the back groove
-  is what the bottom is pre-joined into, see the assembly order.
+  above it). Sides and back carry a 1/4 x 1/2 groove on the inner face,
+  run THROUGH full length (Brian, 2026-09-27; was stopped 3/8 in from
+  each end: the groove ends land inside the post grooves, above their
+  stop, so they never show); the panel is notched 51.85 x 39.15 (front)
+  / 51.85 x 51.85 (rear) around the posts. The back groove is what the
+  bottom is pre-joined into, see the assembly order.
 - **Design values leave a 7 mm ply lip** under the bottom groove in the
   sides and back (groove stop 1-1/2 in, bottom top face 2-1/4 in, 1/2 in
   ply): supported only at the post ends, fine as a dust-panel detail but
