@@ -118,8 +118,8 @@ because option (a) leaves 19-1/4 in of interior depth.
 - Front-rail joinery: 3/8 in dowels, two per rail (one each end, 1 in
   deep into post and rail), not stub-tenons into post mortises (Brian,
   2026-09-18). Rails now butt flush at the post faces (length = opening
-  exactly, was opening + 3/4 in); the rear top rail is unaffected, still
-  stub-tenoned into the back groove line.
+  exactly, was opening + 3/4 in); the rear top rail was unaffected then
+  (and dropped on 2026-09-27, below).
 - Legs, round two (Brian, 2026-09-27, from the rendered leg options
   page): keep E1, the 3/8 in chamfer full length with the posts straight
   to the floor, and bring the side and back panels down to the same line
@@ -134,6 +134,16 @@ because option (a) leaves 19-1/4 in of interior depth.
   nothing shows; one saw or router pass per panel. The CAD's housed-edge
   probes now expect the notch and a volume identity proves each groove
   runs the whole length.
+- No rear rail (Brian, 2026-09-27: "isn't the plywood back sufficient?"
+  It is; the sides already ran full height with no rail, and the rail
+  only gave the top's figure-8 fasteners solid wood). The back now runs
+  full height like the sides, 32-1/4 x 17-1/8 in, and a 3/4 x 1-1/2 in
+  soft maple cleat (rail stock, T18), glued and screwed to the inside
+  face of the back along its top edge between the posts, takes the rear
+  figure-8s; the front top rail still takes the front ones. One part
+  fewer, no rear tenons. The cleat was the recommended landing (Z-clips
+  in a kerf were the alternative); Brian only asked to drop the rail, so
+  the cleat is open to objection.
 - Top thickness confirmed at 1-3/4 in and leg (post) width at 3 in
   (Brian, 2026-09-27). Both match the values already in the CAD
   (`TOP_T`, `POST`), so no geometry changed; `TOP_T` is no longer

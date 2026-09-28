@@ -47,9 +47,8 @@ confirmed against the locked `POST` constant.
   3/8 in deep, stopped 3/4 in above the floor (the same line as the
   bottom drawer front; Brian, 2026-09-27, was 1-1/2 in), open at the
   top. Provisional blanks: sides 16-1/4 x 17-1/8 in, back 32-1/4 x
-  15-5/8 in (each includes 3/8 in per housed edge; height runs from the
-  groove stop to the top of the posts, the back to the underside of the
-  rear rail).
+  17-1/8 in (each includes 3/8 in per housed edge; height runs from the
+  groove stop to the top of the posts).
 - **Front frame (hidden)**: soft maple 3/4 in thick, dowel-jointed into
   the front posts (two 3/8 in dowels per rail, one at each end, 1 in
   deep into post and rail; Brian, 2026-09-18, was stub-tenoned 3/8 in
@@ -58,10 +57,11 @@ confirmed against the locked `POST` constant.
   front gap; see resolution 8). Top rail 1 in tall under the top, mid
   rail 1 in tall centered on the reveal between the fronts, bottom rail
   1-1/2 in tall from the floor gap up; rail length = opening exactly
-  (was opening + 3/4 in for the old tenon reach). A rear top rail in the
-  back groove line stiffens the top edge and takes figure-8 fasteners,
-  unaffected by the front-rail change: it keeps its stub-tenon into the
-  back groove line, rail length = opening + 3/4 in.
+  (was opening + 3/4 in for the old tenon reach). There is no rear rail
+  (Brian, 2026-09-27; it was a 1-1/2 in tenoned rail until then): the
+  back runs full height, and a 3/4 x 1-1/2 in soft maple cleat glued and
+  screwed to its inside face along the top edge, between the posts,
+  takes the rear figure-8 fasteners.
 - **Bottom**: 1/2 in plywood in 1/4 in deep grooves in the side and back
   panels and the front bottom rail; top face 2-1/4 in above the floor.
   Dust panel and slide-bracket landing, not structural.
@@ -115,7 +115,8 @@ confirmed against the locked `POST` constant.
 
 - Maple butcherblock matched to the Boos island (thickness, edge profile,
   overhang to be measured). Fastened with figure-8 fasteners into the
-  front and rear top rails; no glue, no rigid cross-grain screws, so the
+  front top rail and the cleat inside the back's top edge; no glue, no
+  rigid cross-grain screws, so the
   top moves across its 24 in width.
 
 ## Wood movement
@@ -193,13 +194,26 @@ open for Brian's review (change the constant, re-run the file).
   heights, on the same inner face, 1 in behind the front face - solid
   post stays between the rails either way, so the slide's front-tab
   screw-zone probe (already checked against solid post) is unaffected.
-  The rear top rail is untouched: it keeps its stub-tenon into the back
-  groove line. `drawer_bench.py`'s volume-identity asserts were updated
+  The rear top rail was untouched by this change (and dropped on
+  2026-09-27). `drawer_bench.py`'s volume-identity asserts were updated
   to subtract cylinder volumes instead of box-mortise volumes, which
   passed cleanly on the first re-run - no other constant moved.
 - **The rear top rail (1-1/2 in tall) is tenoned into the back groove
   line** and the back panel runs from the groove stop to the rail's
-  underside (15-1/4 in tall, not 16-3/4).
+  underside (15-1/4 in tall, not 16-3/4). SUPERSEDED 2026-09-27, next
+  bullet.
+- **No rear rail; the back runs full height with a cleat** (Brian,
+  2026-09-27: "isn't the plywood back sufficient?"). It is: the sides
+  already ran to the post tops with no rail, and the rail existed only
+  to give the top's figure-8 fasteners solid wood. The back is now
+  32-1/4 x 17-1/8 in like the sides, and `cleat_rear`, soft maple from
+  the rail stock (T18) x 1-1/2 in, opening length, is glued and screwed
+  to the back's inside face flush with the post tops; the figure-8s go
+  into it and into the front top rail. Its front face is 15 mm behind
+  the top drawer box's back and it sits above the rear slide brackets
+  (the pairwise no-overlap check covers it). Alternative not taken:
+  Z-clips in a kerf in the back. The cleat was the recommended landing;
+  Brian only asked to drop the rail.
 - **Rails are milled to the measured ply thickness (T18)** so their stub
   tenons are the full section in the same 3/8 in grooves and mortises;
   the cut list therefore prints 11/16 in, which is a consequence, not a
@@ -258,17 +272,18 @@ open for Brian's review (change the constant, re-run the file).
 
 1. Glue each side panel into its front and rear posts (two side
    sub-assemblies).
-2. Off the bench, pre-join the bottom to the back: the bottom's rear tab
-   goes into the back's stopped groove (the groove is exactly the tab's
-   length, so this cannot be done once the back is in a post).
+2. Off the bench, glue and screw the cleat inside the back's top edge,
+   then pre-join the bottom to the back: the bottom's rear tab goes into
+   the back's groove (through since 2026-09-27, so the tab can also
+   slide in from an end; the pair still goes in together).
 3. Stand the left sub-assembly; slide the back + bottom pair in sideways:
-   the back's tenon into the rear post groove, the bottom's edge into the
-   side panel's groove face-on. Add the rear top rail on the back's top
-   edge (same groove line).
-4. Slide the three front rails sideways into the front post mortises;
-   the bottom rail's through rabbet passes over the bottom's front tab
-   (rails can also go in before the back + bottom pair).
-5. Close the right sub-assembly over all seven tenons and edges at once.
+   the back's edge into the rear post groove, the bottom's edge into the
+   side panel's groove face-on. (No rear rail since 2026-09-27.)
+4. Dowel the three front rails into the left front post; the bottom
+   rail's through rabbet passes over the bottom's front tab (rails can
+   also go in before the back + bottom pair).
+5. Close the right sub-assembly over the back's edge, the bottom's edge
+   and the three rails' dowels at once.
 6. Drawers on their slides, fronts screwed from inside, then the top on
    figure-8 fasteners.
 

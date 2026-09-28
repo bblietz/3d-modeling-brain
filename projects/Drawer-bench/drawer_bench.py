@@ -41,7 +41,7 @@ RAIL_T = T18               # rails milled to the measured ply thickness so
 RAIL_TOP_H = 1.0 * IN      # 25.4
 RAIL_MID_H = 1.0 * IN      # 25.4
 RAIL_BOT_H = 1.5 * IN      # 38.1
-RAIL_REAR_H = 1.5 * IN     # 38.1   rear top rail, figure-8 landing
+CLEAT_H = 1.5 * IN         # 38.1   rear top cleat inside the back, figure-8 landing (replaces the tenoned rear rail, 2026-09-27)
 FLOOR_GAP = 0.75 * IN      # 19.05  shadow gap under the bottom front
 GROOVE_STOP = FLOOR_GAP    # 19.05  side/back bottoms on the drawer-front line (Brian 2026-09-27; was 1-1/2 in)
 REV_TOP = 0.125 * IN       # 3.175  under the top
@@ -83,8 +83,8 @@ OPEN_W = FOOT_W - 2 * POST          # 698.5  between the posts
 X0, Y0 = OH, OH                     # front-left post min corner
 XR, YB = OH + FOOT_W, OH + FOOT_D   # right post outer face, rear post outer face
 PANEL_H = POST_H - GROOVE_STOP      # 425.45 side panels, groove stop to top
-BACK_H = PANEL_H - RAIL_REAR_H      # 387.35 back panel, under the rear rail
-RAIL_L = OPEN_W + 2 * GROOVE_D      # 717.55 opening + two stub tenons
+BACK_H = PANEL_H                    # back panel full height, like the sides (no rear rail since 2026-09-27)
+RAIL_L = OPEN_W + 2 * GROOVE_D      # 819.15 back panel length: opening + two housed ends (named for the old rear rail)
 REV_MID_Z0 = FLOOR_GAP + FRONT_BOT_H                      # 307.975 reveal bottom
 RAIL_BOT_Z0 = FLOOR_GAP                                   # 19.05
 RAIL_MID_Z0 = REV_MID_Z0 + REV_MID / 2 - RAIL_MID_H / 2   # 298.45 centered on the reveal
@@ -206,11 +206,13 @@ for _p in (post_fl, post_fr, post_rl, post_rr):
 assert abs(post_fr.bounding_box().max.X - XR) < 1e-6
 assert abs(post_rl.bounding_box().max.Y - YB) < 1e-6
 
-# --- Parts: side panels (qty 2), back panel, rear top rail -----------------
+# --- Parts: side panels (qty 2), back panel, rear top cleat ----------------
 # Sides: outer face SETBACK behind the post face, housed GROOVE_D in each
 # post, bottom edge on the groove stop, top edge flush with the post tops.
-# Back: same, but stops under the rear top rail, which is tenoned into the
-# same groove line and takes the figure-8 fasteners for the top.
+# Back: the same, full height. A maple cleat glued and screwed inside its
+# top edge, between the posts, takes the figure-8 fasteners for the top
+# (Brian dropped the tenoned rear rail on 2026-09-27: the ply back is the
+# structure; the rail only ever gave the fasteners solid wood).
 SIDE_Y0 = Y0 + POST - GROOVE_D
 SIDE_L = FOOT_D - 2 * POST + 2 * GROOVE_D            # 412.75
 side_l = _box(X0 + SETBACK, SIDE_Y0, GROOVE_STOP, T18, SIDE_L, PANEL_H)
@@ -221,7 +223,7 @@ BACK_X0 = X0 + POST - GROOVE_D
 BACK_Y0 = YB - SETBACK - T18
 back = _box(BACK_X0, BACK_Y0, GROOVE_STOP, RAIL_L, T18, BACK_H)
 back -= _box(BACK_X0 - 1, BACK_Y0 - 1, BOT_Z0, RAIL_L + 2, BOT_GROOVE + 1, T12)
-rail_rear = _box(BACK_X0, BACK_Y0, POST_H - RAIL_REAR_H, RAIL_L, RAIL_T, RAIL_REAR_H)
+cleat = _box(X0 + POST, BACK_Y0 - RAIL_T, POST_H - CLEAT_H, OPEN_W, RAIL_T, CLEAT_H)
 
 side_r = mirror_x(side_l)
 _BOT_GROOVE_NOTE = (f"through groove {BOT_GROOVE:g} deep x {T12:g} (T12) on the inner face for the bottom, "
@@ -230,12 +232,14 @@ PARTS.append({"name": "side", "solid": side_l, "qty": 2, "material": "ply 18mm",
               "notes": "face grain vertical on the show face; housed 3/8 in each post"
                        "; " + _BOT_GROOVE_NOTE})
 PARTS.append({"name": "back", "solid": back, "qty": 1, "material": "ply 18mm",
-              "notes": "housed 3/8 in each post; top edge under the rear rail"
+              "notes": "housed 3/8 in each post; full height, top edge flush with the post tops; "
+                       "cleat_rear glued and screwed inside along the top edge"
                        "; " + _BOT_GROOVE_NOTE})
-PARTS.append({"name": "rail_rear", "solid": rail_rear, "qty": 1, "material": "soft maple",
-              "notes": "REAR top rail, thickness = measured ply (T18): stub tenons 3/8 each end, "
-                       "full section; figure-8 fasteners on top"})
-INST += [("side_l", side_l), ("side_r", side_r), ("back", back), ("rail_rear", rail_rear)]
+PARTS.append({"name": "cleat_rear", "solid": cleat, "qty": 1, "material": "soft maple",
+              "notes": f"REAR top cleat from the rail stock (T18) x {CLEAT_H / IN:g} tall, between the "
+                       "posts; glued and screwed to the inside face of the back, top edge flush with "
+                       "the post tops; figure-8 fasteners on top (replaces the tenoned rear rail)"})
+INST += [("side_l", side_l), ("side_r", side_r), ("back", back), ("cleat_rear", cleat)]
 
 # Housed edges probed from the solids. The panel probes leave out the through
 # groove for the bottom, which runs out of the panel ends inside the posts.
@@ -252,17 +256,17 @@ def _back_probe(x):
 assert_housed(side_l, post_fl, _side_probe(SIDE_Y0))
 assert_housed(side_l, post_rl, _side_probe(YB - POST))
 assert_housed(back, post_rl, _back_probe(BACK_X0))
-assert_housed(rail_rear, post_rl, _box(BACK_X0, BACK_Y0, POST_H - RAIL_REAR_H, GROOVE_D, RAIL_T, RAIL_REAR_H))
 assert_housed(back, post_rr, _back_probe(XR - POST))
-assert_housed(rail_rear, post_rr, _box(XR - POST, BACK_Y0, POST_H - RAIL_REAR_H, GROOVE_D, RAIL_T, RAIL_REAR_H))
 # The bottom grooves run the full panel length (volume identity)
 assert abs(side_l.volume - (T18 * SIDE_L * PANEL_H - BOT_GROOVE * T12 * SIDE_L)) < 1e-3, side_l.volume
 assert abs(back.volume - (T18 * RAIL_L * BACK_H - BOT_GROOVE * T12 * RAIL_L)) < 1e-3, back.volume
 assert abs(side_l.bounding_box().min.X - X0 - SETBACK) < 1e-6
 assert abs(YB - back.bounding_box().max.Y - SETBACK) < 1e-6
 assert abs(side_l.bounding_box().max.Z - POST_H) < 1e-6
-assert abs(back.bounding_box().max.Z - rail_rear.bounding_box().min.Z) < 1e-6
-assert abs(rail_rear.bounding_box().max.Z - POST_H) < 1e-6
+assert abs(back.bounding_box().max.Z - POST_H) < 1e-6
+_cb = cleat.bounding_box()
+assert abs(_cb.max.Y - BACK_Y0) < 1e-6 and abs(_cb.max.Z - POST_H) < 1e-6   # on the back's inner face, flush with the post tops
+assert abs(_cb.min.X - (X0 + POST)) < 1e-6 and abs(_cb.max.X - (XR - POST)) < 1e-6   # between the posts
 
 # --- Parts: front frame rails (hidden behind the drawer fronts) ------------
 # Front face FRAME_SETBACK behind the post faces; dowel joints, not tenons
@@ -490,18 +494,18 @@ assert RUNNER_LEN > BOX_D   # the runner overhangs the box at the back, into the
 
 # --- Part: top (maple butcherblock matched to the Boos island) --------------
 # Provisional thickness and overhang; edge profile copied from the island
-# once measured. Figure-8 fasteners into rail_top and rail_rear, no glue.
+# once measured. Figure-8 fasteners into rail_top and cleat_rear, no glue.
 top = _box(0, 0, POST_H, TOP_W, TOP_D, TOP_T)
 PARTS.append({"name": "top", "solid": top, "qty": 1, "material": "maple butcherblock (Boos match)",
               "notes": "provisional 1-3/4 thick, 1-1/4 overhang all round; edge profile to match "
-                       "the island; figure-8 fasteners into rail_top and rail_rear, no glue"})
+                       "the island; figure-8 fasteners into rail_top and cleat_rear, no glue"})
 INST.append(("top", top))
 assert abs(top.bounding_box().min.X + OH - X0) < 1e-6
 assert abs(top.bounding_box().max.Z - H) < 1e-6
 
 # --- assembly ---------------------------------------------------------------
 assembly = (post_fl + post_fr + post_rl + post_rr
-            + side_l + side_r + back + rail_rear
+            + side_l + side_r + back + cleat
             + rail_top + rail_mid + rail_bot + bottom
             + front_bot + front_top + drawer_bot + drawer_top + top)
 bb = assembly.bounding_box()

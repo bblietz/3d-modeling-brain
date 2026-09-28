@@ -67,9 +67,11 @@ reviewed, not built; update with measured fits after the build.
   1 / 1 / 1-1/2 in tall milled to T18, dowel-jointed into the front
   posts (two 3/8 in dowels per rail, one each end, 1 in deep; was
   stub-tenoned into three stopped mortises per front post until
-  2026-09-18); rear top rail 1-1/2 in in the back groove line above a
-  15-5/8 in back panel (15-1/4 before the panels came down), unaffected
-  (still stub-tenoned); 1/2 ply bottom, top face 2-1/4 in above the
+  2026-09-18); no rear rail since 2026-09-27: the back runs full height
+  like the sides (17-1/8 in) and a 3/4 x 1-1/2 in maple cleat glued and
+  screwed inside its top edge takes the rear figure-8s (the tenoned
+  1-1/2 in rail had only ever been a solid landing for them); 1/2 ply
+  bottom, top face 2-1/4 in above the
   floor, in 1/4 in grooves run through the sides and back full length
   (Brian, 2026-09-27; were stopped at the posts) and a rabbet at the
   front rail.
@@ -89,8 +91,8 @@ reviewed, not built; update with measured fits after the build.
   (length = opening exactly). The post's box mortises became round
   bores at the same rail-centerline heights; the volume-identity asserts
   moved from box to cylinder volumes and passed clean on the first
-  re-run. The rear top rail is unaffected, still stub-tenoned into the
-  back groove line.
+  re-run. The rear top rail was unaffected then, and dropped altogether
+  on 2026-09-27 (see above).
 - 18 in undermount slides (Blum 563H4570B, 471 mm runner), box heights
   computed from the rail-to-rail openings minus Blum's clearances (14 mm
   bottom, 6 mm top) rather than fixed - a hard-coded pair of "Blum
