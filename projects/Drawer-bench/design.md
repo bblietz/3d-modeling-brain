@@ -44,10 +44,12 @@ confirmed against the locked `POST` constant.
 - **Side panels (2) and back panel (1)**: 3/4 in plywood, housed in
   grooves in the posts, outer face 1/2 in behind the post face
   (frame-and-panel shadow). Grooves 3/4 in wide (cut to measured ply),
-  3/8 in deep, stopped 1-1/2 in above the floor, open at the top.
-  Provisional blanks: sides 16-1/4 x 16-3/4 in, back 28-1/4 x 16-3/4 in
-  (each includes 3/8 in per housed edge; height runs from the groove
-  stop to the top of the posts).
+  3/8 in deep, stopped 3/4 in above the floor (the same line as the
+  bottom drawer front; Brian, 2026-09-27, was 1-1/2 in), open at the
+  top. Provisional blanks: sides 16-1/4 x 17-1/8 in, back 32-1/4 x
+  15-5/8 in (each includes 3/8 in per housed edge; height runs from the
+  groove stop to the top of the posts, the back to the underside of the
+  rear rail).
 - **Front frame (hidden)**: soft maple 3/4 in thick, dowel-jointed into
   the front posts (two 3/8 in dowels per rail, one at each end, 1 in
   deep into post and rail; Brian, 2026-09-18, was stub-tenoned 3/8 in
@@ -217,7 +219,18 @@ open for Brian's review (change the constant, re-run the file).
   sides and back (groove stop 1-1/2 in, bottom top face 2-1/4 in, 1/2 in
   ply): supported only at the post ends, fine as a dust-panel detail but
   fragile to machine. Lowering the groove stop to 1 in would give a
-  20 mm lip; owner's call.
+  20 mm lip; owner's call. SUPERSEDED 2026-09-27: the groove stop is
+  now 3/4 in (below), so the lip is 26 mm.
+- **Side and back panels end on the drawer-front line, 3/4 in above the
+  floor** (Brian, 2026-09-27, after the rendered leg options page: he
+  kept the 3/8 in chamfer, E1, with the posts straight to the floor, but
+  wanted the panel bottoms level with the bottom drawer front instead of
+  3/4 in higher). In the CAD `GROOVE_STOP = FLOOR_GAP`, one tie, so the
+  post grooves, the panel heights and the bottom-groove lip all follow;
+  the panels grow 3/4 in and nothing else moves. Options considered and
+  passed on: square, 3/8 roundover, 3/4 outer-corner chamfer or
+  roundover, a stopped edge with a square foot, and 3 or 4-1/2 in of
+  leg showing (`leg_options.py`, `leg-options.html`).
 - **Drawer-box bottoms are 1/4 in (6 mm) plywood, not 1/2 in** (Brian,
   2026-09-17; landed on 1/4 in after a brief 1/8 in): only the bottom
   panel's own thickness changed. The groove that houses it in the

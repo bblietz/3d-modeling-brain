@@ -5,7 +5,7 @@
 - [Logo recreation fidelity](feedback-logo-recreation-fidelity.md) - trace real artwork 1:1, never rebuild logo elements from primitives
 - [Surfboards via Shape3d](project-surfboard-shape3d.md) - parsing proven, Kustom Beak rebuilt in FreeCAD, s3dx writer built; Brian to acceptance-test a written file in Shape3d
 - [X2D LAN status](reference-x2d-printer-lan.md) - read-only MQTT printer check via scripts/x2d-status.py; access code lives in Studio Beta conf
-- [Drawer-bench status](project-drawer-bench.md) - CAD built 2026-08-24; overall size (40x24x19-5/8 in) measured 2026-09-17; top 1-3/4 in and 3 in posts confirmed 2026-09-27; overhang/edge profile still pending; leg options page (E1-E5 edges, F1-F4 floor) awaiting Brian's pick
+- [Drawer-bench status](project-drawer-bench.md) - CAD built 2026-08-24; overall size (40x24x19-5/8 in) measured 2026-09-17; top 1-3/4 in and 3 in posts confirmed 2026-09-27; overhang/edge profile still pending; legs decided 2026-09-27 (E1 chamfer kept, side/back panels lowered to the 3/4 in drawer-front line)
 - [Minimal test coupons](feedback-minimal-test-coupons.md) - coupons hold only the feature under test plus a thin substrate; quote time from a real slice
 - [Keep tools in the vault](project-keep-tools-in-vault.md) - scratchpad is wiped on restarts; pipeline tools and monitors belong in projects/<Name>/pipeline or scripts/
 - [Raised letters recipe](feedback-raised-letters-recipe.md) - VALIDATED by the 14-tag batch: one-wall fill-core modifier + object key + parity check; dead ends not to retry; read knowledge/lettering-x2d.md before any lettering job

@@ -24,15 +24,11 @@ Face-frame bench with drawers. Furniture-grade sibling of
 
 ## Open questions
 
-- Leg/corner style: reopened 2026-09-27 after the island measurements.
-  Round-two options page (rendered from the CAD by `leg_options.py`,
-  page `leg-options.html`, images in `images/legs/`):
-  https://claude.ai/artifact/FyJGk4bqsZq3rfTrXQzhbR. Post edges E1-E5
-  (3/8 chamfer as built, square, 3/8 roundover, 3/4 outer-corner
-  chamfer, 3/4 outer-corner roundover) and at the floor F1-F4 (straight
-  down, stopped edge with a square foot, 3 in of leg showing, 4-1/2 in
-  of leg showing; the last two re-split the fronts and shrink the top
-  box to 2-13/16 / 2-5/16 in). Waiting on one E and one F from Brian.
+- Leg/corner style: DECIDED 2026-09-27 (Decisions locked): E1 kept,
+  panels lowered to the drawer-front line. The round-two options page
+  stays for the record: https://claude.ai/artifact/FyJGk4bqsZq3rfTrXQzhbR
+  (`leg_options.py`, `leg-options.html`, `images/legs/`; post edges
+  E1-E5 and floor treatments F1-F4).
 - Top overhang and edge profile: still pending the Boos island
   measurement (overall top footprint and height locked 2026-09-17, top
   thickness confirmed 2026-09-27, see Decisions locked).
@@ -124,6 +120,14 @@ because option (a) leaves 19-1/4 in of interior depth.
   2026-09-18). Rails now butt flush at the post faces (length = opening
   exactly, was opening + 3/4 in); the rear top rail is unaffected, still
   stub-tenoned into the back groove line.
+- Legs, round two (Brian, 2026-09-27, from the rendered leg options
+  page): keep E1, the 3/8 in chamfer full length with the posts straight
+  to the floor, and bring the side and back panels down to the same line
+  as the bottom drawer front, 3/4 in off the floor (was 1-1/2 in). In the
+  CAD `GROOVE_STOP = FLOOR_GAP`, so the post grooves and the panels stop
+  3/4 in up; the panels grow 3/4 in and the ply lip under the bottom
+  groove in the sides and back becomes 26 mm (was 7 mm), which closes
+  that review item.
 - Top thickness confirmed at 1-3/4 in and leg (post) width at 3 in
   (Brian, 2026-09-27). Both match the values already in the CAD
   (`TOP_T`, `POST`), so no geometry changed; `TOP_T` is no longer
@@ -186,7 +190,8 @@ because option (a) leaves 19-1/4 in of interior depth.
   pending**.
 - Open for Brian's review: the seven CAD resolutions in design.md
   (especially the 58 mm interior height of the top drawer and the 7 mm
-  ply lip under the bottom groove), then the measurements listed under
+  ply lip under the bottom groove; that lip became 26 mm on 2026-09-27
+  when the panels were lowered), then the measurements listed under
   "Provisional inputs".
 - 2026-08-24 (evening): Brian asked how the top drawer's slides fit.
   Checked the Blum 563H sheet: the box width rule, bottom clearance and

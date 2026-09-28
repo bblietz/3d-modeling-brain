@@ -59,8 +59,11 @@ reviewed, not built; update with measured fits after the build.
   island (footprint 37-1/2 x 21-1/2, opening 31-1/2 at the current
   numbers).
 - 3 in posts glued from 8/4, 3/8 chamfer, no taper; 3/4 ply sides and
-  back 1/2 in behind the post faces in T18 x 3/8 grooves stopped 1-1/2 in
-  above the floor; hidden front frame 1 in behind the post faces, rails
+  back 1/2 in behind the post faces in T18 x 3/8 grooves stopped 3/4 in
+  above the floor, the bottom drawer front's line (was 1-1/2 in until
+  2026-09-27, when Brian revisited the legs against a rendered options
+  page and kept the 3/8 chamfer, E1, but wanted the panels to end on the
+  same line as the drawer); hidden front frame 1 in behind the post faces, rails
   1 / 1 / 1-1/2 in tall milled to T18, dowel-jointed into the front
   posts (two 3/8 in dowels per rail, one each end, 1 in deep; was
   stub-tenoned into three stopped mortises per front post until
@@ -115,8 +118,9 @@ reviewed, not built; update with measured fits after the build.
   done 2026-09-27), actual 3/4 and 1/2 ply, the purchased slide spec. Re-run
   `EXPORT=1 .venv/bin/python projects/Drawer-bench/drawer_bench.py`.
 - Brian to review the seven CAD resolutions in design.md, in particular
-  the 58 mm interior height of the top drawer and the 7 mm ply lip under
-  the bottom groove.
+  the 58 mm interior height of the top drawer. (The 7 mm ply lip under
+  the bottom groove resolved itself on 2026-09-27: lowering the panels
+  to the drawer-front line made it 26 mm.)
 - Confirm the purchased slides are 563H4570B (or re-enter the runner
   length and setback rule from that sheet).
 - Decide pulls (routed finger pull vs hardware) and finish.

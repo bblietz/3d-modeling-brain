@@ -31,7 +31,8 @@ POST = 3 * IN              # 76.2   post square
 CHAMFER = 0.375 * IN       # 9.525  post vertical edges, full length
 SETBACK = 0.5 * IN         # 12.7   panel outer face behind the post face
 GROOVE_D = 0.375 * IN      # 9.525  groove depth in the posts
-GROOVE_STOP = 1.5 * IN     # 38.1   panel grooves stop this far above floor
+# GROOVE_STOP (where the panel grooves and the panels stop above the floor) is
+# tied to FLOOR_GAP below
 # FRAME_SETBACK (front frame plane) is derived below the slide block: fronts + Blum front gap
 FRONT_SETBACK = 0.25 * IN  # 6.35   drawer fronts behind the post face
 FRONT_T = 0.75 * IN        # 19.05  drawer front thickness (solid maple)
@@ -42,6 +43,7 @@ RAIL_MID_H = 1.0 * IN      # 25.4
 RAIL_BOT_H = 1.5 * IN      # 38.1
 RAIL_REAR_H = 1.5 * IN     # 38.1   rear top rail, figure-8 landing
 FLOOR_GAP = 0.75 * IN      # 19.05  shadow gap under the bottom front
+GROOVE_STOP = FLOOR_GAP    # 19.05  side/back bottoms on the drawer-front line (Brian 2026-09-27; was 1-1/2 in)
 REV_TOP = 0.125 * IN       # 3.175  under the top
 REV_MID = 0.25 * IN        # 6.35   between the fronts
 REV_SIDE = 0.125 * IN      # 3.175  front to post
@@ -174,7 +176,7 @@ PARTS.append({"name": "post_front", "solid": post_fl, "qty": 2, "material": "sof
                        "glue-up of two 8/4 pieces milled to 1-1/2; "
                        "3/8 chamfer x4 edges full length; "
                        "side groove T18 (measured ply) x 3/8 at 1/2 from the outer face, "
-                       "stopped 1-1/2 above the floor, open at top"
+                       f"stopped {GROOVE_STOP / IN:g} above the floor, open at top"
                        "; grain vertical, glue-up seam on a side face; "
                        f"three {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel bores on the inner "
                        "face 1 in behind the front face, centered on the rail joints at Z "
@@ -185,7 +187,7 @@ PARTS.append({"name": "post_rear", "solid": post_rl, "qty": 2, "material": "soft
               "notes": "one of 2 REAR posts, left/right mirrored, grooves on the inner faces; "
                        "same blank and chamfer as post_front; side groove as post_front; "
                        "back groove T18 x 3/8 on the inner face at 1/2 from the rear face, "
-                       "stopped 1-1/2 above the floor, open at top; no mortises"
+                       f"stopped {GROOVE_STOP / IN:g} above the floor, open at top; no mortises"
                        "; grain vertical"})
 INST += [("post_fl", post_fl), ("post_fr", post_fr), ("post_rl", post_rl), ("post_rr", post_rr)]
 
