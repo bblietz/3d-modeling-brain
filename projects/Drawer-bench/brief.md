@@ -175,6 +175,12 @@ because option (a) leaves 19-1/4 in of interior depth.
   `images/final-iso-front.png`, `images/final-iso-rear.png`. All
   PROVISIONAL: nothing is cut until the space, the Boos island and the
   plywood are measured and the file is re-run.
+- Shop page (2026-09-27): `cutlist.html`, built from `cutlist.csv` by
+  `make_cutlist_page.py` (parts by material in cutting order, inches and
+  mm, notes, hardware list, per-phone tick boxes) and published as a
+  private Artifact at https://claude.ai/artifact/B63kzPtAP56TSzAk8JG1ha.
+  After every `EXPORT=1` run: re-run the generator and republish to the
+  same URL.
 - Self-checks in the file: 46 asserts and 12 housed-edge probes from the
   solids (both ends), 300 pairwise no-overlap intersections, post volume
   identity (chamfers vs grooves vs mortises). Mutation-tested during
