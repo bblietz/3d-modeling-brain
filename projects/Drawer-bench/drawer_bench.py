@@ -10,7 +10,7 @@ floor). All mm. Every dimension is provisional; see design.md
 """
 
 import os
-from math import pi
+from math import acos, pi, sqrt
 from build123d import *
 
 IN = 25.4
@@ -57,6 +57,8 @@ DOWEL_DEPTH = 1.0 * IN     # 25.4   embedment into post and rail, each side
 FIG8_DIA = 0.625 * IN      # 15.875 figure-8 fastener recess, forstner bit, in the top edge of rail_top and cleat_rear
 FIG8_DEPTH = 0.125 * IN    # 3.175  recess depth (fastener thickness)
 FIG8_INSET = 4 * IN        # 101.6  first and last recess from the rail/cleat ends; the third is centered
+FIG8_OFFSET = 0.25 * IN    # 6.35   recess center from the INNER face: the bore opens 1/16 through it so the
+                           #        fastener hangs over into the cabinet and sits flush (Brian, 2026-09-27)
 
 # --- Undermount slide geometry (Blum TANDEM plus BLUMOTION 563H, from the
 # 563H/563 installation sheet, 2016 ed.; face-frame application, inset fronts,
@@ -102,7 +104,9 @@ BOT_Z0 = BOT_TOP_Z - T12                     # 45.15 bottom panel underside
 BOT_X0 = X0 + SETBACK + T18 - BOT_GROOVE     # into the side-panel groove
 BOT_W = FOOT_W - 2 * (SETBACK + T18 - BOT_GROOVE)   # 802.2
 DOWEL_VOL = pi * (DOWEL_DIA / 2) ** 2 * (DOWEL_DEPTH + 1)   # one dowel bore, post or rail side
-FIG8_VOL = pi * (FIG8_DIA / 2) ** 2 * FIG8_DEPTH             # one figure-8 recess
+_r, _d = FIG8_DIA / 2, FIG8_OFFSET
+_seg = _r ** 2 * acos(_d / _r) - _d * sqrt(_r ** 2 - _d ** 2)   # bore area past the inner face (open side)
+FIG8_VOL = (pi * _r ** 2 - _seg) * FIG8_DEPTH                  # one figure-8 recess, what stays in the wood
 FIG8_XS = (X0 + POST + FIG8_INSET, X0 + POST + OPEN_W / 2, X0 + POST + OPEN_W - FIG8_INSET)
 
 PARTS = []   # {"name", "solid", "qty", "material", "notes"}: cut list + assembly
@@ -236,7 +240,7 @@ back = _box(BACK_X0, BACK_Y0, GROOVE_STOP, RAIL_L, T18, BACK_H)
 back -= _box(BACK_X0 - 1, BACK_Y0 - 1, BOT_Z0, RAIL_L + 2, BOT_GROOVE + 1, T12)
 cleat = _box(X0 + POST, BACK_Y0 - RAIL_T, POST_H - CLEAT_H, OPEN_W, RAIL_T, CLEAT_H)
 for _x in FIG8_XS:
-    cleat -= _fig8(_x, BACK_Y0 - RAIL_T / 2, POST_H)
+    cleat -= _fig8(_x, BACK_Y0 - RAIL_T + FIG8_OFFSET, POST_H)   # opens through the cleat's front (inner) face
 
 side_r = mirror_x(side_l)
 _BOT_GROOVE_NOTE = (f"through groove {BOT_GROOVE:g} deep x {T12:g} (T12) on the inner face for the bottom, "
@@ -254,9 +258,11 @@ PARTS.append({"name": "cleat_rear", "solid": cleat, "qty": 1, "material": "soft 
                        "screws countersunk from the cleat's inside face (nothing through the back), "
                        "top edge flush with the post tops; three figure-8 fasteners on top: "
                        f"{FIG8_DIA / IN:g} dia x {FIG8_DEPTH / IN:g} deep forstner recesses centered "
-                       f"across the top edge at {FIG8_INSET / IN:g}, {OPEN_W / 2 / IN:g} and "
-                       f"{(OPEN_W - FIG8_INSET) / IN:g} from either end (blank datums), #8 x 5/8 "
-                       "screws into the cleat and into the top (replaces the tenoned rear rail)"})
+                       f"{FIG8_OFFSET / IN:g} from the front (inner) face, so each opens through it and "
+                       f"the fastener hangs over into the cabinet, at {FIG8_INSET / IN:g}, "
+                       f"{OPEN_W / 2 / IN:g} and {(OPEN_W - FIG8_INSET) / IN:g} from either end (blank "
+                       "datums), #8 x 5/8 screws into the cleat and into the top (replaces the tenoned "
+                       "rear rail)"})
 INST += [("side_l", side_l), ("side_r", side_r), ("back", back), ("cleat_rear", cleat)]
 
 # Housed edges probed from the solids. The panel probes leave out the through
@@ -285,7 +291,8 @@ assert abs(back.bounding_box().max.Z - POST_H) < 1e-6
 _cb = cleat.bounding_box()
 assert abs(_cb.max.Y - BACK_Y0) < 1e-6 and abs(_cb.max.Z - POST_H) < 1e-6   # on the back's inner face, flush with the post tops
 assert abs(_cb.min.X - (X0 + POST)) < 1e-6 and abs(_cb.max.X - (XR - POST)) < 1e-6   # between the posts
-# the three figure-8 recesses land whole in the cleat's top edge
+# the three figure-8 recesses open through the inner face only (solid wall outside)
+assert FIG8_OFFSET < FIG8_DIA / 2 < RAIL_T - FIG8_OFFSET
 assert abs(cleat.volume - (OPEN_W * RAIL_T * CLEAT_H - 3 * FIG8_VOL)) < 1e-2, cleat.volume
 
 # --- Parts: front frame rails (hidden behind the drawer fronts) ------------
@@ -312,7 +319,7 @@ def make_front_rail(z0, h):
 
 rail_top = make_front_rail(RAIL_TOP_Z0, RAIL_TOP_H)
 for _x in FIG8_XS:
-    rail_top -= _fig8(_x, RAIL_Y0 + RAIL_T / 2, POST_H)
+    rail_top -= _fig8(_x, RAIL_Y0 + RAIL_T - FIG8_OFFSET, POST_H)   # opens through the rail's rear (inner) face
 rail_mid = make_front_rail(RAIL_MID_Z0, RAIL_MID_H)
 rail_bot = make_front_rail(RAIL_BOT_Z0, RAIL_BOT_H)
 rail_bot -= _box(RAIL_X0 - 1, RAIL_Y0 + RAIL_T - BOT_GROOVE, BOT_Z0, FRAME_RAIL_L + 2, BOT_GROOVE + 1, T12 + 1)
@@ -321,9 +328,10 @@ PARTS.append({"name": "rail_top", "solid": rail_top, "qty": 1, "material": "soft
               "notes": f"FRONT top rail, thickness = measured ply (T18): butts flush into the post "
                        f"faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; three "
                        f"figure-8 fasteners on top: {FIG8_DIA / IN:g} dia x {FIG8_DEPTH / IN:g} deep "
-                       f"forstner recesses centered across the top edge at {FIG8_INSET / IN:g}, "
-                       f"{OPEN_W / 2 / IN:g} and {(OPEN_W - FIG8_INSET) / IN:g} from either end (blank "
-                       "datums), #8 x 5/8 screws into the rail and into the top"})
+                       f"forstner recesses centered {FIG8_OFFSET / IN:g} from the rear (inner) face, so "
+                       "each opens through it and the fastener hangs over into the cabinet, at "
+                       f"{FIG8_INSET / IN:g}, {OPEN_W / 2 / IN:g} and {(OPEN_W - FIG8_INSET) / IN:g} from "
+                       "either end (blank datums), #8 x 5/8 screws into the rail and into the top"})
 PARTS.append({"name": "rail_mid", "solid": rail_mid, "qty": 1, "material": "soft maple",
               "notes": f"FRONT mid rail, thickness = measured ply (T18): butts flush into the post "
                        f"faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; carries the "

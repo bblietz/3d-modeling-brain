@@ -145,12 +145,15 @@ because option (a) leaves 19-1/4 in of interior depth.
   in a kerf were the alternative); Brian only asked to drop the rail, so
   the cleat is open to objection.
 - Figure-8 recess locations (Brian, 2026-09-27): 5/8 in forstner, 1/8 in
-  deep, centered across the top edge of the front top rail and of the
-  rear cleat at 4, 15-3/4 and 27-1/2 in from either end (blank datums).
-  Modeled in the CAD; the rail and cleat volume identities prove each
-  bore lands whole in the edge and clear of the rail's dowel bores. The
-  top's screw holes are marked from the fasteners at assembly, not
-  pre-drilled.
+  deep, in the top edge of the front top rail and of the rear cleat at
+  4, 15-3/4 and 27-1/2 in from either end (blank datums), centered 1/4 in
+  from the INNER face so each bore opens 1/16 in through it and the
+  fastener hangs over into the cabinet and sits flush (Brian caught the
+  first, centered version: the waist would ride on the edge). Modeled in
+  the CAD; the rail and cleat volume identities use the partial-cylinder
+  volume and prove each bore is clear of the outer face and of the
+  rail's dowel bores. The top's screw holes are marked from the
+  fasteners at assembly, not pre-drilled.
 - Top thickness confirmed at 1-3/4 in and leg (post) width at 3 in
   (Brian, 2026-09-27). Both match the values already in the CAD
   (`TOP_T`, `POST`), so no geometry changed; `TOP_T` is no longer
