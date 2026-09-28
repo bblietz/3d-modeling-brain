@@ -64,7 +64,8 @@ reviewed, not built; update with measured fits after the build.
   2026-09-27, when Brian revisited the legs against a rendered options
   page and kept the 3/8 chamfer, E1, but wanted the panels to end on the
   same line as the drawer); hidden front frame 1 in behind the post faces, rails
-  1 / 1 / 1-1/2 in tall milled to T18, dowel-jointed into the front
+  1 / 1 / 1-1/2 in tall from plain 3/4 in stock (milled to T18 for the
+  tenons until 2026-09-27), dowel-jointed into the front
   posts (two 3/8 in dowels per rail, one each end, 1 in deep; was
   stub-tenoned into three stopped mortises per front post until
   2026-09-18); no rear rail since 2026-09-27: the back runs full height

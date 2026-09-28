@@ -214,7 +214,7 @@ open for Brian's review (change the constant, re-run the file).
   already ran to the post tops with no rail, and the rail existed only
   to give the top's figure-8 fasteners solid wood. The back is now
   32-1/4 x 17-1/8 in like the sides, and `cleat_rear`, soft maple from
-  the rail stock (T18) x 1-1/2 in, opening length, is glued and screwed
+  3/4 in rail stock x 1-1/2 in, opening length, is glued and screwed
   to the back's inside face flush with the post tops; the figure-8s go
   into it and into the front top rail. Its front face is 15 mm behind
   the top drawer box's back and it sits above the rear slide brackets
@@ -224,7 +224,13 @@ open for Brian's review (change the constant, re-run the file).
 - **Rails are milled to the measured ply thickness (T18)** so their stub
   tenons are the full section in the same 3/8 in grooves and mortises;
   the cut list therefore prints 11/16 in, which is a consequence, not a
-  target.
+  target. SUPERSEDED 2026-09-27: with the front rails on dowels and the
+  rear rail replaced by a glued cleat, nothing about them sits in a
+  ply-sized groove any more, so rails and cleat are plain 3/4 in stock
+  (`RAIL_T = 3/4 in`; Brian asked why the cut list said 11/16). Knock-ons:
+  the bottom rail's rabbet and the bottom's front notch move 1 mm, the
+  figure-8 recesses keep 4.8 mm of wall, the cleat clears the top drawer
+  box by about 14 mm.
 - **Bottom panel front edge sits in a rabbet, not a groove**: its top
   face and the bottom rail's top face are both 2-1/4 in above the floor,
   so the rail gets a 1/4 x 1/2 rabbet on its rear-top edge, run THROUGH

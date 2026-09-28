@@ -68,7 +68,7 @@ def cut_list_rows(parts):
     for entry in parts:
         t, w, l, geo_note = _measure(entry)
         notes = " ; ".join(n for n in (entry.get("notes", ""), geo_note) if n)
-        key = (round(t, 1), round(w, 1), round(l, 1), entry.get("material", ""), notes)
+        key = (_r1(t), _r1(w), _r1(l), entry.get("material", ""), notes)
         row = merged.get(key)
         if row:
             row["qty"] += entry.get("qty", 1)
@@ -83,8 +83,14 @@ def cut_list_rows(parts):
     return sorted(merged.values(), key=lambda r: (r["material"], -r["l"], -r["w"]))
 
 
+def _r1(mm):
+    """Round to 0.1 mm; the epsilon keeps a bounding box measured a hair under
+    x.x5 (boolean noise) from printing differently from its twin."""
+    return round(mm + 1e-6, 1)
+
+
 def _fmt(mm):
-    return f"{round(mm, 1):g}"
+    return f"{_r1(mm):g}"
 
 
 def write_cut_list(parts, md_path, csv_path=None, title="Cut list", extra_lines=None):

@@ -154,6 +154,12 @@ because option (a) leaves 19-1/4 in of interior depth.
   volume and prove each bore is clear of the outer face and of the
   rail's dowel bores. The top's screw holes are marked from the
   fasteners at assembly, not pre-drilled.
+- Rails and cleat are plain 3/4 in stock (Brian, 2026-09-27, after
+  asking why the cut list said 11/16). They were milled to the measured
+  ply thickness (T18) so the old stub tenons filled ply-sized grooves;
+  with dowels on the front rails and a glued cleat at the back that
+  reason is gone. `RAIL_T = 3/4 in`; the bottom rail's rabbet and the
+  bottom panel's front notch moved 1 mm, nothing else.
 - Top thickness confirmed at 1-3/4 in and leg (post) width at 3 in
   (Brian, 2026-09-27). Both match the values already in the CAD
   (`TOP_T`, `POST`), so no geometry changed; `TOP_T` is no longer

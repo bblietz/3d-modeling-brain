@@ -36,8 +36,8 @@ GROOVE_D = 0.375 * IN      # 9.525  groove depth in the posts
 # FRAME_SETBACK (front frame plane) is derived below the slide block: fronts + Blum front gap
 FRONT_SETBACK = 0.25 * IN  # 6.35   drawer fronts behind the post face
 FRONT_T = 0.75 * IN        # 19.05  drawer front thickness (solid maple)
-RAIL_T = T18               # rails milled to the measured ply thickness so
-                           # their stub tenons fill the same grooves
+RAIL_T = 0.75 * IN         # 19.05  rails and cleat, plain 3/4 stock (Brian 2026-09-27; was the measured
+                           #        ply thickness T18 while the rails' tenons filled ply-sized grooves)
 RAIL_TOP_H = 1.0 * IN      # 25.4
 RAIL_MID_H = 1.0 * IN      # 25.4
 RAIL_BOT_H = 1.5 * IN      # 38.1
@@ -253,7 +253,7 @@ PARTS.append({"name": "back", "solid": back, "qty": 1, "material": "ply 18mm",
                        "cleat_rear glued and screwed inside along the top edge"
                        "; " + _BOT_GROOVE_NOTE})
 PARTS.append({"name": "cleat_rear", "solid": cleat, "qty": 1, "material": "soft maple",
-              "notes": f"REAR top cleat from the rail stock (T18) x {CLEAT_H / IN:g} tall, between the "
+              "notes": f"REAR top cleat, 3/4 rail stock x {CLEAT_H / IN:g} tall, between the "
                        "posts; glued to the inside face of the back and clamped with #8 x 1-1/4 "
                        "screws countersunk from the cleat's inside face (nothing through the back), "
                        "top edge flush with the post tops; three figure-8 fasteners on top: "
@@ -325,7 +325,7 @@ rail_bot = make_front_rail(RAIL_BOT_Z0, RAIL_BOT_H)
 rail_bot -= _box(RAIL_X0 - 1, RAIL_Y0 + RAIL_T - BOT_GROOVE, BOT_Z0, FRAME_RAIL_L + 2, BOT_GROOVE + 1, T12 + 1)
 
 PARTS.append({"name": "rail_top", "solid": rail_top, "qty": 1, "material": "soft maple",
-              "notes": f"FRONT top rail, thickness = measured ply (T18): butts flush into the post "
+              "notes": f"FRONT top rail, 3/4 stock: butts flush into the post "
                        f"faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; three "
                        f"figure-8 fasteners on top: {FIG8_DIA / IN:g} dia x {FIG8_DEPTH / IN:g} deep "
                        f"forstner recesses centered {FIG8_OFFSET / IN:g} from the rear (inner) face, so "
@@ -333,11 +333,11 @@ PARTS.append({"name": "rail_top", "solid": rail_top, "qty": 1, "material": "soft
                        f"{FIG8_INSET / IN:g}, {OPEN_W / 2 / IN:g} and {(OPEN_W - FIG8_INSET) / IN:g} from "
                        "either end (blank datums), #8 x 5/8 screws into the rail and into the top"})
 PARTS.append({"name": "rail_mid", "solid": rail_mid, "qty": 1, "material": "soft maple",
-              "notes": f"FRONT mid rail, thickness = measured ply (T18): butts flush into the post "
+              "notes": f"FRONT mid rail, 3/4 stock: butts flush into the post "
                        f"faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; carries the "
                        "top drawer slides"})
 PARTS.append({"name": "rail_bot", "solid": rail_bot, "qty": 1, "material": "soft maple",
-              "notes": f"FRONT bottom rail, thickness = measured ply (T18): butts flush into the "
+              "notes": f"FRONT bottom rail, 3/4 stock: butts flush into the "
                        f"post faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; rabbet "
                        f"{BOT_GROOVE:g} x {T12:g} (T12) on the rear-top edge, full length, for the "
                        "bottom panel; glue and screw the bottom into it (no lip above)"})
