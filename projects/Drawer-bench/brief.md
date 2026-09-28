@@ -24,7 +24,15 @@ Face-frame bench with drawers. Furniture-grade sibling of
 
 ## Open questions
 
-- Leg/corner style (visual companion session in progress).
+- Leg/corner style: reopened 2026-09-27 after the island measurements.
+  Round-two options page (rendered from the CAD by `leg_options.py`,
+  page `leg-options.html`, images in `images/legs/`):
+  https://claude.ai/artifact/FyJGk4bqsZq3rfTrXQzhbR. Post edges E1-E5
+  (3/8 chamfer as built, square, 3/8 roundover, 3/4 outer-corner
+  chamfer, 3/4 outer-corner roundover) and at the floor F1-F4 (straight
+  down, stopped edge with a square foot, 3 in of leg showing, 4-1/2 in
+  of leg showing; the last two re-split the fronts and shrink the top
+  box to 2-13/16 / 2-5/16 in). Waiting on one E and one F from Brian.
 - Top overhang and edge profile: still pending the Boos island
   measurement (overall top footprint and height locked 2026-09-17, top
   thickness confirmed 2026-09-27, see Decisions locked).

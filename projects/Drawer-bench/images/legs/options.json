@@ -1,0 +1,66 @@
+{
+ "edges": {
+  "E1": {
+   "name": "3/8 in chamfer, all four edges",
+   "note": "current CAD"
+  },
+  "E2": {
+   "name": "Square, edges only eased",
+   "note": "crispest; closest to a plain Boos leg"
+  },
+  "E3": {
+   "name": "3/8 in roundover, all four edges",
+   "note": "softer, Shaker feel"
+  },
+  "E4": {
+   "name": "3/4 in chamfer on the outer corner, 3/8 in on the reveal edges",
+   "note": "heavier corner"
+  },
+  "E5": {
+   "name": "3/4 in roundover on the outer corner, reveal edges crisp",
+   "note": "one soft corner"
+  }
+ },
+ "feet": {
+  "F1": {
+   "name": "Straight to the floor",
+   "note": "current CAD: panels 1-1/2 in and fronts 3/4 in off the floor",
+   "floor_gap_in": 0.7499999999999999,
+   "panel_gap_in": 1.4999999999999998,
+   "front_bot_in": 11.125,
+   "front_top_in": 5.625,
+   "box_bot_in": 8.463,
+   "box_top_in": 3.588
+  },
+  "F2": {
+   "name": "Stopped edge, square foot",
+   "note": "edge treatment stops at the panel line, 1-1/2 in up; square block below",
+   "floor_gap_in": 0.7499999999999999,
+   "panel_gap_in": 1.4999999999999998,
+   "front_bot_in": 11.125,
+   "front_top_in": 5.625,
+   "box_bot_in": 8.463,
+   "box_top_in": 3.588
+  },
+  "F3": {
+   "name": "3 in of leg showing",
+   "note": "panels and fronts both stop 3 in above the floor",
+   "floor_gap_in": 2.9999999999999996,
+   "panel_gap_in": 2.9999999999999996,
+   "front_bot_in": 9.631,
+   "front_top_in": 4.869,
+   "box_bot_in": 6.968,
+   "box_top_in": 2.832
+  },
+  "F4": {
+   "name": "4-1/2 in of leg showing",
+   "note": "panels and fronts both stop 4-1/2 in above the floor",
+   "floor_gap_in": 4.5,
+   "panel_gap_in": 4.5,
+   "front_bot_in": 8.634,
+   "front_top_in": 4.366,
+   "box_bot_in": 5.972,
+   "box_top_in": 2.328
+  }
+ }
+}

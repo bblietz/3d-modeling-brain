@@ -1,0 +1,277 @@
+<title>Drawer Bench Legs</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #f7f4ee;
+    --surface: #fffdf9;
+    --ink: #24201b;
+    --muted: #6d655a;
+    --line: #e3dccf;
+    --accent: #d96a12;
+    --accent-ink: #8a4108;
+    --good-bg: #e6efe2; --good-ink: #2f5d2a;
+    --warn-bg: #fbe9d7; --warn-ink: #8a4108;
+    --note-bg: #ece7dd; --note-ink: #4d463c;
+    --paper: #f6f1e8;
+    --shadow: 0 1px 2px rgba(40, 30, 10, .06), 0 8px 24px rgba(40, 30, 10, .06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #1b1916; --surface: #24211d; --ink: #ece6dc; --muted: #a79e91; --line: #3a352e;
+      --accent: #f08a3a; --accent-ink: #f6b27e;
+      --good-bg: #253a22; --good-ink: #b9dcae;
+      --warn-bg: #46301c; --warn-ink: #f4c79c;
+      --note-bg: #302c26; --note-ink: #cfc6b8;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1b1916; --surface: #24211d; --ink: #ece6dc; --muted: #a79e91; --line: #3a352e;
+    --accent: #f08a3a; --accent-ink: #f6b27e;
+    --good-bg: #253a22; --good-ink: #b9dcae;
+    --warn-bg: #46301c; --warn-ink: #f4c79c;
+    --note-bg: #302c26; --note-ink: #cfc6b8;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: Archivo, "Helvetica Neue", Arial, sans-serif; font-size: 16px; line-height: 1.5;
+    padding-inline: 16px; padding-block: 28px 64px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  header p, .lede { max-width: 62ch; }
+  .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-ink); font-weight: 600; margin: 0 0 8px; }
+  h1 { font-size: clamp(30px, 5vw, 42px); line-height: 1.08; margin: 0 0 14px; letter-spacing: -.01em; text-wrap: balance; }
+  h2 { font-size: 22px; margin: 0; text-wrap: balance; }
+  .fixed { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
+  .fixed li::before { content: "\2713\00a0"; color: var(--good-ink); font-weight: 700; }
+  section { display: flex; flex-direction: column; gap: 16px; }
+  .sechead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; border-bottom: 2px solid var(--line); padding-bottom: 10px; }
+  .sechead .ask { color: var(--muted); font-size: 15px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .card.pick { border-color: var(--accent); }
+  .head { display: flex; align-items: flex-start; gap: 12px; }
+  .badge { flex: none; width: 40px; height: 40px; border-radius: 8px; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-weight: 600; font-size: 15px; }
+  .head h3 { margin: 0; font-size: 17px; line-height: 1.25; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chip { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--note-bg); color: var(--note-ink); }
+  .chip.good { background: var(--good-bg); color: var(--good-ink); }
+  .chip.warn { background: var(--warn-bg); color: var(--warn-ink); }
+  .figs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  figure { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+  .fig { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; aspect-ratio: 1 / 1; max-width: 100%; display: grid; place-items: center; overflow: hidden; cursor: zoom-in; }
+  .fig img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  figcaption { font-size: 12px; color: var(--muted); }
+  .card p { margin: 0; font-size: 14.5px; }
+  .build { font-size: 13.5px; color: var(--muted); }
+  .build b { color: var(--ink); font-weight: 600; }
+  .specs { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 10px; }
+  .specs dt { color: var(--muted); margin: 0; }
+  .specs dd { margin: 0; }
+  .flag { background: var(--warn-bg); color: var(--warn-ink); border-radius: 6px; padding: 8px 10px; font-size: 13.5px; }
+  .aside { background: var(--note-bg); color: var(--note-ink); border-radius: 10px; padding: 14px 16px; font-size: 14.5px; max-width: 72ch; }
+  .aside b { color: var(--ink); }
+  .cta { border-top: 2px solid var(--line); padding-top: 18px; font-size: 16px; max-width: 62ch; }
+  .cta code { font-family: "IBM Plex Mono", monospace; background: var(--note-bg); padding: 1px 6px; border-radius: 4px; }
+  #lightbox { position: fixed; inset: 0; background: rgba(15, 12, 8, .88); display: none; place-items: center; padding: 24px; z-index: 10; cursor: zoom-out; }
+  #lightbox.open { display: grid; }
+  #lightbox img { max-width: min(96vw, 1100px); max-height: 92vh; background: var(--paper); border-radius: 8px; }
+  #lightbox figcaption { color: #e8e1d5; text-align: center; margin-top: 8px; font-size: 14px; }
+  a:focus-visible, .fig:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (max-width: 420px) { .figs { grid-template-columns: 1fr; } .head h3 { font-size: 16px; } }
+  @media (prefers-reduced-motion: no-preference) { .card { transition: border-color .15s ease; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Drawer bench &middot; leg design, round two</p>
+    <h1>Drawer Bench Legs</h1>
+    <p>Two independent choices, both on the 3 in soft maple posts you confirmed against the island: <b>how the post's vertical edges are treated</b> (E1 to E5) and <b>what happens at the floor</b> (F1 to F4). Every picture is rendered from the bench's own CAD constants, so the reveals, setbacks and gaps are the real ones. Tap any picture to enlarge it.</p>
+    <ul class="fixed">
+      <li>3 x 3 in posts, floor to underside of top</li>
+      <li>1-3/4 in top, 1-1/4 in overhang (overhang still provisional)</li>
+      <li>Ply panels 1/2 in behind the post faces, fronts 1/4 in behind</li>
+      <li>Posts glued from two 8/4 pieces (seam on a side face, same in every option)</li>
+    </ul>
+  </header>
+
+  <section id="edges">
+    <div class="sechead">
+      <h2>Post edges</h2>
+      <span class="ask">pick one: E1 to E5. Left picture: the top 9 in of the front-left corner, seen from outside. Right: plan section of the post, to scale.</span>
+    </div>
+    <div class="grid">
+
+      <article class="card">
+        <div class="head"><div class="badge mono">E1</div><div><h3>3/8 in chamfer, all four edges</h3>
+          <div class="chips"><span class="chip good">current CAD</span><span class="chip">picked 2026-08-24</span></div></div></div>
+        <div class="figs">
+          <figure><div class="fig" tabindex="0"><img src="images/legs/E1-corner.png" alt="E1 corner render"></div><figcaption>corner, from the front-left</figcaption></figure>
+          <figure><div class="fig" tabindex="0"><img src="images/legs/E1-plan.png" alt="E1 plan section"></div><figcaption>plan section</figcaption></figure>
+        </div>
+        <p>A crisp facet on every edge, full length. The facet catches light as a thin bright line up each corner, and the two reveal-side facets echo the 1/2 in panel setback.</p>
+        <p class="build"><b>Build:</b> 45 degree chamfer bit, one pass per edge on the router table before the grooves are cut.</p>
+      </article>
+
+      <article class="card">
+        <div class="head"><div class="badge mono">E2</div><div><h3>Square, edges only eased</h3>
+          <div class="chips"><span class="chip">shown before as "crisp square"</span></div></div></div>
+        <div class="figs">
+          <figure><div class="fig" tabindex="0"><img src="images/legs/E2-corner.png" alt="E2 corner render"></div><figcaption>corner, from the front-left</figcaption></figure>
+          <figure><div class="fig" tabindex="0"><img src="images/legs/E2-plan.png" alt="E2 plan section"></div><figcaption>plan section</figcaption></figure>
+        </div>
+        <p>The blockiest reading of a 3 in post and the closest to a plain Boos leg. Edges broken about 1/16 in with a block plane so they do not chip; nothing else.</p>
+        <p class="build"><b>Build:</b> nothing to machine. Hardest to keep looking sharp over the years (dents show).</p>
+      </article>
+
+      <article class="card">
+        <div class="head"><div class="badge mono">E3</div><div><h3>3/8 in roundover, all four edges</h3>
+          <div class="chips"><span class="chip good">new</span></div></div></div>
+        <div class="figs">
+          <figure><div class="fig" tabindex="0"><img src="images/legs/E3-corner.png" alt="E3 corner render"></div><figcaption>corner, from the front-left</figcaption></figure>
+          <figure><div class="fig" tabindex="0"><img src="images/legs/E3-plan.png" alt="E3 plan section"></div><figcaption>plan section</figcaption></figure>
+        </div>
+        <p>Same reach as the chamfer but soft: the highlight becomes a gradient instead of a line. Reads more Shaker, friendlier at knee height on a bench people sit on.</p>
+        <p class="build"><b>Build:</b> 3/8 in roundover bit, same passes as E1. The fillet meets the 1/2 in panel setback cleanly (3/8 &lt; 1/2).</p>
+      </article>
+
+      <article class="card">
+        <div class="head"><div class="badge mono">E4</div><div><h3>3/4 in chamfer on the outer corner, 3/8 in on the reveal edges</h3>
+          <div class="chips"><span class="chip good">new</span><span class="chip">heavier corner</span></div></div></div>
+        <div class="figs">
+          <figure><div class="fig" tabindex="0"><img src="images/legs/E4-corner.png" alt="E4 corner render"></div><figcaption>corner, from the front-left</figcaption></figure>
+          <figure><div class="fig" tabindex="0"><img src="images/legs/E4-plan.png" alt="E4 plan section"></div><figcaption>plan section</figcaption></figure>
+        </div>
+        <p>The outside corner gets a wide facet, about a quarter of the post face, so the post starts to read as a faceted column. The two edges beside the panels and drawer fronts stay at 3/8 in: anything bigger there breaks into the panel grooves, which sit 1/2 in behind the face.</p>
+        <p class="build"><b>Build:</b> outer corner on the table saw at 45 degrees then a hand plane (or a large chamfer bit); 3/8 in bit for the other two edges.</p>
+      </article>
+
+      <article class="card">
+        <div class="head"><div class="badge mono">E5</div><div><h3>3/4 in roundover on the outer corner, reveal edges crisp</h3>
+          <div class="chips"><span class="chip good">new</span><span class="chip">one soft corner</span></div></div></div>
+        <div class="figs">
+          <figure><div class="fig" tabindex="0"><img src="images/legs/E5-corner.png" alt="E5 corner render"></div><figcaption>corner, from the front-left</figcaption></figure>
+          <figure><div class="fig" tabindex="0"><img src="images/legs/E5-plan.png" alt="E5 plan section"></div><figcaption>plan section</figcaption></figure>
+        </div>
+        <p>Only the corner you bump into is softened, with a big radius; the edges that meet the panels and fronts stay sharp so the 1/2 in and 1/4 in setbacks keep a crisp shadow line. A mixed detail, closer to a modern piece than to E3.</p>
+        <p class="build"><b>Build:</b> 3/4 in roundover bit (a 1-1/2 in diameter cutter, router table, two or three passes) or plane and sand to a template.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="feet">
+    <div class="sechead">
+      <h2>At the floor</h2>
+      <span class="ask">pick one: F1 to F4. Left picture: the whole bench. Right: the bottom 9 in of the front-left corner. All four are drawn with the E1 chamfer; the F choice works with any E.</span>
+    </div>
+    <div class="grid">
+
+      <article class="card">
+        <div class="head"><div class="badge mono">F1</div><div><h3>Straight to the floor</h3>
+          <div class="chips"><span class="chip good">current CAD</span></div></div></div>
+        <div class="figs">
+          <figure><div class="fig" tabindex="0"><img src="images/legs/F1-bench.png" alt="F1 whole bench"></div><figcaption>whole bench</figcaption></figure>
+          <figure><div class="fig" tabindex="0"><img src="images/legs/F1-foot.png" alt="F1 foot close-up"></div><figcaption>foot, bottom 9 in</figcaption></figure>
+        </div>
+        <p>The post runs unchanged to the floor. The side panels stop 1-1/2 in up (the groove stop) and the drawer fronts 3/4 in up, so the bench reads as a cabinet standing on four proud posts.</p>
+        <dl class="specs mono">
+          <dt>panel bottoms</dt><dd>1-1/2 in off the floor</dd>
+          <dt>fronts</dt><dd>3/4 in off the floor</dd>
+          <dt>drawer fronts</dt><dd>5-5/8 over 11-1/8 in</dd>
+          <dt>drawer boxes</dt><dd>3-9/16 over 8-7/16 in tall</dd>
+        </dl>
+      </article>
+
+      <article class="card">
+        <div class="head"><div class="badge mono">F2</div><div><h3>Stopped edge, square foot</h3>
+          <div class="chips"><span class="chip good">new</span><span class="chip">same gaps as F1</span></div></div></div>
+        <div class="figs">
+          <figure><div class="fig" tabindex="0"><img src="images/legs/F2-bench.png" alt="F2 whole bench"></div><figcaption>whole bench</figcaption></figure>
+          <figure><div class="fig" tabindex="0"><img src="images/legs/F2-foot.png" alt="F2 foot close-up"></div><figcaption>foot, bottom 9 in</figcaption></figure>
+        </div>
+        <p>The chamfer (or roundover) stops at the panel line, 1-1/2 in above the floor, and the last 1-1/2 in is left square. The square block reads as a foot and lines up with the bottom of the side panels, so the stop is a design line, not an accident.</p>
+        <p class="build"><b>Build:</b> stop the router pass 1-1/2 in from the bottom; a square stop from a plunge on the router table, or a lamb's-tongue run-out by hand if you want it fancier. Only makes sense with E1, E3, E4 or E5.</p>
+        <dl class="specs mono">
+          <dt>panel bottoms</dt><dd>1-1/2 in off the floor</dd>
+          <dt>fronts</dt><dd>3/4 in off the floor</dd>
+          <dt>drawer fronts</dt><dd>5-5/8 over 11-1/8 in (unchanged)</dd>
+        </dl>
+      </article>
+
+      <article class="card">
+        <div class="head"><div class="badge mono">F3</div><div><h3>3 in of leg showing</h3>
+          <div class="chips"><span class="chip good">new</span><span class="chip warn">changes the drawer split</span></div></div></div>
+        <div class="figs">
+          <figure><div class="fig" tabindex="0"><img src="images/legs/F3-bench.png" alt="F3 whole bench"></div><figcaption>whole bench</figcaption></figure>
+          <figure><div class="fig" tabindex="0"><img src="images/legs/F3-foot.png" alt="F3 foot close-up"></div><figcaption>foot, bottom 9 in</figcaption></figure>
+        </div>
+        <p>Panels and drawer fronts both stop 3 in above the floor, so the posts read as legs the way the island's do, with a toe space under the bench. The cabinet box gets 2-1/4 in shorter, and the front zone is re-split by the same 1:2 rule.</p>
+        <dl class="specs mono">
+          <dt>panel bottoms</dt><dd>3 in off the floor</dd>
+          <dt>fronts</dt><dd>3 in off the floor</dd>
+          <dt>drawer fronts</dt><dd>4-7/8 over 9-5/8 in</dd>
+          <dt>drawer boxes</dt><dd>2-13/16 over 6-15/16 in tall</dd>
+        </dl>
+        <div class="flag">Top drawer box drops to 2-13/16 in tall (about 2-1/4 in inside). Fine for flatware and lids, tight for much else.</div>
+      </article>
+
+      <article class="card">
+        <div class="head"><div class="badge mono">F4</div><div><h3>4-1/2 in of leg showing</h3>
+          <div class="chips"><span class="chip good">new</span><span class="chip warn">changes the drawer split</span></div></div></div>
+        <div class="figs">
+          <figure><div class="fig" tabindex="0"><img src="images/legs/F4-bench.png" alt="F4 whole bench"></div><figcaption>whole bench</figcaption></figure>
+          <figure><div class="fig" tabindex="0"><img src="images/legs/F4-foot.png" alt="F4 foot close-up"></div><figcaption>foot, bottom 9 in</figcaption></figure>
+        </div>
+        <p>Same idea with the box lifted 4-1/2 in: unmistakably a table on legs, and the floor is easy to clean under. The cost is drawer height; at this point a single deep drawer would make more sense than two.</p>
+        <dl class="specs mono">
+          <dt>panel bottoms</dt><dd>4-1/2 in off the floor</dd>
+          <dt>fronts</dt><dd>4-1/2 in off the floor</dd>
+          <dt>drawer fronts</dt><dd>4-3/8 over 8-5/8 in</dd>
+          <dt>drawer boxes</dt><dd>2-5/16 over 6 in tall</dd>
+        </dl>
+        <div class="flag">Top drawer box 2-5/16 in tall (under 2 in inside): too shallow to be useful. Choose F4 only if the top drawer goes away or both become one.</div>
+      </article>
+
+    </div>
+  </section>
+
+  <div class="aside">
+    <b>Not drawn again:</b> the tapered foot (shown 2026-08-24, passed on), the flush wrapped corners and the plinth base (passed on 2026-08-23), and a turned foot (needs a lathe). Any of them can come back if you want to see it against these.
+  </div>
+
+  <p class="cta">Answer with one letter from each group, for example <code>E3 + F2</code>. The CAD takes the change as two constants (edge size and kind, groove stop and floor gap), the asserts re-check the drawer clearances, and the cut list follows.</p>
+</div>
+
+<div id="lightbox" role="dialog" aria-label="Enlarged picture" aria-hidden="true">
+  <figure><img id="lightbox-img" alt=""><figcaption id="lightbox-cap"></figcaption></figure>
+</div>
+
+<script>
+  (function () {
+    var box = document.getElementById('lightbox');
+    var img = document.getElementById('lightbox-img');
+    var cap = document.getElementById('lightbox-cap');
+    function open(fig) {
+      var src = fig.querySelector('img');
+      var card = fig.closest('.card');
+      var title = card ? card.querySelector('h3').textContent : '';
+      var sub = fig.parentNode.querySelector('figcaption');
+      img.src = src.src; img.alt = src.alt;
+      cap.textContent = title + (sub ? ' · ' + sub.textContent : '');
+      box.classList.add('open'); box.setAttribute('aria-hidden', 'false');
+    }
+    function close() { box.classList.remove('open'); box.setAttribute('aria-hidden', 'true'); img.src = ''; }
+    document.querySelectorAll('.fig').forEach(function (fig) {
+      fig.addEventListener('click', function () { open(fig); });
+      fig.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(fig); } });
+    });
+    box.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && box.classList.contains('open')) close(); });
+  })();
+</script>
