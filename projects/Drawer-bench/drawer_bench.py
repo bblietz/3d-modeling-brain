@@ -237,8 +237,11 @@ PARTS.append({"name": "back", "solid": back, "qty": 1, "material": "ply 18mm",
                        "; " + _BOT_GROOVE_NOTE})
 PARTS.append({"name": "cleat_rear", "solid": cleat, "qty": 1, "material": "soft maple",
               "notes": f"REAR top cleat from the rail stock (T18) x {CLEAT_H / IN:g} tall, between the "
-                       "posts; glued and screwed to the inside face of the back, top edge flush with "
-                       "the post tops; figure-8 fasteners on top (replaces the tenoned rear rail)"})
+                       "posts; glued to the inside face of the back and clamped with #8 x 1-1/4 "
+                       "screws countersunk from the cleat's inside face (nothing through the back), "
+                       "top edge flush with the post tops; three figure-8 fasteners on top in 5/8 dia "
+                       "x 1/8 deep recesses, #8 x 5/8 screws into the cleat and into the top "
+                       "(replaces the tenoned rear rail)"})
 INST += [("side_l", side_l), ("side_r", side_r), ("back", back), ("cleat_rear", cleat)]
 
 # Housed edges probed from the solids. The panel probes leave out the through
@@ -297,8 +300,9 @@ rail_bot -= _box(RAIL_X0 - 1, RAIL_Y0 + RAIL_T - BOT_GROOVE, BOT_Z0, FRAME_RAIL_
 
 PARTS.append({"name": "rail_top", "solid": rail_top, "qty": 1, "material": "soft maple",
               "notes": f"FRONT top rail, thickness = measured ply (T18): butts flush into the post "
-                       f"faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; figure-8 "
-                       "fasteners on top"})
+                       f"faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; three "
+                       "figure-8 fasteners on top in 5/8 dia x 1/8 deep recesses, #8 x 5/8 screws "
+                       "into the rail and into the top"})
 PARTS.append({"name": "rail_mid", "solid": rail_mid, "qty": 1, "material": "soft maple",
               "notes": f"FRONT mid rail, thickness = measured ply (T18): butts flush into the post "
                        f"faces, {DOWEL_DIA:g} dia x {DOWEL_DEPTH:g} deep dowel each end; carries the "
@@ -498,7 +502,8 @@ assert RUNNER_LEN > BOX_D   # the runner overhangs the box at the back, into the
 top = _box(0, 0, POST_H, TOP_W, TOP_D, TOP_T)
 PARTS.append({"name": "top", "solid": top, "qty": 1, "material": "maple butcherblock (Boos match)",
               "notes": "provisional 1-3/4 thick, 1-1/4 overhang all round; edge profile to match "
-                       "the island; figure-8 fasteners into rail_top and cleat_rear, no glue"})
+                       "the island; six figure-8 fasteners (three into rail_top, three into "
+                       "cleat_rear, #8 x 5/8 screws both ends), no glue"})
 INST.append(("top", top))
 assert abs(top.bounding_box().min.X + OH - X0) < 1e-6
 assert abs(top.bounding_box().max.Z - H) < 1e-6

@@ -114,9 +114,11 @@ confirmed against the locked `POST` constant.
 ## Top
 
 - Maple butcherblock matched to the Boos island (thickness, edge profile,
-  overhang to be measured). Fastened with figure-8 fasteners into the
-  front top rail and the cleat inside the back's top edge; no glue, no
-  rigid cross-grain screws, so the
+  overhang to be measured). Fastened with six figure-8 fasteners, three
+  into the front top rail and three into the cleat inside the back's top
+  edge (5/8 in recesses 1/8 in deep, #8 x 5/8 in screws both ends; the
+  cleat is glued to the back and clamped with #8 x 1-1/4 in screws from
+  inside); no glue, no rigid cross-grain screws, so the
   top moves across its 24 in width.
 
 ## Wood movement
