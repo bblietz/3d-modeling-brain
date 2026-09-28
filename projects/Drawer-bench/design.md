@@ -1,6 +1,6 @@
 ---
 name: drawer-bench-design
-description: Approved design for the maple post-and-panel drawer bench (kitchen bench); overall footprint and height measured 2026-09-17, top thickness/overhang/profile still pending the Boos island measurement
+description: Approved design for the maple post-and-panel drawer bench (kitchen bench); overall footprint and height measured 2026-09-17, top thickness confirmed 2026-09-27, overhang/edge profile still pending the Boos island measurement
 created: 2026-08-24
 status: cad-built, provisional dimensions, resolutions pending Brian's review
 ---
@@ -18,19 +18,21 @@ with the family's John Boos block island.
 |---|---|---|
 | Overall top size | **40 x 24 in (1016 x 609.6 mm), measured (Brian, 2026-09-17)** | done |
 | Overall height (floor to top surface) | **19-5/8 in (498.475 mm), measured (Brian, 2026-09-17)** | done |
-| Top thickness | 1-3/4 in (44.45 mm) | the Boos island is measured |
-| Top overhang past the posts | 1-1/4 in (31.75 mm) per side | same |
-| Top edge profile | unknown (square / eased / bullnose / chamfer) | same |
+| Top thickness | **1-3/4 in (44.45 mm), confirmed against the Boos island (Brian, 2026-09-27)** | done |
+| Top overhang past the posts | 1-1/4 in (31.75 mm) per side | still to measure |
+| Top edge profile | unknown (square / eased / bullnose / chamfer) | still to measure |
 | 3/4 ply actual thickness | 18.0 mm | measured at cut time |
 | 1/2 ply actual thickness | 12.0 mm | measured at cut time |
 | Undermount slide | 18 in drawer class, Blum 563H4570B (471 mm runner) | purchased slide's sheet |
 
 Convention locked: 40 x 24 is the TOP; the posts sit inside the top by
 the overhang (footprint 37-1/2 x 21-1/2 in, drawer opening between posts
-31-1/2 in at the current numbers; top thickness and overhang are still
-provisional, so the footprint and opening will move slightly once the
-Boos island is measured, but the overall 40 x 24 x 19-5/8 envelope will
-not).
+31-1/2 in at the current numbers; overhang is still provisional, so the
+footprint and opening will move slightly once it is measured, but the
+overall 40 x 24 x 19-5/8 envelope will not). Top thickness is now
+confirmed at 1-3/4 in (matches the provisional CAD value exactly, so
+`TOP_T` did not change); leg width (post size, 3 in) is likewise
+confirmed against the locked `POST` constant.
 
 ## Structure (load path: top -> posts -> floor)
 

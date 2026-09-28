@@ -25,9 +25,9 @@ Face-frame bench with drawers. Furniture-grade sibling of
 ## Open questions
 
 - Leg/corner style (visual companion session in progress).
-- Top thickness, overhang and edge profile: still pending the Boos
-  island measurement (overall top footprint and height are now locked,
-  see Decisions locked 2026-09-17).
+- Top overhang and edge profile: still pending the Boos island
+  measurement (overall top footprint and height locked 2026-09-17, top
+  thickness confirmed 2026-09-27, see Decisions locked).
 - Drawer count/layout, slide hardware.
 - Seating load, what the drawers hold.
 
@@ -116,6 +116,11 @@ because option (a) leaves 19-1/4 in of interior depth.
   2026-09-18). Rails now butt flush at the post faces (length = opening
   exactly, was opening + 3/4 in); the rear top rail is unaffected, still
   stub-tenoned into the back groove line.
+- Top thickness confirmed at 1-3/4 in and leg (post) width at 3 in
+  (Brian, 2026-09-27). Both match the values already in the CAD
+  (`TOP_T`, `POST`), so no geometry changed; `TOP_T` is no longer
+  provisional. Overhang (1-1/4 in) and edge profile are still the
+  provisional guesses until the island is measured for them.
 
 ## Build log (2026-08-24)
 

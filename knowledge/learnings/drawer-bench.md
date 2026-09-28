@@ -95,7 +95,9 @@ reviewed, not built; update with measured fits after the build.
   width opening minus 18 mm (inside = opening minus 42), 12.7 mm bottom
   recess, runner front screws into the posts between the mortises, rear
   brackets on the back panel.
-- Butcherblock top matched to the Boos island, figure-8 fasteners, no glue.
+- Butcherblock top matched to the Boos island, 1-3/4 in thick (confirmed
+  by measurement, Brian 2026-09-27; the provisional value was right),
+  figure-8 fasteners, no glue.
 - Pulls and finish out of scope until the build.
 
 - The "verified from the sheet" lesson: the undermount numbers copied
@@ -109,8 +111,8 @@ reviewed, not built; update with measured fits after the build.
 
 ## Open items for the build
 
-- Measure: the space, the Boos island (thickness, edge profile,
-  overhang), actual 3/4 and 1/2 ply, the purchased slide spec. Re-run
+- Measure: the space, the Boos island (edge profile, overhang; thickness
+  done 2026-09-27), actual 3/4 and 1/2 ply, the purchased slide spec. Re-run
   `EXPORT=1 .venv/bin/python projects/Drawer-bench/drawer_bench.py`.
 - Brian to review the seven CAD resolutions in design.md, in particular
   the 58 mm interior height of the top drawer and the 7 mm ply lip under
