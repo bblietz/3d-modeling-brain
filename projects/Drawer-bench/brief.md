@@ -179,6 +179,14 @@ because option (a) leaves 19-1/4 in of interior depth.
   Cuts sized to plywood say "3/4 ply (measure)" instead of a fraction,
   the materials are 3/4 / 1/2 / 1/4 ply, areas are in sq ft. The CSV
   keeps mm as the page builder's data.
+- Drawer-back bottom grooves run through, full length (Brian, 2026-09-28,
+  after asking why they stopped short). The stop dated from the 1/2 in
+  box bottoms, when the groove reached the Blum hook bores; with 1/4 in
+  bottoms the groove tops out 2.3 mm under the bores, which is Blum's
+  standard geometry. The drawer bottoms lose their rear-corner notches
+  and are plain rectangles; the 35 x 13 mm hook notches in the backs
+  stay. The model's hook-bore probe is the guard if the bottoms ever go
+  back to 1/2 in.
 
 ## Build log (2026-08-24)
 

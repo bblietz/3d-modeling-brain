@@ -543,13 +543,13 @@ def drawer_end(sfx, back):
     stop = UM_HOOK_NOTCH_W + DADO
     v = View(L, box_h, "inner face (toward the inside of the box)")
     if back:
-        v.groove(stop, UM_RECESS, L - 2 * stop, T6)
+        v.groove(0, UM_RECESS, L, T6)
         for x in (0, L - stop):
             v.notch(x, 0, stop, UM_HOOK_NOTCH_H)
         d, dep, inset, up = UM_HOOK_BORE
         for x in (inset + DADO, L - inset - DADO):
             v.bore(x, up, d / 2, hidden=True)
-        v.callout(L / 2, UM_RECESS + T6 / 2, f"bottom groove, STOPPED {dt(stop)} from each end: {PLY6} tall x {dt(DADO)} deep, underside {dt(UM_RECESS)} up")
+        v.callout(L / 2, UM_RECESS + T6 / 2, f"bottom groove, runs out both ends: {PLY6} tall x {dt(DADO)} deep, underside {dt(UM_RECESS)} up")
         v.callout(stop / 2, UM_HOOK_NOTCH_H / 2, f"rear-hook notches, both bottom corners: {dt(stop)} wide x {dt(UM_HOOK_NOTCH_H)} tall")
         v.callout(L - inset - DADO, up, f"rear-hook bores (dashed, from the REAR face): {dt(d)} dia x {dt(dep)} deep, Blum T65.1600.01 template")
         v.dim_h(0, stop, -22)
@@ -573,11 +573,12 @@ def drawer_end(sfx, back):
           [v], "Both ends sit in the sides' end rabbets. Datums: the blank's own ends and bottom edge.")
     y_face = BOX_Y0 + BOX_D - T12 if back else BOX_Y0 + T12 - DADO
     if back:
-        probes = cut_probes(x_blank + stop, y_face, z0 + UM_RECESS, L - 2 * stop, DADO, T6, "+y")
-        probes.append((_box(x_blank + stop - 4, y_face + 1, z0 + UM_RECESS + 1, 2.5, DADO - 2, T6 - 2), "solid"))       # stopped
+        probes = cut_probes(x_blank, y_face, z0 + UM_RECESS, L, DADO, T6, "+y")
+        probes.append((_box(x_blank - 2, y_face + 1, z0 + UM_RECESS + 1, 3, DADO - 2, T6 - 2), "empty"))            # runs out
+        probes.append((_box(x_blank + L - 1, y_face + 1, z0 + UM_RECESS + 1, 3, DADO - 2, T6 - 2), "empty"))
         for x in (x_blank, x_blank + L - stop):
-            probes.append((_box(x + 1, y_face + 1, z0 + 1, stop - 2, T12 - 2, UM_HOOK_NOTCH_H - 2), "empty"))
-            probes.append((_box(x + 1, y_face + 1, z0 + UM_HOOK_NOTCH_H + 0.5, stop - 2, T12 - 2, 1), "solid"))
+            probes.append((_box(x + 1, y_face + 1, z0 + 1, stop - 2, T12 - 2, UM_HOOK_NOTCH_H - 2), "empty"))      # hook notch
+            probes.append((_box(x + 1, y_face + DADO + 1, z0 + UM_HOOK_NOTCH_H + 0.5, stop - 2, T12 - DADO - 2, 1), "solid"))   # wood above it, behind the groove
     else:   # the box front's groove is on its rear (inner) face, so its floor is toward the front
         probes = cut_probes(x_blank, y_face, z0 + UM_RECESS, L, DADO, T6, "-y")
         probes.append((_box(x_blank - 2, y_face + 1, z0 + UM_RECESS + 1, 3, DADO - 2, T6 - 2), "empty"))
@@ -589,25 +590,14 @@ def drawer_bottom(sfx):
     solid = part(name)
     z0 = BOX_BOT_Z0 if sfx == "bot" else BOX_TOP_Z0
     L, D = END_LEN, BOX_D - 2 * (T12 - DADO)
-    nw = UM_HOOK_NOTCH_W + DADO
     v = View(L, D, "plan view; FRONT edge along the bottom, REAR edge along the top")
-    for x in (0, L - nw):
-        v.notch(x, D - DADO, nw, DADO)
-    v.callout(nw / 2, D - DADO / 2, f"rear corners notched {dt(nw)} x {dt(DADO)}, where the back's groove is stopped")
-    v.dim_h(0, nw, -22)
-    v.dim_v(D - DADO, D, -22)
+    v.callout(L / 2, D / 2, f"plain rectangle, no joinery; all four edges sit {dt(DADO)} deep in the box's grooves")
     v.dim_h(0, L, v.top_y())
     v.dim_v(0, D, L + 26)
     v.edge("bottom", "FRONT edge")
     sheet(name, f"{name}  x1  |  {PLY6}, {dt(D)} x {dt(L)}", [v],
           "Sits in the 1/4 in grooves of the sides, front and back, 1/2 in above the box's bottom edges.")
-    x_blank = BOX_X0 + T12 - DADO
-    y_back = BOX_Y0 + BOX_D - T12
-    probes = []
-    for x in (x_blank, x_blank + L - nw):
-        probes.append((_box(x + 1, y_back + 1, z0 + UM_RECESS + 1, nw - 2, DADO - 2, T6 - 2), "empty"))
-        probes.append((_box(x + 1, y_back - 1.5, z0 + UM_RECESS + 1, nw - 2, 1, T6 - 2), "solid"))
-    check(name, solid, probes)
+    assert abs(solid.volume - L * D * T6) < 1e-6, (name, "drawn as a plain rectangle but the solid has cuts")
 
 
 def top_slab():

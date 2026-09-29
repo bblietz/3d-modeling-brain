@@ -71,6 +71,14 @@ reviewed, not built; update with measured fits after the build.
   (measure)" rather than a fraction: 18 mm prints as 23/32, which reads
   as a number to hit. Give the datum that is a clean inch (the bottom
   groove's top wall at 1-1/2, not its lower wall at 1-1/32).
+- Re-check a constraint when its input changes (2026-09-28): the
+  drawer-back groove was stopped because a 1/2 in bottom's groove hit the
+  Blum hook bores; the bottoms went to 1/4 in ten days earlier and nobody
+  asked whether the stop still had a reason. Brian caught it from the
+  drawing ("why is the dado not all the way across?"). The bore probe
+  that guards the real constraint was there all along; the stop was a
+  hand-coded consequence, not a derived one. Assert the constraint and
+  let the geometry be the simple default.
 - Subagent-driven build: one implementer per task with the complete code
   in the brief, one reviewer per task that mutation-tests the asserts, a
   whole-file review at the end. The per-task reviews found only Minor
@@ -133,7 +141,9 @@ reviewed, not built; update with measured fits after the build.
   drawer-bench-design's "Resolutions from the CAD", 2026-09-17); outer
   width opening minus 18 mm (inside = opening minus 42), 12.7 mm bottom
   recess, runner front screws into the posts between the mortises, rear
-  brackets on the back panel.
+  brackets on the back panel. Drawer-back bottom grooves run through
+  (Brian, 2026-09-28; the stop that kept them out of the hook bores dated
+  from the 1/2 in bottoms) and the box bottoms are plain rectangles.
 - Butcherblock top matched to the Boos island, 1-3/4 in thick (confirmed
   by measurement, Brian 2026-09-27; the provisional value was right),
   figure-8 fasteners, no glue.

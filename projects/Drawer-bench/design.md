@@ -351,7 +351,13 @@ applied to the CAD (and to Cabinet-bench, which had the same errors):
   bores centred 7 mm from the side's inner face and 24 mm above the bottom
   edge. In a 12 mm back that bore breaks into a full-length bottom groove,
   so the back's groove is stopped 35 mm from each side and the bottom's
-  rear corners are notched 41 x 6.35 to match. The back is now its own
+  rear corners are notched 41 x 6.35 to match. SUPERSEDED 2026-09-28:
+  that held for the 1/2 in box bottoms; since the bottoms went to 1/4 in
+  (2026-09-17) the groove tops out at 18.7 mm, 2.3 mm under the bore
+  (Blum's standard geometry), so the back's groove runs through like the
+  front's and the bottoms are plain rectangles (Brian asked why it was
+  stopped and had it run through; the hook-bore probe still guards the
+  real constraint). The back is now its own
   registry part (`drawer_back_*`, 20 parts in the file) and a probe asserts
   the bore volume is solid ply and clear of the bottom. The cut list
   now lists front and back (and each rail and post type) on their own

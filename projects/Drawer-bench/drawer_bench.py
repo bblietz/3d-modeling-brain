@@ -504,23 +504,24 @@ def make_drawer(box_h, z0, sfx):
     front -= _box(x0 + T12 - DADO - 1, y0 + T12 - DADO, z0 + UM_RECESS,
                   END_LEN + 2, DADO + 1, T6)
 
-    # Back (Blum rear-hook preparation, 563H sheet p.2): bottom groove stopped
-    # UM_HOOK_NOTCH_W from each side's inner face so the 10-deep hook bores stay
-    # in solid ply; 35 x 13 notches at both bottom corners for the hooks.
+    # Back (Blum rear-hook preparation, 563H sheet p.2): bottom groove run
+    # through like the front's (Brian, 2026-09-28; it was stopped
+    # UM_HOOK_NOTCH_W from each side while the bottoms were T12 and the groove
+    # reached the hook bores; with T6 bottoms the bores clear it, and the probe
+    # below still proves that); 35 x 13 notches at both bottom corners for the
+    # hooks.
     back = _box(x0 + T12 - DADO, y_back, z0, END_LEN, T12, box_h)
-    back -= _box(x0 + T12 + UM_HOOK_NOTCH_W, y_back - 1, z0 + UM_RECESS,
-                 BOX_W - 2 * T12 - 2 * UM_HOOK_NOTCH_W, DADO + 1, T6)
+    back -= _box(x0 + T12 - DADO - 1, y_back - 1, z0 + UM_RECESS, END_LEN + 2, DADO + 1, T6)
     for _nx in (x0 + T12 - DADO - 1, x0 + BOX_W - T12 - UM_HOOK_NOTCH_W):
         back -= _box(_nx, y_back - 1, z0 - 1, UM_HOOK_NOTCH_W + DADO + 1, T12 + 2,
                      UM_HOOK_NOTCH_H + 1)
 
     bot = _box(x0 + T12 - DADO, y0 + T12 - DADO, z0 + UM_RECESS,
-               END_LEN, BOX_D - 2 * (T12 - DADO), T6)
-    for _nx in (x0 + T12 - DADO - 1, x0 + BOX_W - T12 - UM_HOOK_NOTCH_W):   # rear corners
-        bot -= _box(_nx, y_back, z0 + UM_RECESS - 1, UM_HOOK_NOTCH_W + DADO + 1,
-                    DADO + 1, T12 + 2)
+               END_LEN, BOX_D - 2 * (T12 - DADO), T6)   # plain rectangle (rear notches gone with the stopped groove)
 
-    # The hook bores (not modeled) must land in solid back, clear of the bottom
+    # The hook bores (not modeled) must land in solid back, clear of the bottom:
+    # this is what would fail if the bottoms went back to T12 and the through
+    # groove reached the bores again.
     _d, _dep, _in, _up = UM_HOOK_BORE
     for _bx in (x0 + T12 + _in, x0 + BOX_W - T12 - _in):
         _bp = _box(_bx - _d / 2, y_back + T12 - _dep, z0 + _up - _d / 2, _d, _dep, _d)
@@ -535,16 +536,14 @@ def make_drawer(box_h, z0, sfx):
                   "notes": "box front (sub-front): " + _groove + "; locking devices "
                            "bored with the Blum T65.1600.01 template"})
     PARTS.append({"name": f"drawer_back_{sfx}", "solid": back, "qty": 1, "material": "1/2 ply",
-                  "notes": "box back, datums from the blank's ends: " + _groove + ", "
-                           f"STOPPED {inch(UM_HOOK_NOTCH_W + DADO)} from each end (= {inch(UM_HOOK_NOTCH_W)} from "
-                           f"the side's inner face); rear-hook notches {inch(UM_HOOK_NOTCH_W + DADO)} from "
+                  "notes": "box back, datums from the blank's ends: " + _groove + ", runs out both ends; "
+                           f"rear-hook notches {inch(UM_HOOK_NOTCH_W + DADO)} from "
                            f"each end x {inch(UM_HOOK_NOTCH_H)} tall at both bottom corners; rear-hook bores "
                            f"{inch(_d)} dia x {inch(_dep)} deep from the rear face, centered {inch(_in + DADO)} from "
                            f"each end (= {inch(_in)} from the side's inner face) and {inch(_up)} above the bottom "
                            f"edge (Blum T65.1600.01 template)"})
     PARTS.append({"name": f"drawer_bottom_{sfx}", "solid": bot, "qty": 1, "material": "1/4 ply",
-                  "notes": f"rear corners notched {inch(UM_HOOK_NOTCH_W + DADO)} (from each end) x {inch(DADO)} "
-                           "deep where the back groove is stopped"})
+                  "notes": f"plain rectangle; sits in the {inch(DADO)} deep grooves of the sides, front and back"})
 
     s_r = mirror_x(s)
     INST.extend([(f"drawer_side_{sfx}_l", s), (f"drawer_side_{sfx}_r", s_r),
