@@ -1,0 +1,420 @@
+{
+ "round_trip": "pass: colours, per-part extruders, names, modifier + keys, object key, diff lists, centering",
+ "slice": {
+  "rc": 0,
+  "layers": 33,
+  "first_layer_mm": 0.2,
+  "layer_mm": 0.12,
+  "time_estimate": "1h 23m 57s",
+  "prediction_s": 5037,
+  "minutes": 84.0,
+  "grams": {
+   "backer (white)": 23.38,
+   "ink (black)": 3.17
+  },
+  "grams_total": 26.55,
+  "filament_change": {
+   "z": 3.08,
+   "tool": "T1",
+   "flush_mm": 116.41,
+   "flush_mm3": 280,
+   "matrix": [
+    "0",
+    "280",
+    "280",
+    "0",
+    "0",
+    "280",
+    "280",
+    "0"
+   ]
+  },
+  "bed_C": "65",
+  "nozzle_C": 220,
+  "grams_by_feature": {
+   "Sparse infill": 8.78,
+   "Internal solid infill": 7.9,
+   "Bridge": 3.28,
+   "Bottom surface": 1.82,
+   "Outer wall": 1.21,
+   "Top surface": 1.1,
+   "Prime tower": 1.04,
+   "Inner wall": 0.96,
+   "Skirt": 0.1,
+   "Gap infill": 0.01
+  }
+ },
+ "tower": {
+  "wipe_tower_xy": [
+   40.0,
+   87.5
+  ],
+  "layer1_bbox": [
+   34.98,
+   82.46,
+   75.0,
+   121.17
+  ],
+  "bbox_minus_xy": [
+   -5.02,
+   -5.04,
+   35.0,
+   33.67
+  ],
+  "clear_of_badge_mm": 12.04,
+  "clear_of_bed_edge_mm": 34.98
+ },
+ "face_strokes_A": {
+  "visible_mm2": 0.0,
+  "layers": [
+   {
+    "z": 3.08,
+    "fill_deg": 1.4,
+    "along_frac": 0.84,
+    "fill_mm": 120,
+    "widths": {
+     "Top surface": [],
+     "Internal solid infill": [
+      0.31,
+      0.32
+     ]
+    },
+    "inner_wall_mm": 0
+   },
+   {
+    "z": 3.2,
+    "fill_deg": 85.9,
+    "along_frac": 0.63,
+    "fill_mm": 119,
+    "widths": {
+     "Top surface": [],
+     "Internal solid infill": [
+      0.3,
+      0.32
+     ]
+    },
+    "inner_wall_mm": 0
+   },
+   {
+    "z": 3.32,
+    "fill_deg": 1.5,
+    "along_frac": 0.85,
+    "fill_mm": 119,
+    "widths": {
+     "Top surface": [],
+     "Internal solid infill": [
+      0.31
+     ]
+    },
+    "inner_wall_mm": 0
+   },
+   {
+    "z": 3.44,
+    "fill_deg": 86.0,
+    "along_frac": 0.63,
+    "fill_mm": 118,
+    "widths": {
+     "Top surface": [],
+     "Internal solid infill": [
+      0.3,
+      0.32
+     ]
+    },
+    "inner_wall_mm": 0
+   },
+   {
+    "z": 3.56,
+    "fill_deg": 1.5,
+    "along_frac": 0.87,
+    "fill_mm": 1066,
+    "widths": {
+     "Top surface": [],
+     "Internal solid infill": [
+      0.3,
+      0.31
+     ]
+    },
+    "inner_wall_mm": 0,
+    "uncovered_mm2": 9.4
+   },
+   {
+    "z": 3.68,
+    "fill_deg": 87.6,
+    "along_frac": 0.75,
+    "fill_mm": 1063,
+    "widths": {
+     "Top surface": [],
+     "Internal solid infill": [
+      0.3,
+      0.32
+     ]
+    },
+    "inner_wall_mm": 0,
+    "uncovered_mm2": 3.6
+   },
+   {
+    "z": 3.8,
+    "fill_deg": 1.5,
+    "along_frac": 0.87,
+    "fill_mm": 1066,
+    "widths": {
+     "Top surface": [],
+     "Internal solid infill": [
+      0.3,
+      0.31
+     ]
+    },
+    "inner_wall_mm": 0,
+    "uncovered_mm2": 9.32
+   },
+   {
+    "z": 3.92,
+    "fill_deg": 87.6,
+    "along_frac": 0.75,
+    "fill_mm": 1063,
+    "widths": {
+     "Top surface": [],
+     "Internal solid infill": [
+      0.3,
+      0.32
+     ]
+    },
+    "inner_wall_mm": 0,
+    "uncovered_mm2": 3.77
+   },
+   {
+    "z": 4.04,
+    "fill_deg": 0.0,
+    "along_frac": 1.0,
+    "fill_mm": 912,
+    "widths": {
+     "Top surface": [
+      0.3
+     ],
+     "Internal solid infill": []
+    },
+    "inner_wall_mm": 0,
+    "uncovered_mm2": 3.26,
+    "top_interior_mm2": 0.99,
+    "starts": 532
+   }
+  ]
+ },
+ "top_fill_directions_last5": [
+  1.5,
+  87.6,
+  1.5,
+  87.6,
+  0.0
+ ],
+ "hair_top_line_width": [
+  0.42
+ ],
+ "white_top_uncovered_mm2": {
+  "A": 1.36,
+  "B": 1.35,
+  "C": 1.36
+ },
+ "B_no_modifier": {
+  "time": "1h 20m 54s",
+  "diff_outside_face_zone": {
+   "Sparse infill": {
+    "layers": [
+     2.6,
+     2.72,
+     2.84,
+     3.44
+    ],
+    "only_A": 708,
+    "only_B": 710
+   },
+   "Internal solid infill": {
+    "layers": [
+     2.6,
+     2.72,
+     2.84,
+     3.44,
+     3.68,
+     3.8,
+     3.92
+    ],
+    "only_A": 4290,
+    "only_B": 4823
+   },
+   "Top surface": {
+    "layers": [
+     2.96
+    ],
+    "only_A": 369,
+    "only_B": 474
+   },
+   "Gap infill": {
+    "layers": [
+     2.96
+    ],
+    "only_A": 28,
+    "only_B": 37
+   },
+   "Bridge": {
+    "layers": [
+     3.56
+    ],
+    "only_A": 1,
+    "only_B": 1
+   }
+  },
+  "face_visible_mm2": 0.8,
+  "face_top": {
+   "z": 4.04,
+   "fill_deg": 45.0,
+   "along_frac": 1.0,
+   "fill_mm": 80,
+   "widths": {
+    "Top surface": [
+     0.42
+    ],
+    "Internal solid infill": []
+   },
+   "inner_wall_mm": 566.4,
+   "uncovered_mm2": 3.5,
+   "top_interior_mm2": 1.22,
+   "starts": 75
+  }
+ },
+ "C_no_object_key": {
+  "time": "1h 23m 12s",
+  "diff_outside_face_zone": {
+   "Internal solid infill": {
+    "layers": [
+     2.36,
+     2.6,
+     2.72,
+     2.84,
+     3.44,
+     3.56
+    ],
+    "only_A": 2444,
+    "only_B": 1583
+   },
+   "Sparse infill": {
+    "layers": [
+     2.36,
+     2.6,
+     2.72,
+     2.84,
+     2.96,
+     3.44
+    ],
+    "only_A": 1655,
+    "only_B": 1655
+   },
+   "Bridge": {
+    "layers": [
+     3.56
+    ],
+    "only_A": 191,
+    "only_B": 191
+   },
+   "Floating vertical shell": {
+    "layers": [
+     2.36,
+     2.6,
+     2.72,
+     2.84,
+     3.44,
+     3.56
+    ],
+    "only_A": 0,
+    "only_B": 873
+   }
+  },
+  "white_shell_layers_uncovered": [
+   {
+    "z": 2.6,
+    "uncovered_mm2_key_on": 8.17,
+    "uncovered_mm2_key_off": 9.21
+   },
+   {
+    "z": 2.72,
+    "uncovered_mm2_key_on": 5.82,
+    "uncovered_mm2_key_off": 7.0
+   },
+   {
+    "z": 2.84,
+    "uncovered_mm2_key_on": 8.19,
+    "uncovered_mm2_key_off": 9.2
+   },
+   {
+    "z": 2.96,
+    "uncovered_mm2_key_on": 1.36,
+    "uncovered_mm2_key_off": 1.36
+   }
+  ],
+  "face_visible_mm2": 0.15,
+  "face_top": {
+   "z": 4.04,
+   "fill_deg": 0.0,
+   "along_frac": 1.0,
+   "fill_mm": 912,
+   "widths": {
+    "Top surface": [
+     0.3
+    ],
+    "Internal solid infill": []
+   },
+   "inner_wall_mm": 0,
+   "uncovered_mm2": 3.26,
+   "top_interior_mm2": 0.99,
+   "starts": 532
+  }
+ },
+ "presets": {
+  "machine": "Bambu Lab X2D 0.4 nozzle",
+  "process": "0.12mm High Quality @BBL X2D",
+  "filament": "Bambu PLA Basic @BBL X2D 0.4 nozzle"
+ },
+ "geometry": {
+  "narrow_share": {
+   "hair": 0.001,
+   "face": [
+    0.885,
+    0.645,
+    0.859,
+    1.0,
+    1.0
+   ]
+  },
+  "along_share": {
+   "0": 0.7298022503366772,
+   "45": 0.32624721634239956,
+   "90": 0.08129802910660508,
+   "135": 0.15761662823445713
+  },
+  "infill_direction": 0,
+  "modifier": {
+   "buffer": 0.3,
+   "z": [
+    2.96,
+    4.08
+   ],
+   "layers": [
+    3.02,
+    3.14,
+    3.26,
+    3.38,
+    3.5,
+    3.62,
+    3.74,
+    3.86,
+    3.98
+   ],
+   "keys": {
+    "wall_loops": "1",
+    "top_one_wall_type": "all top",
+    "top_surface_line_width": "0.3",
+    "internal_solid_infill_line_width": "0.3",
+    "infill_direction": "0"
+   }
+  }
+ }
+}

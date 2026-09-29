@@ -1,0 +1,112 @@
+<title>Logo Dude Print Options</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column of three style cards, then a size table; ink-on-paper palette with a cool slate accent */
+:root {
+  --paper: #fbfbf9;
+  --ink: #1d1d1f;
+  --muted: #5d6166;
+  --rule: #dcdfe2;
+  --card: #ffffff;
+  --accent: #2f5b82;
+  --ok: #2e7d4f;
+  --warn: #a8641a;
+  --bad: #b23a3a;
+  --f-display: "Permanent Marker", "Comic Sans MS", cursive;
+  --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #16181b; --ink: #ecedef; --muted: #a2a7ad; --rule: #30343a; --card: #1e2125;
+  --accent: #8db8de; --ok: #6cc592; --warn: #e0a55a; --bad: #e57f7f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #16181b; --ink: #ecedef; --muted: #a2a7ad; --rule: #30343a; --card: #1e2125;
+  --accent: #8db8de; --ok: #6cc592; --warn: #e0a55a; --bad: #e57f7f; color-scheme: dark }
+body { background: var(--paper); color: var(--ink); font: 15px/1.55 var(--f-body); padding-inline: 16px; padding-block: 28px 56px; }
+main { max-width: 1040px; margin: 0 auto; display: grid; gap: 36px; }
+h1 { font: 2.3rem/1.1 var(--f-display); margin: 0; text-wrap: balance; }
+h2 { font-size: 1.15rem; margin: 0; text-wrap: balance; }
+.lede { max-width: 65ch; color: var(--muted); margin: 8px 0 0; }
+.styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px; }
+.opt { background: var(--card); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+.opt img { display: block; width: 100%; aspect-ratio: 7 / 6; object-fit: cover; background: #f7f7f7; }
+.opt .body { padding: 14px 16px 16px; display: grid; gap: 6px; align-content: start; }
+.tag { font: 500 .78rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.opt p { margin: 0; color: var(--muted); }
+.opt .dims { font: .85rem var(--f-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 10px; background: var(--card); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 500 .75rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+td.num { font-family: var(--f-mono); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.pill { display: inline-block; font: 500 .75rem var(--f-mono); padding: 1px 7px; border-radius: 99px; border: 1px solid currentColor; white-space: nowrap; }
+.ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+.notes { display: grid; gap: 10px; max-width: 70ch; }
+.notes p { margin: 0; }
+.notes b { color: var(--ink); }
+section > h2 + * { margin-top: 12px; }
+</style>
+
+<main>
+  <header>
+    <h1>Logo Dude, three ways to print it</h1>
+    <p class="lede">Every render below is built from a 1:1 trace of your logo-dude.png, brush streaks included; nothing is redrawn. Shown at 100 mm wide, white base with the ink raised 1 mm in black (two AMS colors).</p>
+  </header>
+
+  <section>
+    <h2>Style</h2>
+    <div class="styles">
+      <article class="opt">
+        <img src="A-plaque.png" alt="Rounded square white plaque with the drawing raised in black on top">
+        <div class="body">
+          <span class="tag">A · Plaque</span>
+          <h2>Rounded plaque</h2>
+          <p>The drawing framed on a rounded square with a 7 mm border. Wall art, a desk sign, or a badge.</p>
+          <span class="dims">114 × 111 × 4 mm</span>
+        </div>
+      </article>
+      <article class="opt">
+        <img src="B-diecut.png" alt="White backer cut to follow the outline of the drawing, with the drawing raised in black">
+        <div class="body">
+          <span class="tag">B · Die-cut</span>
+          <h2>Die-cut outline</h2>
+          <p>The backer follows the drawing with a 3.5 mm margin, like a die-cut sticker. Good as a magnet, a wall piece, or a cab badge.</p>
+          <span class="dims">107 × 104 × 4 mm</span>
+        </div>
+      </article>
+      <article class="opt">
+        <img src="C-stand.png" alt="The die-cut piece standing upright in a white slotted base">
+        <div class="body">
+          <span class="tag">C · Desk stand</span>
+          <h2>Standing figure</h2>
+          <p>The die-cut shape, 4 mm thick, slotted into a small base so it stands on a desk or shelf. Two parts.</p>
+          <span class="dims">107 × 104 figure, 63 × 24 mm base</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Size sets the nozzle</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Art width</th><th>Face lines</th><th>Hair strokes</th><th>Brush streaks</th><th>Nozzle</th></tr></thead>
+        <tbody>
+          <tr><td class="num">50 mm</td><td class="num">0.65–0.78 mm</td><td class="num">2.8 mm</td><td class="num">0.19 mm</td><td><span class="pill bad">0.2 only</span> face lines too thin for 0.4</td></tr>
+          <tr><td class="num">75 mm</td><td class="num">0.97–1.17 mm</td><td class="num">4.2 mm</td><td class="num">0.29 mm</td><td><span class="pill warn">0.4</span> fine; 0.6 too coarse</td></tr>
+          <tr><td class="num">100 mm</td><td class="num">1.29–1.56 mm</td><td class="num">5.6 mm</td><td class="num">0.39 mm</td><td><span class="pill ok">0.4 best</span> 0.6 just clears its 1.24 mm minimum</td></tr>
+          <tr><td class="num">125 mm</td><td class="num">1.62–1.94 mm</td><td class="num">7.0 mm</td><td class="num">0.48 mm</td><td><span class="pill ok">0.4 or 0.6</span></td></tr>
+          <tr><td class="num">150 mm</td><td class="num">1.94–2.33 mm</td><td class="num">8.4 mm</td><td class="num">0.58 mm</td><td><span class="pill ok">0.4 or 0.6</span> streaks start to show with 0.4</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="notes">
+    <h2>Notes</h2>
+    <p><b>Brush streaks.</b> The dry-brush gaps in the hair are part of the trace. Below about 125 mm they are thinner than a nozzle line, so the slicer fills them in and the hair prints as solid strokes. That matches how the Sharks tags handled hairlines; nothing gets widened or redrawn.</p>
+    <p><b>Raised or flush.</b> Raised ink (shown) gives a tactile edge you can feel. A flush inlay, black sunk level with the white, prints a flat ironed top that looks like ink on paper. Same trace either way.</p>
+    <p><b>Colors.</b> Two by default: white base, black ink. Any AMS colors work, up to four.</p>
+  </section>
+</main>
