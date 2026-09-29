@@ -195,8 +195,15 @@ export_step(assembly, "/home/brian/ClaudeProjects/3d-modeling-brain/projects/<Na
   renders in `projects/<Name>/images/`. STL is only a temp render input
   in the scratchpad, not a deliverable. No 3MF, no slicing.
 - The emitter merges identical blanks (same rounded dims + material +
-  notes; parts that differ only in machining stay separate) into one row, prints mm and inches (nearest 1/16), totals face area
+  notes; parts that differ only in machining stay separate) into one row, prints mm and inches (nearest 1/16; Brian's cut
+  lists use `units="in", denom=32`, inches only), totals face area
   per material, and flags non-rectangular parts.
+- If the cut list is published as a shop page, the page opens with a
+  full image of the whole piece captured from the OCP viewer
+  (`ocp_vscode.save_screenshot` with the viewer open via
+  `scripts/cad-viewer.sh`; template `projects/Drawer-bench/hero_shot.py`),
+  never the matplotlib STL render, and every row carries a shop drawing
+  with its joinery located from the blank's own edges, in inches only.
 - FreeCAD path: the emitter measures build123d solids only; pass
   explicit `"dims": (t, w, l)` per part, read from `obj.Shape.BoundBox`.
 - Sheet nesting / cut layout is OUT OF SCOPE for the emitter: lay out

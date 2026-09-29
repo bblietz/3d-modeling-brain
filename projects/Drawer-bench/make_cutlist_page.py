@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 """Build cutlist.html, the shop page, from cutlist.csv and the part drawings.
 
-Re-run after every `EXPORT=1 drawer_bench.py` and `part_drawings.py`, then
-republish the page (same URL). The page has a case section and a drawer
-section, each grouped by material in cutting order; every row shows inches
-to the nearest 1/32 (no metric: Brian, 2026-09-28), the machining notes,
-its shop drawing (tap to zoom), and a tick box (per device, localStorage).
+Re-run after every `EXPORT=1 drawer_bench.py`, `part_drawings.py` and
+`hero_shot.py` (viewer open), then republish the page (same URL) with the
+part PNGs and images/hero.png. The page starts with a full image of the
+bench from the CAD viewer (Brian, 2026-09-28: always), then a case section
+and a drawer section, each grouped by material in cutting order; every row
+shows inches to the nearest 1/32 (no metric: Brian, 2026-09-28), the
+machining notes, its shop drawing (tap to zoom), and a tick box (per
+device, localStorage).
 
 Usage: .venv/bin/python projects/Drawer-bench/make_cutlist_page.py
 """
@@ -105,7 +108,11 @@ def group_section(label, rows):
     </section>"""
 
 
+HERO = "images/hero.png"
+
+
 def build():
+    assert os.path.exists(f"{PROJ}/{HERO}"), f"{HERO} missing: run hero_shot.py with the CAD viewer open"
     rows = load_rows()
     case = [r for r in rows if not is_drawer(r["part"])]
     drawers = [r for r in rows if is_drawer(r["part"])]
@@ -119,7 +126,7 @@ def build():
         for q, what, note in HARDWARE)
     today = date.today().isoformat()
     return PAGE.format(case=case_html, drawers=drawer_html, hardware=hw, total=total_pieces, today=today,
-                       n_case=sum(r["qty"] for r in case), n_drawers=sum(r["qty"] for r in drawers))
+                       n_case=sum(r["qty"] for r in case), n_drawers=sum(r["qty"] for r in drawers), hero=HERO)
 
 
 PAGE = """<title>Drawer Bench Cut List</title>
@@ -184,6 +191,8 @@ PAGE = """<title>Drawer Bench Cut List</title>
   .dwg {{ margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px; cursor: zoom-in; display: flex; flex-direction: column; gap: 4px; }}
   .dwg img {{ width: 100%; height: auto; display: block; }}
   .dwg figcaption {{ font-size: 11.5px; color: var(--muted); text-align: right; }}
+  .hero {{ background: #fff; }}
+  .hero img {{ border-radius: 4px; }}
   .tick:checked + .body {{ color: var(--done); }}
   .tick:checked + .body .name, .tick:checked + .body .dims b {{ text-decoration: line-through; text-decoration-thickness: 2px; }}
   .tick:checked + .body .qty, .tick:checked + .body .note {{ color: var(--done); }}
@@ -201,6 +210,7 @@ PAGE = """<title>Drawer Bench Cut List</title>
 </style>
 
 <div class="wrap">
+  <figure class="dwg hero" tabindex="0"><img src="{hero}" alt="the whole bench, front-left view from the CAD viewer"><figcaption>the whole bench, from the CAD viewer; tap to zoom</figcaption></figure>
   <header>
     <p class="eyebrow">Drawer bench &middot; 40 x 24 x 19-5/8 in</p>
     <h1>Drawer Bench Cut List</h1>
@@ -223,7 +233,7 @@ PAGE = """<title>Drawer Bench Cut List</title>
     <ul class="hw">{hardware}</ul>
   </div>
 
-  <p class="foot">Generated {today} from <span class="mono">projects/Drawer-bench/cutlist.csv</span> and <span class="mono">images/parts/</span>, which <span class="mono">drawer_bench.py</span> and <span class="mono">part_drawings.py</span> write on every export; every drawn cut is probed against the CAD solid before its sheet is written. Part names match the CAD viewer.</p>
+  <p class="foot">Generated {today} from <span class="mono">projects/Drawer-bench/cutlist.csv</span> and <span class="mono">images/parts/</span>, which <span class="mono">drawer_bench.py</span> and <span class="mono">part_drawings.py</span> write on every export; every drawn cut is probed against the CAD solid before its sheet is written. The bench image at the top is a screenshot of the CAD viewer (<span class="mono">hero_shot.py</span>). Part names match the CAD viewer.</p>
 </div>
 
 <div id="lightbox" role="dialog" aria-label="Enlarged drawing" aria-hidden="true"><img id="lightbox-img" alt=""></div>

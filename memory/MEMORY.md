@@ -21,6 +21,7 @@
 - [Figure-8 recess offset](feedback-figure8-recess-offset.md) - bore figure-8 fastener recesses 1/4 in from the inner face so they open through it and the fastener hangs over flush; never centered on the edge
 - [Stopped groove, notched panel](feedback-stopped-groove-notched-panel.md) - stop a post groove short and notch the panel corner to meet it; the groove end is never squared; model the clearance window and assert it
 - [Cut lists in inches only](feedback-cutlist-inches-only.md) - no mm anywhere Brian reads: cut list, shop page, drawings, notes; nearest 1/32; ply-sized cuts say "measure", not a fraction
+- [Cut-list hero image](feedback-cutlist-hero-image.md) - every shop page opens with a full image of the piece from the OCP viewer (save_screenshot via hero_shot.py), never the matplotlib STL render
 - [Hardwood grain wraps](feedback-hardwood-grain-wraps.md) - never design hardwood cabinet grain front to back; it wraps around the box, and hardwood cab shells get no glued stiffeners
 - [OpenSCAD for complex designs](feedback-openscad-for-complex-designs.md) - compound-angle parts go in OpenSCAD with rendered views of the real model; no hand-drawn plans, build123d only for simple prisms
 - [Verify retention features close up](feedback-verify-retention-features-closeup.md) - hooks, cleats, snap lips: close-up section render with the mating part before any print; a sign error made a hook a draft for five versions

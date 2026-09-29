@@ -60,6 +60,8 @@
   .dwg { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px; cursor: zoom-in; display: flex; flex-direction: column; gap: 4px; }
   .dwg img { width: 100%; height: auto; display: block; }
   .dwg figcaption { font-size: 11.5px; color: var(--muted); text-align: right; }
+  .hero { background: #fff; }
+  .hero img { border-radius: 4px; }
   .tick:checked + .body { color: var(--done); }
   .tick:checked + .body .name, .tick:checked + .body .dims b { text-decoration: line-through; text-decoration-thickness: 2px; }
   .tick:checked + .body .qty, .tick:checked + .body .note { color: var(--done); }
@@ -77,6 +79,7 @@
 </style>
 
 <div class="wrap">
+  <figure class="dwg hero" tabindex="0"><img src="images/hero.png" alt="the whole bench, front-left view from the CAD viewer"><figcaption>the whole bench, from the CAD viewer; tap to zoom</figcaption></figure>
   <header>
     <p class="eyebrow">Drawer bench &middot; 40 x 24 x 19-5/8 in</p>
     <h1>Drawer Bench Cut List</h1>
@@ -345,7 +348,7 @@
     <ul class="hw"><li><span class="hqty mono">2 pairs</span><div><b>Blum TANDEM plus BLUMOTION 563H4570B undermount slides, 18 in class</b><span class="hnote">confirm the purchased spec against the 563H sheet before boring the boxes</span></div></li><li><span class="hqty mono">2 pairs</span><div><b>Blum rear mounting brackets 295.3750.02</b><span class="hnote">on the back panel, at runner height</span></div></li><li><span class="hqty mono">2 sets</span><div><b>Blum locking devices for the box fronts</b><span class="hnote">bored with the T65.1600.01 template</span></div></li><li><span class="hqty mono">6</span><div><b>3/8 in dowels, 2 in long</b><span class="hnote">front rails to front posts, one each end, 1 in into each part</span></div></li><li><span class="hqty mono">6</span><div><b>figure-8 desktop fasteners with #8 x 5/8 in screws (12)</b><span class="hnote">three on rail_top, three on cleat_rear, in the offset 5/8 in recesses</span></div></li><li><span class="hqty mono">4 to 5</span><div><b>#8 x 1-1/4 in screws, countersunk</b><span class="hnote">cleat_rear to the inside of the back, from the cleat side</span></div></li><li><span class="hqty mono">as needed</span><div><b>screws for the drawer fronts, through slotted holes from inside the boxes</b><span class="hnote">pulls undecided</span></div></li></ul>
   </div>
 
-  <p class="foot">Generated 2026-09-28 from <span class="mono">projects/Drawer-bench/cutlist.csv</span> and <span class="mono">images/parts/</span>, which <span class="mono">drawer_bench.py</span> and <span class="mono">part_drawings.py</span> write on every export; every drawn cut is probed against the CAD solid before its sheet is written. Part names match the CAD viewer.</p>
+  <p class="foot">Generated 2026-09-28 from <span class="mono">projects/Drawer-bench/cutlist.csv</span> and <span class="mono">images/parts/</span>, which <span class="mono">drawer_bench.py</span> and <span class="mono">part_drawings.py</span> write on every export; every drawn cut is probed against the CAD solid before its sheet is written. The bench image at the top is a screenshot of the CAD viewer (<span class="mono">hero_shot.py</span>). Part names match the CAD viewer.</p>
 </div>
 
 <div id="lightbox" role="dialog" aria-label="Enlarged drawing" aria-hidden="true"><img id="lightbox-img" alt=""></div>

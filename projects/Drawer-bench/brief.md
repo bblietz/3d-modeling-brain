@@ -207,8 +207,9 @@ because option (a) leaves 19-1/4 in of interior depth.
   `make_cutlist_page.py` (case section, then a drawer section, each by
   material in cutting order; inches only to 1/32 (since 2026-09-28),
   notes, hardware list,
-  per-phone tick boxes, a shop drawing per row with tap-to-zoom) and
-  published as a private Artifact at
+  per-phone tick boxes, a shop drawing per row with tap-to-zoom, and
+  since 2026-09-28 a full image of the bench from the OCP viewer at the
+  top, `hero_shot.py`) and published as a private Artifact at
   https://claude.ai/artifact/B63kzPtAP56TSzAk8JG1ha. The drawings come
   from `part_drawings.py` (`images/parts/<part>.png`): each sheet is laid
   out from the model's constants and every groove, rabbet, notch and bore
