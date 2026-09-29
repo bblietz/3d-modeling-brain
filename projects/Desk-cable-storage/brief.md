@@ -2,7 +2,7 @@
 type: project
 project: Desk-cable-storage
 date: 2026-09-26
-status: CAD COMPLETE 2026-09-26 evening, revised twice in the viewer (holes to 7 in apart, side walls to 4.5 in). Sliced 7 h 59 m, 387 g PETG, fits the bed at 254 mm; trough-print.3mf ready. Measurements waived by Brian. Waiting on his sign-off in the viewer, then print.
+status: SIGNED OFF 2026-09-29 ("looks good"). Sliced 7 h 59 m, 387 g PETG, fits the bed at 254 mm; trough-print.3mf ready to print. Reprint note: make it a bit narrower front to back. Measurements waived by Brian. Waiting on his sign-off in the viewer, then print.
 tags: [x2d, cable-management, closet-desk, petg]
 ---
 
@@ -57,9 +57,13 @@ Hidden, reach-in storage for the cord slack under Brian's closet desk: a 3/4 in 
 | Print | floor down, open top up, no supports, no brim, no skirt; X2D 0.6 nozzle, 0.30mm Standard, Bambu PETG Basic, Textured PEI; 508 layers, 7 h 59 m, 387 g |
 | Volume | 358 cm3 |
 
+## If printing again (Brian, 2026-09-29)
+
+- "The container can be a bit narrower from front to back." 6 in is more than the cords need. Next version: DEPTH about 5 in (127 mm) in `trough.py`; everything else stays. Saves about 40 g and 50 minutes.
+
 ## Open before printing
 
-1. Brian's sign-off in the OCP viewer.
+1. Sign-off given 2026-09-29.
 2. Nozzle installed (printer was unreachable 2026-09-26 21:15); the 3MF assumes the 0.6.
 3. Drywall anchor pull-out under a loaded trough is unverified; the load is a few pounds.
 4. Install height: top edge about 1/2 in below the plug heads, set by eye at the wall.

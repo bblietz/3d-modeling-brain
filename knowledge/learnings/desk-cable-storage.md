@@ -8,7 +8,7 @@ tags: [x2d, petg, cable-management, closet-desk, build123d, visual-companion]
 
 # Desk cable storage: wall trough under the printer bench
 
-**CAD complete 2026-09-26.** Not printed yet. Brief: [[brief]] in `projects/Desk-cable-storage/`. One-piece PETG trough, 254 x 152.4 x 152.4 mm, front and side walls 4.5 in, screwed to the back wall under the power strip's plug heads.
+**CAD complete 2026-09-26, signed off 2026-09-29.** Not printed yet. Brief: [[brief]] in `projects/Desk-cable-storage/`. One-piece PETG trough, 254 x 152.4 x 152.4 mm, front and side walls 4.5 in, screwed to the back wall under the power strip's plug heads.
 
 ## What worked
 
@@ -39,6 +39,7 @@ Bambu Lab X2D 0.6 nozzle (assumed installed; printer unreachable), 0.30mm Standa
 
 ## Open
 
+- Reprint note (Brian, 2026-09-29): the container can be a bit narrower from front to back; try 5 in instead of 6 in next time.
 - Print outcome, elephant foot on a 254 x 152 first layer, whether the 2.4 mm walls feel stiff enough over 10 in.
 - Anchor pull-out under a loaded trough (a few pounds of cord and one brick).
 - Whether cords from the outer outlets drape into a 10 in box cleanly or want a second box.

@@ -20,7 +20,7 @@ OUT_STL = HERE / "trough.stl"
 IN = 25.4
 # ---------------- dimensions, mm ----------------
 L = 254.0                 # width across the bed, 10.00 in (bed is 256; no exclusion zone on the X2D)
-DEPTH = 6 * IN            # front to back, 152.4
+DEPTH = 6 * IN            # front to back, 152.4. Brian, 2026-09-29, after sign-off: "if I print again the container can be a bit narrower from front to back"; try 5 in
 H = 6 * IN                # back wall, 152.4
 H_FRONT = 4.5 * IN        # front and side walls, 114.3 (75 percent of H; Brian: sides the same height as the face)
 T = 2.4                   # floor, front and side walls
