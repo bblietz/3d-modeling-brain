@@ -1,7 +1,7 @@
 ---
 title: Logo Dude die-cut badge
 type: project
-status: awaiting viewer sign-off (smooth jaw v4)
+status: CAD signed off; PETG 3MF sliced; not printed
 date: 2026-09-29
 tags: [3d-print, logo, multi-color, x2d]
 ---
@@ -56,7 +56,7 @@ face with eyes, nose, mouth) as a two-color print.
 - OCC area/volume integration is wrong on long periodic splines (0.8% on
   the outline face, 14% on its extrusion); all checks measure the
   tessellated mesh instead.
-- Planned: 0.4 nozzle, PLA Basic white + black, fill-core modifier recipe
+- Material switched to PETG Basic white + black (Brian 2026-09-29, spools in the AMS); 0.4 nozzle, fill-core modifier recipe
   over the thin face lines (knowledge/lettering-x2d.md).
 
 ## Build
@@ -89,3 +89,12 @@ face with eyes, nose, mouth) as a two-color print.
 - Not printed yet. Face strokes are thinner (1.2 to 1.5 mm) than the
   Sharks letters the recipe was proven on; recipe step 4 suggests a
   thin coupon before the real part.
+
+## PETG reslice (2026-09-29)
+
+- `pipeline/make_print_3mf.py` now uses `Bambu PETG Basic @BBL X2D 0.4 nozzle` (250 C, 245 C first layer),
+  textured PEI 70 C. Slice: 1h 25m, 22.51 g white + 3.06 g black = 25.57 g, 33 layers, change at z 3.08.
+- PETG type assumed Basic: the AMS saw spools in slots 2 and 3 but read no Bambu tag data (tray_is_bbl_bits 0),
+  so Studio could not sync them. Fix: reseat the spools or set the slots by hand.
+- Printer had the 0.6 HF nozzle mounted on 2026-09-29; this file needs the 0.4 swapped in.
+- Printer IP moved to 192.168.1.50 (scripts/x2d-status.py default updated).

@@ -1,15 +1,15 @@
 """Bambu Studio project 3MF for the Logo Dude badge: one object, two parts, one color change at z = 3 mm.
 
-  backer (white)  logodude-backer.stl, z 0..3, filament 1, Bambu PLA Basic #FFFFFF
-  ink (black)     logodude-ink.stl,    z 3..4, filament 2, Bambu PLA Basic #000000
+  backer (white)  logodude-backer.stl, z 0..3, filament 1, Bambu PETG Basic #FFFFFF
+  ink (black)     logodude-ink.stl,    z 3..4, filament 2, Bambu PETG Basic #000000
 
 X2D 0.4 nozzle, 0.12 mm layers, textured PEI, both filaments on extruder 1 (direct drive). Built on the validated
 small-lettering recipe (knowledge/lettering-x2d.md) with the Sharks-nametag tooling (fillcore_mod, graft_slice,
 gcode_features, toolpath_voids), imported unchanged:
   - process: the locked SMOOTH_TOP keys of Sharks flatten_04.py (no ironing, 2 top walls, arachne, skirt, tower brim ...),
     every one listed in different_settings_to_system[0]
-  - filament: PLA Basic's own preset (220 C) except the bed: textured PEI 65 C (knowledge/printer-x2d.md design rule; the
-    preset says 55), listed in the filament diff slots
+  - filament: PETG Basic's own preset (250 C, 245 C first layer); bed textured PEI 70 C, the preset's own value and
+    the Sharks PETG setting, still written and listed in the filament diff slots (Brian 2026-09-29: PETG, not PLA)
   - fill-core MODIFIER over the five thin face strokes only (outline + 0.3 mm, z band = the ink-only layers) with the
     recipe's region keys; infill_direction chosen from the strokes' own direction (they run mostly along x, the Sharks
     stems ran along y); the hair (about 5 mm wide) keeps the normal process
@@ -59,7 +59,7 @@ from graft_slice import graft_slice  # noqa: E402
 ROOT = os.path.expanduser("~/.config/BambuStudio/system/BBL")
 MACHINE = "Bambu Lab X2D 0.4 nozzle"
 PROCESS = "0.12mm High Quality @BBL X2D"          # the unsuffixed X2D processes are the 0.4 nozzle ones
-FILAMENT = "Bambu PLA Basic @BBL X2D 0.4 nozzle"
+FILAMENT = "Bambu PETG Basic @BBL X2D 0.4 nozzle"
 PARTS = [  # filament n = position in this list
     {"stl": "logodude-backer.stl", "name": "backer (white)", "colour": "#FFFFFF"},
     {"stl": "logodude-ink.stl", "name": "ink (black)", "colour": "#000000"},
@@ -68,7 +68,7 @@ OBJECT_NAME = "Logo Dude badge"
 OUT = f"{PROJECT}/logodude.3mf"
 CENTER = (128.0, 128.0)
 BED_TYPE = "Textured PEI Plate"
-BED_TEMP = "65"                  # PLA on textured PEI (knowledge/printer-x2d.md); the PLA Basic preset carries 55
+BED_TEMP = "70"                  # PETG Basic on textured PEI (preset value; Sharks tags printed at 70)
 BED_KEYS = ("textured_plate_temp", "textured_plate_temp_initial_layer")
 FILAMENT_MAP = ["1", "1"]        # both filaments on extruder 1, the direct drive
 BACKER_TOP, INK_TOP = 3.0, 4.0
@@ -250,7 +250,7 @@ def check_file(path, label):
         ms = z.read("Metadata/model_settings.config").decode()
         m3 = z.read("3D/3dmodel.model").decode()
     assert cfg["printer_settings_id"] == MACHINE and cfg["print_settings_id"] == PROCESS, label
-    assert cfg["filament_settings_id"] == [FILAMENT] * 2 and cfg["filament_type"] == ["PLA", "PLA"], label
+    assert cfg["filament_settings_id"] == [FILAMENT] * 2 and cfg["filament_type"] == ["PETG", "PETG"], label
     assert cfg["nozzle_diameter"][0] == "0.4" and cfg["layer_height"] == "0.12", (label, cfg["layer_height"])
     assert cfg["filament_colour"] == [p["colour"] for p in PARTS], (label, cfg["filament_colour"])
     assert cfg["filament_map"] == FILAMENT_MAP and cfg["filament_map_mode"] == "Manual", label
@@ -387,7 +387,7 @@ def verify(opos):
     assert "X2D start gcode" in g, "machine include templates did not merge"
     assert re.search(r"^; filament_map = 1,1$", g, re.M)
     assert re.search(rf"^\s*M1[49]0 S{BED_TEMP}\b", g, re.M), "bed temperature"
-    assert re.search(r"^\s*M10[49] S220\b", g, re.M), "nozzle temperature (PLA Basic 220)"
+    assert re.search(r"^\s*M10[49] S250\b", g, re.M), "nozzle temperature (PETG Basic 250)"
     layers = tv.parse_layers(g)
     zs = sorted(layers)
     steps = sorted({round(b - a, 3) for a, b in zip(zs, zs[1:])})
@@ -477,7 +477,7 @@ def verify(opos):
                   "grams": {PARTS[i - 1]["name"]: used[i] for i in sorted(used)}, "grams_total": round(sum(used.values()), 2),
                   "filament_change": {"z": changes[0][0], "tool": changes[0][1], "flush_mm": flush[0],
                                       "flush_mm3": round(flush[0] * math.pi * 0.875 ** 2), "matrix": cfg["flush_volumes_matrix"]},
-                  "bed_C": BED_TEMP, "nozzle_C": 220, "grams_by_feature": grams(A)},
+                  "bed_C": BED_TEMP, "nozzle_C": 250, "grams_by_feature": grams(A)},
         "tower": {"wipe_tower_xy": TOWER, "layer1_bbox": [round(v, 2) for v in tb], "bbox_minus_xy": meas,
                   "clear_of_badge_mm": round(part, 2), "clear_of_bed_edge_mm": round(edge, 2)},
         "face_strokes_A": fmA, "top_fill_directions_last5": dirs,

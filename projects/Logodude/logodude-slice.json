@@ -5,14 +5,14 @@
   "layers": 33,
   "first_layer_mm": 0.2,
   "layer_mm": 0.12,
-  "time_estimate": "1h 23m 57s",
-  "prediction_s": 5037,
-  "minutes": 84.0,
+  "time_estimate": "1h 24m 53s",
+  "prediction_s": 5093,
+  "minutes": 84.9,
   "grams": {
-   "backer (white)": 23.38,
-   "ink (black)": 3.17
+   "backer (white)": 22.51,
+   "ink (black)": 3.06
   },
-  "grams_total": 26.55,
+  "grams_total": 25.57,
   "filament_change": {
    "z": 3.08,
    "tool": "T1",
@@ -29,17 +29,17 @@
     "0"
    ]
   },
-  "bed_C": "65",
-  "nozzle_C": 220,
+  "bed_C": "70",
+  "nozzle_C": 250,
   "grams_by_feature": {
-   "Sparse infill": 8.78,
-   "Internal solid infill": 7.9,
-   "Bridge": 3.28,
-   "Bottom surface": 1.82,
-   "Outer wall": 1.21,
-   "Top surface": 1.1,
-   "Prime tower": 1.04,
-   "Inner wall": 0.96,
+   "Sparse infill": 8.45,
+   "Internal solid infill": 7.6,
+   "Bridge": 3.16,
+   "Bottom surface": 1.75,
+   "Outer wall": 1.16,
+   "Top surface": 1.05,
+   "Prime tower": 1.03,
+   "Inner wall": 0.92,
    "Skirt": 0.1,
    "Gap infill": 0.01
   }
@@ -216,7 +216,7 @@
   "C": 1.36
  },
  "B_no_modifier": {
-  "time": "1h 20m 54s",
+  "time": "1h 21m 37s",
   "diff_outside_face_zone": {
    "Sparse infill": {
     "layers": [
@@ -225,8 +225,8 @@
      2.84,
      3.44
     ],
-    "only_A": 708,
-    "only_B": 710
+    "only_A": 713,
+    "only_B": 715
    },
    "Internal solid infill": {
     "layers": [
@@ -238,8 +238,8 @@
      3.8,
      3.92
     ],
-    "only_A": 4290,
-    "only_B": 4823
+    "only_A": 4235,
+    "only_B": 4768
    },
    "Top surface": {
     "layers": [
@@ -254,13 +254,6 @@
     ],
     "only_A": 28,
     "only_B": 37
-   },
-   "Bridge": {
-    "layers": [
-     3.56
-    ],
-    "only_A": 1,
-    "only_B": 1
    }
   },
   "face_visible_mm2": 0.8,
@@ -282,7 +275,7 @@
   }
  },
  "C_no_object_key": {
-  "time": "1h 23m 12s",
+  "time": "1h 24m 12s",
   "diff_outside_face_zone": {
    "Internal solid infill": {
     "layers": [
@@ -325,7 +318,7 @@
      3.56
     ],
     "only_A": 0,
-    "only_B": 873
+    "only_B": 884
    }
   },
   "white_shell_layers_uncovered": [
@@ -371,7 +364,7 @@
  "presets": {
   "machine": "Bambu Lab X2D 0.4 nozzle",
   "process": "0.12mm High Quality @BBL X2D",
-  "filament": "Bambu PLA Basic @BBL X2D 0.4 nozzle"
+  "filament": "Bambu PETG Basic @BBL X2D 0.4 nozzle"
  },
  "geometry": {
   "narrow_share": {

@@ -24,7 +24,7 @@ from pathlib import Path
 
 import paho.mqtt.client as mqtt
 
-DEFAULT_IP = "192.168.1.68"
+DEFAULT_IP = "192.168.1.50"   # DHCP: moved from .68 by 2026-09-29; SSDP re-finds it (knowledge/x2d-printer-control.md)
 DEFAULT_SERIAL = "20P6AJ641301478"
 CONFS = [
     Path.home() / ".config/BambuStudioBeta/BambuStudio.conf",
