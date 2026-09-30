@@ -18,6 +18,7 @@ State: CAD signed off ("go"); print file built and slice-verified; NOT printed.
 - Printer at 192.168.1.50; had the 0.6 HF nozzle mounted (swap to 0.4); AMS slots 2-3 hold the PETG but tags read empty.
 
 ## Next
-- Brian opens logodude.3mf in Bambu Studio (0.4 nozzle preset selected first): confirm all three plates show their parts, no tower on plate 3, base keeps 0.2 layers; Flushing Volumes: Re-calculate, check AMS mapping, prints.
+- GUI check done 2026-09-29: all three plates look good in Bambu Studio.
+- Brian (0.4 nozzle preset selected): Flushing Volumes: Re-calculate, check AMS mapping, prints.
 - Brian declined the thin-stroke coupon: print the whole badge.
 - After the print: retrospective in knowledge/learnings/logodude.md.

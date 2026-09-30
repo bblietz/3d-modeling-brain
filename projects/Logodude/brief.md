@@ -116,4 +116,5 @@ face with eyes, nose, mouth) as a two-color print.
   the approved 0.20mm Standard values as per-object keys: layer_height 0.2, 15% grid infill, 3 bottom shells,
   1 mm top shell, bridge flow 1, classic walls, 0.20 Standard speeds; 28 min, 11.62 g, 60 layers; the standalone
   file's 26 min differs only by the print-wide accelerations). Built and verified by `pipeline/make_print_3mf.py` (make_base_3mf.py
-  and the VARIANT hack retired); per-plate report in `logodude-slice.json`.
+  and the VARIANT hack retired); per-plate report in `logodude-slice.json`. Brian opened it in the
+  Bambu Studio GUI 2026-09-29: all three plates look good.
