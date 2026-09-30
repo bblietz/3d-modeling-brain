@@ -98,3 +98,18 @@ face with eyes, nose, mouth) as a two-color print.
   so Studio could not sync them. Fix: reseat the spools or set the slots by hand.
 - Printer had the 0.6 HF nozzle mounted on 2026-09-29; this file needs the 0.4 swapped in.
 - Printer IP moved to 192.168.1.50 (scripts/x2d-status.py default updated).
+
+## Desk stand (style C, 2026-09-29)
+
+- `logodude_stand.py`: a standee. The figure is the badge (same outline and ink) plus a 36 mm plain white tab
+  under the jaw, with 2 mm neck fillets and 0.8 mm lead-in chamfers; the outline's lowest point sits 0.5 mm above
+  the base top, so the whole face stays visible. Base: 80 x 34 x 12 mm black PETG stadium, 3 mm top fillet,
+  slot 36.6 x 3.3 x 9 mm with a 0.8 mm lead-in, 4 R1 crush ribs 0.35 mm proud (friction-fits-x2d.md recipe:
+  0.15 mm free per side, 0.20 mm interference). Standing height 114.1 mm (4.49 in).
+- Fit measured from geometry probes and true-scale mesh sections (`images/stand-fit-sections.png`).
+  The rib numbers are the PLA / 0.6 nozzle calibration; PETG is unproven: if the figure is loose or will not
+  go in, change RIB_PROUD.
+- A single periodic spline through the tab's sharp corners overshot (tab bottom sagged 0.018 mm), so the
+  figure face is built by `cornered_face`: lines for straight runs, splines for curved runs.
+- Print files: `logodude-stand-figure.3mf` (VARIANT=stand in make_print_3mf.py; 1h 28m, 23.57 g white +
+  3.05 g black) and `logodude-stand-base-print.3mf` (make_base_3mf.py; 0.20mm Standard, 26 min, 11.6 g black).

@@ -66,6 +66,11 @@ PARTS = [  # filament n = position in this list
 ]
 OBJECT_NAME = "Logo Dude badge"
 OUT = f"{PROJECT}/logodude.3mf"
+if os.environ.get("VARIANT") == "stand":     # desk-stand figure: the badge plus a tab (logodude_stand.py), same ink
+    PARTS[0]["stl"] = "logodude-stand-figure-backer.stl"
+    OBJECT_NAME = "Logo Dude stand figure"
+    OUT = f"{PROJECT}/logodude-stand-figure.3mf"
+    BUILD = f"{PIPE}/build-stand"
 CENTER = (128.0, 128.0)
 BED_TYPE = "Textured PEI Plate"
 BED_TEMP = "70"                  # PETG Basic on textured PEI (preset value; Sharks tags printed at 70)
