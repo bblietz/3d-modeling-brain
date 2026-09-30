@@ -111,10 +111,16 @@ face with eyes, nose, mouth) as a two-color print.
   go in, change RIB_PROUD.
 - A single periodic spline through the tab's sharp corners overshot (tab bottom sagged 0.018 mm), so the
   figure face is built by `cornered_face`: lines for straight runs, splines for curved runs.
-- Print file: ONE `logodude.3mf`, three plates (2026-09-29, one-multi-plate rule): 1 "Badge" (1h 25m, 22.51 g
-  white + 3.06 g black), 2 "Stand figure" (1h 28m, 23.57 g + 3.05 g), 3 "Stand base" (black only, no tower,
-  the approved 0.20mm Standard values as per-object keys: layer_height 0.2, 15% grid infill, 3 bottom shells,
-  1 mm top shell, bridge flow 1, classic walls, 0.20 Standard speeds; 28 min, 11.62 g, 60 layers; the standalone
-  file's 26 min differs only by the print-wide accelerations). Built and verified by `pipeline/make_print_3mf.py` (make_base_3mf.py
-  and the VARIANT hack retired); per-plate report in `logodude-slice.json`. Brian opened it in the
-  Bambu Studio GUI 2026-09-29: all three plates look good.
+- Print file: ONE `logodude.3mf`, TWO plates (2026-09-29, one-multi-plate rule). The earlier three-plate version
+  opened fine in the GUI; Brian then combined the stand plates: "Edit the file to make the 2 items in the print have a
+  border such that they print separately" and "make them print separately but on the same plate".
+  - Plate 1 "Badge", by layer, unchanged: 1h 25m, 22.51 g white + 3.06 g black, 33 layers at 0.12, tower (40, 87.5).
+  - Plate 2 "Stand", BY OBJECT (plate-level print_sequence; survives the CLI round trip), each object with its own
+    skirt, Brian's GUI layout (figure upper right, base lower left, hulls 110.6 mm apart, 60 needed): the figure
+    prints first at 0.12 layers (33, fill-core modifier + key), one change to black at z 3.08 flushed to the chute, then
+    the base on black at 0.2 layers (60) with the approved 0.20mm Standard object keys (15% grid infill, 3 bottom
+    shells, 1 mm top shell, bridge flow 1, classic walls, 0.20 Standard speeds). No prime tower. 1h 47m, 22.62 g white
+    + 14.58 g black.
+  - Built and verified by `pipeline/make_print_3mf.py` (the process stays 0.12mm High Quality + the locked recipe keys,
+    not the 0.20mm Standard Studio switched to in Brian's GUI save); per-plate report in `logodude-slice.json`.
+    Needs a GUI open to confirm plate 2 shows both objects with "By object" set.

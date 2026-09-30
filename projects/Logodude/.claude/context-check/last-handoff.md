@@ -14,11 +14,11 @@ State: CAD signed off ("go"); print file built and slice-verified; NOT printed.
 - Print: 0.4 nozzle, PETG Basic white + black (switched from PLA 2026-09-29), 0.12 mm layers, Sharks fill-core recipe modifier over the 5 face shapes (infill_direction 0), textured PEI 70 C, 250 C, tower at (40, 87.5).
 - Slice: 1h 25m, 22.51 g white + 3.06 g black; one color change at z 3.08.
 - Desk stand: tabbed figure + black crush-rib base (ribs 0.35 proud, PLA calibration, unproven on PETG).
-- ONE logodude.3mf, three plates: Badge 1h 25m / 25.57 g; Stand figure 1h 28m / 26.62 g; Stand base 28 min / 11.62 g (0.20 Standard values as per-object keys). Total about 3h 21m, 63.8 g.
+- ONE logodude.3mf, two plates (Brian 2026-09-29): 1 Badge by layer, 1h 25m / 25.57 g; 2 Stand BY OBJECT (figure first at 0.12, then base at 0.2 with 0.20 Standard object keys, own skirts, no tower), 1h 47m / 37.2 g.
+- Process stays 0.12mm High Quality; selecting a printer preset in the GUI resets it to 0.20mm Standard (happened once, not on purpose).
 - Printer at 192.168.1.50; had the 0.6 HF nozzle mounted (swap to 0.4); AMS slots 2-3 hold the PETG but tags read empty.
 
 ## Next
-- GUI check done 2026-09-29: all three plates look good in Bambu Studio.
-- Brian (0.4 nozzle preset selected): Flushing Volumes: Re-calculate, check AMS mapping, prints.
+- Brian opens the rebuilt two-plate file WITHOUT touching the printer preset (keep project settings if asked): plate 2 shows both objects, By object set; process reads 0.12mm High Quality. Then: Flushing Volumes: Re-calculate, check AMS mapping, prints.
 - Brian declined the thin-stroke coupon: print the whole badge.
 - After the print: retrospective in knowledge/learnings/logodude.md.
