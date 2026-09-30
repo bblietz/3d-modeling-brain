@@ -30,4 +30,4 @@
 - [Cosmetic parts: viewer first](feedback-cosmetic-parts-viewer-first.md) - push to the viewer early, size visible features to what the eye reads, offer guideline tradeoffs before building them, ask follow-ups in plain text
 - [X2D preset includes](reference-x2d-preset-includes.md) - X2D machine presets keep all G-code in include templates; flatteners must merge includes; fixed copy in the iPhone case pipeline
 - [Two materials, two plates, one 3MF](reference-two-material-two-plate-3mf.md) - CLI assemble-list recipe with a filament per plate, and the fixes the raw export needs (flush matrix, per-filament vectors, names); working script in the iPhone case pipeline
-- [Logo Dude badge](project-logodude.md) - die-cut white/black badge from logo-dude.png (Drive via claude.ai connector); 4 in tall; CAD signed off, PETG 3MF sliced 1h25m/25.6 g 2026-09-29 (needs the 0.4 nozzle); not printed
+- [Logo Dude badge](project-logodude.md) - die-cut white/black badge from logo-dude.png (Drive via claude.ai connector); 4 in tall; CAD signed off, PETG 3MF sliced 1h25m/25.6 g 2026-09-29 (needs the 0.4 nozzle), plus a desk stand (figure + crush-rib base); not printed
