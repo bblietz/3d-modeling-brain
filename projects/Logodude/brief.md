@@ -111,5 +111,9 @@ face with eyes, nose, mouth) as a two-color print.
   go in, change RIB_PROUD.
 - A single periodic spline through the tab's sharp corners overshot (tab bottom sagged 0.018 mm), so the
   figure face is built by `cornered_face`: lines for straight runs, splines for curved runs.
-- Print files: `logodude-stand-figure.3mf` (VARIANT=stand in make_print_3mf.py; 1h 28m, 23.57 g white +
-  3.05 g black) and `logodude-stand-base-print.3mf` (make_base_3mf.py; 0.20mm Standard, 26 min, 11.6 g black).
+- Print file: ONE `logodude.3mf`, three plates (2026-09-29, one-multi-plate rule): 1 "Badge" (1h 25m, 22.51 g
+  white + 3.06 g black), 2 "Stand figure" (1h 28m, 23.57 g + 3.05 g), 3 "Stand base" (black only, no tower,
+  the approved 0.20mm Standard values as per-object keys: layer_height 0.2, 15% grid infill, 3 bottom shells,
+  1 mm top shell, bridge flow 1, classic walls, 0.20 Standard speeds; 28 min, 11.62 g, 60 layers; the standalone
+  file's 26 min differs only by the print-wide accelerations). Built and verified by `pipeline/make_print_3mf.py` (make_base_3mf.py
+  and the VARIANT hack retired); per-plate report in `logodude-slice.json`.

@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-Die-cut two-color badge (white backer, black ink raised 1 mm), 4.00 x 4.11 in, from logo-dude.png on Brian's Google Drive (reach Drive through the claude.ai Google Drive connector; the rclone `gdrive:` remote is drive.file-scoped and cannot see it). CAD signed off 2026-09-29 after four look passes: solid strokes, right hair stroke edge filled, all edges smoothed, jaw smoothed. Print file projects/Logodude/logodude.3mf: 0.4 nozzle, PETG Basic white + black (switched from PLA 2026-09-29), Sharks fill-core recipe over the face strokes, 1h 25m, 25.6 g. Brian skipped the test coupon. Desk stand (style C) added 2026-09-29: tabbed figure (1h 28m) + black PETG crush-rib base (26 min); rib fit is uncalibrated for PETG. Not printed yet.
+Die-cut two-color badge (white backer, black ink raised 1 mm), 4.00 x 4.11 in, from logo-dude.png on Brian's Google Drive (reach Drive through the claude.ai Google Drive connector; the rclone `gdrive:` remote is drive.file-scoped and cannot see it). CAD signed off 2026-09-29 after four look passes: solid strokes, right hair stroke edge filled, all edges smoothed, jaw smoothed. Print file projects/Logodude/logodude.3mf: 0.4 nozzle, PETG Basic white + black (switched from PLA 2026-09-29), Sharks fill-core recipe over the face strokes, 1h 25m, 25.6 g. Brian skipped the test coupon. Desk stand (style C) added 2026-09-29: tabbed figure (1h 28m) + black PETG crush-rib base (28 min); rib fit is uncalibrated for PETG. All three parts ship as plates 1-3 of the one logodude.3mf (base plate carries 0.20 Standard per-object keys); GUI open still needed to confirm the plates render. Not printed yet.
 
 **Why:** a new cosmetic logo part; Brian iterated on looks in the viewer, not on dimensions.
 

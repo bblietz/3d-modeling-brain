@@ -13,9 +13,11 @@ State: CAD signed off ("go"); print file built and slice-verified; NOT printed.
 - Solid lines: per-shape close/open (hair 14/10 px, face 3/3), right-stroke outer-edge fill (60 px close in a region), edge smoothing (hair sigma 14 px, face 5, jaw 40 below row 1060, outline 2.5 mm), periodic-spline faces.
 - Print: 0.4 nozzle, PETG Basic white + black (switched from PLA 2026-09-29), 0.12 mm layers, Sharks fill-core recipe modifier over the 5 face shapes (infill_direction 0), textured PEI 70 C, 250 C, tower at (40, 87.5).
 - Slice: 1h 25m, 22.51 g white + 3.06 g black; one color change at z 3.08.
+- Desk stand: tabbed figure + black crush-rib base (ribs 0.35 proud, PLA calibration, unproven on PETG).
+- ONE logodude.3mf, three plates: Badge 1h 25m / 25.57 g; Stand figure 1h 28m / 26.62 g; Stand base 28 min / 11.62 g (0.20 Standard values as per-object keys). Total about 3h 21m, 63.8 g.
 - Printer at 192.168.1.50; had the 0.6 HF nozzle mounted (swap to 0.4); AMS slots 2-3 hold the PETG but tags read empty.
 
 ## Next
-- Brian opens logodude.3mf in Bambu Studio (0.4 nozzle preset selected first), Flushing Volumes: Re-calculate, check AMS mapping, prints.
+- Brian opens logodude.3mf in Bambu Studio (0.4 nozzle preset selected first): confirm all three plates show their parts, no tower on plate 3, base keeps 0.2 layers; Flushing Volumes: Re-calculate, check AMS mapping, prints.
 - Brian declined the thin-stroke coupon: print the whole badge.
 - After the print: retrospective in knowledge/learnings/logodude.md.

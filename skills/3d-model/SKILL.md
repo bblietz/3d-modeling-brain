@@ -226,6 +226,9 @@ m.add_shape(part_b)
 m.write("/home/brian/ClaudeProjects/3d-modeling-brain/projects/<Name>/<name>.3mf")
 ```
 - STL and 3MF are required deliverables; STEP only when interop matters.
+- ONE 3MF per project (Brian 2026-09-29): every printable part goes on its own plate of a
+  single multi-plate `<name>.3mf`, never separate per-part 3MF files; per-part STLs stay
+  as fallbacks. See "Multi-plate kits" below.
 - Save the final 4-view renders to `projects/<Name>/images/`.
 - Verify the 3MF by parsing `3D/3dmodel.model` inside the zip (object
   count, bounding boxes); trimesh cannot load 3MF without networkx.
