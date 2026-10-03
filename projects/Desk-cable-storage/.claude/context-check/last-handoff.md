@@ -24,7 +24,7 @@
 - Read revision A. Concept D stands. Built the D vs D+ page with the ten-span measurement drawing
   (`pipeline/measure_diagram.py` -> `images/design/measure.png`) and a fill-in sheet that composes a
   paste-back line ("pick D+, M1 26 3/4, ..."). Published as a NEW artifact (the morning one was too big
-  to read back): https://claude.ai/artifact/CmY2ksbUC4nRorCnHt3nxY . Same content on the local companion
+  to read back): https://claude.ai/artifact/CmY2ksbUC4nRorCnHt3nxY (deleted 2026-10-02; the local decision.html is the only copy, publish a new artifact if a phone page is wanted again) . Same content on the local companion
   (`.superpowers/brainstorm/1073966-*/content/d-or-dplus.html`, server port 60460).
 - Recommendation given: D+ (D shows from 10 ft; the plug heads show before D+ does).
 - brief.md now exists (written this evening; the morning session had none).

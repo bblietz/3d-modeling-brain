@@ -76,5 +76,5 @@ Hidden, reach-in storage for the cord slack under Brian's closet desk: a 3/4 in 
 - `pipeline/measure_diagram.py`: the measure-these drawing, `images/design/measure.png`.
 - `trough.py`: the part (build123d), self-checking; `trough.stl`; `images/trough-views.png`.
 - `pipeline/make_print_3mf.py`: Bambu print 3MF with a real slice; `trough-print.3mf`, `trough-slice.json`.
-- `decision.html`: phone page, now the finished part, published at https://claude.ai/artifact/CmY2ksbUC4nRorCnHt3nxY
+- `decision.html`: phone page, now the finished part, published at https://claude.ai/artifact/CmY2ksbUC4nRorCnHt3nxY (deleted 2026-10-02; the local decision.html is the only copy, publish a new artifact if a phone page is wanted again)
 - `.superpowers/brainstorm/`: companion pages (gitignored).
