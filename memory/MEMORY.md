@@ -33,3 +33,4 @@
 - [Logo Dude badge](project-logodude.md) - die-cut white/black badge from logo-dude.png (Drive via claude.ai connector); 4 in tall; CAD signed off, PETG 3MF sliced 1h25m/25.6 g 2026-09-29 (needs the 0.4 nozzle), plus a desk stand (figure + crush-rib base); not printed
 - [Studio printer preset resets process](reference-studio-printer-preset-resets-process.md) - selecting the printer preset in the GUI drops the tuned process to 0.20mm Standard; never tell Brian to do it on a project 3MF
 - [One multi-plate 3MF per project](feedback-one-multiplate-3mf.md) - every project ships ONE Bambu 3MF with a plate per part, never separate per-part 3MFs
+- [Skateboard wall holder](project-skateboard-wall-holder.md) - narrow truck hook; Skate Hook Studio tool published 2026-10-04; hold on the hanger body, nut as locator; waiting on concept pick and measurements

@@ -1,0 +1,490 @@
+<title>Skate Hook Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: controls rail left, to-scale drawings right, prompt under the drawings. Single dark theme by choice (shop-light on a dark bench). */
+:root{
+  --bg:#15181d; --panel:#1d2127; --panel-2:#242a32; --line:#343b45; --fg:#e8e6df; --muted:#9aa3ad;
+  --accent:#f28c28; --accent-2:#ffd166; --good:#5fcf8a; --warn:#f2c14e; --bad:#ef6b5c;
+  --wall:#2b2f36; --deck:#c9a06a; --steel:#aab2bc; --steel-2:#7d8792; --urethane:#f3efe2; --bushing:#f6c453;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif; --body:"Barlow",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 var(--body);padding-block:0 32px}
+.wrap{max-width:1380px;margin:0 auto;padding-inline:16px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 20px;padding-block:18px 10px;border-bottom:1px solid var(--line)}
+h1{font:700 32px/1 var(--display);letter-spacing:.01em;margin:0;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.grid{display:grid;grid-template-columns:330px minmax(0,1fr);gap:18px;padding-block:16px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.rail{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.card h2{font:600 13px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+details.card summary{font:600 13px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);cursor:pointer;list-style:none;display:flex;justify-content:space-between}
+details.card summary::after{content:"+";font-size:16px}
+details[open].card summary::after{content:"\2212"}
+details[open].card summary{margin-bottom:10px}
+.row{display:grid;grid-template-columns:1fr 64px;align-items:center;gap:8px;margin-block:6px}
+.row label{font-size:14px;color:var(--fg)}
+.row small{display:block;color:var(--muted);font-size:12px}
+.row output{font:600 13px var(--mono);text-align:right;color:var(--accent-2);font-variant-numeric:tabular-nums}
+.row input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--accent);margin:0}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1 1 auto;background:var(--panel-2);border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:7px 8px;font:500 13px var(--body);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#1a1206;font-weight:600}
+.seg button:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.toggle{display:flex;justify-content:space-between;align-items:center;margin-block:6px;font-size:14px}
+.toggle input{accent-color:var(--accent);width:18px;height:18px}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{background:var(--panel-2);border:1px solid var(--line);color:var(--fg);border-radius:999px;padding:6px 11px;font:500 13px var(--body);cursor:pointer}
+.presets button:hover{border-color:var(--accent)}
+.stage{display:flex;flex-direction:column;gap:14px;min-width:0}
+.views{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+@media (max-width:640px){.views{grid-template-columns:1fr}}
+.view{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px;min-width:0}
+.view h3{font:600 13px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;display:flex;justify-content:space-between}
+.view h3 span{letter-spacing:0;text-transform:none;font:500 12px var(--body)}
+.view svg{width:100%;height:auto;display:block;max-width:100%}
+.readouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.chip{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--good);border-radius:6px;padding:8px 10px;min-width:0}
+.chip[data-state=warn]{border-left-color:var(--warn)}
+.chip[data-state=bad]{border-left-color:var(--bad)}
+.chip b{display:block;font:600 20px var(--mono);font-variant-numeric:tabular-nums;line-height:1.1}
+.chip span{font-size:12px;color:var(--muted)}
+.chip em{display:block;font-style:normal;font-size:12px;color:var(--warn);margin-top:3px}
+.chip[data-state=bad] em{color:var(--bad)}
+.prompt{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.prompt .bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.prompt .bar h2{font:600 13px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0}
+.prompt button{background:var(--accent);border:0;color:#1a1206;font:600 14px var(--body);padding:8px 14px;border-radius:6px;cursor:pointer}
+.prompt pre{white-space:pre-wrap;font:13px/1.5 var(--mono);margin:0;color:var(--fg);user-select:all}
+.notes{color:var(--muted);font-size:13px}
+.notes ul{margin:6px 0 0;padding-left:18px}
+.notes li{margin-block:3px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+svg text{font:11px var(--mono);fill:var(--muted)}
+svg .lbl{font:600 11px var(--body);fill:var(--fg)}
+svg .dim{stroke:var(--accent-2);stroke-width:1;fill:none}
+svg .dimt{fill:var(--accent-2);font:600 11px var(--mono)}
+@media (prefers-reduced-motion:no-preference){.chip,.seg button{transition:border-color .15s,background .15s}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Skate Hook Studio</h1>
+  <p>A narrow wall hook for a street skateboard. The board hangs nose-up with its trucks toward the wall, and the top truck's hanger rests on a narrow tongue with the kingpin nut sitting above it as a locator. Drag the sliders; the drawings are to scale and the clearances update live. Copy the prompt when it looks right.</p>
+</header>
+
+<div class="grid">
+<div class="rail">
+
+  <div class="card">
+    <h2>Concept</h2>
+    <div class="seg" id="modeSeg">
+      <button type="button" data-mode="top" aria-pressed="true">A · Hang from top truck stack</button>
+      <button type="button" data-mode="bottom" aria-pressed="false">B · Stand on bottom truck</button>
+    </div>
+    <p class="notes" id="modeNote" style="margin:8px 0 0"></p>
+  </div>
+
+  <div class="card">
+    <h2>Presets</h2>
+    <div class="presets" id="presets"></div>
+  </div>
+
+  <div class="card">
+    <h2>Tongue</h2>
+    <div id="hookControls"></div>
+  </div>
+
+  <div class="card">
+    <h2>Holder body</h2>
+    <div id="bodyControls"></div>
+  </div>
+
+  <details class="card">
+    <summary>Your truck and wheels</summary>
+    <p class="notes" style="margin:0 0 6px">Defaults are a typical Independent-size traditional-kingpin truck. Match the two check values below to your board.</p>
+    <div id="truckControls"></div>
+  </details>
+
+  <details class="card">
+    <summary>Kingpin stack (advanced)</summary>
+    <div id="stackControls"></div>
+  </details>
+
+</div>
+
+<div class="stage">
+  <div class="views">
+    <div class="view">
+      <h3>Side view <span>to scale, nose up, wall on the left</span></h3>
+      <svg id="side" viewBox="0 0 420 660" role="img" aria-label="Side view of the board hanging on the hook"></svg>
+    </div>
+    <div class="view">
+      <h3>From the room <span>x-ray through the deck</span></h3>
+      <svg id="front" viewBox="0 0 420 660" role="img" aria-label="Front view through the deck"></svg>
+      <div class="legend">
+        <span><i style="background:#f28c28"></i>holder</span>
+        <span><i style="background:#aab2bc"></i>truck</span>
+        <span><i style="background:#f3efe2"></i>wheels</span>
+        <span><i style="background:#f6c453"></i>nut and washer</span>
+        <span><i style="background:#c9a06a"></i>deck</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="readouts" id="readouts"></div>
+
+  <div class="prompt">
+    <div class="bar"><h2>Prompt for Claude</h2><button type="button" id="copyBtn">Copy prompt</button></div>
+    <pre id="prompt"></pre>
+  </div>
+
+  <div class="card notes">
+    <h2>What the drawing assumes</h2>
+    <ul>
+      <li>The board hangs with its trucks toward the wall, so the grip side faces the room and the lower wheels rest on the wall. The deck sits off the wall by one truck height plus one wheel radius.</li>
+      <li>The truck is drawn from typical Independent-size numbers (research 2026-10-04, plus or minus 3 mm). Two check values you can measure on your board are in the chips: deck underside to wheel face, and deck underside to the top of the kingpin nut.</li>
+      <li>Concept A carries the weight on the hanger's center body, not on the nut. The nut only stands about 9 mm proud of the hanger's inboard rim and its axis is nearly level, so a hook on the nut alone would hold by friction.</li>
+      <li>Hold is the vertical lift needed to come off, with no friction counted. The final CAD check runs the same test against a mesh built from your measurements.</li>
+    </ul>
+  </div>
+</div>
+</div>
+</div>
+
+<script>
+// ---------- state ----------
+const DEF = {
+  mode:'top',
+  w:30, tT:12, reach:73, tilt:6, lip:6, saddleR:27, plateT:6, plateH:110, plateAbove:30, gusset:1, round:3,
+  cradleDepth:6, cradleClear:1,
+  deckT:10.5, truckH:55, wheelD:54, wheelW:33, hangerW:139, axleW:203, deckW:210,
+  bulbW:53, bulbTop:10, bulbBot:46, bulbIn:42, bulbOut:10, bossR:12, baseLen:82, baseW:60, baseT:6,
+  nutDepth:55, nutIn:20, kpAngle:15, nutAF:14.3, nutH:6.7, washerD:23, wallGap:0
+};
+const LIP_T = 3;             // lip thickness along the tongue, mm
+const state = Object.assign({}, DEF);
+
+// [key, label, min, max, step, unit, hint]
+const SPEC = {
+  hookTop: [
+    ['reach','Tongue reach from the wall',30,85,1,'mm','how far the tongue runs out under the hanger'],
+    ['tT','Tongue thickness',8,18,1,'mm'],
+    ['lip','Lip at the tongue end',0,15,1,'mm','a wall the hanger must climb over to leave toward the room'],
+    ['tilt','Tongue tilt, up toward the room',0,15,1,'deg','a ramp: the board slides toward the wall and must climb to come off'],
+    ['saddleR','Saddle radius across the width',0,40,1,'mm','0 is a flat top; a concave top cradles the hanger sideways'],
+  ],
+  hookBottom: [
+    ['reach','Block reach from the wall',30,60,1,'mm'],
+    ['tT','Block height under the axle boss',8,24,1,'mm'],
+    ['cradleDepth','Cradle depth',2,14,1,'mm','how far the U wraps the axle boss'],
+    ['cradleClear','Cradle clearance',0,3,0.5,'mm'],
+  ],
+  body: [
+    ['w','Holder width',20,60,1,'mm','must fit between the wheels; narrower looks lighter'],
+    ['plateT','Wall plate thickness',4,10,0.5,'mm'],
+    ['plateH','Wall plate height',60,160,5,'mm','two #8 countersunk screws, 10 mm in from each end'],
+    ['plateAbove','Plate above the tongue',10,60,5,'mm'],
+    ['round','Edge roundover',0,5,0.5,'mm'],
+  ],
+  truck: [
+    ['truckH','Truck height, deck to axle center',45,62,0.5,'mm'],
+    ['wheelD','Wheel diameter',50,60,1,'mm'],
+    ['wheelW','Wheel width',28,36,0.5,'mm'],
+    ['hangerW','Hanger width',125,160,1,'mm','139 on an Indy 139, 149 on a 149'],
+    ['axleW','Axle length',195,225,1,'mm'],
+    ['deckW','Deck width',190,230,1,'mm'],
+    ['deckT','Deck thickness',9,13,0.5,'mm'],
+    ['bulbIn','Hanger center body, inboard end from the axle',30,55,1,'mm','how far the center body reaches toward the middle of the board'],
+    ['bulbOut','Hanger center body, outboard end past the axle',4,20,1,'mm'],
+    ['bulbTop','Center body, near face from the deck',6,20,1,'mm'],
+    ['bulbBot','Center body, far face from the deck',36,56,1,'mm','the bowl rim around the nut'],
+    ['bulbW','Center body width across the axle',40,70,1,'mm'],
+    ['bossR','Axle boss radius',9,16,0.5,'mm'],
+    ['baseLen','Baseplate length',70,95,1,'mm'],
+    ['baseT','Baseplate thickness',4,9,0.5,'mm'],
+    ['wallGap','Wheel to wall gap',0,10,1,'mm','a felt pad or bumper at the lower wheels'],
+  ],
+  stack: [
+    ['nutDepth','Nut top face from the deck',44,66,0.5,'mm','measure it; typically about level with the axle'],
+    ['nutIn','Nut center inboard of the axle',10,32,1,'mm'],
+    ['kpAngle','Kingpin lean toward the axle',0,30,1,'deg','from the deck normal'],
+    ['nutAF','Nut across flats',12,18,0.1,'mm','9/16 in = 14.3'],
+    ['nutH','Nut height',5,13,0.1,'mm'],
+    ['washerD','Cup washer diameter',18,30,0.5,'mm'],
+  ],
+};
+const PRESETS = [
+  ['Standard 30', {w:30,tT:12,reach:73,tilt:6,lip:6,saddleR:27,plateT:6,plateH:110,plateAbove:30,gusset:1,round:3}],
+  ['Slim 26', {w:26,tT:10,reach:73,tilt:6,lip:5,saddleR:27,plateT:5,plateH:100,plateAbove:25,gusset:1,round:2.5}],
+  ['Stout 36', {w:36,tT:14,reach:74,tilt:4,lip:8,saddleR:30,plateT:7,plateH:130,plateAbove:35,gusset:1,round:3}],
+  ['Indy 139 / 54 mm', {truckH:55,wheelD:54,wheelW:33,hangerW:139,axleW:203,deckW:210}],
+  ['Thunder 147 Hi / 52 mm', {truckH:50,wheelD:52,wheelW:32,hangerW:147,axleW:203,deckW:210}],
+  ['Venture 5.2 Lo / 53 mm', {truckH:48.3,wheelD:53,wheelW:32,hangerW:132,axleW:203,deckW:208}],
+];
+
+// ---------- controls ----------
+function buildGroup(host, rows){
+  host.innerHTML = '';
+  for (const [k,label,min,max,step,unit,hint] of rows){
+    const row = document.createElement('div'); row.className = 'row';
+    row.innerHTML = `<label for="c_${k}">${label}${hint?`<small>${hint}</small>`:''}</label>
+      <output id="o_${k}"></output>
+      <input type="range" id="c_${k}" min="${min}" max="${max}" step="${step}" value="${state[k]}">`;
+    const inp = row.querySelector('input'), out = row.querySelector('output');
+    const fmt = v => (unit==='deg' ? `${v}°` : `${(+v).toFixed(step<1?1:0)} ${unit}`);
+    out.textContent = fmt(state[k]);
+    inp.addEventListener('input', () => { state[k] = +inp.value; out.textContent = fmt(state[k]); updateAll(); });
+    host.appendChild(row);
+  }
+}
+function buildControls(){
+  buildGroup(document.getElementById('hookControls'), state.mode==='top' ? SPEC.hookTop : SPEC.hookBottom);
+  buildGroup(document.getElementById('bodyControls'), SPEC.body);
+  const g = document.createElement('label'); g.className='toggle';
+  g.innerHTML = `<span>Gusset under the tongue</span><input type="checkbox" id="c_gusset" ${state.gusset?'checked':''}>`;
+  g.querySelector('input').addEventListener('change', e => { state.gusset = e.target.checked?1:0; updateAll(); });
+  document.getElementById('bodyControls').appendChild(g);
+  buildGroup(document.getElementById('truckControls'), SPEC.truck);
+  buildGroup(document.getElementById('stackControls'), SPEC.stack);
+}
+function syncControls(){
+  for (const rows of Object.values(SPEC)) for (const [k,,,,step,unit] of rows){
+    const inp = document.getElementById('c_'+k), out = document.getElementById('o_'+k);
+    if (!inp) continue;
+    inp.value = state[k];
+    out.textContent = unit==='deg' ? `${state[k]}°` : `${(+state[k]).toFixed(step<1?1:0)} ${unit}`;
+  }
+  const g = document.getElementById('c_gusset'); if (g) g.checked = !!state.gusset;
+}
+
+// ---------- geometry (mm; x from the wall face toward the room, y up the deck, axle of the hook truck at y = 0) ----------
+function geo(){
+  const s = state, top = s.mode==='top', sg = top ? -1 : 1;     // sg: inboard direction along y
+  const deckX = s.truckH + s.wheelD/2 + s.wallGap;
+  const axle = {x: deckX - s.truckH, y: 0};
+  const rb = (s.bulbBot - s.bulbTop)/2;                            // the inboard end is a half-round of the body's depth
+  const bulb = {x0: deckX - s.bulbBot, x1: deckX - s.bulbTop, yIn: sg*s.bulbIn, yOut: -sg*s.bulbOut, r: rb,
+                cx: deckX - s.bulbBot + rb, cy: sg*(s.bulbIn - rb)};  // center of the inboard half-round
+  const a = s.kpAngle*Math.PI/180;
+  const u = {x: -Math.cos(a), y: -sg*Math.sin(a)};                 // kingpin axis from the deck toward the wall, leaning outboard
+  const nutTop = {x: deckX - s.nutDepth, y: sg*s.nutIn};
+  const nutAC = s.nutAF/Math.cos(Math.PI/6);
+  const seg = (s0,s1,r) => {                                       // rotated rectangle along -u from the nut top
+    const p0 = {x: nutTop.x - s0*u.x, y: nutTop.y - s0*u.y}, p1 = {x: nutTop.x - s1*u.x, y: nutTop.y - s1*u.y};
+    const n = {x: -u.y*r, y: u.x*r};
+    return [[p0.x+n.x,p0.y+n.y],[p1.x+n.x,p1.y+n.y],[p1.x-n.x,p1.y-n.y],[p0.x-n.x,p0.y-n.y]];
+  };
+  const nut = seg(0, s.nutH, nutAC/2), washer = seg(s.nutH, s.nutH+2, s.washerD/2);
+  const bulbUnder = x => {                                         // y of the body's inboard face at x (undefined outside)
+    if (x < bulb.x0 || x > bulb.x1) return undefined;
+    if (x <= bulb.cx + rb && x >= bulb.cx - rb) return bulb.cy + sg*Math.sqrt(Math.max(0, rb*rb - (x-bulb.cx)*(x-bulb.cx)));
+    return bulb.yIn;
+  };
+  const g = {top, sg, deckX, axle, bulb, nut, washer, u, nutTop, nutAC};
+  if (top){
+    const th = s.tilt*Math.PI/180;
+    const contact = {x: bulb.cx - rb*Math.sin(th), y: bulb.cy - rb*Math.cos(th)};   // tangent point on the half-round
+    const yTop = x => contact.y + (x - contact.x)*Math.tan(th);
+    const lipTop = yTop(s.reach) + s.lip;
+    const under = bulbUnder(s.reach - LIP_T);
+    g.contact = contact; g.yTop = yTop; g.lipTop = lipTop;
+    g.past = s.reach - contact.x;                                   // tongue past the contact line
+    g.lipClear = (s.lip>0 && under!==undefined) ? under - lipTop : (s.lip>0 ? Infinity : undefined);
+    g.foreHold = s.lip>0 ? Math.max(0, lipTop - bulb.yIn) : Math.max(0, g.past*Math.tan(th));
+    const rBulb = s.bulbW/2, h = s.w/2;
+    g.sideHold = (s.saddleR>0 && s.saddleR>=h) ? (s.saddleR - Math.sqrt(s.saddleR*s.saddleR - h*h))*Math.min(1, rBulb/s.saddleR) : 0;
+    g.sag = (s.saddleR>0 && s.saddleR>=h) ? s.saddleR - Math.sqrt(s.saddleR*s.saddleR - h*h) : 0;
+    g.plateTop = yTop(s.plateT) + s.plateAbove;
+    g.deckGap = deckX - s.reach; g.baseGap = deckX - s.baseT - s.reach;
+    g.gussetL = Math.min(18, Math.max(0, s.reach - s.plateT - 8));
+    g.vol = (s.w*s.plateT*s.plateH + s.w*s.tT*(s.reach - s.plateT) + (s.gusset? s.w*g.gussetL*g.gussetL/2:0) + s.w*LIP_T*s.lip)/1000;
+  } else {
+    const Ru = s.bossR + s.cradleClear;
+    const yRim = -Ru + s.cradleDepth;
+    g.Ru = Ru; g.yRim = yRim; g.yTop = () => yRim;
+    g.plateTop = yRim + s.plateAbove;
+    // pivot arm lower edge: from the boss toward the pivot cup at the baseplate's outboard end
+    const A = {x: axle.x + s.bossR*0.7, y: -(s.bossR*0.7 + 2)}, B = {x: deckX - s.baseT, y: -(s.baseLen/2 - 8)};
+    const pa = x => A.y + (B.y - A.y)*(x - A.x)/(B.x - A.x);
+    const xr = axle.x + Ru;
+    let clear = Infinity;
+    if (s.reach > xr){ clear = Math.min(pa(xr) - yRim, pa(Math.min(s.reach, B.x)) - yRim); }
+    if (s.reach > bulb.x0) clear = Math.min(clear, bulb.yOut - yRim);     // body's outboard face
+    g.pivot = {A, B}; g.rimClear = clear; g.foreHold = s.cradleDepth; g.sideHold = 0;
+    g.deckGap = deckX - s.reach; g.baseGap = deckX - s.baseT - s.reach;
+    g.gussetL = Math.min(18, Math.max(0, s.reach - s.plateT - 8));
+    g.vol = (s.w*s.plateT*s.plateH + s.w*(s.tT + s.cradleDepth)*(s.reach - s.plateT) + (s.gusset? s.w*g.gussetL*g.gussetL/2:0))/1000;
+  }
+  g.pitch = s.plateH - 20;
+  g.wheelGap = s.hangerW + 2 - s.w;
+  return g;
+}
+</script>
+
+<script>
+// ---------- drawing helpers ----------
+const C = {holder:'#f28c28', holder2:'#ffb066', steel:'#aab2bc', steel2:'#7d8792', wheel:'#f3efe2', nut:'#f6c453', deck:'#c9a06a', wall:'#2b2f36', bg:'#1d2127', line:'#343b45'};
+const f1 = v => (Math.round(v*10)/10).toFixed(1).replace(/\.0$/,'');
+function pts(P, X, Y){ return P.map(([x,y]) => `${X(x).toFixed(1)},${Y(y).toFixed(1)}`).join(' '); }
+function rect(x0,x1,y0,y1,fill,X,Y,extra=''){ const a=Math.min(X(x0),X(x1)), b=Math.min(Y(y0),Y(y1)); return `<rect x="${a.toFixed(1)}" y="${b.toFixed(1)}" width="${Math.abs(X(x1)-X(x0)).toFixed(1)}" height="${Math.abs(Y(y1)-Y(y0)).toFixed(1)}" fill="${fill}" ${extra}/>`; }
+
+function renderSide(g){
+  const s = state, k = 2.6, top = g.top, sg = g.sg;
+  const ox = 22*k + 4, oy = 4 + (top?115:135)*k;
+  const X = x => ox + k*x, Y = y => oy - k*y;
+  const yLo = top ? -135 : -115, yHi = top ? 115 : 135;
+  let o = `<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#3a4049" stroke-width="2"/></pattern></defs>`;
+  o += `<rect x="0" y="0" width="420" height="660" fill="${C.bg}"/>`;
+  o += rect(-22,0,yLo,yHi,'url(#hatch)',X,Y) + `<line x1="${X(0)}" y1="${Y(yLo)}" x2="${X(0)}" y2="${Y(yHi)}" stroke="#4a5160" stroke-width="1.5"/>`;
+  // holder
+  const r = s.round;
+  o += rect(0,s.plateT,g.plateTop-s.plateH,g.plateTop,C.holder,X,Y,`rx="${(r*k).toFixed(1)}"`);
+  if (top){
+    const yt = g.yTop;
+    if (s.gusset && g.gussetL>0) o += `<polygon points="${pts([[s.plateT,yt(s.plateT)-s.tT],[s.plateT+g.gussetL,yt(s.plateT+g.gussetL)-s.tT],[s.plateT,yt(s.plateT)-s.tT-g.gussetL]],X,Y)}" fill="${C.holder}"/>`;
+    o += `<polygon points="${pts([[s.plateT-1,yt(s.plateT-1)],[s.reach,yt(s.reach)],[s.reach,yt(s.reach)-s.tT],[s.plateT-1,yt(s.plateT-1)-s.tT]],X,Y)}" fill="${C.holder}"/>`;
+    if (g.sag>0) o += `<polygon points="${pts([[s.plateT,yt(s.plateT)],[s.reach,yt(s.reach)],[s.reach,yt(s.reach)+g.sag],[s.plateT,yt(s.plateT)+g.sag]],X,Y)}" fill="${C.holder2}" opacity=".55"/>`;
+    if (s.lip>0) o += rect(s.reach-LIP_T,s.reach,yt(s.reach-LIP_T),g.lipTop,C.holder2,X,Y);
+  } else {
+    if (s.gusset && g.gussetL>0) o += `<polygon points="${pts([[s.plateT,g.yRim-s.tT],[s.plateT+g.gussetL,g.yRim-s.tT],[s.plateT,g.yRim-s.tT-g.gussetL]],X,Y)}" fill="${C.holder}"/>`;
+    o += rect(s.plateT-1,s.reach,g.yRim-s.tT,g.yRim,C.holder,X,Y);
+    o += `<circle cx="${X(g.axle.x)}" cy="${Y(0)}" r="${(g.Ru*k).toFixed(1)}" fill="${C.bg}"/>`;
+  }
+  for (const ys of [g.plateTop-10, g.plateTop-s.plateH+10]){
+    o += `<line x1="${X(-16)}" y1="${Y(ys)}" x2="${X(s.plateT)}" y2="${Y(ys)}" stroke="#5e6670" stroke-width="2.2"/><polygon points="${pts([[s.plateT,ys-3],[s.plateT,ys+3],[s.plateT-2.5,ys+1],[s.plateT-2.5,ys-1]],X,Y)}" fill="#5e6670"/>`;
+  }
+  // deck with kick
+  const dx = g.deckX, dt = s.deckT, kick = top ? 1 : -1, yk = kick*60, yn = kick*118;
+  o += `<path d="M${X(dx)},${Y(-kick*135)} L${X(dx)},${Y(yk)} Q${X(dx+2)},${Y(kick*100)} ${X(dx+14)},${Y(yn)} L${X(dx+dt+14)},${Y(yn-kick*2)} Q${X(dx+dt+2)},${Y(kick*100)} ${X(dx+dt)},${Y(yk)} L${X(dx+dt)},${Y(-kick*135)} Z" fill="${C.deck}"/>`;
+  // truck: baseplate, pivot arm, center body, axle boss, kingpin, washer, nut
+  o += rect(dx-s.baseT,dx,-s.baseLen/2,s.baseLen/2,C.steel2,X,Y,'rx="2"');
+  const ax = g.axle.x, pv = g.pivot || {A:{x:ax+s.bossR*0.7,y:-sg*(s.bossR*0.7+2)},B:{x:dx-s.baseT,y:-sg*(s.baseLen/2-8)}};
+  o += `<polygon points="${pts([[ax-6,-sg*4],[ax+s.bossR*0.7,-sg*(s.bossR*0.7+2)],[dx-s.baseT,-sg*(s.baseLen/2-8)],[dx-s.baseT,-sg*(s.baseLen/2-26)],[ax+4,sg*6]],X,Y)}" fill="${C.steel}"/>`;
+  const b = g.bulb, R = (b.r*k).toFixed(1), sweep = top ? 1 : 0;
+  o += `<path d="M${X(b.x0)},${Y(b.cy)} L${X(b.x0)},${Y(b.yOut)} L${X(b.x1)},${Y(b.yOut)} L${X(b.x1)},${Y(b.cy)} A${R},${R} 0 0 ${sweep} ${X(b.x0)},${Y(b.cy)} Z" fill="${C.steel}" stroke="#c6ccd3" stroke-width=".8"/>`;
+  o += `<circle cx="${X(ax)}" cy="${Y(0)}" r="${(s.bossR*k).toFixed(1)}" fill="${C.steel}" stroke="#c6ccd3" stroke-width=".8"/>`;
+  const kpEnd = (dx - 2 - g.nutTop.x)/(-g.u.x);
+  o += `<line x1="${X(g.nutTop.x)}" y1="${Y(g.nutTop.y)}" x2="${X(g.nutTop.x - kpEnd*g.u.x)}" y2="${Y(g.nutTop.y - kpEnd*g.u.y)}" stroke="#e5e9ee" stroke-width="2" stroke-dasharray="3 3" opacity=".6"/>`;
+  o += `<polygon points="${pts(g.washer,X,Y)}" fill="${C.steel2}" stroke="#e5e9ee" stroke-width=".8"/>`;
+  o += `<polygon points="${pts(g.nut,X,Y)}" fill="${C.nut}" stroke="#e5e9ee" stroke-width=".8"/>`;
+  // wheel (nearest the viewer)
+  o += `<circle cx="${X(ax)}" cy="${Y(0)}" r="${(s.wheelD/2*k).toFixed(1)}" fill="${C.wheel}" opacity=".45" stroke="#fff" stroke-width=".8"/><circle cx="${X(ax)}" cy="${Y(0)}" r="${(11*k).toFixed(1)}" fill="none" stroke="#fff" stroke-width=".8" opacity=".7"/>`;
+  // contact marker and dims
+  if (top && g.contact) o += `<circle cx="${X(g.contact.x)}" cy="${Y(g.contact.y)}" r="4" fill="none" stroke="#5fcf8a" stroke-width="1.5"/>`;
+  const yd = top ? 108 : -108;
+  o += `<line class="dim" x1="${X(0)}" y1="${Y(yd)}" x2="${X(dx)}" y2="${Y(yd)}"/><line class="dim" x1="${X(0)}" y1="${Y(yd-4)}" x2="${X(0)}" y2="${Y(yd+4)}"/><line class="dim" x1="${X(dx)}" y1="${Y(yd-4)}" x2="${X(dx)}" y2="${Y(yd+4)}"/>`;
+  o += `<text class="dimt" x="${X(dx/2)}" y="${Y(yd)-5}" text-anchor="middle">wall to deck ${f1(dx)}</text>`;
+  const yr = top ? (g.yTop(s.plateT)-s.tT-(s.gusset?g.gussetL:0)-8) : (g.yRim-s.tT-(s.gusset?g.gussetL:0)-8);
+  o += `<line class="dim" x1="${X(0)}" y1="${Y(yr)}" x2="${X(s.reach)}" y2="${Y(yr)}"/><line class="dim" x1="${X(s.reach)}" y1="${Y(yr-4)}" x2="${X(s.reach)}" y2="${Y(yr+4)}"/>`;
+  o += `<text class="dimt" x="${X(s.reach/2)}" y="${Y(yr)+13}" text-anchor="middle">reach ${f1(s.reach)}</text>`;
+  o += `<text class="lbl" x="${X(-20)}" y="${Y(yHi-6)}">wall</text><text class="lbl" x="${X(dx+dt+4)}" y="${Y(top?20:-20)}">${top?'top':'bottom'} truck</text>`;
+  o += `<text x="${X(g.nutTop.x-2)}" y="${Y(g.nutTop.y+sg*14)}" text-anchor="end">nut</text><text x="${X(ax)}" y="${Y(-sg*(s.wheelD/2+6))}" text-anchor="middle">wheel</text>`;
+  o += `<text x="${X(2)}" y="${Y(g.plateTop-s.plateH-8)}">holder</text>`;
+  document.getElementById('side').innerHTML = o;
+}
+
+function renderFront(g){
+  const s = state, k = 1.78, top = g.top, sg = g.sg;
+  const ox = 210, oy = 4 + (top?115:135)*k;
+  const X = x => ox + k*x, Y = y => oy - k*y, h = s.w/2;
+  let o = `<rect x="0" y="0" width="420" height="660" fill="${C.bg}"/><rect x="0" y="0" width="420" height="${(250*k+8).toFixed(0)}" fill="url(#hatch)" opacity=".7"/>`;
+  o += rect(-h,h,g.plateTop-s.plateH,g.plateTop,C.holder,X,Y,`rx="${(s.round*k).toFixed(1)}"`);
+  if (top){
+    const yt = g.yTop(s.reach), R = (s.saddleR*k).toFixed(1), sw = top?0:1;
+    if (g.sag>0) o += `<path d="M${X(-h)},${Y(yt+g.sag)} A${R},${R} 0 0 ${sw} ${X(h)},${Y(yt+g.sag)} L${X(h)},${Y(yt-s.tT)} L${X(-h)},${Y(yt-s.tT)} Z" fill="${C.holder}"/>`;
+    else o += rect(-h,h,yt-s.tT,yt,C.holder,X,Y);
+    if (s.lip>0) o += rect(-h,h,yt,g.lipTop,C.holder2,X,Y,'opacity=".8"');
+  } else {
+    o += rect(-h,h,g.yRim-s.tT,g.yRim,C.holder,X,Y);
+  }
+  // wheels, hanger, body, baseplate, washer, nut
+  for (const sd of [-1,1]){ const a=sd*(s.hangerW/2+1), b=sd*(s.hangerW/2+1+s.wheelW); o += rect(a,b,-s.wheelD/2,s.wheelD/2,C.wheel,X,Y,'rx="6" opacity=".85"'); o += `<circle cx="${X((a+b)/2)}" cy="${Y(0)}" r="${(11*k).toFixed(1)}" fill="none" stroke="#8a929b" stroke-width="1"/>`; }
+  const hw = s.hangerW/2, br = s.bossR;
+  o += `<polygon points="${pts([[-hw,-7],[-hw,7],[-s.bulbW/2,br],[s.bulbW/2,br],[hw,7],[hw,-7],[s.bulbW/2,-br],[-s.bulbW/2,-br]],X,Y)}" fill="${C.steel}" stroke="#c6ccd3" stroke-width=".8"/>`;
+  o += `<line x1="${X(-s.axleW/2)}" y1="${Y(0)}" x2="${X(s.axleW/2)}" y2="${Y(0)}" stroke="#c6ccd3" stroke-width="2"/>`;
+  o += rect(-s.bulbW/2,s.bulbW/2,g.bulb.yOut,g.bulb.yIn,C.steel,X,Y,`rx="${(Math.min(s.bulbW/2,g.bulb.r)*k).toFixed(1)}" stroke="#c6ccd3" stroke-width=".8"`);
+  o += rect(-s.baseW/2,s.baseW/2,-s.baseLen/2,s.baseLen/2,C.steel2,X,Y,'rx="3" opacity=".55"');
+  const ny = g.nutTop.y;
+  o += `<circle cx="${X(0)}" cy="${Y(ny)}" r="${(s.washerD/2*k).toFixed(1)}" fill="${C.steel2}" stroke="#e5e9ee" stroke-width=".8"/>`;
+  const hex = [0,1,2,3,4,5].map(i => [g.nutAC/2*Math.cos(i*Math.PI/3+Math.PI/6), ny + g.nutAC/2*Math.sin(i*Math.PI/3+Math.PI/6)]);
+  o += `<polygon points="${pts(hex,X,Y)}" fill="${C.nut}" stroke="#e5e9ee" stroke-width=".8"/>`;
+  // deck outline (grip side faces the viewer; drawn as an outline so the truck shows through)
+  const dw = s.deckW/2, kick = top?1:-1;
+  o += `<path d="M${X(-dw)},${Y(-kick*135)} L${X(-dw)},${Y(kick*40)} Q${X(-dw)},${Y(kick*125)} ${X(0)},${Y(kick*125)} Q${X(dw)},${Y(kick*125)} ${X(dw)},${Y(kick*40)} L${X(dw)},${Y(-kick*135)}" fill="none" stroke="${C.deck}" stroke-width="2" stroke-dasharray="6 4"/>`;
+  for (const ys of [g.plateTop-10, g.plateTop-s.plateH+10]) o += `<circle cx="${X(0)}" cy="${Y(ys)}" r="${(2.5*k).toFixed(1)}" fill="#2b2f36" stroke="#e8e6df" stroke-width="1"/>`;
+  o += `<text class="lbl" x="${X(-dw)}" y="${Y(-kick*128)}">deck ${s.deckW} wide</text><text x="${X(0)}" y="${Y(g.plateTop-s.plateH-8)}" text-anchor="middle">holder ${s.w} wide</text>`;
+  document.getElementById('front').innerHTML = o;
+}
+
+// ---------- readouts and prompt ----------
+function chip(label, val, unit, st, note){ return `<div class="chip" data-state="${st}"><span>${label}</span><b>${val}${unit?` <small style="font-size:12px;color:var(--muted)">${unit}</small>`:''}</b>${note?`<em>${note}</em>`:''}</div>`; }
+const grade = (v, good, warn) => v>=good?'good':(v>=warn?'warn':'bad');
+function renderReadouts(g){
+  const s = state, top = g.top, c = [];
+  c.push(chip('Deck underside to wall', f1(g.deckX), 'mm', 'good', 'check: measure deck to wheel face'));
+  c.push(chip('Nut top from deck', f1(s.nutDepth), 'mm', 'good', 'check: measure it on your board'));
+  if (top){
+    c.push(chip('Tongue past the contact line', f1(g.past), 'mm', grade(g.past,6,3), g.past<3?'tongue too short to carry the hanger':''));
+    c.push(chip('Hold toward the room (lift)', f1(g.foreHold), 'mm', grade(g.foreHold,6,3), g.foreHold<3?'add a lip or tilt':''));
+    c.push(chip('Hold sideways (lift)', f1(g.sideHold), 'mm', grade(g.sideHold,4,2), g.sideHold<2?'no side hold: add a saddle':'approx, from the saddle'));
+    if (s.lip>0) c.push(chip('Lip under the hanger (docking room)', g.lipClear===Infinity?'free':f1(g.lipClear), g.lipClear===Infinity?'':'mm', g.lipClear===Infinity?'good':grade(g.lipClear,1.5,0.5), g.lipClear<0.5?'lip too tall: the board cannot drop on':''));
+  } else {
+    c.push(chip('Cradle depth (hold)', f1(s.cradleDepth), 'mm', grade(s.cradleDepth,6,3)));
+    c.push(chip('Cradle rim to hanger body', g.rimClear===Infinity?'free':f1(g.rimClear), g.rimClear===Infinity?'':'mm', g.rimClear===Infinity?'good':grade(g.rimClear,1.5,0.5), g.rimClear<0.5?'rim runs into the hanger: less depth or reach':''));
+    c.push(chip('Hold sideways', '0', 'mm', 'bad', 'the boss is a cylinder: only the wheels stop a sideways slide'));
+  }
+  c.push(chip('Tongue end to deck', f1(g.deckGap), 'mm', grade(g.deckGap,8,4)));
+  c.push(chip('Tongue end to baseplate', f1(g.baseGap), 'mm', grade(g.baseGap,2,0.5), g.baseGap<0.5?'runs into the baseplate':''));
+  c.push(chip('Room between the wheels', f1(g.wheelGap), 'mm', grade(g.wheelGap,20,8), 'wheel gap minus holder width'));
+  c.push(chip('Screw pitch', f1(g.pitch), 'mm', grade(g.pitch,60,40), 'two #8 countersunk, into a stud or anchors'));
+  c.push(chip('Plastic, solid volume', f1(g.vol), 'cm³', 'good', `about ${Math.round(g.vol*0.76)} g PETG at 3 walls, 20% infill`));
+  document.getElementById('readouts').innerHTML = c.join('');
+}
+function updatePrompt(g){
+  const s = state, p = [];
+  if (g.top){
+    p.push(`Build the skateboard wall hook as concept A: the board hangs nose-up with its trucks toward the wall, and the top truck's hanger center body rests on a narrow tongue; the kingpin nut sits above the tongue as a locator, not as the load path. The lower wheels rest on the wall.`);
+    p.push(`Holder: ${s.w} mm wide. Wall plate ${s.plateT} x ${s.plateH} mm, standing ${s.plateAbove} mm above the tongue, two #8 countersunk screws 10 mm in from each end (${f1(g.pitch)} mm pitch). Tongue ${s.tT} mm thick reaching ${s.reach} mm from the wall${s.tilt?`, top tilted ${s.tilt} degrees up toward the room`:''}${s.saddleR?`, top hollowed to a R${s.saddleR} saddle across the width`:', flat top'}${s.lip?`, ${s.lip} mm lip at the end`:', no lip'}${s.gusset?', gusset under the tongue':''}, ${s.round} mm roundovers. PETG, printed on its side, 3 walls.`);
+    p.push(`Targets from the drawing: hold toward the room ${f1(g.foreHold)} mm of lift, side hold about ${f1(g.sideHold)} mm, tongue end ${f1(g.deckGap)} mm from the deck.`);
+  } else {
+    p.push(`Build the skateboard wall hook as concept B: the board stands on its bottom truck with the trucks toward the wall; the axle boss sits in a U block and the top wheels lean on the wall.`);
+    p.push(`Holder: ${s.w} mm wide. Wall plate ${s.plateT} x ${s.plateH} mm, two #8 countersunk screws ${f1(g.pitch)} mm apart. Block ${s.tT} mm under the boss, reaching ${s.reach} mm from the wall, U cradle ${s.cradleDepth} mm deep with ${s.cradleClear} mm clearance${s.gusset?', gusset':''}, ${s.round} mm roundovers. PETG, printed on its side.`);
+  }
+  p.push(`My board: deck ${s.deckT} mm thick, ${s.deckW} mm wide; truck height ${s.truckH} mm, hanger ${s.hangerW}, axle ${s.axleW}; wheels ${s.wheelD} x ${s.wheelW} mm; hanger center body ${s.bulbW} wide, ${s.bulbTop} to ${s.bulbBot} mm from the deck, ${s.bulbIn} mm inboard and ${s.bulbOut} mm outboard of the axle, axle boss R${s.bossR}; baseplate ${s.baseLen} x ${s.baseT}; nut top ${s.nutDepth} mm from the deck, ${s.nutIn} mm inboard, kingpin leaning ${s.kpAngle} degrees toward the axle, nut ${s.nutAF} AF x ${s.nutH}, washer ${s.washerD}${s.wallGap?`; ${s.wallGap} mm pad between the wheels and the wall`:''}.`);
+  document.getElementById('prompt').textContent = p.join('\n\n');
+}
+function updateAll(){
+  const g = geo();
+  renderSide(g); renderFront(g); renderReadouts(g); updatePrompt(g);
+  document.getElementById('modeNote').textContent = g.top
+    ? 'The top truck hangs on the tongue by its hanger center body. Grip side faces the room; the lower wheels rest on the wall.'
+    : 'The board stands on its bottom truck in a U block and leans its top wheels on the wall. Grip side faces the room.';
+}
+
+// ---------- wiring ----------
+document.getElementById('modeSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  state.mode = b.dataset.mode;
+  for (const x of e.currentTarget.querySelectorAll('button')) x.setAttribute('aria-pressed', x===b);
+  buildGroup(document.getElementById('hookControls'), state.mode==='top' ? SPEC.hookTop : SPEC.hookBottom);
+  updateAll();
+});
+const ph = document.getElementById('presets');
+for (const [name, vals] of PRESETS){
+  const b = document.createElement('button'); b.type='button'; b.textContent = name;
+  b.addEventListener('click', () => { Object.assign(state, vals); syncControls(); updateAll(); });
+  ph.appendChild(b);
+}
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const btn = document.getElementById('copyBtn'), txt = document.getElementById('prompt').textContent;
+  const done = () => { btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy prompt', 1400); };
+  const fallback = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById('prompt')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); btn.textContent = 'Select and copy'; };
+  try { navigator.clipboard.writeText(txt).then(done, fallback); } catch (e) { fallback(); }
+});
+buildControls();
+updateAll();
+</script>
