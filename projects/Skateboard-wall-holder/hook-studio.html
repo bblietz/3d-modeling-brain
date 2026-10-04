@@ -86,6 +86,7 @@ svg .dimt{fill:var(--accent-2);font:600 11px var(--mono)}
       <button type="button" data-mode="bottom" aria-pressed="false">B · Stand on bottom truck</button>
     </div>
     <p class="notes" id="modeNote" style="margin:8px 0 0"></p>
+    <p class="notes" style="margin:8px 0 0">Built 2026-10-04 from this tool's prompt, with one change: the tongue became a curved cradle (an arc 2 mm over the hanger's half-round) instead of a tilt plus lip, so a bump has to lift the board over a rim in every direction. The CAD check numbers are on the build report.</p>
   </div>
 
   <div class="card">
@@ -287,7 +288,7 @@ function geo(){
   const g = {top, sg, deckX, axle, bulb, nut, washer, u, nutTop, nutAC};
   if (top){
     const th = s.tilt*Math.PI/180;
-    const contact = {x: bulb.cx - rb*Math.sin(th), y: bulb.cy - rb*Math.cos(th)};   // tangent point on the half-round
+    const contact = {x: bulb.cx + rb*Math.sin(th), y: bulb.cy - rb*Math.cos(th)};   // tangent point on the half-round (room side of its lowest point)
     const yTop = x => contact.y + (x - contact.x)*Math.tan(th);
     const lipTop = yTop(s.reach) + s.lip;
     const under = bulbUnder(s.reach - LIP_T);

@@ -1,12 +1,12 @@
 ---
 name: project-skateboard-wall-holder
-description: Narrow skateboard wall hook; Skate Hook Studio design tool published 2026-10-04; hold goes on the hanger center body because the kingpin nut is near-level and only ~9 mm proud; waiting on Brian's concept pick and truck measurements
+description: Narrow skateboard wall hook; CAD complete 2026-10-04 (curved cradle tongue, 40 mm wide, hangs the top truck's hanger body); 3MF waits for Brian's go-ahead; truck numbers are still estimates
 metadata:
   type: project
 ---
 
-Started 2026-10-04: a narrow wall holder where the board "rests on the center circular part of the truck". Brian asked for a visual HTML tool to guide the design; it is the Skate Hook Studio artifact (https://claude.ai/artifact/KLEtv2Tq6MH1gkTuoyo6J6, source `projects/Skateboard-wall-holder/hook-studio.html`): to-scale side and x-ray views, live clearances and lift-to-come-off, prompt copy-out.
+Started 2026-10-04. Design tool (Skate Hook Studio, https://claude.ai/artifact/KLEtv2Tq6MH1gkTuoyo6J6) converged the concept; Brian pasted its prompt back, then asked in the viewer for a curved tongue (bump proof) and a wider tongue with a deeper curve. CAD complete the same day: `projects/Skateboard-wall-holder/skateboard_holder.py`, STL exported, build report https://claude.ai/artifact/Q9SgmT5dGhR47c1FfW84SQ. Not printed; no 3MF yet (Brian: "show in cad viewr before making 3mf file").
 
-Key fact from research: on traditional-kingpin trucks the kingpin is nearly perpendicular to the deck and leans toward the axle, and the nut stands only about 9 mm proud of the hanger's inboard rim. Hanging the board on the nut would hold by friction only, so concept A carries the weight on the hanger's center body with the nut as a locator (lip plus tilt for fore-aft hold, concave saddle for side hold). Concept B stands the board on the bottom truck's axle boss.
+Key facts: the kingpin nut is near-level and only ~9 mm proud of the hanger, so the hook carries the hanger's center body in an R20 cradle (2 mm over its half-round) with an R27 bowl across the 40 mm width; lift to escape 11.5 mm toward the room, 8.25 sideways. The dish is floor = max(cradle arc, saddle arc) built as an intersection of two cutters; a loft collided.
 
-**How to apply:** do not build CAD until Brian picks A or B and measures his truck (deck to wheel face, deck to nut top, hanger body width, inboard end, far face). Then follow [[feedback-check-docking-and-hold-kinematics]] and [[feedback-verify-retention-features-closeup]] with a truck proxy mesh. Precedents: [[project-nacs-wall-holder]] for screws and PETG settings, [[feedback-html-visual-companion]] for the page-first workflow.
+**How to apply:** next step is the 3MF after Brian's OK (recipe in the handoff). The truck in the model is an estimate, plus or minus 3 mm; the four measurements in brief.md decide the drop-on fit. Retrospective: knowledge/learnings/skateboard-wall-holder.md. Related: [[feedback-check-docking-and-hold-kinematics]], [[feedback-verify-retention-features-closeup]], [[feedback-html-visual-companion]].

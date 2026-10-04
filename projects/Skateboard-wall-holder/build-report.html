@@ -1,0 +1,109 @@
+<title>Skate Hook Build Report</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column with figure pairs; same shop-bench palette as the design tool, light and dark. */
+:root{
+  --bg:#f4f2ec; --panel:#ffffff; --line:#d9d5cb; --fg:#23262b; --muted:#5f6670; --accent:#d9731a; --accent-soft:#fbe9d8;
+  --good:#2f9e5f; --warn:#c48a12; --bad:#c9452f;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif; --body:"Barlow",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --bg:#15181d; --panel:#1d2127; --line:#343b45; --fg:#e8e6df; --muted:#9aa3ad; --accent:#f28c28; --accent-soft:#3a2a1a; --good:#5fcf8a; --warn:#f2c14e; --bad:#ef6b5c; color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#15181d; --panel:#1d2127; --line:#343b45; --fg:#e8e6df; --muted:#9aa3ad; --accent:#f28c28; --accent-soft:#3a2a1a; --good:#5fcf8a; --warn:#f2c14e; --bad:#ef6b5c; color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 var(--body);padding-block:0 40px}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px}
+header{padding-block:22px 12px;border-bottom:1px solid var(--line)}
+h1{font:700 36px/1 var(--display);margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:70ch}
+h2{font:600 15px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:30px 0 10px}
+p{max-width:70ch}
+figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;min-width:0}
+figure img{width:100%;height:auto;display:block;border-radius:4px;max-width:100%}
+figcaption{font-size:13px;color:var(--muted);padding:8px 4px 2px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;min-width:0}
+.chip b{display:block;font:600 24px var(--mono);font-variant-numeric:tabular-nums;line-height:1.1;color:var(--accent)}
+.chip span{font-size:13px;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:14px;background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.n{font:14px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tablewrap{overflow-x:auto}
+.note{background:var(--accent-soft);border:1px solid var(--line);padding:10px 14px;border-radius:6px;max-width:70ch}
+code{font:13px var(--mono);background:var(--panel);border:1px solid var(--line);padding:1px 5px;border-radius:4px}
+ul{padding-left:20px;max-width:70ch}
+li{margin-block:4px}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Skate Hook Build Report</h1>
+  <p>Concept A, built 2026-10-04 from the Skate Hook Studio prompt and your two notes from the viewer: a curved cradle instead of the tilt and lip, then a wider tongue with a deeper curve. The model is in the CAD viewer; the 3MF waits for your go-ahead.</p>
+</header>
+
+<h2>The hook as built</h2>
+<div class="pair">
+  <figure><img src="images/docked-iso.png" alt="Holder with the truck docked, deck translucent"><figcaption>Top truck docked. The hanger's center body sits in the cradle; the nut rides above it. Wheels and deck drawn translucent.</figcaption></figure>
+  <figure><img src="images/holder-iso.png" alt="Holder alone"><figcaption>The holder alone: 40 mm wide, plate 6 x 110 mm, tongue reaching 74 mm from the wall, scoop underside, gusset, 3 mm roundovers.</figcaption></figure>
+</div>
+
+<h2>What changed from the tool's prompt</h2>
+<ul>
+  <li><b>Cradle, not tilt plus lip.</b> The tongue top is an arc of R20 around a center 2 mm above the hanger's half-round, so the hanger drops in and nests. Its rim toward the room is the bump stop; the wall and the lower wheels stop the other direction.</li>
+  <li><b>Wider and deeper.</b> Width 30 to 40 mm. The room rim spans 65 degrees of arc (was 55), the wall rim 45 (was 40; 50 brought the wall-side shelf within 1.5 mm of the kingpin washer, so it was eased). The R27 bowl across the width now rises 8.9 mm at the rims instead of 4.6.</li>
+  <li><b>Reach 74 mm</b>, 2 mm short of the baseplate and 8 mm from the deck.</li>
+</ul>
+
+<h2>Docking and hold, measured on the proxy mesh</h2>
+<p>Docking is a straight lowering; the hanging load pulls the same way, so the load drives the part in and the only way out is a lift. The test slices the holder and the truck every 0.5 mm across the width and moves the truck through poses, no friction counted.</p>
+<div class="chips">
+  <div class="chip"><span>Rests where modelled</span><b>0.0 <small>mm</small></b></div>
+  <div class="chip"><span>Drop-in, truck grown 0.2 mm</span><b>free</b></div>
+  <div class="chip"><span>Bump slack, room and sideways</span><b>0.5 <small>mm</small></b></div>
+  <div class="chip"><span>Lift to leave toward the room</span><b>11.5 <small>mm</small></b></div>
+  <div class="chip"><span>Lift to leave sideways</span><b>8.3 <small>mm</small></b></div>
+  <div class="chip"><span>Wall-side rim</span><b>5.9 <small>mm</small></b></div>
+</div>
+
+<h2>Sections through the cradle</h2>
+<div class="pair">
+  <figure><img src="images/section-cradle.png" alt="Side section close-up of the cradle with the hanger"><figcaption>Center-plane cut. The room rim's inner face leans 25 degrees inward over the floor: a hook, not a draft. Nut and washer (yellow) clear the wall-side shelf by 2.8 mm; the baseplate (right) is 2 mm from the tongue end.</figcaption></figure>
+  <figure><img src="images/section-across.png" alt="Section across the width at the cradle bottom"><figcaption>Cut across the width at the cradle bottom. The hanger's rounded underside (drawn R26.5) sits in the R27 bowl, touching at the center only.</figcaption></figure>
+</div>
+<figure style="margin-top:12px"><img src="images/section-side.png" alt="Full side section of the hook with the truck docked"><figcaption>The whole hook at the center plane: plate on the wall at left, two countersunk screw holes, gusset, scoop tongue, truck and deck.</figcaption></figure>
+
+<h2>Printing</h2>
+<div class="pair">
+  <figure><img src="images/print-bed.png" alt="Holder in print orientation"><figcaption>On its side, 74 x 110 mm footprint, 40 mm tall. Layers run along the plate and the tongue, so the tongue's bending load is carried within layers. No supports: the bowl prints as a shallow concave in each layer and the horizontal screw holes bridge at 5 mm.</figcaption></figure>
+  <div>
+    <div class="tablewrap"><table>
+      <tr><th>Setting</th><th>Value</th></tr>
+      <tr><td>Nozzle</td><td class="n">0.6 mm high flow (installed)</td></tr>
+      <tr><td>Material</td><td class="n">PETG Basic</td></tr>
+      <tr><td>Process</td><td class="n">0.30 mm Standard, 3 walls, 20% gyroid</td></tr>
+      <tr><td>Solid volume</td><td class="n">76 cm³, about 55 to 60 g</td></tr>
+      <tr><td>Screws</td><td class="n">two #8 countersunk, 90 mm apart, into a stud or anchors</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<h2>Check on your board before printing</h2>
+<div class="note">The truck in the model is an Independent-size estimate, plus or minus 3 mm. The cradle has 2 mm of radial clearance and the washer has 2.8 mm over the shelf, so these four numbers decide whether it drops on.</div>
+<div class="tablewrap" style="margin-top:12px"><table>
+  <tr><th>Measure on the top truck</th><th>Model assumes</th><th>What it sets</th></tr>
+  <tr><td>Deck underside to wheel face</td><td class="n">82 mm</td><td>how far the deck hangs off the wall, and so the tongue reach</td></tr>
+  <tr><td>Deck underside to the far face of the hanger's center body (the bowl rim around the nut)</td><td class="n">46 mm</td><td>where the cradle sits in from the wall</td></tr>
+  <tr><td>Hanger center body: how far it reaches toward the board's middle from the axle, and its width across</td><td class="n">42 mm, 53 mm</td><td>cradle position and the bowl radius</td></tr>
+  <tr><td>Deck underside to the lowest edge of the cup washer, and nut top</td><td class="n">about 49 mm, 55 mm</td><td>clearance over the wall-side shelf</td></tr>
+</table></div>
+
+<h2>Files</h2>
+<ul>
+  <li><code>projects/Skateboard-wall-holder/skateboard_holder.py</code>: the parametric model with its self-checks; every number above is a constant at the top.</li>
+  <li><code>projects/Skateboard-wall-holder/skateboard-holder.stl</code>: print orientation, on Z = 0.</li>
+  <li><code>pipeline/hold_check.py</code>, <code>pipeline/section_fig.py</code>, <code>pipeline/renders.py</code>: the checks and figures on this page.</li>
+</ul>
+</div>

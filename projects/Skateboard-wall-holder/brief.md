@@ -2,7 +2,7 @@
 type: project
 project: Skateboard-wall-holder
 date: 2026-10-04
-status: design tool published, waiting for Brian to pick the concept and measure his truck
+status: CAD complete 2026-10-04 (cradle, 40 mm wide), in the viewer; 3MF waits for Brian's go-ahead and his truck measurements
 tags: [x2d, petg, wall-mount, skateboard, hook]
 ---
 # Skateboard wall holder
@@ -23,17 +23,26 @@ Brian (2026-10-04): "create a wall holder for a skateboard. It should be narrow,
 - Typical numbers used as tool defaults: Indy Stage 11 Standard height 55 mm (139 hanger, 203 axle); wheels 54 x 33; nut 9/16 in = 14.3 AF, jam nut about 6.7 tall; top cone bushing 19.3 x 9.9; cup washer about 23; deck 10.5; completes 2.0 to 2.4 kg. Thunder 147 Hi 50 mm, Venture 5.2 Lo 48.3 mm.
 - Hanger center body (bulb) dimensions in the tool (53 wide, 10 to 46 mm from the deck, 42 mm inboard of the axle, half-round inboard end) are photo estimates, plus or minus 3 mm. They must be measured on Brian's truck before CAD.
 
+## Build (2026-10-04)
+
+- Brian pasted the tool's prompt (concept A, default numbers), then in the viewer: "the tongue should have a curved shape, so the board doesnt slide off if it is bumped" and "make the tongue wider and teh curve deeper". Built in build123d: `skateboard_holder.py` (constants at the top, self-checks, exports), STL `skateboard-holder.stl` in print orientation.
+- Cradle: R20 arc (hanger half-round R18 + 2 mm) centered 2 mm above the hanger's half-round center; room rim 65 deg of arc (11.5 mm lift to leave toward the room), wall rim 45 deg (5.9 mm; 50 deg put the shelf 1.5 mm from the washer, eased); R27 bowl across the 40 mm width (rims 8.9 mm up). Reach 74 (2 mm from the baseplate, 8 from the deck). Plate 6 x 110, 30 mm above the tongue root, #8 countersunk screws 90 mm apart. 3 mm roundovers, 0.6 side chamfer. Volume 76 cm3.
+- Dish construction that worked: side-view cradle extruded across the width INTERSECTED with the width-wise saddle cylinder (floor = max of the two arcs). A loft of saddle arcs along the cradle carved the sides higher than the hanger proxy and collided (0.6 cm3).
+- Hold check (`pipeline/hold_check.py`, 0.5 mm slices, frictionless): rest 0.0, drop-in free with the truck grown 0.2, bump slack 0.5 mm, lift to leave 11.5 toward the room, 8.25 sideways. Sections: `pipeline/section_fig.py` (true slices, matplotlib; OpenSCAD section previews lose per-part colors).
+- Build report: https://claude.ai/artifact/Q9SgmT5dGhR47c1FfW84SQ
+- Tool fix: the tool's contact point had a sign error (tangent point is on the room side of the hanger's lowest point); fixed and republished with a build note.
+
 ## Decisions already locked
 
-- None from Brian yet. My assumptions: trucks face the wall (grip out); PETG, printed on its side, 3 walls; two #8 countersunk screws (NACS holder convention, 5 mm holes, 90 deg countersink to 10 mm); 0.6 mm high-flow nozzle (printer-verified 2026-10-04).
+- 2026-10-04: concept A (hang from the top truck's hanger center body), curved cradle tongue, 40 mm wide, deeper curve. Trucks face the wall, grip side out. My assumptions: trucks face the wall (grip out); PETG, printed on its side, 3 walls; two #8 countersunk screws (NACS holder convention, 5 mm holes, 90 deg countersink to 10 mm); 0.6 mm high-flow nozzle (printer-verified 2026-10-04).
 
 ## Open
 
-1. Concept A or B, from the pictures.
-2. Measure on the board: deck underside to wheel face, deck underside to nut top, hanger body width across the axle, hanger body inboard end from the axle, and where the hanger's far face sits from the deck. Truck make and size.
-3. Then the build123d model with a truck proxy from those numbers, docking and hold check with the real mesh per [[feedback-check-docking-and-hold-kinematics]], close-up of the lip per [[feedback-verify-retention-features-closeup]], STL and one 3MF.
+1. Brian's go-ahead on the 40 mm cradle in the viewer, then the 3MF (`pipeline/make_print_3mf.py` to write from the Desk-cable-storage recipe: PETG, 0.6 nozzle, 0.30 mm, 3 walls, 20% gyroid).
+2. Still unmeasured: deck to wheel face (82), deck to the hanger's far face (46), hanger body reach inboard and width (42, 53), deck to washer bottom and nut top (49, 55). The cradle has 2 mm radial clearance and the washer 2.8 mm over the shelf, so these decide the drop-on.
 
 ## Files
 
 - `hook-studio.html`: the design tool (single file, no dependencies).
-- `pipeline/render_scene.py`: headless colored OpenSCAD renders of exported STLs for the later options page.
+- `skateboard_holder.py`, `skateboard-holder.stl`, `build/` (regenerated scene STLs, ignored), `images/` (renders and sections), `build-report.html`.
+- `pipeline/render_scene.py` (OpenSCAD colored renders), `pipeline/renders.py`, `pipeline/section_fig.py`, `pipeline/hold_check.py`.
