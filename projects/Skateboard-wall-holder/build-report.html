@@ -41,7 +41,7 @@ li{margin-block:4px}
 <div class="wrap">
 <header>
   <h1>Skate Hook Build Report</h1>
-  <p>Concept A, built 2026-10-04 from the Skate Hook Studio prompt and your two notes from the viewer: a curved cradle instead of the tilt and lip, then a wider tongue with a deeper curve. The model is in the CAD viewer; the 3MF waits for your go-ahead.</p>
+  <p>Concept A, built 2026-10-04 from the Skate Hook Studio prompt and your three notes from the viewer: a curved cradle instead of the tilt and lip, a wider tongue with a deeper curve, and a rounded dip in the front lip. The model is in the CAD viewer and the print 3MF is sliced.</p>
 </header>
 
 <h2>The hook as built</h2>
@@ -54,24 +54,30 @@ li{margin-block:4px}
 <ul>
   <li><b>Cradle, not tilt plus lip.</b> The tongue top is an arc of R20 around a center 2 mm above the hanger's half-round, so the hanger drops in and nests. Its rim toward the room is the bump stop; the wall and the lower wheels stop the other direction.</li>
   <li><b>Wider and deeper.</b> Width 30 to 40 mm. The room rim spans 65 degrees of arc (was 55), the wall rim 45 (was 40; 50 brought the wall-side shelf within 1.5 mm of the kingpin washer, so it was eased). The R27 bowl across the width now rises 8.9 mm at the rims instead of 4.6.</li>
+  <li><b>The lip dips too.</b> The R27 saddle is carried along the whole cradle, so the lip toward the room has the same rounded dip as the floor and the hanger's dome is cradled there as well. Across the width the rims stand 8.9 mm above the center line everywhere.</li>
   <li><b>Reach 74 mm</b>, 2 mm short of the baseplate and 8 mm from the deck.</li>
 </ul>
 
 <h2>Docking and hold, measured on the proxy mesh</h2>
-<p>Docking is a straight lowering; the hanging load pulls the same way, so the load drives the part in and the only way out is a lift. The test slices the holder and the truck every 0.5 mm across the width and moves the truck through poses, no friction counted.</p>
+<p>Docking is a straight lowering; the hanging load pulls the same way, so the load drives the part in and the only way out is a lift. The test slices the holder and the truck every 0.5 mm across the width and moves the truck through poses, no friction counted. The hanger is drawn as a dome, rounded both ways at once, which is the shape the dish is cut for.</p>
 <div class="chips">
   <div class="chip"><span>Rests where modelled</span><b>0.0 <small>mm</small></b></div>
   <div class="chip"><span>Drop-in, truck grown 0.2 mm</span><b>free</b></div>
   <div class="chip"><span>Bump slack, room and sideways</span><b>0.5 <small>mm</small></b></div>
   <div class="chip"><span>Lift to leave toward the room</span><b>11.5 <small>mm</small></b></div>
-  <div class="chip"><span>Lift to leave sideways</span><b>8.3 <small>mm</small></b></div>
+  <div class="chip"><span>Lift to leave sideways</span><b>8.5 <small>mm</small></b></div>
   <div class="chip"><span>Wall-side rim</span><b>5.9 <small>mm</small></b></div>
 </div>
+<p style="margin-top:12px">If your hanger is blockier than a dome (flat across its underside away from the center), it rests 6.5 mm higher on the bowl's shoulders instead of at the bottom, and the holds drop to 5.0 mm toward the room and 2.0 mm sideways. The real shape is between the two; a look at your truck from below tells which it is closer to.</p>
 
 <h2>Sections through the cradle</h2>
 <div class="pair">
   <figure><img src="images/section-cradle.png" alt="Side section close-up of the cradle with the hanger"><figcaption>Center-plane cut. The room rim's inner face leans 25 degrees inward over the floor: a hook, not a draft. Nut and washer (yellow) clear the wall-side shelf by 2.8 mm; the baseplate (right) is 2 mm from the tongue end.</figcaption></figure>
   <figure><img src="images/section-across.png" alt="Section across the width at the cradle bottom"><figcaption>Cut across the width at the cradle bottom. The hanger's rounded underside (drawn R26.5) sits in the R27 bowl, touching at the center only.</figcaption></figure>
+</div>
+<div class="pair" style="margin-top:12px">
+  <figure><img src="images/section-lip.png" alt="Section across the lip toward the room"><figcaption>Cut across the lip toward the room: the same dip, rims 8.9 mm up, so the dome is cradled at the lip as well.</figcaption></figure>
+  <figure><img src="images/from-room.png" alt="View from the room through the deck"><figcaption>From the room, x-ray through the deck: the 40 mm holder between the wheels, the bowl seen end-on under the hanger body.</figcaption></figure>
 </div>
 <figure style="margin-top:12px"><img src="images/section-side.png" alt="Full side section of the hook with the truck docked"><figcaption>The whole hook at the center plane: plate on the wall at left, two countersunk screw holes, gusset, scoop tongue, truck and deck.</figcaption></figure>
 
@@ -84,7 +90,8 @@ li{margin-block:4px}
       <tr><td>Nozzle</td><td class="n">0.6 mm high flow (installed)</td></tr>
       <tr><td>Material</td><td class="n">PETG Basic</td></tr>
       <tr><td>Process</td><td class="n">0.30 mm Standard, 3 walls, 20% gyroid</td></tr>
-      <tr><td>Solid volume</td><td class="n">76 cm³, about 55 to 60 g</td></tr>
+      <tr><td>Sliced</td><td class="n">59 min 30 s, 48.4 g, 133 layers, 250 / 70 °C</td></tr>
+      <tr><td>Skirt and brim</td><td class="n">2-loop skirt, no brim, no supports</td></tr>
       <tr><td>Screws</td><td class="n">two #8 countersunk, 90 mm apart, into a stud or anchors</td></tr>
     </table></div>
   </div>
@@ -103,6 +110,7 @@ li{margin-block:4px}
 <h2>Files</h2>
 <ul>
   <li><code>projects/Skateboard-wall-holder/skateboard_holder.py</code>: the parametric model with its self-checks; every number above is a constant at the top.</li>
+  <li><code>projects/Skateboard-wall-holder/skateboard-holder.3mf</code>: the Bambu Studio project, verified by a CLI round trip and a real slice. Open it as is; do not reselect the printer preset in Studio, that resets the process.</li>
   <li><code>projects/Skateboard-wall-holder/skateboard-holder.stl</code>: print orientation, on Z = 0.</li>
   <li><code>pipeline/hold_check.py</code>, <code>pipeline/section_fig.py</code>, <code>pipeline/renders.py</code>: the checks and figures on this page.</li>
 </ul>
