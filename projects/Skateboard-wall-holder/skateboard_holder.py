@@ -127,8 +127,10 @@ holder = extrude(profile, amount=W / 2, both=True)
 Y_FLOOR = y_top(CRADLE_C[0])
 ZD = W / 2 + 2.0                                   # the arc runs past the side faces
 H_ZD = SADDLE_R - math.sqrt(SADDLE_R ** 2 - ZD ** 2)
-stations = sorted(set([PLATE_T - 1.0, REACH + 1.0, X_RIM_WALL, X_RIM_ROOM]
-                      + [PLATE_T - 1 + i * 5.0 for i in range(1, 8) if PLATE_T - 1 + i * 5.0 < X_RIM_WALL - 1]
+# the first station sits exactly on the plate's front face: one station further in shaved the plate above the
+# tongue to 5 mm and left the upper countersink shallow (caught by the 3MF's screw-pad check, 2026-10-04)
+stations = sorted(set([PLATE_T, REACH + 1.0, X_RIM_WALL, X_RIM_ROOM]
+                      + [PLATE_T + i * 5.0 for i in range(1, 8) if PLATE_T + i * 5.0 < X_RIM_WALL - 1]
                       + [CRADLE_C[0] + CRADLE_R * math.sin(math.radians(a)) for a in range(-RIM_WALL_DEG_I + 5, RIM_ROOM_DEG_I, 5)]))
 sections = []
 for x in stations:
@@ -216,6 +218,10 @@ for x, z, expect in ((CRADLE_C[0], 0.0, y_top(CRADLE_C[0])), (CRADLE_C[0], ZR, y
                      (REACH - 1.0, ZR, Y_RIM_ROOM + SADDLE_R - math.sqrt(SADDLE_R ** 2 - ZR ** 2))):   # the lip dips too
     got = top_at(x, z)
     assert abs(got - expect) < 0.15, (x, z, got, expect)
+# the plate keeps its full thickness above the tongue root (the dish must not cut into the plate's front face)
+plate_probe = holder & Pos(PLATE_T - 0.25, (PLATE_TOP + Y_ROOT + SAG) / 2, 0) * Box(0.5, PLATE_TOP - Y_ROOT - SAG - 4, W - 4)
+_full = 0.5 * (PLATE_TOP - Y_ROOT - SAG - 4) * (W - 4)                # the upper countersink takes about 12% of it
+assert plate_probe.volume > 0.8 * _full, (plate_probe.volume, _full)   # a 1 mm shave would leave nothing
 for ys in SCREW_YS:   # screw holes go through
     assert (holder & Pos(PLATE_T / 2, ys, 0) * Rot(0, 90, 0) * Cylinder(SCREW_D / 2 - 0.05, PLATE_T + 2)).volume < 1e-3
 clash = (holder & (truck + stack)).volume        # docked truck touches the cradle but does not cut into it

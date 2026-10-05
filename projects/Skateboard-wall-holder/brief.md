@@ -2,7 +2,7 @@
 type: project
 project: Skateboard-wall-holder
 date: 2026-10-04
-status: DONE for print 2026-10-04: cradle with a dipped lip, 40 mm wide; skateboard-holder.3mf sliced 59 min 30 s / 48.4 g PETG; not printed; truck numbers still estimates
+status: DONE for print 2026-10-04: cradle with a dipped lip, 40 mm wide, solid screw pads; skateboard-holder.3mf sliced 1 h 4 min / 50.1 g PETG; not printed; truck numbers still estimates
 tags: [x2d, petg, wall-mount, skateboard, hook]
 ---
 # Skateboard wall holder
@@ -37,6 +37,12 @@ Brian (2026-10-04): "create a wall holder for a skateboard. It should be narrow,
 - Brian: "the front lip of the holder should also have a rounded dip, to cradle the truck". The dish became the saddle arc carried along the cradle (a ruled loft of R27 arcs through stations along x; a smooth loft overshot the rim by 1.1 mm). The lip toward the room now dips 8.9 mm at its center. Volume 81.9 cm3.
 - Hanger proxies: a dome (rounded both ways at once, the shape the dish is cut for; ruled loft of half-discs along the half-round) and the earlier rounded block. Hold check, dome: rest 0.0, drop-in free, slack 0.5, lift 11.5 toward the room, 8.5 sideways. Block: rests 6.5 mm higher on the bowl's shoulders, lift 5.0 toward the room, 2.0 sideways. The real hanger is between the two.
 - `skateboard-holder.3mf` (`pipeline/make_print_3mf.py`, from the Desk-cable-storage recipe plus wall_loops 3, 20% gyroid, 2-loop skirt, and a recenter step because the CLI stored this mesh uncentred): PETG Basic, 0.6 nozzle, 0.30 mm, 59 min 30 s, 48.4 g, 133 layers, 250/70 C, centred on the bed, floor on z 0, CLI round trip and a real slice passed. Brian: "make the 3mf" then "go".
+
+## Screw pads and the plate fix (2026-10-04, last)
+
+- Brian: "always use 100% infill around screw holes. chekc to make sure this model has it". It did not. `pipeline/make_print_3mf.py` now adds a modifier part (two 25 mm pads through the plate at the holes, clipped to the part, sparse_infill_density 100%) and proves it in the sliced G-code: 0.76 / 0.75 plastic per volume in the pads, 0.18 in the plain plate. Rule saved: [[feedback-solid-infill-at-screw-holes]].
+- The pad check's "pad goes through the full plate" assert caught a real defect: the dish cutter's first station sat at PLATE_T - 1, shaving the plate's front face to 5 mm above the tongue root and leaving the upper countersink 1 mm shallow. No render or probe had seen it. Fixed (the cutter starts on the plate face; a coplanar cut that OCC handled) and a plate-thickness probe added. Volume 82.8 cm3.
+- Final 3MF: 1 h 4 min, 50.1 g, 133 layers, CLI round trip and real slice passed.
 
 ## Decisions already locked
 

@@ -4,6 +4,8 @@ Copied from projects/Desk-cable-storage/pipeline/make_print_3mf.py (single PETG 
 Bambu PETG Basic, Textured PEI, include-merging preset flattener, graft_slice for the verification slice) with:
   wall_loops 3, 20% gyroid     the NACS wall holder's load-bearing recipe (this hangs a 2 to 2.5 kg board off a wall)
   skirt 2 loops, no brim       the part is 74 x 110 mm on its side; the skirt primes PETG, a brim is not needed
+  screw pads                   a modifier part, two 25 mm pads through the plate at the screw holes at 100% infill
+                               (memory/feedback-solid-infill-at-screw-holes.md), proven solid in the sliced G-code
 The STL is already in print orientation (on its side, profile on the bed, no supports).
 
 Usage:  .venv/bin/python projects/Skateboard-wall-holder/pipeline/make_print_3mf.py
@@ -33,6 +35,10 @@ PROCESS = "0.30mm Standard @BBL X2D 0.6 nozzle"
 FILAMENT = "Bambu PETG Basic @BBL X2D"
 FILAMENT_COLOUR = "#000000"
 
+VAULT = os.path.dirname(os.path.dirname(PROJECT))
+sys.path.insert(0, os.path.join(VAULT, "projects", "Sharks-nametag", "pipeline"))
+PAD_R = 12.5                     # solid infill this far around each screw hole (the NACS holder's pads)
+PAD_NAME = "MOD screw pads: solid infill"
 STEM = "skateboard-holder"
 OUT = f"{STEM}.3mf"
 LABEL = "Skateboard wall hook"
@@ -169,6 +175,98 @@ def recenter(path):
             zout.writestr(item, data)
 
 
+def screw_holes_stl():
+    """(y, z) of each screw hole in the STL's print frame, from the model's constants (rebuilds the model once)."""
+    sys.path.insert(0, PROJECT)
+    import skateboard_holder as M  # noqa: E402
+    return [(y, M.W / 2) for y in M.SCREW_YS], M.PLATE_T
+
+
+def add_screw_pads(path):
+    """One modifier part: two cylinders along print X through the plate at the screw holes, clipped to the part
+    (a modifier that sticks out past the part grows the object's outline and the skirt), sparse_infill_density 100%."""
+    from fillcore_mod import centered, inject_modifier, next_object_id, object_pos
+    holes, t = screw_holes_stl()
+    cyls = " ".join(f"translate([-1, {y:.4f}, {z:.4f}]) rotate([0, 90, 0]) cylinder(r = {PAD_R}, h = {t + 2}, $fn = 64);"
+                    for y, z in holes)
+    scad = f'intersection() {{ import("{PROJECT}/{STEM}.stl"); union() {{ {cyls} }} }}\n'
+    with tempfile.TemporaryDirectory() as d:
+        with open(f"{d}/pads.scad", "w") as f:
+            f.write(scad)
+        subprocess.run([os.path.expanduser("~/.local/bin/openscad"), "--backend=Manifold", "-o", f"{d}/pads.stl", f"{d}/pads.scad"],
+                       capture_output=True, text=True, check=True)
+        pads = trimesh.load(f"{d}/pads.stl")
+    assert len(pads.split()) == 2 and pads.is_watertight, "expected two closed pads"
+    for (y, z), body in zip(sorted(holes), sorted(pads.split(), key=lambda b: b.bounds[0][1])):
+        assert abs(body.bounds[0][0]) < 0.01 and abs(body.bounds[1][0] - t) < 0.01, body.bounds      # through the plate only
+        assert body.bounds[0][1] <= y - 9 and body.bounds[1][1] >= y + 9, (body.bounds, y)   # covers the hole, may be clipped by the plate's end
+    mesh_c, mc = centered(pads)
+    stl_c = trimesh.load(f"{PROJECT}/{STEM}.stl").bounds.mean(axis=0)
+    zin = zipfile.ZipFile(path)
+    files = {i.filename: zin.read(i.filename) for i in zin.infolist()}
+    zin.close()
+    model3d = files["3D/3dmodel.model"].decode()
+    objfiles = {n: files[n].decode() for n in files if n.startswith("3D/Objects/")}
+    settings = files["Metadata/model_settings.config"].decode()
+    oid = re.search(r'<object id="(\d+)"', settings).group(1)
+    block = re.search(rf'<object id="{oid}">.*?</object>', settings, re.S).group(0)
+    # the CLI stored this mesh where it liked (see recenter): the object frame is the STL frame shifted by stl_c - stored_c
+    comp = re.search(rf'<object id="{oid}" [^>]*>\s*<components>\s*<component p:path="([^"]+)" objectid="(\d+)"', model3d, re.S)
+    body = re.search(rf'<object id="{comp.group(2)}"[^>]*>(.*?)</object>', objfiles[comp.group(1).lstrip("/")], re.S).group(1)
+    v = np.array(re.findall(r'<vertex x="([^"]+)" y="([^"]+)" z="([^"]+)"', body), dtype=float)
+    stored_c = (v.min(axis=0) + v.max(axis=0)) / 2
+    pos = object_pos(model3d, oid, stl_c - stored_c)
+    pid = next_object_id(model3d, objfiles)
+    new_block, model3d = inject_modifier(block, model3d, objfiles, oid, pid, PAD_NAME, "screw-pads.stl", mesh_c, mc, pos,
+                                         {"sparse_infill_density": "100%"})
+    files["Metadata/model_settings.config"] = settings.replace(block, new_block).encode()
+    files["3D/3dmodel.model"] = model3d.encode()
+    for n, val in objfiles.items():
+        files[n] = val.encode()
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as zout:
+        for n, val in files.items():
+            zout.writestr(n, val)
+    return holes, t
+
+
+def check_pads_solid(sliced, gcode_name, holes, t, lo, stl_lo):
+    """Plastic per volume in the plate's core (between its 3-wall skins) from the G-code: inside each pad it must be
+    solid, midway between the screws it must still be sparse. The plate stands on its side, so a pad is a horizontal
+    cylinder: the window is the core's x band, 12 mm of y around the hole, layers within 8 mm of the hole's height."""
+    import math
+    g = zipfile.ZipFile(sliced).read(gcode_name).decode(errors="replace")
+    off = lo - stl_lo                                 # STL frame to bed
+    xa, xb = lo[0] + 2.0, lo[0] + 4.0                 # the core: walls are 3 x 0.62 each side of the 6 mm plate
+    windows = {f"pad {i + 1}": (y + off[1], z) for i, (y, z) in enumerate(holes)}
+    windows["plain plate"] = ((holes[0][0] + holes[1][0]) / 2 + off[1], holes[0][1])
+    used, layers = {k: 0.0 for k in windows}, {k: set() for k in windows}
+    z, x, y = 0.0, 0.0, 0.0
+    for line in g.splitlines():
+        if line.startswith("; Z_HEIGHT:"):
+            z = float(line.split(":")[1])
+        elif line[:3] in ("G0 ", "G1 ", "G2 ", "G3 "):
+            mx, my, me = re.search(r" X([-0-9.]+)", line), re.search(r" Y([-0-9.]+)", line), re.search(r" E([-0-9.]+)", line)
+            nx, ny = (float(mx.group(1)) if mx else x), (float(my.group(1)) if my else y)
+            if me and float(me.group(1)) > 0 and (mx or my):
+                mxp, myp = (x + nx) / 2, (y + ny) / 2
+                for k, (cy, cz) in windows.items():
+                    if abs(z - cz) <= 8.0 and xa <= mxp <= xb and abs(myp - cy) <= 6.0:
+                        used[k] += float(me.group(1))
+                        layers[k].add(z)
+            x, y = nx, ny
+    fill = {}
+    for k in windows:
+        zs = sorted(layers[k])
+        height = (zs[1] - zs[0]) * len(zs) if len(zs) > 1 else 1e-9
+        fill[k] = round(used[k] * math.pi * (1.75 / 2) ** 2 / ((xb - xa) * 12.0 * height), 2)
+    # a 2.3 mm core takes three 0.62 mm lines, so a solid core reads about 0.75 to 0.85 here (the NACS plate's wide
+    # window read 0.85 to 0.92); sparse gyroid reads about 0.18
+    assert all(v >= 0.7 for k, v in fill.items() if k.startswith("pad")), f"screw pads are not solid: {fill}"
+    assert fill["plain plate"] <= 0.4, f"the plain plate is not sparse, the modifier leaked: {fill}"
+    assert all(v >= 3 * fill["plain plate"] for k, v in fill.items() if k.startswith("pad")), f"pads barely denser than the plate: {fill}"
+    return fill
+
+
 def check_settings(path, what):
     z = zipfile.ZipFile(path)
     cfg = json.loads(z.read("Metadata/project_settings.config"))
@@ -218,10 +316,12 @@ def gcode_stats(gcode):
             {k: [round(v, 2) for v in b] for k, b in box.items()})
 
 
-def verify(path, tmp):
+def verify(path, tmp, holes, t):
     """Settings and placement in the file, a CLI round trip, then a real slice. A round trip alone does not prove sliceability."""
     z = check_settings(path, "authored file")
     result = {"placement_mm": check_placement(z, "authored file")}
+    ms = z.read("Metadata/model_settings.config").decode()
+    assert ms.count('subtype="modifier_part"') == 1 and f'value="{PAD_NAME}"' in ms, "the screw-pad modifier is missing"
 
     r = subprocess.run(["bambu-studio", "--arrange", "0", "--export-3mf", "roundtrip.3mf", "--outputdir", ".", path],
                        cwd=tmp, capture_output=True, text=True, timeout=600)
@@ -250,6 +350,8 @@ def verify(path, tmp):
     assert re.search(r"^; filament_map = 1$", gcode, re.M), "the G-code does not print from extruder 1"
     layers_expected = round(trimesh.load(f"{PROJECT}/{STEM}.stl").extents[2] / float(json.loads(z.read("Metadata/project_settings.config"))["layer_height"]))
     assert res["layers"] == layers_expected, f"{res['layers']} layers sliced, {layers_expected} expected"
+    lo, _ = world_bounds(z)
+    result["screw_pad_fill"] = check_pads_solid(out, res["gcode"], holes, t, lo, trimesh.load(f"{PROJECT}/{STEM}.stl").bounds[0])
     feature_mm, feature_box = gcode_stats(gcode)
     assert "Brim" not in feature_mm and "Skirt" in feature_mm, f"expected a skirt and no brim: {feature_mm}"
     xy = [min(b[0] for b in feature_box.values()), min(b[1] for b in feature_box.values()),
@@ -278,7 +380,8 @@ def main():
         assert os.path.exists(f"{tmp}/raw.3mf"), f"CLI export failed rc={r.returncode}\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
         patch(f"{tmp}/raw.3mf", final)
         recenter(final)
-        result = verify(final, tmp)
+        holes, t = add_screw_pads(final)
+        result = verify(final, tmp, holes, t)
     with open(f"{PROJECT}/{STEM}-slice.json", "w") as f:
         json.dump(result, f, indent=1)
     print(final)
