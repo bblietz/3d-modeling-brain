@@ -2,7 +2,7 @@
 type: project
 project: Skateboard-wall-holder
 date: 2026-10-04
-status: CAD complete 2026-10-04 (cradle, 40 mm wide), in the viewer; 3MF waits for Brian's go-ahead and his truck measurements
+status: DONE for print 2026-10-04: cradle with a dipped lip, 40 mm wide; skateboard-holder.3mf sliced 59 min 30 s / 48.4 g PETG; not printed; truck numbers still estimates
 tags: [x2d, petg, wall-mount, skateboard, hook]
 ---
 # Skateboard wall holder
@@ -32,17 +32,23 @@ Brian (2026-10-04): "create a wall holder for a skateboard. It should be narrow,
 - Build report: https://claude.ai/artifact/Q9SgmT5dGhR47c1FfW84SQ
 - Tool fix: the tool's contact point had a sign error (tangent point is on the room side of the hanger's lowest point); fixed and republished with a build note.
 
+## Lip dip and 3MF (2026-10-04, later)
+
+- Brian: "the front lip of the holder should also have a rounded dip, to cradle the truck". The dish became the saddle arc carried along the cradle (a ruled loft of R27 arcs through stations along x; a smooth loft overshot the rim by 1.1 mm). The lip toward the room now dips 8.9 mm at its center. Volume 81.9 cm3.
+- Hanger proxies: a dome (rounded both ways at once, the shape the dish is cut for; ruled loft of half-discs along the half-round) and the earlier rounded block. Hold check, dome: rest 0.0, drop-in free, slack 0.5, lift 11.5 toward the room, 8.5 sideways. Block: rests 6.5 mm higher on the bowl's shoulders, lift 5.0 toward the room, 2.0 sideways. The real hanger is between the two.
+- `skateboard-holder.3mf` (`pipeline/make_print_3mf.py`, from the Desk-cable-storage recipe plus wall_loops 3, 20% gyroid, 2-loop skirt, and a recenter step because the CLI stored this mesh uncentred): PETG Basic, 0.6 nozzle, 0.30 mm, 59 min 30 s, 48.4 g, 133 layers, 250/70 C, centred on the bed, floor on z 0, CLI round trip and a real slice passed. Brian: "make the 3mf" then "go".
+
 ## Decisions already locked
 
 - 2026-10-04: concept A (hang from the top truck's hanger center body), curved cradle tongue, 40 mm wide, deeper curve. Trucks face the wall, grip side out. My assumptions: trucks face the wall (grip out); PETG, printed on its side, 3 walls; two #8 countersunk screws (NACS holder convention, 5 mm holes, 90 deg countersink to 10 mm); 0.6 mm high-flow nozzle (printer-verified 2026-10-04).
 
 ## Open
 
-1. Brian's go-ahead on the 40 mm cradle in the viewer, then the 3MF (`pipeline/make_print_3mf.py` to write from the Desk-cable-storage recipe: PETG, 0.6 nozzle, 0.30 mm, 3 walls, 20% gyroid).
+1. Print `skateboard-holder.3mf` (open in Bambu Studio, do not reselect the printer preset: it resets the process). Then measure the fit and write the result into the retrospective.
 2. Still unmeasured: deck to wheel face (82), deck to the hanger's far face (46), hanger body reach inboard and width (42, 53), deck to washer bottom and nut top (49, 55). The cradle has 2 mm radial clearance and the washer 2.8 mm over the shelf, so these decide the drop-on.
 
 ## Files
 
 - `hook-studio.html`: the design tool (single file, no dependencies).
-- `skateboard_holder.py`, `skateboard-holder.stl`, `build/` (regenerated scene STLs, ignored), `images/` (renders and sections), `build-report.html`.
+- `skateboard_holder.py`, `skateboard-holder.stl`, `skateboard-holder.3mf`, `skateboard-holder-slice.json`, `pipeline/make_print_3mf.py`, `build/` (regenerated scene STLs, ignored), `images/` (renders and sections), `build-report.html`.
 - `pipeline/render_scene.py` (OpenSCAD colored renders), `pipeline/renders.py`, `pipeline/section_fig.py`, `pipeline/hold_check.py`.

@@ -3,6 +3,7 @@
 images/section-side.png     the whole hook with the truck docked, cut at the holder's center plane (z = 0)
 images/section-cradle.png   close-up of the cradle with the hanger's half-round, same cut
 images/section-across.png   cut across the width through the cradle bottom (x = cradle center): the saddle
+images/section-lip.png      cut across the width through the lip toward the room: the same dip, cradling the dome
 
 Usage: .venv/bin/python projects/Skateboard-wall-holder/pipeline/section_fig.py   (run skateboard_holder.py first)
 """
@@ -72,3 +73,6 @@ figure(IMG / "section-cradle.png", [0, 0, 0], [0, 0, 1], (0, 1), (30, 80), (-60,
 figure(IMG / "section-across.png", [cx, 0, 0], [1, 0, 0], (2, 1), (-40, 40), (-62, -18),
        f"Section across the width at the cradle bottom: R{M.SADDLE_R:g} saddle, rims {M.SAG:.1f} mm up",
        [(-14, cy + M.SAG + 0.5, "rim"), (0.5, cy - 4, "contact")])
+figure(IMG / "section-lip.png", [M.REACH - 1.0, 0, 0], [1, 0, 0], (2, 1), (-40, 40), (-50, -6),
+       f"Section across the lip toward the room (x = {M.REACH - 1:.0f}): the dip follows the cradle, rims {M.SAG:.1f} mm up",
+       [(-14, M.Y_RIM_ROOM + M.SAG + 0.5, "rim"), (0.5, M.Y_RIM_ROOM - 4, "lip floor")])

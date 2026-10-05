@@ -12,8 +12,10 @@ out is a lift (+y). This script measures, frictionless, on 2D slices across the 
 Slices: the holder across its width every 0.5 mm, the truck at z in [-60, 60] every 0.5 mm (a sideways move
 of dz pairs holder slice z with truck slice z - dz). Collision = overlap area over EPS at any slice.
 
-Usage: .venv/bin/python projects/Skateboard-wall-holder/pipeline/hold_check.py   (run skateboard_holder.py first)
-Writes build/hold-check.json
+Usage: .venv/bin/python projects/Skateboard-wall-holder/pipeline/hold_check.py [truck|truck-block]
+  truck        hanger center body as a dome, rounded both ways at once (the shape the dish is cut for; default)
+  truck-block  hanger as a rounded block (half-round profiles extruded); it rests higher, on the bowl's shoulders
+Writes build/hold-check.json or build/hold-check-block.json  (run skateboard_holder.py first)
 """
 import json
 import pathlib
@@ -45,8 +47,9 @@ def slices(mesh, zs):
     return out
 
 
+PROXY = sys.argv[1] if len(sys.argv) > 1 else "truck"
 holder = trimesh.load(B / "holder-design.stl")
-truck = trimesh.util.concatenate([trimesh.load(B / "truck.stl"), trimesh.load(B / "nut.stl")])
+truck = trimesh.util.concatenate([trimesh.load(B / f"{PROXY}.stl"), trimesh.load(B / "nut.stl")])
 half_w = holder.bounds[1][2]
 zh = np.round(np.arange(-round(half_w) + STEP, round(half_w) - STEP / 2, STEP), 2)   # inside the holder, on the truck's 0.5 lattice
 zt = np.round(np.arange(-60, 60 + STEP / 2, STEP), 2)
@@ -75,14 +78,15 @@ def free_path(dy, axis, span, step=1.0):
     return True
 
 
-res = {}
+res = {"proxy": PROXY}
 # REST: lowest lift (can be negative) at which the nominal pose is free
-dy = 3.0
+dy = 8.0
 while dy > -3 and not collides(0, dy, 0):
     dy -= 0.05
 res["rest_mm"] = round(dy + 0.05, 2)
 rest = res["rest_mm"]
-assert abs(rest) < 0.3, f"the proxy does not rest where the model put it: {rest}"
+if PROXY == "truck":
+    assert abs(rest) < 0.3, f"the proxy does not rest where the model put it: {rest}"
 
 # WAY IN: lowering from 60 mm above to just above rest, truck grown by GROW
 blocked = [round(h, 2) for h in np.arange(60, 0.25, -0.5) if collides(0, rest + h, 0, grown=True)]
@@ -105,5 +109,5 @@ for name, axis, span in (("hold_toward_room_mm", "x", 60), ("hold_sideways_mm", 
             break
 res.update(hold)
 assert res["hold_toward_room_mm"] is not None and res["hold_sideways_mm"] is not None, res
-(B / "hold-check.json").write_text(json.dumps(res, indent=1))
+(B / ("hold-check.json" if PROXY == "truck" else "hold-check-block.json")).write_text(json.dumps(res, indent=1))
 print(json.dumps(res))

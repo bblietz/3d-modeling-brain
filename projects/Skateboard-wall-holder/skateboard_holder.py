@@ -8,8 +8,8 @@ as the load path. The lower wheels rest on the wall.
 Cradle: in side view an arc of CRADLE_R around a center 2 mm above the hanger's half-round
 center, so the hanger drops in and nests with a rim toward the room (the bump stop) and a lower
 rim toward the wall (the wall and wheels stop that side anyway). Across the width the whole
-tongue top is hollowed to a SADDLE_R arc, which gives the sideways hold (the bowl is the floor
-max(cradle arc, saddle arc), see the dish section).
+tongue top is hollowed to a SADDLE_R arc carried along the cradle, so the lip dips too and the
+hanger's dome is cradled at the lip as well as at the floor (see the dish section).
 
 Design frame: x from the wall face toward the room, y up the deck, z across the board
 (the holder's width). The hanging truck's axle is at y = 0. The print frame lays the part
@@ -36,7 +36,8 @@ PLATE_T, PLATE_H, PLATE_ABOVE = 6.0, 110.0, 30.0
 REACH = 74.0                               # 2 mm short of the baseplate
 TONGUE_T = 12.0                            # at the cradle bottom
 CRADLE_CLEAR = 2.0                         # cradle radius over the hanger's half-round
-RIM_ROOM_DEG, RIM_WALL_DEG = 65.0, 45.0    # cradle arc span each side of its bottom (deeper, Brian 2026-10-04); wall side limited by the washer clearance
+RIM_ROOM_DEG, RIM_WALL_DEG = 65.0, 45.0
+RIM_ROOM_DEG_I, RIM_WALL_DEG_I = 65, 45    # cradle arc span each side of its bottom (deeper, Brian 2026-10-04); wall side limited by the washer clearance
 SADDLE_R = 27.0
 GUSSET = 18.0
 ROUND, SMALL_ROUND, SIDE_CHAMFER = 3.0, 2.0, 0.6
@@ -119,18 +120,25 @@ profile = fillet(ShapeList([vert_at(profile, F)]), min(ROUND, END_FLAT * 0.55))
 profile = fillet(ShapeList([vert_at(profile, G)]), min(SMALL_ROUND, END_FLAT * 0.3))
 holder = extrude(profile, amount=W / 2, both=True)
 
-# ---- dish: the side-view cradle extruded across the width, intersected with the width-wise saddle cylinder.
-# The cut removes only what is inside both, so the floor is max(cradle arc, saddle arc): the cradle keeps its
-# full depth along the center line and the saddle gives the side walls. A hanger end shaped like a rounded block
-# or like a dome both nest in it, touching at the bottom only.
+# ---- dish: the saddle arc (SADDLE_R across the width) carried along the side-view top line, so every
+# cross-section is the same arc with its bottom on the cradle: the lip toward the room has the same rounded
+# dip as the floor (Brian 2026-10-04: "the front lip of the holder should also have a rounded dip, to cradle
+# the truck"). Built as a loft of those arcs through stations along x.
 Y_FLOOR = y_top(CRADLE_C[0])
-with BuildLine() as top_line:
-    Polyline((PLATE_T - 1, Y_ROOT), (X_RIM_WALL, Y_ROOT))
-    ThreePointArc((X_RIM_WALL, Y_ROOT), (CRADLE_C[0], Y_FLOOR), (X_RIM_ROOM, Y_RIM_ROOM))
-    Polyline((X_RIM_ROOM, Y_RIM_ROOM), (REACH + 1, Y_RIM_ROOM), (REACH + 1, 20), (PLATE_T - 1, 20), (PLATE_T - 1, Y_ROOT))
-above_cradle = extrude(make_face(top_line.wire()), amount=W, both=True)
-saddle_cyl = Pos(REACH / 2, Y_FLOOR + SADDLE_R, 0) * Rot(0, 90, 0) * Cylinder(SADDLE_R, REACH + 10)
-dish = above_cradle & saddle_cyl
+ZD = W / 2 + 2.0                                   # the arc runs past the side faces
+H_ZD = SADDLE_R - math.sqrt(SADDLE_R ** 2 - ZD ** 2)
+stations = sorted(set([PLATE_T - 1.0, REACH + 1.0, X_RIM_WALL, X_RIM_ROOM]
+                      + [PLATE_T - 1 + i * 5.0 for i in range(1, 8) if PLATE_T - 1 + i * 5.0 < X_RIM_WALL - 1]
+                      + [CRADLE_C[0] + CRADLE_R * math.sin(math.radians(a)) for a in range(-RIM_WALL_DEG_I + 5, RIM_ROOM_DEG_I, 5)]))
+sections = []
+for x in stations:
+    yt = y_top(x)
+    pl = Plane(origin=(x, 0, 0), x_dir=(0, 0, -1), z_dir=(1, 0, 0))      # local x = -z, local y = y
+    with BuildLine(pl) as sec:
+        ThreePointArc((-ZD, yt + H_ZD), (0, yt), (ZD, yt + H_ZD))
+        Polyline((ZD, yt + H_ZD), (ZD, yt + 40), (-ZD, yt + 40), (-ZD, yt + H_ZD))
+    sections.append(make_face(sec.wire()))
+dish = loft(sections, ruled=True)                 # ruled: no spline overshoot where the arc meets the flats
 assert len(dish.solids()) == 1
 holder = holder - dish
 
@@ -159,8 +167,28 @@ pivot = Pos((AXLE_X + DECK_X - BASE_T) / 2, 18, 0) * Box(DECK_X - BASE_T - AXLE_
 bulb_profile = (Pos((BULB_X0 + BULB_X1) / 2, (BULB_CY + BULB_OUT) / 2, 0) * Box(BULB_X1 - BULB_X0, BULB_OUT - BULB_CY, BULB_W)
                 + Pos(BULB_CX, BULB_CY, 0) * Cylinder(RB, BULB_W))
 lateral_round = Pos((BULB_X0 + BULB_X1) / 2, -BULB_IN + BULB_W / 2, 0) * Rot(0, 90, 0) * Cylinder(BULB_W / 2, BULB_X1 - BULB_X0 + 2)
-bulb = bulb_profile & lateral_round
+bulb_block = bulb_profile & lateral_round          # rounded block: half-round side profile, half-round across, both extruded
+
+
+def y_hanger(x):
+    """Underside of the hanger's half-round at x (center line)."""
+    return BULB_CY - math.sqrt(max(0.0, RB ** 2 - (x - BULB_CX) ** 2))
+
+
+RL = BULB_W / 2                                    # lateral half-round of the hanger's underside
+dome_sections = []
+for a in range(-90, 91, 6):                        # stations clustered toward the half-round's ends
+    x = BULB_CX + RB * math.sin(math.radians(a))
+    yh = y_hanger(x)
+    pl = Plane(origin=(x, 0, 0), x_dir=(0, 0, -1), z_dir=(1, 0, 0))
+    with BuildLine(pl) as sec:
+        ThreePointArc((-RL, yh + RL), (0, yh), (RL, yh + RL))
+        Polyline((RL, yh + RL), (RL, BULB_OUT), (-RL, BULB_OUT), (-RL, yh + RL))
+    dome_sections.append(make_face(sec.wire()))
+bulb = loft(dome_sections, ruled=True)             # dome: rounded both ways at once, the shape the dish is cut for
+assert len(bulb.solids()) == 1
 truck = base + boss + axle + pivot + bulb
+truck_block = base + boss + axle + pivot + bulb_block
 
 NUT_AC = NUT_AF / math.cos(math.radians(30))
 u_back = (math.cos(math.radians(KP_DEG)), -math.sin(math.radians(KP_DEG)), 0)   # from the nut top toward the deck
@@ -174,7 +202,7 @@ stack = nut + washer
 assert len(holder.solids()) == 1, len(holder.solids())
 bb = holder.bounding_box()
 assert abs(bb.min.X) < 1e-3 and abs(bb.max.X - REACH) < 1e-3 and abs(bb.max.Z - W / 2) < 1e-3, bb
-assert 60e3 < holder.volume < 90e3, holder.volume
+assert 55e3 < holder.volume < 90e3, holder.volume
 
 
 def top_at(x, z):
@@ -184,7 +212,8 @@ def top_at(x, z):
 
 ZR = W / 2 - 1.0                                   # rim probe inside the side chamfer
 for x, z, expect in ((CRADLE_C[0], 0.0, y_top(CRADLE_C[0])), (CRADLE_C[0], ZR, y_top(CRADLE_C[0]) + SADDLE_R - math.sqrt(SADDLE_R ** 2 - ZR ** 2)),
-                     (20.0, 0.0, Y_ROOT), (REACH - 1.0, 0.0, Y_RIM_ROOM), (X_RIM_ROOM - 6, 0.0, y_top(X_RIM_ROOM - 6))):
+                     (20.0, 0.0, Y_ROOT), (REACH - 1.0, 0.0, Y_RIM_ROOM), (X_RIM_ROOM - 6, 0.0, y_top(X_RIM_ROOM - 6)),
+                     (REACH - 1.0, ZR, Y_RIM_ROOM + SADDLE_R - math.sqrt(SADDLE_R ** 2 - ZR ** 2))):   # the lip dips too
     got = top_at(x, z)
     assert abs(got - expect) < 0.15, (x, z, got, expect)
 for ys in SCREW_YS:   # screw holes go through
@@ -201,8 +230,8 @@ STL = os.path.join(HERE, "skateboard-holder.stl")
 export_stl(print_part, STL)
 m = trimesh.load(STL)
 assert m.is_watertight and abs(m.volume - holder.volume) < 80, (m.is_watertight, m.volume)
-for name, shape in (("holder-design", holder), ("truck", truck), ("nut", stack), ("wheels", wheels), ("deck", deck),
-                    ("bulb", bulb)):
+for name, shape in (("holder-design", holder), ("truck", truck), ("truck-block", truck_block), ("nut", stack),
+                    ("wheels", wheels), ("deck", deck), ("bulb", bulb)):
     export_stl(shape, os.path.join(BUILD, f"{name}.stl"))
 
 if __name__ == "__main__":
