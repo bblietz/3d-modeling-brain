@@ -1,0 +1,401 @@
+<title>Built-in Bench Cut List</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f7f4ee; --surface: #fffdf9; --ink: #24201b; --muted: #6d655a; --line: #e3dccf;
+    --accent: #d96a12; --accent-ink: #8a4108;
+    --warn-bg: #fbe9d7; --warn-ink: #8a4108; --note-bg: #ece7dd; --note-ink: #4d463c;
+    --done: #9a9184; --paper: #f6f1e8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #1b1916; --surface: #24211d; --ink: #ece6dc; --muted: #a79e91; --line: #3a352e;
+      --accent: #f08a3a; --accent-ink: #f6b27e;
+      --warn-bg: #46301c; --warn-ink: #f4c79c; --note-bg: #302c26; --note-ink: #cfc6b8;
+      --done: #6f675c;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1b1916; --surface: #24211d; --ink: #ece6dc; --muted: #a79e91; --line: #3a352e;
+    --accent: #f08a3a; --accent-ink: #f6b27e;
+    --warn-bg: #46301c; --warn-ink: #f4c79c; --note-bg: #302c26; --note-ink: #cfc6b8;
+    --done: #6f675c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Archivo, "Helvetica Neue", Arial, sans-serif;
+         font-size: 16px; line-height: 1.45; padding-inline: 16px; padding-block: 24px 72px; }
+  .wrap { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-ink); font-weight: 600; margin: 0 0 6px; }
+  h1 { font-size: clamp(28px, 5vw, 38px); line-height: 1.08; margin: 0 0 10px; letter-spacing: -.01em; text-wrap: balance; }
+  header p { margin: 0; max-width: 62ch; color: var(--muted); font-size: 15px; }
+  .status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 14px; font-size: 14px; }
+  .status .count { font-weight: 600; }
+  button.reset { font: inherit; font-size: 13px; color: var(--accent-ink); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  button.reset:focus-visible, .tick:focus-visible + .body, .dwg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .flag { background: var(--warn-bg); color: var(--warn-ink); border-radius: 8px; padding: 10px 14px; font-size: 14.5px; max-width: 72ch; }
+  .flag b { font-weight: 600; }
+  .big { display: flex; flex-direction: column; gap: 18px; }
+  .big > h2 { font-size: 24px; margin: 0; padding-bottom: 8px; border-bottom: 3px solid var(--accent); }
+  .big > h2 small { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 10px; }
+  .group { display: flex; flex-direction: column; gap: 4px; }
+  .ghead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+  h3 { font-size: 18px; margin: 0; }
+  .gsum { font-size: 12.5px; color: var(--muted); }
+  ul.parts { list-style: none; margin: 0; padding: 0; }
+  .part { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); align-items: start; }
+  .tick { width: 22px; height: 22px; margin: 4px 0 0 2px; accent-color: var(--accent); cursor: pointer; }
+  .body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .part label { display: flex; flex-direction: column; gap: 4px; cursor: pointer; min-width: 0; }
+  .line1 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .qty { font-weight: 600; color: var(--accent-ink); }
+  .name { font-weight: 600; font-size: 15px; }
+  .chip { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--note-bg); color: var(--note-ink); }
+  .chip.warn { background: var(--warn-bg); color: var(--warn-ink); }
+  .dims { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+  .dims b { font-size: 21px; font-weight: 600; letter-spacing: -.01em; }
+  .note { margin: 0; font-size: 13.5px; color: var(--note-ink); overflow-wrap: anywhere; }
+  .dwg { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px; cursor: zoom-in; display: flex; flex-direction: column; gap: 4px; }
+  .dwg img { width: 100%; height: auto; display: block; }
+  .dwg figcaption { font-size: 11.5px; color: var(--muted); text-align: right; }
+  .hero { background: #fff; }
+  .hero img { border-radius: 4px; }
+  .tick:checked + .body { color: var(--done); }
+  .tick:checked + .body .name, .tick:checked + .body .dims b { text-decoration: line-through; text-decoration-thickness: 2px; }
+  .tick:checked + .body .qty, .tick:checked + .body .note { color: var(--done); }
+  .tick:checked + .body .dwg { opacity: .55; }
+  .hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .hw li { display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  .hw li div { display: flex; flex-direction: column; gap: 2px; }
+  .hqty { font-weight: 600; color: var(--accent-ink); }
+  .hnote { font-size: 13px; color: var(--muted); }
+  ol.notes { margin: 0; padding-left: 24px; display: flex; flex-direction: column; }
+  ol.notes li { padding: 10px 0 10px 4px; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  ol.notes li::marker { font-weight: 600; color: var(--accent-ink); }
+  .foot { font-size: 13px; color: var(--muted); max-width: 72ch; }
+  #lightbox { position: fixed; inset: 0; background: rgba(15, 12, 8, .9); display: none; place-items: center; padding: 12px; z-index: 10; cursor: zoom-out; overflow: auto; }
+  #lightbox.open { display: grid; }
+  #lightbox img { max-width: 100%; max-height: 94vh; background: var(--paper); border-radius: 6px; }
+  @media (max-width: 420px) { .dims b { font-size: 19px; } .hw li { grid-template-columns: 60px 1fr; } }
+</style>
+
+<div class="wrap">
+  <figure class="dwg hero" tabindex="0"><img src="images/hero.png" alt="the whole bench, front-left view from the CAD viewer"><figcaption>the whole bench, from the CAD viewer; tap to zoom</figcaption></figure>
+  <header>
+    <p class="eyebrow">Built-in bench &middot; 66 x 28 in alcove</p>
+    <h1>Built-in Bench Cut List</h1>
+    <p>Two drawers on Blum undermounts, maple frame-and-walnut-panel fronts, solid maple top. 35 pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges; tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</p>
+    <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
+  </header>
+
+  <div class="flag"><b>Measure the alcove at the floor, 16 in and 36 in, at the back wall and the pilaster faces, before cutting.</b> Cut the top, plinth and scribe strips long and scribe them. Confirm the low receptacle seen in the photo before cutting the back.</div>
+
+  <div class="big">
+    <h2>Case<small>15 pieces</small></h2>
+    <section class="group">
+      <div class="ghead">
+        <h3>Hard maple: top, plinth, nailer, scribe strips</h3>
+        <span class="gsum mono">5 pieces &middot; 14.4 sq ft face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-top" class="tick">
+        <div class="body">
+          <label for="cut-top">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">top</span></div>
+            <div class="dims mono"><b>3/4 x 24-5/8 x 66</b></div>
+            <p class="note">glue up from 4 or 5 boards, grain along the 66 in; 1/8 roundover on both front arrises; scribe the ends to the walls; 3/8 gap at the back wall; pocket screws up through the ends and partition near the front, figure-8s on the nailer at the back</p>
+          </label>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-plinth" class="tick">
+        <div class="body">
+          <label for="cut-plinth">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">plinth</span></div>
+            <div class="dims mono"><b>23/32 x 3-7/8 x 66</b></div>
+            <p class="note">cut 4-1/4 tall and scribe to the floor so the top edge sits 1/8 under the fronts; scribe the ends to the walls; grain horizontal; mill to the ply thickness; screwed to the base front rail</p>
+          </label>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-nailer" class="tick">
+        <div class="body">
+          <label for="cut-nailer">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">nailer</span></div>
+            <div class="dims mono"><b>3/4 x 2-1/2 x 62-19/32</b></div>
+            <p class="note">on edge against the back panel, through the partition notch; four 5/8 figure-8 recesses 1/8 deep on the top edge, centered 1/4 in from the front face; screw through it and the back into the wall studs</p>
+          </label>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-scribe_strip" class="tick">
+        <div class="body">
+          <label for="cut-scribe_strip">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">scribe_strip</span></div>
+            <div class="dims mono"><b>23/32 x 1-23/32 x 11-1/4</b></div>
+            <p class="note">rip at 2, scribe to the wall so the inner edge lands flush with the inside of the end panel (about 1-23/32); glue and biscuits to the end&#x27;s front edge; mill to the ply thickness</p>
+          </label>
+        </div>
+      </li>
+      </ul>
+    </section>
+    <section class="group">
+      <div class="ghead">
+        <h3>3/4 in maple plywood (measure the sheet): ends, bottom, partition</h3>
+        <span class="gsum mono">4 pieces &middot; 15.7 sq ft face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-bottom" class="tick">
+        <div class="body">
+          <label for="cut-bottom">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">bottom</span></div>
+            <div class="dims mono"><b>23/32 x 23-1/2 x 63-3/32</b></div>
+            <p class="note">face grain across the 64 in; 1/4 deep back groove 1/4 from the rear edge; 1/4 deep x 3/4 ply (measure) dado for the partition, centered, from the back groove to the front edge; front edge is covered by the drawer fronts</p>
+          </label>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-end" class="tick">
+        <div class="body">
+          <label for="cut-end">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">end</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>23/32 x 11-1/4 x 23-1/2</b></div>
+            <p class="note">face grain vertical; 1/4 x 23/32 (measure) rabbet along the bottom inside edge for the case bottom; 1/4 deep x 1/4 ply (measure) groove 1/4 from the rear edge, through; mirror pair</p>
+          </label>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-partition" class="tick">
+        <div class="body">
+          <label for="cut-partition">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">partition</span></div>
+            <div class="dims mono"><b>23/32 x 10-25/32 x 23-1/32</b></div>
+            <p class="note">face grain vertical; sits in the bottom dado and against the back panel; notch the top rear corner 3/4 deep x 2-1/2 tall for the nailer</p>
+          </label>
+        </div>
+      </li>
+      </ul>
+    </section>
+    <section class="group">
+      <div class="ghead">
+        <h3>1/4 in maple plywood (measure the sheet): back</h3>
+        <span class="gsum mono">1 pieces &middot; 4.7 sq ft face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-back" class="tick">
+        <div class="body">
+          <label for="cut-back">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">back</span></div>
+            <div class="dims mono"><b>1/4 x 10-23/32 x 63-1/32</b></div>
+            <p class="note">plain rectangle; slides down the end grooves into the bottom groove; confirm the low receptacle on the back wall before cutting</p>
+          </label>
+        </div>
+      </li>
+      </ul>
+    </section>
+    <section class="group">
+      <div class="ghead">
+        <h3>3/4 in plywood, any grade (hidden): base ladder</h3>
+        <span class="gsum mono">5 pieces &middot; 5.4 sq ft face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-base_long_rail" class="tick">
+        <div class="body">
+          <label for="cut-base_long_rail">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">base_long_rail</span></div>
+            <div class="dims mono"><b>23/32 x 4 x 62-19/32</b></div>
+            <p class="note">front and back rails between the end rails; pocket screws or glue and screws</p>
+          </label>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-base_end_rail" class="tick">
+        <div class="body">
+          <label for="cut-base_end_rail">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">base_end_rail</span></div>
+            <div class="dims mono"><b>23/32 x 4 x 23-1/2</b></div>
+            <p class="note">ladder base, 4 in tall; the end panels stand on these</p>
+          </label>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-base_center_rail" class="tick">
+        <div class="body">
+          <label for="cut-base_center_rail">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">base_center_rail</span></div>
+            <div class="dims mono"><b>23/32 x 4 x 22-3/32</b></div>
+            <p class="note">under the partition</p>
+          </label>
+        </div>
+      </li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="big">
+    <h2>Drawers<small>20 pieces</small></h2>
+    <section class="group">
+      <div class="ghead">
+        <h3>Drawer front frames, hard maple: stiles and rails</h3>
+        <span class="gsum mono">8 pieces &middot; 1.7 sq ft face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-front_rail" class="tick">
+        <div class="body">
+          <label for="cut-front_rail">
+            <div class="line1"><span class="qty mono">4&times;</span><span class="name mono">front_rail</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>23/32 x 1-1/2 x 28-27/32</b></div>
+            <p class="note">1/4 x 3/8 groove on the inner edge, through; 1/4 x 3/8 stub tenon on both ends (same bit); length includes both tenons</p>
+          </label>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-front_stile" class="tick">
+        <div class="body">
+          <label for="cut-front_stile">
+            <div class="line1"><span class="qty mono">4&times;</span><span class="name mono">front_stile</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>23/32 x 1-1/2 x 11-1/8</b></div>
+            <p class="note">1/4 x 3/8 groove centered on the inner edge, through; the rail tenon shows on the top end</p>
+          </label>
+        </div>
+      </li>
+      </ul>
+    </section>
+    <section class="group">
+      <div class="ghead">
+        <h3>Drawer front panels, 3/4 in walnut plywood (measure the sheet)</h3>
+        <span class="gsum mono">2 pieces &middot; 3.6 sq ft face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-front_panel" class="tick">
+        <div class="body">
+          <label for="cut-front_panel">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">front_panel</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>23/32 x 8-7/8 x 28-27/32</b></div>
+            <p class="note">1/4 x 3/8 tongue on all four edges; grain horizontal; size includes the tongues; glue in (plywood, no movement); mill the maple to this sheet&#x27;s thickness</p>
+          </label>
+        </div>
+      </li>
+      </ul>
+    </section>
+    <section class="group">
+      <div class="ghead">
+        <h3>Drawer box fronts and backs, 3/4 in maple plywood (measure the sheet)</h3>
+        <span class="gsum mono">4 pieces &middot; 7.9 sq ft face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-drawer_front" class="tick">
+        <div class="body">
+          <label for="cut-drawer_front">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_front</span></div>
+            <div class="dims mono"><b>23/32 x 9-1/2 x 29-25/32</b></div>
+            <p class="note">box front, sits in the side rabbets; 1/4 deep bottom groove to match the sides; the walnut front screws to it from inside through 4 oversize holes</p>
+          </label>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-drawer_back" class="tick">
+        <div class="body">
+          <label for="cut-drawer_back">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_back</span></div>
+            <div class="dims mono"><b>23/32 x 9-1/2 x 29-25/32</b></div>
+            <p class="note">box back, sits in the side rabbets; bottom groove only 3/16 deep so the Blum hook bores stay in wood; Blum notch 1-3/8 in from each side&#x27;s inner face x 1/2 tall at both bottom corners; hook bores 1/4 dia x 13/32 deep into the rear face, centered 9/32 in from each side&#x27;s inner face and 15/16 above the bottom edge (Blum 563H sheet)</p>
+          </label>
+        </div>
+      </li>
+      </ul>
+    </section>
+    <section class="group">
+      <div class="ghead">
+        <h3>Drawer sides and bottoms, 1/2 in Baltic birch (measure the sheet)</h3>
+        <span class="gsum mono">6 pieces &middot; 13.8 sq ft face, no kerf or waste</span>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-drawer_bottom" class="tick">
+        <div class="body">
+          <label for="cut-drawer_bottom">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_bottom</span></div>
+            <div class="dims mono"><b>15/32 x 19-31/32 x 29-23/32</b></div>
+            <p class="note">plain rectangle in the grooves; the Blum locking devices screw up into it at the front corners</p>
+          </label>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-drawer_side" class="tick">
+        <div class="body">
+          <label for="cut-drawer_side">
+            <div class="line1"><span class="qty mono">4&times;</span><span class="name mono">drawer_side</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>15/32 x 9-1/2 x 21</b></div>
+            <p class="note">1/4 deep x 3/4 ply (measure) rabbet across both ends on the inside face; 1/4 deep x 1/2 BB (measure) bottom groove, underside 1/2 up from the bottom edge, through</p>
+          </label>
+        </div>
+      </li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="big">
+    <h2>Hardware<small>from the design; not in the cut list</small></h2>
+    <ul class="hw"><li><span class="hqty mono">2 pair</span><div><b>Blum TANDEM plus BLUMOTION 563H, 21 in (563H5330B)</b><span class="hnote">one pair per drawer; 90 lb dynamic; runner front 3/32 behind the case front edge; no rear brackets in a frameless case</span></div></li><li><span class="hqty mono">2 pair</span><div><b>Blum locking devices T51.1901 R and L</b><span class="hnote">front corners under the drawer bottom, screwed into the 3/4 box front with #6 x 5/8</span></div></li><li><span class="hqty mono">2</span><div><b>Brass bar pull, 8 in</b><span class="hnote">centered on each front; break-away machine screws through 3/4 front plus 3/4 box front</span></div></li><li><span class="hqty mono">4</span><div><b>Figure-8 tabletop fasteners</b><span class="hnote">nailer to top; recess centered 1/4 in from the front face so it opens through</span></div></li><li><span class="hqty mono">6</span><div><b>Pocket screws #8 x 1-1/4 fine</b><span class="hnote">ends and partition to the top, near the front</span></div></li><li><span class="hqty mono">8</span><div><b>Wood screws #8 x 1-1/4</b><span class="hnote">walnut fronts to the box fronts, through oversize holes</span></div></li><li><span class="hqty mono">1</span><div><b>Bench cushion</b><span class="hnote">about 65-1/2 x 25 x 3, boxed, full depth to the wall</span></div></li></ul>
+  </div>
+
+  <div class="big">
+    <h2>Build notes<small>in order</small></h2>
+    <ol class="notes"><li>Base: 4 in ladder of 3/4 ply, leveled and shimmed, screwed to the floor. Plinth board scribed to the floor with its top edge 1/8 under the fronts.</li><li>Case: ends stand on the base end rails; bottom in the end rabbets; the 1/4 back slides down the end grooves into the bottom groove; the partition drops into the bottom dado; the nailer goes in through the partition notch, screwed to the ends and through the back into the studs.</li><li>Drawer boxes to the Blum 563H rules: inside width = opening minus 1-21/32; sides 9-1/2 tall; 1/2 clear under the bottom; 21 long; rear notch 1-3/8 wide x 1/2 tall from each side&#x27;s inside face; hook bores 1/4 dia x 13/32 deep, 9/32 in from the side&#x27;s inside face and 15/16 above the bottom edge; locking devices at the front corners into the box front.</li><li>Fronts: mill the maple stiles and rails to the walnut sheet&#x27;s thickness. Groove everything with the tongue-and-groove set first, then cut the panel tongue and the rail tenons to fit. Glue up flat, hang with 1/8 reveals, pulls centered. The rail tenon shows on the top end of each stile.</li><li>Top: glue up, 1/8 roundover on both front arrises, scribe the ends, 3/8 gap at the back wall. Pocket screws up into it near the front; figure-8s on the nailer at the back so it can move toward the wall.</li></ol>
+  </div>
+
+  <p class="foot">Generated 2026-10-07 from <span class="mono">projects/Built-in-bench/cutlist.csv</span> and <span class="mono">images/parts/</span>, which <span class="mono">built_in_bench.py</span> and <span class="mono">part_drawings.py</span> write on every export; every drawn cut is probed against the CAD solid before its sheet is written. The bench image at the top is a screenshot of the CAD viewer (<span class="mono">hero_shot.py</span>). Part names match the CAD viewer.</p>
+</div>
+
+<div id="lightbox" role="dialog" aria-label="Enlarged drawing" aria-hidden="true"><img id="lightbox-img" alt=""></div>
+
+<script>
+  (function () {
+    var KEY = 'built-in-bench-cutlist-ticks';
+    var ticks = document.querySelectorAll('.tick');
+    var count = document.getElementById('count');
+    function load() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; } }
+    function save(ids) { try { localStorage.setItem(KEY, JSON.stringify(ids)); } catch (e) {} }
+    function update() {
+      var ids = [];
+      ticks.forEach(function (t) { if (t.checked) ids.push(t.id); });
+      count.textContent = ids.length + ' of ' + ticks.length + ' rows cut';
+      save(ids);
+    }
+    var saved = load();
+    ticks.forEach(function (t) {
+      if (saved.indexOf(t.id) !== -1) t.checked = true;
+      t.addEventListener('change', update);
+    });
+    document.getElementById('reset').addEventListener('click', function () {
+      ticks.forEach(function (t) { t.checked = false; });
+      update();
+    });
+    update();
+
+    var box = document.getElementById('lightbox');
+    var img = document.getElementById('lightbox-img');
+    function open(fig) {
+      var src = fig.querySelector('img');
+      img.src = src.src; img.alt = src.alt;
+      box.classList.add('open'); box.setAttribute('aria-hidden', 'false');
+    }
+    function close() { box.classList.remove('open'); box.setAttribute('aria-hidden', 'true'); img.removeAttribute('src'); }
+    document.querySelectorAll('.dwg').forEach(function (fig) {
+      fig.addEventListener('click', function (e) { e.preventDefault(); open(fig); });
+      fig.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(fig); } });
+    });
+    box.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && box.classList.contains('open')) close(); });
+  })();
+</script>
