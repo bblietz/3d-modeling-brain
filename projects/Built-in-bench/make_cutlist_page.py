@@ -108,15 +108,20 @@ def part_li(r):
 def group_section(label, rows):
     n_parts = sum(r["qty"] for r in rows)
     area = sum(r["qty"] * r["width_mm"] * r["length_mm"] for r in rows) / 1e6 * 10.7639
-    items = "".join(part_li(r) for r in rows)
+    first = part_li(rows[0])
+    rest = "".join(part_li(r) for r in rows[1:])
+    rest_html = f"\n      <ul class=\"parts\">{rest}\n      </ul>" if rest else ""
+    # the heading and the first row share one block so a page break can never strand the heading
     return f"""
     <section class="group">
-      <div class="ghead">
-        <h3>{html.escape(label)}</h3>
-        <span class="gsum mono">{n_parts} pieces &middot; {area:.1f} sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">{items}
-      </ul>
+      <div class="keep">
+        <div class="ghead">
+          <h3>{html.escape(label)}</h3>
+          <span class="gsum mono">{n_parts} pieces &middot; {area:.1f} sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">{first}
+        </ul>
+      </div>{rest_html}
     </section>"""
 
 
@@ -255,6 +260,28 @@ PAGE = """<title>Built-in Bench Cut List</title>
   #lightbox.open {{ display: grid; }}
   #lightbox img {{ max-width: 100%; max-height: 94vh; background: var(--paper); border-radius: 6px; }}
   @media (max-width: 420px) {{ .dims b {{ font-size: 19px; }} .hw li {{ grid-template-columns: 60px 1fr; }} }}
+  @media print {{
+    @page {{ size: letter; margin: 0.5in 0.5in 0.6in; }}
+    html, body {{ background: #fff; color: #000; font-size: 11pt; }}
+    .wrap {{ max-width: none; padding: 0; margin: 0; gap: 14px; }}
+    .tick, .status, figcaption, #lightbox, .reset {{ display: none !important; }}
+    header p {{ max-width: none; }}
+    .flag {{ border: 1px solid #c8782a; background: #fff3e6; break-inside: avoid; }}
+    .big {{ break-before: page; gap: 10px; }}
+    .big > h2 {{ font-size: 20px; }}
+    .keep {{ break-inside: avoid; }}
+    .screen-only {{ display: none; }}
+    .part {{ grid-template-columns: 1fr; gap: 6px; padding: 8px 0; break-inside: avoid; }}
+    .part label {{ cursor: default; }}
+    .dwg {{ border: 1px solid #ccc; padding: 4px; background: #fff; break-inside: avoid; cursor: default; }}
+    .dwg img {{ max-height: 3.6in; width: auto; max-width: 100%; margin: 0 auto; }}
+    .hero img {{ max-height: 5in; }}
+    .hw li {{ break-inside: avoid; }}
+    .step {{ grid-template-columns: 1fr 1.3fr; break-inside: avoid; padding: 10px 0; }}
+    .step .sfig img {{ max-height: 2.8in; }}
+    .step .sub img {{ max-height: 3.6in; }}
+    .foot {{ font-size: 9pt; }}
+  }}
 </style>
 
 <div class="wrap">
@@ -262,7 +289,7 @@ PAGE = """<title>Built-in Bench Cut List</title>
   <header>
     <p class="eyebrow">Built-in bench &middot; 66 x 28 in alcove</p>
     <h1>Built-in Bench Cut List</h1>
-    <p>Two drawers on Blum undermounts, maple frame-and-walnut-panel fronts, solid maple top. {total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges; tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</p>
+    <p>Two drawers on Blum undermounts, maple frame-and-walnut-panel fronts, solid maple top. {total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
     <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
   </header>
 

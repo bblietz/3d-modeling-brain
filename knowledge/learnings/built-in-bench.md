@@ -32,6 +32,8 @@ Links: [[Built-in-bench]] brief in `projects/Built-in-bench/brief.md`, model `bu
 - The OCP viewer screenshot only works with the GPU Chrome tab open; `scripts/cad-viewer.sh` opens it. `pgrep -f cad-viewer-chrome` matches the pgrep command's own shell line, so check with `curl` plus a look at the screenshot result instead.
 - `cutlist.csv` rounds mm to 0.1, so a part at a 1/32 rounding edge can print differently in `cutlist.md` and the page. Set nominal constants (the 1/4 back is 6.35 in the model) so derived lengths land on clean fractions.
 
+- PDF of the shop page: headless Chrome `--print-to-pdf --no-pdf-header-footer` with an `@media print` block in the page. Wrap each group heading and its first row in one `break-inside: avoid` block, or a page break strands the heading; cap drawing heights (3.6 in) so two rows fit a page; hide the tick boxes and tap captions.
+
 ## Not yet measured
 
 Nothing is cut. Record actual ply thicknesses, the alcove's three widths, and the drawer fit against Blum's rules here when the bench is built.

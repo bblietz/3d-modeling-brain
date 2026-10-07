@@ -84,6 +84,28 @@
   #lightbox.open { display: grid; }
   #lightbox img { max-width: 100%; max-height: 94vh; background: var(--paper); border-radius: 6px; }
   @media (max-width: 420px) { .dims b { font-size: 19px; } .hw li { grid-template-columns: 60px 1fr; } }
+  @media print {
+    @page { size: letter; margin: 0.5in 0.5in 0.6in; }
+    html, body { background: #fff; color: #000; font-size: 11pt; }
+    .wrap { max-width: none; padding: 0; margin: 0; gap: 14px; }
+    .tick, .status, figcaption, #lightbox, .reset { display: none !important; }
+    header p { max-width: none; }
+    .flag { border: 1px solid #c8782a; background: #fff3e6; break-inside: avoid; }
+    .big { break-before: page; gap: 10px; }
+    .big > h2 { font-size: 20px; }
+    .keep { break-inside: avoid; }
+    .screen-only { display: none; }
+    .part { grid-template-columns: 1fr; gap: 6px; padding: 8px 0; break-inside: avoid; }
+    .part label { cursor: default; }
+    .dwg { border: 1px solid #ccc; padding: 4px; background: #fff; break-inside: avoid; cursor: default; }
+    .dwg img { max-height: 3.6in; width: auto; max-width: 100%; margin: 0 auto; }
+    .hero img { max-height: 5in; }
+    .hw li { break-inside: avoid; }
+    .step { grid-template-columns: 1fr 1.3fr; break-inside: avoid; padding: 10px 0; }
+    .step .sfig img { max-height: 2.8in; }
+    .step .sub img { max-height: 3.6in; }
+    .foot { font-size: 9pt; }
+  }
 </style>
 
 <div class="wrap">
@@ -91,7 +113,7 @@
   <header>
     <p class="eyebrow">Built-in bench &middot; 66 x 28 in alcove</p>
     <h1>Built-in Bench Cut List</h1>
-    <p>Two drawers on Blum undermounts, maple frame-and-walnut-panel fronts, solid maple top. 35 pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges; tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</p>
+    <p>Two drawers on Blum undermounts, maple frame-and-walnut-panel fronts, solid maple top. 35 pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
     <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
   </header>
 
@@ -100,11 +122,12 @@
   <div class="big">
     <h2>Case<small>15 pieces</small></h2>
     <section class="group">
-      <div class="ghead">
-        <h3>Hard maple: top, plinth, nailer, scribe strips</h3>
-        <span class="gsum mono">5 pieces &middot; 14.4 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Hard maple: top, plinth, nailer, scribe strips</h3>
+          <span class="gsum mono">5 pieces &middot; 14.4 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-top" class="tick">
         <div class="body">
@@ -115,6 +138,9 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/top.png" alt="shop drawing of top" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
+        </ul>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-plinth" class="tick">
         <div class="body">
@@ -148,11 +174,12 @@
       </ul>
     </section>
     <section class="group">
-      <div class="ghead">
-        <h3>3/4 in maple plywood (measure the sheet): ends, bottom, partition</h3>
-        <span class="gsum mono">4 pieces &middot; 15.7 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>3/4 in maple plywood (measure the sheet): ends, bottom, partition</h3>
+          <span class="gsum mono">4 pieces &middot; 15.7 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-bottom" class="tick">
         <div class="body">
@@ -163,6 +190,9 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/bottom.png" alt="shop drawing of bottom" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
+        </ul>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-end" class="tick">
         <div class="body">
@@ -186,11 +216,12 @@
       </ul>
     </section>
     <section class="group">
-      <div class="ghead">
-        <h3>1/4 in maple plywood (measure the sheet): back</h3>
-        <span class="gsum mono">1 pieces &middot; 4.7 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>1/4 in maple plywood (measure the sheet): back</h3>
+          <span class="gsum mono">1 pieces &middot; 4.7 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-back" class="tick">
         <div class="body">
@@ -201,14 +232,16 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/back.png" alt="shop drawing of back" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
-      </ul>
+        </ul>
+      </div>
     </section>
     <section class="group">
-      <div class="ghead">
-        <h3>3/4 in plywood, any grade (hidden): base ladder</h3>
-        <span class="gsum mono">5 pieces &middot; 5.4 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>3/4 in plywood, any grade (hidden): base ladder</h3>
+          <span class="gsum mono">5 pieces &middot; 5.4 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-base_long_rail" class="tick">
         <div class="body">
@@ -219,6 +252,9 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/base_long_rail.png" alt="shop drawing of base_long_rail" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
+        </ul>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-base_end_rail" class="tick">
         <div class="body">
@@ -246,11 +282,12 @@
   <div class="big">
     <h2>Drawers<small>20 pieces</small></h2>
     <section class="group">
-      <div class="ghead">
-        <h3>Drawer front frames, hard maple: stiles and rails</h3>
-        <span class="gsum mono">8 pieces &middot; 1.7 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Drawer front frames, hard maple: stiles and rails</h3>
+          <span class="gsum mono">8 pieces &middot; 1.7 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-front_rail" class="tick">
         <div class="body">
@@ -261,6 +298,9 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/front_rail.png" alt="shop drawing of front_rail" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
+        </ul>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-front_stile" class="tick">
         <div class="body">
@@ -274,11 +314,12 @@
       </ul>
     </section>
     <section class="group">
-      <div class="ghead">
-        <h3>Drawer front panels, 3/4 in walnut plywood (measure the sheet)</h3>
-        <span class="gsum mono">2 pieces &middot; 3.6 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Drawer front panels, 3/4 in walnut plywood (measure the sheet)</h3>
+          <span class="gsum mono">2 pieces &middot; 3.6 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-front_panel" class="tick">
         <div class="body">
@@ -289,14 +330,16 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/front_panel.png" alt="shop drawing of front_panel" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
-      </ul>
+        </ul>
+      </div>
     </section>
     <section class="group">
-      <div class="ghead">
-        <h3>Drawer box fronts and backs, 3/4 in maple plywood (measure the sheet)</h3>
-        <span class="gsum mono">4 pieces &middot; 7.9 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Drawer box fronts and backs, 3/4 in maple plywood (measure the sheet)</h3>
+          <span class="gsum mono">4 pieces &middot; 7.9 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-drawer_front" class="tick">
         <div class="body">
@@ -307,6 +350,9 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_front.png" alt="shop drawing of drawer_front" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
+        </ul>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-drawer_back" class="tick">
         <div class="body">
@@ -320,11 +366,12 @@
       </ul>
     </section>
     <section class="group">
-      <div class="ghead">
-        <h3>Drawer sides and bottoms, 1/2 in Baltic birch (measure the sheet)</h3>
-        <span class="gsum mono">6 pieces &middot; 13.8 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Drawer sides and bottoms, 1/2 in Baltic birch (measure the sheet)</h3>
+          <span class="gsum mono">6 pieces &middot; 13.8 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-drawer_bottom" class="tick">
         <div class="body">
@@ -335,6 +382,9 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_bottom.png" alt="shop drawing of drawer_bottom" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
+        </ul>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-drawer_side" class="tick">
         <div class="body">
