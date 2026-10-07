@@ -27,6 +27,8 @@ Links: [[Built-in-bench]] brief in `projects/Built-in-bench/brief.md`, model `bu
 
 ## Tooling notes
 
+- Assembly steps as viewer screenshots: keep one STEPS list (file stem, title, instance prefixes, text) in `assembly_shots.py` and import it in the page builder, so the pictures and the words cannot drift. Parts already in place go pale grey, new parts keep their wood colors. Park the mouse with `xdotool mousemove 2 2` before each capture; the viewer tints the face under the pointer blue.
+
 - The OCP viewer screenshot only works with the GPU Chrome tab open; `scripts/cad-viewer.sh` opens it. `pgrep -f cad-viewer-chrome` matches the pgrep command's own shell line, so check with `curl` plus a look at the screenshot result instead.
 - `cutlist.csv` rounds mm to 0.1, so a part at a 1/32 rounding edge can print differently in `cutlist.md` and the page. Set nominal constants (the 1/4 back is 6.35 in the model) so derived lengths land on clean fractions.
 

@@ -51,22 +51,12 @@ HARDWARE = [
     ("8", "Wood screws #8 x 1-1/4", "walnut fronts to the box fronts, through oversize holes"),
     ("1", "Bench cushion", "about 65-1/2 x 25 x 3, boxed, full depth to the wall"),
 ]
-BUILD_NOTES = [
-    "Base: 4 in ladder of 3/4 ply, leveled and shimmed, screwed to the floor. Plinth board scribed to the floor "
-    "with its top edge 1/8 under the fronts.",
-    "Case: ends stand on the base end rails; bottom in the end rabbets; the 1/4 back slides down the end grooves "
-    "into the bottom groove; the partition drops into the bottom dado; the nailer goes in through the partition "
-    "notch, screwed to the ends and through the back into the studs.",
-    "Drawer boxes to the Blum 563H rules: inside width = opening minus 1-21/32; sides 9-1/2 tall; 1/2 clear under "
-    "the bottom; 21 long; rear notch 1-3/8 wide x 1/2 tall from each side's inside face; hook bores 1/4 dia x 13/32 "
-    "deep, 9/32 in from the side's inside face and 15/16 above the bottom edge; locking devices at the front corners "
-    "into the box front.",
-    "Fronts: mill the maple stiles and rails to the walnut sheet's thickness. Groove everything with the "
-    "tongue-and-groove set first, then cut the panel tongue and the rail tenons to fit. Glue up flat, hang with 1/8 "
-    "reveals, pulls centered. The rail tenon shows on the top end of each stile.",
-    "Top: glue up, 1/8 roundover on both front arrises, scribe the ends, 3/8 gap at the back wall. Pocket screws up "
-    "into it near the front; figure-8s on the nailer at the back so it can move toward the wall.",
-]
+sys.path.insert(0, PROJ)
+from assembly_shots import STEPS  # noqa: E402  (file stem, title, prefixes, text); runs the model's checks once
+ASSEMBLY_DIR = "images/assembly"
+EXPLODED = f"{ASSEMBLY_DIR}/exploded.png"
+SUBS = [("drawer-exploded.png", "one drawer box, pulled apart: sides, 3/4 front and back, 1/2 bottom"),
+        ("front-exploded.png", "one drawer front, pulled apart: maple stiles and rails around the walnut panel")]
 
 
 def is_drawer(part):
@@ -133,6 +123,11 @@ def group_section(label, rows):
 HERO = "images/hero.png"
 
 
+def sub_figure(fname, caption):
+    return (f'<figure class="dwg sfig sub" tabindex="0"><img src="{ASSEMBLY_DIR}/{fname}" alt="{html.escape(caption)}">'
+            f'<figcaption>{html.escape(caption)}; tap to zoom</figcaption></figure>')
+
+
 def build():
     assert os.path.exists(f"{PROJ}/{HERO}"), f"{HERO} missing: run hero_shot.py with the CAD viewer open"
     rows = load_rows()
@@ -151,10 +146,27 @@ def build():
     hw = "".join(
         f'<li><span class="hqty mono">{html.escape(q)}</span><div><b>{html.escape(what)}</b><span class="hnote">{html.escape(note)}</span></div></li>'
         for q, what, note in HARDWARE)
-    notes = "".join(f"<li>{html.escape(n)}</li>" for n in BUILD_NOTES)
+    steps = []
+    for stem, title, _prefixes, text in STEPS:
+        img = f"{ASSEMBLY_DIR}/{stem}.png"
+        if not os.path.exists(f"{PROJ}/{img}"):
+            print(f"WARNING: {img} missing (run assembly_shots.py with the CAD viewer open)")
+        extra = ""
+        if stem == "step-08":
+            extra = sub_figure(*SUBS[0])
+        if stem == "step-09":
+            extra = sub_figure(*SUBS[1])
+        steps.append(
+            f'<li class="step"><div class="stext"><h3>{html.escape(title)}</h3><p>{html.escape(text)}</p></div>'
+            f'<figure class="dwg sfig" tabindex="0"><img src="{img}" alt="{html.escape(title)}: parts added in this step in wood colors, the rest grey">'
+            f'<figcaption>new parts in wood colors; tap to zoom</figcaption></figure>{extra}</li>')
+    notes = "".join(steps)
+    if not os.path.exists(f"{PROJ}/{EXPLODED}"):
+        print(f"WARNING: {EXPLODED} missing (run assembly_shots.py with the CAD viewer open)")
     today = date.today().isoformat()
     return PAGE.format(case=case_html, drawers=drawer_html, hardware=hw, notes=notes, total=total_pieces, today=today,
-                       n_case=sum(r["qty"] for r in case), n_drawers=sum(r["qty"] for r in drawers), hero=HERO)
+                       n_case=sum(r["qty"] for r in case), n_drawers=sum(r["qty"] for r in drawers), hero=HERO,
+                       exploded=EXPLODED, n_steps=len(STEPS))
 
 
 PAGE = """<title>Built-in Bench Cut List</title>
@@ -230,9 +242,14 @@ PAGE = """<title>Built-in Bench Cut List</title>
   .hw li div {{ display: flex; flex-direction: column; gap: 2px; }}
   .hqty {{ font-weight: 600; color: var(--accent-ink); }}
   .hnote {{ font-size: 13px; color: var(--muted); }}
-  ol.notes {{ margin: 0; padding-left: 24px; display: flex; flex-direction: column; }}
-  ol.notes li {{ padding: 10px 0 10px 4px; border-bottom: 1px solid var(--line); font-size: 14.5px; }}
-  ol.notes li::marker {{ font-weight: 600; color: var(--accent-ink); }}
+  ol.steps {{ margin: 0; padding: 0; list-style: none; counter-reset: step; display: flex; flex-direction: column; }}
+  .step {{ display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px 20px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: start; }}
+  .step .stext h3 {{ font-size: 17px; margin: 0 0 6px; }}
+  .step .stext h3::before {{ counter-increment: step; content: counter(step) ". "; color: var(--accent-ink); }}
+  .step .stext p {{ margin: 0; font-size: 14.5px; line-height: 1.5; }}
+  .step .sfig {{ margin: 0; }}
+  .step .sub {{ grid-column: 1 / -1; }}
+  @media (max-width: 720px) {{ .step {{ grid-template-columns: 1fr; }} }}
   .foot {{ font-size: 13px; color: var(--muted); max-width: 72ch; }}
   #lightbox {{ position: fixed; inset: 0; background: rgba(15, 12, 8, .9); display: none; place-items: center; padding: 12px; z-index: 10; cursor: zoom-out; overflow: auto; }}
   #lightbox.open {{ display: grid; }}
@@ -265,11 +282,12 @@ PAGE = """<title>Built-in Bench Cut List</title>
   </div>
 
   <div class="big">
-    <h2>Build notes<small>in order</small></h2>
-    <ol class="notes">{notes}</ol>
+    <h2>Assembly<small>{n_steps} steps, in order</small></h2>
+    <figure class="dwg hero" tabindex="0"><img src="{exploded}" alt="the whole bench pulled apart: base, case, back, partition, nailer, strips and plinth, slides, drawer boxes, fronts, top, cushion"><figcaption>everything pulled apart along its assembly direction; tap to zoom</figcaption></figure>
+    <ol class="steps">{notes}</ol>
   </div>
 
-  <p class="foot">Generated {today} from <span class="mono">projects/Built-in-bench/cutlist.csv</span> and <span class="mono">images/parts/</span>, which <span class="mono">built_in_bench.py</span> and <span class="mono">part_drawings.py</span> write on every export; every drawn cut is probed against the CAD solid before its sheet is written. The bench image at the top is a screenshot of the CAD viewer (<span class="mono">hero_shot.py</span>). Part names match the CAD viewer.</p>
+  <p class="foot">Generated {today} from <span class="mono">projects/Built-in-bench/cutlist.csv</span> and <span class="mono">images/parts/</span>, which <span class="mono">built_in_bench.py</span> and <span class="mono">part_drawings.py</span> write on every export; every drawn cut is probed against the CAD solid before its sheet is written. The bench image at the top and the assembly pictures are screenshots of the CAD viewer (<span class="mono">hero_shot.py</span>, <span class="mono">assembly_shots.py</span>). Part names match the CAD viewer.</p>
 </div>
 
 <div id="lightbox" role="dialog" aria-label="Enlarged drawing" aria-hidden="true"><img id="lightbox-img" alt=""></div>

@@ -25,4 +25,4 @@ State: build123d model `built_in_bench.py` passes all asserts; `cutlist.md/.csv`
 ## Next
 
 1. Brian views the model (`SHOW=reset .venv/bin/python projects/Built-in-bench/built_in_bench.py` with `scripts/cad-viewer.sh` open) and OKs the frame width.
-2. On-site measurements, then re-run `EXPORT=1`, `part_drawings.py`, `hero_shot.py`, `make_cutlist_page.py`.
+2. On-site measurements, then re-run `EXPORT=1`, `part_drawings.py`, `hero_shot.py`, `assembly_shots.py`, `make_cutlist_page.py`, and republish cutlist.html to the same artifact URL with the images under images/parts and images/assembly.
