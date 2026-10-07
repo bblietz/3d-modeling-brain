@@ -6,7 +6,7 @@ updated: 2026-10-07
 
 # Built-in bench handoff
 
-State: build123d model `built_in_bench.py` passes all asserts; `cutlist.md/.csv`, STEP, renders, `hero_shot.py`, `part_drawings.py`, `make_cutlist_page.py`, `cutlist.html` written 2026-10-07. Waiting on Brian's look at the viewer and the three on-site measurements.
+State: build123d model `built_in_bench.py` passes all asserts; `cutlist.md/.csv`, STEP, renders, `hero_shot.py`, `part_drawings.py`, `make_cutlist_page.py`, `cutlist.html` written 2026-10-07; shop page published at https://claude.ai/artifact/YQFcx4g5x64K83yhDHvGMf (republish the same file path to update). Waiting on Brian's look at the viewer and the three on-site measurements.
 
 ## Decisions already locked
 
