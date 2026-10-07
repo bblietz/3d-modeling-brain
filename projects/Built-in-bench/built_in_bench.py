@@ -8,8 +8,10 @@ panel on a tongue-and-groove bit set, 8 in brass bar pulls, 3/4 in overhang
 with an eased edge, solid glued-up maple top set 3 in back from the pilaster
 faces, one full-depth cushion, 21 in slides, clear finish.
 
-Axes: X across the alcove (0 at the left pilaster wall), Y depth (0 at the
-back wall, +Y toward the room), Z up (0 at the floor). Units mm; inch
+Axes: X across the alcove, Y depth (0 at the back wall, +Y toward the room),
+Z up (0 at the floor). Right-handed, so X=0 is the pilaster wall on your RIGHT
+when you face the bench from the room; the _l/_r instance suffixes are model
+names, not room sides (the bench is symmetric, so nothing depends on it). Units mm; inch
 constants are written as n * IN. One named solid per part in PARTS; every
 placed instance in INST; hardware (slides, pulls, cushion) in HW for the
 viewer only.
@@ -37,7 +39,7 @@ def inch(mm):
 
 
 # ---------------------------------------------------------------- the space
-ALCOVE_W = 66 * IN          # between the pilasters (X)
+ALCOVE_W = 66 * IN          # between the pilasters (X, 0 at the wall on your right from the room)
 ALCOVE_D = 28 * IN          # back wall to the pilaster faces (Y)
 TOP_SETBACK = 3 * IN        # top front edge back from the pilaster faces
 
@@ -87,8 +89,8 @@ FIG8_DEPTH = 0.125 * IN
 FIG8_OFFSET = 0.25 * IN     # center this far in from the inner face (opens through it)
 
 # ---------------------------------------------------------------- derived layout
-X0 = 1.0 * IN               # left end panel outer face (1 in scribe space)
-X1 = ALCOVE_W - X0          # right end panel outer face
+X0 = 1.0 * IN               # first end panel outer face (1 in scribe space)
+X1 = ALCOVE_W - X0          # other end panel outer face
 CASE_W = X1 - X0            # 64 in
 CASE_D = 23.5 * IN          # back wall to the case front edge
 FACE_Y0 = CASE_D            # fronts, strips and plinth sit on the case front
@@ -102,8 +104,8 @@ BOT_Z1 = BOT_Z0 + T18
 OPEN_H = TOP_Z0 - BOT_Z1
 XC = (X0 + X1) / 2                        # partition center
 PART_X0 = XC - T18 / 2
-END_IN_L = X0 + T18                       # left end inner face
-END_IN_R = X1 - T18                       # right end inner face
+END_IN_L = X0 + T18                       # end inner face at low X
+END_IN_R = X1 - T18                       # end inner face at high X
 OPEN_W = PART_X0 - END_IN_L               # one bay
 STRIP_W = END_IN_L                        # covers the end's front edge, flush inside
 FRONT_W = (END_IN_R - END_IN_L - 3 * GAP) / 2
@@ -258,7 +260,7 @@ FRONT_X0 = [END_IN_L + GAP, END_IN_L + GAP + FRONT_W + GAP]
 _fl = front_parts(FRONT_X0[0])
 _fr = front_parts(FRONT_X0[1])
 add("front_stile", _fl[0], 4, MAPLE,
-    f"{inch(TONGUE_T)} x {inch(TONGUE_L)} groove centered on the inner edge, through; the rail tenon shows on the top end",
+    f"{inch(TONGUE_T)} x {inch(TONGUE_L)} groove centered on the inner edge, through; the rail tenons show on both ends (the top one is the visible one)",
     inst=[("stile_ll", _fl[0]), ("stile_lr", _fl[1]), ("stile_rl", _fr[0]), ("stile_rr", _fr[1])])
 add("front_rail", _fl[2], 4, MAPLE,
     f"{inch(TONGUE_T)} x {inch(TONGUE_L)} groove on the inner edge, through; {inch(TONGUE_T)} x {inch(TONGUE_L)} "
@@ -336,7 +338,7 @@ add("drawer_back", _dl[3], 2, PLY18,
     f"{inch(UM_HOOK_BORE[2])} in from each side's inner face and {inch(UM_HOOK_BORE[3])} above the bottom edge (Blum 563H sheet)",
     inst=[("dback_l", _dl[3]), ("dback_r", _dr[3])])
 add("drawer_bottom", _dl[4], 2, BB12,
-    "plain rectangle in the grooves; the Blum locking devices screw up into it at the front corners",
+    "plain rectangle in the grooves; the Blum locking devices sit flush under it at the front corners (their screws go into the box front)",
     inst=[("dbot_l", _dl[4]), ("dbot_r", _dr[4])])
 
 # ================================================================ hardware and soft goods (viewer only)

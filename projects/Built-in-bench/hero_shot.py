@@ -54,7 +54,7 @@ def color(name):
 items = list(INST) + [(n, s) for n, s in HW if os.environ.get("CUSHION", "1") != "0" or n != "cushion"]
 colors = [color(n) if any(n == x for x, _ in INST) else HW_COLORS[n.split("_")[0]] for n, _ in items]
 
-# the bench front is +Y, its left is -X; look from the front-left, a little above the seat
+# the bench front is +Y; the camera sits at low X, which is the viewer's right when facing the bench
 TARGET = (ALCOVE_W / 2, TOP_Y1 / 2, SEAT_Z / 2)
 POSITION = (TARGET[0] - 1500, TARGET[1] + 2700, TARGET[2] + 800)
 ZOOM = float(os.environ.get("ZOOM", "1.35"))

@@ -7,7 +7,7 @@ project: Built-in bench 66 x 28 (frameless, two drawers)
 
 | Qty | Part | T x W x L (in) | Material | Notes |
 |---|---|---|---|---|
-| 2 | drawer_bottom | 15/32 x 19-31/32 x 29-23/32 | 1/2 Baltic birch | plain rectangle in the grooves; the Blum locking devices screw up into it at the front corners |
+| 2 | drawer_bottom | 15/32 x 19-31/32 x 29-23/32 | 1/2 Baltic birch | plain rectangle in the grooves; the Blum locking devices sit flush under it at the front corners (their screws go into the box front) |
 | 4 | drawer_side | 15/32 x 9-1/2 x 21 | 1/2 Baltic birch | 1/4 deep x 3/4 ply (measure) rabbet across both ends on the inside face; 1/4 deep x 1/2 BB (measure) bottom groove, underside 1/2 up from the bottom edge, through ; not a plain rectangular blank (94% of bounding box); needs a drawing or template |
 | 1 | back | 1/4 x 10-23/32 x 63-1/32 | 1/4 maple ply | plain rectangle; slides down the end grooves into the bottom groove; confirm the low receptacle on the back wall before cutting |
 | 1 | bottom | 23/32 x 23-1/2 x 63-3/32 | 3/4 maple ply | face grain across the 64 in; 1/4 deep back groove 1/4 from the rear edge; 1/4 deep x 3/4 ply (measure) dado for the partition, centered, from the back groove to the front edge; front edge is covered by the drawer fronts |
@@ -24,7 +24,7 @@ project: Built-in bench 66 x 28 (frameless, two drawers)
 | 1 | nailer | 3/4 x 2-1/2 x 62-19/32 | hard maple | on edge against the back panel, through the partition notch; four 5/8 figure-8 recesses 1/8 deep on the top edge, centered 1/4 in from the front face; screw through it and the back into the wall studs |
 | 4 | front_rail | 23/32 x 1-1/2 x 28-27/32 | hard maple | 1/4 x 3/8 groove on the inner edge, through; 1/4 x 3/8 stub tenon on both ends (same bit); length includes both tenons ; not a plain rectangular blank (89% of bounding box); needs a drawing or template |
 | 2 | scribe_strip | 23/32 x 1-23/32 x 11-1/4 | hard maple | rip at 2, scribe to the wall so the inner edge lands flush with the inside of the end panel (about 1-23/32); glue and biscuits to the end's front edge; mill to the ply thickness |
-| 4 | front_stile | 23/32 x 1-1/2 x 11-1/8 | hard maple | 1/4 x 3/8 groove centered on the inner edge, through; the rail tenon shows on the top end ; not a plain rectangular blank (91% of bounding box); needs a drawing or template |
+| 4 | front_stile | 23/32 x 1-1/2 x 11-1/8 | hard maple | 1/4 x 3/8 groove centered on the inner edge, through; the rail tenons show on both ends (the top one is the visible one) ; not a plain rectangular blank (91% of bounding box); needs a drawing or template |
 
 Inches rounded to the nearest 1/32.
 
