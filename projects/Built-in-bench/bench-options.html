@@ -1,0 +1,660 @@
+<title>Alcove Bench Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one column, 1040 px max. A to-scale elevation hero that redraws as you pick,
+     then picture-card radio groups A to J, then measurements and a sticky copy bar for the picks. */
+  :root {
+    --bg: #f6f4ef; --surface: #fffdf9; --ink: #26211b; --muted: #6e665a; --line: #e2dbce;
+    --accent: #a8731f; --accent-ink: #7a5213;
+    --good-bg: #e6efe2; --good-ink: #2f5d2a;
+    --warn-bg: #fbe9d7; --warn-ink: #8a4108;
+    --note-bg: #ece7dd; --note-ink: #4d463c;
+    --paper: #fbf9f4;
+    --shadow: 0 1px 2px rgba(40, 30, 10, .06), 0 8px 24px rgba(40, 30, 10, .06);
+    /* drawing colors: the room's own materials */
+    --c-wall: #ece6da; --c-wall-back: #e1dacc; --c-floor: #6b3826; --c-board: #f3f3ee; --c-board-line: #d9d9d2;
+    --c-paint: #e5ddcc; --c-paint-2: #d8cfbc; --c-stain: #dcbf8d; --c-stain-2: #cdab73;
+    --c-maple: #e9cf9f; --c-maple-edge: #c9a469; --c-cushion: #d6cfbf; --c-cushion-line: #b4ab9b;
+    --c-reveal: #3a342c; --c-brass: #b4842a; --c-box: #e6d3ab; --c-box-line: #b89a66; --c-slide: #7c7772;
+    --c-kick: #4a433b; --c-dim: #26211b; --c-dim-soft: #8a8275;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #1b1916; --surface: #24211d; --ink: #ece6dc; --muted: #a79e91; --line: #3a352e;
+      --accent: #d9a040; --accent-ink: #efc27a;
+      --good-bg: #253a22; --good-ink: #b9dcae; --warn-bg: #46301c; --warn-ink: #f4c79c; --note-bg: #302c26; --note-ink: #cfc6b8;
+      --paper: #2a2622; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+      --c-wall: #4a443c; --c-wall-back: #3f3a33; --c-floor: #4a271a; --c-board: #353129; --c-board-line: #4a453c;
+      --c-paint: #b8ae9c; --c-paint-2: #a49a88; --c-stain: #b9985e; --c-stain-2: #9f8049;
+      --c-maple: #d1b580; --c-maple-edge: #a98650; --c-cushion: #b9b1a1; --c-cushion-line: #8f877a;
+      --c-reveal: #110f0c; --c-brass: #d9a53c; --c-box: #c7b48d; --c-box-line: #8d7a4e; --c-slide: #a09a93;
+      --c-kick: #15120f; --c-dim: #ece6dc; --c-dim-soft: #a79e91;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1b1916; --surface: #24211d; --ink: #ece6dc; --muted: #a79e91; --line: #3a352e;
+    --accent: #d9a040; --accent-ink: #efc27a;
+    --good-bg: #253a22; --good-ink: #b9dcae; --warn-bg: #46301c; --warn-ink: #f4c79c; --note-bg: #302c26; --note-ink: #cfc6b8;
+    --paper: #2a2622; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    --c-wall: #4a443c; --c-wall-back: #3f3a33; --c-floor: #4a271a; --c-board: #353129; --c-board-line: #4a453c;
+    --c-paint: #b8ae9c; --c-paint-2: #a49a88; --c-stain: #b9985e; --c-stain-2: #9f8049;
+    --c-maple: #d1b580; --c-maple-edge: #a98650; --c-cushion: #b9b1a1; --c-cushion-line: #8f877a;
+    --c-reveal: #110f0c; --c-brass: #d9a53c; --c-box: #c7b48d; --c-box-line: #8d7a4e; --c-slide: #a09a93;
+    --c-kick: #15120f; --c-dim: #ece6dc; --c-dim-soft: #a79e91;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Archivo, "Helvetica Neue", Arial, sans-serif; font-size: 16px; line-height: 1.5; padding-inline: 16px; padding-block: 28px 0; }
+  .wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-ink); font-weight: 600; margin: 0 0 8px; }
+  h1 { font-size: clamp(30px, 5vw, 42px); line-height: 1.08; margin: 0 0 14px; letter-spacing: -.01em; text-wrap: balance; }
+  h2 { font-size: 22px; margin: 0; text-wrap: balance; }
+  h3 { margin: 0; font-size: 16px; line-height: 1.3; }
+  header p { max-width: 64ch; margin: 0 0 10px; }
+  .fixed { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 14px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
+  .fixed li::before { content: "\2713\00a0"; color: var(--good-ink); font-weight: 700; }
+
+  .refs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .refs figure { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+  .refs img { width: 100%; height: auto; max-width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block; background: var(--paper); }
+  figcaption { font-size: 13px; color: var(--muted); }
+
+  .hero { display: flex; flex-direction: column; gap: 14px; }
+  .sheet { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 10px 12px; }
+  .sheet svg { width: 100%; height: auto; display: block; max-width: 100%; }
+  .sheet .cap { font-size: 12.5px; color: var(--muted); margin: 6px 2px 0; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .row2 { display: grid; grid-template-columns: minmax(0, 3fr) minmax(260px, 2fr); gap: 14px; align-items: start; }
+  @media (max-width: 760px) { .row2 { grid-template-columns: 1fr; } }
+  .readout { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .readout h3 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .specs { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 14px; margin: 0; }
+  .specs dt { color: var(--muted); margin: 0; }
+  .specs dd { margin: 0; }
+  .flags { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .flags li { font-size: 13.5px; padding: 7px 10px; border-radius: 6px; background: var(--note-bg); color: var(--note-ink); }
+  .flags li.warn { background: var(--warn-bg); color: var(--warn-ink); }
+  .flags li.good { background: var(--good-bg); color: var(--good-ink); }
+
+  section.group { display: flex; flex-direction: column; gap: 14px; }
+  .sechead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; border-bottom: 2px solid var(--line); padding-bottom: 10px; }
+  .sechead .code { font-weight: 700; color: var(--accent-ink); }
+  .sechead .ask { color: var(--muted); font-size: 15px; max-width: 70ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+  .card { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 12px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; min-width: 0; }
+  .card:hover { border-color: var(--accent-ink); }
+  .card input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+  .card:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset, var(--shadow); }
+  .card:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .card .thumb { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .card .thumb svg { width: 100%; height: auto; display: block; max-width: 100%; }
+  .card .head { display: flex; align-items: flex-start; gap: 10px; }
+  .badge { flex: none; width: 36px; height: 36px; border-radius: 8px; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-weight: 600; font-size: 14px; }
+  .card:has(input:checked) .badge { background: var(--accent); color: #fff; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .chip { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--note-bg); color: var(--note-ink); }
+  .chip.good { background: var(--good-bg); color: var(--good-ink); }
+  .chip.warn { background: var(--warn-bg); color: var(--warn-ink); }
+  .card p { margin: 0; font-size: 14px; }
+  .card .build { font-size: 13px; color: var(--muted); }
+  .card .build b { color: var(--ink); font-weight: 600; }
+
+  .meas { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+  .field label { color: var(--muted); }
+  .field input, .field textarea { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; width: 100%; max-width: 100%; }
+  .field input:focus-visible, .field textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .field .hint { font-size: 12.5px; color: var(--muted); }
+  textarea { min-height: 90px; resize: vertical; }
+
+  .summary { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; max-width: 100%; overflow-x: auto; }
+  button { font: inherit; font-weight: 600; border: 0; border-radius: 8px; padding: 10px 16px; background: var(--accent); color: #fff; cursor: pointer; }
+  button.quiet { background: var(--note-bg); color: var(--note-ink); }
+  .bar { position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--line); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); margin-inline: -16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .bar .picks { font-size: 15px; font-weight: 500; }
+  .bar .ok { font-size: 13px; color: var(--good-ink); }
+  footer { font-size: 12.5px; color: var(--muted); padding-bottom: 8px; }
+
+  /* SVG part styles */
+  .sv-floor { fill: var(--c-floor); }
+  .sv-board { fill: var(--c-board); }
+  .sv-boardline { stroke: var(--c-board-line); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+  .sv-wall { fill: var(--c-wall); }
+  .sv-wallback { fill: var(--c-wall-back); }
+  .sv-base { fill: #f2f2ec; stroke: #cfcfc6; stroke-width: 1px; vector-effect: non-scaling-stroke; }
+  .sv-body { fill: var(--c-paint); }
+  .sv-body2 { fill: var(--c-paint-2); }
+  .stain .sv-body { fill: var(--c-stain); }
+  .stain .sv-body2 { fill: var(--c-stain-2); }
+  .sv-reveal { fill: var(--c-reveal); }
+  .sv-maple { fill: var(--c-maple); }
+  .sv-mapleline { stroke: var(--c-maple-edge); stroke-width: 1px; vector-effect: non-scaling-stroke; fill: none; }
+  .sv-cushion { fill: var(--c-cushion); }
+  .sv-cushline { stroke: var(--c-cushion-line); stroke-width: 1px; vector-effect: non-scaling-stroke; fill: none; }
+  .sv-brass { fill: var(--c-brass); }
+  .sv-box { fill: var(--c-box); stroke: var(--c-box-line); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+  .sv-boxline { stroke: var(--c-box-line); stroke-width: 1px; vector-effect: non-scaling-stroke; fill: none; }
+  .sv-slide { fill: var(--c-slide); }
+  .sv-kick { fill: var(--c-kick); }
+  .sv-edge { stroke: var(--c-reveal); stroke-width: 1px; vector-effect: non-scaling-stroke; fill: none; opacity: .55; }
+  .sv-dim { stroke: var(--c-dim); stroke-width: 1px; vector-effect: non-scaling-stroke; fill: none; }
+  .sv-dimsoft { stroke: var(--c-dim-soft); stroke-width: 1px; vector-effect: non-scaling-stroke; fill: none; stroke-dasharray: 4 3; }
+  .sv-t { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; fill: var(--c-dim); }
+  .sv-tsoft { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; fill: var(--c-dim-soft); }
+  @media (prefers-reduced-motion: no-preference) { .card { transition: border-color .15s ease, box-shadow .15s ease; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Built-in bench &middot; design round one</p>
+    <h1>Alcove Bench Studio</h1>
+    <p>Everything below is drawn to scale from the numbers you gave me, and every picture redraws as you pick. Pick one card in each group A to J. The elevation and section at the top always show your current combination; each card's small picture shows that option applied to it.</p>
+    <p>When you are done, press <b>Copy picks</b> in the bar at the bottom and paste the text back to me. Add measurements and notes first if you have them.</p>
+    <ul class="fixed">
+      <li>Opening 66 in wide, 28 in deep, open above (8 ft ceiling)</li>
+      <li>Two drawers side by side, full width</li>
+      <li>Undermount soft-close slides (Blum TANDEM or MOVENTO; group I picks the length)</li>
+      <li>3/4 in maple top, 3 in cushion</li>
+      <li>Baseboard removed inside the alcove; the base replaces it</li>
+      <li>Capped plumbing is in the wall, nothing to clear</li>
+    </ul>
+  </header>
+
+  <div class="refs">
+    <figure><img src="images/space-photo-web.jpg" alt="The empty alcove: cream walls, white baseboard, dark plank floor, a door to the left"><figcaption>The alcove. Baseboard about 4 in on all three walls (coming out); the pilaster faces keep theirs, so a 4 in base lines up with it.</figcaption></figure>
+    <figure><img src="images/concept-ai-bench-web.jpg" alt="AI concept: painted built-in bench with long cushion, two drawers with brass bar pulls, floating oak shelves"><figcaption>Your concept. Translated here: painted body, slim-shaker inset fronts, brass bars, flush base, one long cushion. The dog cubby and shelves are not in this round.</figcaption></figure>
+  </div>
+
+  <div class="hero">
+    <div class="sheet">
+      <svg id="elev" role="img" aria-label="Front elevation of the bench with the current picks"></svg>
+      <div class="cap"><span>Front elevation, to scale. Pilasters shown 5 in thick with their baseboard.</span><span class="mono" id="elevcap"></span></div>
+    </div>
+    <div class="row2">
+      <div class="sheet">
+        <svg id="sect" role="img" aria-label="Side section of the bench with the current picks"></svg>
+        <div class="cap"><span>Side section through one drawer. Back wall at the left, room at the right.</span><span class="mono" id="sectcap"></span></div>
+      </div>
+      <div class="readout">
+        <h3>What these picks give you</h3>
+        <dl class="specs mono" id="specs"></dl>
+        <ul class="flags" id="flags"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="groups"></div>
+
+  <section class="group" id="measure">
+    <div class="sechead"><h2>Measurements and notes</h2><span class="ask">Change these if your tape says otherwise. The alcove is rarely square, so measure the width at the floor, at 16 in, and at 36 in, at the back wall and at the pilaster faces.</span></div>
+    <div class="meas">
+      <div class="field"><label for="mW">Opening width, in</label><input id="mW" type="number" step="0.0625" min="40" max="120" value="66"><span class="hint">Use the smallest of your readings.</span></div>
+      <div class="field"><label for="mD">Opening depth, in</label><input id="mD" type="number" step="0.0625" min="14" max="40" value="28"><span class="hint">Back wall to the pilaster faces.</span></div>
+      <div class="field"><label for="mSB">Front set back from the pilaster faces, in</label><input id="mSB" type="number" step="0.125" min="0" max="3" value="0.75"><span class="hint">3/4 in lets the pilaster baseboard die into the end stiles. 0 puts the fronts flush.</span></div>
+    </div>
+    <div class="field"><label for="notes">Anything else (other measurements, fabric, where the dog bed goes, things you want changed)</label><textarea id="notes" placeholder="For example: width is 65-7/8 at the floor and 66-1/8 at 36 in; cushion fabric is oatmeal boucle"></textarea></div>
+  </section>
+
+  <section class="group" id="picks">
+    <div class="sechead"><h2>Your picks</h2><span class="ask">This is the text the Copy button puts on your clipboard.</span></div>
+    <div class="summary"><pre id="summary" class="mono"></pre><div style="display:flex;gap:10px;flex-wrap:wrap"><button id="copy2" type="button">Copy picks</button><button id="reset" type="button" class="quiet">Back to my recommendations</button></div></div>
+  </section>
+
+  <footer>Source: <span class="mono">projects/Built-in-bench/bench-options.html</span> in the 3d-modeling-brain vault. Drawn 2026-10-06 from the brief; all dimensions preliminary until the CAD model.</footer>
+</div>
+<div class="bar"><span class="picks mono" id="barpicks"></span><button id="copy" type="button">Copy picks</button><span class="ok" id="copyok" aria-live="polite"></span></div>
+
+<script>
+(function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg';
+  const T = 0.75, CUSH = 3;
+  const TODAY = '2026-10-06';
+
+  // Undermount slide rules. The 21 in row is Blum TANDEM plus BLUMOTION 563H, verified against
+  // the Blum sheet for the drawer bench. widthLoss is for 1/2 in drawer sides.
+  // The 24 in row is Blum MOVENTO 769.6100S heavy duty (TANDEM stops at 21 in), from Blum's MOVENTO brochure:
+  // same width rule, height limit opening minus 23 mm, 16 mm bottom clearance, no rear brackets.
+  const SLIDES = {
+    21: { id: 'I1', name: 'Blum TANDEM 563H, 21 in', len: 21, widthLoss: 18, hLoss: 20, botClear: 14, load: '90 lb dynamic', minDepth: 21.9375 },
+    24: { id: 'I2', name: 'Blum MOVENTO 769 heavy duty, 24 in', len: 24, widthLoss: 18, hLoss: 23, botClear: 16, load: '155 lb dynamic', minDepth: 24.8125 }
+  };
+
+  const GROUPS = [
+    { key: 'seat', code: 'A', title: 'Seat height', thumb: 'section',
+      ask: 'Height of the maple top. The 3 in cushion sits on it and gives back about an inch when you sit, so the sat height is roughly the wood height plus 2 in.',
+      options: [
+        { id: 'A1', v: 15, name: 'Wood top at 15 in', note: 'Sits at about 17 in. Lowest step for a dog, shortest drawers.', build: 'Cabinet box 14-1/4 in tall.' },
+        { id: 'A2', v: 16, name: 'Wood top at 16 in', rec: true, note: 'Sits at about 18 in, a standard chair seat. Cushion top at 19 in before it compresses.', build: 'Cabinet box 15-1/4 in tall.' },
+        { id: 'A3', v: 17, name: 'Wood top at 17 in', note: 'Sits at about 19 in. Tallest drawers; a bit high for shorter sitters and kids.', build: 'Cabinet box 16-1/4 in tall.' }
+      ] },
+    { key: 'base', code: 'B', title: 'At the floor', thumb: 'base',
+      ask: 'What the bottom 4 in does. The pilaster baseboard is about 4 in tall, so a 4 in base continues that line into the alcove.',
+      options: [
+        { id: 'B1', v: 'toe', name: 'Toe kick, 4 in tall, 3 in deep', note: 'Heel room when you sit and put on shoes. The dark recess reads like kitchen cabinets.', build: 'Separate ladder base; cabinet sits on it. Scribe the kick board to the floor.' },
+        { id: 'B2', v: 'plinth', name: 'Flush base to the floor', rec: true, note: 'What your concept shows. The base face is the baseboard line continued; one clean painted plane.', build: 'With a face frame the bottom rail is 4 in tall and runs to the floor, scribed. Simplest.' },
+        { id: 'B3', v: 'feet', name: 'Raised 3 in on short legs', note: 'Lighter, more like furniture, less like a built-in. Things roll under it and the dog will check.', build: 'Six 1-1/2 in square legs or two end feet plus a center foot, levelers inside.' }
+      ] },
+    { key: 'build', code: 'C', title: 'Face frame or frameless', thumb: 'build',
+      ask: 'How the fronts sit. Inset fronts in a face frame are the traditional built-in look; overlay fronts on a frameless box are simpler and give taller drawers.',
+      options: [
+        { id: 'C1', v: 'frame', name: 'Face frame, inset fronts', rec: true, note: 'A 1-1/2 in painted frame with the fronts set inside it, 1/16 in reveal all round. Matches your concept and your drawer bench.', build: 'Poplar or maple frame, pocket screwed, glued to the box. Fronts fitted to each opening. Rear brackets for the slides.' },
+        { id: 'C2', v: 'frameless', name: 'Frameless, full-overlay fronts', note: 'Fronts cover the box with 1/8 in gaps. Modern, forgiving to fit, about 2 in more drawer height.', build: '3/4 ply box, 1 in scribe strips at the walls, slides straight on the box sides.' }
+      ] },
+    { key: 'front', code: 'D', title: 'Drawer front style', thumb: 'front',
+      ask: 'The look of the two fronts, each about 31 in wide.',
+      options: [
+        { id: 'D1', v: 'slab', name: 'Flat slab', note: 'Plainest and most modern. Shows every ding on a painted surface.', build: '3/4 maple or MDF, edges eased.' },
+        { id: 'D2', v: 'slim', name: 'Slim shaker, 1-1/4 in frame', rec: true, note: 'What your concept shows: a thin frame and a big flat panel. Reads as shaker from across the room and modern up close.', build: '3/4 frame with a 1/4 in panel, or a slab with a shallow routed step.' },
+        { id: 'D3', v: 'shaker', name: 'Shaker, 2-1/4 in frame', note: 'Classic proportions, heavier frame. Closer to the six-panel door next to it.', build: 'Stile and rail frame with a 1/4 in panel; cope and stick or groove and tenon.' }
+      ] },
+    { key: 'pull', code: 'E', title: 'Pulls', thumb: 'pull',
+      ask: 'How you open the drawers. Legs brush these fronts when you sit, so anything that sticks out will get kicked.',
+      options: [
+        { id: 'E1', v: 'bar', name: 'Brass bar pull, 8 in', rec: true, note: 'Your concept. Sticks out about 1-1/4 in; centered on the front it sits where calves land.', build: '160 mm or 192 mm centers; drill after paint.' },
+        { id: 'E2', v: 'cup', name: 'Brass cup pull', note: 'Half-round bin pull, lower profile, a little more traditional.', build: '3 in or 96 mm centers.' },
+        { id: 'E3', v: 'finger', name: 'Routed finger pull at the top edge', note: 'Nothing sticks out; a dark slot under the top rail. Cleanest with a slab or slim front.', build: 'Route a 7 in cove into the top edge of the front, or a 3/4 in setback behind a lip.' },
+        { id: 'E4', v: 'push', name: 'Push to open, no pull', note: 'Press the front and it springs out. Nothing to kick, nothing to see. Only Blum MOVENTO has it (pick I2), and the 24 in set is rated for drawers over 88 lb, so Blum must confirm it works on a lighter drawer.', build: 'TIP-ON BLUMOTION unit per drawer, a 1/8 in gap behind the front, no rear brackets, wider rear notch.' }
+      ] },
+    { key: 'edge', code: 'F', title: 'Top edge and overhang', thumb: 'edge',
+      ask: 'The only maple you see is the front edge under the cushion. This sets how much it shows and where it lands.',
+      options: [
+        { id: 'F1', v: 'flush', name: 'Flush with the fronts, eased edge', note: 'A 3/4 in maple line, nothing proud. The cushion face reads as the front plane.', build: 'Top cut to the box depth; ease edges with a 1/8 in roundover.' },
+        { id: 'F2', v: 'ov34', name: '3/4 in overhang, eased edge', rec: true, note: 'A shadow line over the fronts, and with the 3/4 in setback the top edge lands flush with the pilaster faces.', build: 'Same top, 3/4 in longer; 1/8 in roundover.' },
+        { id: 'F3', v: 'ov1', name: '1 in overhang, 1-1/2 in built-up nosing', note: 'A thick maple band, the wood accent your concept gets from the shelves. Partly covers the top rail.', build: 'Glue a 3/4 x 1-1/2 in maple strip under the front edge, then profile as one.' }
+      ] },
+    { key: 'top', code: 'G', title: 'Top construction', thumb: 'edge',
+      ask: 'The cushion covers all of it except the front edge.',
+      options: [
+        { id: 'G1', v: 'ply', name: '3/4 maple plywood with a solid maple nosing', rec: true, note: 'Stable, flat, cheaper. A 1-1/2 in solid strip on the front edge is all you see.', build: 'One 4 x 8 sheet yields it; glue and biscuit or spline the nosing.' },
+        { id: 'G2', v: 'solid', name: 'Solid maple, glued up', note: 'Real wood everywhere, but 28 in wide solid moves about 1/8 in across the seasons and must float.', build: 'Six or seven boards; figure-8 fasteners, no glue to the box.' }
+      ] },
+    { key: 'cushion', code: 'H', title: 'Cushion', thumb: 'elevation',
+      ask: 'One or two 3 in cushions, and how deep.',
+      options: [
+        { id: 'H1', v: 'one', name: 'One cushion, full depth', rec: true, note: 'Your concept: one 66 in boxed cushion, wall to wall and front to back. Daybed depth; pillows do the backrest.', build: 'One 3 in medium foam, 66 x 28, boxed with a self welt.' },
+        { id: 'H2', v: 'two', name: 'Two cushions over the two drawers', note: 'Each lifts out alone and matches the drawer split below. Two seams instead of none.', build: 'Two 3 in cushions about 32-3/4 x 28.' },
+        { id: 'H3', v: 'setback', name: 'One cushion, 24 in deep', note: 'Leaves a 4 in maple strip at the back wall for pillows to lean on and shows more wood.', build: 'One 3 in cushion 66 x 24.' }
+      ] },
+    { key: 'slide', code: 'I', title: 'Drawer depth', thumb: 'section',
+      ask: 'How deep the boxes run into the 28 in. Drawers this wide and deep get heavy; the slide rating is for the loaded drawer.',
+      options: [
+        { id: 'I1', v: 21, name: '21 in slides, about 20 in inside', rec: true, note: 'Blum TANDEM 563H, the family from your drawer bench, 90 lb dynamic. Plenty for blankets and shoes. Leaves about 5 in of hidden space at the back. About $50 of slides for both drawers.', build: 'Box length 21 in exactly; rear brackets let the slides hang off a face frame.' },
+        { id: 'I2', v: 24, name: '24 in slides, about 23 in inside', note: 'Blum MOVENTO 769 heavy duty, 155 lb dynamic; TANDEM does not come in 24 in. Uses the depth, and it is the only path to push-to-open. About $200 to $235 for both drawers with the stabilizers Blum wants on fronts this wide.', build: 'Box length 24 in; no rear brackets, so the cabinet sides get blocked out flush with the frame; inset runners raised 1/8 in.' }
+      ] },
+    { key: 'finish', code: 'J', title: 'Body finish', thumb: 'elevation',
+      ask: 'Paint or wood on everything that is not the top.',
+      options: [
+        { id: 'J1', v: 'paint', name: 'Painted, a shade deeper than the walls', rec: true, note: 'Your concept. Paint-grade poplar frame and birch plywood; the maple edge and brass are the only wood and metal.', build: 'Prime, two coats enamel. Fronts sprayed off the bench.' },
+        { id: 'J2', v: 'stain', name: 'Clear or stained maple to match the top', note: 'All wood. Needs maple plywood and a maple frame; grain matching across two 31 in fronts matters.', build: 'Maple ply, solid maple frame and fronts, clear finish.' }
+      ] }
+  ];
+
+  const DEFAULTS = {};
+  GROUPS.forEach(g => { DEFAULTS[g.key] = g.options.find(o => o.rec).v; });
+  let state = Object.assign({}, DEFAULTS);
+  let meas = { W: 66, D: 28, SB: 0.75 };
+
+  // ---------- numbers ----------
+  function frac(x, denom) {
+    denom = denom || 16;
+    const neg = x < 0; x = Math.abs(x);
+    let w = Math.floor(x), n = Math.round((x - w) * denom), d = denom;
+    if (n === d) { w += 1; n = 0; }
+    while (n > 0 && n % 2 === 0) { n /= 2; d /= 2; }
+    let s = n ? (w ? w + '-' + n + '/' + d : n + '/' + d) : String(w);
+    return (neg ? '-' : '') + s;
+  }
+  const mm = v => v / 25.4;
+
+  function derive(o, m) {
+    const W = m.W, D = m.D, SB = m.SB;
+    const Ztop = o.seat, seatTop = Ztop + CUSH;
+    const baseH = o.base === 'feet' ? 3 : 4;
+    const kick = o.base === 'toe' ? 3 : 0;
+    const stile = 1.5, mid = 1.5, rail = 1.5, scribe = 1.0;
+    const frontFace = D - SB;
+    let openW, openH, frontW, frontH, openX, frontX, frontY, openBottom, railBot = 0, bandBot;
+    if (o.build === 'frame') {
+      railBot = o.base === 'plinth' ? 0 : baseH;
+      openBottom = o.base === 'plinth' ? 4 : baseH + rail;
+      openW = (W - 2 * stile - mid) / 2;
+      openH = Ztop - T - rail - openBottom;
+      frontW = openW - 0.125; frontH = openH - 0.125;
+      openX = [stile, stile + openW + mid];
+      frontX = openX.map(x => x + 0.0625);
+      frontY = openBottom + 0.0625;
+      bandBot = railBot;
+    } else {
+      openBottom = baseH + 0.75;
+      openW = (W - 2 * scribe - 3 * 0.75) / 2;
+      openH = Ztop - T - openBottom;
+      frontW = (W - 2 * scribe - 3 * 0.125) / 2; frontH = Ztop - T - baseH - 0.125;
+      openX = [scribe + 0.75, scribe + 0.75 + openW + 0.75];
+      frontX = [scribe + 0.125, scribe + 0.125 + frontW + 0.125];
+      frontY = baseH;
+      bandBot = baseH;
+    }
+    const sl = SLIDES[o.slide];
+    const boxW = openW - mm(sl.widthLoss);
+    const boxHmax = openH - mm(sl.hLoss);
+    const boxH = Math.floor(boxHmax * 4) / 4;
+    const boxD = sl.len;
+    const boxBottom = openBottom + mm(sl.botClear);
+    const boxFront = frontFace - 0.75 - mm(1.5);
+    const boxBack = boxFront - boxD;
+    const clearBehind = boxBack - 0.25;
+    const inside = { w: boxW - 1, h: boxH - 0.75, d: boxD - 1 };
+    const vol = inside.w * inside.h * inside.d / 1728;
+    const edge = { flush: { ov: 0, nose: 0.75 }, ov34: { ov: 0.75, nose: 0.75 }, ov1: { ov: 1.0, nose: 1.5 } }[o.edge];
+    const topFront = frontFace + edge.ov;
+    const cushD = o.cushion === 'setback' ? 24 : topFront;
+    const cushN = o.cushion === 'two' ? 2 : 1;
+    const pulls = frontX.map(x => ({ cx: x + frontW / 2, cy: frontY + frontH / 2 }));
+    return { W, D, SB, Ztop, seatTop, baseH, kick, stile, mid, rail, scribe, frontFace, openW, openH, frontW, frontH, openX, frontX, frontY, openBottom, railBot, bandBot,
+      sl, boxW, boxH, boxHmax, boxD, boxBottom, boxFront, boxBack, clearBehind, inside, vol, edge, topFront, cushD, cushN, pulls };
+  }
+
+  // ---------- svg helpers (world coords in inches, y up; svg y = -y) ----------
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function rect(g, x, y, w, h, cls, rx) {
+    const a = { x: x, y: -(y + h), width: w, height: h, 'class': cls };
+    if (rx) { a.rx = rx; a.ry = rx; }
+    return el('rect', a, g);
+  }
+  function line(g, x1, y1, x2, y2, cls) { return el('line', { x1: x1, y1: -y1, x2: x2, y2: -y2, 'class': cls }, g); }
+  function text(g, x, y, str, fs, cls, anchor, rot) {
+    const a = { x: x, y: -y, 'font-size': fs, 'class': cls || 'sv-t', 'text-anchor': anchor || 'middle' };
+    if (rot) a.transform = 'rotate(' + rot + ' ' + x + ' ' + (-y) + ')';
+    const t = el('text', a, g); t.textContent = str; return t;
+  }
+  function dimH(g, x1, x2, y, label, fs) {
+    line(g, x1, y, x2, y, 'sv-dim');
+    line(g, x1, y - fs * 0.35, x1, y + fs * 0.35, 'sv-dim');
+    line(g, x2, y - fs * 0.35, x2, y + fs * 0.35, 'sv-dim');
+    text(g, (x1 + x2) / 2, y + fs * 0.45, label, fs);
+  }
+  function dimV(g, x, y1, y2, label, fs) {
+    line(g, x, y1, x, y2, 'sv-dim');
+    line(g, x - fs * 0.35, y1, x + fs * 0.35, y1, 'sv-dim');
+    line(g, x - fs * 0.35, y2, x + fs * 0.35, y2, 'sv-dim');
+    text(g, x - fs * 0.4, (y1 + y2) / 2, label, fs, 'sv-t', 'middle', -90);
+  }
+  function setView(svg, x0, y0, x1, y1) {
+    svg.setAttribute('viewBox', [x0, -y1, x1 - x0, y1 - y0].join(' '));
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  }
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+
+  function drawFront(g, d, o, x, y, w, h) {
+    rect(g, x, y, w, h, 'sv-body2');
+    const fw = o.front === 'slim' ? 1.25 : o.front === 'shaker' ? 2.25 : 0;
+    if (fw) {
+      rect(g, x + fw, y + fw, w - 2 * fw, h - 2 * fw, 'sv-body');
+      el('path', { d: 'M' + (x + fw) + ' ' + (-(y + fw)) + ' L' + (x + fw) + ' ' + (-(y + h - fw)) + ' L' + (x + w - fw) + ' ' + (-(y + h - fw)), 'class': 'sv-edge' }, g);
+    }
+    el('rect', { x: x, y: -(y + h), width: w, height: h, 'class': 'sv-edge' }, g);
+    const cx = x + w / 2, cy = y + h / 2;
+    if (o.pull === 'bar') {
+      rect(g, cx - 4.5, cy - 0.25, 9, 0.5, 'sv-brass', 0.25);
+    } else if (o.pull === 'cup') {
+      el('path', { d: 'M' + (cx - 2.4) + ' ' + (-(cy + 0.2)) + ' a2.4 1.5 0 0 0 4.8 0 z', 'class': 'sv-brass' }, g);
+      rect(g, cx - 2.6, cy + 0.1, 5.2, 0.3, 'sv-brass', 0.15);
+    } else if (o.pull === 'finger') {
+      rect(g, cx - 3.5, y + h - 0.85, 7, 0.5, 'sv-reveal', 0.25);
+    }
+  }
+
+  function drawElevation(svg, o, d, crop, dims) {
+    clear(svg);
+    const W = d.W, Hwall = d.seatTop + 7;
+    const vb = crop || { x0: -6, y0: -1.5, x1: W + 6, y1: d.seatTop + 6.5 };
+    setView(svg, vb.x0, vb.y0, vb.x1, vb.y1);
+    const fs = (vb.x1 - vb.x0) / 56;
+    const g = el('g', { 'class': o.finish === 'stain' ? 'stain' : '' }, svg);
+    rect(g, vb.x0 - 2, -1.5, (vb.x1 - vb.x0) + 4, 1.5, 'sv-floor');
+    rect(g, 0, 0, W, Hwall, 'sv-wallback');
+    rect(g, -5, 0, 5, Hwall, 'sv-wall'); rect(g, W, 0, 5, Hwall, 'sv-wall');
+    rect(g, -5, 0, 5, 4, 'sv-base'); rect(g, W, 0, 5, 4, 'sv-base');
+    rect(g, -5, 3.6, 5, 0.4, 'sv-base'); rect(g, W, 3.6, 5, 0.4, 'sv-base');
+    // base
+    if (o.base === 'toe') rect(g, 0, 0, W, 4, 'sv-kick');
+    else if (o.base === 'feet') { [0.75, W / 2 - 0.75, W - 2.25].forEach(x => rect(g, x, 0, 1.5, 3, 'sv-body')); }
+    else if (o.build !== 'frame') { rect(g, 0, 0, W, 4, 'sv-body'); line(g, 0, 0.25, W, 0.25, 'sv-edge'); }
+    // body band
+    rect(g, 0, d.bandBot, W, d.Ztop - T - d.bandBot, 'sv-body');
+    if (o.build === 'frame') {
+      if (o.base === 'plinth') line(g, 0, 0.25, W, 0.25, 'sv-edge');
+      for (let i = 0; i < 2; i++) {
+        rect(g, d.openX[i], d.openBottom, d.openW, d.openH, 'sv-reveal');
+        drawFront(g, d, o, d.frontX[i], d.frontY, d.frontW, d.frontH);
+      }
+    } else {
+      rect(g, d.scribe, d.bandBot, W - 2 * d.scribe, d.Ztop - T - d.bandBot, 'sv-reveal');
+      for (let i = 0; i < 2; i++) drawFront(g, d, o, d.frontX[i], d.frontY, d.frontW, d.frontH);
+    }
+    // top
+    const nose = d.edge.nose;
+    rect(g, 0, d.Ztop - nose, W, nose, 'sv-maple');
+    if (nose > T) line(g, 0, d.Ztop - T, W, d.Ztop - T, 'sv-mapleline');
+    // cushions
+    const n = d.cushN, gap = 0.25;
+    for (let i = 0; i < n; i++) {
+      const cw = (W - 0.5 - gap * (n - 1)) / n, cx0 = 0.25 + i * (cw + gap);
+      rect(g, cx0, d.Ztop, cw, CUSH, 'sv-cushion', 0.6);
+      line(g, cx0 + 0.6, d.Ztop + CUSH / 2, cx0 + cw - 0.6, d.Ztop + CUSH / 2, 'sv-cushline');
+    }
+    if (dims) {
+      dimH(g, 0, W, d.seatTop + 3.2, frac(W) + ' in opening', fs);
+      dimV(g, W + 2.5, 0, d.Ztop, 'top ' + frac(d.Ztop), fs);
+      dimV(g, W + 4.3, 0, d.seatTop, 'cushion ' + frac(d.seatTop), fs);
+      text(g, d.pulls[1].cx, d.frontY + 0.9, 'front ' + frac(d.frontW) + ' x ' + frac(d.frontH), fs * 0.85, 'sv-t');
+      text(g, d.pulls[0].cx, d.frontY + 0.9, (o.build === 'frame' ? 'inset, 1/16 reveal' : 'overlay, 1/8 gaps'), fs * 0.85, 'sv-tsoft');
+    }
+  }
+
+  function drawSection(svg, o, d, crop, dims) {
+    clear(svg);
+    const D = d.D, Hwall = d.seatTop + 7;
+    const vb = crop || { x0: -4, y0: -1.5, x1: D + 7, y1: d.seatTop + 5.5 };
+    setView(svg, vb.x0, vb.y0, vb.x1, vb.y1);
+    const fs = (vb.x1 - vb.x0) / 40;
+    const g = el('g', { 'class': o.finish === 'stain' ? 'stain' : '' }, svg);
+    rect(g, vb.x0 - 2, -1.5, (vb.x1 - vb.x0) + 4, 1.5, 'sv-floor');
+    rect(g, -4, 0, 4, Hwall, 'sv-wall');
+    line(g, D, 0, D, Hwall, 'sv-dimsoft');
+    const ff = d.frontFace, isFrame = o.build === 'frame';
+    // base
+    if (o.base === 'toe') rect(g, 0, 0, ff - d.kick, 4, 'sv-kick');
+    else if (o.base === 'feet') { rect(g, 0.5, 0, 1.5, 3, 'sv-body'); rect(g, ff - 2.25, 0, 1.5, 3, 'sv-body'); }
+    else rect(g, 0, 0, ff, 4, 'sv-body');
+    // bottom and back panels
+    const botY = d.openBottom - 0.75;
+    rect(g, 0, botY, ff - (isFrame ? 0.75 : 0.75), 0.75, 'sv-body2');
+    rect(g, 0, botY, 0.25, d.Ztop - T - botY, 'sv-body2');
+    // frame rails
+    if (isFrame) {
+      rect(g, ff - 0.75, d.railBot, 0.75, d.openBottom - d.railBot, 'sv-body');
+      rect(g, ff - 0.75, d.Ztop - T - d.rail, 0.75, d.rail, 'sv-body');
+    }
+    // drawer front
+    rect(g, ff - 0.75, d.frontY, 0.75, d.frontH, 'sv-body2');
+    el('rect', { x: ff - 0.75, y: -(d.frontY + d.frontH), width: 0.75, height: d.frontH, 'class': 'sv-edge' }, g);
+    // slide and box
+    rect(g, d.boxBack + 0.3, d.openBottom + 0.05, d.boxD - 0.6, 0.45, 'sv-slide');
+    rect(g, d.boxBack, d.boxBottom, d.boxD, d.boxH, 'sv-box');
+    line(g, d.boxBack, d.boxBottom + 0.5, d.boxFront, d.boxBottom + 0.5, 'sv-boxline');
+    line(g, d.boxBack, d.boxBottom + 0.75, d.boxFront, d.boxBottom + 0.75, 'sv-boxline');
+    // top
+    const nose = d.edge.nose, tf = d.topFront;
+    rect(g, 0, d.Ztop - T, tf, T, 'sv-maple');
+    if (nose > T) rect(g, tf - 1.5, d.Ztop - nose, 1.5, nose - T, 'sv-maple');
+    if (o.top === 'ply') {
+      line(g, tf - 1.5, d.Ztop - T, tf - 1.5, d.Ztop, 'sv-mapleline');
+      [0.19, 0.37, 0.56].forEach(f => line(g, 0, d.Ztop - T + f, tf - 1.5, d.Ztop - T + f, 'sv-mapleline'));
+    }
+    el('rect', { x: 0, y: -d.Ztop, width: tf, height: T, 'class': 'sv-edge' }, g);
+    // cushion
+    rect(g, tf - d.cushD, d.Ztop, d.cushD, CUSH, 'sv-cushion', 0.6);
+    line(g, tf - d.cushD + 0.6, d.Ztop + CUSH / 2, tf - 0.6, d.Ztop + CUSH / 2, 'sv-cushline');
+    if (dims) {
+      dimH(g, 0, D, d.seatTop + 2.6, frac(D) + ' in deep', fs);
+      dimH(g, d.boxBack, d.boxFront, d.boxBottom + d.boxH + 0.9, 'box ' + frac(d.boxD) + ' deep, ' + frac(d.boxH) + ' tall', fs);
+      text(g, d.boxBack / 2 + 0.1, d.boxBottom + d.boxH + 1.3, 'clear ' + frac(d.clearBehind), fs * 0.85, 'sv-tsoft');
+      dimV(g, D + 2.6, 0, d.Ztop, 'top ' + frac(d.Ztop), fs);
+      dimV(g, D + 4.8, 0, d.seatTop, 'cushion ' + frac(d.seatTop), fs);
+      text(g, tf - 0.2, d.seatTop + 0.8, (d.edge.ov ? 'overhang ' + frac(d.edge.ov) : 'top flush with fronts'), fs * 0.85, 'sv-tsoft', 'end');
+    }
+  }
+
+  function cropFor(group, d) {
+    const W = d.W, D = d.D;
+    switch (group.thumb) {
+      case 'base': return { kind: 'section', crop: { x0: D - 15, y0: -1.5, x1: D + 2, y1: 10.5 } };
+      case 'build': return { kind: 'elevation', crop: { x0: W / 2 - 9, y0: d.bandBot - 1.2, x1: W / 2 + 9, y1: d.Ztop + 1.2 } };
+      case 'front': return { kind: 'elevation', crop: { x0: 0.5, y0: d.bandBot - 1, x1: W / 2 + 1.5, y1: d.Ztop + 0.8 } };
+      case 'pull': { const p = d.pulls[0]; return { kind: 'elevation', crop: { x0: p.cx - 8, y0: p.cy - 5, x1: p.cx + 8, y1: p.cy + 5 } }; }
+      case 'edge': return { kind: 'section', crop: { x0: D - 8, y0: d.Ztop - 5.5, x1: D + 3, y1: d.Ztop + 4.2 } };
+      case 'section': return { kind: 'section', crop: null };
+      default: return { kind: 'elevation', crop: null };
+    }
+  }
+
+  // ---------- build the option groups ----------
+  const groupsEl = document.getElementById('groups');
+  const thumbs = [];
+  GROUPS.forEach(group => {
+    const sec = document.createElement('section'); sec.className = 'group'; sec.id = 'g-' + group.key;
+    sec.innerHTML = '<div class="sechead"><h2><span class="code">' + group.code + '</span> ' + group.title + '</h2><span class="ask">' + group.ask + '</span></div>';
+    const grid = document.createElement('div'); grid.className = 'grid';
+    group.options.forEach(opt => {
+      const card = document.createElement('label'); card.className = 'card';
+      const chips = (opt.rec ? '<span class="chip good">my recommendation</span>' : '');
+      card.innerHTML =
+        '<input type="radio" name="' + group.key + '" id="opt-' + opt.id + '" value="' + String(opt.v) + '">' +
+        '<div class="thumb"><svg role="img" aria-label="' + opt.name + '"></svg></div>' +
+        '<div class="head"><div class="badge mono">' + opt.id + '</div><div><h3>' + opt.name + '</h3><div class="chips">' + chips + '</div></div></div>' +
+        '<p>' + opt.note + '</p><p class="build"><b>Build:</b> ' + opt.build + '</p>';
+      const input = card.querySelector('input');
+      input.addEventListener('change', () => { if (input.checked) { state[group.key] = opt.v; update(); } });
+      thumbs.push({ group, opt, svg: card.querySelector('svg') });
+      grid.appendChild(card);
+    });
+    sec.appendChild(grid);
+    groupsEl.appendChild(sec);
+  });
+
+  function optFor(key, v) { const g = GROUPS.find(x => x.key === key); return g.options.find(o => String(o.v) === String(v)); }
+
+  function specsHtml(d, o) {
+    const rows = [
+      ['Wood top', frac(d.Ztop) + ' in off the floor'],
+      ['Cushion top', frac(d.seatTop) + ' in, sits at about ' + frac(d.Ztop + 2) + ' in'],
+      ['Drawer fronts', '2 at ' + frac(d.frontW) + ' x ' + frac(d.frontH) + ' in'],
+      ['Drawer boxes', frac(d.boxW) + ' wide x ' + frac(d.boxH) + ' tall x ' + frac(d.boxD) + ' in'],
+      ['Inside each', frac(d.inside.w) + ' x ' + frac(d.inside.h) + ' x ' + frac(d.inside.d) + ' in, ' + d.vol.toFixed(1) + ' cu ft'],
+      ['Slides', d.sl.name + ', ' + d.sl.load],
+      ['Behind the box', frac(d.clearBehind) + ' in to the back panel'],
+      ['Top', frac(d.W) + ' x ' + frac(d.topFront) + ' in, ' + (d.edge.ov ? frac(d.edge.ov) + ' in overhang' : 'flush') + ', ' + frac(d.edge.nose) + ' in edge'],
+      ['Cushion', d.cushN === 2 ? 'two at ' + frac((d.W - 0.75) / 2) + ' x ' + frac(d.cushD) + ' x 3 in' : 'one at ' + frac(d.W - 0.5) + ' x ' + frac(d.cushD) + ' x 3 in'],
+      ['Base', o.base === 'toe' ? 'toe kick 4 tall, 3 deep' : o.base === 'feet' ? '3 in legs' : 'flush, 4 in, scribed to the floor']
+    ];
+    return rows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
+  }
+
+  function flagsFor(d, o) {
+    const f = [];
+    if (d.boxH < 6) f.push({ c: 'warn', t: 'Boxes only ' + frac(d.boxH) + ' in tall. Raise the seat (A), go frameless (C2), or drop the toe kick to get storage back.' });
+    if (o.build === 'frame' && o.base === 'toe') f.push({ c: '', t: 'Toe kick under a face frame stacks 4 in of kick plus a 1-1/2 in rail: 5-1/2 in of painted base before the first drawer.' });
+    if (o.pull === 'bar') f.push({ c: 'warn', t: 'A bar pull at ' + frac(d.pulls[0].cy) + ' in off the floor is at shin height for a seated adult. Consider E3 or E4 if that bothers you.' });
+    if (o.pull === 'push' && o.slide !== 24) f.push({ c: 'warn', t: 'Push-to-open does not exist for TANDEM 563H. Pick I2 (MOVENTO) or another pull.' });
+    if (o.slide === 24) f.push({ c: '', t: 'MOVENTO 769 needs the cabinet sides blocked out flush with the face frame (no rear brackets) and at least ' + frac(d.sl.minDepth) + ' in inside depth; you have ' + frac(d.frontFace - 0.75 - 0.25) + '.' });
+    if (o.slide === 24) f.push({ c: '', t: 'Blum recommends a lateral stabilizer per drawer on MOVENTO openings 24 in and wider. These openings are ' + frac(d.openW) + ' in.' });
+    if (o.slide === 21) f.push({ c: '', t: 'TANDEM 563H needs a stabilizer only when a drawer is more than twice as wide as it is deep; these are ' + (d.openW / d.boxD).toFixed(2) + ' to 1, so none needed.' });
+    if (o.cushion === 'setback') f.push({ c: '', t: 'Cushion stops ' + frac(d.topFront - 24) + ' in short of the back wall. That strip of maple collects whatever falls behind the pillows.' });
+    if (o.top === 'solid') f.push({ c: '', t: 'Solid top: fasten with figure-8s only, no glue, so 28 in of maple can move.' });
+    if (Math.abs(d.topFront - d.D) < 0.01) f.push({ c: 'good', t: 'Top edge lands exactly flush with the pilaster faces.' });
+    if (o.base === 'feet') f.push({ c: '', t: 'Open underneath: a 3 in gap over a dark floor shows every stray kibble.' });
+    if (d.frontW > 36) f.push({ c: 'warn', t: 'Fronts over 36 in wide want a third slide or a stiffener; check with the final width.' });
+    return f;
+  }
+
+  function summaryText(d, o) {
+    const lines = ['Alcove bench picks, ' + TODAY];
+    lines.push('Picks: ' + GROUPS.map(g => optFor(g.key, o[g.key]).id).join(' '));
+    GROUPS.forEach(g => { const op = optFor(g.key, o[g.key]); lines.push(op.id + ' ' + g.title + ': ' + op.name + (op.rec ? '' : ' (changed from ' + g.options.find(x => x.rec).id + ')')); });
+    lines.push('Measurements: opening ' + frac(d.W) + ' x ' + frac(d.D) + ' in, fronts set back ' + frac(d.SB) + ' in');
+    lines.push('Derived: wood top ' + frac(d.Ztop) + ', cushion top ' + frac(d.seatTop) + '; fronts 2 x ' + frac(d.frontW) + ' x ' + frac(d.frontH) + '; boxes ' + frac(d.boxW) + ' x ' + frac(d.boxH) + ' x ' + frac(d.boxD) + ' on ' + d.sl.name + '; ' + frac(d.clearBehind) + ' in behind the box; top ' + frac(d.W) + ' x ' + frac(d.topFront));
+    const notes = document.getElementById('notes').value.trim();
+    if (notes) lines.push('Notes: ' + notes);
+    return lines.join('\n');
+  }
+
+  function update() {
+    const d = derive(state, meas);
+    drawElevation(document.getElementById('elev'), state, d, null, true);
+    drawSection(document.getElementById('sect'), state, d, null, true);
+    document.getElementById('elevcap').textContent = 'fronts ' + frac(d.frontW) + ' x ' + frac(d.frontH) + ' in';
+    document.getElementById('sectcap').textContent = 'box ' + frac(d.boxW) + ' x ' + frac(d.boxH) + ' x ' + frac(d.boxD) + ' in';
+    document.getElementById('specs').innerHTML = specsHtml(d, state);
+    document.getElementById('flags').innerHTML = flagsFor(d, state).map(f => '<li class="' + f.c + '">' + f.t + '</li>').join('');
+    thumbs.forEach(th => {
+      const o2 = Object.assign({}, state); o2[th.group.key] = th.opt.v;
+      const d2 = derive(o2, meas);
+      const c = cropFor(th.group, d2);
+      if (c.kind === 'section') drawSection(th.svg, o2, d2, c.crop, !c.crop); else drawElevation(th.svg, o2, d2, c.crop, !c.crop);
+      const input = document.getElementById('opt-' + th.opt.id);
+      input.checked = String(state[th.group.key]) === String(th.opt.v);
+    });
+    const txt = summaryText(d, state);
+    document.getElementById('summary').textContent = txt;
+    document.getElementById('barpicks').textContent = GROUPS.map(g => optFor(g.key, state[g.key]).id).join(' ');
+    try { localStorage.setItem('alcove-bench-studio', JSON.stringify({ state, meas, notes: document.getElementById('notes').value })); } catch (e) {}
+  }
+
+  function copyPicks() {
+    const txt = document.getElementById('summary').textContent;
+    const ok = document.getElementById('copyok');
+    const done = () => { ok.textContent = 'Copied. Paste it to me in chat.'; setTimeout(() => { ok.textContent = ''; }, 4000); };
+    const fallback = () => {
+      const pre = document.getElementById('summary'); const r = document.createRange(); r.selectNodeContents(pre);
+      const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      ok.textContent = 'Select-all is set; press Ctrl+C.'; pre.scrollIntoView({ block: 'center' });
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
+  }
+  document.getElementById('copy').addEventListener('click', copyPicks);
+  document.getElementById('copy2').addEventListener('click', copyPicks);
+  document.getElementById('reset').addEventListener('click', () => { state = Object.assign({}, DEFAULTS); update(); });
+
+  ['mW', 'mD', 'mSB'].forEach(id => {
+    document.getElementById(id).addEventListener('input', e => {
+      const v = parseFloat(e.target.value);
+      if (!isFinite(v)) return;
+      if (id === 'mW' && v >= 40) meas.W = v;
+      if (id === 'mD' && v >= 14) meas.D = v;
+      if (id === 'mSB' && v >= 0) meas.SB = v;
+      update();
+    });
+  });
+  document.getElementById('notes').addEventListener('input', update);
+
+  try {
+    const saved = JSON.parse(localStorage.getItem('alcove-bench-studio') || 'null');
+    if (saved && saved.state && saved.meas) {
+      GROUPS.forEach(g => { if (optFor(g.key, saved.state[g.key])) state[g.key] = optFor(g.key, saved.state[g.key]).v; });
+      meas = Object.assign({}, meas, saved.meas);
+      document.getElementById('mW').value = meas.W; document.getElementById('mD').value = meas.D; document.getElementById('mSB').value = meas.SB;
+      if (saved.notes) document.getElementById('notes').value = saved.notes;
+    }
+  } catch (e) {}
+  update();
+})();
+</script>
