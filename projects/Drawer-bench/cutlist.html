@@ -75,7 +75,38 @@
   #lightbox { position: fixed; inset: 0; background: rgba(15, 12, 8, .9); display: none; place-items: center; padding: 12px; z-index: 10; cursor: zoom-out; overflow: auto; }
   #lightbox.open { display: grid; }
   #lightbox img { max-width: 100%; max-height: 94vh; background: var(--paper); border-radius: 6px; }
+  a.pdf { font-size: 13px; color: var(--accent-ink); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; text-decoration: none; }
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: flex; flex-direction: column; }
+  .step { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px 20px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: start; }
+  .step .stext h3 { font-size: 17px; margin: 0 0 6px; }
+  .step .stext h3::before { counter-increment: step; content: counter(step) ". "; color: var(--accent-ink); }
+  .step .stext p { margin: 0; font-size: 14.5px; line-height: 1.5; }
+  .step .sfig { margin: 0; background: #fff; }
+  .step .sub { grid-column: 1 / -1; }
+  @media (max-width: 720px) { .step { grid-template-columns: 1fr; } }
   @media (max-width: 420px) { .dims b { font-size: 19px; } .hw li { grid-template-columns: 60px 1fr; } }
+  @media print {
+    @page { size: letter; margin: 0.5in 0.5in 0.6in; }
+    html, body { background: #fff; color: #000; font-size: 11pt; }
+    .wrap { max-width: none; padding: 0; margin: 0; gap: 14px; }
+    .tick, .status, figcaption, #lightbox { display: none !important; }
+    header p { max-width: none; }
+    .flag { border: 1px solid #c8782a; background: #fff3e6; break-inside: avoid; }
+    .big { break-before: page; gap: 10px; }
+    .big > h2 { font-size: 20px; }
+    .group { break-inside: auto; }
+    .keep { break-inside: avoid; }
+    .part { grid-template-columns: 1fr; gap: 6px; padding: 8px 0; break-inside: avoid; }
+    .part label { cursor: default; }
+    .dwg { border: 1px solid #ccc; padding: 4px; background: #fff; break-inside: avoid; cursor: default; }
+    .dwg img { max-height: 4.6in; width: auto; max-width: 100%; margin: 0 auto; }
+    .hero img { max-height: 5in; }
+    .hw li { break-inside: avoid; }
+    .step { grid-template-columns: 1fr 1.3fr; break-inside: avoid; padding: 10px 0; }
+    .step .sfig img { max-height: 3.2in; }
+    .step .sub img { max-height: 4in; }
+    .foot { font-size: 9pt; }
+  }
 </style>
 
 <div class="wrap">
@@ -83,8 +114,8 @@
   <header>
     <p class="eyebrow">Drawer bench &middot; 40 x 24 x 19-5/8 in</p>
     <h1>Drawer Bench Cut List</h1>
-    <p>25 pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges; tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</p>
-    <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
+    <p>25 pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges; tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only. The assembly order with a picture per step is at the end.</p>
+    <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button><a class="pdf" href="cutlist.pdf">PDF for the shop</a></div>
   </header>
 
   <div class="flag"><b>Provisional.</b> Every groove, rabbet and dado that takes plywood is sized to the sheet's real thickness and says "measure". Measure the sheets you bought, put the numbers in the model and re-run it before cutting joinery. The top's overhang and edge profile still wait on the island; the slide numbers wait on the purchased sheet.</div>
@@ -92,11 +123,12 @@
   <div class="big">
     <h2>Case<small>13 pieces</small></h2>
     <section class="group">
-      <div class="ghead">
-        <h3>Soft maple: posts, rails, cleat</h3>
-        <span class="gsum mono">8 pieces &middot; 2.6 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Soft maple: posts, rails, cleat</h3>
+          <span class="gsum mono">8 pieces &middot; 2.6 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-cleat_rear" class="tick">
         <div class="body">
@@ -107,6 +139,9 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/cleat_rear.png" alt="shop drawing of cleat_rear" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
+        </ul>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-rail_bot" class="tick">
         <div class="body">
@@ -160,11 +195,12 @@
       </ul>
     </section>
     <section class="group">
-      <div class="ghead">
-        <h3>3/4 in plywood (measure the sheet): sides and back</h3>
-        <span class="gsum mono">3 pieces &middot; 7.7 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>3/4 in plywood (measure the sheet): sides and back</h3>
+          <span class="gsum mono">3 pieces &middot; 7.7 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-back" class="tick">
         <div class="body">
@@ -175,6 +211,9 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/back.png" alt="shop drawing of back" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
+        </ul>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-side" class="tick">
         <div class="body">
@@ -188,11 +227,12 @@
       </ul>
     </section>
     <section class="group">
-      <div class="ghead">
-        <h3>1/2 in plywood (measure the sheet): case bottom</h3>
-        <span class="gsum mono">1 pieces &middot; 4.7 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>1/2 in plywood (measure the sheet): case bottom</h3>
+          <span class="gsum mono">1 pieces &middot; 4.7 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-bottom" class="tick">
         <div class="body">
@@ -203,14 +243,16 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/bottom.png" alt="shop drawing of bottom" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
-      </ul>
+        </ul>
+      </div>
     </section>
     <section class="group">
-      <div class="ghead">
-        <h3>Butcherblock top (purchased, Boos match)</h3>
-        <span class="gsum mono">1 pieces &middot; 6.7 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Butcherblock top (purchased, Boos match)</h3>
+          <span class="gsum mono">1 pieces &middot; 6.7 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-top" class="tick">
         <div class="body">
@@ -221,18 +263,20 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/top.png" alt="shop drawing of top" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
-      </ul>
+        </ul>
+      </div>
     </section>
   </div>
 
   <div class="big">
     <h2>Drawers<small>12 pieces</small></h2>
     <section class="group">
-      <div class="ghead">
-        <h3>Drawer fronts, soft maple</h3>
-        <span class="gsum mono">2 pieces &middot; 3.6 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Drawer fronts, soft maple</h3>
+          <span class="gsum mono">2 pieces &middot; 3.6 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-front_bot" class="tick">
         <div class="body">
@@ -243,6 +287,9 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/front_bot.png" alt="shop drawing of front_bot" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
+        </ul>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-front_top" class="tick">
         <div class="body">
@@ -256,11 +303,12 @@
       </ul>
     </section>
     <section class="group">
-      <div class="ghead">
-        <h3>Drawer boxes, 1/2 in plywood (measure the sheet)</h3>
-        <span class="gsum mono">8 pieces &middot; 8.1 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Drawer boxes, 1/2 in plywood (measure the sheet)</h3>
+          <span class="gsum mono">8 pieces &middot; 8.1 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-drawer_front_bot" class="tick">
         <div class="body">
@@ -271,6 +319,9 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_front_bot.png" alt="shop drawing of drawer_front_bot" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
+        </ul>
+      </div>
+      <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-drawer_back_bot" class="tick">
         <div class="body">
@@ -324,11 +375,12 @@
       </ul>
     </section>
     <section class="group">
-      <div class="ghead">
-        <h3>Drawer bottoms, 1/4 in plywood (measure the sheet)</h3>
-        <span class="gsum mono">2 pieces &middot; 7.4 sq ft face, no kerf or waste</span>
-      </div>
-      <ul class="parts">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Drawer bottoms, 1/4 in plywood (measure the sheet)</h3>
+          <span class="gsum mono">2 pieces &middot; 7.4 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
       <li class="part">
         <input type="checkbox" id="cut-drawer_bottom_bot-drawer_bottom_top" class="tick">
         <div class="body">
@@ -339,7 +391,8 @@
           </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_bottom_bot.png" alt="shop drawing of drawer_bottom_bot/drawer_bottom_top" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
         </div>
       </li>
-      </ul>
+        </ul>
+      </div>
     </section>
   </div>
 
@@ -348,7 +401,13 @@
     <ul class="hw"><li><span class="hqty mono">2 pairs</span><div><b>Blum TANDEM plus BLUMOTION 563H4570B undermount slides, 18 in class</b><span class="hnote">confirm the purchased spec against the 563H sheet before boring the boxes</span></div></li><li><span class="hqty mono">2 pairs</span><div><b>Blum rear mounting brackets 295.3750.02</b><span class="hnote">on the back panel, at runner height</span></div></li><li><span class="hqty mono">2 sets</span><div><b>Blum locking devices for the box fronts</b><span class="hnote">bored with the T65.1600.01 template</span></div></li><li><span class="hqty mono">6</span><div><b>3/8 in dowels, 2 in long</b><span class="hnote">front rails to front posts, one each end, 1 in into each part</span></div></li><li><span class="hqty mono">6</span><div><b>figure-8 desktop fasteners with #8 x 5/8 in screws (12)</b><span class="hnote">three on rail_top, three on cleat_rear, in the offset 5/8 in recesses</span></div></li><li><span class="hqty mono">4 to 5</span><div><b>#8 x 1-1/4 in screws, countersunk</b><span class="hnote">cleat_rear to the inside of the back, from the cleat side</span></div></li><li><span class="hqty mono">as needed</span><div><b>screws for the drawer fronts, through slotted holes from inside the boxes</b><span class="hnote">pulls undecided</span></div></li></ul>
   </div>
 
-  <p class="foot">Generated 2026-09-28 from <span class="mono">projects/Drawer-bench/cutlist.csv</span> and <span class="mono">images/parts/</span>, which <span class="mono">drawer_bench.py</span> and <span class="mono">part_drawings.py</span> write on every export; every drawn cut is probed against the CAD solid before its sheet is written. The bench image at the top is a screenshot of the CAD viewer (<span class="mono">hero_shot.py</span>). Part names match the CAD viewer.</p>
+  <div class="big">
+    <h2>Assembly<small>7 steps, in order</small></h2>
+    <figure class="dwg hero" tabindex="0"><img src="images/assembly/exploded.png" alt="the whole bench pulled apart: top, side frames, back with its cleat, bottom, rails, drawer boxes and fronts"><figcaption>everything pulled apart along the direction it goes in; tap to zoom</figcaption></figure>
+    <ol class="steps"><li class="step"><div class="stext"><h3>Side frames</h3><p>Glue each side panel into its front and rear posts: the 3/8 tongues above the notches go into the stopped grooves, glue on both faces of each tongue. Stand the posts and the panel on the bench with a 3/4 block under the panel&#x27;s bottom edge; that puts the panel&#x27;s top edge flush with the post tops. Check flush with a straightedge before clamping. Make both sides now: the left one stands up first, the right one closes the case in step 4.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-01.png" alt="Side frames: parts added in this step in wood colors, the rest grey" loading="lazy"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure><figure class="dwg sfig sub" tabindex="0"><img src="images/assembly/side-exploded.png" alt="one side frame pulled apart, seen from inside: the panel&#x27;s housed edges and notched bottom corners, the posts&#x27; stopped grooves and dowel bores" loading="lazy"><figcaption>one side frame pulled apart, seen from inside: the panel&#x27;s housed edges and notched bottom corners, the posts&#x27; stopped grooves and dowel bores; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Back, cleat and bottom</h3><p>Off the bench, glue the cleat inside the back&#x27;s top edge, flush with the top, figure-8 recesses up, and clamp it with the #8 x 1-1/4 screws from the cleat side. Push the bottom&#x27;s rear edge into the back&#x27;s groove with glue. Stand the left side frame and slide the pair in from the right, both at once: the back&#x27;s tongue into the rear post&#x27;s groove, the bottom&#x27;s side edge into the side panel&#x27;s groove.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-02.png" alt="Back, cleat and bottom: parts added in this step in wood colors, the rest grey" loading="lazy"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure><figure class="dwg sfig sub" tabindex="0"><img src="images/assembly/rear-exploded.png" alt="the back with its cleat lifted off the top edge and the bottom pulled out of the back&#x27;s groove" loading="lazy"><figcaption>the back with its cleat lifted off the top edge and the bottom pulled out of the back&#x27;s groove; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Front rails</h3><p>Dowel the three rails into the left front post, two 3/8 dowels each, glue. The bottom&#x27;s front edge sits in the bottom rail&#x27;s rabbet, flush with the rail&#x27;s top: glue it and screw down through the bottom into the rail. The top rail&#x27;s figure-8 recesses face up and open toward the inside.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-03.png" alt="Front rails: parts added in this step in wood colors, the rest grey" loading="lazy"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Close the right side</h3><p>Bring the right side frame in over the back&#x27;s tongue, the bottom&#x27;s edge and the three rails&#x27; dowels at once, all glued. Clamp across the case side to side at the posts, check the front frame square and the post tops level, and leave it until the glue cures.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-04.png" alt="Close the right side: parts added in this step in wood colors, the rest grey" loading="lazy"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Slides and drawer boxes</h3><p>Glue each box up around its bottom: front and back in the sides&#x27; end rabbets, the 1/4 bottom in the grooves with its underside 1/2 above the sides&#x27; bottom edges, hook notches and bores at the rear. Screw the Blum runners to the posts&#x27; inner faces and the rear brackets to the back, clip the locking devices under the box fronts and set the boxes on the runners.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-05.png" alt="Slides and drawer boxes: parts added in this step in wood colors, the rest grey" loading="lazy"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure><figure class="dwg sfig sub" tabindex="0"><img src="images/assembly/drawer-exploded.png" alt="one drawer box pulled apart: sides, front and back, 1/4 bottom" loading="lazy"><figcaption>one drawer box pulled apart: sides, front and back, 1/4 bottom; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Drawer fronts</h3><p>Screw the fronts to the box fronts from inside through oversize holes: 1/8 to the posts, 1/8 under the top, 1/4 between the two, the bottom one 3/4 off the floor. Pulls once chosen.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-06.png" alt="Drawer fronts: parts added in this step in wood colors, the rest grey" loading="lazy"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Top</h3><p>Set the top with 1-1/4 overhang all round and fix it with the six figure-8 fasteners on the top rail and the cleat, #8 x 5/8 screws. No glue; the fasteners let it move.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-07.png" alt="Top: parts added in this step in wood colors, the rest grey" loading="lazy"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure></li></ol>
+  </div>
+
+  <p class="foot">Generated 2026-10-07 from <span class="mono">projects/Drawer-bench/cutlist.csv</span> and <span class="mono">images/parts/</span>, which <span class="mono">drawer_bench.py</span> and <span class="mono">part_drawings.py</span> write on every export; every drawn cut is probed against the CAD solid before its sheet is written. The bench image at the top and the assembly pictures are screenshots of the CAD viewer (<span class="mono">hero_shot.py</span>, <span class="mono">assembly_shots.py</span>); the PDF is this page printed by <span class="mono">make_pdf.py</span>. Part names match the CAD viewer.</p>
 </div>
 
 <div id="lightbox" role="dialog" aria-label="Enlarged drawing" aria-hidden="true"><img id="lightbox-img" alt=""></div>

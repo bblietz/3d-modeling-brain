@@ -164,6 +164,12 @@ confirmed against the locked `POST` constant.
 - `cutlist.md` (inches only, to 1/32; Brian, 2026-09-28) and
   `cutlist.csv` (mm, the page builder's data), `drawer_bench.step`,
   `images/final-4view.png`, viewer sign-off before the cut list is final.
+- Shop page `cutlist.html` (`make_cutlist_page.py`): the viewer hero
+  image, a drawing per row, the hardware list and, since 2026-10-07, an
+  assembly section (an exploded view, then one row per step with its text
+  and a viewer image of the parts going in; `assembly_shots.py` owns the
+  step text and the images) and `cutlist.pdf`, the page printed by
+  `make_pdf.py` (headless Chrome, letter, 23 pages).
 - Re-run after measuring: overall size, top thickness/overhang/edge,
   plywood actuals, purchased slide spec.
 
@@ -308,7 +314,10 @@ open for Brian's review (change the constant, re-run the file).
 ## Assembly order (walked in the CAD; every part enters by a straight sideways move)
 
 1. Glue each side panel into its front and rear posts (two side
-   sub-assemblies).
+   sub-assemblies). Nothing in the joint sets the panel's height, since
+   the grooves run out the top and stop short of the floor: glue up on
+   the bench with a 3/4 in block under the panel's bottom edge, which puts
+   its top edge flush with the post tops (check with a straightedge).
 2. Off the bench, glue and screw the cleat inside the back's top edge,
    then pre-join the bottom to the back: the bottom's rear tab goes into
    the back's groove (through since 2026-09-27, so the tab can also

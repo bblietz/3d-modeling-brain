@@ -204,6 +204,16 @@ export_step(assembly, "/home/brian/ClaudeProjects/3d-modeling-brain/projects/<Na
   `scripts/cad-viewer.sh`; template `projects/Drawer-bench/hero_shot.py`),
   never the matplotlib STL render, and every row carries a shop drawing
   with its joinery located from the blank's own edges, in inches only.
+- The shop page ends with an assembly section and ships as a PDF (Brian,
+  2026-10-07, asked for on both benches): an exploded view, then one row
+  per step with the shop text and a viewer image of the parts going in
+  (new parts in wood colors, parts already placed grey), plus a
+  sub-assembly explosion where a step builds one. Templates:
+  `projects/Drawer-bench/assembly_shots.py` (owns the STEPS text, which
+  the page builder imports; scale each step's zoom by the viewer's fit
+  radius so every step shares one scale) and `make_pdf.py` (headless
+  Chrome, letter, the page's own `@media print` rules; keep each group
+  heading with its first row in one `break-inside: avoid` block).
 - FreeCAD path: the emitter measures build123d solids only; pass
   explicit `"dims": (t, w, l)` per part, read from `obj.Shape.BoundBox`.
 - Sheet nesting / cut layout is OUT OF SCOPE for the emitter: lay out

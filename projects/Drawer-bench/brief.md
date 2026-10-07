@@ -187,6 +187,12 @@ because option (a) leaves 19-1/4 in of interior depth.
   and are plain rectangles; the 35 x 13 mm hook notches in the backs
   stay. The model's hook-bore probe is the guard if the bottoms ever go
   back to 1/2 in.
+- The shop page ends with the assembly order, one row per step with a
+  viewer image of the parts going in, plus an exploded view and
+  sub-assembly explosions, and the page ships as a PDF (Brian,
+  2026-10-07: "add assembly steps/diagram to the cutlist. Export the
+  cutlist to pdf"). The step text records the 3/4 in spacer block that
+  sets the side panels' height at glue-up.
 
 ## Build log (2026-08-24)
 
@@ -214,8 +220,16 @@ because option (a) leaves 19-1/4 in of interior depth.
   from `part_drawings.py` (`images/parts/<part>.png`): each sheet is laid
   out from the model's constants and every groove, rabbet, notch and bore
   drawn is probed against the real solid before the sheet is written, so
-  a drawing cannot disagree with the CAD. After every `EXPORT=1` run:
-  `part_drawings.py`, `make_cutlist_page.py`, republish to the same URL.
+  a drawing cannot disagree with the CAD. Since 2026-10-07 the page ends
+  with an assembly section (exploded view, seven steps with text and a
+  viewer image each, side-frame, back-and-bottom and drawer-box
+  explosions; `assembly_shots.py` owns the step text and captures the
+  images) and links `cutlist.pdf`, the page printed by `make_pdf.py`
+  (headless Chrome, 23 letter pages). After every `EXPORT=1` run:
+  `part_drawings.py`, `hero_shot.py` and `assembly_shots.py` (viewer
+  open), `make_cutlist_page.py`, `make_pdf.py`, republish to the same URL
+  with the part PNGs, `images/hero.png`, `images/assembly/*.png` and
+  `cutlist.pdf`.
 - Self-checks in the file: 46 asserts and 12 housed-edge probes from the
   solids (both ends), 300 pairwise no-overlap intersections, post volume
   identity (chamfers vs grooves vs mortises). Mutation-tested during

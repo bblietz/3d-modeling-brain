@@ -79,6 +79,15 @@ reviewed, not built; update with measured fits after the build.
   that guards the real constraint was there all along; the stop was a
   hand-coded consequence, not a derived one. Assert the constraint and
   let the geometry be the simple default.
+- Assembly pictures at one scale (2026-10-07, `assembly_shots.py`): the
+  OCP viewer fits its camera to whatever is shown (three-cad-viewer takes
+  the larger of the parts' bounding-sphere radius and the bbox center's
+  distance from the origin), so a step that shows three parts came out
+  huge and cut off next to the finished bench. Scale each step's zoom by
+  that fit radius (step over full) with one fixed target and every step
+  image shares one scale, the new parts sitting where they will be. For
+  the PDF, a group heading and its first row share one `break-inside:
+  avoid` block; Chrome ignored `break-after: avoid` on the heading.
 - Subagent-driven build: one implementer per task with the complete code
   in the brief, one reviewer per task that mutation-tests the asserts, a
   whole-file review at the end. The per-task reviews found only Minor
