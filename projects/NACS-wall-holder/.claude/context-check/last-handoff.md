@@ -1,31 +1,39 @@
 ---
 type: handoff
 project: NACS-wall-holder
-date: 2026-09-19
+date: 2026-10-08
 ---
 
-# NACS wall holder handoff (2026-09-19, PROJECT CLOSED)
+# NACS wall holder handoff (2026-10-08, revision built, not printed)
 
 ## State
-Done. Brian: "charger holder is on the wall and working great." The mounted part is the
-final one committed in 9585fc0: v7 cavity (grip up, nose in, grip down docking on a fixed
-cleat), 4 in base, round flange, 1/16 in roundovers on every outside edge except the plate's
-back and the screw holes. `holder.scad`, `holder.stl`, `holder-print.3mf` on disk match what
-was printed. Full history in brief.md; final result in knowledge/learnings/nacs-wall-holder.md.
+The 2026-09-19 holder is on the wall and working. Brian asked for a revision on 2026-10-08; its CAD
+(`holder.scad`), `holder.stl` and `holder-print.3mf` (8 h 37 min, 438 g) are built and checked, not
+printed. Options were picked from rendered pages (https://claude.ai/artifact/5u3wgRBUTWngnCdjFuPzKB);
+the plan page (https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6) is updated. Full record in brief.md
+"Revision of 2026-10-08".
 
-## Decisions locked (all confirmed by the real print)
-- Fixed cleat in the lock pocket on the lower wall, no spring tab; button up; wand 45 down,
-  15 off the wall; drum 75 long, radius 40; cleat 1.25 in from the opening; round flange
-  diameter 104; Tesla T on the flange.
-- Cavity is the swept room of grip-up docking (`dock_tilt = 12`); sides and roof flare 0.1
-  per mm past the nose shoulder; the floor keeps Tesla's line and does not flare.
-- Base 4 in square, body shrunk round the unchanged cavity; solid infill round the screw
-  holes; every outside edge has a 1/16 in rolling-ball roundover except the plate's back and
-  the screw holes (`pipeline/rim_round.py` for the mouth's rim).
-- Reusable tools for any future revision: `pipeline/insertion.py` (docking/hold check),
-  `pipeline/zbudget.py` (depth budget), `pipeline/rim_round.py` (rim roundover), `render.sh` /
-  `renders_page.py` (page at https://claude.ai/artifact/TzbzpN4voPdJoeMWF8jHRw).
+## Decisions already locked (Brian, 2026-10-08)
+- Drum 1 in deeper (`drum_l` 100.4), not 2 in. Drum diameter 90 (`drum_r` 45) for the deeper cavity;
+  flange stays 104 with 7 mm blends.
+- Cavity 1/2 in deeper: `cleat_depth` 44.45 (1.75 in). Wand at the far end, mouth top 3.6 mm under the
+  flange (`mouth_z` 61.48, `cut_top` 93.8).
+- Lip: full width (B), 1.5 in rise (3 in was too tall), `tab_style = "crest"` (shield sides + arched
+  top), frame line yes.
+- Face: Tesla T back (after generic emblems were shown and "bolt" briefly picked), TESLA wordmark bent
+  along the crest's arc. Generic emblems remain as `emblem` options.
+- Top screws: plain holes (`top_mount = "none"`); keyhole and driver-hole variants stay in the file.
+  Brian knows the driver goes in at a 6 degree tilt past the lip.
+- Everything from 2026-09-19 stays locked: v7 cavity and cleat, grip-up docking, 45 / 15 degree wand,
+  4 in base and hole pattern, 1/16 in roundovers.
 
 ## Open
-None. Project closed. If Brian asks for a change, treat it as a new request against this
-locked baseline, not a resumption of open work.
+- Print `holder-print.3mf` (plate down, face up; supports in the cavity, under the flange ring and
+  under the lip). Not sent to the printer.
+- Grip fit in the extra 1/2 in of opening is unproven (Tesla's CAD ends at 48 mm from the tip). Ask
+  for the handle's width and height 1/2 in and 1 in behind the glossy housing, plus the button height;
+  adjust `grip_flare` if needed, then rerun zbudget.py, rim_round.py, insertion.py, the export and
+  make_coupon_3mf.py (that order).
+- If driving the top screws at a tilt proves awkward, switch `top_mount` to "keyhole" and rebuild.
+- Retrospective to finish after the print: knowledge/learnings/nacs-wall-holder.md has the revision's
+  lessons already.

@@ -12,7 +12,7 @@
 - [Vault GitHub repo](reference-vault-github-repo.md) - private bblietz/3d-modeling-brain, remote origin/main; commit and push after milestones; never commit the printer access code
 - [Garmin helm panel](project-garmin-helm-panel.md) - switched 2026-09-26 to PRINTING four ASA tiles at 3/8 in; 4-plate 3MF verified; router template fits; outline still a guess
 - [Desk cable storage](project-desk-cable-storage.md) - closet printer bench; CAD complete 2026-09-26: wall trough D, 254 x 152 x 152 mm, front and side walls 4.5 in, back 6 in, two holes 7 in apart, sliced 7 h 59 m / 387 g PETG; signed off 2026-09-29, awaiting the print; reprint note: a bit narrower front to back (try 5 in)
-- [NACS wall holder](project-nacs-wall-holder.md) - Tesla Wall Connector dock, DONE 2026-09-19: printed, mounted, working great
+- [NACS wall holder](project-nacs-wall-holder.md) - Tesla Wall Connector dock; 2026-09-19 print mounted and working; 2026-10-08 revision (1 in deeper, 90 drum, crest lip + wordmark, cavity 1/2 in deeper) sliced 8 h 37 min / 438 g, NOT printed; grip fit in the extra 1/2 in unproven, ask for handle measurements
 - [Model dispatch](feedback-model-dispatch.md) - say which model fits each task, flag when Fable 5.1 beats the active model, never switch silently
 - [Speaker cab system](project-speaker-cab-system.md) - MaximoCabs guitar cab capability; quote wizard live; 2 orders done; baffles are 1/2 in 9-ply void-free; cab-share auto-publishes each preview
 - [Friction fit recipe](feedback-friction-fit-recipe.md) - crush ribs not tighter clearance, plus a designed opening feature; read knowledge/friction-fits-x2d.md first

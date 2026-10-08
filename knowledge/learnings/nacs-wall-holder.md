@@ -3,7 +3,7 @@ title: NACS wall holder (Tesla Wall Connector Gen 3)
 type: learning
 project: NACS-wall-holder
 created: 2026-09-18
-tags: [x2d, petg, openscad, nacs, tesla, fixed-cleat, docking-kinematics, dual-nozzle-support]
+tags: [x2d, petg, openscad, nacs, tesla, fixed-cleat, docking-kinematics, curved-text, dual-nozzle-support]
 ---
 
 # NACS wall holder
@@ -139,6 +139,51 @@ was never covered by a coupon, only by Tesla's CAD plus a 1.6 mm flare estimate)
 body holds the docking geometry unchanged, the round flange, and the rounded floor lip's small
 shift in the hang (3.5 degrees, 1.75 mm of the cleat's edge engaged, computed HOLD 20.4 mm).
 
+## Revision 2026-10-08 (built, not printed)
+
+Brian reopened the project: the holder 1 in deeper (first asked 2 in), a squared-off top lip with
+rounded corners (3 in asked, 1.5 in kept after a look), the cavity 1/2 in deeper. Full record in the
+brief's "Revision of 2026-10-08". Result: drum 100 long and 90 across, a full-width "crest" lip (shield
+sides under an arched top) with a frame line, the T and the TESLA wordmark bent along the arc, cleat
+1.75 in from the opening; 8 h 37 min, 438 g. Every pick was made against rendered options on an HTML
+page (options -> page -> pick, four rounds), which is the right way to run a revision with Brian.
+
+### What worked
+- Measure the limit before asking: `pipeline/depth_limit.py` exported the raw cavity at several cleat
+  depths and measured the wall left at its far corner (the cavity crosses the drum at 45 degrees, so
+  each 1/4 in of depth costs 5.5 mm of wall). That turned "deeper" into a table Brian could choose
+  from (1/4 in on the 80 drum, 1/2 in on a 90 drum).
+- Lip outlines as parameters (`tab_style`, `tab_trim`, `emblem`, `top_mount`, `lip_text`) so every
+  option is one `-D` away and the chosen one is just the default. The rejected options stay in the
+  file; Brian changed his mind twice (generic emblem to bolt to the T back) at no cost.
+- Curved text in OpenSCAD: cut the flat SVG artwork into 0.4 mm strips and stand each on the arc at its
+  own angle (`wordmark_arc()`); the crown's arc centre is almost the drum axis, so the text follows
+  the lip's own curve.
+- The connector's own face as an emblem: `pipeline/nacs_face.py` sections the housing mesh 0.5 mm
+  behind the tip and writes the outline and pin holes as polygons (orientation from the outline's
+  top/bottom width ratio against nose_outline.scad). Not chosen, but a reusable pictogram.
+
+### What bit
+- OpenSCAD `import(svg, center = true)` centres on the viewBox ORIGIN, not on the content: a cropped
+  viewBox like `0 324 278 36` lands the artwork 90 mm off. Shift the paths' transform so the viewBox
+  starts at 0 0 (how `reference/tesla-t.svg` was made too).
+- The pipeline parses holder.scad constants with a regex that only takes literal numbers:
+  `drum_l = 75 + 50.8` silently reads 75. Keep every parsed constant literal.
+- Bambu CLI 3MF: the item transform places the model's origin (the plate centre) at the bed position,
+  NOT the bounding-box centre. "Correcting" the screw-pad check windows for the lip's 19 mm
+  bounding-box shift moved them off the plate (pads 0.0). The pad modifier placement was right all
+  along.
+- A lip adds a wide horizontal slab high in the print: its tree supports root far outside the part,
+  and the prime tower that was 26.6 mm clear is 13.2 mm from the part. The build's gap assertion
+  caught it; the tower moved beside the plate (212, 40).
+- A full-width lip 4 in in front of the plate hides the top screws from a straight driver. Keyhole
+  slots and driver holes were built as options; Brian chose plain holes and a tilted driver. Say the
+  tilt angle out loud (6 degrees here) so the choice is informed.
+
+### Open
+- Not printed. The grip past Tesla's CAD (48 mm from the tip) now sits 1/2 in inside the opening with
+  only the 0.1 per mm flare for room: measure the real grip before printing, or accept the risk.
+
 ## Open
 
-None. The project is closed. Any further change is a new request.
+None of the 2026-09-19 work. The revision above is open until printed.

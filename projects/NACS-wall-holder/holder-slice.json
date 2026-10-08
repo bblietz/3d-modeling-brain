@@ -1,17 +1,17 @@
 {
- "minutes": 332,
- "grams": 241.4,
+ "minutes": 517,
+ "grams": 438.2,
  "grams_per_filament": {
-  "1": 232.9,
-  "2": 8.6
+  "1": 426.1,
+  "2": 12.1
  },
- "layers": 267,
- "tower_gap_mm": 26.6,
+ "layers": 351,
+ "tower_gap_mm": 20.2,
  "screw_pads": {
   "pad 1": 0.9,
-  "pad 2": 0.89,
+  "pad 2": 0.9,
   "pad 3": 0.9,
-  "pad 4": 0.9,
-  "plain plate": 0.19
+  "pad 4": 0.91,
+  "plain plate": 0.18
  }
 }

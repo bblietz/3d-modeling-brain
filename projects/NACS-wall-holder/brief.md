@@ -2,13 +2,73 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: DONE 2026-09-19 (Brian: "charger holder is on the wall and working great"). Full part printed, mounted and in daily use: v7 cavity (grip up, nose in, grip down docking on a fixed cleat), 4 in base, round flange, 1/16 in roundovers.
+status: REVISION 2026-10-08, CAD and 3MF done, not printed. Drum 1 in deeper and 90 across, crest lip 1.5 in with the TESLA wordmark, frame line, T back, cavity 1/2 in deeper (cleat 1.75 in); sliced 8 h 37 min, 438 g. The 2026-09-19 holder (v7 cavity, 4 in base, round flange, 1/16 in roundovers) is on the wall and working great.
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
 # NACS wall holder (Tesla Wall Connector Gen 3, 48A)
 
 Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector handle, with a cable wrap hook.
+
+## Revision of 2026-10-08 (CAD and 3MF done, not printed)
+
+Brian asked for a deeper holder, a taller squared-off top lip and a deeper wand cavity. Picked from
+rendered options (page: https://claude.ai/artifact/5u3wgRBUTWngnCdjFuPzKB, built by
+`pipeline/render_options.sh` + `pipeline/options_page.py`, renders in `images/options-2026-10-08/`):
+
+- Drum `drum_l` 75 to 100.4 (1 in deeper; "2 in" was first asked, then "only be 1 in deeper"). The
+  holder stands 105 mm off the wall; 72 mm of straight drum for the loops (was 47).
+- Drum `drum_r` 40 to 45 (diameter 90) because the cavity 1/2 in deeper did not fit the 80 drum: the
+  cavity crosses the drum at 45 degrees, and `pipeline/depth_limit.py` measured the wall left at its far
+  corner at 11.4 / 5.9 / 0.1 mm for cleat depths 1.25 / 1.5 / 1.75 in on the 80 drum; the 90 drum
+  leaves 5 mm at 1.75 in. The flange stays 104, so `fillet_flange` 12 to 7 and `fillet_plate` 8 to 7
+  (the plate blend's foot must stay inside the screw countersinks, 52.7 off the axis; it is at 52).
+- Cavity: `cleat_depth` 31.75 to 44.45 (1.75 in, "1/2 deeper, 90mm drum"). `mouth_z` 61.48 keeps the
+  wand at the far end with the mouth top 3.6 mm under the flange as validated (`cut_top` 93.8 = flange
+  underside 97.4 minus 3.6); the deepest corner is now 23 mm off the wall, no longer in the plate.
+  Checks: `holder.stl` one watertight body, 612 cm3; docked clash 0 mm3; `insertion.py` (GOAL_TIP
+  raised 45 to 72 for the deeper mouth) WAY IN yes at 0 to 9 degrees, HOLD 19.6 mm with 1.87 of 3.57 mm
+  engaged, tip 3.20 mm from the end wall at -3.0 degrees: the v7 numbers, because the rounded floor lip
+  now sits under the grip, which the tool does not model (the 1.25 in cavity gave 3.37 / -3.5 / 1.75 /
+  20.4 with the lip on the housing).
+  - NOT PROVEN: the first 1/2 in of the grip (48 to 61 mm from the tip) now sits inside the opening,
+    where Tesla's CAD ends. The cavity there is the housing's last section plus the 0.1 per mm flare
+    (about 2 mm per side at the rim) and the floor on Tesla's line. If the grip or the top button is
+    bigger than that, it will not dock. Ask Brian for the handle's width and height 1/2 in and 1 in
+    behind the glossy housing, and the button height, before printing.
+- Lip ("the top lip of the holder should be 3 in taller, and have a squared off profile with rounded
+  corners"): 3 in "is too tall", so `tab_rise` 38.1 (1.5 in above the flange's top). Width: option B,
+  full width 104 (tangent to the flange), over A (72 mm, clearing the top screws) and C (the whole
+  flange squared off). Outline: Brian asked to "combine the top of the arch lip with the shield lip"
+  after seeing plain / arch / shield / gable: `tab_style = "crest"`, sides tapering to `tab_top_w` 84
+  tangent to the circle, top an arc crowned `tab_crown` 10, corners `tab_r` 12.7, 8 mm thick, all edges
+  edge_r (sphere minkowski). Trim: `tab_trim = "frame"` (2.5 mm line 1 mm deep, 6 mm in, round the
+  whole face outline), yes.
+- Face: Brian first asked to "remove the tesla artwork and put something more generic"; four generic
+  emblems were built and shown (bolt, plug, the NACS face traced from the housing STEP by
+  `pipeline/nacs_face.py` into `nacs_face.scad`, the letters EV; `emblem` parameter), picked "bolt",
+  then "actually add the tesla logo back in. keep border. Tesla text at top that follows the curve of
+  the lip": `emblem = "tesla"` (the T, 59 mm, as before) and `lip_text = true`: the official wordmark
+  (`reference/tesla-wordmark.svg`, the wordmark group of Wikimedia Tesla_Motors.svg with its transform
+  shifted so the viewBox starts at 0 0) 62 mm wide, cut into 0.4 mm strips and stood on the crest's own
+  arc 2 mm under the frame line (`wordmark_arc()`). The generic emblems stay in the file as options.
+- Top screws: the full-width lip hides them from a straight driver. Keyhole slots (`top_mount =
+  "keyhole"`, hang on the top screws, drive the bottom two) and driver holes through the lip
+  (`"holes"`) were built and shown; Brian: "just keep regular holes, now that the lip is slightly out
+  of the way" (`"none"`). Told him: the crest's edge is 6 mm outside the top screw centres at that
+  height, so the driver goes in at about a 6 degree tilt, not straight.
+- Print (`pipeline/make_coupon_3mf.py holder`, same recipe): 8 h 37 min, 438 g (426 g PETG, 12 g support
+  interface), 351 layers, 104 x 142 x 105 mm on the bed. The prime tower moved from (212, 180) to
+  (212, 40): the lip's tree supports root further out and left it 13.2 mm from the part (the build
+  asserts 15); now 20.2 mm. Screw pads 90% solid, plain plate 18%. Learned on the way: the 3MF item
+  transform puts the model's ORIGIN (the plate centre) at BED_CENTRE, not the bounding-box centre; a
+  bounding-box correction to the pad check put the windows off the plate (pads 0.0).
+- Tools: `pipeline/depth_limit.py` (far-wall thickness vs cleat depth, from the raw cavity:
+  `part="cavity"` in holder.scad), `pipeline/render_options.sh` + `pipeline/options_page.py` (the
+  options page), `pipeline/nacs_face.py`. Pipeline constants parsed by regex (`insertion.py`,
+  `make_coupon_3mf.py`, `renders_page.py`) must stay literal numbers in holder.scad, never
+  expressions. OpenSCAD's `import(svg, center = true)` centres on the viewBox origin, not on the
+  content, so artwork viewBoxes must start at 0 0.
 
 ## Decisions already locked (2026-09-17, supersedes the nose-down socket of 09-16)
 
@@ -68,7 +128,7 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
 
 ## Files (2026-09-17)
 
-- `holder.scad` (+ `nose_outline.scad`): the model; `part="coupon"` gives the fit coupon. `render.sh` renders `images/scad/*.png`; `renders_page.py` builds `plan.html` (published as the "NACS Holster Plan" artifact).
+- `holder.scad` (+ `nose_outline.scad`): the model; `part="coupon"` gives the fit coupon. `render.sh` renders `images/scad/*.png`; `renders_page.py` builds `plan.html` (published as the "NACS Holster Plan" artifact, https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6 since 2026-10-08; the earlier artifact was deleted).
 - `coupon.stl`, `coupon-print.3mf`, `coupon-slice.json`, `images/scad/coupon-*.png`: the fit coupon, generated from holder.scad (`part="coupon"`, export needs `-D show_wall=false` or the render's wall plane comes along): the v7 nose cavity and the cleat, cut off 1 mm past the nose shoulder (`coupon_cut`), 3 mm walls, 0.9 mm base, print orientation unchanged: 72 x 67 x 57 mm. Real slice: 1 h 36 min, 59 g (55 g PETG including the prime tower, 3.8 g support). The first printed coupon (v4, commit cb42b65) had the small drafted cleat and the step roof. Set `coupon_cut` past the mouth to get the whole opening.
 - `rim_round.scad`: GENERATED by `pipeline/rim_round.py` (the mouth rim's roundover stations), included by `holder.scad`; never edit by hand.
 - `images/scad/entry.png` and `edges.png` (from `render.sh`) and `entry-before.png` (one-off: the stepped entry of commit 4e9f8d9 on the 4 in body).

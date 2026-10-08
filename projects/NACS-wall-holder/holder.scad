@@ -18,6 +18,7 @@
 include <nose_outline.scad>;
 include <bell_sections.scad>;
 include <rim_round.scad>;
+include <nacs_face.scad>;
 
 display = true;       // rotate so +Y is up on screen for renders
 show_nose = true;     // ghost of the connector, docked
@@ -26,7 +27,7 @@ pose_tilt = 0;        // ghost wand only: tilted up about its tip by this much, 
 pose_out = 0;
 show_wall = true;     // faint wall plane behind the plate in renders
 part = "holder";      // "coupon": the cavity and cleat with thin walls on a piece of the plate, print orientation unchanged
-show_logo = true;     // Tesla T recessed in the flange face (reference/tesla-t.svg, official artwork)
+show_logo = true;     // the emblem recessed in the flange face (insertion.py turns it off for its export)
 $fn = 96;
 
 // connector facts (Tesla TS-0023666, STEP)
@@ -53,19 +54,39 @@ cleat_a = notch_a + tip_gap;                       // the holding edge, from the
 cleat_h = pocket_h - cleat_clear;                  // edge height above the floor
 cleat_b = cleat_a + pocket_len_mouth - 0.11 - cleat_clear - 0.1;   // foot of the ramp, just inside the pocket's mouth-side wall
 undercut = 15;        // the back face overhangs by this much, so the contact is at the edge
-cleat_depth = 31.75;  // the cleat's holding wall to the opening, along the cleat's wall (Brian: 1.25 in)
+cleat_depth = 44.45;  // the cleat's holding wall to the opening, along the cleat's wall: 1.75 in (Brian, 2026-10-08: cavity 1/2 in deeper; was 1.25 in)
 grip_flare = 0.1;     // the sides and roof open by this much per mm from the nose shoulder to the outer edge, with no step: 1.6 by the end
                       // of Tesla's housing CAD (48.2 from the tip), where the grip is not modelled, and on at the same rate
 floor_knee = 4;       // the floor carries the hanging wand, so it keeps Tesla's line to the end of that CAD, then falls to the flare over this length
 plate_w = 101.6; plate_t = 5; plate_r = 10; hole_in = 10; hole_d = 5; csk_d = 10;   // corner radius = hole_in, so each countersink sits centred in its rounded corner
 edge_r = 25.4 / 16;  // every outside edge is rounded at least 1/16 in (Brian, 2026-09-18), except the plate's back edge and the screw holes;
                      // the cleat keeps its sharp holding edge and the T its crisp outline. The mouth's rim: rim_round.scad, from pipeline/rim_round.py
-drum_r = 40; drum_l = 75;                  // plate front to flange front; drum 80 across for the 4 in base (Brian, 2026-09-18), the cavity keeps its size
+drum_r = 45; drum_l = 100.4;                // plate front to flange front: 75 plus 1 in (Brian, 2026-10-08: "only be 1 in deeper", down from the 2 in first asked); drum 90 across
+                                            // for the 1/2 in deeper cavity (Brian, 2026-10-08; 80 left 0.1 mm of wall at the cavity's far corner, 90 leaves 5)
 flange_t = 8;                              // the flange is round (Brian, 2026-09-18: no point at the lower left)
-fillet_flange = 12;                        // concave blend from the drum into the flange face
-fillet_plate = 8;                          // concave blend from the drum into the plate
+fillet_flange = 7;                         // concave blend from the drum into the flange face (12 with the 80 drum; 7 keeps the flange at 104 on the 90 drum)
+fillet_plate = 7;                          // concave blend from the drum into the plate (8 with the 80 drum; its foot must stay inside the screw countersinks, 52.7 off the axis)
 flange_r = drum_r + fillet_flange;
-logo_h = 59; logo_depth = 1;               // Tesla T height on the flange face (57% of the round part, as on the sample), recess depth
+// the top lip (Brian, 2026-10-08): a squared-off tab with rounded corners rising from the round flange, full width so its sides meet the flange's
+// circle tangentially (his pick B over a narrower tab), 1.5 in above the flange's top (3 in was too tall). It hides the plate's top screws from a
+// driver, hence top_mount.
+tab_w = 104; tab_rise = 38.1; tab_r = 12.7;  // width (= flange diameter), rise above the flange's top, corner radius
+tab_style = "crest";   // the lip's outline: "plain" flat top; "arch" crowned top; "shield" sides tapering to tab_top_w; "crest" shield sides with the arch's
+                       // crowned top (Brian, 2026-10-08: "combine the top of the arch lip with the shield lip"); "gable" peaked top; "none" for the round flange alone
+tab_top_w = 84;        // shield: width at the top
+tab_crown = 10;        // arch: rise of the top's arc at the centre
+tab_peak = 12;         // gable: rise of the apex above the eaves
+tab_trim = "frame";    // "frame": a recessed line following the whole face's outline (Brian, 2026-10-08: yes)
+frame_in = 6; frame_w = 2.5; frame_depth = 1;
+top_mount = "none";    // reaching the top screws behind the lip: "keyhole" slots open at the plate's top edge (hang the holder on the top screws, drive the bottom two);
+                       // "holes" driver holes through the lip; "none" plain holes (Brian, 2026-10-08: the crest's edge is 6 mm outside the top screw centres, driver goes in at a 6 degree tilt)
+driver_d = 12;
+logo_h = 59; logo_depth = 1;               // emblem height on the flange face (57% of the round part, as the T was), recess depth
+emblem = "tesla";      // "tesla" the T (reference/tesla-t.svg, official artwork; Brian, 2026-10-08: back in after a look at generic ones); "bolt" a lightning bolt; "plug" a
+                       // two-prong plug; "nacs" the connector's own face from Tesla's housing STEP (nacs_face.scad, pipeline/nacs_face.py); "ev" the letters EV; "none"
+lip_text = true;       // the TESLA wordmark (reference/tesla-wordmark.svg, official artwork) recessed in the lip, bent along the crest's arch (Brian, 2026-10-08)
+wordmark_w = 62;       // its width along the arc
+wordmark_gap = 2;      // between the wordmark's top and the frame line's inner edge
 coupon_wall = 3;                           // wall around the cavity in the fit coupon
 coupon_slab = 0.9;                         // the coupon keeps only this much under the cavity's deepest corner (3 layers)
 coupon_cut = tip_gap + nose_len + 1;       // the coupon ends here, just past the nose shoulder: the deeper opening gets no coupon (Brian, 2026-09-17)
@@ -84,7 +105,7 @@ function lip_q(b, c) = let(p = M0 + b * [v[0], v[1]] + c * [w[0], w[1]], dxy = [
     (-B + sqrt(B * B - 4 * A * C)) / (2 * A);
 mouth = cleat_a + cleat_depth - lip_q(floor_y, 0);   // cavity end wall to the mouth centre, so the lip on the cleat's wall is cleat_depth from the holding wall
 behind = 3;                                          // solid left between the wall and the cavity's deepest corner, which dips into the 5 mm plate
-mouth_z = 37.92;                                     // mouth centre out from the wall that gives `behind` (pipeline/zbudget.py)
+mouth_z = 61.48;                                      // mouth centre out from the wall: the wand stays at the far end, mouth top 3.6 mm under the flange as validated (cut_top = flange underside - 3.6); the deepest corner is then 23 mm off the wall, pipeline/zbudget.py
 M = [M0[0], M0[1], mouth_z];                         // mouth centre, on the drum surface
 T = M - mouth * d;                                                     // cavity floor centre
 
@@ -178,25 +199,77 @@ module drum_profile() {
 module plate() hull() for (sx = [-1, 1], sy = [-1, 1]) translate([sx, sy] * (plate_w / 2 - plate_r))
     rotate_extrude() polygon(concat([[0, 0], [plate_r, 0]], [for (t = [0 : 10 : 90]) [plate_r - edge_r + edge_r * cos(t), plate_t - edge_r + edge_r * sin(t)]], [[0, plate_t]]));
 
+// the top lip's outline in the flange plane (+Y up). tab_raw: sharp corners, the sides meeting the flange's circle at their tangent points, the
+// part below those points inside the flange. tab2d: the top corners rounded tab_r (offset in and out), the bottom ones put back sharp so the
+// sides stay tangent to the circle. The lip itself: every edge rounded edge_r (sphere minkowski on the outline shrunk by edge_r).
+y_top = flange_r + tab_rise;
+module tab_raw() {
+    if (tab_style == "plain") translate([-tab_w / 2, 0]) square([tab_w, y_top]);
+    else if (tab_style == "arch") { R = (pow(tab_w / 2, 2) + pow(tab_crown, 2)) / (2 * tab_crown);
+        intersection() { translate([-tab_w / 2, 0]) square([tab_w, y_top]); translate([0, y_top - R]) circle(R, $fn = 720); } }
+    else if (tab_style == "shield") { P = [tab_top_w / 2, y_top]; a = atan2(P[1], P[0]) - acos(flange_r / norm(P)); Q = flange_r * [cos(a), sin(a)];
+        polygon([[-Q[0], Q[1]], Q, P, [-P[0], P[1]]]); }
+    else if (tab_style == "crest") { P = [tab_top_w / 2, y_top - tab_crown]; a = atan2(P[1], P[0]) - acos(flange_r / norm(P)); Q = flange_r * [cos(a), sin(a)];
+        R = (pow(P[0], 2) + pow(tab_crown, 2)) / (2 * tab_crown); E = P + (P - Q) / norm(P - Q) * 30;   // the sides run on past P; the crown's arc through P cuts them back
+        intersection() { polygon([[-Q[0], Q[1]], Q, E, [-E[0], E[1]]]); translate([0, y_top - R]) circle(R, $fn = 720); } }
+    else if (tab_style == "gable") polygon([[-tab_w / 2, 0], [tab_w / 2, 0], [tab_w / 2, y_top - tab_peak], [0, y_top], [-tab_w / 2, y_top - tab_peak]]);
+}
+module tab2d() if (tab_style != "none") union() { offset(r = tab_r) offset(r = -tab_r) tab_raw(); intersection() { tab_raw(); translate([-100, -1]) square([200, 25]); } }
+module tab() if (tab_style != "none") translate([0, 0, total_l - flange_t + edge_r]) minkowski() { linear_extrude(flange_t - 2 * edge_r) offset(r = -edge_r) tab2d(); sphere(edge_r, $fn = 24); }
+module face2d() union() { circle(flange_r); tab2d(); }     // the whole front face's outline
+// the wordmark bent along the crest's arch: the flat artwork cut into strips, each stood on the arc at its own angle (the arc's centre is the crown's)
+wm_strip = 0.4;
+module wordmark_flat() resize([wordmark_w, 0], auto = true) import("reference/tesla-wordmark.svg", center = true);
+module wordmark_arc() if (tab_style == "crest" || tab_style == "arch") {
+    Rc = (pow((tab_style == "crest" ? tab_top_w : tab_w) / 2, 2) + pow(tab_crown, 2)) / (2 * tab_crown);   // the crown's radius, as in tab_raw
+    wh = wordmark_w * 36.249 / 278.672;                                                                   // the wordmark's height at this width
+    Rt = Rc - frame_in - frame_w - wordmark_gap - wh / 2;                                                 // the text's centreline radius
+    n = ceil(wordmark_w / wm_strip);
+    translate([0, y_top - Rc]) for (i = [0 : n - 1]) { x0 = -wordmark_w / 2 + i * wm_strip;
+        rotate(-(x0 + wm_strip / 2) / Rt * 180 / PI) translate([0, Rt]) translate([-(x0 + wm_strip / 2), 0]) intersection() { wordmark_flat(); translate([x0 - 0.01, -50]) square([wm_strip + 0.02, 100]); } }
+}
+module trim() {
+    if (lip_text) translate([0, 0, total_l - logo_depth]) linear_extrude(logo_depth + 0.01) wordmark_arc();
+    if (tab_trim == "frame") translate([0, 0, total_l - frame_depth]) linear_extrude(frame_depth + 0.01) difference() { offset(r = -frame_in) face2d(); offset(r = -frame_in - frame_w) face2d(); }
+}
+
 module body() {
     plate();
     rotate_extrude() drum_profile();
+    tab();
 }
 
-// official emblem, two paths; the 0.05 mm closing heals a 0.02 mm self-crossing at the top of the stem in Tesla's outline
-module logo() translate([0, 0, total_l - logo_depth]) linear_extrude(logo_depth + 0.01)
-    resize([0, logo_h], auto = true) offset(r = -0.05) offset(r = 0.05) import("reference/tesla-t.svg", center = true);
+// the emblem, logo_h tall, centred on the drum axis. The T: official emblem, two paths; the 0.05 mm closing heals a 0.02 mm self-crossing at the top of the stem
+module bolt2d() translate([-0.275, -0.5]) polygon([[0.25, 1], [0, 0.42], [0.21, 0.42], [0.1, 0], [0.55, 0.58], [0.34, 0.58], [0.45, 1]]);   // 0.55 wide, 1 tall
+module plug2d() translate([0, -30]) {                                                                                   // 60 tall: prongs, body, cord
+    for (sx = [-1, 1]) hull() { translate([sx * 8 - 2.5, 44]) square([5, 1]); translate([sx * 8, 57.5]) circle(2.5); }
+    hull() for (sx = [-1, 1], sy = [-1, 1]) translate([sx * 13, 34 + sy * 7]) circle(5);
+    hull() { translate([-3, 22]) square([6, 1]); translate([0, 3]) circle(3); }
+}
+module nacs2d() { difference() { polygon(nacs_face_outer); offset(r = -2) polygon(nacs_face_outer); } for (h = nacs_face_holes) polygon(h); }   // outline band and pin holes
+module emblem() if (emblem != "none") translate([0, 0, total_l - logo_depth]) linear_extrude(logo_depth + 0.01) {
+    if (emblem == "tesla") resize([0, logo_h], auto = true) offset(r = -0.05) offset(r = 0.05) import("reference/tesla-t.svg", center = true);
+    else if (emblem == "bolt") resize([0, logo_h], auto = true) bolt2d();
+    else if (emblem == "plug") resize([0, logo_h], auto = true) plug2d();
+    else if (emblem == "nacs") resize([0, logo_h * 0.9], auto = true) nacs2d();
+    else if (emblem == "ev") text("EV", size = logo_h * 0.62, font = "DejaVu Sans:style=Bold", halign = "center", valign = "center");
+}
 
 module holes() {
     for (sx = [-1, 1], sy = [-1, 1]) translate([sx * (plate_w / 2 - hole_in), sy * (plate_w / 2 - hole_in), 0]) {
-        translate([0, 0, -1]) cylinder(h = plate_t + 2, d = hole_d);
-        translate([0, 0, plate_t - (csk_d - hole_d) / 2]) cylinder(h = (csk_d - hole_d) / 2 + 0.01, d1 = hole_d, d2 = csk_d);
+        slot = sy > 0 && top_mount == "keyhole" ? 20 : 0;   // the top holes run out through the plate's top edge, countersink and all
+        hull() for (dy = [0, slot]) translate([0, dy, -1]) cylinder(h = plate_t + 2, d = hole_d);
+        hull() for (dy = [0, slot]) translate([0, dy, plate_t - (csk_d - hole_d) / 2]) cylinder(h = (csk_d - hole_d) / 2 + 0.01, d1 = hole_d, d2 = csk_d);
+    }
+    if (top_mount == "holes") for (sx = [-1, 1]) translate([sx * (plate_w / 2 - hole_in), plate_w / 2 - hole_in, total_l - flange_t - 1]) {   // driver holes through the lip, in line with the top screws
+        cylinder(h = flange_t + 2, d = driver_d);
+        translate([0, 0, flange_t + 1 - edge_r]) cylinder(h = edge_r + 0.01, d1 = driver_d, d2 = driver_d + 2 * edge_r);
     }
 }
 
 // the cavity as cut from the body. It stops at cut_top, the height its top reaches inside the drum (pipeline/zbudget.py, mouth top). Above that the
 // docking room's flared top corner ran on outside the drum as a narrow groove up the blend to the flange's rim, where no wand goes (insertion.py)
-cut_top = 68.4;
+cut_top = 93.8;
 module cavity_cut(grow = 0) intersection() { in_cavity_frame() cavity(grow); translate([-500, -500, -500]) cube([1000, 1000, 500 + cut_top + grow]); }
 
 // the mouth's rim, rounded by a rolling ball of edge_r: between stations the sharp wedge is cut away back to where the ball touches, and the balls go back in
@@ -210,7 +283,8 @@ module holder() {
         cavity_cut();
         rim_cut();
         holes();
-        if (show_logo) logo();
+        if (show_logo) emblem();
+        trim();
     }
     intersection() { rim_fill(); difference() { body(); cavity_cut(); } }
     color("limegreen") in_cavity_frame() cleat();
@@ -240,7 +314,7 @@ module probe() intersection() { in_cavity_frame() cavity(); cylinder(r = drum_r,
 // what the docked handle would cut out of the holder: must be empty
 module clash() intersection() { holder(); in_cavity_frame() handle(); }
 
-module part_body() { if (part == "coupon") coupon(); else if (part == "probe") probe(); else if (part == "clash") clash(); else holder(); }
+module part_body() { if (part == "coupon") coupon(); else if (part == "probe") probe(); else if (part == "cavity") in_cavity_frame() cavity(); else if (part == "clash") clash(); else holder(); }
 
 module model() {
     if (section == 1) intersection() { part_body(); in_cavity_frame() translate([-500, -500, -500]) cube([500, 1000, 1000]); }

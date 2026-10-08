@@ -59,7 +59,8 @@ OUT = f"{STEM}-print.3mf"
 JOBS = {   # label, bed centre of the part, prime tower corner (the CLI default (165, 236) puts the 35 mm tower off the bed), extra process settings
     "coupon": ("NACS holder fit coupon", (128.0, 128.0), ("175", "100"), {}),
     # the two nozzles share x 20..256 only (CLI log: shared_printable_size 236, centre 138): the 4 in holder spans 56..160, well clear of 20; its tree supports root up to 20 mm outside it, so the tower stands 50 mm off
-    "holder": ("NACS wall holder", (108.0, 128.0), ("212", "180"), {"wall_loops": "3", "sparse_infill_density": "20%", "sparse_infill_pattern": "gyroid"}),
+    # since the crest lip (2026-10-08) the part spans y 57..199 and its lip supports root out past x 160, so the tower sits at the lower right, beside the plate
+    "holder": ("NACS wall holder", (108.0, 128.0), ("212", "40"), {"wall_loops": "3", "sparse_infill_density": "20%", "sparse_infill_pattern": "gyroid"}),
 }
 LABEL, BED_CENTRE, PRIME_TOWER_XY, EXTRA = JOBS[STEM]
 PAD_R = 12.5          # holder only: solid infill this far around each screw hole
@@ -246,10 +247,11 @@ def check_pads_solid(sliced, gcode_name):
     g = zipfile.ZipFile(sliced).read(gcode_name).decode(errors="replace")
     t = scad_const("plate_t")
     off = scad_const("plate_w") / 2 - scad_const("hole_in")
-    windows = {f"pad {i + 1}": (BED_CENTRE[0] + x, BED_CENTRE[1] + y, PAD_R - 3.5, math.pi * (scad_const("hole_d") / 2) ** 2)
+    pc = BED_CENTRE      # the item transform puts the model's origin, the plate's centre, at BED_CENTRE (checked in the G-code with the lip pulling the bounding box 19 mm off it)
+    windows = {f"pad {i + 1}": (pc[0] + x, pc[1] + y, PAD_R - 3.5, math.pi * (scad_const("hole_d") / 2) ** 2)
                for i, (x, y) in enumerate(hole_centres())}
-    windows["plain plate"] = (BED_CENTRE[0] - off, BED_CENTRE[1], 7.0, 0.0)      # midway between two holes, clear of the edge walls
-    used, layers = {k: 0.0 for k in windows}, set()
+    windows["plain plate"] = (pc[0] - off, pc[1], 7.0, 0.0)      # midway between two holes, clear of the edge walls
+    used, layers, seen = {k: 0.0 for k in windows}, set(), []
     z, x, y = 0.0, 0.0, 0.0
     for line in g.splitlines():
         if line.startswith("; Z_HEIGHT:"):
@@ -259,11 +261,14 @@ def check_pads_solid(sliced, gcode_name):
             nx, ny = (float(mx.group(1)) if mx else x), (float(my.group(1)) if my else y)
             if me and float(me.group(1)) > 0 and (mx or my) and 1.2 <= z <= t - 1.2:
                 layers.add(z)
+                seen.append(((x + nx) / 2, (y + ny) / 2))
                 for k, (cx, cy, r, _) in windows.items():
                     if ((x + nx) / 2 - cx) ** 2 + ((y + ny) / 2 - cy) ** 2 < r * r:
                         used[k] += float(me.group(1))
             x, y = nx, ny
     zs = sorted(layers)
+    sx, sy = [q[0] for q in seen if q[0] < 190], [q[1] for q in seen if q[0] < 190]
+    print(f"plate check: extrusion at plate height spans x {min(sx):.1f}..{max(sx):.1f}, y {min(sy):.1f}..{max(sy):.1f}; windows at " + ", ".join(f"{k} ({v[0]:.1f}, {v[1]:.1f})" for k, v in windows.items()))
     height = (zs[1] - zs[0]) * len(zs)
     fill = {k: round(used[k] * math.pi * (1.75 / 2) ** 2 / ((math.pi * r * r - hole) * height), 2) for k, (_, _, r, hole) in windows.items()}
     assert all(v >= 0.8 for k, v in fill.items() if k.startswith("pad")), f"screw pads are not solid: {fill}"
