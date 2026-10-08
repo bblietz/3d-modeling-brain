@@ -7,7 +7,8 @@ interface material on the X2D's second (Bowden) nozzle, using Bambu's own
 recommended parameters for that pairing (support_recommended_params.json).
 
 Usage:  .venv/bin/python projects/NACS-wall-holder/pipeline/make_coupon_3mf.py [coupon|holder]      (default: coupon)
-Reads <stem>.stl; writes <stem>-print.3mf and <stem>-slice.json, and prints real minutes and grams per filament.
+Reads <stem>.stl (the holder also holder-inlay.stl, assembled as a second part on filament 3, the face's colour); writes
+<stem>-print.3mf and <stem>-slice.json, and prints real minutes and grams per filament.
 The holder gets 3 walls and 20% gyroid (it hangs a wand and an 18 ft cable off a wall), sits left of centre so the
 prime tower fits beside it, and gets a modifier part that makes the plate solid for PAD_R around each screw hole
 (Brian, 2026-09-18); the slice check reads the G-code to confirm the pads print solid.
@@ -30,10 +31,11 @@ ROOT = os.path.expanduser("~/.config/BambuStudioBeta/system/BBL")
 
 MACHINE = "Bambu Lab X2D 0.6 nozzle"
 PROCESS = "0.30mm Standard @BBL X2D 0.6 nozzle"
-FILAMENTS = ["Bambu PETG Basic @BBL X2D", "Bambu Support For PLA/PETG @BBL X2D"]   # 1 = model, 2 = support interface
-FILAMENT_MAP = ["1", "2"]   # extruder per filament: 1 = direct drive (main), 2 = Bowden (support)
-FILAMENT_COLOUR = ["#00AE42", "#FFFFFF"]   # preview only; the AMS sync replaces these on open
-FILAMENT_NOZZLE_MAP = ["1", "2"]
+# 1 = body, 2 = support interface, 3 = the face inlay's colour (T, TESLA, frame line; Brian, 2026-10-08), a second PETG in another AMS slot
+FILAMENTS = ["Bambu PETG Basic @BBL X2D", "Bambu Support For PLA/PETG @BBL X2D", "Bambu PETG Basic @BBL X2D"]
+FILAMENT_MAP = ["1", "2", "1"]   # extruder per filament: 1 = direct drive (main), 2 = Bowden (support)
+FILAMENT_COLOUR = ["#00AE42", "#FFFFFF", "#D9D9D9"]   # preview only; the AMS sync replaces these on open
+FILAMENT_NOZZLE_MAP = ["1", "2", "1"]
 # Filament keys Studio stores once per (filament, extruder variant): a GUI-saved X2D config has
 # filaments x 6 entries for these, in the machine's printer_extruder_variant order. The CLI writes
 # only the first variant per filament, and the slicer then cannot find the Bowden variant of a
@@ -58,11 +60,16 @@ STEM = sys.argv[1] if len(sys.argv) > 1 else "coupon"
 OUT = f"{STEM}-print.3mf"
 JOBS = {   # label, bed centre of the part, prime tower corner (the CLI default (165, 236) puts the 35 mm tower off the bed), extra process settings
     "coupon": ("NACS holder fit coupon", (128.0, 128.0), ("175", "100"), {}),
+    # the holder is two STLs assembled into ONE object: the body on filament 1 and the face inlay on filament 3 (PARTS below)
     # the two nozzles share x 20..256 only (CLI log: shared_printable_size 236, centre 138): the 4 in holder spans 56..160, well clear of 20; its tree supports root up to 20 mm outside it, so the tower stands 50 mm off
     # since the crest lip (2026-10-08) the part spans y 57..199 and its lip supports root out past x 160, so the tower sits at the lower right, beside the plate
     "holder": ("NACS wall holder", (108.0, 128.0), ("212", "40"), {"wall_loops": "3", "sparse_infill_density": "20%", "sparse_infill_pattern": "gyroid"}),
 }
 LABEL, BED_CENTRE, PRIME_TOWER_XY, EXTRA = JOBS[STEM]
+PARTS = {   # STL, filament id, part name; the first is the object
+    "coupon": [("coupon.stl", "1", "NACS holder fit coupon")],
+    "holder": [("holder.stl", "1", "NACS wall holder"), ("holder-inlay.stl", "3", "face inlay: T, TESLA, frame line")],
+}[STEM]
 PAD_R = 12.5          # holder only: solid infill this far around each screw hole
 PAD_NAME = "MOD screw pads: solid infill"
 BED_TYPE = "Textured PEI Plate"
@@ -184,7 +191,8 @@ def patch(src, dst):
                 cfg["wipe_tower_x"], cfg["wipe_tower_y"] = [PRIME_TOWER_XY[0]], [PRIME_TOWER_XY[1]]
                 data = json.dumps(cfg, indent=4).encode()
             elif item.filename == "Metadata/model_settings.config":
-                s = re.sub(r'value="[^"]*\.stl"', f'value="{LABEL}"', data.decode())
+                names = {stl: name for stl, _, name in PARTS}
+                s = re.sub(r'value="([^"]*\.stl)"', lambda m: f'value="{names.get(m.group(1), LABEL)}"', data.decode())
                 s = s.replace('key="filament_map_mode" value="Auto For Flush"', 'key="filament_map_mode" value="Manual"')
                 data = s.encode()
             zout.writestr(item, data)
@@ -312,6 +320,9 @@ def verify(path, tmp):
     assert cfg["textured_plate_temp"][0] == "70", cfg["textured_plate_temp"]
     assert cfg["filament_map_mode"] == "Manual" and cfg["filament_map"] == FILAMENT_MAP, (cfg["filament_map_mode"], cfg["filament_map"])
     assert cfg["filament_colour"] == FILAMENT_COLOUR and cfg["filament_nozzle_map"] == FILAMENT_NOZZLE_MAP
+    ms = z.read("Metadata/model_settings.config").decode()
+    for _, fid, name in PARTS:   # every part is there, named, on its filament
+        assert re.search(rf'<part [^>]*>\s*<metadata key="name" value="{re.escape(name)}"/>.*?<metadata key="extruder" value="{fid}"/>', ms, re.S), (name, fid)
     assert (cfg["wipe_tower_x"], cfg["wipe_tower_y"]) == ([PRIME_TOWER_XY[0]], [PRIME_TOWER_XY[1]])
     nv = len(cfg["printer_extruder_variant"])
     assert len(cfg["filament_extruder_variant"]) == len(cfg["nozzle_temperature"]) == nv * len(FILAMENTS)
@@ -329,6 +340,8 @@ def verify(path, tmp):
     per = re.findall(r'<filament id="(\d+)"[^>]*used_g="([^"]*)"', info)
     result = {"minutes": round(int(grab("prediction")) / 60), "grams": round(float(grab("weight")), 1),
               "grams_per_filament": {i: round(float(g), 1) for i, g in per}, "layers": res.get("layers")}
+    for _, fid, name in PARTS:
+        assert result["grams_per_filament"].get(fid, 0) > 0, f"nothing printed on filament {fid} ({name}): {result}"
     result["tower_gap_mm"] = tower_gap(out, res["gcode"])
     if STEM == "holder":
         assert result["tower_gap_mm"] >= 15, f"the prime tower is {result['tower_gap_mm']} mm from the part"
@@ -340,13 +353,14 @@ def verify(path, tmp):
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         write_presets(tmp)
-        shutil.copy(f"{PROJECT}/{STEM}.stl", f"{tmp}/{STEM}.stl")
+        for stl, _, _ in PARTS:
+            shutil.copy(f"{PROJECT}/{stl}", f"{tmp}/{stl}")
         r = subprocess.run(
-            ["bambu-studio", "--arrange", "1",
-             "--load-settings", "machine.json;process.json",
+            ["bambu-studio", "--arrange", "1"] + (["--assemble"] if len(PARTS) > 1 else []) +   # --assemble: one object with per-part filaments, parts kept in place
+            ["--load-settings", "machine.json;process.json",
              "--load-filaments", ";".join(f"filament{i}.json" for i in range(1, len(FILAMENTS) + 1)),
-             "--load-filament-ids", "1",
-             "--export-3mf", "raw.3mf", "--outputdir", ".", f"{STEM}.stl"],
+             "--load-filament-ids", ",".join(fid for _, fid, _ in PARTS),
+             "--export-3mf", "raw.3mf", "--outputdir", "."] + [stl for stl, _, _ in PARTS],
             cwd=tmp, capture_output=True, text=True, timeout=600)
         assert os.path.exists(f"{tmp}/raw.3mf"), f"CLI export failed rc={r.returncode}\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
         final = f"{PROJECT}/{OUT}"

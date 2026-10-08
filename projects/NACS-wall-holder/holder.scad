@@ -12,6 +12,7 @@
 // wall, +Y up.
 //
 // Render views: render.sh.  Export: openscad -D display=false -D show_nose=false -D show_wall=false -o holder.stl holder.scad
+// Inlay:        openscad -D display=false -D show_nose=false -D show_wall=false -D 'part="inlay"' -o holder-inlay.stl holder.scad   (the face's second colour)
 // Coupon:       openscad -D display=false -D show_nose=false -D show_wall=false -D 'part="coupon"' -o coupon.stl holder.scad
 //               (the nose cavity and cleat only, cut off just past the nose shoulder: coupon_cut)
 
@@ -28,6 +29,7 @@ pose_out = 0;
 show_wall = true;     // faint wall plane behind the plate in renders
 part = "holder";      // "coupon": the cavity and cleat with thin walls on a piece of the plate, print orientation unchanged
 show_logo = true;     // the emblem recessed in the flange face (insertion.py turns it off for its export)
+show_inlay = true;    // renders only: the face inlays in their own colour, sitting in the recesses
 $fn = 96;
 
 // connector facts (Tesla TS-0023666, STEP)
@@ -49,11 +51,13 @@ dock_top = 0.1;       // roof clearance over the tilted nose (Tesla's nose taper
 // The cleat is a wedge that fills the lock pocket: a ramp rising from the mouth side to a sharp edge at the back,
 // and an overhanging back face, so the pocket's wall hangs on that edge, up near the pocket's base.
 cleat_clear = 0.45;   // between the cleat and the pocket, sides and top
-tip_gap = 2.5;        // nose tip to the cavity end wall when hanging: the travel left to push the pocket past the edge so the nose can drop
+tip_gap = 5;          // nose tip to the cavity end wall when hanging: the travel left to push the pocket past the edge so the nose can drop. It is also the catch window:
+                      // the pocket lands behind the edge if the nose is pushed to within tip_gap of the stop. 2.5 until 2026-10-08 (Brian: the wand "has a tendency to
+                      // fall off if not seated perfectly"); the cleat itself cannot grow, it fills the pocket
 cleat_a = notch_a + tip_gap;                       // the holding edge, from the cavity end wall
 cleat_h = pocket_h - cleat_clear;                  // edge height above the floor
 cleat_b = cleat_a + pocket_len_mouth - 0.11 - cleat_clear - 0.1;   // foot of the ramp, just inside the pocket's mouth-side wall
-undercut = 15;        // the back face overhangs by this much, so the contact is at the edge
+undercut = 20;        // the back face overhangs by this much, so the contact is at the edge (15 until 2026-10-08: a more positive hook with the wider window)
 cleat_depth = 44.45;  // the cleat's holding wall to the opening, along the cleat's wall: 1.75 in (Brian, 2026-10-08: cavity 1/2 in deeper; was 1.25 in)
 grip_flare = 0.1;     // the sides and roof open by this much per mm from the nose shoulder to the outer edge, with no step: 1.6 by the end
                       // of Tesla's housing CAD (48.2 from the tip), where the grip is not modelled, and on at the same rate
@@ -77,11 +81,11 @@ tab_top_w = 84;        // shield: width at the top
 tab_crown = 10;        // arch: rise of the top's arc at the centre
 tab_peak = 12;         // gable: rise of the apex above the eaves
 tab_trim = "frame";    // "frame": a recessed line following the whole face's outline (Brian, 2026-10-08: yes)
-frame_in = 6; frame_w = 2.5; frame_depth = 1;
+frame_in = 6; frame_w = 2.5; frame_depth = 1.2;   // the frame line is inlaid too
 top_mount = "none";    // reaching the top screws behind the lip: "keyhole" slots open at the plate's top edge (hang the holder on the top screws, drive the bottom two);
                        // "holes" driver holes through the lip; "none" plain holes (Brian, 2026-10-08: the crest's edge is 6 mm outside the top screw centres, driver goes in at a 6 degree tilt)
 driver_d = 12;
-logo_h = 59; logo_depth = 1;               // emblem height on the flange face (57% of the round part, as the T was), recess depth
+logo_h = 59; logo_depth = 1.2;             // emblem height on the flange face (57% of the round part), recess depth: four 0.30 mm layers, filled by the inlay (part = "inlay")
 emblem = "tesla";      // "tesla" the T (reference/tesla-t.svg, official artwork; Brian, 2026-10-08: back in after a look at generic ones); "bolt" a lightning bolt; "plug" a
                        // two-prong plug; "nacs" the connector's own face from Tesla's housing STEP (nacs_face.scad, pipeline/nacs_face.py); "ev" the letters EV; "none"
 lip_text = true;       // the TESLA wordmark (reference/tesla-wordmark.svg, official artwork) recessed in the lip, bent along the crest's arch (Brian, 2026-10-08)
@@ -105,7 +109,7 @@ function lip_q(b, c) = let(p = M0 + b * [v[0], v[1]] + c * [w[0], w[1]], dxy = [
     (-B + sqrt(B * B - 4 * A * C)) / (2 * A);
 mouth = cleat_a + cleat_depth - lip_q(floor_y, 0);   // cavity end wall to the mouth centre, so the lip on the cleat's wall is cleat_depth from the holding wall
 behind = 3;                                          // solid left between the wall and the cavity's deepest corner, which dips into the 5 mm plate
-mouth_z = 61.48;                                      // mouth centre out from the wall: the wand stays at the far end, mouth top 3.6 mm under the flange as validated (cut_top = flange underside - 3.6); the deepest corner is then 23 mm off the wall, pipeline/zbudget.py
+mouth_z = 61.43;                                      // mouth centre out from the wall: the wand stays at the far end, mouth top 3.6 mm under the flange as validated (cut_top = flange underside - 3.6); the deepest corner is then 23 mm off the wall, pipeline/zbudget.py
 M = [M0[0], M0[1], mouth_z];                         // mouth centre, on the drum surface
 T = M - mouth * d;                                                     // cavity floor centre
 
@@ -228,9 +232,21 @@ module wordmark_arc() if (tab_style == "crest" || tab_style == "arch") {
     translate([0, y_top - Rc]) for (i = [0 : n - 1]) { x0 = -wordmark_w / 2 + i * wm_strip;
         rotate(-(x0 + wm_strip / 2) / Rt * 180 / PI) translate([0, Rt]) translate([-(x0 + wm_strip / 2), 0]) intersection() { wordmark_flat(); translate([x0 - 0.01, -50]) square([wm_strip + 0.02, 100]); } }
 }
+module frame2d() difference() { offset(r = -frame_in) face2d(); offset(r = -frame_in - frame_w) face2d(); }
 module trim() {
     if (lip_text) translate([0, 0, total_l - logo_depth]) linear_extrude(logo_depth + 0.01) wordmark_arc();
-    if (tab_trim == "frame") translate([0, 0, total_l - frame_depth]) linear_extrude(frame_depth + 0.01) difference() { offset(r = -frame_in) face2d(); offset(r = -frame_in - frame_w) face2d(); }
+    if (tab_trim == "frame") translate([0, 0, total_l - frame_depth]) linear_extrude(frame_depth + 0.01) frame2d();
+}
+// the face inlays (Brian, 2026-10-08: "the tesla logo and the border should be a different filament color fill"): the emblem, the wordmark and the
+// frame line as solids filling their recesses flush with the face, the same 2D shapes that cut the body, so they mate exactly. Exported as
+// holder-inlay.stl (part = "inlay") and assembled with holder.stl into one object on a second colour by pipeline/make_coupon_3mf.py.
+module inlay() intersection() {
+    union() {
+        if (show_logo && emblem != "none") translate([0, 0, total_l - logo_depth]) linear_extrude(logo_depth) emblem2d();
+        if (lip_text) translate([0, 0, total_l - logo_depth]) linear_extrude(logo_depth) wordmark_arc();
+        if (tab_trim == "frame") translate([0, 0, total_l - frame_depth]) linear_extrude(frame_depth) frame2d();
+    }
+    body();
 }
 
 module body() {
@@ -247,13 +263,14 @@ module plug2d() translate([0, -30]) {                                           
     hull() { translate([-3, 22]) square([6, 1]); translate([0, 3]) circle(3); }
 }
 module nacs2d() { difference() { polygon(nacs_face_outer); offset(r = -2) polygon(nacs_face_outer); } for (h = nacs_face_holes) polygon(h); }   // outline band and pin holes
-module emblem() if (emblem != "none") translate([0, 0, total_l - logo_depth]) linear_extrude(logo_depth + 0.01) {
+module emblem2d() {
     if (emblem == "tesla") resize([0, logo_h], auto = true) offset(r = -0.05) offset(r = 0.05) import("reference/tesla-t.svg", center = true);
     else if (emblem == "bolt") resize([0, logo_h], auto = true) bolt2d();
     else if (emblem == "plug") resize([0, logo_h], auto = true) plug2d();
     else if (emblem == "nacs") resize([0, logo_h * 0.9], auto = true) nacs2d();
     else if (emblem == "ev") text("EV", size = logo_h * 0.62, font = "DejaVu Sans:style=Bold", halign = "center", valign = "center");
 }
+module emblem() if (emblem != "none") translate([0, 0, total_l - logo_depth]) linear_extrude(logo_depth + 0.01) emblem2d();
 
 module holes() {
     for (sx = [-1, 1], sy = [-1, 1]) translate([sx * (plate_w / 2 - hole_in), sy * (plate_w / 2 - hole_in), 0]) {
@@ -314,12 +331,13 @@ module probe() intersection() { in_cavity_frame() cavity(); cylinder(r = drum_r,
 // what the docked handle would cut out of the holder: must be empty
 module clash() intersection() { holder(); in_cavity_frame() handle(); }
 
-module part_body() { if (part == "coupon") coupon(); else if (part == "probe") probe(); else if (part == "cavity") in_cavity_frame() cavity(); else if (part == "clash") clash(); else holder(); }
+module part_body() { if (part == "coupon") coupon(); else if (part == "probe") probe(); else if (part == "cavity") in_cavity_frame() cavity(); else if (part == "inlay") inlay(); else if (part == "clash") clash(); else holder(); }
 
 module model() {
     if (section == 1) intersection() { part_body(); in_cavity_frame() translate([-500, -500, -500]) cube([500, 1000, 1000]); }
     else if (section == 2) intersection() { part_body(); in_cavity_frame() translate([-500, -500, -500]) cube([1000, 1000, 500 + cleat_a + 1.5]); }
     else part_body();
+    if (part == "holder" && section == 0 && show_inlay) color("gainsboro") inlay();
     if (show_nose) color(section == 0 ? "steelblue" : "gainsboro", section == 0 ? 0.55 : 0.85) in_cavity_frame() {
         if (section == 1) intersection() { tilt_about_tip(pose_tilt) translate([0, 0, pose_out]) handle(); translate([-500, -500, -500]) cube([500, 1000, 1000]); }
         else if (section == 2) intersection() { handle(); translate([-500, -500, -500]) cube([1000, 1000, 500 + cleat_a + 1.5]); }

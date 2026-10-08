@@ -1,12 +1,13 @@
 {
- "minutes": 517,
- "grams": 438.2,
+ "minutes": 527,
+ "grams": 442.5,
  "grams_per_filament": {
-  "1": 426.1,
-  "2": 12.1
+  "1": 426.6,
+  "2": 12.4,
+  "3": 3.5
  },
  "layers": 351,
- "tower_gap_mm": 20.2,
+ "tower_gap_mm": 19.9,
  "screw_pads": {
   "pad 1": 0.9,
   "pad 2": 0.9,

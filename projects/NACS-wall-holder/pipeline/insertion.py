@@ -41,7 +41,7 @@ W = [0, 2.5, 4.5, 8, 12, 16, 19]          # side-view slices, mm across the wand
 REF = (17.03, -17.76)                     # pose reference on the wand: the pocket's tip-side corner at the nose's lowest line
 DA, DY, DT = 0.25, 0.125, 0.5             # grid: along, lift (mm), tilt (deg)
 SKIN = 0.05                               # contact closer than this is not a collision (HOLD uses the bare wand less this)
-GOAL_TIP = 72.0                           # nose tip this far from the end wall: the wand is out (past the mouth: 69.1 mm deep since the 1.75 in cleat depth of 2026-10-08; was 45 for the 1.25 in cavity)
+GOAL_TIP = 75.0                           # nose tip this far from the end wall: the wand is out (past the mouth: 69.1 mm deep since the 1.75 in cleat depth of 2026-10-08; was 45 for the 1.25 in cavity)
 LOAD = (150.0, 0.0)                       # where the hanging weight acts on the wand: along from the tip, up from the nose centre
 J_RANGE, K_RANGE = (-8, 160), (-36, 44)   # lift -1..20 mm, tilt -18..22 deg
 

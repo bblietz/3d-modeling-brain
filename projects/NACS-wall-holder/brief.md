@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: REVISION 2026-10-08, CAD and 3MF done, not printed. Drum 1 in deeper and 90 across, crest lip 1.5 in with the TESLA wordmark, frame line, T back, cavity 1/2 in deeper (cleat 1.75 in); sliced 8 h 37 min, 438 g. The 2026-09-19 holder (v7 cavity, 4 in base, round flange, 1/16 in roundovers) is on the wall and working great.
+status: REVISION 2026-10-08, CAD and 3MF done, not printed. Drum 1 in deeper and 90 across, crest lip 1.5 in with the TESLA wordmark, frame line, T back, cavity 1/2 in deeper (cleat 1.75 in); cleat catch window 5 mm, face inlays in a second colour; sliced 8 h 47 min, 442 g. The 2026-09-19 holder (v7 cavity, 4 in base, round flange, 1/16 in roundovers) is on the wall and working great.
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -21,7 +21,8 @@ rendered options (page: https://claude.ai/artifact/5u3wgRBUTWngnCdjFuPzKB, built
 - Drum `drum_r` 40 to 45 (diameter 90) because the cavity 1/2 in deeper did not fit the 80 drum: the
   cavity crosses the drum at 45 degrees, and `pipeline/depth_limit.py` measured the wall left at its far
   corner at 11.4 / 5.9 / 0.1 mm for cleat depths 1.25 / 1.5 / 1.75 in on the 80 drum; the 90 drum
-  leaves 5 mm at 1.75 in. The flange stays 104, so `fillet_flange` 12 to 7 and `fillet_plate` 8 to 7
+  leaves 10.3 mm at 1.75 in (first estimated at 5 from the 80 drum's numbers; the mouth moves out with the
+  drum, so the far reach grows less than the radius). The flange stays 104, so `fillet_flange` 12 to 7 and `fillet_plate` 8 to 7
   (the plate blend's foot must stay inside the screw countersinks, 52.7 off the axis; it is at 52).
 - Cavity: `cleat_depth` 31.75 to 44.45 (1.75 in, "1/2 deeper, 90mm drum"). `mouth_z` 61.48 keeps the
   wand at the far end with the mouth top 3.6 mm under the flange as validated (`cut_top` 93.8 = flange
@@ -69,6 +70,31 @@ rendered options (page: https://claude.ai/artifact/5u3wgRBUTWngnCdjFuPzKB, built
   `make_coupon_3mf.py`, `renders_page.py`) must stay literal numbers in holder.scad, never
   expressions. OpenSCAD's `import(svg, center = true)` centres on the viewBox origin, not on the
   content, so artwork viewBoxes must start at 0 0.
+
+### Later the same day (2026-10-08)
+
+- Cleat ("the cleat should be a bit bigger. The wand has a tendency to fall off if not seated
+  perfectly"). The cleat fills the lock pocket to within 0.45 mm on every side and cannot grow (the
+  50% longer cleat of September ran into the nose's underside), so what grew is the catch window:
+  `tip_gap` 2.5 to 5 (the pocket's wall lands behind the edge if the nose is pushed to within 5 mm
+  of the stop, twice the old window; the wand also slides back 5 mm on release before it catches)
+  and `undercut` 15 to 20 degrees (the pull seats the pocket's wall deeper into the hook). Cost: the
+  cavity 2.4 mm longer (mouth depth 71.6), far wall 10.3 to about 8.3 mm, `mouth_z` 61.43 (mouth top
+  still 3.6 under the flange). `insertion.py` (GOAL_TIP 75): WAY IN yes 0 to 9 degrees, hanging tip
+  5.70 mm from the end wall at -3.0 degrees, 1.87 of 3.57 mm engaged, HOLD 19.6 mm. Docked clash 0.
+- Face in a second colour ("the tesla logo and the border should be a different filament color
+  fill"): the T, the TESLA wordmark and the frame line are now flush inlays, `logo_depth` and
+  `frame_depth` 1.2 (four 0.30 mm layers), exported as `holder-inlay.stl` (`part = "inlay"`, the same
+  2D shapes that cut the body, 12 bodies, 2.35 cm3) and assembled with `holder.stl` into ONE object
+  by `make_coupon_3mf.py` (`PARTS`, `--assemble`, `--load-filament-ids 1,3`): filament 1 body PETG,
+  2 support interface on the second nozzle, 3 a second PETG in another AMS slot for the inlay (preview
+  colour #D9D9D9; Brian picks the real one in the AMS). The build asserts each part's name and
+  extruder in model_settings.config and that filament 3 prints grams. Slice: 8 h 47 min, 442.5 g
+  (426.6 body, 12.4 support, 3.5 inlay), 351 layers, tower 19.9 mm, pads 90%. Renders show the
+  inlays in gainsboro (`show_inlay`).
+- `holder.stl` now has one spot (41, 10.5, 45) where two surfaces touch along an edge (trimesh:
+  not watertight, 2 edges in 4 faces, 6 zero-area triangles; Manifold reports NoError). The CLI
+  sliced it without complaint; noted, not fixed.
 
 ## Decisions already locked (2026-09-17, supersedes the nose-down socket of 09-16)
 

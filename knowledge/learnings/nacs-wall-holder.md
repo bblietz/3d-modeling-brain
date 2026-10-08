@@ -163,6 +163,17 @@ page (options -> page -> pick, four rounds), which is the right way to run a rev
   behind the tip and writes the outline and pin holes as polygons (orientation from the outline's
   top/bottom width ratio against nose_outline.scad). Not chosen, but a reusable pictogram.
 
+- "Bigger cleat" translated into geometry: the cleat already fills the lock pocket, so the wand's
+  tendency to fall off when not seated perfectly was fixed by the catch WINDOW (`tip_gap` 2.5 to 5:
+  how far short of the stop the nose may be and still drop the pocket behind the edge) and a 20
+  degree hook overhang. Say what the user's words map to before changing numbers.
+- Two-colour face without painting: the recess shapes extruded as solids (`part = "inlay"`) and the
+  body with the recesses, assembled by the CLI (`--assemble`, one filament id per STL) into one
+  object; the inlay goes on a second PETG in its own AMS slot. Recess depth a layer multiple (1.2 =
+  four 0.30 layers). 3.5 g of colour on a 442 g print.
+- The far-wall estimate scaled from the 80 drum was wrong by 2x (5 vs 10.3 mm): the mouth sits on the
+  drum's surface, so a bigger drum moves the whole cavity out. Measure on the real drum, never scale.
+
 ### What bit
 - OpenSCAD `import(svg, center = true)` centres on the viewBox ORIGIN, not on the content: a cropped
   viewBox like `0 324 278 36` lands the artwork 90 mm off. Shift the paths' transform so the viewBox
@@ -183,6 +194,7 @@ page (options -> page -> pick, four rounds), which is the right way to run a rev
 ### Open
 - Not printed. The grip past Tesla's CAD (48 mm from the tip) now sits 1/2 in inside the opening with
   only the 0.1 per mm flare for room: measure the real grip before printing, or accept the risk.
+- holder.stl has a two-edge touching spot (not watertight for trimesh, fine for Manifold and the slicer).
 
 ## Open
 

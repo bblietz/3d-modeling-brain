@@ -6,12 +6,14 @@ import numpy as np, trimesh
 
 PROJECT = "/home/brian/ClaudeProjects/3d-modeling-brain/projects/NACS-wall-holder"
 O = os.path.expanduser("~/.local/bin/openscad")
-drum_r = 45.0   # 40 until 2026-10-08
-depths = [float(a) for a in sys.argv[1:]] or [31.75, 38.1, 44.45, 50.8, 57.15]
+# args: cleat depths, plus name=value overrides passed to OpenSCAD (e.g. tip_gap=4 drum_r=46); drum_r here follows the override
+over = [a for a in sys.argv[1:] if "=" in a]
+drum_r = float(dict(o.split("=") for o in over).get("drum_r", 45.0))   # 40 until 2026-10-08
+depths = [float(a) for a in sys.argv[1:] if "=" not in a] or [31.75, 38.1, 44.45, 50.8, 57.15]
 for cd in depths:
     with tempfile.TemporaryDirectory() as tmp:
         r = subprocess.run([O, "--backend=Manifold", "-D", "display=false", "-D", "show_nose=false", "-D", "show_wall=false",
-                            "-D", 'part="cavity"', "-D", "mouth_z=0", "-D", f"cleat_depth={cd}", "-o", f"{tmp}/c.stl", f"{PROJECT}/holder.scad"],
+                            "-D", 'part="cavity"', "-D", "mouth_z=0", "-D", f"cleat_depth={cd}"] + sum([["-D", o] for o in over], []) + ["-o", f"{tmp}/c.stl", f"{PROJECT}/holder.scad"],
                            capture_output=True, text=True)
         m = trimesh.load(f"{tmp}/c.stl")
         mouth = float(re.search(r"mouth depth=([-0-9.]+)", r.stderr + r.stdout).group(1))
