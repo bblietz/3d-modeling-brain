@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: v7 VALIDATED 2026-09-18 (Brian: "the last coupon printed great. This is the one."); full part resized to a 4 in base with a step-free entry, a round flange and 1/16 in roundovers, exported and sliced (holder.stl, holder-print.3mf: 5 h 32 min, 241 g); awaiting the full print
+status: DONE 2026-09-19 (Brian: "charger holder is on the wall and working great"). Full part printed, mounted and in daily use: v7 cavity (grip up, nose in, grip down docking on a fixed cleat), 4 in base, round flange, 1/16 in roundovers.
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -108,7 +108,22 @@ Our own design for a wall-mounted dock for Brian's Tesla Gen 3 Wall Connector ha
 - Retention: a spring tab in the floor, about 12 wide x 2.7 thick x 22 long, with a 2 mm bump (rejected for our design: fixed cleat instead).
 - Cable hook: trough 60 wide, lip 15 to 19 above the saddle.
 
-## Open
+## Shipped (2026-09-19)
+
+Brian: "charger holder is on the wall and working great." The part mounted on the wall,
+holding the wand with its cable on the drum, is the final one: 4 in base, round flange,
+1/16 in roundovers, `holder.stl` / `holder-print.3mf` as committed in 9585fc0. This closes
+out every open question below and in the last handoff:
+
+- The reading of "reduce the size" (drum 80, flange 104, not only a smaller plate) works in
+  practice.
+- The rounded floor lip's small change to the hang (3.5 degrees tilt, 1.75 mm of the cleat's
+  edge engaged, HOLD 20.4 mm) holds the real connector under real use.
+- The housing and the grip past the end of Tesla's CAD, never covered by a coupon, fit; no
+  report of a bind or a gap there.
+- Project is closed. Any further change is a new request, not open work.
+
+## Superseded open items (kept for history)
 
 - Cleat position and size: design it to engage the lock notch on the bottom of the connector nose (the one the car's charge-port lock pin enters), from the Tesla spec once retrieved. The cleat and the extra opening room both depend on that notch's location and depth.
 - Cable diameter: Ø14.5 mm per Tesla's 48A datasheet. This replaces the 18 mm forum estimate. The cable is 5.5 m (18 ft). Coiled in loops about 300 mm across (about 0.94 m of cable each), that is about 6 loops, 87 mm side by side at 14.5 mm, so a hook about 100 mm wide. Settle the hook size in the design plan.

@@ -94,11 +94,12 @@ code{{font-size:.9em}}
 </style>
 <main>
 <h1>NACS Holster Plan</h1>
+<p class="k" style="display:block;font-size:1.1em;margin-bottom:8px">Shipped 2026-09-19: mounted on the wall and working great.</p>
 <p class="lead">OpenSCAD model of the wall holder for the Tesla Gen 3 Wall Connector handle: a drum on a square plate, the wand out of the drum's right side at {wand_down:.0f}&#176; down, hanging on a fixed cleat in the connector's own lock notch. Rendered from <code>holder.scad</code>; the nose profile is Tesla's, from their NACS STEP file.</p>
 <div class="grid">{figs(holder_views)}</div>
 
-<h2>The full part: ready to print</h2>
-<p>The v7 fit coupon printed and the wand docks and holds on it (Brian, 2026-09-18: "the last coupon printed great. This is the one."). The full holder is the same cavity and cleat in the whole drum, exported and sliced: <code>holder.stl</code> and <code>holder-print.3mf</code>.</p>
+<h2>The full part: printed and mounted</h2>
+<p>The v7 fit coupon printed and the wand docks and holds on it (Brian, 2026-09-18: "the last coupon printed great. This is the one."). The full holder, same cavity and cleat in the whole drum, is now printed and on the wall (Brian, 2026-09-19: "charger holder is on the wall and working great"), holding the wand with its cable wrapped on the drum. Files: <code>holder.stl</code> and <code>holder-print.3mf</code>.</p>
 <ul>
 <li>Print: <span class="k">{hs['minutes'] // 60} h {hs['minutes'] % 60:02d} min, {hs['grams']:.0f} g</span> ({hg.get('1', 0):.0f} g PETG, {hg.get('2', 0):.0f} g support interface), {hs['layers']} layers, from a real slice. Same recipe as the coupon (X2D 0.6 nozzle, 0.30 mm, Bambu PETG Basic, textured PEI, tree supports with Support For PLA/PETG on the second nozzle), plus <span class="k">3 walls and 20% gyroid</span> because it hangs a wand and an 18 ft cable off the wall.</li>
 <li>Orientation: plate down on the bed, flange and Tesla T up, as the coupon printed. Supports go in the cavity and under the flange ring; the T is a recess in the top face and needs none.</li>

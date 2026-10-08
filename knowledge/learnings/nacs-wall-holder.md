@@ -11,9 +11,10 @@ tags: [x2d, petg, openscad, nacs, tesla, fixed-cleat, docking-kinematics, dual-n
 Wall dock for the Tesla Gen 3 Wall Connector handle: a drum on a square plate, the wand
 out of the drum's side at 45 degrees down and 15 degrees off the wall, hanging on a FIXED
 cleat in the connector's own lock pocket. Status 2026-09-18: **v7 fit coupon printed, the
-wand docks and holds** (Brian: "the last coupon printed great. This is the one."). The full
-part is exported and sliced on a 4 in base with a step-free entry, not printed yet. Project
-notes: [[NACS-wall-holder/brief]].
+wand docks and holds** (Brian: "the last coupon printed great. This is the one."). Status
+2026-09-19: **DONE.** The full part (4 in base, round flange, 1/16 in roundovers) is printed,
+mounted on the wall and in daily use (Brian: "charger holder is on the wall and working
+great"). Project notes: [[NACS-wall-holder/brief]].
 
 ## What worked
 
@@ -129,10 +130,15 @@ solid for 12.5 mm around each screw hole. 4 in base, drum 80, round flange 104, 
 roundovers: 5 h 32 min, 241 g (233 g PETG, 9 g support interface), 267 layers, prime tower at
 (212, 180). The earlier 150 mm base, drum 100 version was 7 h 47 min, 366 g.
 
+## Result (2026-09-19)
+
+Full print mounted and working (Brian: "charger holder is on the wall and working great"),
+holding the wand with its cable wrapped on the drum. This confirms, in daily use, everything
+that was untested in the coupon: the housing and grip fit in the deep opening (the last 48 mm
+was never covered by a coupon, only by Tesla's CAD plus a 1.6 mm flare estimate), the 4 in
+body holds the docking geometry unchanged, the round flange, and the rounded floor lip's small
+shift in the hang (3.5 degrees, 1.75 mm of the cleat's edge engaged, computed HOLD 20.4 mm).
+
 ## Open
 
-- Full part not printed. First tried on it: the housing and the start of the grip in the deep
-  opening (the grip past 48 mm from the tip is not in Tesla's CAD; sides and roof have 1.6 mm
-  extra room there and keep flaring, the floor has 0.5 mm and ramps down within 4 mm).
-- Base is 4 in square (Brian, 2026-09-18), drum 80, round flange 104 (the teardrop point was
-  removed on his word the same day); all four screw heads clear the flange's edge by 0.7 mm.
+None. The project is closed. Any further change is a new request.
