@@ -7,8 +7,10 @@ Jobs:
   bench    images/space-photo-web.jpg (the room) + images/hero.png (CAD render) -> images/bench-in-nook.png
   shelves  images/bench-in-nook-v2.png (the composite) + images/concept-ai-bench-web.jpg (the concept)
            -> images/bench-in-nook-shelves.png, three maple floating shelves added above the bench
+  white    images/bench-in-nook-shelves-10in.png -> images/bench-in-nook-white.png, the bench's maple painted
+           white with the walnut panels, maple top and maple shelves kept bare
 
-Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves] [variant]
+Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white] [variant]
 A variant name is appended to the output file so reruns do not overwrite earlier images.
 """
 import os
@@ -68,11 +70,24 @@ The shelves:
 - Lightly styled the way image 2 is: a few books, a small plant, a basket, a framed picture. No dog, no dog
   bowls, no signs with words, no lights added. Photorealistic, matching image 1's grain and white balance."""
 
+WHITE_PROMPT = """Image 1 is a photograph of a built-in bench in an alcove with three maple floating shelves above it. The bench
+has two drawers, each a pale maple frame around a dark walnut panel with a brass bar pull, a pale maple plinth at
+the floor, narrow maple strips at the walls, a solid maple top and an oatmeal cushion.
+
+Edit image 1 so the bench's woodwork is PAINTED WHITE, and change nothing else. Repaint in a smooth satin white
+enamel, the same white as the door and the baseboards in the photo: the drawer frames (stiles and rails), the
+plinth at the floor, the narrow strips at the walls, and the thin edge of the case that shows between them.
+Keep exactly as they are: the dark walnut panels inside the frames (bare wood, visible grain), the brass bar
+pulls, the solid maple top with its bare blond wood and 3/4 inch overhang, the oatmeal cushion, the three maple
+shelves with their objects, the walls, floor, door, lighting and camera. Painted surfaces show no wood grain,
+with soft sprayed-enamel reflections. Photorealistic, matching image 1's grain and white balance."""
+
 JOBS = {
     "bench": ((f"{PROJ}/images/space-photo-web.jpg", "image/jpeg"), (f"{PROJ}/images/hero.png", "image/png"),
               BENCH_PROMPT, "bench-in-nook"),
     "shelves": ((f"{PROJ}/images/bench-in-nook-v2.png", "image/png"),
                 (f"{PROJ}/images/concept-ai-bench-web.jpg", "image/jpeg"), SHELVES_PROMPT, "bench-in-nook-shelves"),
+    "white": ((f"{PROJ}/images/bench-in-nook-shelves-10in.png", "image/png"), None, WHITE_PROMPT, "bench-in-nook-white"),
 }
 job = sys.argv[1] if len(sys.argv) > 1 else "bench"
 if job not in JOBS:
@@ -83,7 +98,7 @@ OUT = f"{PROJ}/images/{stem}{('-' + variant) if variant else ''}.png"
 
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 parts = []
-for path, mime in (img1, img2):
+for path, mime in [i for i in (img1, img2) if i]:
     with open(path, "rb") as f:
         parts.append(types.Part.from_bytes(data=f.read(), mime_type=mime))
 parts.append(PROMPT)
