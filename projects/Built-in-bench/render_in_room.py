@@ -59,8 +59,10 @@ nothing else: same camera, lighting, walls, floor, door, and the bench exactly a
 
 The shelves:
 - Solid hard maple, clear satin finish, the same pale blond maple as the bench's top and frames (not white oak,
-  not darker). Each shelf is one thick slab about 1-1/2 inches thick and 10 inches deep, spanning the alcove
-  wall to wall (66 inches) with no visible brackets, like the shelves in image 2.
+  not darker). Each shelf is one thick slab 1-1/2 inches thick and a full 10 INCHES DEEP: it projects 10 inches
+  out from the back wall, so its front edge stops 18 inches short of the pilaster faces (the alcove is 28
+  inches deep). From this camera the top face of each shelf is clearly visible as a deep slab, not a thin
+  ledge. Each spans the alcove wall to wall (66 inches) with no visible brackets, like the shelves in image 2.
 - Three shelves, evenly spaced: the lowest about 20 inches above the cushion, the others about 14 inches apart,
   all well below the ceiling. Their front edges are set back a few inches from the pilaster faces.
 - Lightly styled the way image 2 is: a few books, a small plant, a basket, a framed picture. No dog, no dog
