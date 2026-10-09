@@ -11,8 +11,10 @@ Jobs:
            white with the walnut panels, maple top and maple shelves kept bare
   white-maple  images/bench-in-nook-white.png -> images/bench-in-nook-white-maple.png, the white bench with
            pale maple panels in the drawer fronts instead of walnut
+  white-all  images/bench-in-nook-white.png -> images/bench-in-nook-white-all.png, the white bench with the
+           drawer panels painted white too (all-white fronts, brass pulls, maple top and shelves bare)
 
-Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple] [variant]
+Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all] [variant]
 A variant name is appended to the output file so reruns do not overwrite earlier images.
 """
 import os
@@ -97,6 +99,19 @@ with the same thin shadow lines, and the brass bar pulls stay exactly where they
 the white painted frames, plinth and wall strips, the maple top, the cushion, the three maple shelves with their
 objects, the walls, floor, door, lighting and camera. Photorealistic, matching image 1's grain and white balance."""
 
+WHITE_ALL_PROMPT = """Image 1 is a photograph of a built-in bench in an alcove with three maple floating shelves above it. The bench
+is painted satin white: white drawer frames, a white plinth at the floor, white strips at the walls. Inside each
+white drawer frame is a dark walnut panel with a brass bar pull. The top is bare solid maple with an oatmeal
+cushion on it.
+
+Edit image 1 so the two DARK WALNUT PANELS inside the white drawer frames are PAINTED WHITE as well, and change
+nothing else. Each drawer front becomes all white: the panel is the same smooth satin white enamel as the frame
+around it, with no wood grain, so the frame and panel are only told apart by the thin shadow line of the
+tongue-and-groove joint where the panel sits in the frame. The brass bar pulls stay exactly where they are. Keep
+exactly as they are: the white painted frames, plinth and wall strips, the bare maple top, the cushion, the three
+maple shelves with their objects, the walls, floor, door, lighting and camera. Photorealistic, soft sprayed-enamel
+reflections on the painted surfaces, matching image 1's grain and white balance."""
+
 JOBS = {
     "bench": ((f"{PROJ}/images/space-photo-web.jpg", "image/jpeg"), (f"{PROJ}/images/hero.png", "image/png"),
               BENCH_PROMPT, "bench-in-nook"),
@@ -105,6 +120,8 @@ JOBS = {
     "white": ((f"{PROJ}/images/bench-in-nook-shelves-10in.png", "image/png"), None, WHITE_PROMPT, "bench-in-nook-white"),
     "white-maple": ((f"{PROJ}/images/bench-in-nook-white.png", "image/png"), None, WHITE_MAPLE_PROMPT,
                     "bench-in-nook-white-maple"),
+    "white-all": ((f"{PROJ}/images/bench-in-nook-white.png", "image/png"), None, WHITE_ALL_PROMPT,
+                  "bench-in-nook-white-all"),
 }
 job = sys.argv[1] if len(sys.argv) > 1 else "bench"
 if job not in JOBS:
