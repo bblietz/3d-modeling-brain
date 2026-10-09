@@ -51,6 +51,7 @@ def dt(mm):
 
 
 P18, P12, P6 = "3/4 ply (measure)", "1/2 BB (measure)", "1/4 ply (measure)"
+PW12 = "1/2 walnut ply (measure)"
 
 
 def info(name):
@@ -582,7 +583,7 @@ def scribe_strip():
     v.dim_v(0, H, STRIP_CUT + v.o(14))
     v.edge("left", "inner edge")
     v.edge("bottom", "bottom end")
-    sheet(name, head(name, f"hard maple, {dt(H)} long, ripped {dt(STRIP_CUT)} wide, milled to the drawer-front panel's thickness (measure)"),
+    sheet(name, head(name, f"hard maple, {dt(H)} long, ripped {dt(STRIP_CUT)} wide, milled to the 3/4 maple ply's thickness (measure), painted white"),
           [v], "Glue and biscuits to the end panel's front edge; the inner edge lands flush with the inside face of the end.")
     return 0
 
@@ -600,7 +601,7 @@ def plinth():
     v.dim_v(0, CUTH, ALCOVE_W + v.o(14))
     v.dim_h(0, ALCOVE_W, v.top_y(), f"{dt(ALCOVE_W)}, scribe both ends to the walls")
     v.edge("bottom", "floor edge (scribed)")
-    sheet(name, head(name, f"hard maple, cut {dt(CUTH)} x {dt(ALCOVE_W)}, grain horizontal, milled to the drawer-front panel's thickness (measure)"),
+    sheet(name, head(name, f"hard maple, cut {dt(CUTH)} x {dt(ALCOVE_W)}, grain horizontal, milled to the 3/4 maple ply's thickness (measure), painted white"),
           [v], "Screwed to the base front rail; flush with the drawer fronts.")
     return 0
 
@@ -655,7 +656,8 @@ def front_stile():
     E = Face(solid, "+y", "+z")            # inner edge: front face at right
     e = View(FACE_T, FRONT_H, "B  INNER edge\nfront face at right", size="small")
     e.groove(*E.rect(g))
-    e.callout(FACE_T / 2, FRONT_H * 0.5, f"groove, through both ends: {dt(TONGUE_T)} wide x {dt(TONGUE_L)} deep, centered", ha="left")
+    e.callout(FACE_T / 2, FRONT_H * 0.5, f"groove, through both ends: {dt(TONGUE_T)} wide x {dt(TONGUE_L)} deep", ha="left")
+    e.dim_h(E.rect(g)[0] + E.rect(g)[2], FACE_T, -8, dt(FACE_T - PANEL_T))
     e.dim_v(0, FRONT_H, FACE_T + 26)
     e.edge("right", "FRONT face")
 
@@ -665,11 +667,12 @@ def front_stile():
     s.notch(gu, gv, gw, gh)
     s.dim_h(0, TONGUE_L, FACE_T + 8, dt(TONGUE_L))
     s.dim_v(gv, gv + gh, -8, dt(TONGUE_T))
+    s.dim_v(0, gv, -8, dt(FACE_T - PANEL_T))
     s.dim_v(0, FACE_T, STILE_W + 8, P18)
     s.edge("bottom", "FRONT face")
 
     sheet(name, head(name, f"hard maple, {dt(STILE_W)} x {dt(FRONT_H)}, thickness: {P18}"),
-          [f, e, s], "All four the same; mill to the walnut panel's thickness. Groove centered on the thickness (tongue-and-groove bit set). The rail tenon shows on the top end; Brian is fine with that.")
+          [f, e, s], "All four the same; mill to the 3/4 maple ply's thickness so the fronts, plinth and strips share one plane. Set the groove from the 1/2 walnut panel: the groove's front wall is the panel's inset, so test-cut on scrap and measure. The rail tenon shows on the top end; Brian is fine with that. Painted white.")
     pr = cut_probes(*g, "-x")
     pr += [wood(*g, "-y"), wood(*g, "+y"), runout(*g, "-z"), runout(*g, "+z")]
     return check(name, solid, pr)
@@ -694,8 +697,8 @@ def front_rail():
         v.notch(*P.rect((xe, FACE_Y0, z0 + STILE_W - TONGUE_L, TONGUE_L, FACE_T, TONGUE_L)))
         v.groove(*P.rect((xe, FACE_Y0, z0, TONGUE_L, GY0 - FACE_Y0, STILE_W - TONGUE_L)))
     v.mark(TONGUE_L, H - TONGUE_L, L - TONGUE_L, H - TONGUE_L)
-    v.callout(L * 0.5, H - TONGUE_L / 2, f"dashed: groove in the inner edge, through both ends: {dt(TONGUE_T)} wide x {dt(TONGUE_L)} deep, centered")
-    v.callout(TONGUE_L / 2, H * 0.3, f"stub tenon both ends: {dt(TONGUE_T)} thick x {dt(TONGUE_L)} long, centered (same bit); the groove runs through it")
+    v.callout(L * 0.5, H - TONGUE_L / 2, f"dashed: groove in the inner edge, through both ends: {dt(TONGUE_T)} wide x {dt(TONGUE_L)} deep")
+    v.callout(TONGUE_L / 2, H * 0.3, f"stub tenon both ends: {dt(TONGUE_T)} thick x {dt(TONGUE_L)} long (same bit); the groove runs through it")
     v.dim_h(TONGUE_L, L - TONGUE_L, -v.o(20), f"{dt(L - 2 * TONGUE_L)} shoulder to shoulder")
     v.dim_h(0, L, v.top_y(), f"{dt(L)} overall, includes both tenons")
     v.dim_v(0, H, L + v.o(16))
@@ -710,6 +713,7 @@ def front_rail():
     e.callout(FACE_T / 2, (H - TONGUE_L) / 2, "tenon", ha="center")
     gu = E.rect(g)[0]
     e.dim_h(gu, gu + TONGUE_T, -8, dt(TONGUE_T))
+    e.dim_h(0, gu, -8, dt(FACE_T - PANEL_T))
     e.dim_v(H - TONGUE_L, H, FACE_T + 8, dt(TONGUE_L))
     e.dim_v(0, H, FACE_T + 22)
     e.dim_h(0, FACE_T, -24, P18)
@@ -743,41 +747,39 @@ def front_panel():
     name = "front_panel"
     solid = part(name)
     px0, pz0 = FRONT_X0[0] + STILE_W - TONGUE_L, FRONT_Z0 + STILE_W - TONGUE_L
-    check_blank(name, px0, FACE_Y0, pz0, PW, FACE_T, PH)
+    check_blank(name, px0, FACE_Y0, pz0, PW, PANEL_T, PH)
     TL = TONGUE_L
     bands = [(px0, pz0, PW, TL), (px0, pz0 + PH - TL, PW, TL), (px0, pz0, TL, PH), (px0 + PW - TL, pz0, TL, PH)]
-    P = Face(solid, "-x", "+z")
-    v = View(PW, PH, "A  FRONT (show) face; grain horizontal")
+    P = Face(solid, "+x", "+z")            # looking at the BACK face
+    v = View(PW, PH, "A  BACK face; grain horizontal")
     for bx, bz, bw, bh in bands:
         v.groove(*P.rect((bx, FACE_Y0, bz, bw, GY0 - FACE_Y0, bh)))
-    v.callout(PW * 0.5, PH * 0.5, "full-thickness field; grain horizontal")
-    v.callout(TL / 2, PH * 0.75, f"tongue on all four edges: {dt(TONGUE_T)} thick x {dt(TL)} long, centered (hatched)")
+    v.callout(PW * 0.5, PH * 0.5, "full-thickness field; the show face is the other side; grain horizontal")
+    v.callout(TL / 2, PH * 0.75, f"hatched: rabbet the BACK edges {dt(PANEL_T - TONGUE_T)} deep x {dt(TL)} wide, leaving a {dt(TONGUE_T)} tongue flush with the show face")
     v.dim_h(TL, PW - TL, -v.o(20), f"{dt(PW - 2 * TL)} field")
     v.dim_v(TL, PH - TL, -v.o(22), f"{dt(PH - 2 * TL)} field")
     v.dim_h(0, PW, v.top_y(), f"{dt(PW)} overall, includes tongues")
     v.dim_v(0, PH, PW + v.o(22), f"{dt(PH)} overall")
     v.edge("bottom", "bottom edge")
 
-    S = Face(solid, "-y", "+z", win=(0, FACE_T, 0, 30))
+    S = Face(solid, "-y", "+z", win=(0, PANEL_T, 0, 30))
     s = View(S.w, S.h, "B  section, bottom edge\n(front face at left)", size="small")
-    for y0, dy in ((FACE_Y0, GY0 - FACE_Y0), (GY0 + TONGUE_T, FACE_Y1 - GY0 - TONGUE_T)):
-        s.notch(*S.rect((px0 + PW / 2, y0, pz0, 1, dy, TL)))
+    s.notch(*S.rect((px0 + PW / 2, FACE_Y0, pz0, 1, GY0 - FACE_Y0, TL)))
     gu = S.rect((0, GY0, 0, 1, TONGUE_T, 1))[0]
     s.dim_h(gu, gu + TONGUE_T, -8, dt(TONGUE_T))
-    s.dim_v(0, TL, FACE_T + 8, dt(TL))
-    s.dim_h(0, FACE_T, 30 + 8, P18)
-    s.edge("left", "FRONT")
+    s.dim_v(0, TL, PANEL_T + 8, dt(TL))
+    s.dim_h(0, PANEL_T, 30 + 8, PW12)
+    s.edge("left", "SHOW face")
 
-    sheet(name, head(name, f"3/4 walnut ply, {dt(PH)} x {dt(PW)} including tongues, grain horizontal"), [v, s],
-          "Cut the tongues with the same bit set as the frame. Glue in all round (plywood does not move). "
-          "Mill the maple frame to this sheet's thickness.")
+    sheet(name, head(name, f"1/2 walnut ply, {dt(PH)} x {dt(PW)} including tongues, grain horizontal"), [v, s],
+          "Rabbet the back edges with a straight bit or the bit set's tongue cutter so the tongue stays flush with the show face. "
+          "The back goes in flush with the back of the frame. Glue in all round (plywood does not move).")
     pr = []
     for bx, bz, bw, bh in bands:
-        for y0, dy, floor in ((FACE_Y0, GY0 - FACE_Y0, "+y"), (GY0 + TONGUE_T, FACE_Y1 - GY0 - TONGUE_T, "-y")):
-            pr += cut_probes(bx, y0, bz, bw, dy, bh, floor)
+        pr += cut_probes(bx, FACE_Y0, bz, bw, GY0 - FACE_Y0, bh, "+y")
     fx, fz, fw, fh = px0 + TL, pz0 + TL, PW - 2 * TL, PH - 2 * TL            # field shoulders
-    pr += [wood(fx, FACE_Y0, pz0, fw, FACE_T, TL, "+z"), wood(fx, FACE_Y0, pz0 + PH - TL, fw, FACE_T, TL, "-z"),
-           wood(px0, FACE_Y0, fz, TL, FACE_T, fh, "+x"), wood(px0 + PW - TL, FACE_Y0, fz, TL, FACE_T, fh, "-x")]
+    pr += [wood(fx, FACE_Y0, pz0, fw, PANEL_T, TL, "+z"), wood(fx, FACE_Y0, pz0 + PH - TL, fw, PANEL_T, TL, "-z"),
+           wood(px0, FACE_Y0, fz, TL, PANEL_T, fh, "+x"), wood(px0 + PW - TL, FACE_Y0, fz, TL, PANEL_T, fh, "-x")]
     return check(name, solid, pr)
 
 
@@ -791,17 +793,17 @@ def drawer_side():
     x0 = _box_x0()
     check_blank(name, x0, BOX_Y0, BOX_Z0, T12, BOX_D, BOX_H)
     xi = x0 + T12 - RABBET_D
-    rf = (xi, BOX_Y1 - T18, BOX_Z0, RABBET_D, T18, BOX_H)
-    rb = (xi, BOX_Y0, BOX_Z0, RABBET_D, T18, BOX_H)
+    rf = (xi, BOX_Y1 - T12, BOX_Z0, RABBET_D, T12, BOX_H)
+    rb = (xi, BOX_Y0, BOX_Z0, RABBET_D, T12, BOX_H)
     gb = (xi, BOX_Y0, BOX_Z0 + UM_RECESS, RABBET_D, BOX_D, T12)
     P = Face(solid, "+y", "+z")            # inside face: rear end left, FRONT end right
     v = View(BOX_D, BOX_H, "A  INSIDE face (toward the inside of the box); REAR end at left, FRONT end at right")
     for b in (rb, rf, gb):
         v.groove(*P.rect(b))
-    v.callout(T18 / 2, BOX_H * 0.7, f"rabbet across both ends: {P18} wide x {dt(RABBET_D)} deep; the box front and back sit in them", ha="left")
+    v.callout(T12 / 2, BOX_H * 0.7, f"rabbet across both ends: {P12} wide x {dt(RABBET_D)} deep; the box front and back sit in them", ha="left")
     v.callout(BOX_D * 0.5, UM_RECESS + T12 / 2, f"bottom groove, through: {P12} tall x {dt(RABBET_D)} deep, underside {dt(UM_RECESS)} up from the bottom edge")
-    v.dim_h(0, T18, -v.o(22), P18)
-    v.dim_h(BOX_D - T18, BOX_D, -v.o(22), P18)
+    v.dim_h(0, T12, -v.o(22), P12)
+    v.dim_h(BOX_D - T12, BOX_D, -v.o(22), P12)
     v.dim_v(0, UM_RECESS, -v.o(22))
     v.dim_v(UM_RECESS, UM_RECESS + T12, -v.o(50), P12)
     v.dim_h(0, BOX_D, v.top_y())
@@ -821,11 +823,11 @@ def drawer_side():
                   "Datums: the bottom edge and the blank's ends.")
     pr = cut_probes(*rf, "-x") + cut_probes(*rb, "-x")
     above = BOX_Z0 + UM_RECESS + T12 + 1
-    pr += [wood(rf[0], rf[1], above, RABBET_D, T18, BOX_Z0 + BOX_H - above, "-y"),
-           wood(rb[0], rb[1], above, RABBET_D, T18, BOX_Z0 + BOX_H - above, "+y")]
+    pr += [wood(rf[0], rf[1], above, RABBET_D, T12, BOX_Z0 + BOX_H - above, "-y"),
+           wood(rb[0], rb[1], above, RABBET_D, T12, BOX_Z0 + BOX_H - above, "+y")]
     pr += [runout(*rf, "-z"), runout(*rf, "+z"), runout(*rb, "-z"), runout(*rb, "+z")]
     pr += cut_probes(*gb, "-x")
-    mid = (xi, BOX_Y0 + T18 + 1, gb[2], RABBET_D, BOX_D - 2 * T18 - 2, T12)
+    mid = (xi, BOX_Y0 + T12 + 1, gb[2], RABBET_D, BOX_D - 2 * T12 - 2, T12)
     pr += [wood(*mid, "-z"), wood(*mid, "+z"), runout(*gb, "-y"), runout(*gb, "+y")]
     return check(name, solid, pr)
 
@@ -835,8 +837,8 @@ def drawer_front():
     solid = part(name)
     ex0 = _box_x0() + T12 - RABBET_D
     L = END_LEN
-    check_blank(name, ex0, BOX_Y1 - T18, BOX_Z0, L, T18, BOX_H)
-    gf = (ex0, BOX_Y1 - T18, BOX_Z0 + UM_RECESS, L, RABBET_D, T12)
+    check_blank(name, ex0, BOX_Y1 - T12, BOX_Z0, L, T12, BOX_H)
+    gf = (ex0, BOX_Y1 - T12, BOX_Z0 + UM_RECESS, L, RABBET_D, T12)
     P = Face(solid, "+x", "+z")            # inside face, looking toward the room
     v = View(L, BOX_H, "A  INSIDE face (toward the inside of the box); bottom edge down")
     v.groove(*P.rect(gf))
@@ -845,7 +847,7 @@ def drawer_front():
         for w in (hz, BOX_H - hz):
             v.bore(u, w, 3 / 16 * IN / 2)
     v.callout(L * 0.5, UM_RECESS + T12 / 2, f"bottom groove, runs out both ends: {P12} tall x {dt(RABBET_D)} deep, underside {dt(UM_RECESS)} up from the bottom edge")
-    v.callout(hx, BOX_H - hz, "4 oversize holes, 3/16 dia, through, for the screws into the walnut front", ha="left")
+    v.callout(hx, BOX_H - hz, "4 oversize holes, 3/16 dia, through, for the #8 x 7/8 screws into the front", ha="left")
     v.dim_h(0, hx, -v.o(22))
     v.dim_h(L - hx, L, -v.o(22))
     v.dim_v(0, UM_RECESS, -v.o(22))
@@ -856,13 +858,13 @@ def drawer_front():
     v.dim_h(0, L, v.top_y())
     v.edge("bottom", "bottom edge")
     v.edge("left", "end: sits in the side's rabbet")
-    S = Face(solid, "-y", "+z", win=(0, T18, 0, 45))
+    S = Face(solid, "-y", "+z", win=(0, T12, 0, 45))
     s = View(S.w, S.h, "B  section, bottom edge\n(inside face at right)", size="small")
     s.notch(*S.rect(gf))
-    s.dim_h(T18 - RABBET_D, T18, -8, dt(RABBET_D))
+    s.dim_h(T12 - RABBET_D, T12, -8, dt(RABBET_D))
     s.dim_v(UM_RECESS, UM_RECESS + T12, -8, P12)
     s.edge("right", "inside face")
-    sheet(name, head(name, f"3/4 maple ply, {dt(BOX_H)} tall x {dt(L)} long (box front, behind the walnut front)"), [v, s],
+    sheet(name, head(name, f"{P12}, {dt(BOX_H)} tall x {dt(L)} long (box front, behind the front)"), [v, s],
           "Both ends sit in the sides' end rabbets. The holes are not in the model: drill them after the groove. "
           "Datums: the blank's own ends and bottom edge.")
     pr = cut_probes(*gf, "+y")
@@ -876,12 +878,11 @@ def drawer_back():
     x0 = _box_x0()
     ex0 = x0 + T12 - RABBET_D
     L = END_LEN
-    check_blank(name, ex0, BOX_Y0, BOX_Z0, L, T18, BOX_H)
+    check_blank(name, ex0, BOX_Y0, BOX_Z0, L, T12, BOX_H)
     nw, nh = UM_HOOK_NOTCH_W + RABBET_D, UM_HOOK_NOTCH_H
     dia, depth, off, up = UM_HOOK_BORE
-    notches = [(ex0, BOX_Y0, BOX_Z0, nw, T18, nh), (ex0 + L - nw, BOX_Y0, BOX_Z0, nw, T18, nh)]
+    notches = [(ex0, BOX_Y0, BOX_Z0, nw, T12, nh), (ex0 + L - nw, BOX_Y0, BOX_Z0, nw, T12, nh)]
     bxs = [x0 + T12 + off, x0 + BOX_W - T12 - off]          # from each side's inner face
-    gk = (ex0, BOX_Y0 + T18 - DRAWER_BACK_GROOVE_D, BOX_Z0 + UM_RECESS, L, DRAWER_BACK_GROOVE_D, T12)
 
     P = Face(solid, "+x", "+z")            # REAR face, standing behind the drawer
     v = View(L, BOX_H, "A  REAR (outside) face, seen from behind the drawer; bottom edge down")
@@ -892,12 +893,9 @@ def drawer_back():
         u, w = P.pt(bx, BOX_Y0, BOX_Z0 + up)
         bu.append(u)
         v.bore(u, w, dia / 2)
-    v.hidden(*P.rect(gk))
     v.callout(nw / 2, nh / 2, f"Blum notch, both bottom corners, through: {dt(nw)} from the blank's end x {dt(nh)} tall", ha="left")
     v.callout(bu[1], up, f"Blum hook bore, both ends: {dt(dia)} dia x {dt(depth)} deep into this face", ha="right")
-    v.callout(L * 0.5, UM_RECESS + T12 / 2,
-              f"dashed: bottom groove on the INSIDE face, through: {P12} tall x {dt(DRAWER_BACK_GROOVE_D)} deep, underside {dt(UM_RECESS)} up")
-    v.dim_v(UM_RECESS, UM_RECESS + T12, L + v.o(22), P12)
+    v.callout(L * 0.5, UM_RECESS + T12 / 2, f"no bottom groove: the bottom butts this part's front (inside) face")
     v.dim_v(0, BOX_H, L + v.o(50))
     v.dim_h(0, L, v.top_y())
     v.edge("bottom", "bottom edge")
@@ -905,33 +903,29 @@ def drawer_back():
     C = Face(solid, "+x", "+z", win=(0, 70, 0, 45))
     c = View(C.w, C.h, "C  detail, left bottom corner (REAR face)\nright corner is the mirror image", size="small")
     c.notch(*C.rect(notches[0]))
-    c.hidden(*C.rect(gk))
     c.bore(bu[0], up, dia / 2)
     c.dim_h(0, nw, -8)
     c.dim_h(0, bu[0], -22)
     c.dim_v(0, nh, -8)
     c.dim_v(0, up, -22)
-    c.dim_v(UM_RECESS, UM_RECESS + T12, 70 + 8, P12)
     c.edge("left", "end")
 
-    S = Face(solid, "+y", "+z", win=(0, T18, 0, 45))
+    S = Face(solid, "+y", "+z", win=(0, T12, 0, 45))
     s = View(S.w, S.h, "B  section through a hook bore\n(rear face at left)", size="small")
-    s.notch(0, 0, T18, nh)
+    s.notch(0, 0, T12, nh)
     s.notch(*S.rect((bxs[0] - dia / 2, BOX_Y0, BOX_Z0 + up - dia / 2, dia, depth, dia)))
-    s.notch(*S.rect(gk))
     s.dim_h(0, depth, 45 + 8, dt(depth))
-    s.dim_h(depth, T18 - DRAWER_BACK_GROOVE_D, -8, dt(T18 - DRAWER_BACK_GROOVE_D - depth))
-    s.dim_v(UM_RECESS, UM_RECESS + T12, T18 + 8, P12)
+    s.dim_h(depth, T12, -8, dt(T12 - depth))
     s.dim_v(0, nh, -8)
     s.edge("left", "REAR face")
 
-    sheet(name, head(name, f"3/4 maple ply, {dt(BOX_H)} tall x {dt(L)} long (box back)"), [v, c, s],
-          f"The bottom groove is only {dt(DRAWER_BACK_GROOVE_D)} deep (not {dt(RABBET_D)}) so about {dt(T18 - DRAWER_BACK_GROOVE_D - depth)} of wood "
-          "stays between each hook bore and the groove. Both ends sit in the sides' rabbets. Datums: the blank's own ends and bottom edge.")
+    sheet(name, head(name, f"{P12}, {dt(BOX_H)} tall x {dt(L)} long (box back)"), [v, c, s],
+          f"No bottom groove: the bottom butts this part's front face, and each hook bore leaves only a {dt(T12 - depth)} skin of wood behind it, "
+          "so test-drill scrap first. Both ends sit in the sides' rabbets. Datums: the blank's own ends and bottom edge.")
     pr = []
     for n, toward in zip(notches, ("+x", "-x")):
         pr.append((_box(n[0] + 1, n[1] + 1, n[2] + 1, n[3] - 2, n[4] - 2, n[5] - 2), "empty"))
-        pr.append(wood(n[0], n[1], n[2], n[3], T18 - DRAWER_BACK_GROOVE_D, n[5], "+z"))     # wood above, outside the groove
+        pr.append(wood(*n, "+z"))                                                            # wood above
         pr.append(wood(*n, toward))                                                            # wood beside, toward the middle
         pr += [runout(*n, "-z"), runout(*n, "-x" if toward == "+x" else "+x")]
     for bx in bxs:
@@ -939,19 +933,16 @@ def drawer_back():
         pr.append(runout(bx - 2, BOX_Y0, BOX_Z0 + up - 2, 4, depth, 4, "-y"))
         pr.append((_box(bx + dia / 2 + 0.5, BOX_Y0 + 1, BOX_Z0 + up - 1, 1, depth - 2, 2), "solid"))
         pr.append((_box(bx + dia / 2 - 1.2, BOX_Y0 + 1, BOX_Z0 + up - 0.5, 0.8, depth - 2, 1), "empty"))
-    pr += cut_probes(*gk, "-y")
-    mid = (ex0 + nw + 1, gk[1], gk[2], L - 2 * nw - 2, gk[4], gk[5])
-    pr += [wood(*mid, "-z"), wood(*mid, "+z"), runout(*gk, "-x"), runout(*gk, "+x")]
     return check(name, solid, pr)
 
 
 def drawer_bottom():
     name = "drawer_bottom"
     P, v = plain(name, "-x", "-y", "plan view from above; FRONT edge along the bottom",
-                 f"plain rectangle; all four edges sit in the box's grooves")
+                 f"plain rectangle; the rear edge butts the back's front face (glued), the other three edges sit {dt(RABBET_D)} deep in the front and side grooves")
     v.edge("bottom", "FRONT edge")
     sheet(name, head(name, f"1/2 Baltic birch, {dt(P.h)} front to back x {dt(P.w)} wide"), [v],
-          f"Sizes already take off {dt(PLAY)} total play each way. The Blum locking devices go under it at the front corners.")
+          f"Sizes already take off {dt(PLAY)} total play each way (the front-to-back size takes half, the rear edge butts the back). The Blum locking devices go under it at the front corners.")
     return 0
 
 

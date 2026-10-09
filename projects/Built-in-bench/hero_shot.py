@@ -28,10 +28,12 @@ COLORS = {
     "3/4 maple ply": "#e9d9b0",
     "1/4 maple ply": "#ecdfbc",
     "3/4 ply (any, hidden)": "#cdbb94",
-    "3/4 walnut ply": "#5a3a24",
+    "1/2 walnut ply": "#5a3a24",
     "1/2 Baltic birch": "#efe2bd",
 }
 HW_COLORS = {"slide": "#8c8f94", "pull": "#b8903f", "cushion": "#c9bda8"}
+PAINTED = {"front_stile", "front_rail", "plinth", "scribe_strip"}   # painted white (Brian, 2026-10-09)
+PAINT_WHITE = "#fbfbf8"
 
 # instance name -> registry part (names are built as <part stem>_<l|r|...>)
 STEM = {
@@ -47,7 +49,7 @@ MATERIAL = {p["name"]: p["material"] for p in PARTS}
 def color(name):
     for stem, partname in STEM.items():
         if name == stem or name.startswith(stem + "_"):
-            return COLORS[MATERIAL[partname]]
+            return PAINT_WHITE if partname in PAINTED else COLORS[MATERIAL[partname]]
     raise KeyError(name)
 
 

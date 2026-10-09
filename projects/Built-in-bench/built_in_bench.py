@@ -3,10 +3,11 @@
 Blum TANDEM 563H undermounts, solid maple top with a 3 in cushion.
 
 Picks (Brian, 2026-10-06/07): wood top at 16 in, flush base, frameless with
-full-overlay fronts, flat fronts built as a maple frame around a walnut-ply
-panel on a tongue-and-groove bit set, 8 in brass bar pulls, 3/4 in overhang
+full-overlay fronts, flat fronts built as a maple frame around a 1/2 walnut-ply
+panel (back flush with the frame, face inset 1/4 in) on a tongue-and-groove bit set, 8 in brass bar pulls, 3/4 in overhang
 with an eased edge, solid glued-up maple top set 3 in back from the pilaster
-faces, one full-depth cushion, 21 in slides, clear finish.
+faces, one full-depth cushion, 21 in slides. Finish (2026-10-09): frames, plinth and
+scribe strips painted white; walnut panels, top and shelves bare.
 
 Axes: X across the alcove, Y depth (0 at the back wall, +Y toward the room),
 Z up (0 at the floor). Right-handed, so X=0 is the pilaster wall on your RIGHT
@@ -53,7 +54,7 @@ WALL_GAP = 0.375 * IN       # top to back wall, absorbs the top's movement
 ROUND = 0.125 * IN          # eased front arrises of the top
 
 # ---------------------------------------------------------------- stock (actual, MEASURE)
-T18 = 18.0                  # 3/4 maple ply, 3/4 walnut ply
+T18 = 18.0                  # 3/4 maple ply
 T12 = 12.0                  # 1/2 Baltic birch (drawer sides, bottoms)
 T6 = 6.35                   # 1/4 maple ply back (nominal; the groove is cut to the measured sheet)
 TS = 0.75 * IN              # solid maple: top, plinth, scribe strips, nailer
@@ -67,6 +68,7 @@ BACK_SET = 0.25 * IN        # back panel groove this far in from the rear edge
 PLAY = 1.6                  # 1/16 in total play on housed panels
 TONGUE_T = 0.25 * IN        # front frames: tongue-and-groove bit set
 TONGUE_L = 0.375 * IN
+PANEL_T = T12                # 1/2 walnut ply (measures 12 mm): back flush with the frame, face inset FACE_T - PANEL_T
 STILE_W = 1.5 * IN          # maple frame width on the fronts
 NAILER_H = 2.5 * IN
 STRIP_CUT = 2.0 * IN        # scribe strips ripped at 2 in, scribed to STRIP_W
@@ -81,7 +83,6 @@ UM_FRONT_GAP = 1.5          # box front behind the case front edge
 UM_MIN_DEPTH = 557.0        # inside case depth for the 21 in runner
 UM_HOOK_NOTCH_W, UM_HOOK_NOTCH_H = 35.0, 13.0   # from the side's inner face; flush with the bottom
 UM_HOOK_BORE = (6.0, 10.0, 7.0, 24.0)   # dia, depth, from side inner face, above side bottom
-DRAWER_BACK_GROOVE_D = 0.1875 * IN      # shallower so the hook bores stay in wood
 
 # ---------------------------------------------------------------- figure-8 fasteners (nailer only)
 FIG8_DIA = 0.625 * IN
@@ -149,7 +150,7 @@ MAPLE = "hard maple"
 PLY18 = "3/4 maple ply"
 PLYBASE = "3/4 ply (any, hidden)"
 PLY6 = "1/4 maple ply"
-WALNUT = "3/4 walnut ply"
+WALNUT = "1/2 walnut ply"
 BB12 = "1/2 Baltic birch"
 
 # ================================================================ base frame (ladder, 3/4 ply)
@@ -217,14 +218,14 @@ add("back", back, 1, PLY6, "plain rectangle; slides down the end grooves into th
 strip = _box(0, FACE_Y0, BASE_H, STRIP_W, FACE_T, TOP_Z0 - BASE_H)
 add("scribe_strip", strip, 2, MAPLE,
     f"rip at {inch(STRIP_CUT)}, scribe to the wall so the inner edge lands flush with the inside of the end panel "
-    f"(about {inch(STRIP_W)}); glue and biscuits to the end's front edge; mill to the ply thickness",
+    f"(about {inch(STRIP_W)}); glue and biscuits to the end's front edge; mill to the ply thickness; painted white",
     inst=[("strip_l", strip), ("strip_r", mirror(strip, Plane.YZ.offset(ALCOVE_W / 2)))])
 
 # plinth: solid maple, flush with the fronts, 1/8 reveal under them
 plinth = _box(0, FACE_Y0, 0, ALCOVE_W, FACE_T, PLINTH_H)
 add("plinth", plinth, 1, MAPLE,
     f"cut 4-1/4 tall and scribe to the floor so the top edge sits {inch(GAP)} under the fronts; "
-    "scribe the ends to the walls; grain horizontal; mill to the ply thickness; screwed to the base front rail")
+    "scribe the ends to the walls; grain horizontal; mill to the ply thickness; screwed to the base front rail; painted white")
 
 # ================================================================ top: solid maple, floats on the nailer figure-8s
 top = _box(0, TOP_Y0, TOP_Z0, ALCOVE_W, TOP_Y1 - TOP_Y0, TS)
@@ -237,7 +238,7 @@ add("top", top, 1, MAPLE,
 # ================================================================ drawer fronts: maple frame, walnut panel, T&G
 RL = FRONT_W - 2 * STILE_W + 2 * TONGUE_L     # rail length with stub tenons
 PW, PH = RL, FRONT_H - 2 * STILE_W + 2 * TONGUE_L
-GY0 = FACE_Y0 + (FACE_T - TONGUE_T) / 2       # groove / tongue plane
+GY0 = FACE_Y0 + PANEL_T - TONGUE_T            # groove / tongue plane: the groove front wall lands on the panel face
 
 
 def front_parts(x0):
@@ -252,7 +253,7 @@ def front_parts(x0):
         rail -= _box(xe, GY0 + TONGUE_T, z0 - 1, TONGUE_L, FACE_Y1 - GY0 - TONGUE_T + 1, STILE_W + 2)
     rail_top = mirror(rail, Plane.XY.offset(z0 + FRONT_H / 2))
     panel = _box(x0 + STILE_W - TONGUE_L, GY0, z0 + STILE_W - TONGUE_L, PW, TONGUE_T, PH)
-    panel += _box(x0 + STILE_W, FACE_Y0, z0 + STILE_W, PW - 2 * TONGUE_L, FACE_T, PH - 2 * TONGUE_L)
+    panel += _box(x0 + STILE_W, FACE_Y0, z0 + STILE_W, PW - 2 * TONGUE_L, PANEL_T, PH - 2 * TONGUE_L)
     return stile, stile_r, rail, rail_top, panel
 
 
@@ -260,21 +261,26 @@ FRONT_X0 = [END_IN_L + GAP, END_IN_L + GAP + FRONT_W + GAP]
 _fl = front_parts(FRONT_X0[0])
 _fr = front_parts(FRONT_X0[1])
 add("front_stile", _fl[0], 4, MAPLE,
-    f"{inch(TONGUE_T)} x {inch(TONGUE_L)} groove centered on the inner edge, through; the rail tenons show on both ends (the top one is the visible one)",
+    f"{inch(TONGUE_T)} x {inch(TONGUE_L)} groove on the inner edge, through, front wall {inch(FACE_T - PANEL_T)} thick (set the fence from the panel ply); the rail tenons show on both ends (the top one is the visible one); painted white",
     inst=[("stile_ll", _fl[0]), ("stile_lr", _fl[1]), ("stile_rl", _fr[0]), ("stile_rr", _fr[1])])
 add("front_rail", _fl[2], 4, MAPLE,
     f"{inch(TONGUE_T)} x {inch(TONGUE_L)} groove on the inner edge, through; {inch(TONGUE_T)} x {inch(TONGUE_L)} "
-    f"stub tenon on both ends (same bit); length includes both tenons",
+    f"stub tenon on both ends (same bit); length includes both tenons; painted white",
     inst=[("rail_lb", _fl[2]), ("rail_lt", _fl[3]), ("rail_rb", _fr[2]), ("rail_rt", _fr[3])])
 add("front_panel", _fl[4], 2, WALNUT,
-    f"{inch(TONGUE_T)} x {inch(TONGUE_L)} tongue on all four edges; grain horizontal; size includes the tongues; "
-    "glue in (plywood, no movement); mill the maple to this sheet's thickness",
+    f"{inch(TONGUE_T)} x {inch(TONGUE_L)} tongue on all four edges, flush with the show face (rabbet the BACK edges "
+    f"{inch(PANEL_T - TONGUE_T)} deep); grain horizontal; size includes the tongues; back flush with the frame back, "
+    f"face {inch(FACE_T - PANEL_T)} below the maple; glue in (plywood, no movement)",
     inst=[("panel_l", _fl[4]), ("panel_r", _fr[4])])
 
 front_l = _fl[0] + _fl[1] + _fl[2] + _fl[3] + _fl[4]
 assert len(front_l.solids()) == 1, "front frame and panel do not close up"
 _bb = front_l.bounding_box()
 assert abs(_bb.size.X - FRONT_W) < 1e-6 and abs(_bb.size.Z - FRONT_H) < 1e-6 and abs(_bb.size.Y - FACE_T) < 1e-6
+# the panel face sits FACE_T - PANEL_T below the frame face, and its back is flush with the frame back
+_pb = _fl[4].bounding_box()
+assert abs(_pb.min.Y - FACE_Y0) < 1e-6 and abs((FACE_Y1 - _pb.max.Y) - (FACE_T - PANEL_T)) < 1e-6, "panel is not inset"
+assert abs(_pb.max.Y - (GY0 + TONGUE_T)) < 1e-6, "tongue is not flush with the panel face"
 
 # ================================================================ drawer boxes: Blum 563H
 BOX_W = OPEN_W - UM_WIDTH_LOSS + 2 * T12
@@ -284,8 +290,8 @@ BOX_D = SLIDE_LEN
 BOX_Z0 = BOT_Z1 + UM_BOTTOM_CLEAR
 BOX_Y1 = CASE_D - UM_FRONT_GAP
 BOX_Y0 = BOX_Y1 - BOX_D
-END_LEN = BOX_W - 2 * (T12 - RABBET_D)      # drawer front and back length (3/4 ply)
-BOTTOM_D = BOX_D - 2 * T18 + RABBET_D + DRAWER_BACK_GROOVE_D
+END_LEN = BOX_W - 2 * (T12 - RABBET_D)      # drawer front and back length (1/2 Baltic birch, in the side rabbets)
+BOTTOM_D = BOX_D - 2 * T12 + RABBET_D        # bottom: 1/4 into the front groove, butted to the back (no back groove)
 
 
 def make_drawer(bay_x0, sfx):
@@ -295,50 +301,50 @@ def make_drawer(bay_x0, sfx):
     gz = z0 + UM_RECESS                      # underside of the bottom
     # side: rabbets at both ends on the inner face, bottom groove through
     side = _box(x0, y0, z0, T12, BOX_D, BOX_H)
-    side -= _box(x0 + T12 - RABBET_D, y1 - T18, z0 - 1, RABBET_D + 1, T18 + 1, BOX_H + 2)
-    side -= _box(x0 + T12 - RABBET_D, y0 - 1, z0 - 1, RABBET_D + 1, T18 + 1, BOX_H + 2)
+    side -= _box(x0 + T12 - RABBET_D, y1 - T12, z0 - 1, RABBET_D + 1, T12 + 1, BOX_H + 2)
+    side -= _box(x0 + T12 - RABBET_D, y0 - 1, z0 - 1, RABBET_D + 1, T12 + 1, BOX_H + 2)
     side -= _box(x0 + T12 - RABBET_D, y0 - 1, gz, RABBET_D + 1, BOX_D + 2, T12)
     side_r = mirror(side, Plane.YZ.offset(xc))
-    # front: 3/4 ply between the sides, bottom groove
+    # front: 1/2 birch between the sides, bottom groove
     ex0 = x0 + T12 - RABBET_D
-    front = _box(ex0, y1 - T18, z0, END_LEN, T18, BOX_H)
-    front -= _box(ex0 - 1, y1 - T18 - 1, gz, END_LEN + 2, RABBET_D + 1, T12)
-    # back: 3/4 ply, shallower groove, Blum hook notches and bores
-    backp = _box(ex0, y0, z0, END_LEN, T18, BOX_H)
-    backp -= _box(ex0 - 1, y0 + T18 - DRAWER_BACK_GROOVE_D, gz, END_LEN + 2, DRAWER_BACK_GROOVE_D + 1, T12)
+    front = _box(ex0, y1 - T12, z0, END_LEN, T12, BOX_H)
+    front -= _box(ex0 - 1, y1 - T12 - 1, gz, END_LEN + 2, RABBET_D + 1, T12)
+    # back: 1/2 birch, no groove (the 10 mm hook bore leaves only 2 mm of a 12 mm back), Blum hook notches and bores
+    backp = _box(ex0, y0, z0, END_LEN, T12, BOX_H)
     nw = UM_HOOK_NOTCH_W + RABBET_D              # back end sits in the rabbet; notch measured from the side's inner face
     for xe in (ex0, ex0 + END_LEN - nw):
-        backp -= _box(xe, y0 - 1, z0 - 1, nw, T18 + 2, UM_HOOK_NOTCH_H + 1)
+        backp -= _box(xe, y0 - 1, z0 - 1, nw, T12 + 2, UM_HOOK_NOTCH_H + 1)
     dia, depth, off, up = UM_HOOK_BORE
     for xin in (x0 + T12, x0 + BOX_W - T12):          # sides' inner faces
         bx = xin + off if xin < xc else xin - off
         backp -= Pos(bx, y0 - 1, z0 + up) * Rot(-90, 0, 0) * Cylinder(dia / 2, depth + 1,
                                                                         align=(Align.CENTER, Align.CENTER, Align.MIN))
-    # bottom: 1/2 Baltic birch in the grooves
+    # bottom: 1/2 Baltic birch in the side and front grooves, butted to the back
     bx0 = x0 + T12 - RABBET_D + PLAY / 2
-    by0 = y0 + T18 - DRAWER_BACK_GROOVE_D + PLAY / 2
-    bot = _box(bx0, by0, gz, BOX_W - 2 * (T12 - RABBET_D) - PLAY, BOTTOM_D - PLAY, T12)
+    by0 = y0 + T12
+    bot = _box(bx0, by0, gz, BOX_W - 2 * (T12 - RABBET_D) - PLAY, BOTTOM_D - PLAY / 2, T12)
     return side, side_r, front, backp, bot
 
 
 _dl = make_drawer(END_IN_L, "l")
 _dr = make_drawer(PART_X0 + T18, "r")
 add("drawer_side", _dl[0], 4, BB12,
-    f"{inch(RABBET_D)} deep x 3/4 ply (measure) rabbet across both ends on the inside face; "
+    f"{inch(RABBET_D)} deep x 1/2 BB (measure) rabbet across both ends on the inside face; "
     f"{inch(RABBET_D)} deep x 1/2 BB (measure) bottom groove, underside {inch(UM_RECESS)} up from the bottom edge, through",
     inst=[("dside_ll", _dl[0]), ("dside_lr", _dl[1]), ("dside_rl", _dr[0]), ("dside_rr", _dr[1])])
-add("drawer_front", _dl[2], 2, PLY18,
+add("drawer_front", _dl[2], 2, BB12,
     f"box front, sits in the side rabbets; {inch(RABBET_D)} deep bottom groove to match the sides; "
-    "the walnut front screws to it from inside through 4 oversize holes",
+    "the front screws to it from inside through 4 oversize holes: #8 x 7/8 in, pre-drilled, so the bite stays short of the "
+    "face; the box front overlaps the top rail by 1-1/8 in (best bite) and the panel field, but the bottom rail by only 1/4 in",
     inst=[("dfront_l", _dl[2]), ("dfront_r", _dr[2])])
-add("drawer_back", _dl[3], 2, PLY18,
-    f"box back, sits in the side rabbets; bottom groove only {inch(DRAWER_BACK_GROOVE_D)} deep so the Blum hook bores "
-    f"stay in wood; Blum notch {inch(UM_HOOK_NOTCH_W)} in from each side's inner face x {inch(UM_HOOK_NOTCH_H)} tall at both bottom corners; hook bores "
+add("drawer_back", _dl[3], 2, BB12,
+    f"box back, sits in the side rabbets; no bottom groove (a groove would break into the hook bores), the bottom butts "
+    f"its front face; Blum notch {inch(UM_HOOK_NOTCH_W)} in from each side's inner face x {inch(UM_HOOK_NOTCH_H)} tall at both bottom corners; hook bores "
     f"{inch(UM_HOOK_BORE[0])} dia x {inch(UM_HOOK_BORE[1])} deep into the rear face, centered "
     f"{inch(UM_HOOK_BORE[2])} in from each side's inner face and {inch(UM_HOOK_BORE[3])} above the bottom edge (Blum 563H sheet)",
     inst=[("dback_l", _dl[3]), ("dback_r", _dr[3])])
 add("drawer_bottom", _dl[4], 2, BB12,
-    "plain rectangle in the grooves; the Blum locking devices sit flush under it at the front corners (their screws go into the box front)",
+    f"plain rectangle: {inch(RABBET_D)} into the side and front grooves, butted to the back and glued to it; the Blum locking devices sit flush under it at the front corners (their screws go into the box front)",
     inst=[("dbot_l", _dl[4]), ("dbot_r", _dr[4])])
 
 # ================================================================ hardware and soft goods (viewer only)
@@ -382,19 +388,19 @@ assert TOP_Z0 - (BOX_Z0 + BOX_H) >= UM_TOP_CLEAR, "box too tall for the opening"
 assert abs(BOX_D - SLIDE_LEN) < 1e-6
 assert CASE_D - BACK_Y1 >= UM_MIN_DEPTH, "case too shallow for the 21 in runner"
 assert BOX_Y0 > NAILER_Y1 and BOX_Y0 > BACK_Y1, "box hits the nailer or back"
-assert T18 - DRAWER_BACK_GROOVE_D - UM_HOOK_BORE[1] >= 2.5, "hook bore would break into the bottom groove"
+assert T12 - UM_HOOK_BORE[1] >= 1.9, "hook bore would break through the back"   # a 2 mm skin; test-drill scrap first
 # the bore is really there, in wood, and stops short of the groove
 _dia, _depth, _off, _up = UM_HOOK_BORE
 _bx = _dl[0].bounding_box().min.X + T12 + _off              # left box, left bore center
 _probe_air = Pos(_bx, BOX_Y0 + 1, BOX_Z0 + _up) * Rot(-90, 0, 0) * Cylinder(_dia / 2 - 0.5, _depth - 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
 assert vol(_probe_air & part("drawer_back")) < 1e-3, "hook bore not cut"
-_probe_wood = _box(_bx - 1, BOX_Y0 + _depth + 0.3, BOX_Z0 + _up - 1, 2, T18 - DRAWER_BACK_GROOVE_D - _depth - 0.6, 2)
-assert abs(vol(_probe_wood & part("drawer_back")) - _probe_wood.volume) < 1e-3, "no wood between bore and groove"
+_probe_wood = _box(_bx - 1, BOX_Y0 + _depth + 0.3, BOX_Z0 + _up - 1, 2, T12 - _depth - 0.6, 2)
+assert abs(vol(_probe_wood & part("drawer_back")) - _probe_wood.volume) < 1e-3, "no wood between the bore and the back's front face"
 
 _sx = _dl[0].bounding_box().min.X + T12                     # left side inner face
-_notch_air = _box(_sx + 0.5, BOX_Y0 + 0.5, BOX_Z0 + 0.5, UM_HOOK_NOTCH_W - 1, T18 - 1, UM_HOOK_NOTCH_H - 1)
+_notch_air = _box(_sx + 0.5, BOX_Y0 + 0.5, BOX_Z0 + 0.5, UM_HOOK_NOTCH_W - 1, T12 - 1, UM_HOOK_NOTCH_H - 1)
 assert vol(_notch_air & part("drawer_back")) < 1e-3, "rear notch not cut"
-_notch_wood = _box(_sx + UM_HOOK_NOTCH_W + 0.3, BOX_Y0 + 0.5, BOX_Z0 + 0.5, 2, T18 - 1, UM_HOOK_NOTCH_H - 1)
+_notch_wood = _box(_sx + UM_HOOK_NOTCH_W + 0.3, BOX_Y0 + 0.5, BOX_Z0 + 0.5, 2, T12 - 1, UM_HOOK_NOTCH_H - 1)
 assert abs(vol(_notch_wood & part("drawer_back")) - _notch_wood.volume) < 1e-3, "rear notch too wide"
 assert abs((BOX_Z0 + UM_RECESS) - (BOX_Z0 + UM_HOOK_NOTCH_H)) < 1e-6, "notch not flush with the bottom"
 
@@ -416,18 +422,19 @@ housed(part("front_rail"), part("front_stile"),
 housed(part("front_panel"), part("front_rail"),
        _box(FRONT_X0[0] + FRONT_W / 2, GY0 + 0.3, FRONT_Z0 + STILE_W - TONGUE_L + 0.3, 10, TONGUE_T - 0.6, TONGUE_L - 0.6))
 housed(part("drawer_front"), part("drawer_side"),
-       _box(_dl[0].bounding_box().max.X - RABBET_D + 0.3, BOX_Y1 - T18 + 0.5, BOX_Z0 + BOX_H / 2, RABBET_D - 0.6, T18 - 1, 10))
+       _box(_dl[0].bounding_box().max.X - RABBET_D + 0.3, BOX_Y1 - T12 + 0.5, BOX_Z0 + BOX_H / 2, RABBET_D - 0.6, T12 - 1, 10))
 housed(part("drawer_bottom"), part("drawer_side"),
        _box(_dl[0].bounding_box().max.X - RABBET_D + PLAY / 2 + 0.3, BOX_Y0 + BOX_D / 2, BOX_Z0 + UM_RECESS + 0.5,
             RABBET_D - PLAY / 2 - 0.6, 10, T12 - 1))
-housed(part("drawer_bottom"), part("drawer_back"),
-       _box(XC / 2, BOX_Y0 + T18 - DRAWER_BACK_GROOVE_D + PLAY / 2 + 0.3, BOX_Z0 + UM_RECESS + 0.5,
-            10, DRAWER_BACK_GROOVE_D - PLAY / 2 - 0.6, T12 - 1))
+housed(part("drawer_bottom"), part("drawer_front"),
+       _box(XC / 2, BOX_Y1 - T12 + 0.3, BOX_Z0 + UM_RECESS + 0.5, 10, RABBET_D - PLAY / 2 - 0.6, T12 - 1))
+_bb_b, _bb_k = _dl[4].bounding_box(), _dl[3].bounding_box()
+assert abs(_bb_b.min.Y - _bb_k.max.Y) < 1e-6, "bottom does not butt the back"
 
 # volumes against analytic values
 assert abs(part("front_stile").volume - (STILE_W * FACE_T * FRONT_H - TONGUE_L * TONGUE_T * FRONT_H)) < 1e-3
-assert abs(part("front_panel").volume - (PW * PH * TONGUE_T + (PW - 2 * TONGUE_L) * (PH - 2 * TONGUE_L) * (FACE_T - TONGUE_T))) < 1e-3
-assert abs(part("drawer_bottom").volume - (BOX_W - 2 * (T12 - RABBET_D) - PLAY) * (BOTTOM_D - PLAY) * T12) < 1e-3
+assert abs(part("front_panel").volume - (PW * PH * TONGUE_T + (PW - 2 * TONGUE_L) * (PH - 2 * TONGUE_L) * (PANEL_T - TONGUE_T))) < 1e-3
+assert abs(part("drawer_bottom").volume - (BOX_W - 2 * (T12 - RABBET_D) - PLAY) * (BOTTOM_D - PLAY / 2) * T12) < 1e-3
 
 assembly = Compound(children=[s for _, s in INST] + [s for _, s in HW])
 
@@ -451,9 +458,9 @@ if os.environ.get("EXPORT"):
         {"part": "Blum TANDEM plus BLUMOTION 563H, 21 in (563H5330B)", "qty": 2, "unit": "pair",
          "material": "hardware", "notes": "one pair per drawer; 90 lb dynamic; runner front sits 3/32 behind the case front edge"},
         {"part": "Blum locking devices T51.1901 R and L", "qty": 2, "unit": "pair", "material": "hardware",
-         "notes": "front corners under the drawer bottom, screwed into the 3/4 box front with #6 x 5/8"},
+         "notes": "front corners under the drawer bottom, screwed into the 1/2 box front: use #6 x 1/2 so the points stay inside it"},
         {"part": "Brass bar pull, 8 in", "qty": 2, "unit": "ea", "material": "hardware",
-         "notes": "break-away machine screws long enough for 3/4 front + 3/4 box front"},
+         "notes": "break-away machine screws long enough for 1/2 panel + 1/2 box front"},
         {"part": "Figure-8 tabletop fasteners", "qty": 4, "unit": "ea", "material": "hardware", "notes": "nailer to top"},
         {"part": "Pocket screws #8 x 1-1/4 fine", "qty": 6, "unit": "ea", "material": "hardware",
          "notes": "ends and partition to the top, near the front"},

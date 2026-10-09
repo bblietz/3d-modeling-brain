@@ -25,30 +25,29 @@ sys.path.insert(0, f"{VAULT}/scripts")
 from cutlist import inch_frac  # noqa: E402
 
 CASE_ORDER = ["hard maple", "3/4 maple ply", "1/4 maple ply", "3/4 ply (any, hidden)"]
-DRAWER_ORDER = ["hard maple", "3/4 walnut ply", "3/4 maple ply", "1/2 Baltic birch"]
+DRAWER_ORDER = ["hard maple", "1/2 walnut ply", "1/2 Baltic birch"]
 CASE_LABEL = {
-    "hard maple": "Hard maple: top, plinth, nailer, scribe strips",
+    "hard maple": "Hard maple: top (bare), nailer; plinth and scribe strips (painted white)",
     "3/4 maple ply": "3/4 in maple plywood (measure the sheet): ends, bottom, partition",
     "1/4 maple ply": "1/4 in maple plywood (measure the sheet): back",
     "3/4 ply (any, hidden)": "3/4 in plywood, any grade (hidden): base ladder",
 }
 DRAWER_LABEL = {
-    "hard maple": "Drawer front frames, hard maple: stiles and rails",
-    "3/4 walnut ply": "Drawer front panels, 3/4 in walnut plywood (measure the sheet)",
-    "3/4 maple ply": "Drawer box fronts and backs, 3/4 in maple plywood (measure the sheet)",
-    "1/2 Baltic birch": "Drawer sides and bottoms, 1/2 in Baltic birch (measure the sheet)",
+    "hard maple": "Drawer front frames, hard maple, painted white: stiles and rails",
+    "1/2 walnut ply": "Drawer front panels, 1/2 in walnut plywood, left bare (measure the sheet)",
+    "1/2 Baltic birch": "Drawer boxes: sides, fronts, backs and bottoms, 1/2 in 9-ply Baltic birch (measure the sheet)",
 }
 TEMPLATE_TAG = "not a plain rectangular blank"
 HARDWARE = [
     ("2 pair", "Blum TANDEM plus BLUMOTION 563H, 21 in (563H5330B)",
      "one pair per drawer; 90 lb dynamic; runner front 3/32 behind the case front edge; no rear brackets in a frameless case"),
     ("2 pair", "Blum locking devices T51.1901 R and L",
-     "front corners under the drawer bottom, screwed into the 3/4 box front with #6 x 5/8"),
+     "front corners under the drawer bottom, screwed into the 1/2 box front with #6 x 1/2"),
     ("2", "Brass bar pull, 8 in",
-     "centered on each front; break-away machine screws through 3/4 front plus 3/4 box front"),
+     "centered on each front; break-away machine screws through the 1/2 panel plus the 1/2 box front"),
     ("4", "Figure-8 tabletop fasteners", "nailer to top; recess centered 1/4 in from the front face so it opens through"),
     ("6", "Pocket screws #8 x 1-1/4 fine", "ends and partition to the top, near the front"),
-    ("8", "Wood screws #8 x 1-1/4", "walnut fronts to the box fronts, through oversize holes"),
+    ("8", "Wood screws #8 x 7/8", "fronts to the box fronts, through oversize holes, pre-drilled"),
     ("1", "Bench cushion", "about 65-1/2 x 25 x 3, boxed, full depth to the wall"),
 ]
 sys.path.insert(0, PROJ)
@@ -56,7 +55,7 @@ from assembly_shots import STEPS  # noqa: E402  (file stem, title, prefixes, tex
 ASSEMBLY_DIR = "images/assembly"
 EXPLODED = f"{ASSEMBLY_DIR}/exploded.png"
 SUBS = [("drawer-exploded.png", "one drawer box, pulled apart: sides, 3/4 front and back, 1/2 bottom"),
-        ("front-exploded.png", "one drawer front, pulled apart: maple stiles and rails around the walnut panel")]
+        ("front-exploded.png", "one drawer front, pulled apart: maple stiles and rails around the inset walnut panel")]
 
 
 def is_drawer(part):
@@ -126,6 +125,7 @@ def group_section(label, rows):
 
 
 HERO = "images/hero.png"
+NOOK = "images/bench-in-nook-white-web.jpg"    # AI composite of the white option in the alcove, with the shelves
 
 
 def sub_figure(fname, caption):
@@ -170,7 +170,7 @@ def build():
         print(f"WARNING: {EXPLODED} missing (run assembly_shots.py with the CAD viewer open)")
     today = date.today().isoformat()
     return PAGE.format(case=case_html, drawers=drawer_html, hardware=hw, notes=notes, total=total_pieces, today=today,
-                       n_case=sum(r["qty"] for r in case), n_drawers=sum(r["qty"] for r in drawers), hero=HERO,
+                       n_case=sum(r["qty"] for r in case), n_drawers=sum(r["qty"] for r in drawers), hero=HERO, nook=NOOK,
                        exploded=EXPLODED, n_steps=len(STEPS))
 
 
@@ -276,6 +276,8 @@ PAGE = """<title>Built-in Bench Cut List</title>
     .dwg {{ border: 1px solid #ccc; padding: 4px; background: #fff; break-inside: avoid; cursor: default; }}
     .dwg img {{ max-height: 3.6in; width: auto; max-width: 100%; margin: 0 auto; }}
     .hero img {{ max-height: 5in; }}
+    .nook {{ break-before: page; }}
+    .nook img {{ max-height: 7.5in; }}
     .hw li {{ break-inside: avoid; }}
     .step {{ grid-template-columns: 1fr 1.3fr; break-inside: avoid; padding: 10px 0; }}
     .step .sfig img {{ max-height: 2.8in; }}
@@ -289,9 +291,10 @@ PAGE = """<title>Built-in Bench Cut List</title>
   <header>
     <p class="eyebrow">Built-in bench &middot; 66 x 28 in alcove</p>
     <h1>Built-in Bench Cut List</h1>
-    <p>Two drawers on Blum undermounts, maple frame-and-walnut-panel fronts, solid maple top. {total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
+    <p>Two drawers on Blum undermounts, white-painted maple frames around inset walnut panels, solid maple top. {total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
     <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
   </header>
+  <figure class="dwg nook" tabindex="0"><img src="{nook}" alt="the finished bench in the alcove, white frames with walnut panels, maple top, cushion and three maple shelves above"><figcaption>how it should look in the alcove: white frames, walnut panels, maple top, cushion, three maple shelves (an AI composite from the photo of the alcove, not a drawing; the shelves are not in this cut list); tap to zoom</figcaption></figure>
 
   <div class="flag"><b>Measure the alcove at the floor, 16 in and 36 in, at the back wall and the pilaster faces, before cutting.</b> Cut the top, plinth and scribe strips long and scribe them. Confirm the low receptacle seen in the photo before cutting the back.</div>
 

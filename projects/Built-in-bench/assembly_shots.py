@@ -51,20 +51,21 @@ STEPS = [
      ("strip_", "plinth"),
      "Scribe both strips to the walls and glue them to the ends' front edges with biscuits, inner edges flush with "
      "the inside of the ends. Scribe the plinth to the floor and screw it to the base front rail with its top edge "
-     "1/8 below the case bottom."),
+     "1/8 below the case bottom. Paint the strips and plinth white."),
     ("step-07", "Slides",
      ("slide_",),
      "Screw the Blum cabinet members to the ends and the partition, sitting on the case bottom, fronts 3/32 behind "
      "the case front edge. Use the five marked holes per runner."),
     ("step-08", "Drawer boxes",
      ("dside_", "dfront_", "dback_", "dbot_"),
-     "Glue each box up around its bottom: front and back in the side rabbets, bottom in the grooves with its "
-     "underside 1/2 above the side edges, notches and hook bores at the rear. Clip the locking devices under the "
-     "bottom at the front corners and set the boxes on the runners."),
+     "Glue each 1/2 birch box up around its bottom: front and back in the side rabbets, bottom in the side and "
+     "front grooves with its underside 1/2 above the side edges, butted to the back and glued to it. Notches and "
+     "hook bores at the rear (drill scrap first: the bore leaves a thin skin). Clip the locking devices under the "
+     "bottom at the front corners with #6 x 1/2 screws and set the boxes on the runners."),
     ("step-09", "Fronts and pulls",
      ("stile_", "rail_", "panel_", "pull_"),
-     "Glue up each walnut panel in its maple frame (groove every piece first, then cut the tongues and tenons to "
-     "fit). Hang the fronts with 1/8 reveals all round, screwed from inside the box through oversize holes. "
+     "Glue up each 1/2 walnut panel in its maple frame, back faces flush so the panel sits 1/4 below the maple (groove "
+     "every piece first, then cut the tongues and tenons to fit). Prime and paint the frames white. Hang the fronts with 1/8 reveals all round, screwed from inside the box through oversize holes. "
      "Center the pulls."),
     ("step-10", "Top",
      ("top",),
@@ -87,9 +88,11 @@ EXPLODE = {
 
 COLORS = {
     "hard maple": "#e2c48f", "3/4 maple ply": "#e9d9b0", "1/4 maple ply": "#ecdfbc",
-    "3/4 ply (any, hidden)": "#cdbb94", "3/4 walnut ply": "#5a3a24", "1/2 Baltic birch": "#efe2bd",
+    "3/4 ply (any, hidden)": "#cdbb94", "1/2 walnut ply": "#5a3a24", "1/2 Baltic birch": "#efe2bd",
 }
 HW_COLORS = {"slide": "#8c8f94", "pull": "#b8903f", "cushion": "#c9bda8"}
+PAINTED = {"front_stile", "front_rail", "plinth", "scribe_strip"}   # painted white
+PAINT_WHITE = "#fbfbf8"
 DONE = "#dedad2"      # already in place
 STEM = {
     "base_end": "base_end_rail", "base_back": "base_long_rail", "base_front": "base_long_rail",
@@ -108,7 +111,7 @@ def wood_color(name):
         return HW_COLORS[name.split("_")[0]]
     for stem, partname in STEM.items():
         if name == stem or name.startswith(stem + "_"):
-            return COLORS[MATERIAL[partname]]
+            return PAINT_WHITE if partname in PAINTED else COLORS[MATERIAL[partname]]
     raise KeyError(name)
 
 

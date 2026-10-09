@@ -26,3 +26,7 @@ State: build123d model `built_in_bench.py` passes all asserts; `cutlist.md/.csv`
 
 1. Brian views the model (`SHOW=reset .venv/bin/python projects/Built-in-bench/built_in_bench.py` with `scripts/cad-viewer.sh` open) and OKs the frame width.
 2. On-site measurements, then re-run `EXPORT=1`, `part_drawings.py`, `hero_shot.py`, `assembly_shots.py`, `make_cutlist_page.py`, `make_pdf.py` (cutlist.pdf), and republish cutlist.html to the same artifact URL with the images under images/parts and images/assembly.
+
+## Update 2026-10-09 (late)
+
+Decisions locked: 1/2 walnut ply panels inset 1/4 (back flush with the frame); frames, plinth, strips painted white (panels, top, shelves bare); every drawer box part is 1/2 9-ply Baltic birch (no back groove, bottom butts the back; locking-device screws #6 x 1/2). Pipeline rerun: EXPORT=1, part_drawings, hero_shot (CUSHION=0), assembly_shots, make_cutlist_page (now includes the alcove picture with shelves), make_pdf (20 pages), shop page republished as Version 4. Open: test-drill a scrap 1/2 BB back for the Blum hook bore (2 mm skin), site measurements, receptacle, the nook composite predates the inset.

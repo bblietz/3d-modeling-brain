@@ -37,3 +37,10 @@ Links: [[Built-in-bench]] brief in `projects/Built-in-bench/brief.md`, model `bu
 ## Not yet measured
 
 Nothing is cut. Record actual ply thicknesses, the alcove's three widths, and the drawer fit against Blum's rules here when the bench is built.
+
+## 2026-10-09 revisions
+
+- An inset panel in a flush-thickness frame needs a thinner panel set back-flush; with only 3/4 walnut ply the options were a 1/4 maple lip on the frame or 1/2 ply. Do not plane plywood (veneer, glue lines, unbalanced).
+- The "same thickness" trap: the groove position now comes from the panel thickness (GY0 = back face + panel thickness - tongue), not from centering. Panels of 12 mm ply (nominal 1/2) make the groove front wall 6 mm.
+- 1/2 in box backs cannot take a bottom groove and Blum's 10 mm hook bore (12 - 10 = 2 mm skin). Bottom butts the back instead. Unverified against Blum's sheets.
+- Painted parts get their own white color in hero_shot.py and assembly_shots.py (PAINTED set); picture composites by Gemini are mood only and predate geometry changes.
