@@ -38,3 +38,4 @@
 - [Solid infill at screw holes](feedback-solid-infill-at-screw-holes.md) - every screw hole gets a 100% infill modifier pad in the 3MF, proven in the sliced G-code; Brian's rule 2026-10-04
 - [Built-in alcove bench](project-built-in-bench.md) - 66x28 former wet bar; picks locked, build123d CAD + cut list + shop page built 2026-10-07 (maple frame/walnut panel fronts on T&G, top 3 in back from pilasters); waiting on viewer look and site measurements
 - [Keep the skirt](feedback-keep-skirt.md) - every print 3MF keeps the 2-loop skirt (Bambu default is none); Brian confirmed 2026-10-09, do not ask again
+- [Report nanobanana cost](feedback-nanobanana-report-cost.md) - every Gemini image call is reported to Brian with its dollar cost (2K image about $0.13, 4K about $0.24); scripts print usage tokens and the estimate
