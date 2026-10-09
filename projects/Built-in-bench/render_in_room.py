@@ -11,10 +11,12 @@ Jobs:
            white with the walnut panels, maple top and maple shelves kept bare
   white-maple  images/bench-in-nook-white.png -> images/bench-in-nook-white-maple.png, the white bench with
            pale maple panels in the drawer fronts instead of walnut
+  white-inset  images/bench-in-nook-white.png + images/hero.png -> images/bench-in-nook-white-inset.png, the white
+           bench with the 1/2 walnut panels visibly recessed 1/4 in below the white frames
   white-all  images/bench-in-nook-white.png -> images/bench-in-nook-white-all.png, the white bench with the
            drawer panels painted white too (all-white fronts, brass pulls, maple top and shelves bare)
 
-Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all] [variant]
+Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset] [variant]
 A variant name is appended to the output file so reruns do not overwrite earlier images.
 """
 import os
@@ -112,6 +114,18 @@ exactly as they are: the white painted frames, plinth and wall strips, the bare 
 maple shelves with their objects, the walls, floor, door, lighting and camera. Photorealistic, soft sprayed-enamel
 reflections on the painted surfaces, matching image 1's grain and white balance."""
 
+WHITE_INSET_PROMPT = """Image 1 is a photograph of a built-in bench in an alcove with three maple floating shelves above it. The bench
+is painted satin white, with a dark walnut panel inside each white drawer frame, brass bar pulls, a bare maple top
+and an oatmeal cushion. Image 2 is a CAD rendering of the same bench, only to show how the walnut panels are built.
+
+Edit image 1 so each dark walnut panel is visibly INSET: the panel face sits recessed about 1/4 inch BELOW the
+front face of the white frame on all four sides, like a shaker door with a shallow recess. The white frame's inner
+edges therefore show as a thin, crisp white step around the panel, and the top edge of the opening casts a soft
+shadow onto the upper part of the walnut panel. Keep the panel itself flat, bare walnut with visible grain and no
+raised profile or bevel. Do not change anything else: the white frames, plinth and wall strips, the brass pulls in
+the same places, the bare maple top, the cushion, the three maple shelves with their objects, the walls, floor,
+door, lighting and camera. Photorealistic, matching image 1's grain and white balance."""
+
 JOBS = {
     "bench": ((f"{PROJ}/images/space-photo-web.jpg", "image/jpeg"), (f"{PROJ}/images/hero.png", "image/png"),
               BENCH_PROMPT, "bench-in-nook"),
@@ -122,6 +136,8 @@ JOBS = {
                     "bench-in-nook-white-maple"),
     "white-all": ((f"{PROJ}/images/bench-in-nook-white.png", "image/png"), None, WHITE_ALL_PROMPT,
                   "bench-in-nook-white-all"),
+    "white-inset": ((f"{PROJ}/images/bench-in-nook-white.png", "image/png"), (f"{PROJ}/images/hero.png", "image/png"),
+                    WHITE_INSET_PROMPT, "bench-in-nook-white-inset"),
 }
 job = sys.argv[1] if len(sys.argv) > 1 else "bench"
 if job not in JOBS:
