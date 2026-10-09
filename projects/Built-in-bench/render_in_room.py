@@ -20,21 +20,29 @@ variant = sys.argv[1] if len(sys.argv) > 1 else ""
 OUT = f"{PROJ}/images/bench-in-nook{('-' + variant) if variant else ''}.png"
 
 PROMPT = """Image 1 is a photo of an empty alcove in a house (a former wet bar): cream walls, a white baseboard,
-dark hand-scraped plank floor, a six-panel door at the left, a passage past the right pilaster.
+dark hand-scraped plank floor, a six-panel door at the left, a passage past the right pilaster. The alcove is
+66 inches wide between the two pilasters and 28 inches deep from the back wall to the pilaster faces.
 Image 2 is a CAD rendering of a built-in bench designed for exactly this alcove.
 
 Edit image 1 so the bench from image 2 is built into the alcove, as a realistic photograph taken with the
 same camera, from the same spot, with the same lens, lighting, white balance, shadows and grain as image 1.
 Keep the walls, door, floor, trim outside the alcove and everything else exactly as they are.
 
+DEPTH IS THE CRITICAL PART. The bench is 25 inches deep and fills almost the whole 28 inch depth of the alcove.
+Its top's front edge is only 3 inches behind the faces of the pilasters, so the bench front is nearly flush
+with the pilaster faces. Of each pilaster's inner side wall, only a 3 inch wide strip remains visible in front
+of the bench; the rest of the side walls is hidden behind the bench. The front of the bench must NOT be
+recessed deep into the alcove. Seen from this camera, the drawer fronts sit just behind the plane of the
+pilaster faces, and the top and cushion come almost out to that plane.
+
 The bench, built the way image 2 shows it:
-- It spans the alcove wall to wall (66 inches) with no gaps; its maple front sits 3 inches back from the
-  faces of the two pilasters, and the seat is low: the wood top is 16 inches above the floor.
+- It spans the alcove wall to wall (66 inches) with no gaps. The seat is low: the wood top is 16 inches above
+  the floor, the cushion top 19 inches.
 - Two drawers side by side, full width. Each drawer front is a flat panel: a pale clear-finished hard maple
-  frame about 1-1/2 inches wide around a dark chocolate walnut veneer panel, flush, with a thin 1/8 inch
+  frame only 1-1/2 inches wide around a dark chocolate walnut veneer panel, flush, with a thin 1/8 inch
   shadow gap around each front. One 8 inch brushed brass bar pull centered on each drawer.
 - A solid hard maple top, 3/4 inch thick, with a gently eased front edge overhanging the drawer fronts by 3/4
-  inch. On it sits one long boxed cushion, 3 inches thick, oatmeal linen, covering the whole top.
+  inch. On it sits one long boxed cushion, 3 inches thick, oatmeal linen, covering the whole 25 inch depth.
 - A flush maple plinth 4 inches tall at the floor, in the same plane as the drawer fronts, in place of the
   baseboard, which has been removed inside the alcove. Narrow maple strips at each wall.
 - Clear satin finish: the maple reads pale blond, the walnut dark brown with visible grain. No shelves above,

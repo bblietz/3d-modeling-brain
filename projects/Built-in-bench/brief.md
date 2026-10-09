@@ -66,4 +66,4 @@ Deliverables: `cutlist.md`, `cutlist.csv`, `built_in_bench.step`, `images/final-
 
 ## Photoreal composite, 2026-10-09
 
-`images/bench-in-nook.png`: the alcove photo with the bench built in, made by `render_in_room.py` (Gemini 3 Pro Image via the nanobanana skill, inputs: the space photo and the CAD hero render). One 2K image, about $0.14 per run. The maple frames came out a little wider than the 1-1/2 in in the model; rerun with a tighter prompt if that matters.
+`images/bench-in-nook.png`: the alcove photo with the bench built in, made by `render_in_room.py` (Gemini 3 Pro Image via the nanobanana skill, inputs: the space photo and the CAD hero render). The first run (`bench-in-nook.png`, $0.14) recessed the bench about 10 in and shrank its depth; the second (`bench-in-nook-v2.png`, $0.17) with the prompt rewritten around the 25 in depth and the 3 in setback is the keeper. About $0.14 to $0.17 per 2K image.
