@@ -13,3 +13,5 @@ Whenever the nanobanana skill (Google Gemini image generation, `gemini-3-pro-ima
 **Why:** the Gemini image API is metered per image on Brian's own API key, unlike the rest of the vault tooling. Brian said on 2026-10-09: "whenever you use nanobanana API, if there is a cost associated always report it to me."
 
 **How to apply:** scripts that call the API print the response's usage metadata (prompt and candidate token counts) and a dollar estimate from Google's current price list; quote that in the reply, and give the count of images generated. Check the price list again if it is more than a few months old. Related: [[project-built-in-bench]] (first use: `projects/Built-in-bench/render_in_room.py`).
+
+Refinement 2026-10-09: Brian said "I do not need a Gemini update if you don't use Gemini." Report cost only in replies where a Gemini call was actually made; never add a "no Gemini calls" or running-total line otherwise.
