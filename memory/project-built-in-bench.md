@@ -19,3 +19,5 @@ Status 2026-10-07: `built_in_bench.py` (build123d) passes all asserts; `cutlist.
 Update 2026-10-09: Brian locked 1/2 walnut ply panels inset 1/4 (frames stay 3/4 maple), frames/plinth/strips painted white (panels, top, shelves bare), and every drawer box part is 1/2 9-ply Baltic birch (no groove in the back, bottom butts it; the 10 mm Blum hook bore leaves a 2 mm skin, not verified against Blum, test-drill scrap). Shop page Version 4 carries the alcove picture with the shelves. See brief.md "Decisions 2026-10-09".
 
 Finish decided 2026-10-09: Osmo Natural (clear, Brian confirmed) on the bare maple top and shelves; frames, plinth, strips painted white.
+
+Height lowered 2026-10-09 for the senior dog: wood top 14 in (seat 17 in with cushion), base 3 in, drawer box 8.5 in tall. Composites predate it.

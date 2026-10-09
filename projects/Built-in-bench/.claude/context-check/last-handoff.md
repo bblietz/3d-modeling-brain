@@ -30,3 +30,5 @@ State: build123d model `built_in_bench.py` passes all asserts; `cutlist.md/.csv`
 ## Update 2026-10-09 (late)
 
 Decisions locked: 1/2 walnut ply panels inset 1/4 (back flush with the frame); frames, plinth, strips painted white (panels, top, shelves bare); every drawer box part is 1/2 9-ply Baltic birch (no back groove, bottom butts the back; locking-device screws #6 x 1/2). Pipeline rerun: EXPORT=1, part_drawings, hero_shot (CUSHION=0), assembly_shots, make_cutlist_page (now includes the alcove picture with shelves), make_pdf (20 pages), shop page republished as Version 4. Open: test-drill a scrap 1/2 BB back for the Blum hook bore (2 mm skin), site measurements, receptacle, the nook composite predates the inset.
+
+Height lowered 2 in 2026-10-09 (top 14 in, base 3 in, box 8.5 in); pipeline rerun and shop page republished (Version 5). Osmo Natural (clear) on the maple top and shelves.

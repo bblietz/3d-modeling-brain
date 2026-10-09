@@ -2,7 +2,7 @@
 """Built-in alcove bench: 66 x 28 in former wet bar, two full-width drawers on
 Blum TANDEM 563H undermounts, solid maple top with a 3 in cushion.
 
-Picks (Brian, 2026-10-06/07): wood top at 16 in, flush base, frameless with
+Picks (Brian, 2026-10-06/07): wood top at 16 in (lowered to 14 in on 2026-10-09 for the senior dog; cushion top 17 in), flush base, frameless with
 full-overlay fronts, flat fronts built as a maple frame around a 1/2 walnut-ply
 panel (back flush with the frame, face inset 1/4 in) on a tongue-and-groove bit set, 8 in brass bar pulls, 3/4 in overhang
 with an eased edge, solid glued-up maple top set 3 in back from the pilaster
@@ -45,9 +45,9 @@ ALCOVE_D = 28 * IN          # back wall to the pilaster faces (Y)
 TOP_SETBACK = 3 * IN        # top front edge back from the pilaster faces
 
 # ---------------------------------------------------------------- picks
-SEAT_Z = 16 * IN            # top face of the wood top
+SEAT_Z = 14 * IN            # top face of the wood top (was 16; lowered 2 in 2026-10-09 so the senior dog can jump up)
 CUSHION_H = 3 * IN
-BASE_H = 4 * IN             # flush plinth, continues the 4 in baseboard line
+BASE_H = 3 * IN             # flush plinth (was 4 in; 1 in of the 2 in drop)
 OVERHANG_MIN = 0.75 * IN    # F2: 3/4 in overhang (actual is derived below)
 GAP = 0.125 * IN            # reveal around the fronts
 WALL_GAP = 0.375 * IN       # top to back wall, absorbs the top's movement
@@ -156,7 +156,7 @@ BB12 = "1/2 Baltic birch"
 # ================================================================ base frame (ladder, 3/4 ply)
 base_end = _box(X0, 0, 0, T18, CASE_D, BASE_H)
 add("base_end_rail", base_end, 2, PLYBASE,
-    "ladder base, 4 in tall; the end panels stand on these",
+    f"ladder base, {inch(BASE_H)} tall; the end panels stand on these",
     inst=[("base_end_l", base_end), ("base_end_r", Pos(CASE_W - T18, 0, 0) * base_end)])
 base_long = _box(END_IN_L, 0, 0, END_IN_R - END_IN_L, T18, BASE_H)
 add("base_long_rail", base_long, 2, PLYBASE,
@@ -224,7 +224,7 @@ add("scribe_strip", strip, 2, MAPLE,
 # plinth: solid maple, flush with the fronts, 1/8 reveal under them
 plinth = _box(0, FACE_Y0, 0, ALCOVE_W, FACE_T, PLINTH_H)
 add("plinth", plinth, 1, MAPLE,
-    f"cut 4-1/4 tall and scribe to the floor so the top edge sits {inch(GAP)} under the fronts; "
+    f"cut {inch(PLINTH_H + 0.375 * IN)} tall and scribe to the floor so the top edge sits {inch(GAP)} under the fronts; "
     "scribe the ends to the walls; grain horizontal; mill to the ply thickness; screwed to the base front rail; painted white")
 
 # ================================================================ top: solid maple, floats on the nailer figure-8s
@@ -285,7 +285,7 @@ assert abs(_pb.max.Y - (GY0 + TONGUE_T)) < 1e-6, "tongue is not flush with the p
 # ================================================================ drawer boxes: Blum 563H
 BOX_W = OPEN_W - UM_WIDTH_LOSS + 2 * T12
 BOX_IN_W = OPEN_W - UM_WIDTH_LOSS
-BOX_H = 9.5 * IN
+BOX_H = 8.5 * IN            # was 9.5; the other 1 in of the 2 in drop
 BOX_D = SLIDE_LEN
 BOX_Z0 = BOT_Z1 + UM_BOTTOM_CLEAR
 BOX_Y1 = CASE_D - UM_FRONT_GAP

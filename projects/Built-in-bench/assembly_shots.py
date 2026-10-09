@@ -30,7 +30,7 @@ SETTLE = float(os.environ.get("SETTLE", "2.5"))
 STEPS = [
     ("step-01", "Base ladder",
      ("base_",),
-     "Glue and screw the five rails into a 64 x 23-1/2 ladder, 4 in tall. Set it in the alcove with its front edge "
+     "Glue and screw the five rails into a 64 x 23-1/2 ladder, 3 in tall. Set it in the alcove with its front edge "
      "23-1/2 in from the back wall, level it on shims and screw it to the floor."),
     ("step-02", "Ends and bottom",
      ("end_", "bottom"),
