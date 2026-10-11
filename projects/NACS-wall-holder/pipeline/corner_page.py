@@ -98,6 +98,14 @@ Brian: it broke along the contour of the main cylinder, so the flap came off at 
 <figcaption>The same section through a screw hole on the new STL. The countersink now takes 2.5 mm of a 6.35 mm plate instead of half of it, and the drum blend lands on 3.85 mm of solid plate instead of 2.5 mm of skins and lattice.</figcaption>
 </figure>
 
+<h2>The ring Studio shows</h2>
+<p>Brian, October 11: the added ring is squared off, it should round into the wall plate the way the drum rounds into the flange. That ring is not plastic. It is the slicer's modifier, the region told to print solid, and Bambu Studio draws a modifier translucent over the part. The first version was a squared-off ring that poked out of the blend, and it showed through the screw holes and on the plate's top too. The printed part was always the body on the right, blend and all. The modifier now follows the blend's arc from 0.6 mm inside it, stops a layer under the plate's top, and stays clear of the screw holes, so it sits wholly inside the body and Studio shows the part as it prints.</p>
+
+<figure>
+<img src="{img('modifier-ring.png')}" alt="Before and after: the modifier drawn translucent over the body as Studio shows it, and true sections along the plate's diagonal with the modifier shaded">
+<figcaption>Top: the body with the modifier drawn translucent, the way Studio draws it; before, the squared-off collar and the tint through the holes; after, only the part. Bottom: true sections along the plate's diagonal with the modifier shaded. Before, 10.4 cm3 of the modifier sat outside the body; after, none. Re-sliced and measured again in the G-code: {solid_min:.0f} to {solid_max:.0f}% plastic in the plate and blend windows, including a new window at the blend's foot where the arc meets the walls, and {above:.0f}% in the drum's core above the blend.</figcaption>
+</figure>
+
 <h2>What it costs</h2>
 <div class="wrap">
 <table>

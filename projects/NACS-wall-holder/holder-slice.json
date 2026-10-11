@@ -1,8 +1,8 @@
 {
- "minutes": 561,
- "grams": 499.1,
+ "minutes": 562,
+ "grams": 497.7,
  "grams_per_filament": {
-  "1": 483.2,
+  "1": 481.7,
   "2": 12.4,
   "3": 3.5
  },
@@ -15,6 +15,7 @@
   "pad 4": 0.99,
   "plain plate": 0.95,
   "drum blend": 0.94,
+  "blend foot": 0.98,
   "drum above": 0.18
  }
 }

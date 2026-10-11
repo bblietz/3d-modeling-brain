@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: REVISION 2026-10-08 plus the 2026-10-10 plate fix, CAD and 3MF done, not printed. Drum 1 in deeper and 90 across, crest lip 1.5 in with the TESLA wordmark, frame line, T back, cavity 1/2 in deeper (cleat 1.75 in); cleat catch window 5 mm, face inlays in a second colour; plate 1/4 in and solid through with the drum blend; sliced 9 h 21 min, 499 g. The 2026-09-19 holder (v7 cavity, 4 in base, round flange, 1/16 in roundovers) was on the wall and working great until it was dropped on 2026-10-10 and a plate corner broke off along the drum blend.
+status: REVISION 2026-10-08 plus the 2026-10-10 plate fix, CAD and 3MF done, not printed. Drum 1 in deeper and 90 across, crest lip 1.5 in with the TESLA wordmark, frame line, T back, cavity 1/2 in deeper (cleat 1.75 in); cleat catch window 5 mm, face inlays in a second colour; plate 1/4 in and solid through with the drum blend; sliced 9 h 22 min, 498 g. The 2026-09-19 holder (v7 cavity, 4 in base, round flange, 1/16 in roundovers) was on the wall and working great until it was dropped on 2026-10-10 and a plate corner broke off along the drum blend.
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -251,3 +251,12 @@ Brian: "it broke along the contour of the main cylinder", then "do 1 and 2". Bot
   100 mm rectilinear lines as 58 to 76% (fixed by clipping); hairline plots of 0.56 mm lines alias into a
   crosshatch that looks sparse (drawn at real width now); and an unknown `sparse_infill_pattern` name is not an
   error to Bambu, it just slices as some other pattern.
+- 2026-10-11, Brian: "the added ring is squared off, it should round into the wall plate, like the device rounds
+  into the front plate". Studio draws a modifier translucent over the part, and the squared-off ring poked out of
+  the blend (10.4 cm3 of the modifier sat outside the body, with tint through the screw holes and on the plate's
+  top as well). The printed part never changed. The modifier now follows the blend's arc 0.6 mm inside it
+  (`BLEND_INSET`), stops one layer under the plate's top (`LAYER_H`) and clears the screw holes by 1 mm, so none of
+  it is outside the body (`pipeline/modifier_views.py` measures that and draws the Studio view and a true section,
+  before and after: `images/modifier-ring.png`, on the evidence page). Re-sliced: 9 h 22 min, 497.7 g (481.7 body,
+  12.4 support interface, 3.5 inlay); check unchanged, pads 0.99 to 1.00, plain plate 0.95, blend 0.94, drum above
+  0.18, plus a new window at the blend's foot where the arc meets the walls: 0.98.

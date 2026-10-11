@@ -10,9 +10,12 @@ date: 2026-10-10
 The 2026-09-19 holder was on the wall and working until Brian dropped it on 2026-10-10 and a plate corner broke
 off along the drum blend. The 2026-10-08 revision (deeper, 90 drum, crest lip, wordmark, two-colour face, wider
 cleat catch window) now also has the plate fix: `plate_t` 6.35 (1/4 in) and a solid-base modifier in the print
-3MF (whole plate plus the drum blend ring at 100% monotonic; "rectilinear" is not a Bambu pattern name). `holder.stl` (622.7 cm3, watertight),
-`holder-inlay.stl` and `holder-print.3mf` (9 h 21 min, 499.1 g: 483.2 body PETG, 12.4 support interface, 3.5 inlay
-colour) are built and checked, not printed. Evidence page for the break (before and after plate layers):
+3MF (whole plate plus the drum blend ring at 100% monotonic; "rectilinear" is not a Bambu pattern name). Since
+2026-10-11 the modifier sits wholly inside the body (the ring follows the blend's arc 0.6 mm inside it, the slab stops
+a layer under the plate's top and clears the screw holes): Brian saw the first, squared-off ring in Studio and asked
+for it to round into the plate. `holder.stl` (622.7 cm3, watertight), `holder-inlay.stl` and `holder-print.3mf`
+(9 h 22 min, 497.7 g: 481.7 body PETG, 12.4 support interface, 3.5 inlay colour) are built and checked, not printed.
+Evidence page for the break (before and after plate layers, and the modifier before and after):
 https://claude.ai/artifact/QCeo4UdoVNbcSQv3je5xm4; plan page https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6.
 Full record in brief.md "Revision of 2026-10-08", "Later the same day", "Dropped, 2026-10-10" and "The fix".
 
@@ -34,6 +37,9 @@ Full record in brief.md "Revision of 2026-10-08", "Later the same day", "Dropped
   the body are 0). Inlay: same with `-D 'part="inlay"'`.
 - `pipeline/corner_check.py [sliced.3mf|""] [tag] [body.stl]` draws the mid-plate toolpaths and a screw-hole section;
   `pipeline/corner_page.py` builds the evidence page from the before and after images.
+- `pipeline/modifier_views.py [body.stl]` draws the solid-base modifier over the body the way Studio shows it and in a
+  true section, before and after, and prints its volume outside the body (must be 0). Any modifier change: run it,
+  then `make_coupon_3mf.py holder` (the check has a window at the blend's foot where the modifier's arc meets the walls).
 - Regex-parsed constants stay literal numbers. Do not `pkill -f` a pattern that appears in your own command line.
 
 ## Open

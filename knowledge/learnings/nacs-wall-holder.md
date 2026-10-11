@@ -207,7 +207,7 @@ main cylinder". Evidence from the real print file (`pipeline/corner_check.py`, e
 5 mm plate printed as two 0.9 mm skins over 20% gyroid, solid only in the 12.5 mm screw pads, with a half-depth
 countersink and the drum blend's foot landing on its edge; each corner flap outside the blend was skins and air.
 Fix, Brian's pick of both options: plate 1/4 in, and the print 3MF makes the whole plate and the drum blend solid
-(100% monotonic modifier, measured 94 to 100% plastic). 9 h 21 min, 499 g (was 8 h 47, 442).
+(100% monotonic modifier, measured 94 to 100% plastic). 9 h 22 min, 498 g (was 8 h 47, 442).
 
 What worked:
 - **Diagnose from the sliced G-code, not the CAD.** The CAD says "5 mm plate"; the G-code shows two thin skins over
@@ -220,6 +220,12 @@ What worked:
   move out with the plate's front; zbudget and insertion confirmed nothing else moved.
 
 What bit:
+- **A modifier that pokes out of the body is what Brian sees in Studio.** Studio draws modifiers translucent over
+  the part; the first solid-base ring (a squared-off cylinder ring over the blend) read as an added collar, and the
+  plate slab showed through the screw holes and on the plate's top ("the added ring is squared off, it should
+  round into the wall plate", 2026-10-11). Keep every modifier wholly inside the body: offset inward from the
+  surface it follows, a layer under any coplanar face, clear of holes. `pipeline/modifier_views.py` measures the
+  modifier's volume outside the body (must be 0) and draws the Studio view and a section, before and after.
 - **The body export needs `-D show_inlay=false`.** holder.scad's own header command lacked it and the export fused
   the inlay into the body (volume 2.35 cm3 high). The recess check (inlay volume samples inside the body must be 0)
   caught it; the header is fixed.

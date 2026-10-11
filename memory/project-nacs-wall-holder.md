@@ -23,9 +23,12 @@ before printing. **2026-10-10: Brian dropped the mounted holder and a plate corn
 https://claude.ai/artifact/QCeo4UdoVNbcSQv3je5xm4, `pipeline/corner_check.py`): the 5 mm plate was
 two 0.9 mm skins over 20% gyroid, solid only in the 12.5 mm screw pads. **Fix built the same day, Brian's
 pick of both options:** `plate_t` 6.35 (1/4 in) and a solid-base modifier in the 3MF (whole plate plus
-the drum blend ring, 100% monotonic, measured 94 to 100% plastic). Slice now 9 h 21 min, 499 g. The
+the drum blend ring, 100% monotonic, measured 94 to 100% plastic). Slice now 9 h 22 min, 498 g. The
 wand's place is unchanged (mouth_z, cut_top kept); the flange and lip moved out 1.35 mm. Body export
-needs `-D show_inlay=false`. Every pick was made from rendered options on
+needs `-D show_inlay=false`. 2026-10-11: Brian saw the modifier's squared-off ring in Studio ("it should
+round into the wall plate"); the modifier now follows the blend from 0.6 mm inside the body, a layer under
+the plate's top and clear of the holes, none of it outside (`pipeline/modifier_views.py` proves it and
+draws before and after); see [[feedback-modifiers-inside-the-body]]. Every pick was made from rendered options on
 https://claude.ai/artifact/5u3wgRBUTWngnCdjFuPzKB; plan page https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6.
 
 Project files and tools: `projects/NACS-wall-holder/` (brief.md "Revision of 2026-10-08",

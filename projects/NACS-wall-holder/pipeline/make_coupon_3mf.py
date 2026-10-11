@@ -73,7 +73,9 @@ PARTS = {   # STL, filament id, part name; the first is the object
 }[STEM]
 PAD_R = 12.5          # holder only: the solid check window round each screw hole (the pads the modifier used to be, before the whole plate went solid)
 BASE_NAME = "MOD solid base: plate and drum blend"
-BASE_INSET = 1.0      # the modifier stays this far inside the plate's outline
+BASE_INSET = 1.0      # the modifier stays this far inside the plate's outline and the screw holes
+BLEND_INSET = 0.6     # and this far inside the drum's blend (one line width, so the solid region reaches the walls in every layer)
+LAYER_H = 0.3         # the process's layer height: the modifier stops one layer under the plate's top so no face is coplanar with the body
 BED_TYPE = "Textured PEI Plate"
 SCALARS = {
     "curr_bed_type": BED_TYPE,
@@ -211,18 +213,41 @@ def hole_centres():
     return [(sx * off, sy * off) for sx in (-1, 1) for sy in (-1, 1)]
 
 
+def solid_base_scad():
+    """OpenSCAD for the solid-base modifier: the plate, BASE_INSET inside its outline and the screw holes and one layer under
+    its top, plus a ring up through the drum's blend whose outside follows the blend's arc BLEND_INSET inside it. The whole
+    modifier sits inside the body: Bambu Studio draws a modifier translucent, and the first version's squared-off ring poking
+    out of the blend read as an added collar (Brian, 2026-10-11: "it should round into the wall plate"). A modifier that sticks
+    out past the part also grows the object's outline, and the skirt with it."""
+    w, r, t = scad_const("plate_w"), scad_const("plate_r"), scad_const("plate_t")
+    dr, fp = scad_const("drum_r"), scad_const("fillet_plate")
+    hd, csk = scad_const("hole_d"), (scad_const("csk_d") - scad_const("hole_d")) / 2       # countersink: a 45 degree cone csk deep
+    off = w / 2 - scad_const("hole_in")
+    cone = BASE_INSET * 2 ** 0.5                                                            # the cone's face moved out BASE_INSET
+    outline = f"offset(r = {r - BASE_INSET}) offset(delta = -{r}) square({w}, center = true)"
+    arc = f"[for (a = [90 : -5 : 0]) [{dr + fp} - {fp + BLEND_INSET} * sin(a), {t + fp} - {fp + BLEND_INSET} * cos(a)]]"
+    return (f"difference() {{\n"
+            f"  union() {{\n"
+            f"    linear_extrude({t - LAYER_H}) {outline};\n"
+            f"    intersection() {{\n"
+            f"      rotate_extrude($fn = 180) polygon(concat([[{dr - 3}, {t - BLEND_INSET}], [{dr - 3}, {t + fp}]], {arc}));\n"
+            f"      linear_extrude({t + fp + 1}) {outline};\n"
+            f"    }}\n"
+            f"  }}\n"
+            f"  for (sx = [-1, 1], sy = [-1, 1]) translate([sx * {off}, sy * {off}, 0]) {{\n"
+            f"    translate([0, 0, -1]) cylinder(h = {t + 2}, r = {hd / 2 + BASE_INSET}, $fn = 90);\n"
+            f"    translate([0, 0, {t - csk - cone}]) cylinder(h = {csk + cone + 1}, r1 = {hd / 2}, r2 = {hd / 2 + csk + cone + 1}, $fn = 90);\n"
+            f"  }}\n"
+            f"}}\n")
+
+
 def add_solid_base(path):
-    """One modifier part, sparse_infill_density 100% rectilinear: the whole plate plus a ring over the drum's blend into it.
+    """One modifier part, sparse_infill_density 100% monotonic: the whole plate plus a ring over the drum's blend into it.
     Brian, 2026-10-10: the 5 mm plate's corner broke off along the blend when the holder was dropped; between its skins it
     was 20% gyroid everywhere but the screw pads. The ring makes the flap's root solid up through the blend."""
     import trimesh
     from fillcore_mod import centered, inject_modifier, next_object_id, object_pos
-    # kept inside the part's outline (BASE_INSET): a modifier that sticks out past the part grows the object's outline, and the skirt with it
-    w, r, t = scad_const("plate_w"), scad_const("plate_r"), scad_const("plate_t")
-    dr, fp = scad_const("drum_r"), scad_const("fillet_plate")
-    scad = (f"union() {{\n  linear_extrude({t}) offset(r = {r - BASE_INSET}) offset(delta = -{r}) square({w}, center = true);\n"
-            f"  translate([0, 0, {t} - 0.5]) difference() {{ cylinder(r = {dr + fp - BASE_INSET}, h = {fp} + 0.5, $fn = 180);"
-            f" translate([0, 0, -1]) cylinder(r = {dr - 3}, h = {fp} + 3, $fn = 180); }}\n}}\n")
+    scad = solid_base_scad()
     with tempfile.TemporaryDirectory() as d:
         with open(f"{d}/base.scad", "w") as f:
             f.write(scad)
@@ -281,6 +306,7 @@ def check_solid_base(sliced, gcode_name):
     windows = {f"pad {i + 1}": (pc[0] + x, pc[1] + y, PAD_R - 3.5, hole, 1.2, t - 1.2) for i, (x, y) in enumerate(hole_centres())}
     windows["plain plate"] = (pc[0] - off, pc[1], 7.0, 0.0, 1.2, t - 1.2)                 # midway between two holes, under the drum's wall
     windows["drum blend"] = (pc[0], pc[1] - (dr - 1.5), 1.2, 0.0, t + 0.6, t + 2.1)       # inside the drum's skin where the blend starts
+    windows["blend foot"] = (pc[0], pc[1] - (dr + 1.8), 0.9, 0.0, t + 0.3, t + 1.2)       # just above the plate under the blend, where the modifier's arc meets the walls
     windows["drum above"] = (pc[0], pc[1] - (dr - 4.5), 2.5, 0.0, t + fp + 3, t + fp + 9)  # the drum's own core, still sparse
     used, layers = {k: 0.0 for k in windows}, {k: set() for k in windows}
     z, x, y = 0.0, 0.0, 0.0
