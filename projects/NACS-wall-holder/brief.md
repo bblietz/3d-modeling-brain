@@ -214,3 +214,16 @@ out every open question below and in the last handoff:
 - Cleat position and size: design it to engage the lock notch on the bottom of the connector nose (the one the car's charge-port lock pin enters), from the Tesla spec once retrieved. The cleat and the extra opening room both depend on that notch's location and depth.
 - Cable diameter: Ø14.5 mm per Tesla's 48A datasheet. This replaces the 18 mm forum estimate. The cable is 5.5 m (18 ft). Coiled in loops about 300 mm across (about 0.94 m of cable each), that is about 6 loops, 87 mm side by side at 14.5 mm, so a hook about 100 mm wide. Settle the hook size in the design plan.
 - The Gen 3 handle has a button on top that opens the car's charge port; the holster must not press it.
+
+## Dropped, 2026-10-10
+
+Brian dropped the mounted 2026-09-19 holder on the floor and "the corner broke off rather easily". Evidence
+page (from the real print file, `pipeline/corner_check.py` and `pipeline/corner_page.py`, images
+`images/corner-layer.png` and `images/corner-section.png`): https://claude.ai/artifact/QCeo4UdoVNbcSQv3je5xm4.
+The 5 mm plate prints as two 3-layer skins (0.9 mm each) over 20% gyroid, 3 walls at the edge; only the 12.5 mm
+screw pads are solid, so each corner flap outside the drum blend is skins and air except at the hole, with a
+countersink half the plate deep and the drum blend's foot landing on its edge (52 vs 52.7 off the axis). Along
+each edge the flap's root, from the blend foot (11 mm from the centre line) to the pad (33 mm), is unprotected.
+Open: which way the break ran (through the hole, or around the blend) and a photo of the break face. Fix
+candidates, not built: a 100% infill modifier over the whole plate (about 40 g, 25 to 30 min more, no CAD
+change) and/or a 1/4 in plate. The revision stays unprinted until Brian picks.

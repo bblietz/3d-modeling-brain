@@ -18,7 +18,13 @@ lip, driver at a 6 degree tilt), cleat catch window doubled (`tip_gap` 5, hook o
 the wand "has a tendency to fall off if not seated perfectly" (the cleat itself fills the pocket and
 cannot grow). 8 h 47 min, 442 g. Open: the grip's first 1/2 in now sits inside the opening with no
 Tesla CAD behind it; ask Brian to measure the handle 1/2 in and 1 in behind the glossy housing
-before printing. Every pick was made from rendered options on
+before printing. **2026-10-10: Brian dropped the mounted holder and a plate corner broke off
+"rather easily".** Cause from the sliced G-code (evidence page
+https://claude.ai/artifact/QCeo4UdoVNbcSQv3je5xm4, `pipeline/corner_check.py`): the 5 mm plate is
+two 0.9 mm skins over 20% gyroid, solid only in the 12.5 mm screw pads, with a half-depth countersink
+and the drum blend landing on its edge. Waiting on Brian: where the break ran and a photo. Fix
+candidates (not built): a 100% infill modifier over the whole plate (about 40 g, 25 to 30 min), or a
+1/4 in plate, or both. The revision must get the fix before it prints. Every pick was made from rendered options on
 https://claude.ai/artifact/5u3wgRBUTWngnCdjFuPzKB; plan page https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6.
 
 Project files and tools: `projects/NACS-wall-holder/` (brief.md "Revision of 2026-10-08",
