@@ -10,8 +10,9 @@ Usage:  .venv/bin/python projects/NACS-wall-holder/pipeline/make_coupon_3mf.py [
 Reads <stem>.stl (the holder also holder-inlay.stl, assembled as a second part on filament 3, the face's colour); writes
 <stem>-print.3mf and <stem>-slice.json, and prints real minutes and grams per filament.
 The holder gets 3 walls and 20% gyroid (it hangs a wand and an 18 ft cable off a wall), sits left of centre so the
-prime tower fits beside it, and gets a modifier part that makes the plate solid for PAD_R around each screw hole
-(Brian, 2026-09-18); the slice check reads the G-code to confirm the pads print solid.
+prime tower fits beside it, and gets a modifier part that makes the whole plate and the drum's blend into it solid
+(Brian, 2026-10-10, after a dropped holder's plate corner broke off along the blend; until then only 12.5 mm pads round
+the screw holes were solid, Brian 2026-09-18); the slice check reads the G-code to confirm the base prints solid.
 """
 import json
 import os
@@ -70,8 +71,9 @@ PARTS = {   # STL, filament id, part name; the first is the object
     "coupon": [("coupon.stl", "1", "NACS holder fit coupon")],
     "holder": [("holder.stl", "1", "NACS wall holder"), ("holder-inlay.stl", "3", "face inlay: T, TESLA, frame line")],
 }[STEM]
-PAD_R = 12.5          # holder only: solid infill this far around each screw hole
-PAD_NAME = "MOD screw pads: solid infill"
+PAD_R = 12.5          # holder only: the solid check window round each screw hole (the pads the modifier used to be, before the whole plate went solid)
+BASE_NAME = "MOD solid base: plate and drum blend"
+BASE_INSET = 1.0      # the modifier stays this far inside the plate's outline
 BED_TYPE = "Textured PEI Plate"
 SCALARS = {
     "curr_bed_type": BED_TYPE,
@@ -209,22 +211,25 @@ def hole_centres():
     return [(sx * off, sy * off) for sx in (-1, 1) for sy in (-1, 1)]
 
 
-def add_screw_pads(path):
-    """One modifier part, four cylinders through the plate at the screw holes, sparse_infill_density 100%."""
+def add_solid_base(path):
+    """One modifier part, sparse_infill_density 100% rectilinear: the whole plate plus a ring over the drum's blend into it.
+    Brian, 2026-10-10: the 5 mm plate's corner broke off along the blend when the holder was dropped; between its skins it
+    was 20% gyroid everywhere but the screw pads. The ring makes the flap's root solid up through the blend."""
     import trimesh
     from fillcore_mod import centered, inject_modifier, next_object_id, object_pos
-    # clipped to the plate: a modifier that sticks out past the part grows the object's outline, and the skirt with it
+    # kept inside the part's outline (BASE_INSET): a modifier that sticks out past the part grows the object's outline, and the skirt with it
     w, r, t = scad_const("plate_w"), scad_const("plate_r"), scad_const("plate_t")
-    cyls = " ".join(f"translate([{x}, {y}, 0]) cylinder(r = {PAD_R}, h = {t}, $fn = 64);" for x, y in hole_centres())
-    scad = (f"intersection() {{\n  linear_extrude({t}) offset(r = {r}) offset(delta = -{r}) square({w}, center = true);\n"
-            f"  union() {{ {cyls} }}\n}}\n")
+    dr, fp = scad_const("drum_r"), scad_const("fillet_plate")
+    scad = (f"union() {{\n  linear_extrude({t}) offset(r = {r - BASE_INSET}) offset(delta = -{r}) square({w}, center = true);\n"
+            f"  translate([0, 0, {t} - 0.5]) difference() {{ cylinder(r = {dr + fp - BASE_INSET}, h = {fp} + 0.5, $fn = 180);"
+            f" translate([0, 0, -1]) cylinder(r = {dr - 3}, h = {fp} + 3, $fn = 180); }}\n}}\n")
     with tempfile.TemporaryDirectory() as d:
-        with open(f"{d}/pads.scad", "w") as f:
+        with open(f"{d}/base.scad", "w") as f:
             f.write(scad)
-        subprocess.run([os.path.expanduser("~/.local/bin/openscad"), "--backend=Manifold", "-o", f"{d}/pads.stl", f"{d}/pads.scad"],
+        subprocess.run([os.path.expanduser("~/.local/bin/openscad"), "--backend=Manifold", "-o", f"{d}/base.stl", f"{d}/base.scad"],
                        capture_output=True, text=True, check=True)
-        pads = trimesh.load(f"{d}/pads.stl")
-    assert len(pads.split()) == 4 and pads.is_watertight, "expected four closed pads"
+        pads = trimesh.load(f"{d}/base.stl")
+    assert len(pads.split()) == 1 and pads.is_watertight, "expected one closed solid-base modifier"
     mesh_c, mc = centered(pads)
     b = trimesh.load(f"{PROJECT}/{STEM}.stl").bounds
     zin = zipfile.ZipFile(path)
@@ -237,8 +242,8 @@ def add_screw_pads(path):
     block = re.search(rf'<object id="{oid}">.*?</object>', settings, re.S).group(0)
     pos = object_pos(model3d, oid, (b[0] + b[1]) / 2)
     pid = next_object_id(model3d, objfiles)
-    new_block, model3d = inject_modifier(block, model3d, objfiles, oid, pid, PAD_NAME, "screw-pads.stl", mesh_c, mc, pos,
-                                         {"sparse_infill_density": "100%"})
+    new_block, model3d = inject_modifier(block, model3d, objfiles, oid, pid, BASE_NAME, "solid-base.stl", mesh_c, mc, pos,
+                                         {"sparse_infill_density": "100%", "sparse_infill_pattern": "monotonic"})   # Bambu's enum has no "rectilinear": that value sliced as a three-direction lattice; monotonic is one direction per layer
     files["Metadata/model_settings.config"] = settings.replace(block, new_block).encode()
     files["3D/3dmodel.model"] = model3d.encode()
     for n, v in objfiles.items():
@@ -248,18 +253,36 @@ def add_screw_pads(path):
             zout.writestr(n, v)
 
 
-def check_pads_solid(sliced, gcode_name):
-    """Plastic per volume between the plate's skins, from the G-code: each pad must be solid, the plain plate must not be.
-    (Bambu keeps the "Sparse infill" label at 100% density, so the label says nothing; gyroid comes as G2/G3 arcs.)"""
+def inside_fraction(x0, y0, x1, y1, cx, cy, r):
+    """Fraction of the segment's length inside the circle (solid rectilinear lines run the whole plate, so a midpoint test
+    hands a window either all of a 100 mm line or none of it)."""
+    import math
+    dx, dy, fx, fy = x1 - x0, y1 - y0, x0 - cx, y0 - cy
+    a, b, c = dx * dx + dy * dy, 2 * (fx * dx + fy * dy), fx * fx + fy * fy - r * r
+    if a == 0:
+        return 1.0 if c < 0 else 0.0
+    disc = b * b - 4 * a * c
+    if disc <= 0:
+        return 0.0
+    s0, s1 = (-b - math.sqrt(disc)) / (2 * a), (-b + math.sqrt(disc)) / (2 * a)
+    return max(0.0, min(1.0, s1) - max(0.0, s0))
+
+
+def check_solid_base(sliced, gcode_name):
+    """Plastic per volume from the G-code, in windows between the plate's skins (round each screw hole and midway between two
+    holes under the drum) and inside the drum's blend just above the plate: all must be solid now. Above the blend the drum
+    stays 20%, checked too. (Bambu keeps the "Sparse infill" label at 100% density, so the label says nothing.)"""
     import math
     g = zipfile.ZipFile(sliced).read(gcode_name).decode(errors="replace")
-    t = scad_const("plate_t")
+    t, dr, fp = scad_const("plate_t"), scad_const("drum_r"), scad_const("fillet_plate")
     off = scad_const("plate_w") / 2 - scad_const("hole_in")
     pc = BED_CENTRE      # the item transform puts the model's origin, the plate's centre, at BED_CENTRE (checked in the G-code with the lip pulling the bounding box 19 mm off it)
-    windows = {f"pad {i + 1}": (pc[0] + x, pc[1] + y, PAD_R - 3.5, math.pi * (scad_const("hole_d") / 2) ** 2)
-               for i, (x, y) in enumerate(hole_centres())}
-    windows["plain plate"] = (pc[0] - off, pc[1], 7.0, 0.0)      # midway between two holes, clear of the edge walls
-    used, layers, seen = {k: 0.0 for k in windows}, set(), []
+    hole = math.pi * (scad_const("hole_d") / 2) ** 2
+    windows = {f"pad {i + 1}": (pc[0] + x, pc[1] + y, PAD_R - 3.5, hole, 1.2, t - 1.2) for i, (x, y) in enumerate(hole_centres())}
+    windows["plain plate"] = (pc[0] - off, pc[1], 7.0, 0.0, 1.2, t - 1.2)                 # midway between two holes, under the drum's wall
+    windows["drum blend"] = (pc[0], pc[1] - (dr - 1.5), 1.2, 0.0, t + 0.6, t + 2.1)       # inside the drum's skin where the blend starts
+    windows["drum above"] = (pc[0], pc[1] - (dr - 4.5), 2.5, 0.0, t + fp + 3, t + fp + 9)  # the drum's own core, still sparse
+    used, layers = {k: 0.0 for k in windows}, {k: set() for k in windows}
     z, x, y = 0.0, 0.0, 0.0
     for line in g.splitlines():
         if line.startswith("; Z_HEIGHT:"):
@@ -267,20 +290,19 @@ def check_pads_solid(sliced, gcode_name):
         elif line[:3] in ("G0 ", "G1 ", "G2 ", "G3 "):
             mx, my, me = re.search(r" X([-0-9.]+)", line), re.search(r" Y([-0-9.]+)", line), re.search(r" E([-0-9.]+)", line)
             nx, ny = (float(mx.group(1)) if mx else x), (float(my.group(1)) if my else y)
-            if me and float(me.group(1)) > 0 and (mx or my) and 1.2 <= z <= t - 1.2:
-                layers.add(z)
-                seen.append(((x + nx) / 2, (y + ny) / 2))
-                for k, (cx, cy, r, _) in windows.items():
-                    if ((x + nx) / 2 - cx) ** 2 + ((y + ny) / 2 - cy) ** 2 < r * r:
-                        used[k] += float(me.group(1))
+            if me and float(me.group(1)) > 0 and (mx or my):
+                for k, (cx, cy, r, _, z0, z1) in windows.items():
+                    if z0 <= z <= z1:
+                        layers[k].add(z)
+                        used[k] += float(me.group(1)) * inside_fraction(x, y, nx, ny, cx, cy, r)
             x, y = nx, ny
-    zs = sorted(layers)
-    sx, sy = [q[0] for q in seen if q[0] < 190], [q[1] for q in seen if q[0] < 190]
-    print(f"plate check: extrusion at plate height spans x {min(sx):.1f}..{max(sx):.1f}, y {min(sy):.1f}..{max(sy):.1f}; windows at " + ", ".join(f"{k} ({v[0]:.1f}, {v[1]:.1f})" for k, v in windows.items()))
-    height = (zs[1] - zs[0]) * len(zs)
-    fill = {k: round(used[k] * math.pi * (1.75 / 2) ** 2 / ((math.pi * r * r - hole) * height), 2) for k, (_, _, r, hole) in windows.items()}
-    assert all(v >= 0.8 for k, v in fill.items() if k.startswith("pad")), f"screw pads are not solid: {fill}"
-    assert fill["plain plate"] <= 0.4, f"the plain plate is not sparse, the modifier leaked: {fill}"
+    zs = sorted(set.union(*layers.values()))
+    step = min(b - a for a, b in zip(zs, zs[1:]))
+    fill = {k: round(used[k] * math.pi * (1.75 / 2) ** 2 / ((math.pi * r * r - h) * step * len(layers[k])), 2)
+            for k, (_, _, r, h, _, _) in windows.items()}
+    print("solid base check (plastic per volume): " + ", ".join(f"{k} {v:.2f}" for k, v in fill.items()))
+    assert all(v >= 0.8 for k, v in fill.items() if k != "drum above"), f"the base is not solid: {fill}"
+    assert fill["drum above"] <= 0.4, f"the drum above the blend is not sparse, the modifier leaked: {fill}"
     return fill
 
 
@@ -345,8 +367,8 @@ def verify(path, tmp):
     result["tower_gap_mm"] = tower_gap(out, res["gcode"])
     if STEM == "holder":
         assert result["tower_gap_mm"] >= 15, f"the prime tower is {result['tower_gap_mm']} mm from the part"
-        assert PAD_NAME in z.read("Metadata/model_settings.config").decode()
-        result["screw_pads"] = check_pads_solid(out, res["gcode"])
+        assert BASE_NAME in z.read("Metadata/model_settings.config").decode()
+        result["solid_base"] = check_solid_base(out, res["gcode"])
     return result
 
 
@@ -366,7 +388,7 @@ def main():
         final = f"{PROJECT}/{OUT}"
         patch(f"{tmp}/raw.3mf", final)
         if STEM == "holder":
-            add_screw_pads(final)
+            add_solid_base(final)
         result = verify(final, tmp)
     with open(f"{PROJECT}/{STEM}-slice.json", "w") as f:
         json.dump(result, f, indent=1)

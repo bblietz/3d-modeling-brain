@@ -199,3 +199,37 @@ page (options -> page -> pick, four rounds), which is the right way to run a rev
 ## Open
 
 None of the 2026-09-19 work. The revision above is open until printed.
+
+## Plate fix 2026-10-10 (after the drop)
+
+Brian dropped the mounted 2026-09-19 holder; a plate corner broke off "rather easily", "along the contour of the
+main cylinder". Evidence from the real print file (`pipeline/corner_check.py`, evidence page in the brief): the
+5 mm plate printed as two 0.9 mm skins over 20% gyroid, solid only in the 12.5 mm screw pads, with a half-depth
+countersink and the drum blend's foot landing on its edge; each corner flap outside the blend was skins and air.
+Fix, Brian's pick of both options: plate 1/4 in, and the print 3MF makes the whole plate and the drum blend solid
+(100% monotonic modifier, measured 94 to 100% plastic). 9 h 21 min, 499 g (was 8 h 47, 442).
+
+What worked:
+- **Diagnose from the sliced G-code, not the CAD.** The CAD says "5 mm plate"; the G-code shows two thin skins over
+  lattice. Drawing the mid-plate layer's toolpaths and a true STL section through the screw hole made the cause
+  obvious and gave Brian pictures to answer "where did it break" against.
+- **One modifier for the structural zone, verified by plastic per volume.** A 100% monotonic modifier over the
+  plate plus a blend ring; the check clips every G-code segment to its window. Bambu still labels it "Sparse
+  infill".
+- **Thicker plate with the wand left where it was.** `mouth_z` and `cut_top` untouched, the flange and lip just
+  move out with the plate's front; zbudget and insertion confirmed nothing else moved.
+
+What bit:
+- **The body export needs `-D show_inlay=false`.** holder.scad's own header command lacked it and the export fused
+  the inlay into the body (volume 2.35 cm3 high). The recess check (inlay volume samples inside the body must be 0)
+  caught it; the header is fixed.
+- **Midpoint window tests fail on long solid lines.** Attributing a segment's extrusion by its midpoint read a solid
+  plate as 58 to 76% (and the plate's centre as 900%) because rectilinear lines run the whole plate. Clip segments
+  to the window.
+- **Hairline toolpath plots alias.** 0.56 mm pitch lines drawn at 0.9 pt looked like a 2 mm crosshatch. Draw
+  extrusions at their real width.
+- **Bambu takes an unknown pattern name without complaint.** `sparse_infill_pattern` "rectilinear" is not in
+  Bambu's enum (its names include zigzag, monotonic, monotonicline, alignedrectilinear, grid, gyroid, crosshatch);
+  the modifier sliced as a three-direction lattice at 100%, 95% plastic by volume but heaped crossings. Only a
+  per-layer histogram of the infill lines' directions showed it. Verify the pattern from the G-code.
+- **`pkill -f <pattern>` matches the shell that runs it.** Killed my own command (exit 144).

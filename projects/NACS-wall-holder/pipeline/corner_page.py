@@ -13,6 +13,14 @@ def img(name):
         return "data:image/png;base64," + base64.b64encode(f.read()).decode()
 
 
+import json
+hs = json.load(open(f"{PROJECT}/holder-slice.json"))
+sb = hs["solid_base"]
+solid_min = min(v for k, v in sb.items() if k != "drum above") * 100
+solid_max = max(v for k, v in sb.items() if k != "drum above") * 100
+above = sb["drum above"] * 100
+hours, mins, grams = hs["minutes"] // 60, hs["minutes"] % 60, hs["grams"]
+
 page = f"""<title>Plate Corner Break</title>
 <style>
 /* layout: one reading column, two full-width figures, a facts table, one question box; same palette as the revision's options page */
@@ -42,7 +50,7 @@ li {{ margin: 5px 0; }}
 </style>
 <main>
 <h1>Why the plate corner broke off</h1>
-<p class="sub">NACS wall holder, the print of September 19, dropped on the floor on October 10. Both pictures come from the real print file (the revision uses the same plate, pads and slicer recipe), not from a sketch.</p>
+<p class="sub">NACS wall holder, the print of September 19, dropped on the floor on October 10. The first two pictures come from the print file as it was (the revision used the same plate, pads and slicer recipe), not from a sketch; the last two from the fixed file.</p>
 
 <p>The base plate is 3/16 in thick, but it is not solid. The slicer prints it as two skins of three layers (about 1/32 in each) over a 20% gyroid core, with three walls around the edge. The only solid plastic is the pad around each screw, 1/2 in in radius. Everything else inside the plate is open lattice, so a corner that hits the floor is a thin hollow flap with a half-depth countersink through it.</p>
 
@@ -73,20 +81,34 @@ li {{ margin: 5px 0; }}
 <p>A drop onto a corner puts the whole holder's momentum into one flap of plate. The two thin skins have to take the bending on their own, with a half-depth countersink and the drum's blend both landing on the same line. Once the skins crack, the lattice core has nothing to offer, so the corner comes away clean. The screw pads kept the ring around the hole solid, and nothing else.</p>
 
 <div class="q">
-<strong>One question before I draw the fix: where did it break?</strong>
-<ol>
-<li>A crescent outside the screw hole came off and the hole is half gone (the break ran through the hole).</li>
-<li>The whole corner, hole included, came off along the drum (the break ran around the drum's blend).</li>
-</ol>
-A photo of the break face would settle it, and show whether the core looks hollow.
+<strong>Where it broke, and the fix</strong>
+Brian: it broke along the contour of the main cylinder, so the flap came off at its root around the drum's blend. His pick: both fixes, a solid plate and a thicker one.
 </div>
 
-<h2>Where this points</h2>
-<ul>
-<li><span class="gold">Make the plate solid.</span> A 100% infill modifier over the whole plate, no CAD change. Roughly 40 g and 25 to 30 min more on the revision print, to be confirmed by a slice. This is the cheapest change and fixes the hollow core in every corner.</li>
-<li><span class="gold">Thicken the plate.</span> 1/4 in instead of 3/16 in gives the countersink a full plate under it and moves the drum blend off the countersink's edge. The drum and everything on it move out 1/16 in, so the CAD exports, the docking check and the slice rerun.</li>
-<li>Both together is the belt and braces version. Either way the revision stays unprinted until you pick.</li>
-</ul>
+<h2>After the fix</h2>
+<p>The plate is now 1/4 in thick, and the print file makes the whole plate solid, plus a ring up through the drum's blend, so the flap's root is solid plastic from the wall to above the blend. Same slicer recipe otherwise. Both pictures below come from the new print file and the new STL.</p>
+
+<figure>
+<img src="{img('corner-layer-fixed.png')}" alt="Toolpaths of the fixed plate's mid layer: solid infill across the whole plate, walls at the edge">
+<figcaption>The fixed plate's layer at mid height, from the sliced G-code. Solid everywhere between the walls; the dashed circles only mark where the old pads were. Measured in the G-code: {solid_min:.0f} to {solid_max:.0f}% plastic in the plate and blend windows, {above:.0f}% in the drum's core above the blend, which stays sparse.</figcaption>
+</figure>
+
+<figure>
+<img src="{img('corner-section-fixed.png')}" alt="True section of the fixed holder through a screw hole: 1/4 in plate, solid through, blend ring solid">
+<figcaption>The same section through a screw hole on the new STL. The countersink now takes 2.5 mm of a 6.35 mm plate instead of half of it, and the drum blend lands on 3.85 mm of solid plate instead of 2.5 mm of skins and lattice.</figcaption>
+</figure>
+
+<h2>What it costs</h2>
+<div class="wrap">
+<table>
+<tr><th></th><th>Before</th><th>After</th></tr>
+<tr><td>Plate</td><td>3/16 in, two skins over 20% lattice</td><td>1/4 in, solid through, blend ring solid</td></tr>
+<tr><td>Print time</td><td>8 h 47 min</td><td>{hours} h {mins:02d} min</td></tr>
+<tr><td>Filament</td><td>442 g</td><td>{grams:.0f} g</td></tr>
+<tr><td>Holder off the wall</td><td>105.4 mm</td><td>106.75 mm (the flange and lip move out with the plate's front; the wand's place is unchanged)</td></tr>
+</table>
+</div>
+<p>Docking and hold were rerun on the new model and are unchanged. The file is <code>holder-print.3mf</code>, not yet printed.</p>
 </main>
 """
 

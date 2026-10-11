@@ -11,7 +11,7 @@
 // face on the wall at Z=0, +Z out from the wall, +X to the right as you face the
 // wall, +Y up.
 //
-// Render views: render.sh.  Export: openscad -D display=false -D show_nose=false -D show_wall=false -o holder.stl holder.scad
+// Render views: render.sh.  Export: openscad -D display=false -D show_nose=false -D show_wall=false -D show_inlay=false -o holder.stl holder.scad   (show_inlay=false or the inlay is fused into the body)
 // Inlay:        openscad -D display=false -D show_nose=false -D show_wall=false -D 'part="inlay"' -o holder-inlay.stl holder.scad   (the face's second colour)
 // Coupon:       openscad -D display=false -D show_nose=false -D show_wall=false -D 'part="coupon"' -o coupon.stl holder.scad
 //               (the nose cavity and cleat only, cut off just past the nose shoulder: coupon_cut)
@@ -62,7 +62,10 @@ cleat_depth = 44.45;  // the cleat's holding wall to the opening, along the clea
 grip_flare = 0.1;     // the sides and roof open by this much per mm from the nose shoulder to the outer edge, with no step: 1.6 by the end
                       // of Tesla's housing CAD (48.2 from the tip), where the grip is not modelled, and on at the same rate
 floor_knee = 4;       // the floor carries the hanging wand, so it keeps Tesla's line to the end of that CAD, then falls to the flare over this length
-plate_w = 101.6; plate_t = 5; plate_r = 10; hole_in = 10; hole_d = 5; csk_d = 10;   // corner radius = hole_in, so each countersink sits centred in its rounded corner
+plate_w = 101.6; plate_t = 6.35; plate_r = 10; hole_in = 10; hole_d = 5; csk_d = 10;   // corner radius = hole_in, so each countersink sits centred in its rounded corner
+                     // plate 1/4 in (Brian, 2026-10-10, after the 5 mm plate's corner broke off along the drum blend in a drop; the print 3MF also makes
+                     // the plate and the blend solid, pipeline/make_coupon_3mf.py). mouth_z and cut_top stay: the wand keeps its place off the wall,
+                     // the flange and lip move out with the plate's front.
 edge_r = 25.4 / 16;  // every outside edge is rounded at least 1/16 in (Brian, 2026-09-18), except the plate's back edge and the screw holes;
                      // the cleat keeps its sharp holding edge and the T its crisp outline. The mouth's rim: rim_round.scad, from pipeline/rim_round.py
 drum_r = 45; drum_l = 100.4;                // plate front to flange front: 75 plus 1 in (Brian, 2026-10-08: "only be 1 in deeper", down from the 2 in first asked); drum 90 across

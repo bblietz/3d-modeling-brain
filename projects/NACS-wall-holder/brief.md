@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: REVISION 2026-10-08, CAD and 3MF done, not printed. Drum 1 in deeper and 90 across, crest lip 1.5 in with the TESLA wordmark, frame line, T back, cavity 1/2 in deeper (cleat 1.75 in); cleat catch window 5 mm, face inlays in a second colour; sliced 8 h 47 min, 442 g. The 2026-09-19 holder (v7 cavity, 4 in base, round flange, 1/16 in roundovers) is on the wall and working great.
+status: REVISION 2026-10-08 plus the 2026-10-10 plate fix, CAD and 3MF done, not printed. Drum 1 in deeper and 90 across, crest lip 1.5 in with the TESLA wordmark, frame line, T back, cavity 1/2 in deeper (cleat 1.75 in); cleat catch window 5 mm, face inlays in a second colour; plate 1/4 in and solid through with the drum blend; sliced 9 h 21 min, 499 g. The 2026-09-19 holder (v7 cavity, 4 in base, round flange, 1/16 in roundovers) was on the wall and working great until it was dropped on 2026-10-10 and a plate corner broke off along the drum blend.
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -227,3 +227,27 @@ each edge the flap's root, from the blend foot (11 mm from the centre line) to t
 Open: which way the break ran (through the hole, or around the blend) and a photo of the break face. Fix
 candidates, not built: a 100% infill modifier over the whole plate (about 40 g, 25 to 30 min more, no CAD
 change) and/or a 1/4 in plate. The revision stays unprinted until Brian picks.
+
+### The fix, same day
+
+Brian: "it broke along the contour of the main cylinder", then "do 1 and 2". Both built:
+- `plate_t` 5 to 6.35 (1/4 in). `mouth_z` and `cut_top` stay, so the wand keeps its place off the wall and the
+  flange, lip and inlay move out 1.35 mm with the plate's front (holder 106.75 off the wall; mouth top 4.95 mm
+  under the flange, was 3.6; grip to wall unchanged, zbudget.py). rim_round.scad regenerated (270 stations, same
+  run). insertion.py unchanged: WAY IN 0 to 9 degrees, hanging tip 5.70 mm, 1.87 of 3.57 mm engaged, HOLD 19.6 mm.
+- The print 3MF's screw-pad modifier became a solid-base modifier (`add_solid_base`, "MOD solid base: plate and
+  drum blend"): the whole plate (inset 1 mm from its outline) plus a ring r 42..51 from the plate's top through the
+  blend (to 13.35 off the wall), `sparse_infill_density` 100% `monotonic` (Bambu's enum has no "rectilinear": that value sliced as a
+  three-direction lattice at 100%, caught by a per-layer histogram of the infill lines' directions). Measured in the
+  G-code with `check_solid_base` (segments clipped to each window): pads 0.99 to 1.00, plain plate 0.95, blend 0.94,
+  the drum's core above the blend 0.18.
+- Slice: 9 h 21 min, 499.1 g (483.2 body PETG, 12.4 support interface, 3.5 inlay), 356 layers, tower 19.8 mm:
+  34 min and 57 g more than before the fix. `holder.stl` 622.7 cm3, watertight (the two-edge touching spot is
+  gone), `holder-inlay.stl` 12 bodies 2.35 cm3 at 105.55..106.75; the inlay's volume lies in open recesses (0 of
+  101 sample points inside the body). Renders and plan page (https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6)
+  rebuilt; before-and-after plate layers on the evidence page.
+- Bit on the way: the body export MUST carry `-D show_inlay=false` (the header's command lacked it; the inlay was
+  fused in, 625.0 cm3, caught by the recess check); a window test by segment midpoint reads a solid plate of
+  100 mm rectilinear lines as 58 to 76% (fixed by clipping); hairline plots of 0.56 mm lines alias into a
+  crosshatch that looks sparse (drawn at real width now); and an unknown `sparse_infill_pattern` name is not an
+  error to Bambu, it just slices as some other pattern.
