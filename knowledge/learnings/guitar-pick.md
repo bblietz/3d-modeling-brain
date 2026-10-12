@@ -1,7 +1,7 @@
 ---
 title: Guitar pick retrospective (Dunlop Tortex 1.0 copy)
 date: 2026-10-12
-status: modelled and sliced with a mirrored 38 degree bevel, print pending
+status: modelled and sliced standing on a snap-off base, print pending
 tags: [learning, 3d-print, petg, 0.2-nozzle, photo-trace]
 ---
 
@@ -68,7 +68,29 @@ A plain 1:1 copy of the Dunlop Tortex Standard 1.0 mm pick in PETG on the
   is at most about 0.45 mm wide for a 0.35 mm drop. Decide the edge
   profile AND the print orientation together in Phase 2 for anything
   symmetric and thin; the alternative (standing the part on a snap-off
-  base) is support by another name and needs the user's say-so.
+  base) is support by another name and needs the user's say-so. Brian
+  gave it: see the stand-up design below.
+- **Standing a thin part on a designed base.** What worked: the base is
+  part of the model (same filament, one solid), a one-line neck (0.22 x
+  0.3 mm) holds the outline wherever it faces down (the top edge arc and
+  the shoulder rounds up to 45 degrees; above that the outline is steep
+  enough to self-support), the block's top is the outline shifted down
+  by the neck height so every layer of the neck sits on the layer below,
+  and a 4 mm column of the same height beside the part makes the nozzle
+  leave the thin tip cross-sections every layer. Land the total height on
+  a layer boundary by deriving the base height from the part length. The
+  G-code confirmed the neck as a single line and zero overhang walls.
+- **Pin the seam with paint, not with seam_position.** On a standing thin
+  part the "back" seam sat at the end of the face's flat run and walked
+  toward the tip with the outline; "aligned" would have gone to the rim.
+  A 1.5 mm wide, 2 micron deep recess down the face gives the mesh its
+  own triangles, and painting them `paint_seam="4"` in the 3MF object
+  mesh (one unsplit enforcer triangle; the CLI keeps it through a round
+  trip) put all 402 loops within 0.8 mm of the centre line. Splitting
+  the solid with planes and fusing back without clean() does NOT keep the
+  imprint in build123d (the fuse unified the faces and came back invalid).
+  Scarf seams (`seam_slope_type external`) produced no ramp moves at all
+  in the 02.08 CLI, on two different files; do not ship them unverified.
 - **The "back" seam is not always the centre.** Bambu's rear seam landed
   at the top centre on two profiles and at the top edge's left shoulder on
   a third, with nothing changed but the edge profile. A G-code seam check
@@ -101,22 +123,28 @@ A plain 1:1 copy of the Dunlop Tortex Standard 1.0 mm pick in PETG on the
   exactly. The pipeline asserts the layer count and the top Z from the
   G-code.
 
-## Settings used
+## Settings used (standing print, shipped)
 
 0.2 nozzle, `0.08mm High Quality @BBL X2D 0.2 nozzle` with layer_height
 0.06, `Bambu PETG Basic @BBL X2D 0.2 nozzle` (250 C / 70 C textured PEI),
-solid zig-zag, arachne, seam back (proven at the top centre from the outer
-wall start points in the G-code), no ironing, two top walls
-(`top_one_wall_type` not apply), skirt 2 / 3 / 1, no brim, elephant-foot
-compensation 0 (rounded underside). Edge: 0.45 mm bevel dropping 0.35 (38
-degrees) on both faces, creases blended R 0.35, 0.30 mm rim. 16 layers,
-13 min 12 s estimated, 0.68 g. Underside steps from the G-code: 0.127 mm
-at layer 2, then 0.07 to 0.08 per layer up the band.
+solid zig-zag (the slicer still labels the column's fill "Sparse infill"
+at 100%), arachne, four wall loops (the 1.0 mm body is four 0.25 lines),
+seam back plus a painted seam strip on the rear face, no ironing, skirt
+2 / 3 / 1, no brim, elephant foot at the preset's 0.15 (only the base
+touches the bed). Edge: 1.5 mm bevel dropping 0.35 on both faces, creases
+blended R 5, rim creases R 0.15, 0.30 mm rim. 577 layers to 34.66 mm,
+2 h 11 min estimated (12 s minimum layer time x 577), 2.51 g of which
+0.68 g is the pick.
+
+The flat alternative (`guitar-pick-sym.stl`, 0.45 mm symmetric bevel at 38
+degrees) sliced to 16 layers, 13 min, 0.68 g, with the second layer 0.127
+mm past the first; kept, not shipped.
 
 ## Pending
 
-- Brian's pick between the mirrored 38 degree bevel (built), the 1.5 mm
-  bevel on top only, and a stand-up print for the full mirrored bevel.
+- The standing print: does the neck hold through 577 layers, does it cut
+  clean, how the sanded thumb edge looks, the real print time against the
+  2 h 11 min estimate, and whether 12 s per layer was needed.
 - Print result: thickness by calipers, edge smoothness, feel against the
   Tortex, the real print time against the estimate.
 - Ironing coupon on a second pick if the 0.22 mm top lines show; the vault

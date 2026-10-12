@@ -11,7 +11,8 @@ flattener, graft_slice for the verification slice), with the screw-pad modifier 
   skirt 2 loops / 3 mm / 1     memory/feedback-keep-skirt.md
 
 Usage:  .venv/bin/python projects/Guitar-pick/pipeline/make_print_3mf.py
-Reads guitar-pick.stl; writes guitar-pick.3mf and guitar-pick-slice.json.
+Reads guitar-pick-sym.stl; writes guitar-pick-flat.3mf and guitar-pick-sym-slice.json. Superseded by make_standup_3mf.py
+(Brian 2026-10-12: print standing); kept for the flat variants.
 """
 import json
 import math
@@ -38,9 +39,9 @@ PROCESS = "0.08mm High Quality @BBL X2D 0.2 nozzle"
 FILAMENT = "Bambu PETG Basic @BBL X2D 0.2 nozzle"
 FILAMENT_COLOUR = "#000000"      # display only; any PETG Basic slot in the AMS prints it
 
-STEM = "guitar-pick"
-OUT = f"{STEM}.3mf"
-LABEL = "Guitar pick, Tortex 1.0 copy"
+STEM = "guitar-pick-sym"           # the flat-printable variant; the shipped 3MF is the standing one (make_standup_3mf.py)
+OUT = "guitar-pick-flat.3mf"
+LABEL = "Guitar pick, Tortex 1.0 copy, flat"
 BED = 256.0
 BED_CENTRE = (128.0, 128.0)
 BED_TYPE = "Textured PEI Plate"

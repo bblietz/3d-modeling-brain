@@ -23,7 +23,7 @@ WIDTH, LENGTH, THICK = 26.19, 30.38, 1.0
 
 EDGE_LABELS = {
     "sym": ("Mirrored bevel, printable", "the widest bevel the underside can carry without support, on both faces: 0.45 mm wide dropping 0.35 (38 degrees), creases blended R 0.35, 0.30 mm rim. In the 3MF now."),
-    "mirror": ("Mirrored 1.5 mm bevel", "the top bevel with its 5 mm lead-in copied underneath. Red layers hang more than a whole line past the one below: printed in air."),
+    "mirror": ("Mirrored 1.5 mm bevel, rounded rim", "the 1.5 mm bevel with its 5 mm lead-in on both faces, and the rim's two creases rounded R 0.15. Printed standing. Flat, the red layers would hang more than a whole line past the one below."),
     "soft": ("1.5 mm bevel on top only", "the blended bevel on top, a 45 degree flat underneath. Not mirrored."),
     "square": ("Square (the first model)", "the outline extruded as is, 90 degree edge."),
     "round": ("Round", "fillet R 0.45 on both faces, 0.10 mm rim."),
@@ -51,6 +51,20 @@ def tip_circle(pts, band=2.5):
     A = np.column_stack([2 * p[:, 0], 2 * p[:, 1], np.ones(len(p))])
     (cx, cy, c), *_ = np.linalg.lstsq(A, (p ** 2).sum(axis=1), rcond=None)
     return cx, cy, np.sqrt(c + cx ** 2 + cy ** 2)
+
+
+def standing_svg(var, layer, window=3.0):
+    """The same tip section turned the way it prints: tip up, layers horizontal. Each 0.06 mm layer of the bevel
+    steps in by 0.014 mm, so the stair is drawn but reads as a smooth line."""
+    sec = var["section"]                                   # (inset from the tip, z) with z the pick thickness 0..1
+    path = "M " + " L ".join(f"{z - 0.5:.3f} {x - window:.3f}" for x, z in sec)      # tip up: inset 0 at the top of the panel
+    lines = "".join(f'<line x1="-0.75" y1="{-k * layer:.3f}" x2="0.75" y2="{-k * layer:.3f}"/>' for k in range(int(window / layer) + 1))
+    return f"""<svg viewBox="-0.9 -{window + 0.12:.2f} 1.8 {window + 0.3:.2f}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="tip section standing, tip up">
+      <g stroke="var(--rule)" stroke-width="0.008">{lines}</g>
+      <path d="{path}" fill="var(--accent)" fill-opacity="0.22" stroke="var(--measured)" stroke-width="0.025" stroke-linejoin="round"/>
+      <g stroke="var(--muted)" stroke-width="0.012"><line x1="-0.5" y1="0.1" x2="0.5" y2="0.1"/><line x1="-0.5" y1="0.06" x2="-0.5" y2="0.14"/><line x1="0.5" y1="0.06" x2="0.5" y2="0.14"/></g>
+      <text x="0" y="0.24" font-family="Barlow, Arial, sans-serif" font-size="0.1" fill="var(--muted)" text-anchor="middle">1 mm</text>
+    </svg>"""
 
 
 def profile_svg(var, first_layer, layer, window=3.0, limit=0.13):
@@ -86,6 +100,11 @@ def main(out):
     wy = dun[np.argmax(dun[:, 0]), 1]          # y of the widest point
     edge = json.loads((PROJECT / "edge-options.json").read_text())
     V = edge["variants"]
+    standup = json.loads((PROJECT / "standup.json").read_text())
+    sl = json.loads((PROJECT / "guitar-pick-slice.json").read_text())
+    iso = data_uri(IMG / "standup-iso.png", 900)
+    neck = data_uri(IMG / "standup-neck.png", 700, "JPEG")
+    tipshot = data_uri(IMG / "standup-tip.png", 700, "JPEG")
     order = ("soft", "bevel", "round", "chamfer")
 
     photo = data_uri(IMG / "trace-1657.png", 700, "JPEG")
@@ -102,12 +121,16 @@ def main(out):
     <figure class="panel">
       <img src="{closeups[v]}" alt="close-up render of the {v} edge at the tip, from above and from below">
       <figcaption><b>{EDGE_LABELS[v][0]}.</b> Tip seen from above (top) and from underneath (bottom).</figcaption>
-    </figure>""" for v in ("sym", "mirror", "soft", "round"))
-    chosen = "".join(f"""
+    </figure>""" for v in ("mirror", "sym", "soft", "round"))
+    chosen = f"""
     <figure class="panel">
-      {profile_svg(V[v], edge["first_layer"], edge["layer"])}
-      <figcaption><b>{EDGE_LABELS[v][0]}.</b> {EDGE_LABELS[v][1]}</figcaption>
-    </figure>""" for v in ("mirror", "sym"))
+      {standing_svg(V["mirror"], edge["layer"])}
+      <figcaption><b>Standing, as it prints.</b> The tip, with the layers horizontal: each 0.06 mm layer of the bevel steps in by 0.014 mm, a fiftieth of a line. The faces and bevels are walls.</figcaption>
+    </figure>
+    <figure class="panel">
+      {profile_svg(V["mirror"], edge["first_layer"], edge["layer"])}
+      <figcaption><b>The same edge printed flat, for the record.</b> {EDGE_LABELS["mirror"][1]}</figcaption>
+    </figure>"""
 
     def worst(v):
         w = V[v]["worst_bottom"]
@@ -171,21 +194,52 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
 <main>
 <header>
   <div class="kicker">Guitar pick, Dunlop Tortex Standard 1.0 mm</div>
-  <h1>The edge, mirrored: what a flat print can carry without support</h1>
+  <h1>Standing up: the mirrored bevel, rounded rim, printed as walls</h1>
 </header>
-<p class="lede">Mirroring the 1.5 mm bevel underneath runs into the print. The pick lies on the bed, so the underside is built upward layer by layer, and each 0.06 mm layer can only reach about half a 0.22 mm line past the one below it. A 13 degree slope asks for 0.26 mm per layer, more than a whole line, so every layer of that band would be laid in air (the red stair, left). The steepest slope the underside carries is about 38 degrees, which makes the band 0.45 mm wide for the same 0.35 mm drop. That bevel, on both faces with the creases softened, is in the 3MF (right). The only way to get the full 1.5 mm on both faces is to print the pick standing on a snap-off base, which is support by another name, so I have not built it.</p>
+<p class="lede">Your call: the 1.5 mm blended bevel on both faces, the rim rounded, no support material, printed standing for the smoothest PETG. The pick stands tip-up on its top edge. Only the top edge and the shoulder rounds up to the 45 degree point face downward, and they sit on a one-line neck (0.22 mm wide, 0.3 mm tall) on a saddle-topped block. Everything else is a wall or leans less than 27 degrees. A 4 mm column beside the pick gives the nozzle somewhere to go each layer so the thin tip cross-sections cool instead of baking. When it is done you cut the neck at the block and sand the 0.3 mm rim flush along the thumb edge; nothing else is touched.</p>
 
 <figure>
-  <div class="legend"><span class="mea">CAD profile</span><span class="stair">What the printer makes of it, layer by layer (0.1 mm first layer, then 0.06)</span><span class="bad">Layer laid in air</span></div>
+  <img src="{iso}" alt="the pick standing tip-up on its saddle block, with the cooling column beside it">
+  <figcaption>The print: pick, neck, block, and the column tied in by a plate. {standup["height"]} mm tall, {sl["layers"]} layers of 0.06 mm, {sl["grams"]} g of which the pick is {standup["pick_mm3"] * 1.27e-3:.2f} g, {sl["time"]} estimated (the 0.2 nozzle estimates ran about 1.4x under on the Sharks tags).</figcaption>
+</figure>
+
+<figure>
+  <div class="pair">
+    <figure class="panel">
+      <img src="{neck}" alt="close-up of the shoulder resting on the neck and block">
+      <figcaption><b>The neck.</b> The shoulder sits on the saddle through the thin neck line. The block runs 2 mm past the neck on each side so there is something to hold while you cut.</figcaption>
+    </figure>
+    <figure class="panel">
+      <img src="{tipshot}" alt="close-up of the tip, rounded rim running into the bevel band">
+      <figcaption><b>The tip.</b> Rounded rim, bevel, lead-in, face: no crease anywhere. The faceting is the render, not the model.</figcaption>
+    </figure>
+  </div>
+</figure>
+
+<figure>
+  <div class="legend"><span class="mea">CAD profile</span><span class="stair">What the printer makes of it, layer by layer</span><span class="bad">Layer laid in air (flat print only)</span></div>
   <div class="pair">{chosen}
   </div>
-  <figcaption>Cross-section through the tip, first 3 mm from the edge, bed at the bottom, both at the same scale. The stair is the real printed edge: the slicer samples the profile at the middle of each layer. On the printable one, the second layer sits 0.11 mm past the first (half a line, the same as the round profile had) and the band's layers a third of a line.</figcaption>
+  <figcaption>Cross-section through the tip, first 3 mm from the edge, drawn at scale. Standing, the stair on the bevel is 0.014 mm per layer and the faces are straight walls; the only terraces left are on the rounded rim at the very tip, where the outline curves over, 0.06 mm tall.</figcaption>
 </figure>
+
+<section>
+  <h2>The print, checked in the sliced G-code</h2>
+  <div class="scroll"><table>
+    <tr><th>Item</th><th>Result</th></tr>
+    <tr><td>Layers</td><td>{sl["layers"]}, 0.1 mm first then 0.06 mm, top at {sl["top_z"]} mm</td></tr>
+    <tr><td>Neck</td><td>printed as a single line: the wall stays within {sl["neck_wall_off_midplane_mm"]} mm of the mid-plane</td></tr>
+    <tr><td>Seam</td><td>painted down the centre of the {sl["seam"]["face"]} face: all {sl["seam"]["pick_loops"]} pick loops start between {sl["seam"]["x_from_pick_centre_mm"][0]} and {sl["seam"]["x_from_pick_centre_mm"][1]} mm of the centre line, so the only seam is one faint line up the middle of the thumb face, never on the rim</td></tr>
+    <tr><td>Overhang walls</td><td>{sl["overhang_fraction_of_outer_wall"] * 100:.1f}% of the outer wall length (the shoulders above the neck)</td></tr>
+    <tr><td>Support</td><td>none generated, none needed</td></tr>
+    <tr><td>Material</td><td>{sl["grams"]} g PETG, {sl["metres"]} m, {sl["nozzle_C"]} C nozzle, {sl["bed_C"]} C textured PEI</td></tr>
+  </table></div>
+</section>
 
 <figure>
   <div class="pair">{panels}
   </div>
-  <figcaption>The earlier options at the same scale, for comparison. The 1.5 mm bevel on top only is still a printable choice if you would rather keep that feel on one face.</figcaption>
+  <figcaption>The flat-print options at the same scale, for the record.</figcaption>
 </figure>
 
 <figure>
@@ -198,22 +252,23 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
   <h2>Numbers</h2>
   <div class="scroll"><table>
     <tr><th>Profile</th><th>Top face</th><th>Underside</th><th>Rim</th><th>Worst underside overhang</th><th>Weight</th></tr>
-    <tr><td>Mirrored bevel, printable <b>(in the 3MF)</b></td><td>0.45 mm wide, drops 0.35 mm (38 degrees), R 0.35 blend</td><td>the same</td><td class="num">{V["sym"]["rim_mm"]:.2f} mm</td><td>{worst("sym")}</td><td class="num">{grams("sym")}</td></tr>
-    <tr><td>Mirrored 1.5 mm bevel</td><td>1.5 mm wide, drops 0.35 mm, 5 mm blend</td><td>the same</td><td class="num">{V["mirror"]["rim_mm"]:.2f} mm</td><td>{worst("mirror")}: in air, cannot print flat</td><td class="num">{grams("mirror")}</td></tr>
+    <tr><td>Mirrored 1.5 mm bevel, rounded rim <b>(in the 3MF, standing)</b></td><td>1.5 mm wide, drops 0.35 mm, 5 mm blend</td><td>the same</td><td class="num">{V["mirror"]["rim_mm"]:.2f} mm, rounded R 0.15</td><td>{worst("mirror")} if printed flat: in air</td><td class="num">{grams("mirror")}</td></tr>
+    <tr><td>Mirrored 0.45 mm bevel (flat alternative)</td><td>0.45 mm wide, drops 0.35 mm (38 degrees), R 0.35 blend</td><td>the same</td><td class="num">{V["sym"]["rim_mm"]:.2f} mm</td><td>{worst("sym")}</td><td class="num">{grams("sym")}</td></tr>
     <tr><td>1.5 mm bevel on top only</td><td>1.5 mm wide, drops 0.35 mm, 5 mm blend into the face</td><td>45 degrees, 0.35 mm, 0.35 mm blend into the face</td><td class="num">{V["soft"]["rim_mm"]:.2f} mm</td><td>{worst("soft")}</td><td class="num">{grams("soft")}</td></tr>
     <tr><td>Bevel with a crease</td><td>1.5 mm wide, drops 0.35 mm (13 degrees)</td><td>45 degrees, 0.35 mm</td><td class="num">{V["bevel"]["rim_mm"]:.2f} mm</td><td>{worst("bevel")}</td><td class="num">{grams("bevel")}</td></tr>
     <tr><td>Round</td><td>fillet R 0.45</td><td>fillet R 0.45</td><td class="num">{V["round"]["rim_mm"]:.2f} mm</td><td>{worst("round")}</td><td class="num">{grams("round")}</td></tr>
     <tr><td>Chamfer</td><td>45 degrees, 0.45 mm</td><td>45 degrees, 0.45 mm</td><td class="num">{V["chamfer"]["rim_mm"]:.2f} mm</td><td>{worst("chamfer")}</td><td class="num">{grams("chamfer")}</td></tr>
     <tr><td>Square</td><td>flat to the edge</td><td>flat to the edge</td><td class="num">1.00 mm</td><td>{worst("square")}</td><td class="num">{grams("square")}</td></tr>
   </table></div>
-  <p class="note">Worst underside overhang is how far one layer's outer wall sits past the layer below, read from the geometry at the slicer's sampling heights; the sliced G-code runs about 0.01 mm higher. Half a line (0.11 mm) is the most the first pick's profiles asked of any layer. Wider symmetric bands were measured too: 0.52 mm (34 degrees) puts the band at 0.089 mm per layer and the second layer at 0.121; 0.60 mm (30 degrees) at 0.103 and 0.137. The 0.45 band keeps every layer under half a line.</p>
+  <p class="note">Worst underside overhang applies to a flat print only: how far one layer's outer wall would sit past the layer below. Standing, none of it applies.</p>
 </section>
 
 <section class="ask">
-  <h2>What I need from you</h2>
+  <h2>Printing it</h2>
   <ol>
-    <li>Print the mirrored 0.45 mm bevel as it is in the 3MF, or keep the 1.5 mm bevel on the top face only with the steeper underside. Say which.</li>
-    <li>If you want the full 1.5 mm on both faces, the pick has to print standing on a snap-off base along its top edge (a mark to sand under the thumb). That is a base, not support filament, but it is still support. Only on your say-so.</li>
+    <li>0.2 mm nozzle in, PETG Basic in the AMS, textured PEI plate. Open the 3MF in Bambu Studio once with the 0.2 machine selected (do not reselect the printer preset on this file).</li>
+    <li>After the print: cut the neck at the block with a flush cutter or a blade, then sand the top edge's rim flush on 400 then 800 grit laid on something flat. The rim is 0.3 mm wide and the neck remnant 0.22 mm, so it is a few strokes.</li>
+    <li>Tell me how the faces, the bevels and the tip feel against the Tortex, and whether the thumb edge shows after sanding.</li>
   </ol>
 </section>
 
@@ -261,7 +316,7 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
 
 <figure>
   <img src="{render}" alt="Four rendered views of the modelled pick with the rounded edge">
-  <figcaption>The CAD model with the mirrored bevel: {WIDTH} x {LENGTH} x {THICK} mm, flat on the bed. The streaks in the iso view are a shading artifact of the renderer on the flat faces, not geometry.</figcaption>
+  <figcaption>The CAD model with the mirrored bevel: {WIDTH} x {LENGTH} x {THICK} mm, shown flat. The streaks in the iso view are a shading artifact of the renderer on the flat faces, not geometry.</figcaption>
 </figure>
 
 <section>
@@ -273,7 +328,7 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
     <tr><td>Tip radius</td><td class="num">{dr:.1f} mm</td><td class="num">{gr:.1f} mm</td><td>circle fit on the traced edge, both photos agree within 0.15 mm</td></tr>
     <tr><td>Widest point</td><td class="num">{-wy:.1f} mm below the top</td><td class="num">8.7 mm</td><td>trace</td></tr>
     <tr><td>Thickness</td><td class="num">{THICK} mm</td><td class="num"></td><td>your calipers</td></tr>
-    <tr><td>Material, nozzle</td><td colspan="2">PETG, 0.2 mm nozzle, 0.06 mm layers, flat on the bed, about 0.7 g, 13 min sliced (expect about 20)</td><td>your call, for the smoothest edge</td></tr>
+    <tr><td>Material, nozzle</td><td colspan="2">PETG, 0.2 mm nozzle, 0.06 mm layers, printed standing on a snap-off base</td><td>your call, for the smoothest edge</td></tr>
   </table></div>
 </section>
 </div>
