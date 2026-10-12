@@ -13,7 +13,7 @@ from build123d import Face, Wire, extrude, export_stl
 
 HERE = Path(__file__).resolve().parent
 
-THICK = 1.0                  # nominal Tortex 1.0 mm; set from calipers when measured
+THICK = 1.0                  # Brian's calipers 2026-10-11: 1.0 mm
 WIDTH, LENGTH = 26.19, 30.38  # caliper readings 2026-10-11, asserted below
 
 pts = [tuple(p) for p in np.loadtxt(HERE / "outline-dunlop.csv", delimiter=",")]

@@ -1,0 +1,43 @@
+{
+ "placement_mm": {
+  "min": [
+   114.9,
+   112.81,
+   0.0
+  ],
+  "max": [
+   141.1,
+   143.19,
+   1.0
+  ]
+ },
+ "roundtrip": "settings and placement survive bambu-studio --arrange 0 --export-3mf",
+ "time": "13m 27s",
+ "minutes": 13,
+ "grams": 0.7,
+ "metres": 0.23,
+ "used_g_per_filament": 0.7,
+ "layers": 16,
+ "top_z": 1.0,
+ "nozzle_C": 250,
+ "bed_C": 70,
+ "seam_xy_mm": [
+  129.11,
+  142.91
+ ],
+ "toolpath_xy_mm": [
+  111.56,
+  109.49,
+  144.43,
+  146.53
+ ],
+ "feature_mm": {
+  "Internal solid infill": 170.8,
+  "Inner wall": 21.1,
+  "Bottom surface": 19.6,
+  "Top surface": 12.1,
+  "Outer wall": 7.3,
+  "Skirt": 2.0,
+  "Gap infill": 0.0
+ }
+}
