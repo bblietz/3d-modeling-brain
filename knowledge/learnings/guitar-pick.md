@@ -1,7 +1,7 @@
 ---
 title: Guitar pick retrospective (Dunlop Tortex 1.0 copy)
 date: 2026-10-12
-status: modelled and sliced with a blended bevel edge, print pending
+status: modelled and sliced with a mirrored 38 degree bevel, print pending
 tags: [learning, 3d-print, petg, 0.2-nozzle, photo-trace]
 ---
 
@@ -59,6 +59,21 @@ A plain 1:1 copy of the Dunlop Tortex Standard 1.0 mm pick in PETG on the
   new outer edge loop; OCC takes a 5 mm fillet on a 167 degree edge along
   a convex spline without complaint). Lesson: when a hand touches a
   transition, blend it; a chamfer alone is never the finished answer.
+- **Mirrored edges and a flat print do not mix.** Brian then wanted the
+  1.5 mm bevel on both faces and no support material. The underside of a
+  flat print can carry about 38 degrees at most (0.06 mm layers, 0.22 mm
+  line: layer 2 at half a line, the band at a third); a 13 degree band
+  needs 0.26 mm per layer, laid in air, and thinner layers do not fix it
+  (0.04 mm still steps 0.17). So a symmetric edge profile on a flat print
+  is at most about 0.45 mm wide for a 0.35 mm drop. Decide the edge
+  profile AND the print orientation together in Phase 2 for anything
+  symmetric and thin; the alternative (standing the part on a snap-off
+  base) is support by another name and needs the user's say-so.
+- **The "back" seam is not always the centre.** Bambu's rear seam landed
+  at the top centre on two profiles and at the top edge's left shoulder on
+  a third, with nothing changed but the edge profile. A G-code seam check
+  should ask for the region (the top edge, aligned within 2 mm) rather
+  than an exact point.
 - **A flat print cannot carry a shallow taper underneath.** With 0.06 mm
   layers and a 0.22 mm wall, each layer's outer wall can hang about half a
   line past the one below, so the underside slope must be about 45 degrees
@@ -93,15 +108,15 @@ A plain 1:1 copy of the Dunlop Tortex Standard 1.0 mm pick in PETG on the
 solid zig-zag, arachne, seam back (proven at the top centre from the outer
 wall start points in the G-code), no ironing, two top walls
 (`top_one_wall_type` not apply), skirt 2 / 3 / 1, no brim, elephant-foot
-compensation 0 (rounded underside). Edge: 1.5 mm bevel dropping 0.35 on
-top with its crease blended R 5; 45 degree flat 0.35 underneath with its
-crease blended R 0.35; 0.30 mm rim. 16 layers, 12 min 57 s estimated,
-0.67 g. Underside steps from the G-code: 0.112 mm at layer 2, then 0.06
-per layer up the 45 degree flat.
+compensation 0 (rounded underside). Edge: 0.45 mm bevel dropping 0.35 (38
+degrees) on both faces, creases blended R 0.35, 0.30 mm rim. 16 layers,
+13 min 12 s estimated, 0.68 g. Underside steps from the G-code: 0.127 mm
+at layer 2, then 0.07 to 0.08 per layer up the band.
 
 ## Pending
 
-- Brian's look at the blended bevel on the page (his spec, built).
+- Brian's pick between the mirrored 38 degree bevel (built), the 1.5 mm
+  bevel on top only, and a stand-up print for the full mirrored bevel.
 - Print result: thickness by calipers, edge smoothness, feel against the
   Tortex, the real print time against the estimate.
 - Ironing coupon on a second pick if the 0.22 mm top lines show; the vault

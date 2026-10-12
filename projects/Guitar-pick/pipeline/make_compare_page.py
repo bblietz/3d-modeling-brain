@@ -22,7 +22,9 @@ IMG = PROJECT / "images"
 WIDTH, LENGTH, THICK = 26.19, 30.38, 1.0
 
 EDGE_LABELS = {
-    "soft": ("Bevel with a curved lead-in", "the 1.5 mm bevel on top, blended into the face with a 5 mm radius so there is no crease; underneath the 45 degree flat blended with a 0.35 mm radius; 0.30 mm rim. In the 3MF now."),
+    "sym": ("Mirrored bevel, printable", "the widest bevel the underside can carry without support, on both faces: 0.45 mm wide dropping 0.35 (38 degrees), creases blended R 0.35, 0.30 mm rim. In the 3MF now."),
+    "mirror": ("Mirrored 1.5 mm bevel", "the top bevel with its 5 mm lead-in copied underneath. Red layers hang more than a whole line past the one below: printed in air."),
+    "soft": ("1.5 mm bevel on top only", "the blended bevel on top, a 45 degree flat underneath. Not mirrored."),
     "square": ("Square (the first model)", "the outline extruded as is, 90 degree edge."),
     "round": ("Round", "fillet R 0.45 on both faces, 0.10 mm rim."),
     "chamfer": ("Chamfer", "45 degree flat, 0.45 mm, on both faces, 0.10 mm rim."),
@@ -51,14 +53,16 @@ def tip_circle(pts, band=2.5):
     return cx, cy, np.sqrt(c + cx ** 2 + cy ** 2)
 
 
-def profile_svg(var, first_layer, layer, window=3.0):
+def profile_svg(var, first_layer, layer, window=3.0, limit=0.13):
     """The tip cross-section at scale: the CAD profile as a line over the stair of layers the slicer makes of it
     (each layer's wall reaches from its inset to the right). Tip at the left, bed at the bottom."""
     rects, bounds = [], [0.0]
     for r in var["overhang"]:
         z0 = 0.0 if r["layer"] == 1 else first_layer + (r["layer"] - 2) * layer
         z1 = first_layer if r["layer"] == 1 else z0 + layer
-        rects.append(f'<rect x="{r["inset"]:.3f}" y="{-z1:.3f}" width="{window + 0.3 - r["inset"]:.3f}" height="{z1 - z0:.3f}"/>')
+        bad = r["layer"] > 1 and r["step"] > limit and z0 < 0.5      # an underside layer hanging past what the one below can carry
+        rects.append(f'<rect x="{r["inset"]:.3f}" y="{-z1:.3f}" width="{window + 0.3 - r["inset"]:.3f}" height="{z1 - z0:.3f}"'
+                     + (' fill="var(--warn)" fill-opacity="0.55"' if bad else '') + '/>')
         bounds.append(z1)
     lines = "".join(f'<line x1="-0.15" y1="{-z:.3f}" x2="{window + 0.3}" y2="{-z:.3f}"/>' for z in bounds)
     path = "M " + " L ".join(f"{x:.3f} {-z:.3f}" for x, z in var["section"])      # open: the window edge is not a wall
@@ -82,11 +86,11 @@ def main(out):
     wy = dun[np.argmax(dun[:, 0]), 1]          # y of the widest point
     edge = json.loads((PROJECT / "edge-options.json").read_text())
     V = edge["variants"]
-    order = ("bevel", "round", "chamfer", "square")
+    order = ("soft", "bevel", "round", "chamfer")
 
     photo = data_uri(IMG / "trace-1657.png", 700, "JPEG")
     photo2 = data_uri(IMG / "trace-1656.png", 700, "JPEG")
-    render = data_uri(IMG / "pick-v5.png", 1000, "JPEG")
+    render = data_uri(IMG / "pick-v6.png", 1000, "JPEG")
     closeups = {v: data_uri(IMG / f"edge-{v}.png", 700) for v in V}
 
     panels = "".join(f"""
@@ -98,12 +102,12 @@ def main(out):
     <figure class="panel">
       <img src="{closeups[v]}" alt="close-up render of the {v} edge at the tip, from above and from below">
       <figcaption><b>{EDGE_LABELS[v][0]}.</b> Tip seen from above (top) and from underneath (bottom).</figcaption>
-    </figure>""" for v in ("soft", "bevel", "round", "chamfer"))
-    chosen = f"""
+    </figure>""" for v in ("sym", "mirror", "soft", "round"))
+    chosen = "".join(f"""
     <figure class="panel">
-      {profile_svg(V["soft"], edge["first_layer"], edge["layer"])}
-      <figcaption><b>{EDGE_LABELS["soft"][0]}.</b> {EDGE_LABELS["soft"][1]}</figcaption>
-    </figure>"""
+      {profile_svg(V[v], edge["first_layer"], edge["layer"])}
+      <figcaption><b>{EDGE_LABELS[v][0]}.</b> {EDGE_LABELS[v][1]}</figcaption>
+    </figure>""" for v in ("mirror", "sym"))
 
     def worst(v):
         w = V[v]["worst_bottom"]
@@ -157,6 +161,7 @@ td.num {{ text-align: right; white-space: nowrap; }}
 .legend .gen {{ color: var(--accent); }} .legend .gen::before {{ border-top-style: dashed; }}
 .legend .mea {{ color: var(--measured); }}
 .legend .stair::before {{ border-top: 10px solid var(--accent); opacity: .25; }}
+.legend .bad::before {{ border-top: 10px solid var(--warn); opacity: .6; }}
 .ask {{ border-left: 4px solid var(--warn); padding: 4px 0 4px 14px; display: grid; gap: 8px; }}
 .ask li {{ margin: 0; }}
 ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }}
@@ -166,46 +171,49 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
 <main>
 <header>
   <div class="kicker">Guitar pick, Dunlop Tortex Standard 1.0 mm</div>
-  <h1>The edge: the bevel, with a curved lead-in instead of a crease</h1>
+  <h1>The edge, mirrored: what a flat print can carry without support</h1>
 </header>
-<p class="lede">Your call was the bevel without a noticeable line, so the crease where the 1.5 mm bevel met the flat face is now a 5 mm radius blend about 1.1 mm wide: the face eases into the slope and there is no edge to feel or see. The same is done underneath, where the pick sits on the bed, with the smaller radius the print allows (0.35 mm; each 0.06 mm layer can only hang about half a line past the one below). This profile is in the 3MF. The earlier three are kept below for comparison.</p>
+<p class="lede">Mirroring the 1.5 mm bevel underneath runs into the print. The pick lies on the bed, so the underside is built upward layer by layer, and each 0.06 mm layer can only reach about half a 0.22 mm line past the one below it. A 13 degree slope asks for 0.26 mm per layer, more than a whole line, so every layer of that band would be laid in air (the red stair, left). The steepest slope the underside carries is about 38 degrees, which makes the band 0.45 mm wide for the same 0.35 mm drop. That bevel, on both faces with the creases softened, is in the 3MF (right). The only way to get the full 1.5 mm on both faces is to print the pick standing on a snap-off base, which is support by another name, so I have not built it.</p>
 
 <figure>
-  <div class="legend"><span class="mea">CAD profile</span><span class="stair">What the printer makes of it, layer by layer (0.1 mm first layer, then 0.06)</span></div>
-  {chosen}
-  <figcaption>Cross-section through the tip, first 3 mm from the edge, bed at the bottom, drawn at scale. The blue stair is the real printed edge: the slicer samples the profile at the middle of each layer. On the top slope that means six terraces 0.06 mm tall and about 0.26 mm wide, widening into the blend; the 0.2 mm nozzle and 0.06 mm layers are what keep them this fine.</figcaption>
+  <div class="legend"><span class="mea">CAD profile</span><span class="stair">What the printer makes of it, layer by layer (0.1 mm first layer, then 0.06)</span><span class="bad">Layer laid in air</span></div>
+  <div class="pair">{chosen}
+  </div>
+  <figcaption>Cross-section through the tip, first 3 mm from the edge, bed at the bottom, both at the same scale. The stair is the real printed edge: the slicer samples the profile at the middle of each layer. On the printable one, the second layer sits 0.11 mm past the first (half a line, the same as the round profile had) and the band's layers a third of a line.</figcaption>
 </figure>
 
 <figure>
   <div class="pair">{panels}
   </div>
-  <figcaption>The earlier options at the same scale, for comparison.</figcaption>
+  <figcaption>The earlier options at the same scale, for comparison. The 1.5 mm bevel on top only is still a printable choice if you would rather keep that feel on one face.</figcaption>
 </figure>
 
 <figure>
   <div class="pair">{shots}
   </div>
-  <figcaption>The last 6 mm of the tip, rendered from the STL. Same scale in every panel. The crease on the bevel shows as a hard line where the shading changes; on the blended one the shading grades into the slope.</figcaption>
+  <figcaption>The last 6 mm of the tip, rendered from the STL. Same scale in every panel.</figcaption>
 </figure>
 
 <section>
   <h2>Numbers</h2>
   <div class="scroll"><table>
     <tr><th>Profile</th><th>Top face</th><th>Underside</th><th>Rim</th><th>Worst underside overhang</th><th>Weight</th></tr>
-    <tr><td>Bevel, curved lead-in <b>(in the 3MF)</b></td><td>1.5 mm wide, drops 0.35 mm, 5 mm blend into the face</td><td>45 degrees, 0.35 mm, 0.35 mm blend into the face</td><td class="num">{V["soft"]["rim_mm"]:.2f} mm</td><td>{worst("soft")}</td><td class="num">{grams("soft")}</td></tr>
+    <tr><td>Mirrored bevel, printable <b>(in the 3MF)</b></td><td>0.45 mm wide, drops 0.35 mm (38 degrees), R 0.35 blend</td><td>the same</td><td class="num">{V["sym"]["rim_mm"]:.2f} mm</td><td>{worst("sym")}</td><td class="num">{grams("sym")}</td></tr>
+    <tr><td>Mirrored 1.5 mm bevel</td><td>1.5 mm wide, drops 0.35 mm, 5 mm blend</td><td>the same</td><td class="num">{V["mirror"]["rim_mm"]:.2f} mm</td><td>{worst("mirror")}: in air, cannot print flat</td><td class="num">{grams("mirror")}</td></tr>
+    <tr><td>1.5 mm bevel on top only</td><td>1.5 mm wide, drops 0.35 mm, 5 mm blend into the face</td><td>45 degrees, 0.35 mm, 0.35 mm blend into the face</td><td class="num">{V["soft"]["rim_mm"]:.2f} mm</td><td>{worst("soft")}</td><td class="num">{grams("soft")}</td></tr>
     <tr><td>Bevel with a crease</td><td>1.5 mm wide, drops 0.35 mm (13 degrees)</td><td>45 degrees, 0.35 mm</td><td class="num">{V["bevel"]["rim_mm"]:.2f} mm</td><td>{worst("bevel")}</td><td class="num">{grams("bevel")}</td></tr>
     <tr><td>Round</td><td>fillet R 0.45</td><td>fillet R 0.45</td><td class="num">{V["round"]["rim_mm"]:.2f} mm</td><td>{worst("round")}</td><td class="num">{grams("round")}</td></tr>
     <tr><td>Chamfer</td><td>45 degrees, 0.45 mm</td><td>45 degrees, 0.45 mm</td><td class="num">{V["chamfer"]["rim_mm"]:.2f} mm</td><td>{worst("chamfer")}</td><td class="num">{grams("chamfer")}</td></tr>
     <tr><td>Square</td><td>flat to the edge</td><td>flat to the edge</td><td class="num">1.00 mm</td><td>{worst("square")}</td><td class="num">{grams("square")}</td></tr>
   </table></div>
-  <p class="note">The blended underside's one steeper layer is the second one, about 0.10 mm past the first at the very bottom of the rim, where the slicer's overhang slowdown covers it; from the third layer up the 45 degree flat steps exactly one layer height, 0.06 mm.</p>
+  <p class="note">Worst underside overhang is how far one layer's outer wall sits past the layer below, read from the geometry at the slicer's sampling heights; the sliced G-code runs about 0.01 mm higher. Half a line (0.11 mm) is the most the first pick's profiles asked of any layer. Wider symmetric bands were measured too: 0.52 mm (34 degrees) puts the band at 0.089 mm per layer and the second layer at 0.121; 0.60 mm (30 degrees) at 0.103 and 0.137. The 0.45 band keeps every layer under half a line.</p>
 </section>
 
 <section class="ask">
   <h2>What I need from you</h2>
   <ol>
-    <li>Is this the edge you meant? If yes, the 3MF is ready to print.</li>
-    <li>If not, the three numbers to move are the bevel width (1.5 mm), the rim (0.30 mm) and the lead-in radius (5 mm; bigger is softer and starts the slope further in). Say which.</li>
+    <li>Print the mirrored 0.45 mm bevel as it is in the 3MF, or keep the 1.5 mm bevel on the top face only with the steeper underside. Say which.</li>
+    <li>If you want the full 1.5 mm on both faces, the pick has to print standing on a snap-off base along its top edge (a mark to sand under the thumb). That is a base, not support filament, but it is still support. Only on your say-so.</li>
   </ol>
 </section>
 
@@ -253,7 +261,7 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
 
 <figure>
   <img src="{render}" alt="Four rendered views of the modelled pick with the rounded edge">
-  <figcaption>The CAD model with the blended bevel: {WIDTH} x {LENGTH} x {THICK} mm, flat on the bed. The streaks in the iso view are a shading artifact of the renderer on the flat faces, not geometry.</figcaption>
+  <figcaption>The CAD model with the mirrored bevel: {WIDTH} x {LENGTH} x {THICK} mm, flat on the bed. The streaks in the iso view are a shading artifact of the renderer on the flat faces, not geometry.</figcaption>
 </figure>
 
 <section>

@@ -5,13 +5,14 @@ pick by pipeline/trace_photo.py (IMG_1657 for the shape, calipers for the
 size). outline-351.csv is the generic 351 from the Iron Age SVG pack, kept
 only as the cross-check: the Dunlop tip is blunter (4.5 mm vs 3.4 mm radius).
 
-Edge: not square (Brian 2026-10-12): a wide bevel on top with a curved
-lead-in so there is no line to feel. The side is a smooth closed spline
-through the trace (no facets) and both edge loops get the profile in EDGE. Printed flat, so the underside profile must
+Edge: not square (Brian 2026-10-12): a bevel with a curved lead-in so there
+is no line to feel, the same on both faces, and no support material. The
+side is a smooth closed spline through the trace (no facets) and both edge
+loops get the profile in EDGE. Printed flat, so the underside profile must
 stay steep enough for the 0.06 mm layers to support each other (see
 pipeline/edge_options.py for the per-layer overhang numbers).
 
-    EDGE=soft|round|chamfer|bevel|square .venv/bin/python guitar_pick.py   (default soft)
+    EDGE=sym|mirror|soft|round|chamfer|bevel|square .venv/bin/python guitar_pick.py   (default sym; others write guitar-pick-<edge>.stl)
 """
 import os
 from pathlib import Path
@@ -35,6 +36,14 @@ EDGES = {                    # profile on each face edge: (top, bottom); 1.0 mm 
     # (blend about 1.1 mm wide). Underneath only R 0.35: the pick prints flat, and a wider arc hangs the second layer
     # too far past the first (R 0.5 gives 0.12 mm, R 0.35 gives 0.10, the 45 degree flat beyond it 0.06).
     "soft":    {"kind": "soft", "top": (1.5, 0.35), "top_lead_r": 5.0, "bottom": (0.35, 0.35), "bottom_lead_r": 0.35},
+    # Brian 2026-10-12: the top mirrored underneath. The pick's true shape; it cannot print flat (13 degree underside:
+    # each 0.06 mm layer sits 0.26 mm past the one below, more than a 0.22 mm line), so it needs another route.
+    "mirror":  {"kind": "soft", "top": (1.5, 0.35), "top_lead_r": 5.0, "bottom": (1.5, 0.35), "bottom_lead_r": 5.0},
+    # The widest symmetric bevel the flat print carries without support (Brian 2026-10-12: mirrored, no support
+    # material): 38 degrees, 0.45 wide, 0.35 drop on both faces, creases blended R 0.35. Underneath, layer 2 sits
+    # 0.11 mm past layer 1 (half a line, the same as the round profile) and the band's layers 0.077 (a third of a
+    # line). 0.52 wide (34 degrees) measured 0.121 and 0.089; 0.6 wide (30 degrees) 0.137 and 0.103, too far.
+    "sym":     {"kind": "soft", "top": (0.45, 0.35), "top_lead_r": 0.35, "bottom": (0.45, 0.35), "bottom_lead_r": 0.35},
 }
 
 
@@ -56,7 +65,7 @@ def smooth_outline(raw, step=0.25, sigma=SMOOTH_SIGMA, n_out=160):
     return out
 
 
-def build(edge="soft"):
+def build(edge="sym"):
     raw = np.loadtxt(HERE / "outline-dunlop.csv", delimiter=",")
     nxt = np.roll(raw, -1, 0)
     if (raw[:, 0] * nxt[:, 1] - nxt[:, 0] * raw[:, 1]).sum() < 0:    # shoelace: clockwise trace
@@ -92,10 +101,11 @@ def build(edge="soft"):
 
 
 if __name__ == "__main__":
-    edge = os.environ.get("EDGE", "soft")
+    edge = os.environ.get("EDGE", "sym")
     pick = build(edge)
-    export_stl(pick, str(HERE / "guitar-pick.stl"))
-    m = trimesh.load(HERE / "guitar-pick.stl")
+    stem = "guitar-pick" if edge == "sym" else f"guitar-pick-{edge}"       # the default is the print file's STL
+    export_stl(pick, str(HERE / f"{stem}.stl"))
+    m = trimesh.load(HERE / f"{stem}.stl")
     assert m.is_watertight, "STL not watertight"
     bb = pick.bounding_box()
     print("OK", edge, bb.size, "vol mm3", round(pick.volume, 1), "PETG g ~", round(pick.volume * 1.27e-3, 2))

@@ -1,6 +1,6 @@
 ---
 title: Guitar pick, Dunlop Tortex Standard 1.0 mm
-status: blended bevel edge built and sliced 2026-10-12, waiting on Brian's look, then the print
+status: mirrored 38 degree bevel built and sliced 2026-10-12 (the 1.5 mm bevel cannot be mirrored on a flat print without support), waiting on Brian's pick, then the print
 created: 2026-10-11
 tags: [project, 3d-print, petg]
 ---
@@ -59,7 +59,9 @@ numbers in `edge-options.json`, close-ups in `images/edge-*.png`):
 
 | profile | top face | underside | rim left | worst underside step |
 |---|---|---|---|---|
-| soft (built into the 3MF) | 1.5 mm wide, drops 0.35, crease blended R 5 | 45 degree flat, 0.35, crease blended R 0.35 | 0.30 mm | layer 2: 0.097 mm geometry, 0.112 in the G-code, 58 degrees |
+| sym (built into the 3MF) | 0.45 mm wide, drops 0.35 (38 deg), crease blended R 0.35 | the same | 0.30 mm | layer 2: 0.109 mm geometry, 0.127 in the G-code, then 0.077 per layer |
+| mirror (the true shape, unprintable flat) | 1.5 mm wide, drops 0.35, crease blended R 5 | the same | 0.30 mm | layer 2: 0.46 mm, band 0.26 mm per layer, in air |
+| soft | 1.5 mm wide, drops 0.35, crease blended R 5 | 45 degree flat, 0.35, crease blended R 0.35 | 0.30 mm | layer 2: 0.097 mm geometry, 0.112 in the G-code, 58 degrees |
 | bevel (Flow style) | 1.5 mm wide, drops 0.35 | 45 degree flat, 0.35 | 0.30 mm | layer 2: 0.080 mm, 53 degrees |
 | round | fillet R 0.45 | fillet R 0.45 | 0.10 mm | layer 2: 0.112 mm, 62 degrees off vertical, half a line |
 | chamfer | 45 degree flat, 0.45 | 45 degree flat, 0.45 | 0.10 mm | layer 2: 0.080 mm, 53 degrees |
@@ -70,11 +72,25 @@ That is `soft`: the bevel's crease with the flat face is filleted R 5 (a
 blend about 1.1 mm wide, 0.57 mm each side of where the crease was, so the
 slope now starts 2.07 mm from the rim), and the underside crease R 0.35.
 Underneath the radius is capped by the print: R 0.5 hangs layer 2 by 0.12
-mm, R 0.35 by 0.10, and R 0.25 fails in the kernel. The bevel is a taper on
-the top face only; the underside keeps the 45 degree flat because the pick
-prints flat. On the top slope the printer makes six 0.06 mm terraces about
-0.26 mm wide, widening into the blend; that is inherent to a 13 degree
-slope printed flat and the 0.2 nozzle is what keeps them this fine.
+mm, R 0.35 by 0.10, and R 0.25 fails in the kernel. On the top slope the
+printer makes six 0.06 mm terraces about 0.26 mm wide, widening into the
+blend; that is inherent to a 13 degree slope printed flat and the 0.2
+nozzle is what keeps them this fine.
+
+Then (same day): "the top should be mirrored on the bottom as well" and
+"the design must not require support material". `mirror` is that CAD
+(`guitar-pick-mirror.stl`, kept as the true shape) and it cannot print
+flat: the 13 degree underside asks each 0.06 mm layer to sit 0.26 mm past
+the one below (118% of a 0.22 line, laid in air) and the lead-in puts
+layer 2 at 0.46 mm. Thinner layers do not rescue it (0.04 mm layers still
+step 0.17). The steepest slope the underside carries without support is
+about 38 degrees, measured on symmetric candidates: 0.45 wide (38 deg)
+layer 2 0.109 then 0.077 per layer; 0.52 wide (34 deg) 0.121 then 0.089;
+0.60 wide (30 deg) 0.137 then 0.103. `sym` = 0.45 wide, 0.35 drop, R 0.35
+blends, on both faces, 0.30 rim, is the print file. The only route to the
+full 1.5 mm on both faces is printing the pick standing on a snap-off base
+along its top edge, which is support by another name; not built, offered
+to Brian as a yes/no.
 
 `elefant_foot_compensation` is 0 in the 3MF (the preset has 0.15): the
 rounded underside already takes the foot, and shrinking layer 1 another
@@ -83,10 +99,10 @@ line.
 
 ## Files
 
-- `guitar_pick.py`: build123d source; `build(edge)` with `EDGES` = soft, bevel, round, chamfer, square (default soft, `EDGE=` env var picks another); asserts one solid, 26.19 x 30.38 x 1.0 mm on Z=0, spline within 0.1 mm of the trace and convex, watertight STL.
-- `guitar-pick.stl`: current export, blended bevel (about 0.71 g PETG).
-- `pipeline/edge_options.py`: builds the five edge variants, cuts the tip section, tabulates the per-layer underside overhang, renders `images/edge-*.png` with OpenSCAD (above and below); writes `edge-options.json` for the sign-off page.
-- `images/pick-v5.png`: 4-view render of the current model (v4 round edge, v3 square, kept for the record).
+- `guitar_pick.py`: build123d source; `build(edge)` with `EDGES` = sym, mirror, soft, bevel, round, chamfer, square (default sym writes `guitar-pick.stl`; `EDGE=<other>` writes `guitar-pick-<edge>.stl`); asserts one solid, 26.19 x 30.38 x 1.0 mm on Z=0, spline within 0.1 mm of the trace and convex, watertight STL.
+- `guitar-pick.stl`: current export, mirrored 38 degree bevel (about 0.72 g PETG). `guitar-pick-mirror.stl`: the mirrored 1.5 mm bevel, the true shape, unprintable flat.
+- `pipeline/edge_options.py`: builds the seven edge variants, cuts the tip section, tabulates the per-layer underside overhang, renders `images/edge-*.png` with OpenSCAD (above and below); writes `edge-options.json` for the sign-off page.
+- `images/pick-v6.png`: 4-view render of the current model (v5 blended bevel, v4 round edge, v3 square, kept for the record).
 - `pipeline/trace_photo.py`: photo trace; writes `outline-dunlop.csv` and `images/trace-overlay.png`.
 - `pipeline/make_compare_page.py`: the sign-off page (published 2026-10-11: https://claude.ai/artifact/Xdy17d32z8uCNaQAHhxuis).
 - `images/pick-v3.png`: 4-view render of the current model (v1 teardrop and v2 generic 351 kept for the record).
@@ -99,25 +115,29 @@ layer_height 0.06 (0.1 first layer + 15 x 0.06 = 1.0 mm exactly; the stock
 0.08 would print 0.98), filament `Bambu PETG Basic @BBL X2D 0.2 nozzle`,
 Textured PEI 70 C, 250 C nozzle. Solid (100% zig-zag; the preset's gyroid is
 refused at 100% by the CLI), arachne walls, seam at the top centre
-(`seam_position` back, proven in the G-code: every outer wall loop starts
-at x 129.1, y 142.9 on a top edge at y 143.2), no ironing, skirt 2 loops /
+(`seam_position` back; the slicer put it at the top centre on the round
+and soft profiles and at the left shoulder of the top edge, x 121.0 y
+141.5, on the sym profile; the check now asks for the top edge and an
+aligned seam, within 2 mm between layers, rather than the exact centre), no ironing, skirt 2 loops /
 3 mm / 1 layer, no brim. Centred on the bed, tip toward the front.
 
-Slice (`guitar-pick-slice.json`, blended bevel, 2026-10-12): 16 layers to z
-1.0, 12 min 57 s estimated (0.2 nozzle estimates ran 1.4x under on the
-Sharks tags, so expect about 18 min), 0.67 g, 0.22 m. Round trip through the CLI
+Slice (`guitar-pick-slice.json`, mirrored 38 degree bevel, 2026-10-12): 16
+layers to z 1.0, 13 min 12 s estimated (0.2 nozzle estimates ran 1.4x
+under on the Sharks tags, so expect about 18 min), 0.68 g, 0.22 m. Round trip through the CLI
 and a real slice both pass. The verify step now also reads the outer wall's
 tip position per layer from the G-code (arc moves evaluated properly: the
 preset has arc fitting on, and a G2's endpoints sit above its lowest point)
 and asserts no underside layer hangs more than 0.13 mm past the one below;
-measured 0.112, 0.060, 0.063, 0.054, 0.047 mm for layers 2 to 6 on the
-blended bevel (the 45 degree flat steps one layer height).
+measured 0.127, 0.078, 0.068, 0.071, 0.068 mm for layers 2 to 6 on the
+mirrored 38 degree bevel (0.01 to 0.02 above the geometry, as before).
 
 ## Open
 
-- Brian confirms the blended bevel on the sign-off page (built into the
-  3MF; the knobs are bevel width 1.5, rim 0.30, lead-in R 5 in `EDGES`,
-  then rerun `guitar_pick.py`, `edge_options.py`, `make_print_3mf.py`).
+- Brian picks on the sign-off page: the mirrored 38 degree bevel (in the
+  3MF), the 1.5 mm bevel on top only (`soft`), or a stand-up print on a
+  snap-off base for the full mirrored bevel (not built). Changing the
+  default in `EDGES`, then `guitar_pick.py`, `edge_options.py`,
+  `make_print_3mf.py`, `make_compare_page.py`.
 - Open `guitar-pick.3mf` in Bambu Studio once (GUI ground truth), with the
   0.2 nozzle installed and the 0.2 machine selected in Studio.
 - Print, then measure thickness and compare the feel against the Tortex.
@@ -131,5 +151,5 @@ blended bevel (the 45 degree flat steps one layer height).
 - Measured outline over the generic 351 (tip radius differs by 1.1 mm); Brian approved the outline on the sign-off page 2026-10-11.
 - Thickness 1.0 mm (measured).
 - 0.2 mm nozzle, Brian's call 2026-10-11, for the smoothest edge and faces. (The 0.6 nozzle was never an option: a 1.0 mm pick is below its 1.24 mm two-wall minimum.)
-- Edges tapered, not square (Brian 2026-10-12), and specifically the wide bevel with a curved lead-in and no noticeable line (Brian, same day, after seeing round, chamfer and bevel). Built as `soft`.
+- Edges tapered, not square (Brian 2026-10-12), and specifically the wide bevel with a curved lead-in and no noticeable line (Brian, same day, after seeing round, chamfer and bevel), then mirrored on both faces, and no support material (Brian, same day). The flat print caps the underside at about 38 degrees, so the mirrored print file is the 0.45 mm bevel (`sym`); the 1.5 mm mirrored shape is kept as CAD only.
 - Smooth spline side instead of the traced polygon (2026-10-12), so the fillet has one edge loop and the print has no facets.
