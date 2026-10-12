@@ -22,7 +22,7 @@ PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 import guitar_pick  # noqa: E402
 
-VARIANTS = ["square", "round", "chamfer", "bevel"]
+VARIANTS = ["soft", "bevel", "round", "chamfer", "square"]
 FIRST_LAYER, LAYER = 0.1, 0.06            # as in make_print_3mf.py
 LINE = 0.22                               # outer wall line width, 0.2 nozzle preset
 TIP_WINDOW = 3.0                          # mm of the tip shown in the section

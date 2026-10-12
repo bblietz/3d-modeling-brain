@@ -1,7 +1,7 @@
 ---
 title: Guitar pick retrospective (Dunlop Tortex 1.0 copy)
 date: 2026-10-12
-status: modelled and sliced with a rounded edge, print pending
+status: modelled and sliced with a blended bevel edge, print pending
 tags: [learning, 3d-print, petg, 0.2-nozzle, photo-trace]
 ---
 
@@ -53,7 +53,12 @@ A plain 1:1 copy of the Dunlop Tortex Standard 1.0 mm pick in PETG on the
   Phase 2, not left to the extrusion. Research found the real Tortex
   Standard is die-stamped square and wears into a bevel, so there was no
   number to copy; the profile became a sign-off choice (round, chamfer,
-  bevel) drawn at scale.
+  bevel) drawn at scale. Brian chose the bevel but with "no noticeable
+  line": a crease between a face and a bevel is felt even at 13 degrees,
+  so the crease got a R 5 fillet (chamfer first, then fillet the face's
+  new outer edge loop; OCC takes a 5 mm fillet on a 167 degree edge along
+  a convex spline without complaint). Lesson: when a hand touches a
+  transition, blend it; a chamfer alone is never the finished answer.
 - **A flat print cannot carry a shallow taper underneath.** With 0.06 mm
   layers and a 0.22 mm wall, each layer's outer wall can hang about half a
   line past the one below, so the underside slope must be about 45 degrees
@@ -88,13 +93,15 @@ A plain 1:1 copy of the Dunlop Tortex Standard 1.0 mm pick in PETG on the
 solid zig-zag, arachne, seam back (proven at the top centre from the outer
 wall start points in the G-code), no ironing, two top walls
 (`top_one_wall_type` not apply), skirt 2 / 3 / 1, no brim, elephant-foot
-compensation 0 (rounded underside). Edge: fillet R 0.45 top and bottom,
-0.10 mm rim. 16 layers, 13 min 13 s estimated, 0.69 g. Underside steps from
-the G-code: 0.117 mm at layer 2, then 0.053, 0.043, 0.019 and under.
+compensation 0 (rounded underside). Edge: 1.5 mm bevel dropping 0.35 on
+top with its crease blended R 5; 45 degree flat 0.35 underneath with its
+crease blended R 0.35; 0.30 mm rim. 16 layers, 12 min 57 s estimated,
+0.67 g. Underside steps from the G-code: 0.112 mm at layer 2, then 0.06
+per layer up the 45 degree flat.
 
 ## Pending
 
-- Brian's pick of the edge profile (round built; chamfer and bevel drawn).
+- Brian's look at the blended bevel on the page (his spec, built).
 - Print result: thickness by calipers, edge smoothness, feel against the
   Tortex, the real print time against the estimate.
 - Ironing coupon on a second pick if the 0.22 mm top lines show; the vault

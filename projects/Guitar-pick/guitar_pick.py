@@ -5,13 +5,13 @@ pick by pipeline/trace_photo.py (IMG_1657 for the shape, calipers for the
 size). outline-351.csv is the generic 351 from the Iron Age SVG pack, kept
 only as the cross-check: the Dunlop tip is blunter (4.5 mm vs 3.4 mm radius).
 
-Edge: the real pick's edge is rounded, not square (Brian 2026-10-12). The
-side is a smooth closed spline through the trace (no facets) and both edge
-loops get the profile in EDGE. Printed flat, so the underside profile must
+Edge: not square (Brian 2026-10-12): a wide bevel on top with a curved
+lead-in so there is no line to feel. The side is a smooth closed spline
+through the trace (no facets) and both edge loops get the profile in EDGE. Printed flat, so the underside profile must
 stay steep enough for the 0.06 mm layers to support each other (see
 pipeline/edge_options.py for the per-layer overhang numbers).
 
-    EDGE=round|chamfer|bevel|square .venv/bin/python guitar_pick.py   (default round)
+    EDGE=soft|round|chamfer|bevel|square .venv/bin/python guitar_pick.py   (default soft)
 """
 import os
 from pathlib import Path
@@ -31,6 +31,10 @@ EDGES = {                    # profile on each face edge: (top, bottom); 1.0 mm 
     "round":   {"kind": "fillet", "r": 0.45},                                     # R 0.45 both faces, 0.10 mm rim
     "chamfer": {"kind": "chamfer", "top": (0.45, 0.45), "bottom": (0.45, 0.45)},  # 45 degree flats both faces, 0.10 rim
     "bevel":   {"kind": "chamfer", "top": (1.5, 0.35), "bottom": (0.35, 0.35)},   # 1.5 mm Flow-style bevel on top, 45 underneath, 0.30 rim
+    # Brian 2026-10-12: like the bevel but no noticeable line, so each crease is blended with a tangent arc. Top: R 5
+    # (blend about 1.1 mm wide). Underneath only R 0.35: the pick prints flat, and a wider arc hangs the second layer
+    # too far past the first (R 0.5 gives 0.12 mm, R 0.35 gives 0.10, the 45 degree flat beyond it 0.06).
+    "soft":    {"kind": "soft", "top": (1.5, 0.35), "top_lead_r": 5.0, "bottom": (0.35, 0.35), "bottom_lead_r": 0.35},
 }
 
 
@@ -52,7 +56,7 @@ def smooth_outline(raw, step=0.25, sigma=SMOOTH_SIGMA, n_out=160):
     return out
 
 
-def build(edge="round"):
+def build(edge="soft"):
     raw = np.loadtxt(HERE / "outline-dunlop.csv", delimiter=",")
     nxt = np.roll(raw, -1, 0)
     if (raw[:, 0] * nxt[:, 1] - nxt[:, 0] * raw[:, 1]).sum() < 0:    # shoelace: clockwise trace
@@ -76,6 +80,9 @@ def build(edge="round"):
         (bt, bs), (tt, ts) = spec["bottom"], spec["top"]
         pick = chamfer(pick.edges().group_by(Axis.Z)[0], bt, bs, reference=pick.faces().sort_by(Axis.Z)[0])
         pick = chamfer(pick.edges().group_by(Axis.Z)[-1], tt, ts, reference=pick.faces().sort_by(Axis.Z)[-1])
+        if spec["kind"] == "soft":   # round off the crease where each chamfer meets its face (the face's outer edge loop)
+            pick = fillet(pick.faces().sort_by(Axis.Z)[0].edges(), spec["bottom_lead_r"])
+            pick = fillet(pick.faces().sort_by(Axis.Z)[-1].edges(), spec["top_lead_r"])
 
     bb = pick.bounding_box()
     assert len(pick.solids()) == 1
@@ -85,7 +92,7 @@ def build(edge="round"):
 
 
 if __name__ == "__main__":
-    edge = os.environ.get("EDGE", "round")
+    edge = os.environ.get("EDGE", "soft")
     pick = build(edge)
     export_stl(pick, str(HERE / "guitar-pick.stl"))
     m = trimesh.load(HERE / "guitar-pick.stl")
