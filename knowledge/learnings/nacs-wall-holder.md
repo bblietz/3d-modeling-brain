@@ -239,3 +239,23 @@ What bit:
   the modifier sliced as a three-direction lattice at 100%, 95% plastic by volume but heaped crossings. Only a
   per-layer histogram of the infill lines' directions showed it. Verify the pattern from the G-code.
 - **`pkill -f <pattern>` matches the shell that runs it.** Killed my own command (exit 144).
+
+## Solid face and the base, 2026-10-11
+
+Brian, looking at the fixed file: the face should be solid like the base ("it will also break if dropped"), and the
+drum runs past the base on all four sides. The face got a second modifier built by the model itself (flange, lip, blend
+behind the flange, 0.6 mm inside every surface, recesses and mouth cleared); 10 h 11 min, 575 g. The base is open: the
+2026-10-08 drum (90 across, 7 mm blend, flange 104) outgrew the 4 in plate (foot at 52, edge at 50.8) and nobody
+checked; options rendered, Brian to pick.
+
+What worked:
+- **Let the model build its own modifier when the modifier must follow the model.** The face modifier reuses the lip's
+  minkowski (smaller ball), the blend's arcs (offset radii about the same centres, still tangent), the cavity with a
+  `grow` and the recess outlines with an `offset`. One OpenSCAD boolean against the body proves nothing sticks out.
+
+What bit:
+- **A bigger drum needs a bigger plate.** The drum grew for the cavity's sake and its blend foot and flange ran past the
+  plate's sides for three days unnoticed. When one feature grows, re-check every feature it lands on; holder.scad now
+  echoes a warning when the foot passes the plate's flat top (an assert once the base is picked).
+- **The CLI's arrange turns the part on the bed.** A G-code window placed on the model's axes at the bed centre read
+  0.0 in the lip: the object was 88 degrees round. Map check windows through the item transform in the sliced 3MF.

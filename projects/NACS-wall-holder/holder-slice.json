@@ -1,8 +1,8 @@
 {
- "minutes": 562,
- "grams": 497.7,
+ "minutes": 611,
+ "grams": 574.7,
  "grams_per_filament": {
-  "1": 481.7,
+  "1": 558.7,
   "2": 12.4,
   "3": 3.5
  },
@@ -11,11 +11,15 @@
  "solid_base": {
   "pad 1": 1.0,
   "pad 2": 1.0,
-  "pad 3": 1.0,
-  "pad 4": 0.99,
+  "pad 3": 1.01,
+  "pad 4": 1.0,
   "plain plate": 0.95,
-  "drum blend": 0.94,
+  "drum blend": 0.97,
   "blend foot": 0.98,
-  "drum above": 0.18
+  "drum above": 0.18,
+  "flange": 0.95,
+  "lip": 0.95,
+  "flange blend": 0.95,
+  "under flange": 0.19
  }
 }

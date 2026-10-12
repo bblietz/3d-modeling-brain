@@ -258,6 +258,35 @@ module body() {
     tab();
 }
 
+// the solid-face modifier for the print 3MF (part = "facemod", pipeline/make_coupon_3mf.py add_solid_face): the flange, the lip and the
+// blend ring behind the flange, mod_skin inside every surface so that none of it lies outside the body (Brian, 2026-10-11: "the face should
+// also be solid infill, like the base. It will also break if dropped"; a modifier poking out of the body shows in Studio as added geometry).
+// The blend's arc is the body's with a larger radius about the same centre, the rims' arcs the body's with smaller radii, so they stay
+// tangent; the lip is the body's minkowski with a smaller ball. The mouth (rim rounding included) and the face's recesses are cleared too.
+mod_skin = 0.6;   // one line width: the solid region still reaches the walls in every layer
+module facemod_profile() {
+    zf = total_l - flange_t;
+    fb = fillet_flange + mod_skin; rr = edge_r - mod_skin;
+    tt = acos(edge_r / (fillet_flange + edge_r));
+    zc = zf - fillet_flange + sqrt(fillet_flange * (fillet_flange + 2 * edge_r));
+    b = [for (t = concat([for (q = [0 : 5 : tt]) q], [tt])) [flange_r - fb * cos(t), zf - fillet_flange + fb * sin(t)]];
+    c = [for (t = concat([for (q = [-tt + 10 : 10 : -1]) q], [0])) [flange_r - edge_r + rr * cos(t), zc + rr * sin(t)]];
+    e = [for (t = [0 : 10 : 90]) [flange_r - edge_r + rr * cos(t), total_l - edge_r + rr * sin(t)]];
+    polygon(concat([[0, zf], [drum_r - 3, zf], [drum_r - 3, zf - fillet_flange]], b, c, e, [[0, total_l - mod_skin]]));
+}
+module facemod() difference() {
+    union() {
+        rotate_extrude() facemod_profile();
+        if (tab_style != "none") translate([0, 0, total_l - flange_t + edge_r]) minkowski() { linear_extrude(flange_t - 2 * edge_r) offset(r = -edge_r) tab2d(); sphere(edge_r - mod_skin, $fn = 24); }
+    }
+    cavity_cut(mod_skin + edge_r);
+    translate([0, 0, total_l - max(logo_depth, frame_depth) - mod_skin]) linear_extrude(max(logo_depth, frame_depth) + mod_skin + 1) offset(r = mod_skin) {
+        if (show_logo && emblem != "none") emblem2d();
+        if (lip_text) wordmark_arc();
+        if (tab_trim == "frame") frame2d();
+    }
+}
+
 // the emblem, logo_h tall, centred on the drum axis. The T: official emblem, two paths; the 0.05 mm closing heals a 0.02 mm self-crossing at the top of the stem
 module bolt2d() translate([-0.275, -0.5]) polygon([[0.25, 1], [0, 0.42], [0.21, 0.42], [0.1, 0], [0.55, 0.58], [0.34, 0.58], [0.45, 1]]);   // 0.55 wide, 1 tall
 module plug2d() translate([0, -30]) {                                                                                   // 60 tall: prongs, body, cord
@@ -334,7 +363,7 @@ module probe() intersection() { in_cavity_frame() cavity(); cylinder(r = drum_r,
 // what the docked handle would cut out of the holder: must be empty
 module clash() intersection() { holder(); in_cavity_frame() handle(); }
 
-module part_body() { if (part == "coupon") coupon(); else if (part == "probe") probe(); else if (part == "cavity") in_cavity_frame() cavity(); else if (part == "inlay") inlay(); else if (part == "clash") clash(); else holder(); }
+module part_body() { if (part == "coupon") coupon(); else if (part == "probe") probe(); else if (part == "cavity") in_cavity_frame() cavity(); else if (part == "inlay") inlay(); else if (part == "facemod") facemod(); else if (part == "clash") clash(); else holder(); }
 
 module model() {
     if (section == 1) intersection() { part_body(); in_cavity_frame() translate([-500, -500, -500]) cube([500, 1000, 1000]); }
@@ -350,6 +379,11 @@ module model() {
 }
 
 if (display) rotate([90, 0, 0]) model(); else model();
+
+// the drum's blend must land on the plate's flat top (Brian, 2026-10-11: "the center cylinder extends past the edge of the base on all 4 sides";
+// true since the 90 drum of 2026-10-08). A warning until the base is picked from the options page, then an assert.
+if (drum_r + fillet_plate > plate_w / 2 - edge_r) echo(str("WARNING: the drum's blend foot (", drum_r + fillet_plate, " from the axis) runs past the plate's flat top (",
+                                                         plate_w / 2 - edge_r, "); the flange is ", 2 * flange_r, " across on a ", plate_w, " plate"));
 
 echo(str("wand direction d=", d, " up v=", v, " across w=", w, " mouth M=", M, " tip T=", T, " mouth depth=", mouth, " edge_r=", edge_r));
 echo(str("cleat: edge at ", cleat_a, " height ", cleat_h, " ramp foot ", cleat_b, " ramp angle ", atan(cleat_h / (cleat_b - cleat_a))));

@@ -16,9 +16,12 @@ def img(name):
 import json
 hs = json.load(open(f"{PROJECT}/holder-slice.json"))
 sb = hs["solid_base"]
-solid_min = min(v for k, v in sb.items() if k != "drum above") * 100
-solid_max = max(v for k, v in sb.items() if k != "drum above") * 100
+SPARSE = ("drum above", "under flange")
+solid_min = min(v for k, v in sb.items() if k not in SPARSE) * 100
+solid_max = max(v for k, v in sb.items() if k not in SPARSE) * 100
 above = sb["drum above"] * 100
+under = sb.get("under flange", 0) * 100
+face = {k: sb.get(k, 0) * 100 for k in ("flange", "lip", "flange blend")}
 hours, mins, grams = hs["minutes"] // 60, hs["minutes"] % 60, hs["grams"]
 
 page = f"""<title>Plate Corner Break</title>
@@ -106,17 +109,26 @@ Brian: it broke along the contour of the main cylinder, so the flap came off at 
 <figcaption>Top: the body with the modifier drawn translucent, the way Studio draws it; before, the squared-off collar and the tint through the holes; after, only the part. Bottom: true sections along the plate's diagonal with the modifier shaded. Before, 10.4 cm3 of the modifier sat outside the body; after, none. Re-sliced and measured again in the G-code: {solid_min:.0f} to {solid_max:.0f}% plastic in the plate and blend windows, including a new window at the blend's foot where the arc meets the walls, and {above:.0f}% in the drum's core above the blend.</figcaption>
 </figure>
 
+<h2>The face, solid too</h2>
+<p>Brian, October 11: the face should also be solid infill, like the base; it will also break if dropped. A second modifier now makes the flange, the lip and the blend behind the flange print solid. The model builds it itself, so it follows the lip's rounded edges, keeps 0.6 mm inside every face, stays 0.6 mm under the floors of the T, the wordmark and the frame line, and clears the mouth and its rounded rim. None of it lies outside the body.</p>
+
+<figure>
+<img src="{img('modifier-face.png')}" alt="The face modifier drawn translucent over the body as Studio shows it, and a true section through the drum axis and the lip with the modifier shaded">
+<figcaption>Top: the body with the face modifier drawn translucent, the way Studio draws it: nothing of it shows. Bottom: a true section through the drum axis and the lip's centreline, the modifier shaded. The notches along the top are the recesses for the T's stem, the frame line and the wordmark, each with the modifier held 0.6 mm under its floor; the modifier runs down the blend behind the flange on both sides. Measured in the G-code: {face['flange']:.0f}% plastic in the flange, {face['lip']:.0f}% in the lip, {face['flange blend']:.0f}% in the blend behind the flange, and {under:.0f}% in the drum's core just under the flange, which stays sparse.</figcaption>
+</figure>
+
 <h2>What it costs</h2>
 <div class="wrap">
 <table>
-<tr><th></th><th>Before</th><th>After</th></tr>
-<tr><td>Plate</td><td>3/16 in, two skins over 20% lattice</td><td>1/4 in, solid through, blend ring solid</td></tr>
-<tr><td>Print time</td><td>8 h 47 min</td><td>{hours} h {mins:02d} min</td></tr>
-<tr><td>Filament</td><td>442 g</td><td>{grams:.0f} g</td></tr>
-<tr><td>Holder off the wall</td><td>105.4 mm</td><td>106.75 mm (the flange and lip move out with the plate's front; the wand's place is unchanged)</td></tr>
+<tr><th></th><th>Before</th><th>Plate fix, October 10</th><th>Plus the solid face, October 11</th></tr>
+<tr><td>Plate</td><td>3/16 in, two skins over 20% lattice</td><td>1/4 in, solid through, blend ring solid</td><td>same</td></tr>
+<tr><td>Face</td><td>two skins over 20% lattice</td><td>same</td><td>flange, lip and blend solid</td></tr>
+<tr><td>Print time</td><td>8 h 47 min</td><td>9 h 22 min</td><td>{hours} h {mins:02d} min</td></tr>
+<tr><td>Filament</td><td>442 g</td><td>498 g</td><td>{grams:.0f} g</td></tr>
+<tr><td>Holder off the wall</td><td>105.4 mm</td><td>106.75 mm (the flange and lip move out with the plate's front; the wand's place is unchanged)</td><td>106.75 mm</td></tr>
 </table>
 </div>
-<p>Docking and hold were rerun on the new model and are unchanged. The file is <code>holder-print.3mf</code>, not yet printed.</p>
+<p>Docking and hold were rerun on the new model and are unchanged. The file is <code>holder-print.3mf</code>, not yet printed. Still open: the drum's foot and flange run past the 4 in plate's sides, a separate page with options.</p>
 </main>
 """
 

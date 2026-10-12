@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: REVISION 2026-10-08 plus the 2026-10-10 plate fix, CAD and 3MF done, not printed. Drum 1 in deeper and 90 across, crest lip 1.5 in with the TESLA wordmark, frame line, T back, cavity 1/2 in deeper (cleat 1.75 in); cleat catch window 5 mm, face inlays in a second colour; plate 1/4 in and solid through with the drum blend; sliced 9 h 22 min, 498 g. The 2026-09-19 holder (v7 cavity, 4 in base, round flange, 1/16 in roundovers) was on the wall and working great until it was dropped on 2026-10-10 and a plate corner broke off along the drum blend.
+status: REVISION 2026-10-08 plus the 2026-10-10 plate fix, CAD and 3MF done, not printed. Drum 1 in deeper and 90 across, crest lip 1.5 in with the TESLA wordmark, frame line, T back, cavity 1/2 in deeper (cleat 1.75 in); cleat catch window 5 mm, face inlays in a second colour; plate 1/4 in and solid through with the drum blend, face (flange, lip, blend) solid too; sliced 10 h 11 min, 575 g. OPEN: the 90 drum's foot and the 104 flange run past the 4 in plate's sides, options page waiting on Brian's pick. The 2026-09-19 holder (v7 cavity, 4 in base, round flange, 1/16 in roundovers) was on the wall and working great until it was dropped on 2026-10-10 and a plate corner broke off along the drum blend.
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -260,3 +260,27 @@ Brian: "it broke along the contour of the main cylinder", then "do 1 and 2". Bot
   before and after: `images/modifier-ring.png`, on the evidence page). Re-sliced: 9 h 22 min, 497.7 g (481.7 body,
   12.4 support interface, 3.5 inlay); check unchanged, pads 0.99 to 1.00, plain plate 0.95, blend 0.94, drum above
   0.18, plus a new window at the blend's foot where the arc meets the walls: 0.98.
+
+## 2026-10-11: the face solid too, and the drum past the base
+
+- Brian: "the face should also be solid infill, like the base. It will also break if dropped, since the bottom did."
+  `holder.scad` builds this modifier itself (`part = "facemod"`, `mod_skin` 0.6): the flange disc, the lip (the body's
+  minkowski with a ball 0.6 smaller) and the blend ring behind the flange (the blend's arc 0.6 inside, the rims' arcs
+  0.6 inside, still tangent), minus the cavity grown 0.6 + edge_r (the mouth with its rounded rim) and the recesses
+  offset 0.6 from 0.6 under their floors. 90.5 cm3, none of it outside the body (`pipeline/modifier_views.py`,
+  `images/modifier-face.png`, on the evidence page). `make_coupon_3mf.py` injects it as "MOD solid face: flange, lip
+  and blend" beside the base one; the check gained windows flange 0.95, lip 0.95, flange blend 0.95, under flange 0.19
+  (the drum's core between the cavity's top and the flange, sparse as it should be). Slice: 10 h 11 min, 574.7 g
+  (558.7 body, 12.4 support interface, 3.5 inlay): 49 min and 77 g more than with the solid plate alone.
+- Bit: the first lip window read 0.0 plastic. The CLI's arrange turns the object on the bed (88 degrees in this build),
+  so the check's windows are now set out in the model's frame and mapped through the item transform read from the
+  sliced 3MF, instead of assuming the model's axes at BED_CENTRE.
+- Brian: "the center cylinder extends past the edge of the base on all 4 sides". True since the 2026-10-08 drum (90
+  across, blend 7: foot 52 from the axis, flange 104) against the 4 in plate (edge 50.8): the blend runs 1.2 mm off the
+  edge at the middle of each side and the flange is 2.4 mm wider than the plate. The September print's 80 drum with
+  its 8 blend had the foot at 48. Options rendered from the model (`pipeline/render_plate_options.sh`, page
+  `pipeline/plate_options_page.py`, https://claude.ai/artifact/5YuDCMozLvJvJUdhwWxwJk), all keeping the screw
+  pattern: A plate 4.5 in (`hole_in` and `plate_r` 16.35; recommended, 3.5 mm of flat plate outside the foot), B plate
+  4.25 in (13.175; the foot on the edge round's start), C plate 4 in with both blends 4 mm (face and `tab_w` 98,
+  `logo_h` 56). Waiting on Brian's pick; then the full pipeline, the solid checks and the pages again. holder.scad now
+  echoes a warning when the foot runs past the plate's flat top.

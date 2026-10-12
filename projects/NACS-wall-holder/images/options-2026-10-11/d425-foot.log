@@ -1,0 +1,13 @@
+ECHO: "wand direction d=[0.683013, -0.683013, 0.258819] up v=[0.638694, 0.730406, 0.242025] across w=[-0.354349, -2.77556e-17, 0.935113] mouth M=[31.8198, -31.8198, 61.43] tip T=[-17.0574, 17.0574, 42.9086] mouth depth=71.5611 edge_r=1.5875"
+ECHO: "cleat: edge at 22.14 height 3.57 ramp foot 28.02 ramp angle 31.2637"
+ECHO: "lips from the cavity end wall: cleat wall 66.59 roof 60.5467 flange side 76.8716 wall side 65.5617"
+Geometries in cache: 2991
+Geometry cache size in bytes: 31733504
+CGAL Polyhedrons in cache: 648
+CGAL cache size in bytes: 0
+Total rendering time: 0:00:06.413
+   Top level object is a 3D object (manifold):
+   Status:     NoError
+   Genus:      4
+   Vertices:    33754
+   Facets:      67520

@@ -1,6 +1,6 @@
 ---
 name: project-nacs-wall-holder
-description: Tesla Wall Connector wall holder - 2026-09-19 version on the wall and working; 2026-10-08 revision (deeper, crest lip, wordmark, two-colour face, wider cleat catch window) built and sliced, not printed
+description: Tesla Wall Connector wall holder - 2026-09-19 print broke in a drop; 2026-10-08 revision (deeper, crest lip, wordmark, two-colour face) with a solid 1/4 in plate and a solid face, sliced, not printed; the base size is an open question (drum runs past the 4 in plate)
 metadata:
   type: project
 ---
@@ -28,7 +28,13 @@ wand's place is unchanged (mouth_z, cut_top kept); the flange and lip moved out 
 needs `-D show_inlay=false`. 2026-10-11: Brian saw the modifier's squared-off ring in Studio ("it should
 round into the wall plate"); the modifier now follows the blend from 0.6 mm inside the body, a layer under
 the plate's top and clear of the holes, none of it outside (`pipeline/modifier_views.py` proves it and
-draws before and after); see [[feedback-modifiers-inside-the-body]]. Every pick was made from rendered options on
+draws before and after); see [[feedback-modifiers-inside-the-body]]. Same day Brian asked for
+the face solid too ("it will also break if dropped"): `holder.scad` part "facemod" builds it (flange,
+lip, blend behind the flange, 0.6 inside every surface), injected as a second modifier; slice 10 h 11 min,
+575 g. **OPEN 2026-10-11: "the center cylinder extends past the edge of the base on all 4 sides"**: the
+90 drum's blend foot (52) and the 104 flange run past the 4 in plate (edge 50.8) since 2026-10-08. Options
+page https://claude.ai/artifact/5YuDCMozLvJvJUdhwWxwJk (A plate 4.5 in recommended, B 4.25 in, C 4 in with
+4 mm blends and a 98 face; all keep the screw pattern). After the pick: full pipeline, checks, pages. Every pick was made from rendered options on
 https://claude.ai/artifact/5u3wgRBUTWngnCdjFuPzKB; plan page https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6.
 
 Project files and tools: `projects/NACS-wall-holder/` (brief.md "Revision of 2026-10-08",

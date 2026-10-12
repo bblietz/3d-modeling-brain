@@ -73,6 +73,8 @@ PARTS = {   # STL, filament id, part name; the first is the object
 }[STEM]
 PAD_R = 12.5          # holder only: the solid check window round each screw hole (the pads the modifier used to be, before the whole plate went solid)
 BASE_NAME = "MOD solid base: plate and drum blend"
+FACE_NAME = "MOD solid face: flange, lip and blend"
+SPARSE = {"drum above", "under flange"}   # the check windows that must stay 20%: the drum's core just above the plate's blend and just under the flange
 BASE_INSET = 1.0      # the modifier stays this far inside the plate's outline and the screw holes
 BLEND_INSET = 0.6     # and this far inside the drum's blend (one line width, so the solid region reaches the walls in every layer)
 LAYER_H = 0.3         # the process's layer height: the modifier stops one layer under the plate's top so no face is coplanar with the body
@@ -246,16 +248,38 @@ def add_solid_base(path):
     Brian, 2026-10-10: the 5 mm plate's corner broke off along the blend when the holder was dropped; between its skins it
     was 20% gyroid everywhere but the screw pads. The ring makes the flap's root solid up through the blend."""
     import trimesh
-    from fillcore_mod import centered, inject_modifier, next_object_id, object_pos
     scad = solid_base_scad()
     with tempfile.TemporaryDirectory() as d:
         with open(f"{d}/base.scad", "w") as f:
             f.write(scad)
         subprocess.run([os.path.expanduser("~/.local/bin/openscad"), "--backend=Manifold", "-o", f"{d}/base.stl", f"{d}/base.scad"],
                        capture_output=True, text=True, check=True)
-        pads = trimesh.load(f"{d}/base.stl")
-    assert len(pads.split()) == 1 and pads.is_watertight, "expected one closed solid-base modifier"
-    mesh_c, mc = centered(pads)
+        mesh = trimesh.load(f"{d}/base.stl")
+    inject_solid(path, BASE_NAME, "solid-base.stl", mesh)
+
+
+def export_facemod(out):
+    """holder.scad's part "facemod": the solid-face modifier, built by the model itself so it follows the lip, the recesses and the mouth."""
+    subprocess.run([os.path.expanduser("~/.local/bin/openscad"), "--backend=Manifold", "-D", "display=false", "-D", "show_nose=false", "-D", "show_wall=false",
+                    "-D", "show_inlay=false", "-D", 'part="facemod"', "-o", out, f"{PROJECT}/holder.scad"], capture_output=True, text=True, check=True)
+
+
+def add_solid_face(path):
+    """A second modifier part at 100% monotonic: the flange, the lip and the blend ring behind the flange, from holder.scad's own
+    facemod part (Brian, 2026-10-11: "the face should also be solid infill, like the base. It will also break if dropped")."""
+    import trimesh
+    with tempfile.TemporaryDirectory() as d:
+        export_facemod(f"{d}/face.stl")
+        mesh = trimesh.load(f"{d}/face.stl")
+    inject_solid(path, FACE_NAME, "solid-face.stl", mesh)
+
+
+def inject_solid(path, name, src, mesh):
+    """Adds the mesh to the print 3MF as a modifier part of the object, sparse_infill_density 100% monotonic."""
+    import trimesh
+    from fillcore_mod import centered, inject_modifier, next_object_id, object_pos
+    assert len(mesh.split()) == 1 and mesh.is_watertight, f"expected one closed modifier for {name}"
+    mesh_c, mc = centered(mesh)
     b = trimesh.load(f"{PROJECT}/{STEM}.stl").bounds
     zin = zipfile.ZipFile(path)
     files = {i.filename: zin.read(i.filename) for i in zin.infolist()}
@@ -267,7 +291,7 @@ def add_solid_base(path):
     block = re.search(rf'<object id="{oid}">.*?</object>', settings, re.S).group(0)
     pos = object_pos(model3d, oid, (b[0] + b[1]) / 2)
     pid = next_object_id(model3d, objfiles)
-    new_block, model3d = inject_modifier(block, model3d, objfiles, oid, pid, BASE_NAME, "solid-base.stl", mesh_c, mc, pos,
+    new_block, model3d = inject_modifier(block, model3d, objfiles, oid, pid, name, src, mesh_c, mc, pos,
                                          {"sparse_infill_density": "100%", "sparse_infill_pattern": "monotonic"})   # Bambu's enum has no "rectilinear": that value sliced as a three-direction lattice; monotonic is one direction per layer
     files["Metadata/model_settings.config"] = settings.replace(block, new_block).encode()
     files["3D/3dmodel.model"] = model3d.encode()
@@ -301,13 +325,23 @@ def check_solid_base(sliced, gcode_name):
     g = zipfile.ZipFile(sliced).read(gcode_name).decode(errors="replace")
     t, dr, fp = scad_const("plate_t"), scad_const("drum_r"), scad_const("fillet_plate")
     off = scad_const("plate_w") / 2 - scad_const("hole_in")
-    pc = BED_CENTRE      # the item transform puts the model's origin, the plate's centre, at BED_CENTRE (checked in the G-code with the lip pulling the bounding box 19 mm off it)
+    # windows are set out in the model's frame (the plate's centre at the origin, the lip toward +Y, the mouth toward +X -Y) and mapped
+    # through the object's own item transform: the CLI's arrange turns the part on the bed (88 degrees in the first build)
+    m = re.search(r'<item [^>]*transform="([^"]+)"', zipfile.ZipFile(sliced).read("3D/3dmodel.model").decode()).group(1).split()
+    m00, m01, m10, m11, tx, ty = (float(m[i]) for i in (0, 1, 3, 4, 9, 10))
+    bed = lambda x, y: (x * m00 + y * m10 + tx, x * m01 + y * m11 + ty)
     hole = math.pi * (scad_const("hole_d") / 2) ** 2
-    windows = {f"pad {i + 1}": (pc[0] + x, pc[1] + y, PAD_R - 3.5, hole, 1.2, t - 1.2) for i, (x, y) in enumerate(hole_centres())}
-    windows["plain plate"] = (pc[0] - off, pc[1], 7.0, 0.0, 1.2, t - 1.2)                 # midway between two holes, under the drum's wall
-    windows["drum blend"] = (pc[0], pc[1] - (dr - 1.5), 1.2, 0.0, t + 0.6, t + 2.1)       # inside the drum's skin where the blend starts
-    windows["blend foot"] = (pc[0], pc[1] - (dr + 1.8), 0.9, 0.0, t + 0.3, t + 1.2)       # just above the plate under the blend, where the modifier's arc meets the walls
-    windows["drum above"] = (pc[0], pc[1] - (dr - 4.5), 2.5, 0.0, t + fp + 3, t + fp + 9)  # the drum's own core, still sparse
+    windows = {f"pad {i + 1}": (*bed(x, y), PAD_R - 3.5, hole, 1.2, t - 1.2) for i, (x, y) in enumerate(hole_centres())}
+    windows["plain plate"] = (*bed(-off, 0), 7.0, 0.0, 1.2, t - 1.2)                     # midway between two holes, under the drum's wall
+    windows["drum blend"] = (*bed(0, -(dr - 1.5)), 1.2, 0.0, t + 0.6, t + 2.1)           # inside the drum's skin where the blend starts
+    windows["blend foot"] = (*bed(0, -(dr + 1.8)), 0.9, 0.0, t + 0.3, t + 1.2)           # just above the plate under the blend, where the modifier's arc meets the walls
+    windows["drum above"] = (*bed(0, -(dr - 4.5)), 2.5, 0.0, t + fp + 3, t + fp + 9)      # the drum's own core, still sparse
+    ft, ff = scad_const("flange_t"), scad_const("fillet_flange")
+    zf = t + scad_const("drum_l") - ft                                                    # the flange's back plane
+    windows["flange"] = (*bed(35, -15), 3.5, 0.0, zf + 1.5, zf + ft - 1.5)                # the flange disc between its skins, clear of the T and the frame line
+    windows["lip"] = (*bed(0, dr + ff + 10), 3.5, 0.0, zf + 1.5, zf + ft - 1.5)           # the lip, under the wordmark
+    windows["flange blend"] = (*bed(-30.8, 30.8), 1.2, 0.0, zf - 2.45, zf - 0.95)         # inside the blend behind the flange, away from the mouth
+    windows["under flange"] = (*bed(-15, 15), 3.0, 0.0, zf - 3.75, zf - 2.25)             # the drum's core between the cavity's top and the flange, still sparse
     used, layers = {k: 0.0 for k in windows}, {k: set() for k in windows}
     z, x, y = 0.0, 0.0, 0.0
     for line in g.splitlines():
@@ -326,9 +360,9 @@ def check_solid_base(sliced, gcode_name):
     step = min(b - a for a, b in zip(zs, zs[1:]))
     fill = {k: round(used[k] * math.pi * (1.75 / 2) ** 2 / ((math.pi * r * r - h) * step * len(layers[k])), 2)
             for k, (_, _, r, h, _, _) in windows.items()}
-    print("solid base check (plastic per volume): " + ", ".join(f"{k} {v:.2f}" for k, v in fill.items()))
-    assert all(v >= 0.8 for k, v in fill.items() if k != "drum above"), f"the base is not solid: {fill}"
-    assert fill["drum above"] <= 0.4, f"the drum above the blend is not sparse, the modifier leaked: {fill}"
+    print("solid check (plastic per volume): " + ", ".join(f"{k} {v:.2f}" for k, v in fill.items()))
+    assert all(v >= 0.8 for k, v in fill.items() if k not in SPARSE), f"the base or the face is not solid: {fill}"
+    assert all(fill[k] <= 0.4 for k in SPARSE), f"the drum's core is not sparse, a modifier leaked: {fill}"
     return fill
 
 
@@ -393,7 +427,8 @@ def verify(path, tmp):
     result["tower_gap_mm"] = tower_gap(out, res["gcode"])
     if STEM == "holder":
         assert result["tower_gap_mm"] >= 15, f"the prime tower is {result['tower_gap_mm']} mm from the part"
-        assert BASE_NAME in z.read("Metadata/model_settings.config").decode()
+        ms = z.read("Metadata/model_settings.config").decode()
+        assert BASE_NAME in ms and FACE_NAME in ms
         result["solid_base"] = check_solid_base(out, res["gcode"])
     return result
 
@@ -415,6 +450,7 @@ def main():
         patch(f"{tmp}/raw.3mf", final)
         if STEM == "holder":
             add_solid_base(final)
+            add_solid_face(final)
         result = verify(final, tmp)
     with open(f"{PROJECT}/{STEM}-slice.json", "w") as f:
         json.dump(result, f, indent=1)
