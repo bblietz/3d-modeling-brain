@@ -8,6 +8,7 @@ tags: [printer, hardware, reference]
 
 - Build volume: 256 x 256 x 260 mm with the main nozzle; 235.5 x 256 x 256 mm when a print uses both nozzles (dual-nozzle or multi-material).
 - AMS 2 Pro feeds the main nozzle: max 4 colors per print. The second nozzle is dedicated to support material; it can act as a 5th color only where placement accuracy does not matter, never for precision or mating features.
+- Dual-hotend prints need BOTH nozzles the same diameter (Bambu X2D FAQ, https://wiki.bambulab.com/en/x2d/manual/x2d-faq; Studio's X2D machine profiles only pair identical sizes, and Bambu support said in 2026-06 there are no plans for mixed sizes). So a 0.2 main with the 0.6 support nozzle cannot use support filament at all; swap both or print single-nozzle. For PETG parts the support interface filament is Bambu Support for PLA/PETG (GFS05, breakaway, 210 C, interface only, top Z distance 0), which Bambu rates "not recommended" on a 0.2 aux nozzle; PLA Basic as the interface under PETG is Bambu's documented alternative (https://wiki.bambulab.com/en/filament-acc/filament/h2d-pla-and-petg-mutual-support). Researched 2026-10-12 for the guitar pick, not used (Brian: no support material).
 - Chamber fan has a cool/heat mode switch on the printer (set to cool as of 2026-08-08). Cool vents the chamber and is correct for PLA and PETG, whose Bambu filament presets command `chamber_temperatures` 0; heat holds chamber warmth and is only for high-temp materials (ABS/ASA/PC/PA). A heated chamber with PETG invites heat creep and stringing.
 
 ## Nozzle inventory
