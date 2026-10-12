@@ -259,3 +259,27 @@ What bit:
   asserts the foot on the plate's flat top and the flange inside the plate (Brian picked the 4.5 in plate, A).
 - **The CLI's arrange turns the part on the bed.** A G-code window placed on the model's axes at the bed centre read
   0.0 in the lip: the object was 88 degrees round. Map check windows through the item transform in the sliced 3MF.
+
+## The filament budget, 2026-10-12
+
+Brian wants two holders from one 1000 g spool; the file was 564 g of body PETG. Reading the G-code back by region
+showed a third of the spool is thrown away: 151 g of supports (83 g a dense block under the lip, a 4 in shelf printed
+3-7/8 in up) and a 30 g prime tower. 36 variants sliced in minutes; the options page offers 488, 465 and 453 g.
+
+What worked:
+- **Read the G-code back before touching the part.** Grams by filament and feature from the moves (G1 and G2/G3,
+  retractions netted) match the slicer to 0.1 g; sparse infill inside a 100% modifier is still labelled "Sparse infill",
+  so classify by containment in the modifier mesh, and supports by where they stand. The levers were in the throwaway,
+  not in the part.
+- **Slice every option.** A settings-only variant of the print 3MF slices in about ten seconds on this machine, so a
+  table of 36 real numbers costs less than one guess. Keep one result file per variant; parallel writers raced on a
+  shared one.
+- **Draw the support, not its name.** "Hollow" and "lightning" support bases looked like big savings until a layer
+  picture just under the lip showed dense lines bridging the block's full depth; "slim trees" turned out to be a few
+  10 mm columns under a 92 mm shelf. The 5 mm comb and single-wall tree branches are the cheap, honest savings.
+
+What bit:
+- **The prime tower is the purge, not the width.** 35 to 12 mm wide changed nothing; the X2D refuses "no sparse
+  layers" unless the tower sits in front of the whole part (gantry rule), and this part fills the bed's depth.
+- **A cached slice went stale.** `corner_check.py` reused an Oct 10 slice after the plate changed; cache by the print
+  file's mtime.

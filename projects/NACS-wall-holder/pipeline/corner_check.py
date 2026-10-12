@@ -51,7 +51,8 @@ def sliced_3mf():
     if len(sys.argv) > 1 and sys.argv[1]:
         return sys.argv[1]
     out = f"{SCRATCH}/corner-slice{TAG}/sliced.3mf"
-    if not os.path.exists(out):
+    src = f"{PROJECT}/holder-print.3mf"
+    if not os.path.exists(out) or os.path.getmtime(out) < os.path.getmtime(src):   # a cached slice older than the print file is stale (it was, on 2026-10-11)
         from graft_slice import graft_slice
         res = graft_slice(f"{PROJECT}/holder-print.3mf", out)
         assert res["rc"] == 0 and res["gcode"], res
@@ -176,9 +177,12 @@ def main():
     print(f"layer z = {z_pick}: extrusion length by feature in the four corner flaps (outside the blend foot at r = {foot:.0f}):")
     for k, v in sorted(tot.items(), key=lambda kv: -kv[1]):
         print(f"  {k:24s} {v:8.0f} mm")
-    print(f"hole centres {off:.1f} from each edge = {math.hypot(off, off):.1f} from the axis; blend foot at {foot:.0f}; pad reaches {math.hypot(off, off) - PAD_R:.1f}..{math.hypot(off, off) + PAD_R:.1f} on the diagonal")
+    print(f"hole centres {off:.1f} from the axis on each side = {math.hypot(off, off):.1f} on the diagonal; blend foot at {foot:.0f}; pad reaches {math.hypot(off, off) - PAD_R:.1f}..{math.hypot(off, off) + PAD_R:.1f} on the diagonal")
     e = w / 2
-    print(f"along the plate's edge the pad covers y = {off - math.sqrt(PAD_R**2 - (e - off)**2):.1f}..{off + math.sqrt(PAD_R**2 - (e - off)**2):.1f}; the blend foot meets the edge at y = {math.sqrt(foot**2 - e**2):.1f}")
+    if e - off < PAD_R:   # on the 4.5 in plate the old 12.5 mm pad no longer reaches the edge (the whole plate is solid now anyway)
+        print(f"along the plate's edge the pad covers y = {off - math.sqrt(PAD_R**2 - (e - off)**2):.1f}..{off + math.sqrt(PAD_R**2 - (e - off)**2):.1f}")
+    if foot > e:
+        print(f"the blend foot meets the edge at y = {math.sqrt(foot**2 - e**2):.1f}")
     print(f"countersink depth {(scad_const('csk_d') - scad_const('hole_d')) / 2:.2f} of the {t:.0f} mm plate")
 
 

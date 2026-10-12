@@ -1,68 +1,54 @@
 ---
 type: handoff
 project: NACS-wall-holder
-date: 2026-10-10
+date: 2026-10-12
 ---
 
-# NACS wall holder handoff (2026-10-10, revision plus plate fix built, not printed)
+# NACS wall holder handoff (2026-10-12, filament budget options out, waiting on Brian's pick)
 
 ## State
-The 2026-09-19 holder was on the wall and working until Brian dropped it on 2026-10-10 and a plate corner broke
-off along the drum blend. The 2026-10-08 revision (deeper, 90 drum, crest lip, wordmark, two-colour face, wider
-cleat catch window) now also has the plate fix: `plate_t` 6.35 (1/4 in) and a solid-base modifier in the print
-3MF (whole plate plus the drum blend ring at 100% monotonic; "rectilinear" is not a Bambu pattern name). Since
-2026-10-11 the modifier sits wholly inside the body (the ring follows the blend's arc 0.6 mm inside it, the slab stops
-a layer under the plate's top and clears the screw holes): Brian saw the first, squared-off ring in Studio and asked
-for it to round into the plate. The same day the face went solid too (Brian: "it will also break if dropped"): a second
-modifier from holder.scad's own `part = "facemod"` (flange, lip and the blend behind the flange, `mod_skin` 0.6 inside
-every surface, recesses and mouth cleared). Then Brian's "the center cylinder extends past the edge of the base on all
-4 sides" (the 90 drum's blend foot at 52 and the 104 flange against the 4 in plate's edge at 50.8, since 2026-10-08):
-options page https://claude.ai/artifact/5YuDCMozLvJvJUdhwWxwJk, Brian picked A, the plate 4.5 in (`plate_w` 114.3,
-`hole_in` and `plate_r` 16.35, holes still 81.6 apart). `pipeline/run_all.sh` ran the whole order on it. `holder.stl`
-(639.1 cm3, watertight, 114.3 square), `holder-inlay.stl` and `holder-print.3mf` (10 h 19 min, 580.4 g: 564.1 body PETG,
-12.7 support interface, 3.5 inlay colour; tower gap 17.7) are built and checked (solid windows 0.94 to 1.00, sparse
-ones 0.18 and 0.21; zbudget, rim_round and insertion unchanged), not printed. Evidence page for the break (before and
-after plate layers, the modifiers):
-https://claude.ai/artifact/QCeo4UdoVNbcSQv3je5xm4; plan page https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6.
-Full record in brief.md "Revision of 2026-10-08", "Later the same day", "Dropped, 2026-10-10" and "The fix".
+The 2026-10-11 file (4.5 in plate, solid base and face, 90 drum, crest lip, wordmark inlay) slices at 10 h 19 min and
+564.1 g of body PETG (580.4 g with the interface and inlay spools). Brian wants the body under 500 g so two holders come
+off one 1000 g spool. `pipeline/filament_budget.py` reads the G-code back by filament, feature and region (sum matches
+the slicer to 0.1 g): the part is 382 g (solid face 97, core 97, walls 76, solid base 75, shells 36), the rest is
+thrown away (lip support block 83, flange-ring trees 46, cavity trees 22, prime tower 30). 36 setting variants sliced
+(`filament-variants.json`, ten seconds each). Options page https://claude.ai/artifact/59PbyNyw5qRfGKi6yD4M7N:
+A hybrid supports, comb 5 mm, single-wall trees, 15% core = 488.0 g, 8 h 55 (recommended); B same with 10% core =
+465.1 g, 8 h 34; C slim single-wall trees, 15% = 453.2 g, 8 h 38 (not recommended). Nothing in holder.scad or the
+print file has changed yet. Evidence page https://claude.ai/artifact/QCeo4UdoVNbcSQv3je5xm4, plan page
+https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6, base options https://claude.ai/artifact/5YuDCMozLvJvJUdhwWxwJk.
 
 ## Decisions already locked (Brian)
-- 2026-10-11: the face (flange, lip, blend behind the flange) solid like the base; every modifier wholly inside the body.
-- 2026-10-11: plate 4.5 in (pick A), same screw pattern; the blend's foot lands on flat plate and the flange sits inside
-  the plate (asserted in holder.scad).
-- 2026-10-10: plate 1/4 in AND solid ("do 1 and 2"). The break ran "along the contour of the main cylinder".
-- `mouth_z` 61.43 and `cut_top` 93.8 stay with the thicker plate: the wand keeps its place off the wall; the flange,
-  lip and inlay move out 1.35 mm (holder 106.75 off the wall, mouth top 4.95 under the flange).
-- 2026-10-08: drum 1 in deeper (`drum_l` 100.4), `drum_r` 45, flange 104; `cleat_depth` 44.45; `tip_gap` 5,
-  `undercut` 20; crest lip 1.5 in full width with the frame line; Tesla T, curved TESLA wordmark and frame inlaid
-  flush in filament 3; plain top screw holes (driver at a 6 degree tilt); skirt kept.
-- Everything from 2026-09-19 stays locked: v7 cavity and cleat shape, grip-up docking, 45 / 15 degree wand, 4 in
-  base and hole pattern, 1/16 in roundovers.
+- 2026-10-12: body PETG under 500 g (two holders per 1000 g spool). Pick pending (A, B or C on the options page).
+- 2026-10-11: the face solid like the base; every modifier wholly inside the body; plate 4.5 in (pick A), same screw
+  pattern, foot on flat plate and flange inside the plate (asserted).
+- 2026-10-10: plate 1/4 in AND solid. `mouth_z` 61.43 and `cut_top` 93.8 stay.
+- 2026-10-08: drum 1 in deeper, 90 across, flange 104, cleat_depth 44.45, tip_gap 5, undercut 20, crest lip 1.5 in,
+  inlaid T, wordmark and frame in filament 3, plain top screw holes, skirt kept.
+- Everything from 2026-09-19 stays: v7 cavity and cleat, grip-up docking, 45 / 15 degree wand, 1/16 in roundovers.
 
 ## Pipeline notes
-- Order after a cavity, drum or plate change: zbudget.py, rim_round.py, insertion.py, both exports, make_coupon_3mf.py
-  holder, render.sh, renders_page.py, republish plan.html to its URL.
-- Body export: `openscad -D display=false -D show_nose=false -D show_wall=false -D show_inlay=false -o holder.stl
-  holder.scad` (without show_inlay=false the inlay is fused into the body; check that inlay volume samples inside
-  the body are 0). Inlay: same with `-D 'part="inlay"'`.
-- `pipeline/corner_check.py [sliced.3mf|""] [tag] [body.stl]` draws the mid-plate toolpaths and a screw-hole section;
-  `pipeline/corner_page.py` builds the evidence page from the before and after images.
-- `pipeline/modifier_views.py [body.stl]` draws the solid-base modifier over the body the way Studio shows it and in a
-  true section, before and after, and prints its volume outside the body (must be 0). Any modifier change: run it,
-  then `make_coupon_3mf.py holder` (the check has a window at the blend's foot where the modifier's arc meets the walls).
-- Regex-parsed constants stay literal numbers. Do not `pkill -f` a pattern that appears in your own command line.
-
-- The G-code check's windows are set out in the model's frame and mapped through the object's item transform from the
-  sliced 3MF: the CLI's arrange turns the part on the bed (88 degrees in this build).
-- `pipeline/render_plate_options.sh` and `pipeline/plate_options_page.py` made the base options page (its "now" option
-  pins the old 4 in plate). `pipeline/run_all.sh` runs the whole order after any cavity, drum or plate change, logs in
-  the scratchpad's run-all/; it restores images/modifier-ring.png afterwards (that figure is history, the squared ring on
-  the 4 in plate). Then republish plan.html, the evidence page and the options page to their URLs.
+- When Brian picks: put the settings into `make_coupon_3mf.py` JOBS["holder"] EXTRA (A: `support_base_pattern_spacing`
+  "5", `tree_support_wall_count` "1", `sparse_infill_density` "15%"; B: "10%"; C: `support_style` "tree_slim" too),
+  update its docstring and the SPARSE windows' expectation if the core changes (0.18/0.21 were at 20%), run
+  `pipeline/run_all.sh`, then `filament_budget.py breakdown` on the new slice to confirm the grams, republish plan.html
+  and the options page with a "Picked" line.
+- `filament_budget.py variant <name> key=value ...` slices a settings variant of holder-print.3mf into $SCRATCH/fil/<name>
+  (vector keys stay vectors; `mod:`/`base:`/`face:` prefixes patch the modifiers); `table` merges the per-variant
+  result.json files (never a shared file: the parallel slices raced on one); `regions <sliced>` needs the unsliced
+  print.3mf beside it (the sliced file bakes the part offsets into the mesh). Run region passes at most four at a time
+  (each loads the G-code and meshes; 28 at once got OOM-killed).
+- `filament_figures.py section|layer|bars` draws the toolpaths by region; `filament_options_page.py` builds the page.
+- Known dead ends: tower width does nothing; `wipe_tower_no_sparse_layers` is refused ("relative position of the model and
+  the prime tower") with the tower beside the part, and at y 5 the tower is off the printable area; hollow and lightning
+  support bases bridge the lip's full depth just under it.
+- `corner_check.py` re-slices when its cached slice is older than holder-print.3mf (it reused an Oct 10 slice on
+  2026-10-11) and no longer prints the pad-reach line when the pad does not reach the plate's edge.
+- Order after a cavity, drum or plate change: `pipeline/run_all.sh` (zbudget, rim_round, insertion, exports, 3MF with
+  both modifiers, renders, modifier figures, corner figures, pages), then republish the pages.
 
 ## Open
-- Print `holder-print.3mf` (plate down, face up; supports in the cavity, under the flange ring and under the lip;
-  a second PETG colour in the AMS slot for filament 3). Not sent to the printer.
-- Grip fit in the extra 1/2 in of opening is unproven (Tesla's CAD ends 48 mm from the tip). Ask for the handle's
-  width and height 1/2 in and 1 in behind the glossy housing, plus the button height; adjust `grip_flare` if needed
-  and rerun the pipeline.
-- If driving the top screws at a tilt proves awkward, switch `top_mount` to "keyhole" and rebuild.
+- Brian's pick on the filament page, then the rebuild above.
+- Print `holder-print.3mf` (plate down; a second PETG colour in the AMS slot for filament 3). Not sent to the printer.
+- Grip fit in the extra 1/2 in of opening is unproven (ask for the handle's width and height 1/2 in and 1 in behind the
+  glossy housing, plus the button height; adjust `grip_flare` if needed).

@@ -1,0 +1,2277 @@
+{
+ "base": {
+  "minutes": 620,
+  "slice_info_g": {
+   "1": 564.15,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 269.1,
+    "Support": 146.1,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "base",
+  "settings": [],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "support: under the lip": 83.1,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ },
+ "hyb_branch5": {
+  "minutes": 617,
+  "slice_info_g": {
+   "1": 571.07,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 269.1,
+    "Support": 153.1,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_branch5",
+  "settings": [
+   "tree_support_branch_diameter=5"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "support: under the lip": 84.3,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 53.4,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: in the cavity": 20.5,
+   "other": 1.1
+  }
+ },
+ "hyb_hollow": {
+  "minutes": 582,
+  "slice_info_g": {
+   "1": 514.79,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 269.1,
+    "Support": 96.8,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_hollow",
+  "settings": [
+   "support_base_pattern=hollow"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 35.9,
+   "support: under the lip": 33.7,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.9,
+   "other": 1.1
+  }
+ },
+ "hyb_hollow_inf10": {
+  "minutes": 536,
+  "slice_info_g": {
+   "1": 469.58,
+   "2": 12.73,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 223.8,
+    "Support": 96.8,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Bridge": 0.1,
+    "Prime tower": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_hollow_inf10",
+  "settings": [
+   "support_base_pattern=hollow",
+   "sparse_infill_density=10%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 51.6,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 36.0,
+   "support: under the lip": 33.7,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.9,
+   "other": 1.1
+  }
+ },
+ "hyb_lightning": {
+  "minutes": 596,
+  "slice_info_g": {
+   "1": 520.31,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 269.1,
+    "Support": 102.3,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_lightning",
+  "settings": [
+   "support_base_pattern=lightning"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 46.6,
+   "support: under the lip": 39.1,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.8,
+   "other": 1.1
+  }
+ },
+ "hyb_lightning_inf15": {
+  "minutes": 570,
+  "slice_info_g": {
+   "1": 498.0,
+   "2": 12.73,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 246.8,
+    "Support": 102.3,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_lightning_inf15",
+  "settings": [
+   "support_base_pattern=lightning",
+   "sparse_infill_density=15%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 74.5,
+   "support: under the flange ring": 46.6,
+   "support: under the lip": 39.1,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.8,
+   "other": 1.1
+  }
+ },
+ "hyb_sp4": {
+  "minutes": 604,
+  "slice_info_g": {
+   "1": 545.26,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 269.1,
+    "Support": 127.2,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_sp4",
+  "settings": [
+   "support_base_pattern_spacing=4"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the lip": 64.3,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ },
+ "hyb_sp5_inf10": {
+  "minutes": 552,
+  "slice_info_g": {
+   "1": 493.39,
+   "2": 12.73,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 223.8,
+    "Support": 120.6,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Bridge": 0.1,
+    "Prime tower": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_sp5_inf10",
+  "settings": [
+   "support_base_pattern_spacing=5",
+   "sparse_infill_density=10%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the lip": 57.6,
+   "drum core, 20%": 51.6,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ },
+ "hyb_sp5_inf15": {
+  "minutes": 574,
+  "slice_info_g": {
+   "1": 516.33,
+   "2": 12.73,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 246.8,
+    "Support": 120.6,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_sp5_inf15",
+  "settings": [
+   "support_base_pattern_spacing=5",
+   "sparse_infill_density=15%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 74.5,
+   "support: under the lip": 57.6,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ },
+ "hyb_sp5_w1": {
+  "minutes": 561,
+  "slice_info_g": {
+   "1": 510.33,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 269.1,
+    "Support": 92.3,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_sp5_w1",
+  "settings": [
+   "support_base_pattern_spacing=5",
+   "tree_support_wall_count=1"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the lip": 56.2,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: under the flange ring": 27.9,
+   "support: in the cavity": 13.5,
+   "other": 1.1
+  }
+ },
+ "hyb_sp5_w1_inf10": {
+  "minutes": 514,
+  "slice_info_g": {
+   "1": 465.11,
+   "2": 12.73,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 223.8,
+    "Support": 92.3,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Bridge": 0.1,
+    "Prime tower": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_sp5_w1_inf10",
+  "settings": [
+   "support_base_pattern_spacing=5",
+   "tree_support_wall_count=1",
+   "sparse_infill_density=10%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the lip": 56.2,
+   "drum core, 20%": 51.6,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: under the flange ring": 27.9,
+   "support: in the cavity": 13.5,
+   "other": 1.1
+  }
+ },
+ "hyb_sp5_w1_inf15": {
+  "minutes": 535,
+  "slice_info_g": {
+   "1": 488.03,
+   "2": 12.73,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 246.8,
+    "Support": 92.3,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_sp5_w1_inf15",
+  "settings": [
+   "support_base_pattern_spacing=5",
+   "tree_support_wall_count=1",
+   "sparse_infill_density=15%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 74.5,
+   "support: under the lip": 56.2,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: under the flange ring": 27.9,
+   "support: in the cavity": 13.5,
+   "other": 1.1
+  }
+ },
+ "hyb_w1": {
+  "minutes": 580,
+  "slice_info_g": {
+   "1": 535.97,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 269.1,
+    "Support": 118.0,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_w1",
+  "settings": [
+   "tree_support_wall_count=1"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "support: under the lip": 81.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: under the flange ring": 27.9,
+   "support: in the cavity": 13.6,
+   "other": 1.1
+  }
+ },
+ "hyb_w1_hollow": {
+  "minutes": 533,
+  "slice_info_g": {
+   "1": 472.83,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 269.1,
+    "Support": 54.8,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_w1_hollow",
+  "settings": [
+   "tree_support_wall_count=1",
+   "support_base_pattern=hollow"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: under the flange ring": 27.7,
+   "support: under the lip": 18.7,
+   "support: in the cavity": 13.6,
+   "other": 1.1
+  }
+ },
+ "hyb_w1_hollow_inf15": {
+  "minutes": 507,
+  "slice_info_g": {
+   "1": 450.53,
+   "2": 12.73,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 246.8,
+    "Support": 54.8,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 5.2,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.4,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "hyb_w1_hollow_inf15",
+  "settings": [
+   "tree_support_wall_count=1",
+   "support_base_pattern=hollow",
+   "sparse_infill_density=15%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 74.5,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: under the flange ring": 27.8,
+   "support: under the lip": 18.7,
+   "support: in the cavity": 13.6,
+   "other": 1.1
+  }
+ },
+ "iface1": {
+  "minutes": 608,
+  "slice_info_g": {
+   "1": 565.19,
+   "2": 9.11,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 272.0,
+    "Support": 159.2,
+    "Inner wall": 50.6,
+    "Prime tower": 32.0,
+    "Outer wall": 26.3,
+    "Internal solid infill": 20.6,
+    "Floating vertical shell": 6.2,
+    "Support transition": 5.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.5,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 8.1,
+    "Support interface": 3.8
+   },
+   "3": {
+    "Outer wall": 1.1,
+    "Inner wall": 1.1,
+    "Flush": 0.7,
+    "Gap infill": 0.3,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.1,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "iface1",
+  "settings": [
+   "support_interface_top_layers=1"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "support: under the lip": 83.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 46.7,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.7,
+   "support: in the cavity": 22.2,
+   "other": 1.1
+  }
+ },
+ "inf10": {
+  "minutes": 572,
+  "slice_info_g": {
+   "1": 518.93,
+   "2": 12.73,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 175.8,
+    "Support": 116.2,
+    "Inner wall": 43.0,
+    "Outer wall": 22.6,
+    "Prime tower": 22.1,
+    "Internal solid infill": 19.9,
+    "Floating vertical shell": 4.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Support transition": 3.7,
+    "Bridge": 1.9,
+    "Flush": 0.7,
+    "Gap infill": 0.3,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.2,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Flush": 0.7,
+    "Outer wall": 0.7,
+    "Inner wall": 0.6,
+    "Gap infill": 0.2,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "inf10",
+  "settings": [
+   "sparse_infill_density=10%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "support: under the lip": 83.1,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 51.6,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ },
+ "inf15": {
+  "minutes": 594,
+  "slice_info_g": {
+   "1": 541.85,
+   "2": 12.73,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 177.7,
+    "Support": 116.2,
+    "Inner wall": 43.0,
+    "Outer wall": 22.6,
+    "Prime tower": 22.1,
+    "Internal solid infill": 19.9,
+    "Floating vertical shell": 4.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Support transition": 3.7,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.4,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.2,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Flush": 0.7,
+    "Outer wall": 0.7,
+    "Inner wall": 0.6,
+    "Gap infill": 0.2,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "inf15",
+  "settings": [
+   "sparse_infill_density=15%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "support: under the lip": 83.1,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 74.5,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ },
+ "normal_hollow": {
+  "minutes": 686,
+  "slice_info_g": {
+   "1": 597.3,
+   "2": 26.95,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 188.9,
+    "Support": 175.7,
+    "Inner wall": 43.0,
+    "Prime tower": 25.2,
+    "Outer wall": 22.6,
+    "Internal solid infill": 19.9,
+    "Support transition": 6.8,
+    "Floating vertical shell": 4.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.4,
+    "Skirt": 0.2,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 16.4,
+    "Support interface": 16.3
+   },
+   "3": {
+    "Flush": 0.7,
+    "Outer wall": 0.7,
+    "Inner wall": 0.6,
+    "Gap infill": 0.2,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "normal_hollow",
+  "settings": [
+   "support_type=normal(auto)",
+   "support_style=default",
+   "support_base_pattern=hollow"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "support: under the lip": 90.7,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 63.4,
+   "shells and solid layers": 35.9,
+   "prime tower": 32.3,
+   "support: in the cavity": 28.6,
+   "other": 1.1
+  }
+ },
+ "normal_lightning": {
+  "minutes": 685,
+  "slice_info_g": {
+   "1": 597.29,
+   "2": 26.95,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 188.9,
+    "Support": 175.7,
+    "Inner wall": 43.0,
+    "Prime tower": 25.2,
+    "Outer wall": 22.6,
+    "Internal solid infill": 19.9,
+    "Support transition": 6.8,
+    "Floating vertical shell": 4.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.4,
+    "Skirt": 0.2,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 16.4,
+    "Support interface": 16.3
+   },
+   "3": {
+    "Flush": 0.7,
+    "Outer wall": 0.7,
+    "Inner wall": 0.6,
+    "Gap infill": 0.2,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "normal_lightning",
+  "settings": [
+   "support_type=normal(auto)",
+   "support_style=default",
+   "support_base_pattern=lightning"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "support: under the lip": 90.7,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 63.4,
+   "shells and solid layers": 35.9,
+   "prime tower": 32.3,
+   "support: in the cavity": 28.6,
+   "other": 1.1
+  }
+ },
+ "organic": {
+  "minutes": 619,
+  "slice_info_g": {
+   "1": 564.15,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 188.9,
+    "Support": 116.2,
+    "Inner wall": 43.0,
+    "Outer wall": 22.6,
+    "Prime tower": 22.1,
+    "Internal solid infill": 19.9,
+    "Floating vertical shell": 4.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Support transition": 3.7,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.4,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.2,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Flush": 0.7,
+    "Outer wall": 0.7,
+    "Inner wall": 0.6,
+    "Gap infill": 0.2,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "organic",
+  "settings": [
+   "support_style=organic"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "support: under the lip": 83.1,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ },
+ "slim10": {
+  "minutes": 549,
+  "slice_info_g": {
+   "1": 470.82,
+   "2": 12.11,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 225.8,
+    "Support": 114.3,
+    "Inner wall": 50.6,
+    "Prime tower": 31.8,
+    "Outer wall": 26.3,
+    "Internal solid infill": 20.6,
+    "Floating vertical shell": 6.2,
+    "Support transition": 5.0,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Bridge": 1.9,
+    "Flush": 0.7,
+    "Gap infill": 0.5,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.1,
+    "Support interface": 5.9
+   },
+   "3": {
+    "Outer wall": 1.1,
+    "Inner wall": 1.1,
+    "Flush": 0.7,
+    "Gap infill": 0.3,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.1,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "slim10",
+  "settings": [
+   "support_style=tree_slim",
+   "sparse_infill_density=10%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 55.4,
+   "drum core, 20%": 51.6,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: under the lip": 26.5,
+   "support: in the cavity": 21.5,
+   "other": 1.1
+  }
+ },
+ "slim15": {
+  "minutes": 570,
+  "slice_info_g": {
+   "1": 493.74,
+   "2": 12.11,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 249.3,
+    "Support": 114.3,
+    "Inner wall": 50.6,
+    "Prime tower": 31.8,
+    "Outer wall": 26.3,
+    "Internal solid infill": 20.6,
+    "Floating vertical shell": 6.2,
+    "Support transition": 5.0,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.5,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.1,
+    "Support interface": 5.9
+   },
+   "3": {
+    "Outer wall": 1.1,
+    "Inner wall": 1.1,
+    "Flush": 0.7,
+    "Gap infill": 0.3,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.1,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "slim15",
+  "settings": [
+   "support_style=tree_slim",
+   "sparse_infill_density=15%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 74.5,
+   "support: under the flange ring": 55.4,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: under the lip": 26.5,
+   "support: in the cavity": 21.5,
+   "other": 1.1
+  }
+ },
+ "slim15tower20": {
+  "minutes": 567,
+  "slice_info_g": {
+   "1": 492.03,
+   "2": 11.84,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 249.3,
+    "Support": 114.3,
+    "Inner wall": 50.6,
+    "Prime tower": 30.1,
+    "Outer wall": 26.3,
+    "Internal solid infill": 20.6,
+    "Floating vertical shell": 6.2,
+    "Support transition": 5.0,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.5,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 8.8,
+    "Support interface": 5.9
+   },
+   "3": {
+    "Outer wall": 1.1,
+    "Inner wall": 1.1,
+    "Flush": 0.7,
+    "Gap infill": 0.3,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.1,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "slim15tower20",
+  "settings": [
+   "support_style=tree_slim",
+   "sparse_infill_density=15%",
+   "prime_tower_width=20"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 74.5,
+   "support: under the flange ring": 55.4,
+   "shells and solid layers": 36.0,
+   "prime tower": 28.7,
+   "support: under the lip": 26.5,
+   "support: in the cavity": 21.5,
+   "other": 1.1
+  }
+ },
+ "slim15w2": {
+  "minutes": 561,
+  "slice_info_g": {
+   "1": 478.39,
+   "2": 12.11,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 257.8,
+    "Support": 114.3,
+    "Prime tower": 31.8,
+    "Outer wall": 26.3,
+    "Inner wall": 25.4,
+    "Internal solid infill": 21.3,
+    "Floating vertical shell": 6.0,
+    "Support transition": 5.0,
+    "Top surface": 5.0,
+    "Bottom surface": 4.3,
+    "Bridge": 1.7,
+    "Flush": 0.7,
+    "Gap infill": 0.6,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.1,
+    "Support interface": 5.9
+   },
+   "3": {
+    "Outer wall": 1.1,
+    "Inner wall": 0.8,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Bridge": 0.2,
+    "Internal solid infill": 0.2,
+    "Top surface": 0.2,
+    "Prime tower": 0.2,
+    "Floating vertical shell": 0.1,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "slim15w2",
+  "settings": [
+   "support_style=tree_slim",
+   "sparse_infill_density=15%",
+   "wall_loops=2"
+  ],
+  "regions": {
+   "solid face": 100.5,
+   "solid base": 78.1,
+   "drum core, 20%": 76.8,
+   "support: under the flange ring": 55.3,
+   "walls": 51.1,
+   "shells and solid layers": 37.2,
+   "prime tower": 30.4,
+   "support: under the lip": 26.5,
+   "support: in the cavity": 21.5,
+   "other": 1.1
+  }
+ },
+ "slimw1_inf15": {
+  "minutes": 518,
+  "slice_info_g": {
+   "1": 453.23,
+   "2": 12.11,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 246.8,
+    "Support": 58.0,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 4.8,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.3,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.3,
+    "Support interface": 4.8
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "slimw1_inf15",
+  "settings": [
+   "support_style=tree_slim",
+   "tree_support_wall_count=1",
+   "sparse_infill_density=15%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 74.5,
+   "shells and solid layers": 36.0,
+   "support: under the flange ring": 32.9,
+   "prime tower": 30.4,
+   "support: under the lip": 16.7,
+   "support: in the cavity": 13.3,
+   "other": 1.1
+  }
+ },
+ "slimwall0": {
+  "minutes": 543,
+  "slice_info_g": {
+   "1": 475.52,
+   "2": 12.11,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 272.0,
+    "Support": 67.2,
+    "Inner wall": 50.6,
+    "Prime tower": 31.8,
+    "Outer wall": 26.3,
+    "Internal solid infill": 20.6,
+    "Floating vertical shell": 6.2,
+    "Support transition": 5.0,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.5,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.1,
+    "Support interface": 5.9
+   },
+   "3": {
+    "Outer wall": 1.1,
+    "Inner wall": 1.1,
+    "Flush": 0.7,
+    "Gap infill": 0.3,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.1,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "slimwall0",
+  "settings": [
+   "support_style=tree_slim",
+   "tree_support_wall_count=0"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "shells and solid layers": 35.9,
+   "support: under the flange ring": 32.9,
+   "prime tower": 30.4,
+   "support: under the lip": 16.7,
+   "support: in the cavity": 13.3,
+   "other": 1.1
+  }
+ },
+ "slimwall1": {
+  "minutes": 543,
+  "slice_info_g": {
+   "1": 475.52,
+   "2": 12.11,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 272.0,
+    "Support": 67.2,
+    "Inner wall": 50.6,
+    "Prime tower": 31.8,
+    "Outer wall": 26.3,
+    "Internal solid infill": 20.6,
+    "Floating vertical shell": 6.2,
+    "Support transition": 5.0,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.5,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.1,
+    "Support interface": 5.9
+   },
+   "3": {
+    "Outer wall": 1.1,
+    "Inner wall": 1.1,
+    "Flush": 0.7,
+    "Gap infill": 0.3,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.1,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "slimwall1",
+  "settings": [
+   "support_style=tree_slim",
+   "tree_support_wall_count=1"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "shells and solid layers": 35.9,
+   "support: under the flange ring": 32.9,
+   "prime tower": 30.4,
+   "support: under the lip": 16.7,
+   "support: in the cavity": 13.3,
+   "other": 1.1
+  }
+ },
+ "spacing5": {
+  "minutes": 599,
+  "slice_info_g": {
+   "1": 538.61,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 188.9,
+    "Support": 90.0,
+    "Inner wall": 43.0,
+    "Outer wall": 22.6,
+    "Prime tower": 22.1,
+    "Internal solid infill": 19.9,
+    "Floating vertical shell": 4.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Support transition": 3.7,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.4,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.2,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Flush": 0.7,
+    "Outer wall": 0.7,
+    "Inner wall": 0.6,
+    "Gap infill": 0.2,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "spacing5",
+  "settings": [
+   "support_base_pattern_spacing=5"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the lip": 57.6,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ },
+ "strong_w1": {
+  "minutes": 536,
+  "slice_info_g": {
+   "1": 487.61,
+   "2": 12.11,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 269.1,
+    "Support": 70.1,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 4.8,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.2,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.3,
+    "Support interface": 4.8
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "strong_w1",
+  "settings": [
+   "support_style=tree_strong",
+   "tree_support_wall_count=1"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 37.9,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: under the lip": 21.6,
+   "support: in the cavity": 15.2,
+   "other": 1.1,
+   "support: elsewhere": 0.3
+  }
+ },
+ "strong_w1_inf10": {
+  "minutes": 489,
+  "slice_info_g": {
+   "1": 442.4,
+   "2": 12.11,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 223.8,
+    "Support": 70.1,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 4.8,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.2,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.3,
+    "Support interface": 4.8
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Bridge": 0.1,
+    "Prime tower": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "strong_w1_inf10",
+  "settings": [
+   "support_style=tree_strong",
+   "tree_support_wall_count=1",
+   "sparse_infill_density=10%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 51.6,
+   "support: under the flange ring": 38.0,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: under the lip": 21.6,
+   "support: in the cavity": 15.1,
+   "other": 1.1,
+   "support: elsewhere": 0.3
+  }
+ },
+ "strong_w1_inf15": {
+  "minutes": 511,
+  "slice_info_g": {
+   "1": 465.33,
+   "2": 12.11,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 246.8,
+    "Support": 70.1,
+    "Inner wall": 50.6,
+    "Prime tower": 30.4,
+    "Outer wall": 25.7,
+    "Internal solid infill": 20.4,
+    "Floating vertical shell": 5.3,
+    "Support transition": 4.8,
+    "Bottom surface": 4.2,
+    "Top surface": 4.1,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Skirt": 0.2,
+    "Gap infill": 0.1,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 7.3,
+    "Support interface": 4.8
+   },
+   "3": {
+    "Inner wall": 1.1,
+    "Outer wall": 1.0,
+    "Flush": 0.7,
+    "Gap infill": 0.2,
+    "Prime tower": 0.1,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "strong_w1_inf15",
+  "settings": [
+   "support_style=tree_strong",
+   "tree_support_wall_count=1",
+   "sparse_infill_density=15%"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "drum core, 20%": 74.5,
+   "support: under the flange ring": 38.0,
+   "shells and solid layers": 36.0,
+   "prime tower": 30.4,
+   "support: under the lip": 21.6,
+   "support: in the cavity": 15.1,
+   "other": 1.1,
+   "support: elsewhere": 0.3
+  }
+ },
+ "tower12": {
+  "minutes": 616,
+  "slice_info_g": {
+   "1": 562.44,
+   "2": 12.45,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 272.0,
+    "Support": 158.4,
+    "Inner wall": 50.6,
+    "Prime tower": 30.1,
+    "Outer wall": 26.3,
+    "Internal solid infill": 20.6,
+    "Floating vertical shell": 6.2,
+    "Support transition": 5.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.5,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 8.9,
+    "Support interface": 6.4
+   },
+   "3": {
+    "Outer wall": 1.1,
+    "Inner wall": 1.1,
+    "Flush": 0.7,
+    "Gap infill": 0.3,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.1,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "tower12",
+  "settings": [
+   "prime_tower_width=12"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "support: under the lip": 83.1,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 35.9,
+   "prime tower": 28.7,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ },
+ "tower20": {
+  "minutes": 616,
+  "slice_info_g": {
+   "1": 562.44,
+   "2": 12.45,
+   "3": 3.53
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 272.0,
+    "Support": 158.4,
+    "Inner wall": 50.6,
+    "Prime tower": 30.1,
+    "Outer wall": 26.3,
+    "Internal solid infill": 20.6,
+    "Floating vertical shell": 6.2,
+    "Support transition": 5.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.5,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 8.9,
+    "Support interface": 6.4
+   },
+   "3": {
+    "Outer wall": 1.1,
+    "Inner wall": 1.1,
+    "Flush": 0.7,
+    "Gap infill": 0.3,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.1,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "tower20",
+  "settings": [
+   "prime_tower_width=20"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "support: under the lip": 83.1,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 35.9,
+   "prime tower": 28.7,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ },
+ "tree_default": {
+  "minutes": 619,
+  "slice_info_g": {
+   "1": 564.15,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 188.9,
+    "Support": 116.2,
+    "Inner wall": 43.0,
+    "Outer wall": 22.6,
+    "Prime tower": 22.1,
+    "Internal solid infill": 19.9,
+    "Floating vertical shell": 4.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Support transition": 3.7,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.4,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.2,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Flush": 0.7,
+    "Outer wall": 0.7,
+    "Inner wall": 0.6,
+    "Gap infill": 0.2,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "tree_default",
+  "settings": [
+   "support_style=default"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "support: under the lip": 83.1,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ },
+ "tree_slim": {
+  "minutes": 596,
+  "slice_info_g": {
+   "1": 516.04,
+   "2": 12.11,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 188.9,
+    "Support": 73.4,
+    "Inner wall": 43.0,
+    "Outer wall": 22.6,
+    "Prime tower": 22.0,
+    "Internal solid infill": 19.9,
+    "Floating vertical shell": 4.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Support transition": 3.4,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.4,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.1,
+    "Support interface": 4.8
+   },
+   "3": {
+    "Flush": 0.7,
+    "Outer wall": 0.7,
+    "Inner wall": 0.6,
+    "Gap infill": 0.2,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "tree_slim",
+  "settings": [
+   "support_style=tree_slim"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 55.4,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: under the lip": 26.5,
+   "support: in the cavity": 21.5,
+   "other": 1.1
+  }
+ },
+ "tree_strong": {
+  "minutes": 609,
+  "slice_info_g": {
+   "1": 554.62,
+   "2": 12.11,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 188.9,
+    "Support": 59.4,
+    "Inner wall": 43.0,
+    "Outer wall": 22.6,
+    "Prime tower": 22.0,
+    "Internal solid infill": 19.9,
+    "Floating vertical shell": 4.5,
+    "Bottom surface": 4.2,
+    "Top surface": 4.2,
+    "Support transition": 3.4,
+    "Bridge": 1.8,
+    "Flush": 0.7,
+    "Gap infill": 0.4,
+    "Skirt": 0.2,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.1,
+    "Support interface": 4.8
+   },
+   "3": {
+    "Flush": 0.7,
+    "Outer wall": 0.7,
+    "Inner wall": 0.6,
+    "Gap infill": 0.2,
+    "Prime tower": 0.2,
+    "Bridge": 0.1,
+    "Internal solid infill": 0.1,
+    "Top surface": 0.1,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "tree_strong",
+  "settings": [
+   "support_style=tree_strong"
+  ],
+  "regions": {
+   "solid face": 97.2,
+   "drum core, 20%": 96.8,
+   "walls": 76.3,
+   "solid base": 75.1,
+   "support: under the flange ring": 74.3,
+   "support: under the lip": 39.4,
+   "shells and solid layers": 35.9,
+   "prime tower": 30.4,
+   "support: in the cavity": 27.8,
+   "other": 1.1,
+   "support: elsewhere": 0.5
+  }
+ },
+ "walls2": {
+  "minutes": 611,
+  "slice_info_g": {
+   "1": 550.0,
+   "2": 12.73,
+   "3": 3.54
+  },
+  "features": {
+   "1": {
+    "Sparse infill": 195.8,
+    "Support": 116.2,
+    "Outer wall": 22.6,
+    "Prime tower": 22.1,
+    "Inner wall": 21.6,
+    "Internal solid infill": 20.6,
+    "Top surface": 5.0,
+    "Bottom surface": 4.3,
+    "Floating vertical shell": 4.1,
+    "Support transition": 3.7,
+    "Bridge": 1.6,
+    "Flush": 0.7,
+    "Gap infill": 0.5,
+    "Skirt": 0.3,
+    "Custom": 0.1
+   },
+   "2": {
+    "Prime tower": 9.2,
+    "Support interface": 5.3
+   },
+   "3": {
+    "Flush": 0.7,
+    "Outer wall": 0.7,
+    "Inner wall": 0.5,
+    "Bridge": 0.2,
+    "Top surface": 0.2,
+    "Gap infill": 0.2,
+    "Prime tower": 0.2,
+    "Internal solid infill": 0.2,
+    "Floating vertical shell": 0.0,
+    "Sparse infill": 0.0
+   }
+  },
+  "name": "walls2",
+  "settings": [
+   "wall_loops=2"
+  ],
+  "regions": {
+   "solid face": 100.5,
+   "drum core, 20%": 100.4,
+   "support: under the lip": 83.1,
+   "solid base": 78.1,
+   "walls": 51.1,
+   "support: under the flange ring": 46.5,
+   "shells and solid layers": 37.2,
+   "prime tower": 30.4,
+   "support: in the cavity": 21.7,
+   "other": 1.1
+  }
+ }
+}

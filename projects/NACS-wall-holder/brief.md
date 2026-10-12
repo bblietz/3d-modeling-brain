@@ -291,3 +291,32 @@ Brian: "it broke along the contour of the main cylinder", then "do 1 and 2". Bot
   body), the 3MF with both modifiers (checks: pads 0.94, plain plate 0.95, drum blend 0.96, blend foot 0.98, flange
   0.94, lip 0.96, flange blend 1.00; sparse 0.18 and 0.21), renders, figures and pages. Slice: 10 h 19 min, 580.4 g
   (564.1 body, 12.7 support interface, 3.5 inlay), tower gap 17.7 mm: 8 min and 6 g more than the 4 in plate.
+
+## 2026-10-12: under 500 g, two holders from one spool
+
+- Brian: "I would like to keep the amount of filament below 500g, so I can print 2 parts on one 1000g spool." The
+  2026-10-11 file is 564.1 g of body PETG (580.4 with the interface and inlay spools). `pipeline/filament_budget.py`
+  reads the sliced G-code back by filament and feature (G1/G2/G3 moves, retractions netted; the sum matches the slicer's
+  grams to 0.1), then by region in the model's frame (sparse infill inside the two solid modifiers counted as solid,
+  supports by what they hold up): solid face 97, drum core 97, lip supports 83, walls 76, solid base 75, flange-ring
+  supports 46, shells 36, prime tower 30, cavity supports 22. The part is 382 g; 182 g (a third) is supports and tower.
+  The lip is the cost: printed plate down it is a 4 in shelf 1-1/2 in deep, 3-7/8 in up, and Bambu's hybrid style stands
+  a dense comb block (2.5 mm lines, two-wall perimeter) under all of it.
+- 36 variants of the print file sliced (`filament_budget.py variant`, settings patched into the 3MF; the 3MF slices in
+  about ten seconds, so every option carries a real number; `filament-variants.json`): comb at 5 mm −26 g, single-wall
+  tree branches −28, 15% core −22, 10% core −45, two walls −14 (not taken), slim trees −48 (the lip on a few 10 mm
+  columns), strong trees −10 (worse under the ring), hollow or lightning block −49/−44 (a two-wall box with dense lines
+  bridging 33 mm just under the lip: out), tower width nothing (the purge sets it), no-sparse-layers tower refused by
+  the X2D's gantry rule unless the tower sits in front of the whole part, one interface layer nothing, normal supports
+  +33 (worse everywhere). Figures: `pipeline/filament_figures.py` (true toolpath sections at x = 0 and single layers
+  from above, coloured by region; stacked bars), `images/filament-2026-10-12/`.
+- Options page https://claude.ai/artifact/59PbyNyw5qRfGKi6yD4M7N (`pipeline/filament_options_page.py`,
+  `options-2026-10-12.html`): A hybrid supports with the comb at 5 mm, single-wall trees, 15% gyroid core: 488.0 g,
+  8 h 55 min, two holders 976 g (recommended; the part unchanged except the core); B the same with a 10% core: 465.1 g,
+  8 h 34 min; C slim single-wall trees and 15%: 453.2 g, 8 h 38 min, not recommended (a 92 mm tall slim forest under
+  the lip in PETG). Not built: a 45 degree underside to the flange would drop the 46 g ring of trees but changes the
+  cove Brian asked the base to match. Waiting on Brian's pick; then `make_coupon_3mf.py` takes the settings and the
+  whole pipeline reruns.
+- Found on the way: last night's `run_all.sh` corner check reused a stale slice from Oct 10 (the 4 in plate) and then
+  crashed on a pad-reach print that no longer applies to the 4.5 in plate; `corner_check.py` now re-slices when its
+  cache is older than the print file and guards the print. Rerun on the current file, evidence page republished.

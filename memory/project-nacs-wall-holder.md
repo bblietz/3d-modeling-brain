@@ -1,6 +1,6 @@
 ---
 name: project-nacs-wall-holder
-description: Tesla Wall Connector wall holder - 2026-09-19 print broke in a drop; 2026-10-08 revision (deeper, crest lip, wordmark, two-colour face) with a solid 1/4 in plate, now 4-1/2 in square, and a solid face, sliced 10 h 19 min / 580 g on 2026-10-11, not printed
+description: Tesla Wall Connector wall holder - 2026-09-19 print broke in a drop; 2026-10-08 revision (deeper, crest lip, wordmark, two-colour face) with a solid 1/4 in plate, now 4-1/2 in square, and a solid face, 564 g of body PETG; 2026-10-12 Brian wants it under 500 g (two per spool), options page out, pick pending
 metadata:
   type: project
 ---
@@ -34,8 +34,14 @@ lip, blend behind the flange, 0.6 inside every surface), injected as a second mo
 575 g. **OPEN 2026-10-11: "the center cylinder extends past the edge of the base on all 4 sides"**: the
 90 drum's blend foot (52) and the 104 flange run past the 4 in plate (edge 50.8) since 2026-10-08. Options
 page https://claude.ai/artifact/5YuDCMozLvJvJUdhwWxwJk (A plate 4.5 in recommended, B 4.25 in, C 4 in with
-4 mm blends and a 98 face; all keep the screw pattern). **Brian picked A the same evening:** plate 114.3, hole_in and plate_r 16.35, holes still 81.6 apart; holder.scad asserts the foot on the flat top; `pipeline/run_all.sh` ran everything; 10 h 19 min, 580 g. Every pick was made from rendered options on
-https://claude.ai/artifact/5u3wgRBUTWngnCdjFuPzKB; plan page https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6.
+4 mm blends and a 98 face; all keep the screw pattern). **Brian picked A the same evening:** plate 114.3, hole_in and plate_r 16.35, holes still 81.6 apart; holder.scad asserts the foot on the flat top; `pipeline/run_all.sh` ran everything; 10 h 19 min, 580 g. **OPEN 2026-10-12: body PETG under 500 g so two holders print from one 1000 g spool** (564 g as sliced; a third of it
+is supports and the prime tower, the lip's support block alone 83 g). `pipeline/filament_budget.py` reads the G-code
+back by region and slices settings variants of the print 3MF in seconds; options page
+https://claude.ai/artifact/59PbyNyw5qRfGKi6yD4M7N: A hybrid supports with a 5 mm comb, single-wall trees and a 15%
+core (488 g, 8 h 55, recommended), B same with 10% (465 g), C slim trees (453 g, not recommended). Nothing changed in
+the files yet; when Brian picks, the settings go into make_coupon_3mf.py and run_all.sh reruns. Every pick was made
+from rendered options on https://claude.ai/artifact/5u3wgRBUTWngnCdjFuPzKB; plan page
+https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6.
 
 Project files and tools: `projects/NACS-wall-holder/` (brief.md "Revision of 2026-10-08",
 `holder.scad` with `tab_style` / `emblem` / `top_mount` / `lip_text` options and `part = "inlay"`,
