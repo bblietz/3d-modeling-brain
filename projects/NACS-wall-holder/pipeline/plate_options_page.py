@@ -96,6 +96,7 @@ th {{ font-weight: 600; color: var(--muted); font-size: 0.78rem; letter-spacing:
 </div>
 
 <div class="q">Which base: A, B or C? The face is being made solid like the base in any case, and that goes into the same print file once the base is picked.</div>
+<p><b>Picked: A, the 4-1/2 in base</b> (Brian, October 11). Built, sliced and checked in the print file.</p>
 </main>
 """
 

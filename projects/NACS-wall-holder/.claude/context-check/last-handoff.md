@@ -15,18 +15,21 @@ cleat catch window) now also has the plate fix: `plate_t` 6.35 (1/4 in) and a so
 a layer under the plate's top and clears the screw holes): Brian saw the first, squared-off ring in Studio and asked
 for it to round into the plate. The same day the face went solid too (Brian: "it will also break if dropped"): a second
 modifier from holder.scad's own `part = "facemod"` (flange, lip and the blend behind the flange, `mod_skin` 0.6 inside
-every surface, recesses and mouth cleared). `holder.stl` (622.7 cm3, watertight), `holder-inlay.stl` and
-`holder-print.3mf` (10 h 11 min, 574.7 g: 558.7 body PETG, 12.4 support interface, 3.5 inlay colour) are built and
-checked (solid windows 0.95 to 1.01, sparse ones 0.18 and 0.19), not printed. OPEN AND BLOCKING THE PRINT: Brian's
-"the center cylinder extends past the edge of the base on all 4 sides" (the 90 drum's blend foot at 52 and the 104
-flange against the 4 in plate's edge at 50.8, since 2026-10-08); options page
-https://claude.ai/artifact/5YuDCMozLvJvJUdhwWxwJk (A plate 4.5 in recommended, B 4.25 in, C 4 in with 4 mm blends and
-a 98 face; all keep the screw pattern). Evidence page for the break (before and after plate layers, the modifiers):
+every surface, recesses and mouth cleared). Then Brian's "the center cylinder extends past the edge of the base on all
+4 sides" (the 90 drum's blend foot at 52 and the 104 flange against the 4 in plate's edge at 50.8, since 2026-10-08):
+options page https://claude.ai/artifact/5YuDCMozLvJvJUdhwWxwJk, Brian picked A, the plate 4.5 in (`plate_w` 114.3,
+`hole_in` and `plate_r` 16.35, holes still 81.6 apart). `pipeline/run_all.sh` ran the whole order on it. `holder.stl`
+(639.1 cm3, watertight, 114.3 square), `holder-inlay.stl` and `holder-print.3mf` (10 h 19 min, 580.4 g: 564.1 body PETG,
+12.7 support interface, 3.5 inlay colour; tower gap 17.7) are built and checked (solid windows 0.94 to 1.00, sparse
+ones 0.18 and 0.21; zbudget, rim_round and insertion unchanged), not printed. Evidence page for the break (before and
+after plate layers, the modifiers):
 https://claude.ai/artifact/QCeo4UdoVNbcSQv3je5xm4; plan page https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6.
 Full record in brief.md "Revision of 2026-10-08", "Later the same day", "Dropped, 2026-10-10" and "The fix".
 
 ## Decisions already locked (Brian)
 - 2026-10-11: the face (flange, lip, blend behind the flange) solid like the base; every modifier wholly inside the body.
+- 2026-10-11: plate 4.5 in (pick A), same screw pattern; the blend's foot lands on flat plate and the flange sits inside
+  the plate (asserted in holder.scad).
 - 2026-10-10: plate 1/4 in AND solid ("do 1 and 2"). The break ran "along the contour of the main cylinder".
 - `mouth_z` 61.43 and `cut_top` 93.8 stay with the thicker plate: the wand keeps its place off the wall; the flange,
   lip and inlay move out 1.35 mm (holder 106.75 off the wall, mouth top 4.95 under the flange).
@@ -51,15 +54,13 @@ Full record in brief.md "Revision of 2026-10-08", "Later the same day", "Dropped
 
 - The G-code check's windows are set out in the model's frame and mapped through the object's item transform from the
   sliced 3MF: the CLI's arrange turns the part on the bed (88 degrees in this build).
-- `pipeline/render_plate_options.sh` and `pipeline/plate_options_page.py` made the base options page; after Brian's pick
-  set `plate_w`, `hole_in`, `plate_r` (A: 114.3, 16.35, 16.35; B: 107.95, 13.175, 13.175) or `fillet_plate`,
-  `fillet_flange` 4 with `tab_w` 98 and `logo_h` 56 (C), turn holder.scad's foot warning into an assert, and run the
-  whole pipeline (the plate's size does not move the cavity, but every export, the 3MF, the checks, renders and pages
-  follow).
+- `pipeline/render_plate_options.sh` and `pipeline/plate_options_page.py` made the base options page (its "now" option
+  pins the old 4 in plate). `pipeline/run_all.sh` runs the whole order after any cavity, drum or plate change, logs in
+  the scratchpad's run-all/; it restores images/modifier-ring.png afterwards (that figure is history, the squared ring on
+  the 4 in plate). Then republish plan.html, the evidence page and the options page to their URLs.
 
 ## Open
-- Brian's pick of the base (A, B or C above). Nothing prints before that.
-- Then print `holder-print.3mf` (plate down, face up; supports in the cavity, under the flange ring and under the lip;
+- Print `holder-print.3mf` (plate down, face up; supports in the cavity, under the flange ring and under the lip;
   a second PETG colour in the AMS slot for filament 3). Not sent to the printer.
 - Grip fit in the extra 1/2 in of opening is unproven (Tesla's CAD ends 48 mm from the tip). Ask for the handle's
   width and height 1/2 in and 1 in behind the glossy housing, plus the button height; adjust `grip_flare` if needed

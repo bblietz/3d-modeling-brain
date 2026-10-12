@@ -26,6 +26,14 @@ import numpy as np  # noqa: E402
 import trimesh  # noqa: E402
 
 BED_CENTRE = (108.0, 128.0)          # make_coupon_3mf.py JOBS["holder"]: the model origin (plate centre) lands here
+
+
+def to_model(sliced):
+    """Bed to model coordinates from the object's item transform in the sliced 3MF: the CLI's arrange turns the part on the bed
+    (88 degrees in the 2026-10 builds), so the model's axes cannot be assumed."""
+    m = re.search(r'<item [^>]*transform="([^"]+)"', zipfile.ZipFile(sliced).read("3D/3dmodel.model").decode()).group(1).split()
+    m00, m01, m10, m11, tx, ty = (float(m[i]) for i in (0, 1, 3, 4, 9, 10))
+    return lambda x, y: ((x - tx) * m00 + (y - ty) * m01, (x - tx) * m10 + (y - ty) * m11)
 PAD_R = 12.5
 TAG = sys.argv[2] if len(sys.argv) > 2 else ""
 FIXED = TAG != ""
@@ -50,8 +58,8 @@ def sliced_3mf():
     return out
 
 
-def layer_paths(gcode, z_want):
-    """Extrusion polylines of the layer nearest z_want, in model coordinates: list of (type, [(x, y), ...])."""
+def layer_paths(gcode, z_want, back=lambda x, y: (x - BED_CENTRE[0], y - BED_CENTRE[1])):
+    """Extrusion polylines of the layer nearest z_want, in model coordinates (back: bed to model): list of (type, [(x, y), ...])."""
     zs = sorted({float(l.split(":")[1]) for l in gcode.splitlines() if l.startswith("; Z_HEIGHT:")})
     z_pick = min(zs, key=lambda z: abs(z - z_want))
     paths, z, feat, x, y = [], 0.0, "", 0.0, 0.0
@@ -79,7 +87,7 @@ def layer_paths(gcode, z_want):
                     pts = [(cx + r * math.cos(a0 + (a1 - a0) * k / n), cy + r * math.sin(a0 + (a1 - a0) * k / n)) for k in range(n + 1)]
                 else:
                     pts = [(x, y), (nx, ny)]
-                paths.append((feat, [(px - BED_CENTRE[0], py - BED_CENTRE[1]) for px, py in pts]))
+                paths.append((feat, [back(px, py) for px, py in pts]))
             x, y = nx, ny
     return z_pick, paths
 
@@ -153,7 +161,7 @@ def main():
     z = zipfile.ZipFile(path)
     gname = [n for n in z.namelist() if n.endswith(".gcode")][0]
     gcode = z.read(gname).decode(errors="replace")
-    z_pick, paths = layer_paths(gcode, t / 2)
+    z_pick, paths = layer_paths(gcode, t / 2, to_model(path))
     os.makedirs(f"{PROJECT}/images", exist_ok=True)
     draw_layer(z_pick, paths, holes, w, f"{PROJECT}/images/corner-layer{TAG}.png")
     draw_section(holes, f"{PROJECT}/images/corner-section{TAG}.png")

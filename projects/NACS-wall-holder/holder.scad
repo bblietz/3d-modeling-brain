@@ -62,7 +62,9 @@ cleat_depth = 44.45;  // the cleat's holding wall to the opening, along the clea
 grip_flare = 0.1;     // the sides and roof open by this much per mm from the nose shoulder to the outer edge, with no step: 1.6 by the end
                       // of Tesla's housing CAD (48.2 from the tip), where the grip is not modelled, and on at the same rate
 floor_knee = 4;       // the floor carries the hanging wand, so it keeps Tesla's line to the end of that CAD, then falls to the flare over this length
-plate_w = 101.6; plate_t = 6.35; plate_r = 10; hole_in = 10; hole_d = 5; csk_d = 10;   // corner radius = hole_in, so each countersink sits centred in its rounded corner
+plate_w = 114.3; plate_t = 6.35; plate_r = 16.35; hole_in = 16.35; hole_d = 5; csk_d = 10;   // corner radius = hole_in, so each countersink sits centred in its rounded corner
+                     // plate 4.5 in with the holes 81.6 apart as on the 4 in plate, so the wall anchors are reused (Brian, 2026-10-11, pick A on the options
+                     // page: the 90 drum's blend foot at 52 and the 104 flange ran past the 4 in plate's edge at 50.8; the foot now lands on 3.5 mm of flat plate)
                      // plate 1/4 in (Brian, 2026-10-10, after the 5 mm plate's corner broke off along the drum blend in a drop; the print 3MF also makes
                      // the plate and the blend solid, pipeline/make_coupon_3mf.py). mouth_z and cut_top stay: the wand keeps its place off the wall,
                      // the flange and lip move out with the plate's front.
@@ -380,10 +382,10 @@ module model() {
 
 if (display) rotate([90, 0, 0]) model(); else model();
 
-// the drum's blend must land on the plate's flat top (Brian, 2026-10-11: "the center cylinder extends past the edge of the base on all 4 sides";
-// true since the 90 drum of 2026-10-08). A warning until the base is picked from the options page, then an assert.
-if (drum_r + fillet_plate > plate_w / 2 - edge_r) echo(str("WARNING: the drum's blend foot (", drum_r + fillet_plate, " from the axis) runs past the plate's flat top (",
-                                                         plate_w / 2 - edge_r, "); the flange is ", 2 * flange_r, " across on a ", plate_w, " plate"));
+// the drum's blend must land on the plate's flat top, and the flange must sit inside the plate (Brian, 2026-10-11: "the center cylinder extends past the
+// edge of the base on all 4 sides"; true from the 90 drum of 2026-10-08 until the 4.5 in plate)
+assert(drum_r + fillet_plate <= plate_w / 2 - edge_r, str("the drum's blend foot (", drum_r + fillet_plate, " from the axis) runs past the plate's flat top (", plate_w / 2 - edge_r, ")"));
+assert(2 * flange_r <= plate_w, str("the flange (", 2 * flange_r, " across) is wider than the plate (", plate_w, ")"));
 
 echo(str("wand direction d=", d, " up v=", v, " across w=", w, " mouth M=", M, " tip T=", T, " mouth depth=", mouth, " edge_r=", edge_r));
 echo(str("cleat: edge at ", cleat_a, " height ", cleat_h, " ramp foot ", cleat_b, " ramp angle ", atan(cleat_h / (cleat_b - cleat_a))));

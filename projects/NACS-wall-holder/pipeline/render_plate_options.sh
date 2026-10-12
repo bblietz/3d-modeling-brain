@@ -18,18 +18,18 @@ BASE="$P --camera=150,-230,135,-6,6,12"
 FOOT="$P --camera=-150,-85,42,-47,0,7"
 FRONT="--projection=o --camera=0,0,0,90,0,0,500 --viewall"
 declare -A OPT=(
-  [now]=""
+  [now]="-D plate_w=101.6 -D hole_in=10 -D plate_r=10"      # as built until 2026-10-11 (holder.scad has had pick A since)
   [a45]="-D plate_w=114.3 -D hole_in=16.35 -D plate_r=16.35"
   [d425]="-D plate_w=107.95 -D hole_in=13.175 -D plate_r=13.175"
   [c4]="-D fillet_plate=4 -D fillet_flange=4 -D tab_w=98 -D logo_h=56"
 )
 for k in now a45 d425 c4; do
   # shellcheck disable=SC2086
-  ( $O -o "$OUT/$k-base.png" $BASE $R ${OPT[$k]} holder.scad >"$OUT/$k-base.log" 2>&1 ) &
+  ( $O -o "$OUT/$k-base.png" $BASE $R ${OPT[$k]} holder.scad >/dev/null 2>&1 ) &
   # shellcheck disable=SC2086
-  ( $O -o "$OUT/$k-foot.png" $FOOT $R ${OPT[$k]} holder.scad >"$OUT/$k-foot.log" 2>&1 ) &
+  ( $O -o "$OUT/$k-foot.png" $FOOT $R ${OPT[$k]} holder.scad >/dev/null 2>&1 ) &
   # shellcheck disable=SC2086
-  ( $O -o "$OUT/$k-front.png" $FRONT $R ${OPT[$k]} holder.scad >"$OUT/$k-front.log" 2>&1 ) &
+  ( $O -o "$OUT/$k-front.png" $FRONT $R ${OPT[$k]} holder.scad >/dev/null 2>&1 ) &
 done
 wait
 ls "$OUT"/*.png | sed 's#.*/##' | tr '\n' ' '; echo

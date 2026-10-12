@@ -2,7 +2,7 @@
 type: project
 project: NACS-wall-holder
 date: 2026-09-16
-status: REVISION 2026-10-08 plus the 2026-10-10 plate fix, CAD and 3MF done, not printed. Drum 1 in deeper and 90 across, crest lip 1.5 in with the TESLA wordmark, frame line, T back, cavity 1/2 in deeper (cleat 1.75 in); cleat catch window 5 mm, face inlays in a second colour; plate 1/4 in and solid through with the drum blend, face (flange, lip, blend) solid too; sliced 10 h 11 min, 575 g. OPEN: the 90 drum's foot and the 104 flange run past the 4 in plate's sides, options page waiting on Brian's pick. The 2026-09-19 holder (v7 cavity, 4 in base, round flange, 1/16 in roundovers) was on the wall and working great until it was dropped on 2026-10-10 and a plate corner broke off along the drum blend.
+status: REVISION 2026-10-08 plus the 2026-10-10 plate fix, CAD and 3MF done, not printed. Drum 1 in deeper and 90 across, crest lip 1.5 in with the TESLA wordmark, frame line, T back, cavity 1/2 in deeper (cleat 1.75 in); cleat catch window 5 mm, face inlays in a second colour; plate 4-1/2 in (pick A, 2026-10-11, after the 90 drum's foot and the 104 flange were found running past the 4 in plate), 1/4 in and solid through with the drum blend, face (flange, lip, blend) solid too; sliced 10 h 19 min, 580 g. The 2026-09-19 holder (v7 cavity, 4 in base, round flange, 1/16 in roundovers) was on the wall and working great until it was dropped on 2026-10-10 and a plate corner broke off along the drum blend.
 tags: [x2d, nacs, tesla, wall-mount]
 ---
 
@@ -282,5 +282,12 @@ Brian: "it broke along the contour of the main cylinder", then "do 1 and 2". Bot
   `pipeline/plate_options_page.py`, https://claude.ai/artifact/5YuDCMozLvJvJUdhwWxwJk), all keeping the screw
   pattern: A plate 4.5 in (`hole_in` and `plate_r` 16.35; recommended, 3.5 mm of flat plate outside the foot), B plate
   4.25 in (13.175; the foot on the edge round's start), C plate 4 in with both blends 4 mm (face and `tab_w` 98,
-  `logo_h` 56). Waiting on Brian's pick; then the full pipeline, the solid checks and the pages again. holder.scad now
-  echoes a warning when the foot runs past the plate's flat top.
+  `logo_h` 56). Brian: "A".
+- Pick A built the same evening: `plate_w` 114.3, `hole_in` and `plate_r` 16.35 (holes still 81.6 apart, so the wall
+  anchors are reused); holder.scad now asserts the blend's foot on the plate's flat top and the flange inside the plate.
+  `pipeline/run_all.sh` ran the whole order: zbudget (mouth_z 61.43 unchanged), rim_round (270 stations, same), insertion
+  (WAY IN 0 to 9 degrees, hanging tip 5.70 mm, 1.87 of 3.57 mm engaged, HOLD 19.6 mm: unchanged), exports (body
+  639.1 cm3, one watertight solid, 114.3 square, 106.75 off the wall; inlay 2.35 cm3, 12 bodies, 0 samples inside the
+  body), the 3MF with both modifiers (checks: pads 0.94, plain plate 0.95, drum blend 0.96, blend foot 0.98, flange
+  0.94, lip 0.96, flange blend 1.00; sparse 0.18 and 0.21), renders, figures and pages. Slice: 10 h 19 min, 580.4 g
+  (564.1 body, 12.7 support interface, 3.5 inlay), tower gap 17.7 mm: 8 min and 6 g more than the 4 in plate.

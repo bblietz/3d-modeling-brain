@@ -120,15 +120,15 @@ Brian: it broke along the contour of the main cylinder, so the flap came off at 
 <h2>What it costs</h2>
 <div class="wrap">
 <table>
-<tr><th></th><th>Before</th><th>Plate fix, October 10</th><th>Plus the solid face, October 11</th></tr>
-<tr><td>Plate</td><td>3/16 in, two skins over 20% lattice</td><td>1/4 in, solid through, blend ring solid</td><td>same</td></tr>
-<tr><td>Face</td><td>two skins over 20% lattice</td><td>same</td><td>flange, lip and blend solid</td></tr>
-<tr><td>Print time</td><td>8 h 47 min</td><td>9 h 22 min</td><td>{hours} h {mins:02d} min</td></tr>
-<tr><td>Filament</td><td>442 g</td><td>498 g</td><td>{grams:.0f} g</td></tr>
-<tr><td>Holder off the wall</td><td>105.4 mm</td><td>106.75 mm (the flange and lip move out with the plate's front; the wand's place is unchanged)</td><td>106.75 mm</td></tr>
+<tr><th></th><th>Before</th><th>Plate fix, October 10</th><th>Plus the solid face, October 11</th><th>Plus the 4-1/2 in base, October 11</th></tr>
+<tr><td>Plate</td><td>4 in, 3/16 in thick, two skins over 20% lattice</td><td>4 in, 1/4 in, solid through, blend ring solid</td><td>same</td><td>4-1/2 in, the blend on flat plate, flange inside the edge</td></tr>
+<tr><td>Face</td><td>two skins over 20% lattice</td><td>same</td><td>flange, lip and blend solid</td><td>same</td></tr>
+<tr><td>Print time</td><td>8 h 47 min</td><td>9 h 22 min</td><td>10 h 11 min</td><td>{hours} h {mins:02d} min</td></tr>
+<tr><td>Filament</td><td>442 g</td><td>498 g</td><td>575 g</td><td>{grams:.0f} g</td></tr>
+<tr><td>Holder off the wall</td><td>105.4 mm</td><td>106.75 mm (the flange and lip move out with the plate's front; the wand's place is unchanged)</td><td>106.75 mm</td><td>106.75 mm</td></tr>
 </table>
 </div>
-<p>Docking and hold were rerun on the new model and are unchanged. The file is <code>holder-print.3mf</code>, not yet printed. Still open: the drum's foot and flange run past the 4 in plate's sides, a separate page with options.</p>
+<p>Docking and hold were rerun on the new model and are unchanged. The file is <code>holder-print.3mf</code>, not yet printed. The drum's foot and flange ran past the 4 in plate's sides; Brian picked the 4-1/2 in plate from the options page, and the numbers above are from that file.</p>
 </main>
 """
 
