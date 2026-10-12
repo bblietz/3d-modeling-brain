@@ -14,6 +14,7 @@ Usage:  .venv/bin/python projects/Guitar-pick/pipeline/make_print_3mf.py
 Reads guitar-pick.stl; writes guitar-pick.3mf and guitar-pick-slice.json.
 """
 import json
+import math
 import os
 import re
 import shutil
@@ -59,6 +60,9 @@ SCALARS = {
     "ironing_type": "no ironing",
     "top_one_wall_type": "not apply",
     "seam_gap": "0%",
+    # the rounded underside already stands in for the foot; shrinking layer 1 another 0.15 would leave layer 2's
+    # wall hanging 0.26 mm past it (more than a 0.22 line), so the compensation is off for this part
+    "elefant_foot_compensation": "0",
 }
 LISTS = {   # one value per extruder variant
     "top_surface_speed": "60",
@@ -184,6 +188,7 @@ def check_settings(path, what):
         (cfg["printer_settings_id"], cfg["print_settings_id"], cfg["filament_settings_id"])
     assert cfg["nozzle_diameter"][0] == "0.2" and cfg["layer_height"] == f"{LAYER:g}", (cfg["nozzle_diameter"], cfg["layer_height"])
     assert cfg["initial_layer_print_height"] == "0.1", cfg["initial_layer_print_height"]
+    assert cfg["elefant_foot_compensation"] == "0", cfg["elefant_foot_compensation"]
     assert float(cfg["min_layer_height"][0]) <= LAYER <= float(cfg["max_layer_height"][0]), (cfg["min_layer_height"], cfg["max_layer_height"])
     assert cfg["textured_plate_temp"] == flatten("filament", FILAMENT)["textured_plate_temp"], cfg["textured_plate_temp"]
     assert cfg["filament_map_mode"] == "Manual" and cfg["filament_map"] == ["1"] and cfg["filament_nozzle_map"] == ["1"], \
@@ -206,16 +211,34 @@ def check_placement(z, what):
     return {"min": [round(float(v), 2) for v in lo], "max": [round(float(v), 2) for v in hi]}
 
 
+def arc_min_y(line, x, y, nx, ny):
+    """Lowest y a move reaches: the endpoints for a G1, the bottom of the circle if a G2/G3 arc sweeps through it
+    (arc fitting is on in the preset, so the pick's tip is drawn as arcs whose endpoints sit above the real tip)."""
+    mi, mj = re.search(r" I([-0-9.]+)", line), re.search(r" J([-0-9.]+)", line)
+    if line[:3] not in ("G2 ", "G3 ") or not (mi and mj):
+        return min(y, ny)
+    cx, cy = x + float(mi.group(1)), y + float(mj.group(1))
+    r = math.hypot(x - cx, y - cy)
+    a0, a1 = math.atan2(y - cy, x - cx), math.atan2(ny - cy, nx - cx)
+    if line.startswith("G2"):       # clockwise: angles decrease from a0 to a1
+        sweep, off = (a0 - a1) % (2 * math.pi), (a0 + math.pi / 2) % (2 * math.pi)
+    else:
+        sweep, off = (a1 - a0) % (2 * math.pi), (-math.pi / 2 - a0) % (2 * math.pi)
+    return cy - r if off <= sweep else min(y, ny)
+
+
 def gcode_stats(gcode):
     """Extruded filament (mm) and the xy extent per G-code feature, the top Z, and where each outer wall loop starts
     (the seam)."""
     used, box, feat, x, y, z_top, seams, new_loop = {}, {}, "", 0.0, 0.0, 0.0, [], False
+    tip_y = {}        # per layer: the lowest y any outer wall reaches (the pick's tip points to the front of the bed)
     for line in gcode.splitlines():
         if line.startswith("; FEATURE:"):
             feat = line.split(":", 1)[1].strip()
             new_loop = feat == "Outer wall"
         elif line.startswith("; Z_HEIGHT:"):
             z_top = max(z_top, float(line.split(":")[1]))
+            layer_z = float(line.split(":")[1])
         elif line[:3] in ("G0 ", "G1 ", "G2 ", "G3 "):
             mx, my, me = re.search(r" X([-0-9.]+)", line), re.search(r" Y([-0-9.]+)", line), re.search(r" E([-0-9.]+)", line)
             nx, ny = (float(mx.group(1)) if mx else x), (float(my.group(1)) if my else y)
@@ -224,11 +247,13 @@ def gcode_stats(gcode):
                     seams.append((x, y))        # the loop starts where the travel left the nozzle
                     new_loop = False
                 used[feat] = used.get(feat, 0.0) + float(me.group(1))
+                if feat == "Outer wall":
+                    tip_y[layer_z] = min(tip_y.get(layer_z, ny), arc_min_y(line, x, y, nx, ny))
                 b = box.setdefault(feat, [nx, ny, nx, ny])
                 b[0], b[1], b[2], b[3] = min(b[0], nx), min(b[1], ny), max(b[2], nx), max(b[3], ny)
             x, y = nx, ny
     return ({k: round(v, 1) for k, v in sorted(used.items(), key=lambda kv: -kv[1])},
-            {k: [round(v, 2) for v in b] for k, b in box.items()}, z_top, seams)
+            {k: [round(v, 2) for v in b] for k, b in box.items()}, z_top, seams, tip_y)
 
 
 def verify(path, tmp):
@@ -268,7 +293,7 @@ def verify(path, tmp):
     layers_expected = 1 + round((height - 0.1) / LAYER)         # 0.1 first layer, then LAYER
     assert abs(0.1 + (layers_expected - 1) * LAYER - height) < 1e-6, f"{LAYER} layers do not sum to the {height} mm pick"
     assert res["layers"] == layers_expected, f"{res['layers']} layers sliced, {layers_expected} expected"
-    feature_mm, feature_box, z_top, seams = gcode_stats(gcode)
+    feature_mm, feature_box, z_top, seams, tip_y = gcode_stats(gcode)
     assert abs(z_top - height) < 1e-3, f"the sliced top is at z {z_top}, the pick is {height} mm"
     assert "Brim" not in feature_mm and "Skirt" in feature_mm, f"expected a skirt and no brim: {feature_mm}"
     assert "Sparse infill" not in feature_mm, f"the pick is not solid: {feature_mm}"
@@ -280,11 +305,19 @@ def verify(path, tmp):
     xy = [min(b[0] for b in feature_box.values()), min(b[1] for b in feature_box.values()),
           max(b[2] for b in feature_box.values()), max(b[3] for b in feature_box.values())]
     assert xy[0] >= 0 and xy[1] >= 0 and xy[2] <= BED and xy[3] <= BED, f"toolpaths leave the bed: {xy}"
+    # underside overhang: how far each layer's outer wall at the tip sits past the layer below. The rounded edge grows
+    # outward for the bottom half; every step must fit on the line below it (0.22 mm wide, so at most ~0.13 mm)
+    zs = sorted(tip_y)
+    steps = [(round(z, 2), round(tip_y[z0] - tip_y[z], 3)) for z0, z in zip(zs, zs[1:])]
+    worst = max(steps[:len(steps) // 2], key=lambda s: s[1])
+    assert worst[1] <= 0.13, f"the underside wall at z {worst[0]} hangs {worst[1]} mm past the layer below"
+    result_steps = steps[:len(steps) // 2]
     grams = float(grab("weight"))
     result.update({"time": res["time"], "minutes": round(int(grab("prediction")) / 60), "grams": round(grams, 2),
                    "metres": round(used_m, 2), "used_g_per_filament": round(used_g, 2), "layers": res["layers"],
                    "top_z": z_top, "nozzle_C": int(temp), "bed_C": int(bed), "seam_xy_mm": [round(v, 2) for v in seams[0]],
-                   "toolpath_xy_mm": [round(v, 2) for v in xy], "feature_mm": feature_mm})
+                   "toolpath_xy_mm": [round(v, 2) for v in xy], "feature_mm": feature_mm,
+                   "underside_steps_mm": result_steps})
     return result
 
 

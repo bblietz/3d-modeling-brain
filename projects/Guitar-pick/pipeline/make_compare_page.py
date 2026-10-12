@@ -1,13 +1,16 @@
-"""Build the HTML page that shows Brian the traced Dunlop outline against the
-generic 351 and the CAD model, so he can sign off against pictures.
+"""Build the HTML sign-off page: the edge profile options (2026-10-12) on top, the
+traced Dunlop outline against the generic 351 and the CAD model (approved
+2026-10-11) below, so Brian decides against pictures.
 
     .venv/bin/python projects/Guitar-pick/pipeline/make_compare_page.py <out.html>
 
-Reads outline-dunlop.csv, outline-351.csv and the PNGs in images/ (run
-trace_photo.py and guitar_pick.py + render_stl.py first).
+Reads outline-dunlop.csv, outline-351.csv, edge-options.json and the PNGs in
+images/ (run trace_photo.py, guitar_pick.py, edge_options.py and
+render_stl.py first).
 """
 import base64
 import io
+import json
 import sys
 from pathlib import Path
 
@@ -17,6 +20,13 @@ from PIL import Image
 PROJECT = Path(__file__).resolve().parent.parent
 IMG = PROJECT / "images"
 WIDTH, LENGTH, THICK = 26.19, 30.38, 1.0
+
+EDGE_LABELS = {
+    "square": ("Square (what you saw)", "the outline extruded as is, 90 degree edge."),
+    "round": ("Round", "fillet R 0.45 on both faces, 0.10 mm rim. In the 3MF now."),
+    "chamfer": ("Chamfer", "45 degree flat, 0.45 mm, on both faces, 0.10 mm rim."),
+    "bevel": ("Bevel (Flow style)", "1.5 mm wide taper on top dropping 0.35 mm; 45 degree flat underneath; 0.30 mm rim."),
+}
 
 
 def data_uri(path, max_w=None, fmt="PNG"):
@@ -40,6 +50,27 @@ def tip_circle(pts, band=2.5):
     return cx, cy, np.sqrt(c + cx ** 2 + cy ** 2)
 
 
+def profile_svg(var, first_layer, layer, window=3.0):
+    """The tip cross-section at scale: the CAD profile as a line over the stair of layers the slicer makes of it
+    (each layer's wall reaches from its inset to the right). Tip at the left, bed at the bottom."""
+    rects, bounds = [], [0.0]
+    for r in var["overhang"]:
+        z0 = 0.0 if r["layer"] == 1 else first_layer + (r["layer"] - 2) * layer
+        z1 = first_layer if r["layer"] == 1 else z0 + layer
+        rects.append(f'<rect x="{r["inset"]:.3f}" y="{-z1:.3f}" width="{window + 0.3 - r["inset"]:.3f}" height="{z1 - z0:.3f}"/>')
+        bounds.append(z1)
+    lines = "".join(f'<line x1="-0.15" y1="{-z:.3f}" x2="{window + 0.3}" y2="{-z:.3f}"/>' for z in bounds)
+    path = "M " + " L ".join(f"{x:.3f} {-z:.3f}" for x, z in var["section"])      # open: the window edge is not a wall
+    return f"""<svg viewBox="-0.3 -1.22 3.6 1.5" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="tip cross-section">
+      <g stroke="var(--rule)" stroke-width="0.012">{lines}</g>
+      <g fill="var(--accent)" fill-opacity="0.22" stroke="none">{"".join(rects)}</g>
+      <path d="{path}" fill="none" stroke="var(--measured)" stroke-width="0.03" stroke-linejoin="round"/>
+      <line x1="-0.15" y1="0" x2="{window + 0.3}" y2="0" stroke="var(--fg)" stroke-width="0.02"/>
+      <g stroke="var(--muted)" stroke-width="0.015"><line x1="2.0" y1="0.12" x2="3.0" y2="0.12"/><line x1="2.0" y1="0.06" x2="2.0" y2="0.18"/><line x1="3.0" y1="0.06" x2="3.0" y2="0.18"/></g>
+      <text x="2.5" y="0.26" font-family="Barlow, Arial, sans-serif" font-size="0.12" fill="var(--muted)" text-anchor="middle">1 mm</text>
+    </svg>"""
+
+
 def main(out):
     dun = np.loadtxt(PROJECT / "outline-dunlop.csv", delimiter=",")
     gen = np.loadtxt(PROJECT / "outline-351.csv", delimiter=",")
@@ -48,19 +79,41 @@ def main(out):
     dcx, dcy, dr = tip_circle(dun)
     gcx, gcy, gr = tip_circle(gen)
     wy = dun[np.argmax(dun[:, 0]), 1]          # y of the widest point
+    edge = json.loads((PROJECT / "edge-options.json").read_text())
+    V = edge["variants"]
+    order = ("square", "round", "chamfer", "bevel")
 
     photo = data_uri(IMG / "trace-1657.png", 700, "JPEG")
     photo2 = data_uri(IMG / "trace-1656.png", 700, "JPEG")
-    render = data_uri(IMG / "pick-v3.png", 1000, "JPEG")
+    render = data_uri(IMG / "pick-v4.png", 1000, "JPEG")
+    closeups = {v: data_uri(IMG / f"edge-{v}.png", 700) for v in V}
+
+    panels = "".join(f"""
+    <figure class="panel">
+      {profile_svg(V[v], edge["first_layer"], edge["layer"])}
+      <figcaption><b>{EDGE_LABELS[v][0]}.</b> {EDGE_LABELS[v][1]}</figcaption>
+    </figure>""" for v in order)
+    shots = "".join(f"""
+    <figure class="panel">
+      <img src="{closeups[v]}" alt="close-up render of the {v} edge at the tip, from above and from below">
+      <figcaption><b>{EDGE_LABELS[v][0]}.</b> Tip seen from above (top) and from underneath (bottom).</figcaption>
+    </figure>""" for v in order)
+
+    def worst(v):
+        w = V[v]["worst_bottom"]
+        return f'layer {w["layer"]}: {w["step"]:.2f} mm, {w["angle"]:.0f} degrees off vertical' if w["step"] > 0.005 else "none, the walls stack straight up"
+
+    def grams(v):
+        return f'{V[v]["volume_mm3"] * 1.27e-3:.2f} g'
 
     html = f"""<title>Tortex Pick Trace</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
 <style>
 /* Layout: one column of figures, each figure a bordered sheet like a drawing; numbers in tabular type */
 :root {{
   --bg: #f6f4ef; --fg: #1d1b17; --muted: #6b665c; --rule: #d9d4c8; --sheet: #ffffff;
-  --accent: #1f5fb8;           /* the Tortex blue of the pick, used for the generic outline */
-  --measured: #1d1b17;         /* the measured outline */
+  --accent: #1f5fb8;           /* the Tortex blue of the pick */
+  --measured: #1d1b17;         /* the measured outline and the CAD profile */
   --warn: #b4502a;
   --display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
@@ -81,28 +134,75 @@ p {{ margin: 0; max-width: 66ch; }}
 figure {{ margin: 0; background: var(--sheet); border: 1px solid var(--rule); padding: 16px; display: grid; gap: 12px; }}
 figure img {{ max-width: 100%; display: block; }}
 figcaption {{ color: var(--muted); font-size: 14px; max-width: 70ch; }}
+figcaption b {{ color: var(--fg); font-weight: 600; }}
 .pair {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }}
 @media (max-width: 640px) {{ .pair {{ grid-template-columns: 1fr; }} }}
-.pair > div {{ min-width: 0; }}
+.pair > div, .pair > figure {{ min-width: 0; }}
+.panel {{ padding: 12px; background: var(--bg); }}
+.panel img {{ margin: 0 auto; max-height: 340px; }}
 svg {{ width: 100%; height: auto; display: block; }}
 table {{ border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }}
 th, td {{ text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }}
 th {{ font-weight: 500; color: var(--muted); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }}
 td.num {{ text-align: right; white-space: nowrap; }}
+.scroll {{ overflow-x: auto; }}
 .legend {{ display: flex; gap: 20px; flex-wrap: wrap; font-size: 14px; }}
 .legend span::before {{ content: ""; display: inline-block; width: 26px; height: 0; border-top: 3px solid currentColor; vertical-align: middle; margin-right: 8px; }}
 .legend .gen {{ color: var(--accent); }} .legend .gen::before {{ border-top-style: dashed; }}
 .legend .mea {{ color: var(--measured); }}
+.legend .stair::before {{ border-top: 10px solid var(--accent); opacity: .25; }}
 .ask {{ border-left: 4px solid var(--warn); padding: 4px 0 4px 14px; display: grid; gap: 8px; }}
 .ask li {{ margin: 0; }}
 ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }}
+.done {{ border-top: 1px solid var(--rule); padding-top: 24px; display: grid; gap: 28px; }}
+.note {{ margin-top: 10px; }}
 </style>
 <main>
 <header>
   <div class="kicker">Guitar pick, Dunlop Tortex Standard 1.0 mm</div>
-  <h1>Traced from your calipers: {WIDTH} x {LENGTH} mm, 4.5 mm tip</h1>
+  <h1>The edge: three tapers to choose from, drawn at scale</h1>
 </header>
-<p class="lede">The outline below comes from the second caliper photo (the whole pick visible), scaled to the two readings. The generic 351 from the SVG pack is shown for comparison: same width and length, but its tip is sharper (3.4 mm radius against 4.5 mm on your pick) and its lower sides are about 0.9 mm narrower per side. The model is built from the measured outline.</p>
+<p class="lede">You are right that the model's edge was square: the outline was extruded as is. Dunlop's own copy and the pick forums say a new Tortex Standard is die-stamped Delrin with a square edge and that the taper you feel is wear (only the Ultex Flow has a moulded bevel), and nobody has published a measurement, so the profile is your call. One limit comes from printing the pick flat: with 0.06 mm layers and a 0.22 mm wall, each layer can hang about half a line past the one below, so the underside has to stay around 45 degrees or steeper. A shallow taper is fine on top and prints in air underneath. The round profile is in the 3MF now.</p>
+
+<figure>
+  <div class="legend"><span class="mea">CAD profile</span><span class="stair">What the printer makes of it, layer by layer (0.1 mm first layer, then 0.06)</span></div>
+  <div class="pair">{panels}
+  </div>
+  <figcaption>Cross-section through the tip, first 3 mm from the edge, bed at the bottom. The blue stair is the real printed edge: the slicer samples the profile at the middle of each layer.</figcaption>
+</figure>
+
+<figure>
+  <div class="pair">{shots}
+  </div>
+  <figcaption>The last 6 mm of the tip, rendered from the STL. Same scale in every panel.</figcaption>
+</figure>
+
+<section>
+  <h2>Numbers</h2>
+  <div class="scroll"><table>
+    <tr><th>Profile</th><th>Top face</th><th>Underside</th><th>Rim</th><th>Worst underside overhang</th><th>Weight</th></tr>
+    <tr><td>Square</td><td>flat to the edge</td><td>flat to the edge</td><td class="num">1.00 mm</td><td>{worst("square")}</td><td class="num">{grams("square")}</td></tr>
+    <tr><td>Round <b>(in the 3MF)</b></td><td>fillet R 0.45</td><td>fillet R 0.45</td><td class="num">{V["round"]["rim_mm"]:.2f} mm</td><td>{worst("round")}</td><td class="num">{grams("round")}</td></tr>
+    <tr><td>Chamfer</td><td>45 degrees, 0.45 mm</td><td>45 degrees, 0.45 mm</td><td class="num">{V["chamfer"]["rim_mm"]:.2f} mm</td><td>{worst("chamfer")}</td><td class="num">{grams("chamfer")}</td></tr>
+    <tr><td>Bevel</td><td>1.5 mm wide, drops 0.35 mm (13 degrees)</td><td>45 degrees, 0.35 mm</td><td class="num">{V["bevel"]["rim_mm"]:.2f} mm</td><td>{worst("bevel")}</td><td class="num">{grams("bevel")}</td></tr>
+  </table></div>
+  <p class="note">Round's one steep layer is the second one, 0.12 mm past the first at the very bottom of the rim, where the slicer's overhang slowdown covers it; the sliced G-code shows 0.117 mm there and under 0.06 mm everywhere else. Chamfer and bevel never exceed 0.08 mm.</p>
+</section>
+
+<section class="ask">
+  <h2>What I need from you</h2>
+  <ol>
+    <li>Pick one: <b>round</b> (already in the 3MF), <b>chamfer</b>, or <b>bevel</b>. Or give me numbers: how wide the taper band should be on each face and how thick the rim.</li>
+    <li>If you can, hold the Tortex edge-on under a light and tell me whether its edge looks rounded or flat-sided; that settles round against chamfer.</li>
+  </ol>
+</section>
+
+<div class="done">
+<header>
+  <div class="kicker">Approved 2026-10-11</div>
+  <h2>The outline: traced from your calipers, {WIDTH} x {LENGTH} mm, 4.5 mm tip</h2>
+</header>
+<p>The outline comes from the second caliper photo (the whole pick visible), scaled to the two readings. The generic 351 from the SVG pack is shown for comparison: same width and length, but its tip is sharper (3.4 mm radius against 4.5 mm on your pick) and its lower sides are about 0.9 mm narrower per side. The model is built from the measured outline, now as a smooth curve rather than a 52-sided polygon.</p>
 
 <figure>
   <div class="pair">
@@ -140,35 +240,27 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
 </figure>
 
 <figure>
-  <img src="{render}" alt="Four rendered views of the modelled pick">
-  <figcaption>The CAD model built from the measured outline: {WIDTH} x {LENGTH} x {THICK} mm, flat on the bed. The streaks in the iso view are a shading artifact of the renderer on the flat faces, not geometry.</figcaption>
+  <img src="{render}" alt="Four rendered views of the modelled pick with the rounded edge">
+  <figcaption>The CAD model with the round edge: {WIDTH} x {LENGTH} x {THICK} mm, flat on the bed. The streaks in the iso view are a shading artifact of the renderer on the flat faces, not geometry.</figcaption>
 </figure>
 
 <section>
   <h2>Numbers</h2>
-  <table>
+  <div class="scroll"><table>
     <tr><th>Item</th><th>Measured pick</th><th>Generic 351</th><th>Source</th></tr>
     <tr><td>Width</td><td class="num">{WIDTH} mm</td><td class="num">scaled to match</td><td>your calipers, IMG_1656</td></tr>
     <tr><td>Length</td><td class="num">{LENGTH} mm</td><td class="num">scaled to match</td><td>your calipers, IMG_1657</td></tr>
     <tr><td>Tip radius</td><td class="num">{dr:.1f} mm</td><td class="num">{gr:.1f} mm</td><td>circle fit on the traced edge, both photos agree within 0.15 mm</td></tr>
     <tr><td>Widest point</td><td class="num">{-wy:.1f} mm below the top</td><td class="num">8.7 mm</td><td>trace</td></tr>
-    <tr><td>Thickness</td><td class="num">{THICK} mm assumed</td><td class="num"></td><td>not measured yet</td></tr>
-    <tr><td>Material, nozzle</td><td colspan="2">PETG, 0.4 mm nozzle, flat on the bed, about 0.74 g</td><td>your picks</td></tr>
-  </table>
+    <tr><td>Thickness</td><td class="num">{THICK} mm</td><td class="num"></td><td>your calipers</td></tr>
+    <tr><td>Material, nozzle</td><td colspan="2">PETG, 0.2 mm nozzle, 0.06 mm layers, flat on the bed, about 0.7 g, 13 min sliced (expect about 20)</td><td>your call, for the smoothest edge</td></tr>
+  </table></div>
 </section>
-
-<section class="ask">
-  <h2>What I need from you</h2>
-  <ol>
-    <li>One more caliper reading: the pick's thickness, anywhere on the flat. Tortex 1.0 picks usually measure 0.95 to 1.05 mm and the print will be set to that number.</li>
-    <li>Look at the black outline against your pick. If a region looks off, say where (tip, lower sides, shoulders, top) and I will re-trace there.</li>
-    <li>If it looks right, say go and I build the Bambu 3MF: one pick, PETG, 0.4 mm nozzle, skirt on.</li>
-  </ol>
-</section>
+</div>
 </main>
 """
     Path(out).write_text(html)
-    print("wrote", out, f"{Path(out).stat().st_size/1024:.0f} KB")
+    print("wrote", out, round(len(html) / 1024), "KB")
 
 
 if __name__ == "__main__":
