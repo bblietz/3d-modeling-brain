@@ -1,11 +1,13 @@
 ---
 name: project-logodude
-description: Logo Dude die-cut badge from Brian's brush-drawn logo-dude.png; CAD signed off and 3MF slice-verified 2026-09-29, not printed yet
+description: Logo Dude die-cut badge (4 in, 0.4 nozzle, logodude.3mf, not printed) plus the 3 in luggage tag with inlaid back text (logodude-tag.3mf, 2026-10-13); both CAD signed off
 metadata:
   type: project
 ---
 
 Die-cut two-color badge (white backer, black ink raised 1 mm), 4.00 x 4.11 in, from logo-dude.png on Brian's Google Drive (reach Drive through the claude.ai Google Drive connector; the rclone `gdrive:` remote is drive.file-scoped and cannot see it). CAD signed off 2026-09-29 after four look passes: solid strokes, right hair stroke edge filled, all edges smoothed, jaw smoothed. Print file projects/Logodude/logodude.3mf: 0.4 nozzle, PETG Basic white + black (switched from PLA 2026-09-29), Sharks fill-core recipe over the face strokes, 1h 25m, 25.6 g. Brian skipped the test coupon. Desk stand (style C) added 2026-09-29: tabbed figure (1h 28m) + black PETG crush-rib base (28 min); rib fit is uncalibrated for PETG. All three parts ship in the one logodude.3mf: plate 1 badge; plate 2 figure + base printed BY OBJECT on one plate (Brian's layout, 2026-09-29), base with 0.20 Standard per-object keys, process stays 0.12mm High Quality (Studio's GUI reset it once, see [[reference-studio-printer-preset-resets-process]]). Not printed yet.
+
+**Luggage tag (2026-10-13):** `logodude_tag.py` imports the badge's ink and rescales it: silhouette 3.00 in, 78.3 x 85.2 mm overall with a 13 mm round eyelet (6 mm hole) on the centroid axis, 3.08 backer + 0.96 ink. Name, two phones and the email are inlaid flush into the bottom face (black, first 3 layers, 0.52 mm), mirrored so they read from the back, in Russo One (strokes 0.25 x cap, so caps 4.4 / 4.0 / 4.0 / 3.5 mm give 0.86 to 1.10 mm strokes = two 0.42 mm arachne beads, no fill-core modifier). Brian: "this will be done with .6mm nozzle", then "I can go with .4mm, but I need the print to take less than 1.25hrs": built for the 0.4 (the 0.6 needs 5 to 6 mm caps and a 3.5 in tag, drawn as option D in `tag-options.html`). CAD signed off in the viewer 2026-10-13. Separate `logodude-tag.3mf` by Brian's explicit request (preserve the badge file), built by `pipeline/make_tag_3mf.py`: 0.16mm Standard, PETG white + black, arachne, skirt 2, 100% infill; 25 layers, 53 min (cap 75), 20.5 g, 4 changes. Not printed.
 
 **Why:** a new cosmetic logo part; Brian iterated on looks in the viewer, not on dimensions.
 

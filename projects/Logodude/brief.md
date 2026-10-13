@@ -124,3 +124,59 @@ face with eyes, nose, mouth) as a two-color print.
   - Built and verified by `pipeline/make_print_3mf.py` (the process stays 0.12mm High Quality + the locked recipe keys,
     not the 0.20mm Standard Studio switched to in Brian's GUI save); per-plate report in `logodude-slice.json`.
     Needs a GUI open to confirm plate 2 shows both objects with "By object" set.
+
+## Luggage tag (2026-10-13)
+
+Brian: "I want to create a luggage tag, where my name email and phone numbers
+are on the back ... Alter the size accordingly. Create a new 3MF file,
+preserving the work we have already done." Then: "this will be done with .6mm
+nozzle", then "I can go with .4mm, but I need the print to take less than
+1.25hrs". CAD signed off in the viewer ("cad looks good, create 3mf").
+
+- `logodude_tag.py` (build123d) imports `logodude.py` for the traced, cleaned,
+  smoothed ink and re-solves the scale: silhouette 3.00 in tall (face + hair,
+  outline included), tag 78.3 x 85.2 mm overall (3.08 x 3.35 in) with the
+  eyelet, 3.08 mm white backer + 0.96 mm black ink = 4.04 mm. Same 3.5 mm
+  outline margin as the badge. Ink 71.9 x 69.7 mm, 0.0698 mm/px.
+- Eyelet: a 13 mm round lobe on the backer's centroid axis (x 0.8) so the tag
+  hangs straight, 6 mm hole (worm loops, cable loops, silicone straps), 3.5 mm
+  wall, 4 mm fillet into the outline; the hole keeps 2.5 mm from the ink
+  (asserted). It sits between the two central hair peaks.
+- Back text, inlaid flush into the bottom face (black into white, the first
+  3 layers, 0.52 mm deep), mirrored about YZ so it reads after flipping the
+  tag over (asserted on the mirrored centroid; checked in
+  `images/tag-front-back.png`). Russo One (installed in ~/.local/share/fonts):
+  every stroke is 0.25 x cap height, so the lines are sized to the clean
+  two-bead regime of the 0.4 nozzle (0.86 to 1.10 mm strokes, two 0.42 mm
+  arachne beads, no fill-core modifier): BLIETZ 4.4 mm caps, the two phone
+  numbers 4.0, the email 3.5. Block above the waist of the silhouette (the
+  back is an hourglass: face, a waist where the hair arms leave it, the
+  forehead band, the peaks), 2.5 mm inside the outline, 3 mm line gap,
+  centred on the band's own axis. Letters 49 pieces, 317 mm2.
+- Nozzle: 0.4. The 0.6 would need two 0.62 mm beads per stroke, i.e. 5 to
+  6 mm caps and a 3.5 in tag (variant D on the options page); the face
+  strokes at 3 in (0.92 mm thinnest) are two 0.42 beads at 0.4.
+- Options drawn to scale from the geometry in `tag-options.html`
+  (`pipeline/tag_options.py`, variants via `TAG_IN=`, `EYELET=hole|slot|punch`,
+  `NOZZLE=0.6`): A built; B strap slot 14 x 3.2 (tag 3.24 in tall); C hole
+  punched through the forehead (silhouette unchanged, text block moves into
+  the face region); D 3.5 in for the 0.6 nozzle. Brian signed off A in the
+  viewer before the page was needed.
+- Exports: `logodude-tag-backer.stl`, `logodude-tag-ink.stl`,
+  `logodude-tag-text.stl` (all watertight, same coordinates, on z = 0).
+  `EXPORT=1` writes them, `SHOW=1` pushes to the viewer, `DUMP_2D=<json>`
+  dumps the 2D geometry for the options page. The badge files are untouched.
+- Print file `logodude-tag.3mf` (built and verified by `pipeline/make_tag_3mf.py`,
+  report `logodude-tag-slice.json`): one plate, one object "Logo Dude luggage
+  tag" with parts backer (white, filament 1), ink (black, 2), back text
+  (black, 2); X2D 0.4 nozzle, `0.16mm Standard @BBL X2D` with arachne walls,
+  skirt 2 loops, 100% zig-zag infill (solid, the eyelet gets yanked), no brim,
+  elephant-foot compensation 0 (flush inlay edges), prime tower rib + fillet
+  wall + 5 mm brim at (180, 112.5); PETG Basic white + black, textured PEI
+  70 C, 250 C. Offline slice: 25 layers, 53 min (cap 75), 18.09 g white +
+  2.41 g black = 20.5 g, 4 filament changes (starts on black for the letters:
+  L1 to white, L2 black, L3 white, L20 black for the ink). G-code proofs: every
+  black move in layers 1 to 3 inside the text footprint, every black move
+  above z 3.08 inside the ink footprint, no black in layers 4 to 19, no white
+  above the backer. Studio: select the 0.4 nozzle preset BEFORE opening the
+  file, AMS white / black, Flushing Volumes: Re-calculate. Not printed.

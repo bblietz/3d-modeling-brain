@@ -1,24 +1,29 @@
 ---
 title: Logodude handoff
-date: 2026-09-29
+date: 2026-10-13
 ---
 
-# Logodude handoff (2026-09-29)
+# Logodude handoff (2026-10-13, luggage tag)
 
-State: CAD signed off ("go"); print file built and slice-verified; NOT printed.
+State: luggage tag CAD signed off in the viewer; logodude-tag.3mf built and
+slice-verified (53 min, 20.5 g, 4 changes); badge files untouched; NOT printed.
 
 ## Decisions already locked
-- Source: Drive logo-dude.png, traced 1:1 (pipeline/trace.py -> traced.json).
-- Style B die-cut badge, 4.00 in tall (101.60 mm) x 4.11 in; 3 mm white backer, black ink raised 1 mm, 3.5 mm outline margin (min 2.5 asserted).
-- Solid lines: per-shape close/open (hair 14/10 px, face 3/3), right-stroke outer-edge fill (60 px close in a region), edge smoothing (hair sigma 14 px, face 5, jaw 40 below row 1060, outline 2.5 mm), periodic-spline faces.
-- Print: 0.4 nozzle, PETG Basic white + black (switched from PLA 2026-09-29), 0.12 mm layers, Sharks fill-core recipe modifier over the 5 face shapes (infill_direction 0), textured PEI 70 C, 250 C, tower at (40, 87.5).
-- Slice: 1h 25m, 22.51 g white + 3.06 g black; one color change at z 3.08.
-- Desk stand: tabbed figure + black crush-rib base (ribs 0.35 proud, PLA calibration, unproven on PETG).
-- ONE logodude.3mf, two plates (Brian 2026-09-29): 1 Badge by layer, 1h 25m / 25.57 g; 2 Stand BY OBJECT (figure first at 0.12, then base at 0.2 with 0.20 Standard object keys, own skirts, no tower), 1h 47m / 37.2 g.
-- Process stays 0.12mm High Quality; selecting a printer preset in the GUI resets it to 0.20mm Standard (happened once, not on purpose).
-- Printer at 192.168.1.50; had the 0.6 HF nozzle mounted (swap to 0.4); AMS slots 2-3 hold the PETG but tags read empty.
+- Badge (2026-09-29): see the earlier handoff block in brief.md; logodude.3mf
+  and its pipeline are frozen.
+- Tag: new file logodude-tag.3mf (Brian: "create a new 3MF file, preserving
+  the work"), silhouette 3.00 in, 78.3 x 85.2 mm overall, 3.08 backer +
+  0.96 ink, round 13 mm eyelet with a 6 mm hole on the centroid axis.
+- Back text inlaid flush, 0.52 mm, Russo One, caps 4.4 / 4.0 / 4.0 / 3.5,
+  lines BLIETZ / 408.829.5860 / 415.407.5201 / bblietz@gmail.com, block
+  above the waist, mirrored so it reads from the back.
+- 0.4 nozzle (Brian would print 0.6, accepted 0.4 if under 1 h 15 min),
+  0.16mm Standard process, PETG Basic white + black, textured PEI 70 C,
+  arachne walls, skirt 2 loops, 100% zig-zag infill, no modifiers.
+- No fill-core modifier: all strokes are two-bead (0.86 to 1.10 mm).
 
 ## Next
-- Brian opens the rebuilt two-plate file WITHOUT touching the printer preset (keep project settings if asked): plate 2 shows both objects, By object set; process reads 0.12mm High Quality. Then: Flushing Volumes: Re-calculate, check AMS mapping, prints.
-- Brian declined the thin-stroke coupon: print the whole badge.
-- After the print: retrospective in knowledge/learnings/logodude.md.
+- Brian opens logodude-tag.3mf in Studio with the 0.4 nozzle preset selected
+  first; AMS mapping white / black; Flushing Volumes: Re-calculate.
+- After the print: knowledge/learnings/logodude.md (tag section: text
+  legibility at 3.5 mm caps, eyelet strength, inlay edge quality).
