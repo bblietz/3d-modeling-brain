@@ -12,11 +12,11 @@
   ]
  },
  "roundtrip": "settings and placement survive bambu-studio --arrange 0 --export-3mf",
- "time": "2h 11m 19s",
+ "time": "2h 11m 14s",
  "minutes": 131,
- "grams": 2.51,
+ "grams": 2.53,
  "metres": 0.84,
- "used_g_per_filament": 2.51,
+ "used_g_per_filament": 2.53,
  "layers": 577,
  "top_z": 34.66,
  "nozzle_C": 250,
@@ -24,12 +24,26 @@
  "seam": {
   "face": "+y (bed rear)",
   "x_from_pick_centre_mm": [
-   -0.8,
-   0.64
+   -0.86,
+   0.18
   ],
   "pick_loops": 402
  },
- "neck_wall_off_midplane_mm": 0.0,
+ "neck_wall_off_midplane_mm": 0.097,
+ "neck_lines": 2,
+ "edge_path_ends": {
+  "neck_zone_outer_wall": 0,
+  "neck_zone_any_within_0.3": 0,
+  "neck_zone_z": [
+   4.33,
+   8.32
+  ],
+  "stray_split_layers_above": [
+   8.62,
+   9.82
+  ],
+  "layers_checked_to_z": 33.66
+ },
  "overhang_fraction_of_outer_wall": 0.0,
  "toolpath_xy_mm": [
   105.31,
@@ -38,11 +52,11 @@
   134.84
  ],
  "feature_mm": {
-  "Inner wall": 312.8,
-  "Sparse infill": 186.7,
-  "Outer wall": 174.4,
-  "Internal solid infill": 123.1,
-  "Floating vertical shell": 28.5,
+  "Inner wall": 316.0,
+  "Sparse infill": 187.0,
+  "Outer wall": 175.5,
+  "Internal solid infill": 122.5,
+  "Floating vertical shell": 28.7,
   "Bottom surface": 6.6,
   "Top surface": 2.4,
   "Skirt": 2.0,

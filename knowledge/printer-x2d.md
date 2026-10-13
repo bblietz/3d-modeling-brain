@@ -91,6 +91,13 @@ Before printing fine-detail work, verify BOTH the physically installed nozzle AN
 - Layer lines are the weak direction: orient parts so load runs along layers, not across them.
 - Thin flexing features (snap legs, clips) under about 1.5 mm: use the 0.4 mm nozzle, and print in PETG rather than PLA.
 - Press/panel fits: tune with slicer XY compensation (-0.1 to -0.2 mm), never by rescaling the model.
+- Break-away tabs and necks that meet a part's edge in the layer plane (a part standing on a designed base, a sloped
+  edge held from below): make the tab AND the edge it meets at least two lines wide (0.2 nozzle: 0.37 mm, the
+  slicer's 85% minimum bead, use 0.40 and 0.44), the tab a little narrower so it breaks first. A one-line tab off a
+  one-line edge is a spur: Arachne prints it as its own short path ending on the part and seams the wall loop there
+  on every layer, and the edge comes out chipped (guitar pick, 2026-10-12). Paint the base's outer face as a seam
+  enforcer so the combined loop seams on the base, and verify with path starts and ends in the G-code
+  (`projects/Guitar-pick/pipeline/toolpath.py`), see [[guitar-pick]].
 
 ## Related
 

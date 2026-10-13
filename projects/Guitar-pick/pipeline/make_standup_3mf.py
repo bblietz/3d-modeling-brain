@@ -12,8 +12,11 @@ Copied from make_print_3mf.py (the flat pipeline, kept for the flat variants) wi
   skirt 2 loops / 3 mm / 1     memory/feedback-keep-skirt.md
   elephant foot                left at the preset's 0.15: only the base block touches the bed
 
-Checks beyond the flat pipeline: the neck prints as a single line, every pick loop's seam sits on one face and
-stays aligned, the scarf ramps are present, nothing is classed as overhang beyond the shoulders.
+Checks beyond the flat pipeline: the neck prints as two lines on the mid-plane, every pick loop's seam sits on
+one face and stays aligned, nothing is classed as overhang beyond the shoulders, and (since the first print,
+2026-10-13) no wall path starts or ends on the pick's edge anywhere above the base: with the one-line neck the
+slicer printed the neck as a separate bead ending on the shoulder's edge and seamed the wall loop there, and the
+shoulders came out with chunks missing. The parser with path ends is toolpath.py.
 
 Usage:  .venv/bin/python projects/Guitar-pick/pipeline/make_standup_3mf.py
 Reads guitar-pick.stl and standup.json; writes guitar-pick.3mf and guitar-pick-slice.json.
@@ -35,7 +38,9 @@ import trimesh
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(os.path.dirname(PROJECT), "Sharks-nametag", "pipeline"))
+sys.path.insert(0, HERE)
 from graft_slice import graft_slice  # noqa: E402
+import toolpath  # noqa: E402
 
 ROOT = os.path.expanduser("~/.config/BambuStudio/system/BBL")   # the 02.08.00.06 bundle of the installed 02.08.02.61 Studio
 
@@ -132,20 +137,25 @@ def world_bounds(z):
 def paint_seam_strip(xml):
     """Mark the triangles of the seam strip (the 2 micron recess down the +y face, standup.py) as seam enforcers:
     paint_seam="4" is one unsplit triangle in the enforcer state, the encoding Studio writes for its own seam
-    painting. The strip floor is the only surface at its y, so it is picked by y alone."""
+    painting. The strip floor is the only surface at its y, so it is picked by y alone. The block's rear face
+    (y = +3.5, the only surface at that y) is painted too: in the neck layers the pick, neck and block are one wall
+    loop, and without this the slicer seamed it in the inside corner where the neck meets the block."""
     verts = np.array(re.findall(r'<vertex x="([^"]+)" y="([^"]+)" z="([^"]+)"', xml), dtype=float)
     floor_y = 0.5 - STANDUP["seam_depth"]           # the strip floor is the only surface at this y (the mesh is centred in y)
-    n = [0]
+    block_y = STANDUP["block"][1] / 2               # the block's rear face
+    n = [0, 0]
 
     def mark(m):
         tri = verts[[int(m.group(i)) for i in (1, 2, 3)]]
-        if np.all(np.abs(tri[:, 1] - floor_y) < 0.0005):
-            n[0] += 1
-            return m.group(0)[:-2] + ' paint_seam="4"/>'
+        for k, y in enumerate((floor_y, block_y)):
+            if np.all(np.abs(tri[:, 1] - y) < 0.0005):
+                n[k] += 1
+                return m.group(0)[:-2] + ' paint_seam="4"/>'
         return m.group(0)
     xml = re.sub(r'<triangle v1="(\d+)" v2="(\d+)" v3="(\d+)"/>', mark, xml)
     assert n[0] >= 2, f"only {n[0]} seam strip triangles found on the face"
-    print(f"seam strip: {n[0]} triangles painted")
+    assert n[1] >= 2, f"only {n[1]} triangles found on the block's rear face"
+    print(f"seam strip: {n[0]} triangles painted on the face, {n[1]} on the block's rear face")
     return xml
 
 
@@ -344,12 +354,31 @@ def verify(path, tmp):
         with open(os.environ["SEAM_DUMP"], "w") as f:
             json.dump({"cx": cx, "cy": cy, "tower_x": tower_x, "neck": {str(z): pts[z] for z in pts if base_top < z < base_top + neck_h + 0.1},
                        "loops": [[round(v, 3) if isinstance(v, float) else v for v in l] for l in loops]}, f)
-    # the neck: in its layers the outer wall near the pick's centre is a single 0.22 mm line on the mid-plane
-    neck_layers = [z for z in pts if base_top + 0.08 < z <= base_top + neck_h + 0.001]
+    # the neck: in its layers the outer wall near the pick's centre is two lines either side of the mid-plane
+    # (segments, not just their end points: a bead can cross the centre in one long move)
+    tp = toolpath.parse(gcode)
+    neck_layers = [z for z in tp if base_top + 0.08 < z <= base_top + neck_h + 0.001]
     assert len(neck_layers) >= 3, f"no neck layers found around z {base_top:.2f}..{base_top + neck_h:.2f}"
     # within 1 mm of the centre only: at the top of the neck the block's saddle edges sit 1.8 mm out and are 7 mm wide
-    neck_y = max(abs(py - cy) for z in neck_layers for px, py in pts[z] if abs(px - cx) < 1.0)
-    assert neck_y < 0.2, f"the neck's wall wanders {neck_y:.2f} mm off the mid-plane: not a single line"
+    neck_ys = [(s[1] + s[3]) / 2 - cy for z in neck_layers for s in tp[z]
+               if s[5] == "Outer wall" and min(s[0], s[2]) < cx + 1.0 and max(s[0], s[2]) > cx - 1.0 and abs(s[1] - cy) < 1.0]
+    neck_y = max(abs(v) for v in neck_ys)
+    assert neck_y < 0.25, f"the neck's wall wanders {neck_y:.2f} mm off the mid-plane: wider than two lines"
+    assert min(neck_ys) < -0.05 < 0.05 < max(neck_ys), f"the neck is not two lines: wall y from {min(neck_ys):.2f} to {max(neck_ys):.2f}"
+    # the pick's edges: no wall path may start or end on them (the first print's shoulder damage, toolpath.py). In the
+    # neck layers the strip's ends are where the neck meets the block, and nothing may end there either (the seam of
+    # that combined loop is painted onto the block's rear face). Above the neck the slicer occasionally splits the
+    # loop at the rounded tip for one layer (2 of 450 in the 2026-10-13 slice, a one-layer seam point on the edge);
+    # up to three such layers are tolerated, none within 0.5 mm of the neck's top (the 2026-10-13 slice has one at
+    # 0.8 mm above it).
+    apex, neck_top = base_top + neck_h, base_top + STANDUP["held_drop"] + neck_h
+    neck_ends = toolpath.tip_path_ends(tp, cx, cy, apex + 0.05, neck_top + 0.5, feats=("Outer wall",), tol=0.6)
+    assert not neck_ends, f"{len(neck_ends)} outer wall path ends on the pick's edge or the neck junction, e.g. {neck_ends[:5]}"
+    edge_ends = toolpath.tip_path_ends(tp, cx, cy, neck_top + 0.5, height - 1.0, feats=("Outer wall",), tol=0.6)
+    stray_layers = sorted({e[0] for e in edge_ends})
+    assert len(stray_layers) <= 3, f"the wall loop splits at the pick's edge in {len(stray_layers)} layers: {stray_layers[:8]}"
+    near_ends = toolpath.tip_path_ends(tp, cx, cy, apex + 0.05, neck_top + 0.5, feats=None, tol=0.3)
+    assert not near_ends, f"{len(near_ends)} path ends within 0.3 mm of the pick's edge, e.g. {near_ends[:5]}"
     # the pick's loops (not the column, not the block, not the lead-in zones): seam on one face, aligned, scarfed
     block_top = base_top + STANDUP["held_drop"]
     pick_loops = [l for l in loops if block_top + 1.0 < l[0] < height - 2.0 and abs(l[1] - tower_x) > 6.0]
@@ -370,7 +399,12 @@ def verify(path, tmp):
                    "top_z": z_top, "nozzle_C": int(temp), "bed_C": int(bed),
                    "seam": {"face": face, "x_from_pick_centre_mm": [round(min(seam_x) - cx, 2), round(max(seam_x) - cx, 2)],
                             "pick_loops": len(pick_loops)},
-                   "neck_wall_off_midplane_mm": round(neck_y, 3), "overhang_fraction_of_outer_wall": round(overhang, 3),
+                   "neck_wall_off_midplane_mm": round(neck_y, 3), "neck_lines": 2,
+                   "edge_path_ends": {"neck_zone_outer_wall": len(neck_ends), "neck_zone_any_within_0.3": len(near_ends),
+                                      "neck_zone_z": [round(apex + 0.05, 2), round(neck_top + 0.5, 2)],
+                                      "stray_split_layers_above": [round(z, 2) for z in stray_layers],
+                                      "layers_checked_to_z": round(height - 1.0, 2)},
+                   "overhang_fraction_of_outer_wall": round(overhang, 3),
                    "toolpath_xy_mm": [round(v, 2) for v in xy], "feature_mm": feature_mm})
     return result
 

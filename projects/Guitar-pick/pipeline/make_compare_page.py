@@ -105,6 +105,9 @@ def main(out):
     iso = data_uri(IMG / "standup-iso.png", 900)
     neck = data_uri(IMG / "standup-neck.png", 700, "JPEG")
     tipshot = data_uri(IMG / "standup-tip.png", 700, "JPEG")
+    # one shoulder layer's wall toolpaths from the sliced G-code, first print and now (pipeline/corner_figure.py)
+    corner1, corner2 = ((IMG / f"corner-print{i}.svg").read_text().replace(' width="600" height="440"', "") for i in (1, 2))
+    ends = sl["edge_path_ends"]
     order = ("soft", "bevel", "round", "chamfer")
 
     photo = data_uri(IMG / "trace-1657.png", 700, "JPEG")
@@ -125,7 +128,7 @@ def main(out):
     chosen = f"""
     <figure class="panel">
       {standing_svg(V["mirror"], edge["layer"])}
-      <figcaption><b>Standing, as it prints.</b> The tip, with the layers horizontal: each 0.06 mm layer of the bevel steps in by 0.014 mm, a fiftieth of a line. The faces and bevels are walls.</figcaption>
+      <figcaption><b>Standing, as it prints.</b> The tip, with the layers horizontal: each 0.06 mm layer of the bevel steps in by 0.011 mm, a twentieth of a line. The faces and bevels are walls.</figcaption>
     </figure>
     <figure class="panel">
       {profile_svg(V["mirror"], edge["first_layer"], edge["layer"])}
@@ -190,24 +193,37 @@ td.num {{ text-align: right; white-space: nowrap; }}
 ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }}
 .done {{ border-top: 1px solid var(--rule); padding-top: 24px; display: grid; gap: 28px; }}
 .note {{ margin-top: 10px; }}
+.corner svg {{ width: 100%; height: auto; display: block; border: 1px solid var(--rule); }}
 </style>
 <main>
 <header>
   <div class="kicker">Guitar pick, Dunlop Tortex Standard 1.0 mm</div>
-  <h1>Standing up: the mirrored bevel, rounded rim, printed as walls</h1>
+  <h1>Standing up, second print: the corners fixed in the toolpath</h1>
 </header>
-<p class="lede">Your call: the 1.5 mm blended bevel on both faces, the rim rounded, no support material, printed standing for the smoothest PETG. The pick stands tip-up on its top edge. Only the top edge and the shoulder rounds up to the 45 degree point face downward, and they sit on a one-line neck (0.22 mm wide, 0.3 mm tall) on a saddle-topped block. Everything else is a wall or leans less than 27 degrees. A 4 mm column beside the pick gives the nozzle somewhere to go each layer so the thin tip cross-sections cool instead of baking. When it is done you cut the neck at the block and sand the 0.3 mm rim flush along the thumb edge; nothing else is touched.</p>
+<p class="lede">The first print came off the stand with chunks missing from the two rounded corners of the top edge. The sliced G-code shows why: on the shoulders the one-line neck sat beside the pick's edge in every layer, so the slicer printed it as a separate bead of under a millimetre that started and ended on the pick's edge, and put the wall loop's own seam on that same spot, at all 55 shoulder layers. The fix is in the geometry: the rim is now two lines wide (0.44 mm, the bevels drop 0.28 mm each instead of 0.35) and the neck is two lines wide (0.40 mm), so the pick's outer wall runs along the faces, straight along the neck and into the block as one loop with nothing starting or ending on the pick. Everything else stands: the 1.5 mm blended bevel on both faces, the rim rounded, no support material, tip-up on the saddle block, the 4 mm cooling column, 0.2 mm nozzle and 0.06 mm layers.</p>
+
+<figure>
+  <div class="pair">
+    <figure class="panel corner">{corner1}
+      <figcaption><b>First print.</b> The two face walls merge into one bead at the 0.30 mm rim; the neck is a second bead that starts at the block (orange) and ends on the pick (black), and the loop's seam sits beside it. Every layer of the corner.</figcaption>
+    </figure>
+    <figure class="panel corner">{corner2}
+      <figcaption><b>Now.</b> Two beads from the face, along the 0.40 mm neck, into the block's wall. No start, no end, no seam on the pick.</figcaption>
+    </figure>
+  </div>
+  <figcaption>The right shoulder, one layer 5.5 mm up the print, drawn from the sliced G-code at the beads' real widths. Dark blue is the outer wall, light blue the inner walls and the block; the dashed line is where the pick's outline is at this height.</figcaption>
+</figure>
 
 <figure>
   <img src="{iso}" alt="the pick standing tip-up on its saddle block, with the cooling column beside it">
-  <figcaption>The print: pick, neck, block, and the column tied in by a plate. {standup["height"]} mm tall, {sl["layers"]} layers of 0.06 mm, {sl["grams"]} g of which the pick is {standup["pick_mm3"] * 1.27e-3:.2f} g, {sl["time"]} estimated (the 0.2 nozzle estimates ran about 1.4x under on the Sharks tags).</figcaption>
+  <figcaption>The print: pick, neck, block, and the column tied in by a plate. {standup["height"]} mm tall, {sl["layers"]} layers of 0.06 mm, {sl["grams"]} g of which the pick is {standup["pick_mm3"] * 1.27e-3:.2f} g, {sl["time"]} estimated; the first print took that to the minute, since the 12 s minimum layer time sets the pace.</figcaption>
 </figure>
 
 <figure>
   <div class="pair">
     <figure class="panel">
       <img src="{neck}" alt="close-up of the shoulder resting on the neck and block">
-      <figcaption><b>The neck.</b> The shoulder sits on the saddle through the thin neck line. The block runs 2 mm past the neck on each side so there is something to hold while you cut.</figcaption>
+      <figcaption><b>The neck.</b> The shoulder sits on the saddle through the 0.40 mm neck, 0.3 mm tall. The block runs 2 mm past the neck on each side so there is something to hold while you snap it off.</figcaption>
     </figure>
     <figure class="panel">
       <img src="{tipshot}" alt="close-up of the tip, rounded rim running into the bevel band">
@@ -228,7 +244,8 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
   <div class="scroll"><table>
     <tr><th>Item</th><th>Result</th></tr>
     <tr><td>Layers</td><td>{sl["layers"]}, 0.1 mm first then 0.06 mm, top at {sl["top_z"]} mm</td></tr>
-    <tr><td>Neck</td><td>printed as a single line: the wall stays within {sl["neck_wall_off_midplane_mm"]} mm of the mid-plane</td></tr>
+    <tr><td>Neck</td><td>printed as two lines either side of the mid-plane, the walls within {sl["neck_wall_off_midplane_mm"]} mm of it</td></tr>
+    <tr><td>The pick's edge</td><td>from the top edge to 1 mm above the neck: {ends["neck_zone_outer_wall"]} wall paths start or end on the pick's edge or at the neck junction, {ends["neck_zone_any_within_0.3"]} paths of any kind within 0.3 mm of the edge. Above that, the loop splits at the tip for a single layer in {len(ends["stray_split_layers_above"])} places{(" (z " + ", ".join(f"{z:.1f}" for z in ends["stray_split_layers_above"]) + " mm)") if ends["stray_split_layers_above"] else ""}: a one-layer seam point each, 0.06 mm tall</td></tr>
     <tr><td>Seam</td><td>painted down the centre of the {sl["seam"]["face"]} face: all {sl["seam"]["pick_loops"]} pick loops start between {sl["seam"]["x_from_pick_centre_mm"][0]} and {sl["seam"]["x_from_pick_centre_mm"][1]} mm of the centre line, so the only seam is one faint line up the middle of the thumb face, never on the rim</td></tr>
     <tr><td>Overhang walls</td><td>{sl["overhang_fraction_of_outer_wall"] * 100:.1f}% of the outer wall length (the shoulders above the neck)</td></tr>
     <tr><td>Support</td><td>none generated, none needed</td></tr>
@@ -252,7 +269,7 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
   <h2>Numbers</h2>
   <div class="scroll"><table>
     <tr><th>Profile</th><th>Top face</th><th>Underside</th><th>Rim</th><th>Worst underside overhang</th><th>Weight</th></tr>
-    <tr><td>Mirrored 1.5 mm bevel, rounded rim <b>(in the 3MF, standing)</b></td><td>1.5 mm wide, drops 0.35 mm, 5 mm blend</td><td>the same</td><td class="num">{V["mirror"]["rim_mm"]:.2f} mm, rounded R 0.15</td><td>{worst("mirror")} if printed flat: in air</td><td class="num">{grams("mirror")}</td></tr>
+    <tr><td>Mirrored 1.5 mm bevel, rounded rim <b>(in the 3MF, standing)</b></td><td>1.5 mm wide, drops 0.28 mm (was 0.35 in the first print), 5 mm blend</td><td>the same</td><td class="num">{V["mirror"]["rim_mm"]:.2f} mm, rounded R 0.15</td><td>{worst("mirror")} if printed flat: in air</td><td class="num">{grams("mirror")}</td></tr>
     <tr><td>Mirrored 0.45 mm bevel (flat alternative)</td><td>0.45 mm wide, drops 0.35 mm (38 degrees), R 0.35 blend</td><td>the same</td><td class="num">{V["sym"]["rim_mm"]:.2f} mm</td><td>{worst("sym")}</td><td class="num">{grams("sym")}</td></tr>
     <tr><td>1.5 mm bevel on top only</td><td>1.5 mm wide, drops 0.35 mm, 5 mm blend into the face</td><td>45 degrees, 0.35 mm, 0.35 mm blend into the face</td><td class="num">{V["soft"]["rim_mm"]:.2f} mm</td><td>{worst("soft")}</td><td class="num">{grams("soft")}</td></tr>
     <tr><td>Bevel with a crease</td><td>1.5 mm wide, drops 0.35 mm (13 degrees)</td><td>45 degrees, 0.35 mm</td><td class="num">{V["bevel"]["rim_mm"]:.2f} mm</td><td>{worst("bevel")}</td><td class="num">{grams("bevel")}</td></tr>
@@ -267,8 +284,8 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
   <h2>Printing it</h2>
   <ol>
     <li>0.2 mm nozzle in, PETG Basic in the AMS, textured PEI plate. Open the 3MF in Bambu Studio once with the 0.2 machine selected (do not reselect the printer preset on this file).</li>
-    <li>After the print: cut the neck at the block with a flush cutter or a blade, then sand the top edge's rim flush on 400 then 800 grit laid on something flat. The rim is 0.3 mm wide and the neck remnant 0.22 mm, so it is a few strokes.</li>
-    <li>Tell me how the faces, the bevels and the tip feel against the Tortex, and whether the thumb edge shows after sanding.</li>
+    <li>After the print, once the plate is cool: hold the pick flat by its faces and bend the block down and away; the 0.40 mm neck lets go before the 0.44 mm rim does. Then sand the top edge and shoulders flush on 400 then 800 grit laid on something flat. The neck remnant is at most 0.3 mm tall, so it is a few strokes.</li>
+    <li>Tell me whether the two corners came out clean this time, how the faces, the bevels and the tip feel against the Tortex, and whether the thumb edge shows after sanding.</li>
   </ol>
 </section>
 

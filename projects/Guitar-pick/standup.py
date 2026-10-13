@@ -2,8 +2,15 @@
 1.5 mm bevel on both faces, no support material, printed standing for the smoothest PETG surfaces).
 
 Standing, the faces and bevels are walls. Only the top edge arc and the shoulder rounds up to the 45 degree point
-face down, and those sit on a one-line neck (0.22 x 0.3 mm) on a saddle-topped block. A column beside the pick
+face down, and those sit on a two-line neck (0.40 x 0.3 mm) on a saddle-topped block. A column beside the pick
 gives the nozzle somewhere to go each layer so the thin tip cross-sections cool. Everything is one solid.
+
+Why two lines (2026-10-13, after the first print): on the shoulders the neck sits beside the pick's edge in every
+layer, so a one-line neck was a spur off the end of the pick's wall loop. The slicer printed that spur as its own
+0.3 to 1.3 mm bead, started and ended on the pick's edge, and put the loop's seam there as well, at every one of
+the 55 shoulder layers; the corners came out with chunks missing. With the rim two lines wide (0.44, guitar_pick.py)
+and the neck two lines wide, the outer wall runs along the pick's faces, straight along the neck's sides and into
+the block, one closed loop with no spur and no path end on the pick (checked in pipeline/make_standup_3mf.py).
 
     .venv/bin/python projects/Guitar-pick/standup.py      -> guitar-pick.stl (the print STL), standup.json
 """
@@ -20,7 +27,7 @@ import guitar_pick as gp
 HERE = Path(__file__).resolve().parent
 EDGE = "mirror"
 FIRST_LAYER, LAYER = 0.1, 0.06
-NECK_T, NECK_H = 0.22, 0.30       # one 0.2-nozzle line wide; cut at the block, sand the rim flush
+NECK_T, NECK_H = 0.40, 0.30       # two 0.2-nozzle lines wide (a hair under the 0.44 rim so it, not the rim, breaks); snap off, sand the rim flush
 SUPPORT_DEG = 45                  # the neck holds the outline up to where it is this steep; above that it self-supports
 BLOCK_W, BLOCK_MARGIN = 7.0, 2.0  # block width (pick thickness direction) and how far it runs past the neck ends
 OVERLAP = 0.1                     # the neck reaches this far into the pick and the block so the union is one solid

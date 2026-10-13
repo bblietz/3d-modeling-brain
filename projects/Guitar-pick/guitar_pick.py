@@ -38,11 +38,15 @@ EDGES = {                    # profile on each face edge: (top, bottom); 1.0 mm 
     # (blend about 1.1 mm wide). Underneath only R 0.35: the pick prints flat, and a wider arc hangs the second layer
     # too far past the first (R 0.5 gives 0.12 mm, R 0.35 gives 0.10, the 45 degree flat beyond it 0.06).
     "soft":    {"kind": "soft", "top": (1.5, 0.35), "top_lead_r": 5.0, "bottom": (0.35, 0.35), "bottom_lead_r": 0.35},
-    # Brian 2026-10-12: the top mirrored underneath. The pick's true shape; it cannot print flat (13 degree underside:
-    # each 0.06 mm layer sits 0.26 mm past the one below, more than a 0.22 mm line), so it needs another route.
-    # rim_r (Brian 2026-10-12, "round off the edges too"): the two creases where the bevels meet the 0.30 rim are
-    # rounded R 0.15, each fillet reaching 0.12 along the rim (R tan 38.5 deg on a 103 degree crease), 0.06 flat left.
-    "mirror":  {"kind": "soft", "top": (1.5, 0.35), "top_lead_r": 5.0, "bottom": (1.5, 0.35), "bottom_lead_r": 5.0, "rim_r": 0.15},
+    # Brian 2026-10-12: the top mirrored underneath. The pick's true shape; it cannot print flat (the underside bevel
+    # steps each 0.06 mm layer about 0.3 mm past the one below, more than a 0.22 mm line), so it prints standing.
+    # rim_r (Brian 2026-10-12, "round off the edges too"): the two creases where the bevels meet the rim are rounded
+    # R 0.15, each fillet reaching 0.12 along the rim (R tan 39.7 deg on a 100.6 degree crease), 0.19 flat left.
+    # Rim 0.44 (drop 0.28 per face, 10.6 degrees) since 2026-10-13: the first print's 0.30 rim was a single 0.22 mm
+    # line at every layer's two ends, so the slicer closed the wall loop there and, where the snap-off neck joined,
+    # printed the neck as a separate bead ending on that spot; the shoulders came out with chunks missing. At 0.44
+    # the rim is two lines and the wall loop runs straight through the edge and the neck (standup.py).
+    "mirror":  {"kind": "soft", "top": (1.5, 0.28), "top_lead_r": 5.0, "bottom": (1.5, 0.28), "bottom_lead_r": 5.0, "rim_r": 0.15},
     # The widest symmetric bevel the flat print carries without support (Brian 2026-10-12: mirrored, no support
     # material): 38 degrees, 0.45 wide, 0.35 drop on both faces, creases blended R 0.35. Underneath, layer 2 sits
     # 0.11 mm past layer 1 (half a line, the same as the round profile) and the band's layers 0.077 (a third of a

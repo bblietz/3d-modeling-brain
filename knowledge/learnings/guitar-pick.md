@@ -1,7 +1,7 @@
 ---
 title: Guitar pick retrospective (Dunlop Tortex 1.0 copy)
 date: 2026-10-12
-status: modelled and sliced standing on a snap-off base, printed 2026-10-12 (no errors), inspection pending
+status: first standing print 2026-10-12 lost its top-edge corners; rim and neck made two lines wide, second file sliced 2026-10-13, not printed
 tags: [learning, 3d-print, petg, 0.2-nozzle, photo-trace]
 ---
 
@@ -71,15 +71,41 @@ A plain 1:1 copy of the Dunlop Tortex Standard 1.0 mm pick in PETG on the
   base) is support by another name and needs the user's say-so. Brian
   gave it: see the stand-up design below.
 - **Standing a thin part on a designed base.** What worked: the base is
-  part of the model (same filament, one solid), a one-line neck (0.22 x
-  0.3 mm) holds the outline wherever it faces down (the top edge arc and
+  part of the model (same filament, one solid), a thin neck (0.3 mm tall)
+  holds the outline wherever it faces down (the top edge arc and
   the shoulder rounds up to 45 degrees; above that the outline is steep
   enough to self-support), the block's top is the outline shifted down
   by the neck height so every layer of the neck sits on the layer below,
   and a 4 mm column of the same height beside the part makes the nozzle
   leave the thin tip cross-sections every layer. Land the total height on
   a layer boundary by deriving the base height from the part length. The
-  G-code confirmed the neck as a single line and zero overhang walls.
+  neck held through all 577 layers of the first print. Its width is the
+  catch, next bullet.
+- **A snap-off neck beside a part's edge must be two lines wide, and so
+  must the edge.** The first print (0.22 mm neck under a 0.30 mm rim) came
+  off with chunks missing from both rounded corners of the top edge. On a
+  sloped outline the neck ribbon sits BESIDE the part's edge in every
+  layer, and a one-line rim is where the two face walls merge into one
+  bead, so the neck was a spur off the end of that bead. Arachne printed
+  the spur as its own 0.3 to 1.3 mm path, starting at the block and
+  ending on the part's edge, laid the wall loop's U-turn over the spur's
+  end, and put the loop's seam within 0.2 mm of it, on all 55 shoulder
+  layers per side. Rim 0.44 and neck 0.40 (two 0.22 lines each, the neck a
+  hair narrower so it breaks first) make the layer polygon two beads wide
+  from the face along the neck into the block: one closed loop, no spur,
+  no path end on the part. The loop's seam then wants the inside corner
+  where the neck meets the block, so paint the block's rear face as a
+  seam enforcer as well. Check it in the G-code with path starts and ends
+  (`pipeline/toolpath.py`), not just loop starts: the first pipeline's
+  "neck is a single line" and "all loops seam on the face" both passed on
+  the bad file. Rule for any break-away tab on the X2D 0.2: tab and the
+  edge it meets both at least 2 x 0.187 = 0.37 mm (the slicer's 85%
+  minimum bead), the tab a little narrower than the edge.
+- **Arachne splits a loop at a rounded tip now and then.** With R 0.15
+  creases on a 0.44 rim the strip's end dips below two beads for its last
+  0.1 mm; on about 2 of 450 layers the slicer emits that as a one-layer
+  break in the outer wall (a seam point on the edge, 0.06 mm tall). The
+  0.30 rim did it on 3 layers. Tolerated and counted, not chased.
 - **Pin the seam with paint, not with seam_position.** On a standing thin
   part the "back" seam sat at the end of the face's flat run and walked
   toward the tip with the outline; "aligned" would have gone to the rim.
@@ -129,12 +155,14 @@ A plain 1:1 copy of the Dunlop Tortex Standard 1.0 mm pick in PETG on the
 0.06, `Bambu PETG Basic @BBL X2D 0.2 nozzle` (250 C / 70 C textured PEI),
 solid zig-zag (the slicer still labels the column's fill "Sparse infill"
 at 100%), arachne, four wall loops (the 1.0 mm body is four 0.25 lines),
-seam back plus a painted seam strip on the rear face, no ironing, skirt
+seam back plus a painted seam strip on the rear face (and, since the
+second slice, the block's rear face), no ironing, skirt
 2 / 3 / 1, no brim, elephant foot at the preset's 0.15 (only the base
-touches the bed). Edge: 1.5 mm bevel dropping 0.35 on both faces, creases
-blended R 5, rim creases R 0.15, 0.30 mm rim. 577 layers to 34.66 mm,
-2 h 11 min estimated (12 s minimum layer time x 577), 2.51 g of which
-0.68 g is the pick.
+touches the bed). Edge, first print: 1.5 mm bevel dropping 0.35 on both
+faces, creases blended R 5, rim creases R 0.15, 0.30 mm rim, 0.22 neck:
+577 layers to 34.66 mm, 2 h 11 min estimated, 2.51 g of which 0.68 g is
+the pick. Second print (2026-10-13): drop 0.28, rim 0.44, neck 0.40,
+otherwise the same; 577 layers, 2 h 11 min estimated.
 
 The flat alternative (`guitar-pick-sym.stl`, 0.45 mm symmetric bevel at 38
 degrees) sliced to 16 layers, 13 min, 0.68 g, with the second layer 0.127
@@ -142,11 +170,10 @@ mm past the first; kept, not shipped.
 
 ## Pending
 
-- The standing print: does the neck hold through 577 layers, does it cut
-  clean, how the sanded thumb edge looks, the real print time against the
-  2 h 11 min estimate, and whether 12 s per layer was needed.
+- The second standing print: are the corners clean, does the 0.40 neck
+  break before the 0.44 rim, how the sanded thumb edge looks.
 - Print result: thickness by calipers, edge smoothness, feel against the
-  Tortex, the real print time against the estimate.
+  Tortex.
 - Ironing coupon on a second pick if the 0.22 mm top lines show; the vault
   PETG rule is no ironing until a coupon says otherwise.
 - Bottom finish comes from the plate; a Smooth PEI plate is the only route
@@ -156,4 +183,4 @@ mm past the first; kept, not shipped.
 
 - Printed on the 0.2 mm nozzle, PETG Basic black, 250 C / 70 C, chamber 42 C, textured PEI, no slicer support, no ironing, 2-loop skirt. Finished 22:47 in the FINISH state with no HMS errors (read-only MQTT watch via `scripts/x2d-chamber-watch.sh`).
 - The pick layers ran at 12.4 s per layer (281 layers in 58 min), which is the 12 s PETG minimum layer time plus travel to the cooling column. When the minimum layer time dominates, the slicer estimate is accurate; the 1.4x under-run seen on the flat 0.2 slices does not apply.
-- Inspection pending: feel against the Tortex, whether the neck held through the whole print, the rear-face seam line, the sanded top rim.
+- Result (Brian, 2026-10-13): the neck held and the rim did not tear on removal, but "the outline of the pick was messed up at the top of the pick (the edge that was on the stand). The rounded corners had small chunks missing", "it was a bad print". Root cause and fix above (two-line neck and rim); second file built and slice-verified the same day, not printed.
