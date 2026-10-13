@@ -121,10 +121,17 @@ is still outside the cover end.
 `gauge-page.html` (renders, spec table, usage) is published privately at
 https://claude.ai/artifact/7fBtPeEGbjEZiQmq3z3zQv
 
+## Brian's pickups (2026-10-13)
+
+Brian is waiting on new Fender '62 reissue P-Bass pickups. Those are
+Fender's "Vintage style" row: start at 3.2 mm (8/64 in) under the E and
+2.4 mm (6/64 in) under the G. The '62 reissue has flush pole pieces, so the
+arm rests on the cover and the poles together, which is the same plane.
+The 2.8 and 2.0 arms stay on the gauge as the next step closer if the
+vintage spacing sounds weak.
+
 ## Open
 
-- Which pickup is in Brian's P-Bass decides the starting pair; the gauge
-  covers both.
 - Not printed yet; the viewer had the model on 2026-10-13 for a look.
 - Pipeline tools: `pipeline/make_print_3mf.py` (3MF + verified slice),
   `pipeline/closeup.py` (close-up renders), `pipeline/usage_scene.py`
