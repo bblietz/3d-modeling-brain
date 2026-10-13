@@ -180,3 +180,35 @@ nozzle", then "I can go with .4mm, but I need the print to take less than
   above z 3.08 inside the ink footprint, no black in layers 4 to 19, no white
   above the backer. Studio: select the 0.4 nozzle preset BEFORE opening the
   file, AMS white / black, Flushing Volumes: Re-calculate. Not printed.
+
+## Luggage tag, 0.6-nozzle version (2026-10-13)
+
+Brian printed `logodude-tag.3mf` (built for the 0.4) through the 0.6 nozzle by
+mistake, then asked: "build the 3.5 in version for the .6".
+
+- Same `logodude_tag.py` with `NOZZLE=0.6`: silhouette 3.50 in, tag 91.4 x
+  97.3 mm overall (3.60 x 3.83 in), 3.0 mm backer + 0.9 mm ink on the 0.6
+  grid (0.3 first layer + 0.18 layers: backer 0.3 + 15 x 0.18, ink 5 layers),
+  text inlay 0.66 mm (3 layers). Face strokes 1.07 to 1.3 mm = two 0.62 beads.
+- Back text in the two-bead regime of the 0.62 line (caps 4.4 to 6.2): BLIETZ
+  6.2 mm caps (1.56 mm strokes), bblietz@gmail.com 5.0 (1.22), the phones
+  5.4 (1.36). The email sits under the name because at 5 mm caps it is 66 mm
+  wide and only fits the forehead band; the conventional order would push
+  the name up into the notch between the hair peaks (asserted fit).
+- Exports `logodude-tag-06-{backer,ink,text}.stl`, plot
+  `images/tag-06-front-back.png`; pushed to the viewer 2026-10-13.
+- Print file `logodude-tag-06.3mf` by `pipeline/make_tag_3mf.py` with
+  `NOZZLE=0.6`: X2D 0.6 nozzle, `0.18mm Balanced Quality @BBL X2D 0.6 nozzle`,
+  PETG Basic 0.6 white + black, same locked keys as the 0.4 build; report in
+  `logodude-tag-06-slice.json`. The 0.6 machine's PETG preset is the
+  unsuffixed `Bambu PETG Basic @BBL X2D` (250 / 245 C, textured PEI 70).
+  Offline slice: 21 layers, 51 min (cap 75), 23.1 g white + 3.2 g black =
+  26.3 g, 4 filament changes (L1 to white, L2 black, L3 white, L17 black),
+  tower (185, 115). G-code proofs as for the 0.4 file (black only in the
+  text footprint for layers 1 to 3 and the ink footprint above z 3.0, no
+  white above the backer). Studio: select the 0.6 nozzle preset BEFORE
+  opening the file. Not printed.
+- Meanwhile the mis-print of the 0.4 file was running on the printer
+  (Studio had re-profiled it to the 0.6's 0.30 mm process, 13 layers,
+  38.7 g, seen in the device tab 2026-10-13 16:23); its letters and face
+  lines were sliced under two 0.62 mm walls.

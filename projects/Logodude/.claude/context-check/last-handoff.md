@@ -9,6 +9,10 @@ State: luggage tag CAD signed off in the viewer; logodude-tag.3mf built and
 slice-verified (53 min, 20.5 g, 4 changes); badge files untouched; NOT printed.
 
 ## Decisions already locked
+- 0.6 version (Brian 2026-10-13 after printing the 0.4 file through the 0.6):
+  NOZZLE=0.6 build, 3.5 in silhouette, tiers 3.0 / 0.9 / 0.66 on the 0.3 + 0.18
+  grid, caps 6.2 / 5.0 / 5.4 / 5.4 with the email under the name, own
+  logodude-tag-06.3mf and -06 STLs; the 0.4 files stay as they are.
 - Badge (2026-09-29): see the earlier handoff block in brief.md; logodude.3mf
   and its pipeline are frozen.
 - Tag: new file logodude-tag.3mf (Brian: "create a new 3MF file, preserving

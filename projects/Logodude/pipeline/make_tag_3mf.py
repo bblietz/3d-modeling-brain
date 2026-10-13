@@ -9,21 +9,28 @@ already done"); the badge file and its pipeline are not touched.
     back text (black, filament 2, z 0..0.52, 49 letters inlaid flush in the bottom face)
   Tiers sit on the 0.16 mm grid (0.2 first layer): text = layers 1-3, backer = 1-19, ink = 20-25.
 
-Brian 2026-10-13: 0.6 nozzle, or 0.4 if the print takes less than 1 h 15 min. Built for the X2D 0.4 nozzle,
-0.16mm Standard, PETG Basic white + black, textured PEI 70 C. No modifier parts and no lettering object key: at this
-size every stroke (face lines and letters, 0.9 to 1.1 mm) is two 0.42 mm arachne beads, the clean regime, so the
-process keys are the proven Sharks/Logodude SMOOTH_TOP set minus the fill-core lettering keys, plus arachne, a 2-loop
-skirt (Brian's rule), no brim, a solid tag (100% zig-zag, the eyelet gets yanked) and elefant_foot_compensation 0 so the
-flush bottom inlay keeps its first-layer outlines. Prime tower at the free spot closest to the bed centre (brim >= 12 mm
-from the part, >= 15 mm from the bed edges); its brim offsets are re-measured from this file's own slice.
+Two nozzle modes, chosen with NOZZLE (default 0.4), sharing every step; each mode has its own STLs, presets, output,
+build directory and measured tower-brim constant:
+  0.4 (Brian 2026-10-13: "I can go with .4mm, but I need the print to take less than 1.25hrs"): 3 in tag,
+      logodude-tag-*.stl, 0.16mm Standard (0.2 first layer): text layers 1-3, backer to 19, ink 20-25 -> logodude-tag.3mf
+  0.6 (Brian 2026-10-13, after printing the 0.4 file through the 0.6 nozzle by mistake: a real 0.6 version): 3.5 in tag,
+      logodude-tag-06-*.stl, 0.18mm Balanced Quality (0.3 first layer): text 1-3, backer to 16, ink 17-21 -> logodude-tag-06.3mf
+PETG Basic white + black, textured PEI 70 C, nozzle 250 C (read from the filament preset). No modifier parts and no
+lettering object key: at these sizes every stroke (face lines and letters) is two arachne beads of the nozzle's line,
+the clean regime, so the process keys are the proven Sharks/Logodude SMOOTH_TOP set minus the fill-core lettering keys,
+plus arachne, a 2-loop skirt (Brian's rule), no brim, a solid tag (100% zig-zag, the eyelet gets yanked) and
+elefant_foot_compensation 0 so the flush bottom inlay keeps its first-layer outlines. Prime tower at the free spot
+closest to the bed centre (brim >= 12 mm from the part, >= 15 mm from the bed edges); its brim offsets are re-measured
+from the file's own slice (one rebuild pass if they moved).
 
 Verification, all offline: authored-file checks, a CLI round trip, then a real CLI slice (graft_slice): rc 0, layer count,
 estimated time under TIME_CAP_MIN (hard assert), grams, filament changes by layer, and G-code proofs that black extrusion
 in the text layers stays inside the text footprint, black above the backer stays inside the ink footprint, no black in
 the backer-only layers and no white above the backer. Writes logodude-tag.3mf and logodude-tag-slice.json.
 
-Usage: .venv/bin/python projects/Logodude/pipeline/make_tag_3mf.py            (the deliverable)
-       PROCESS="0.20mm Standard @BBL X2D" .venv/bin/python .../make_tag_3mf.py  (time check only, writes build-tag/alt.3mf)
+Usage: .venv/bin/python projects/Logodude/pipeline/make_tag_3mf.py                 (0.4 nozzle: logodude-tag.3mf)
+       NOZZLE=0.6 .venv/bin/python projects/Logodude/pipeline/make_tag_3mf.py      (0.6 nozzle: logodude-tag-06.3mf)
+       PROCESS="0.20mm Standard @BBL X2D" .venv/bin/python .../make_tag_3mf.py     (time check only, writes <build>/alt.3mf)
 """
 import json
 import math
@@ -40,7 +47,6 @@ from shapely.ops import unary_union
 
 PIPE = os.path.dirname(os.path.abspath(__file__))
 PROJECT = os.path.dirname(PIPE)
-BUILD = f"{PIPE}/build-tag"
 SHARKS = os.path.join(os.path.dirname(PROJECT), "Sharks-nametag", "pipeline")
 sys.path.insert(0, SHARKS)
 import fillcore_mod as fm  # noqa: E402  section_polys, cli, BED, tower minimums
@@ -48,23 +54,37 @@ import gcode_features as gf  # noqa: E402
 from graft_slice import graft_slice  # noqa: E402
 
 ROOT = os.path.expanduser("~/.config/BambuStudio/system/BBL")
-MACHINE = "Bambu Lab X2D 0.4 nozzle"
-DEFAULT_PROCESS = "0.16mm Standard @BBL X2D"      # the unsuffixed X2D processes are the 0.4 nozzle ones
+NOZZLE = os.environ.get("NOZZLE", "0.4")
+# Per-nozzle mode: presets (the unsuffixed X2D process names are the 0.4 ones; the unsuffixed PETG preset is the one
+# compatible with the 0.6 machine), STL name pattern, output, build dir, and the layer-1 prime tower brim relative to
+# wipe_tower_x/y (x0, y0, x1, y1) measured on that mode's own slice (main() re-measures and rebuilds once if it moved).
+MODES = {
+    "0.4": {"machine": "Bambu Lab X2D 0.4 nozzle", "process": "0.16mm Standard @BBL X2D",
+            "filament": "Bambu PETG Basic @BBL X2D 0.4 nozzle", "stl": "logodude-tag-{}.stl",
+            "out": "logodude-tag.3mf", "build": "build-tag",
+            "brim": (-3.87, -5.0, 30.84, 29.22)},    # measured 2026-10-13 at 0.16 Standard (34.7 x 34.2 mm)
+    "0.6": {"machine": "Bambu Lab X2D 0.6 nozzle", "process": "0.18mm Balanced Quality @BBL X2D 0.6 nozzle",
+            "filament": "Bambu PETG Basic @BBL X2D", "stl": "logodude-tag-06-{}.stl",
+            "out": "logodude-tag-06.3mf", "build": "build-tag-06",
+            "brim": (-3.85, -4.79, 30.97, 28.78)},   # measured 2026-10-13 at 0.18 Balanced Quality (34.8 x 33.6 mm)
+}
+MODE = MODES[NOZZLE]
+MACHINE = MODE["machine"]
+DEFAULT_PROCESS = MODE["process"]
 PROCESS = os.environ.get("PROCESS", DEFAULT_PROCESS)
 ALT = PROCESS != DEFAULT_PROCESS                  # a time check with another process: never the deliverable
-FILAMENT = "Bambu PETG Basic @BBL X2D 0.4 nozzle"
+FILAMENT = MODE["filament"]
+BUILD = f"{PIPE}/{MODE['build']}"
 COLOURS = ["#FFFFFF", "#000000"]                  # filament n = position in this list
 OBJECT = "Logo Dude luggage tag"
 PLATE = "Tag"
-PARTS = [{"stl": "logodude-tag-backer.stl", "name": "backer (white)", "filament": 1},     # the anchor
-         {"stl": "logodude-tag-ink.stl", "name": "ink (black)", "filament": 2},
-         {"stl": "logodude-tag-text.stl", "name": "back text (black)", "filament": 2}]
+PARTS = [{"stl": MODE["stl"].format("backer"), "name": "backer (white)", "filament": 1},     # the anchor
+         {"stl": MODE["stl"].format("ink"), "name": "ink (black)", "filament": 2},
+         {"stl": MODE["stl"].format("text"), "name": "back text (black)", "filament": 2}]
 CENTER = (128.0, 128.0)
-OUT = f"{BUILD}/alt.3mf" if ALT else f"{PROJECT}/logodude-tag.3mf"
+OUT = f"{BUILD}/alt.3mf" if ALT else f"{PROJECT}/{MODE['out']}"
 TIME_CAP_MIN = 75                                 # Brian 2026-10-13: "less than 1.25hrs"
 BED_TYPE = "Textured PEI Plate"
-BED_TEMP = "70"                                   # PETG Basic on textured PEI, the preset value
-NOZZLE_TEMP = "250"                               # PETG Basic preset
 BED_KEYS = ("textured_plate_temp", "textured_plate_temp_initial_layer")
 FILAMENT_MAP = ["1", "1"]                         # both filaments on extruder 1
 # Process keys locked in the file (every one listed in different_settings_to_system[0], or Studio resets it).
@@ -85,9 +105,7 @@ LOCKED = {
     "brim_type": "no_brim",
     "elefant_foot_compensation": "0",             # keeps the first-layer letter/white outlines where the CAD put them
 }
-# Layer-1 prime tower brim relative to wipe_tower_x/y (x0, y0, x1, y1), measured on this file's own slice; main()
-# re-measures and rebuilds once if it moved by more than BRIM_TOL.
-BRIM_OFFSETS = (-3.87, -5.0, 30.84, 29.22)   # measured 2026-10-13 on this file at 0.16 Standard (34.7 x 34.2 mm)
+BRIM_OFFSETS = MODE["brim"]
 BRIM_TOL = 0.5
 NOT_PART = ("Prime tower", "Wipe tower", "Skirt", "Brim", "Flush + retract net", "Start purge", "Custom", "Support",
             "Support interface", "Support transition")
@@ -151,7 +169,7 @@ def build(tower):
     proc = dict(PROCESS_CFG)
     for k, v in LOCKED.items():   # list keys: one value per extruder variant, as many as the preset has
         proc[k] = [v[0]] * len(proc[k]) if isinstance(v, list) else v
-    for fname, data in (("machine.json", MACHINE_CFG), ("process.json", proc), ("filament.json", flatten("filament", FILAMENT))):
+    for fname, data in (("machine.json", MACHINE_CFG), ("process.json", proc), ("filament.json", FILAMENT_CFG)):
         with open(f"{BUILD}/{fname}", "w") as f:
             json.dump(data, f, indent=1)
     # pos_x/pos_y place the STLs' shared origin so the anchor's bbox centre lands on CENTER; one assemble_index = one object
@@ -216,7 +234,7 @@ def check_file(path, label, tower):
         m3 = z.read("3D/3dmodel.model").decode()
     assert cfg["printer_settings_id"] == MACHINE and cfg["print_settings_id"] == PROCESS, label
     assert cfg["filament_settings_id"] == [FILAMENT] * 2 and cfg["filament_type"] == ["PETG", "PETG"], label
-    assert cfg["nozzle_diameter"][0] == "0.4" and cfg["layer_height"] == PROCESS_CFG["layer_height"], (label, cfg["layer_height"])
+    assert cfg["nozzle_diameter"][0] == NOZZLE and cfg["layer_height"] == PROCESS_CFG["layer_height"], (label, cfg["nozzle_diameter"], cfg["layer_height"])
     assert cfg["filament_colour"] == COLOURS, (label, cfg["filament_colour"])
     assert cfg["filament_map"] == FILAMENT_MAP and cfg["filament_map_mode"] == "Manual", label
     assert cfg["curr_bed_type"] == BED_TYPE and all(cfg[k] == [BED_TEMP] * 2 for k in BED_KEYS), label
@@ -309,11 +327,18 @@ def verify(tower):
     assert re.search(r"^; print_sequence = by layer$", g, re.M)
     assert re.search(r"^; wall_generator = arachne$", g, re.M) and re.search(r"^; sparse_infill_density = 100%$", g, re.M)
     assert re.search(r"^; skirt_loops = 2$", g, re.M) and re.search(r"^; brim_type = no_brim$", g, re.M)
-    h = float(PROCESS_CFG["layer_height"])
+    h, first = float(PROCESS_CFG["layer_height"]), float(PROCESS_CFG["initial_layer_print_height"])
     moves = gf.parse_moves(norm_tools(g))
     zs = sorted({m[0] for m in moves if m[0] > 0})
     layer_of = {z: i + 1 for i, z in enumerate(zs)}
     assert hdr["layers"] == len(zs) == A["layers"], (hdr["layers"], len(zs), A["layers"])
+    # the layer grid from the preset: layer n tops out at first + (n - 1) h; tier tops from the meshes
+    text_top, backer_top, ink_top = (BOUNDS[k][1][2] for k in ("text", "backer", "ink"))
+    grid = lambda top: 1 + round((top - first) / h)                     # the layer whose top is nearest this height
+    on_grid = {k: bool(abs(first + (grid(v) - 1) * h - v) < 1e-3) for k, v in (("text", text_top), ("backer", backer_top), ("ink", ink_top))}
+    assert ALT or all(on_grid.values()), f"tier tops off the {first} + n x {h} layer grid: {on_grid}"
+    assert abs(zs[0] - first) < 1e-6 and all(abs(b - a - h) < 1e-6 for a, b in zip(zs, zs[1:])), "layer heights"
+    assert len(zs) == grid(ink_top), (len(zs), grid(ink_top))
     feats = {m[1] for m in moves}
     assert "Skirt" in feats and "Brim" not in feats and "Prime tower" in feats, feats
     # toolpaths stay on the bed
@@ -326,12 +351,13 @@ def verify(tower):
     bx = (min(min(m[3], m[5]) for m in t1) - tower[0], min(min(m[4], m[6]) for m in t1) - tower[1],
           max(max(m[3], m[5]) for m in t1) - tower[0], max(max(m[4], m[6]) for m in t1) - tower[1])
     measured = tuple(round(v, 2) for v in bx)
-    # tiers from the meshes; a layer belongs to a tier when its top z is at or under the tier top (half a layer of slack)
-    text_top, backer_top, ink_top = (BOUNDS[k][1][2] for k in ("text", "backer", "ink"))
+    # tiers: a layer belongs to a tier when its top z is at or under the tier top (half a layer of slack)
     text_layers = [z for z in zs if z <= text_top + h / 2]
     backer_layers = [z for z in zs if z <= backer_top + h / 2]
     ink_layers = [z for z in zs if z > backer_top + h / 2]
     assert ink_layers and abs(zs[-1] - ink_top) < h / 2 + 1e-6, (zs[-1], ink_top)
+    assert (len(text_layers), len(backer_layers)) == (grid(text_top), grid(backer_top)), \
+        (len(text_layers), len(backer_layers), grid(text_top), grid(backer_top))
     part = [m for m in moves if m[1] not in NOT_PART and m[0] > 0]
     pad = lambda k: (BOUNDS[k][0][0] + POS[0] - FOOT_PAD, BOUNDS[k][0][1] + POS[1] - FOOT_PAD,
                      BOUNDS[k][1][0] + POS[0] + FOOT_PAD, BOUNDS[k][1][1] + POS[1] + FOOT_PAD)
@@ -355,7 +381,7 @@ def verify(tower):
     minutes = pred / 60
     per_feature = gf.feature_split(moves, hdr)[0]
     report.update({
-        "rc": A["rc"], "layers": A["layers"], "layer_height": h,
+        "rc": A["rc"], "layers": A["layers"], "layer_height": h, "first_layer_height": first, "tiers_on_grid": on_grid,
         "time": {"estimate": A["time"], "prediction_s": pred, "minutes": round(minutes, 1),
                  "h_m": f"{int(minutes // 60)} h {int(round(minutes % 60))} min", "cap_min": TIME_CAP_MIN,
                  "under_cap": minutes < TIME_CAP_MIN},
@@ -371,7 +397,7 @@ def verify(tower):
                          "first_layer_black_moves_in_text": first_text, "black_in_backer_only_layers": len(black_mid),
                          "white_above_backer": len(white_high)},
         "tower": {"wipe_tower_xy": list(tower), "brim_offsets_measured": measured, "brim_offsets_used": list(BRIM_OFFSETS),
-                  "clearance": check_tower(tower, FOOT_PLATE, measured)},
+                  "clearance": check_tower(tower, FOOT_PLATE, measured, strict=False)},   # main() re-places the tower if the measured brim moved
         "bed_xy": [round(v, 1) for v in xy],
     })
     assert minutes < TIME_CAP_MIN, f"{minutes:.1f} min is over Brian's {TIME_CAP_MIN} min cap"
@@ -380,6 +406,13 @@ def verify(tower):
 
 PROCESS_CFG = flatten("process", PROCESS)
 MACHINE_CFG = flatten("machine", MACHINE)
+FILAMENT_CFG = flatten("filament", FILAMENT)
+BED_TEMP = FILAMENT_CFG["textured_plate_temp"][0]           # PETG Basic on textured PEI: 70
+NOZZLE_TEMP = FILAMENT_CFG["nozzle_temperature"][0]         # PETG Basic: 250
+assert MACHINE in FILAMENT_CFG.get("compatible_printers", [MACHINE]) and MACHINE in PROCESS_CFG.get("compatible_printers", [MACHINE]), \
+    (FILAMENT, PROCESS, "not for", MACHINE)
+assert (BED_TEMP, NOZZLE_TEMP) == ("70", "250") and FILAMENT_CFG["filament_type"][0] == "PETG", (BED_TEMP, NOZZLE_TEMP)
+assert MACHINE_CFG["nozzle_diameter"][0] == NOZZLE, MACHINE_CFG["nozzle_diameter"]
 MESHES = {k: trimesh.load(f"{PROJECT}/{q['stl']}") for k, q in zip(("backer", "ink", "text"), PARTS)}
 BOUNDS = {k: m.bounds for k, m in MESHES.items()}
 assert all(m.is_watertight for m in MESHES.values())
@@ -392,11 +425,11 @@ def main():
     offsets = BRIM_OFFSETS
     for attempt in (1, 2):
         tower = tower_spot(FOOT_PLATE, offsets)
-        print(f"{PROCESS}: tower {tower}, clearance {check_tower(tower, FOOT_PLATE, offsets)} (brim offsets {offsets})")
+        print(f"{NOZZLE} nozzle, {PROCESS}: tower {tower}, clearance {check_tower(tower, FOOT_PLATE, offsets)} (brim offsets {offsets})")
         build(tower)
         report, measured = verify(tower)
         drift = max(abs(a - b) for a, b in zip(measured, offsets))
-        if drift <= BRIM_TOL:
+        if drift <= BRIM_TOL and check_tower(tower, FOOT_PLATE, measured, strict=False):
             break
         print(f"  tower brim measured {measured}, off by {drift:.2f} mm: rebuilding with the measured offsets")
         offsets = measured
@@ -404,15 +437,16 @@ def main():
         raise AssertionError(f"tower brim offsets still drifting: {measured}")
     report["tower"]["clearance"] = check_tower(tower, FOOT_PLATE, measured)
     if drift > 0 and measured != BRIM_OFFSETS:
-        report["tower"]["note"] = f"update BRIM_OFFSETS in make_tag_3mf.py to {measured}"
-    report.update({"file": OUT, "nozzle": "0.4", "presets": {"machine": MACHINE, "process": PROCESS, "filament": FILAMENT,
+        report["tower"]["note"] = f"update MODES['{NOZZLE}']['brim'] in make_tag_3mf.py to {measured}"
+    report.update({"file": OUT, "nozzle": NOZZLE, "presets": {"machine": MACHINE, "process": PROCESS, "filament": FILAMENT,
                                                              "colours": COLOURS, "bed": BED_TYPE, "bed_temp": BED_TEMP},
                    "object": OBJECT, "plate": PLATE, "parts": [{k: v for k, v in q.items()} for q in PARTS],
                    "placement": list(CENTER), "locked_process_keys": LOCKED, "deliverable": not ALT})
     with open(OUT.replace(".3mf", "-slice.json"), "w") as f:
         json.dump(report, f, indent=1)
     t, gr, tc = report["time"], report["grams"], report["tool_changes"]
-    print(f"{OUT}\n  {t['h_m']} ({t['minutes']} min, cap {TIME_CAP_MIN}, {'OK' if t['under_cap'] else 'OVER'}); {report['layers']} layers at {report['layer_height']}; "
+    print(f"{OUT}\n  {NOZZLE} nozzle: {t['h_m']} ({t['minutes']} min, cap {TIME_CAP_MIN}, {'OK' if t['under_cap'] else 'OVER'}); "
+          f"{report['layers']} layers ({report['first_layer_height']} + {report['layer_height']}); "
           f"white {gr['white (1)']} g + black {gr['black (2)']} g = {gr['total']} g\n"
           f"  filament changes {tc['count']} (start {tc['start']}): " + ", ".join(f"L{c['layer']}->{c['to']}" for c in tc["changes"])
           + f"\n  tower at {tower}, brim {report['tower']['brim_offsets_measured']}, clearance {report['tower']['clearance']}; "

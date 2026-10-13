@@ -1,0 +1,199 @@
+{
+ "authored": true,
+ "round_trip": true,
+ "rc": 0,
+ "layers": 21,
+ "layer_height": 0.18,
+ "first_layer_height": 0.3,
+ "tiers_on_grid": {
+  "text": true,
+  "backer": true,
+  "ink": true
+ },
+ "time": {
+  "estimate": "50m 47s",
+  "prediction_s": 3047,
+  "minutes": 50.8,
+  "h_m": "0 h 51 min",
+  "cap_min": 75,
+  "under_cap": true
+ },
+ "grams": {
+  "white (1)": 23.1,
+  "black (2)": 3.16,
+  "total": 26.26,
+  "header_weights": [
+   23.1,
+   3.16
+  ]
+ },
+ "grams_by_feature": {
+  "Sparse infill": 10.53,
+  "Internal solid infill": 6.46,
+  "Outer wall": 2.3,
+  "Bottom surface": 1.52,
+  "Inner wall": 1.39,
+  "Top surface": 1.24,
+  "Prime tower": 1.19,
+  "Skirt": 0.16,
+  "Floating vertical shell": 0.07,
+  "Gap infill": 0.01
+ },
+ "tool_changes": {
+  "start": "T1",
+  "count": 4,
+  "flushes": 4,
+  "changes": [
+   {
+    "layer": 1,
+    "z": 0.3,
+    "to": "T0"
+   },
+   {
+    "layer": 2,
+    "z": 0.48,
+    "to": "T1"
+   },
+   {
+    "layer": 3,
+    "z": 0.66,
+    "to": "T0"
+   },
+   {
+    "layer": 17,
+    "z": 3.18,
+    "to": "T1"
+   }
+  ]
+ },
+ "tiers": {
+  "text_layers": [
+   1,
+   2,
+   3
+  ],
+  "backer_layers": [
+   1,
+   16
+  ],
+  "ink_layers": [
+   17,
+   21
+  ],
+  "tops_mm": {
+   "text": 0.66,
+   "backer": 3.0,
+   "ink": 3.9
+  }
+ },
+ "gcode_proofs": {
+  "black_text_moves": 7470,
+  "black_ink_moves": 9922,
+  "first_layer_black_moves_in_text": 2405,
+  "black_in_backer_only_layers": 0,
+  "white_above_backer": 0
+ },
+ "tower": {
+  "wipe_tower_xy": [
+   185.0,
+   115.0
+  ],
+  "brim_offsets_measured": [
+   -3.85,
+   -4.79,
+   30.97,
+   28.78
+  ],
+  "brim_offsets_used": [
+   -3.85,
+   -4.79,
+   30.97,
+   28.78
+  ],
+  "clearance": [
+   12.15,
+   40.03
+  ]
+ },
+ "bed_xy": [
+  0.0,
+  75.5,
+  220.8,
+  200.0
+ ],
+ "file": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Logodude/logodude-tag-06.3mf",
+ "nozzle": "0.6",
+ "presets": {
+  "machine": "Bambu Lab X2D 0.6 nozzle",
+  "process": "0.18mm Balanced Quality @BBL X2D 0.6 nozzle",
+  "filament": "Bambu PETG Basic @BBL X2D",
+  "colours": [
+   "#FFFFFF",
+   "#000000"
+  ],
+  "bed": "Textured PEI Plate",
+  "bed_temp": "70"
+ },
+ "object": "Logo Dude luggage tag",
+ "plate": "Tag",
+ "parts": [
+  {
+   "stl": "logodude-tag-06-backer.stl",
+   "name": "backer (white)",
+   "filament": 1
+  },
+  {
+   "stl": "logodude-tag-06-ink.stl",
+   "name": "ink (black)",
+   "filament": 2
+  },
+  {
+   "stl": "logodude-tag-06-text.stl",
+   "name": "back text (black)",
+   "filament": 2
+  }
+ ],
+ "placement": [
+  128.0,
+  128.0
+ ],
+ "locked_process_keys": {
+  "ironing_type": "no ironing",
+  "seam_gap": "0%",
+  "small_perimeter_speed": [
+   "30"
+  ],
+  "small_perimeter_threshold": [
+   "10"
+  ],
+  "gap_infill_speed": [
+   "40"
+  ],
+  "wall_distribution_count": "3",
+  "wall_transition_filter_deviation": "50%",
+  "min_feature_size": "10%",
+  "min_bead_width": "50%",
+  "wall_generator": "arachne",
+  "prime_tower_brim_width": "5",
+  "prime_tower_rib_wall": "1",
+  "prime_tower_fillet_wall": "1",
+  "top_shell_layers": "5",
+  "top_surface_speed": [
+   "60"
+  ],
+  "skirt_loops": "2",
+  "skirt_distance": "3",
+  "skirt_height": "1",
+  "initial_layer_speed": [
+   "30"
+  ],
+  "initial_layer_infill_speed": [
+   "50"
+  ],
+  "sparse_infill_density": "100%",
+  "sparse_infill_pattern": "zig-zag",
+  "brim_type": "no_brim",
+  "elefant_foot_compensation": "0"
+ },
+ "deliverable": true
+}

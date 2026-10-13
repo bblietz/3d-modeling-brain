@@ -27,9 +27,13 @@ os.environ.update(_held)
 # Brian 2026-10-13: 0.6 nozzle, or 0.4 if the print stays under 1 h 15 min. Built for
 # the 0.4 nozzle: at 3 in the face strokes scale to 0.9 to 1.1 mm = two 0.42 mm beads
 # (clean, no fill-core modifier needed); at 0.6 the tag would have to grow to 3.5 in.
-TAG_H = float(os.environ.get("TAG_IN", 3.0)) * 25.4   # mm, silhouette height (face + hair, outline included), eyelet not counted
-BACKER_T = 3.08         # mm, on the 0.4-nozzle 0.16 layer grid (0.2 first layer + 18 x 0.16)
-INK_H = 0.96            # mm raised, 6 layers of 0.16 (the badge has 1.0)
+# NOZZLE=0.4 (default): 3 in tag on the 0.16 layer grid. NOZZLE=0.6 (Brian 2026-10-13, after
+# printing the 0.4 file through the 0.6 by mistake): 3.5 in tag on the 0.6 grid (0.3 first
+# layer + 0.18), letters sized for two 0.62 mm beads.
+NOZZLE = os.environ.get("NOZZLE", "0.4")
+TAG_H = float(os.environ.get("TAG_IN", 3.5 if NOZZLE == "0.6" else 3.0)) * 25.4   # mm, silhouette height, eyelet not counted
+BACKER_T = 3.0 if NOZZLE == "0.6" else 3.08    # mm: 0.3 + 15 x 0.18, or 0.2 + 18 x 0.16
+INK_H = 0.90 if NOZZLE == "0.6" else 0.96      # mm raised: 5 x 0.18, or 6 x 0.16 (the badge has 1.0)
 MIN_MARGIN = L.MIN_MARGIN
 # Eyelet: a round lobe on the backer's centroid axis so the tag hangs straight,
 # a hole for a strap loop, blended into the outline with a fillet.
@@ -40,13 +44,14 @@ LOBE_FILLET = 4.0       # mm, concave blend between lobe and outline
 # 0.4 nozzle: Russo One keeps every stroke at 0.25 x cap height, so caps of 3.5 to
 # 4.4 mm give 0.9 to 1.1 mm strokes = two 0.42 mm beads, no fill core needed.
 FONT = "/home/brian/.local/share/fonts/RussoOne-Regular.ttf"
-TEXT_D = 0.52           # mm deep: first layer 0.2 + 2 x 0.16
+TEXT_D = 0.66 if NOZZLE == "0.6" else 0.52   # mm deep, 3 layers: 0.3 + 2 x 0.18, or 0.2 + 2 x 0.16
 TEXT_MARGIN = 2.5       # mm, text keeps this far inside the outline (the inlay is only TEXT_D deep)
 LINE_GAP = 3.0          # mm, between the lines' bounding boxes
 TEXT_TOP_FRAC = 0.87    # top of the name line, as a fraction of TAG_H up from the silhouette bottom
 # (text, cap height mm)
 LINES = [("BLIETZ", 4.4), ("408.829.5860", 4.0), ("415.407.5201", 4.0), ("bblietz@gmail.com", 3.5)]
-if os.environ.get("NOZZLE") == "0.6":   # the 0.6-nozzle alternative (options page only): two 0.62 beads = caps 4.4 to 6.2
+if NOZZLE == "0.6":     # two 0.62 beads = caps 4.4 to 6.2; the email goes under the name because at 5 mm caps
+                        # it only fits the forehead band (the conventional order would push the name into the notch)
     LINES = [("BLIETZ", 6.2), ("bblietz@gmail.com", 5.0), ("408.829.5860", 5.4), ("415.407.5201", 5.4)]
     LINE_GAP, TEXT_TOP_FRAC = 2.2, 0.843
 CAP_PER_SIZE = Text("H", font_size=10, font_path=FONT).bounding_box().size.Y / 10
@@ -214,7 +219,7 @@ if os.environ.get("EXPORT"):
     import trimesh
     for name, part, vol in (("backer", backer, _v_backer), ("ink", ink, ink_2d.area * INK_H),
                             ("text", text, text_2d.area * TEXT_D)):
-        f = OUT / f"logodude-tag-{name}.stl"
+        f = OUT / f"logodude-tag{'-06' if NOZZLE == '0.6' else ''}-{name}.stl"
         export_stl(part, str(f), tolerance=0.005, angular_tolerance=0.1)
         m = trimesh.load(f)
         assert m.is_watertight, f"{f.name} not watertight"
