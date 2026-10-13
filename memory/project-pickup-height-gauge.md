@@ -17,7 +17,8 @@ on the two poles that flank it. 3MF for the 0.2 nozzle, PETG, 0.1 mm layers
 (every thickness a whole number of layers, asserted in the sliced G-code),
 1 h 14 min, 7.2 g. Not printed; Brian has not looked yet. Brian's bass is
 getting Fender '62 reissue pickups (said 2026-10-13): Fender's "Vintage
-style" row, so his pair is 3.2 mm under the E and 2.4 mm under the G.
+style" row, so his pair is 3.2 mm under the E and 2.4 mm under the G. The
+bass itself is a 2002 Mexican-made Standard Precision.
 
 **Why:** Fender's two support pages disagree by one 64th on a standard P's
 bass side (7/64 vs 6/64), so the gauge carries all four values instead of

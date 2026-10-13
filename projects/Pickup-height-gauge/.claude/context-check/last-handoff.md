@@ -22,7 +22,8 @@
   layers; the pipeline asserts each arm's top layer in the G-code.
 - Labels debossed on the hub, numbers only (the 2.4 value is a treble
   value on one Fender page and a bass value on the other).
-- Brian's bass is getting Fender '62 reissue pickups (Brian 2026-10-13):
+- Brian's bass is a 2002 Mexican-made Standard P getting Fender '62
+  reissue pickups (Brian 2026-10-13):
   Fender's "Vintage style" row, so his pair is 3.2 (E) and 2.4 (G). The
   other two arms stay as the next step closer.
 

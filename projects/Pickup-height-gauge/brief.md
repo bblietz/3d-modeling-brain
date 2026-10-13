@@ -123,9 +123,11 @@ https://claude.ai/artifact/7fBtPeEGbjEZiQmq3z3zQv
 
 ## Brian's pickups (2026-10-13)
 
-Brian is waiting on new Fender '62 reissue P-Bass pickups. Those are
-Fender's "Vintage style" row: start at 3.2 mm (8/64 in) under the E and
-2.4 mm (6/64 in) under the G. The '62 reissue has flush pole pieces, so the
+The bass is a 2002 Mexican-made Standard Precision, and Brian is waiting
+on new Fender '62 reissue P-Bass pickups for it. Those are Fender's
+"Vintage style" row: start at 3.2 mm (8/64 in) under the E and 2.4 mm
+(6/64 in) under the G. (Fender's factory-specs 6/64 in bass-side number
+is for the stock MIM pickup, which is coming out.) The '62 reissue has flush pole pieces, so the
 arm rests on the cover and the poles together, which is the same plane.
 The 2.8 and 2.0 arms stay on the gauge as the next step closer if the
 vintage spacing sounds weak.
