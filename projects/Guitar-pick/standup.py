@@ -28,7 +28,11 @@ HERE = Path(__file__).resolve().parent
 EDGE = "mirror"
 FIRST_LAYER, LAYER = 0.1, 0.06
 NECK_T, NECK_H = 0.40, 0.30       # two 0.2-nozzle lines wide (a hair under the 0.44 rim so it, not the rim, breaks); snap off, sand the rim flush
-SUPPORT_DEG = 45                  # the neck holds the outline up to where it is this steep; above that it self-supports
+SUPPORT_DEG = 60                  # the neck holds the outline up to where it is this steep; above that it self-supports.
+                                  # 45 in the first print (neck to 3.55 mm above the apex); Brian's photos of it showed
+                                  # the corners ragged to about 6 mm up, so since 2026-10-13 the neck runs to the 60
+                                  # degree point (5.05 mm up, x about +-11.9) and the self-supporting stubs above it
+                                  # step 0.035 mm per layer instead of 0.06
 BLOCK_W, BLOCK_MARGIN = 7.0, 2.0  # block width (pick thickness direction) and how far it runs past the neck ends
 OVERLAP = 0.1                     # the neck reaches this far into the pick and the block so the union is one solid
 TOWER, TOWER_X = 4.0, 24.0        # cooling column, square, centred at this x (pick half-width is 13.1)

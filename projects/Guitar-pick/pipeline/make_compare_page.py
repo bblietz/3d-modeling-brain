@@ -108,6 +108,8 @@ def main(out):
     # one shoulder layer's wall toolpaths from the sliced G-code, first print and now (pipeline/corner_figure.py)
     corner1, corner2 = ((IMG / f"corner-print{i}.svg").read_text().replace(' width="600" height="440"', "") for i in (1, 2))
     ends = sl["edge_path_ends"]
+    photo_a = data_uri(IMG / "print1-top-a.jpg", 800, "JPEG")     # Brian's photos of the first print, top 40% enlarged
+    photo_b = data_uri(IMG / "print1-top-b.jpg", 800, "JPEG")
     order = ("soft", "bevel", "round", "chamfer")
 
     photo = data_uri(IMG / "trace-1657.png", 700, "JPEG")
@@ -200,7 +202,21 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
   <div class="kicker">Guitar pick, Dunlop Tortex Standard 1.0 mm</div>
   <h1>Standing up, second print: the corners fixed in the toolpath</h1>
 </header>
-<p class="lede">The first print came off the stand with chunks missing from the two rounded corners of the top edge. The sliced G-code shows why: on the shoulders the one-line neck sat beside the pick's edge in every layer, so the slicer printed it as a separate bead of under a millimetre that started and ended on the pick's edge, and put the wall loop's own seam on that same spot, at all 55 shoulder layers. The fix is in the geometry: the rim is now two lines wide (0.44 mm, the bevels drop 0.28 mm each instead of 0.35) and the neck is two lines wide (0.40 mm), so the pick's outer wall runs along the faces, straight along the neck and into the block as one loop with nothing starting or ending on the pick. Everything else stands: the 1.5 mm blended bevel on both faces, the rim rounded, no support material, tip-up on the saddle block, the 4 mm cooling column, 0.2 mm nozzle and 0.06 mm layers.</p>
+<p class="lede">The first print came off the stand with chunks missing from the two rounded corners of the top edge. The sliced G-code shows why: on the shoulders the one-line neck sat beside the pick's edge in every layer, so the slicer printed it as a separate bead of under a millimetre that started and ended on the pick's edge, and put the wall loop's own seam on that same spot, at all 55 shoulder layers. The fix is in the geometry: the rim is now two lines wide (0.44 mm, the bevels drop 0.28 mm each instead of 0.35) and the neck is two lines wide (0.40 mm), so the pick's outer wall runs along the faces, straight along the neck and into the block as one loop with nothing starting or ending on the pick. Your photos show the bites reaching about 6 mm up the corners, past where the neck ended (3.5 mm), so the neck now runs up to where the outline is 60 degrees from horizontal, 5 mm up, and the unsupported stubs above it step 0.035 mm per layer instead of 0.06. Everything else stands: the 1.5 mm blended bevel on both faces, the rim rounded, no support material, tip-up on the saddle block, the 4 mm cooling column, 0.2 mm nozzle and 0.06 mm layers.</p>
+
+<figure>
+  <div class="pair">
+    <figure class="panel">
+      <img src="{photo_a}" alt="first print, one face: the top edge ragged along its length and both corners bitten">
+      <figcaption><b>First print, one face.</b> The whole top edge is ragged, not just the corners: the neck ran along all of it.</figcaption>
+    </figure>
+    <figure class="panel">
+      <img src="{photo_b}" alt="first print, the other face, with the seam line up the centre and white scuffs on the upper left">
+      <figcaption><b>The other face.</b> The faint line up the middle is the painted seam, as intended. The white scuffs on the upper left are not in the toolpath: sanding marks if you sanded it, otherwise wisps from the nozzle's hops to the cooling column, which sits on that side; say which.</figcaption>
+    </figure>
+  </div>
+  <figcaption>Your photos, the top 40% of the pick enlarged three times. The bites are deepest in the first 3.5 mm of each corner, the stretch the neck held, and fade out by about 6 mm.</figcaption>
+</figure>
 
 <figure>
   <div class="pair">
@@ -223,7 +239,7 @@ ol {{ margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 66ch; }
   <div class="pair">
     <figure class="panel">
       <img src="{neck}" alt="close-up of the shoulder resting on the neck and block">
-      <figcaption><b>The neck.</b> The shoulder sits on the saddle through the 0.40 mm neck, 0.3 mm tall. The block runs 2 mm past the neck on each side so there is something to hold while you snap it off.</figcaption>
+      <figcaption><b>The neck.</b> The shoulder sits on the saddle through the 0.40 mm neck, 0.3 mm tall, now up to the 60 degree point. The block runs 2 mm past the neck on each side so there is something to hold while you snap it off.</figcaption>
     </figure>
     <figure class="panel">
       <img src="{tipshot}" alt="close-up of the tip, rounded rim running into the bevel band">

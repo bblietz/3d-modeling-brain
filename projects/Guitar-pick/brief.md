@@ -101,10 +101,11 @@ what broke the corners: see the standing print section. 0.44 is two lines.
 ## Standing print (`standup.py`, `pipeline/make_standup_3mf.py`, 2026-10-12)
 
 The pick stands tip-up on its top edge. Standing, the faces and bevels are
-walls; only the top edge arc and the shoulder rounds up to the 45 degree
-point (x -10.9 to 10.95, 3.55 mm above the apex) face down, and they sit on
-a two-line neck (0.40 wide, 0.30 tall; 0.22 in the first print, see below)
-on a saddle-topped block (26 mm
+walls; only the top edge arc and the shoulder rounds face down, and they sit
+on a two-line neck (0.40 wide, 0.30 tall; 0.22 in the first print, see
+below) that runs up the shoulders to the 60 degree point (x -12.16 to 12.17,
+5.09 mm above the apex; the first print stopped at 45 degrees, x +-10.9,
+3.55 mm up) on a saddle-topped block (28 mm
 long, 7 wide, 3.975 at the centre, running 2 mm past the neck ends). A 4 mm
 square column 24 mm off centre, tied in by a 1 mm plate, gives the nozzle
 somewhere to go each layer so the tip's thin cross-sections cool. Height
@@ -128,6 +129,12 @@ estimated and about that in practice (the pick layers ran at 12.4 s each,
 the 12 s minimum layer time plus travel). It printed without errors and
 the neck held, but the two rounded corners of the top edge came off the
 stand with chunks missing (Brian: "a bad print", the rim did not tear).
+Brian's photos (`images/IMG_1659.jpg`, `IMG_1660.jpg`; the top 40% enlarged
+in `images/print1-top-a.jpg` and `-b.jpg`): the whole top edge is ragged,
+both corners are bitten, deepest in the first 3.5 mm and fading out about
+6 mm above the apex. The rear face shows the painted seam as a faint
+centre line and some white scuffing on its upper left, not explained by
+the toolpath (asked Brian whether that is sanding or stringing).
 
 Why (read from the sliced G-code with `pipeline/toolpath.py`; the summary
 and dumps that found it were run from a scratch copy of the pipeline's
@@ -153,13 +160,18 @@ enforcer too, because the combined pick-neck-block loop of the neck layers
 otherwise seamed in the inside corner where the neck meets the block.
 `make_standup_3mf.py` now asserts: two neck lines, no outer-wall path end
 within 0.6 mm of the pick's edge or the neck junction from the top edge to
-1 mm above the neck, nothing of any kind within 0.3 mm there, and at most
+0.1 mm above the neck, nothing of any kind within 0.3 mm there, and at most
 three layers above the neck where the loop splits at the rounded tip for one
 layer (the slicer does that on about 2 of 450 layers, a 0.06 mm seam
-point; the 0.30 rim had 3 such layers too).
+point; the 0.30 rim had 3 such layers too). Since the photos showed the
+bites reaching past the old neck's end, the neck runs to the 60 degree point
+(SUPPORT_DEG 60): the stubs above it step 0.035 mm per layer, not 0.06.
 
-Second slice (`guitar-pick-slice.json`): 577 layers, 2 h 11 min estimated,
-seam as above, numbers in the JSON. Not printed yet.
+Second slice (`guitar-pick-slice.json`, neck to 60 degrees): 577 layers,
+2 h 13 min estimated, 2.74 g (the longer neck and taller block), seam on
+the rear face centre line (376 pick loops within 0.9 mm), zero path ends at
+the pick's edge up to the neck's top, one stray tip split at z 9.76. Not
+printed yet.
 
 After the print: let the plate cool, hold the pick by its faces and bend the
 block down and away (the 0.40 neck gives before the 0.44 rim), then sand the
@@ -178,7 +190,7 @@ line.
 - `guitar-pick-mirror.stl`: the pick alone (mirrored 1.5 mm bevel, rounded rim). `guitar-pick-sym.stl`: the flat-printable alternative.
 - `pipeline/make_standup_3mf.py`: the shipped 3MF (standing); paints the seam strip and the block's rear face, checks the neck (two lines), the seam, path ends at the pick's edge, overhang and layer count in the real slice. `pipeline/toolpath.py`: arc-aware G-code parser with path starts and ends. `pipeline/corner_figure.py`: one shoulder layer's beads as an SVG (`images/corner-print1.svg`, `corner-print2.svg`). `pipeline/render_standup.sh`: the three OpenSCAD renders. `pipeline/make_print_3mf.py`: the flat pipeline, now pointed at `guitar-pick-sym.stl` and `guitar-pick-flat.3mf`, kept for the flat variants.
 - `pipeline/edge_options.py`: builds the seven edge variants, cuts the tip section, tabulates the per-layer underside overhang, renders `images/edge-*.png` with OpenSCAD (above and below); writes `edge-options.json` for the sign-off page.
-- `images/standup-iso.png`, `images/standup-neck.png`, `images/standup-tip.png`: OpenSCAD renders of the standing print. `images/pick-v6.png`: 4-view render of the flat sym model (v5 blended bevel, v4 round edge, v3 square, kept for the record).
+- `images/standup-iso.png`, `images/standup-neck.png`, `images/standup-tip.png`: OpenSCAD renders of the standing print (`pipeline/render_standup.sh`). `images/IMG_1659.jpg`, `IMG_1660.jpg`: Brian's photos of the first print (2026-10-13), `print1-top-a.jpg` / `-b.jpg` their top 40% enlarged. `images/pick-v6.png`: 4-view render of the flat sym model (v5 blended bevel, v4 round edge, v3 square, kept for the record).
 - `pipeline/trace_photo.py`: photo trace; writes `outline-dunlop.csv` and `images/trace-overlay.png`.
 - `pipeline/make_compare_page.py`: the sign-off page (published 2026-10-11: https://claude.ai/artifact/Xdy17d32z8uCNaQAHhxuis).
 - `images/pick-v3.png`: 4-view render of the current model (v1 teardrop and v2 generic 351 kept for the record).
@@ -230,4 +242,4 @@ mirrored 38 degree bevel (0.01 to 0.02 above the geometry, as before).
 - Edges tapered, not square (Brian 2026-10-12), and specifically the wide bevel with a curved lead-in and no noticeable line (Brian, same day, after seeing round, chamfer and bevel), then mirrored on both faces, no support material, and the rim rounded too (all Brian, same day).
 - Printed standing on a snap-off base (Brian 2026-10-12: "the standup version with a base, as this will give the smoothest surface for PETG"; a nozzle change was allowed but the 0.2 stays). The base is part of the model, same filament, no slicer support.
 - Smooth spline side instead of the traced polygon (2026-10-12), so the fillet has one edge loop and the print has no facets.
-- Rim and neck two lines wide (0.44 rim, 0.40 neck) since 2026-10-13, after the first print's corners failed; the bevel drop is 0.28 per face as a consequence. Brian has not yet seen this change; it is on the page.
+- Rim and neck two lines wide (0.44 rim, 0.40 neck) and the neck run to the 60 degree point, since 2026-10-13, after the first print's corners failed; the bevel drop is 0.28 per face as a consequence. Brian has not yet commented on the rim change; it is on the page.

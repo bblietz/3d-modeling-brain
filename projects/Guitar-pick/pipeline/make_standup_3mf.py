@@ -369,15 +369,15 @@ def verify(path, tmp):
     # neck layers the strip's ends are where the neck meets the block, and nothing may end there either (the seam of
     # that combined loop is painted onto the block's rear face). Above the neck the slicer occasionally splits the
     # loop at the rounded tip for one layer (2 of 450 in the 2026-10-13 slice, a one-layer seam point on the edge);
-    # up to three such layers are tolerated, none within 0.5 mm of the neck's top (the 2026-10-13 slice has one at
-    # 0.8 mm above it).
+    # up to three such layers are tolerated, none within 0.1 mm of the neck's top (the 2026-10-13 slice has one 0.4 mm
+    # above it, at the same height as before the neck was lengthened: it follows the mesh, not the neck).
     apex, neck_top = base_top + neck_h, base_top + STANDUP["held_drop"] + neck_h
-    neck_ends = toolpath.tip_path_ends(tp, cx, cy, apex + 0.05, neck_top + 0.5, feats=("Outer wall",), tol=0.6)
+    neck_ends = toolpath.tip_path_ends(tp, cx, cy, apex + 0.05, neck_top + 0.1, feats=("Outer wall",), tol=0.6)
     assert not neck_ends, f"{len(neck_ends)} outer wall path ends on the pick's edge or the neck junction, e.g. {neck_ends[:5]}"
-    edge_ends = toolpath.tip_path_ends(tp, cx, cy, neck_top + 0.5, height - 1.0, feats=("Outer wall",), tol=0.6)
+    edge_ends = toolpath.tip_path_ends(tp, cx, cy, neck_top + 0.1, height - 1.0, feats=("Outer wall",), tol=0.6)
     stray_layers = sorted({e[0] for e in edge_ends})
     assert len(stray_layers) <= 3, f"the wall loop splits at the pick's edge in {len(stray_layers)} layers: {stray_layers[:8]}"
-    near_ends = toolpath.tip_path_ends(tp, cx, cy, apex + 0.05, neck_top + 0.5, feats=None, tol=0.3)
+    near_ends = toolpath.tip_path_ends(tp, cx, cy, apex + 0.05, neck_top + 0.1, feats=None, tol=0.3)
     assert not near_ends, f"{len(near_ends)} path ends within 0.3 mm of the pick's edge, e.g. {near_ends[:5]}"
     # the pick's loops (not the column, not the block, not the lead-in zones): seam on one face, aligned, scarfed
     block_top = base_top + STANDUP["held_drop"]
@@ -401,7 +401,7 @@ def verify(path, tmp):
                             "pick_loops": len(pick_loops)},
                    "neck_wall_off_midplane_mm": round(neck_y, 3), "neck_lines": 2,
                    "edge_path_ends": {"neck_zone_outer_wall": len(neck_ends), "neck_zone_any_within_0.3": len(near_ends),
-                                      "neck_zone_z": [round(apex + 0.05, 2), round(neck_top + 0.5, 2)],
+                                      "neck_zone_z": [round(apex + 0.05, 2), round(neck_top + 0.1, 2)],
                                       "stray_split_layers_above": [round(z, 2) for z in stray_layers],
                                       "layers_checked_to_z": round(height - 1.0, 2)},
                    "overhang_fraction_of_outer_wall": round(overhang, 3),

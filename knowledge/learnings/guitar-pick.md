@@ -100,7 +100,12 @@ A plain 1:1 copy of the Dunlop Tortex Standard 1.0 mm pick in PETG on the
   "neck is a single line" and "all loops seam on the face" both passed on
   the bad file. Rule for any break-away tab on the X2D 0.2: tab and the
   edge it meets both at least 2 x 0.187 = 0.37 mm (the slicer's 85%
-  minimum bead), the tab a little narrower than the edge.
+  minimum bead), the tab a little narrower than the edge. Brian's photos
+  showed the bites deepest in the stretch the neck held and fading out
+  about 2.5 mm above its end: damage at a junction propagates upward for
+  a few dozen layers before the self-supporting stubs recover, so hold the
+  outline a little further than the overhang rule alone requires (the neck
+  now runs to the 60 degree point, 0.035 mm steps above it).
 - **Arachne splits a loop at a rounded tip now and then.** With R 0.15
   creases on a 0.44 rim the strip's end dips below two beads for its last
   0.1 mm; on about 2 of 450 layers the slicer emits that as a one-layer
@@ -161,8 +166,9 @@ second slice, the block's rear face), no ironing, skirt
 touches the bed). Edge, first print: 1.5 mm bevel dropping 0.35 on both
 faces, creases blended R 5, rim creases R 0.15, 0.30 mm rim, 0.22 neck:
 577 layers to 34.66 mm, 2 h 11 min estimated, 2.51 g of which 0.68 g is
-the pick. Second print (2026-10-13): drop 0.28, rim 0.44, neck 0.40,
-otherwise the same; 577 layers, 2 h 11 min estimated.
+the pick. Second print (2026-10-13): drop 0.28, rim 0.44, neck 0.40 run to
+the 60 degree point, otherwise the same; 577 layers, 2 h 13 min
+estimated, 2.74 g.
 
 The flat alternative (`guitar-pick-sym.stl`, 0.45 mm symmetric bevel at 38
 degrees) sliced to 16 layers, 13 min, 0.68 g, with the second layer 0.127
@@ -183,4 +189,4 @@ mm past the first; kept, not shipped.
 
 - Printed on the 0.2 mm nozzle, PETG Basic black, 250 C / 70 C, chamber 42 C, textured PEI, no slicer support, no ironing, 2-loop skirt. Finished 22:47 in the FINISH state with no HMS errors (read-only MQTT watch via `scripts/x2d-chamber-watch.sh`).
 - The pick layers ran at 12.4 s per layer (281 layers in 58 min), which is the 12 s PETG minimum layer time plus travel to the cooling column. When the minimum layer time dominates, the slicer estimate is accurate; the 1.4x under-run seen on the flat 0.2 slices does not apply.
-- Result (Brian, 2026-10-13): the neck held and the rim did not tear on removal, but "the outline of the pick was messed up at the top of the pick (the edge that was on the stand). The rounded corners had small chunks missing", "it was a bad print". Root cause and fix above (two-line neck and rim); second file built and slice-verified the same day, not printed.
+- Result (Brian, 2026-10-13): the neck held and the rim did not tear on removal, but "the outline of the pick was messed up at the top of the pick (the edge that was on the stand). The rounded corners had small chunks missing", "it was a bad print". His photos (`images/IMG_1659.jpg`, `IMG_1660.jpg`): the whole top edge ragged, both corners bitten to about 6 mm above the apex, the painted seam a faint centre line on the rear face, white scuffs on that face's upper left (unexplained; sanding or stringing). Root cause and fix above (two-line neck and rim, neck to 60 degrees); second file built and slice-verified the same day, not printed.
