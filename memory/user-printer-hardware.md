@@ -8,7 +8,7 @@ metadata:
   modified: 2026-09-10T16:00:22.907Z
 ---
 
-Brian prints on a Bambu Lab X2D with an AMS 2 Pro (max 4 colors per print). Nozzles owned: 0.2 mm, 0.4 mm, 0.6 mm, and 0.6 mm high-flow ("speed nozzle"), all hardened steel. The 0.6 high-flow is normally installed; the 0.4 was installed for the Sharks nametag (Aug 2026); the 0.2 mm nozzles arrived Aug 2026.
+Brian prints on a Bambu Lab X2D with an AMS 2 Pro (max 4 colors per print). Nozzles owned: 0.2 mm, 0.4 mm, 0.6 mm, and 0.6 mm high-flow ("speed nozzle"), all hardened steel. The 0.6 high-flow is normally installed; the 0.4 was installed for the Sharks nametag (Aug 2026); the 0.2 mm nozzles arrived Aug 2026; the 0.2 went into the main hotend on 2026-10-12 for the guitar pick (the printer reports it as HS00 stainless steel, the 0.6 in the auxiliary as HS01 hardened).
 
 **How to apply:** when suggesting how to get the best result, say which nozzle fits the job and why, using all four: 0.2 for hairline detail and small raised text when a 3 to 4x print time is acceptable (Bambu caps PETG at 2 mm3/s there), 0.4 for fine detail at normal speed (arachne walls get raised art down to ~0.5 mm), 0.6 / 0.6 HF for speed and strength on coarse parts. Full rules and per-nozzle floors: knowledge/printer-x2d.md. See also [[feedback-agentic-os-conventions]].
 

@@ -1,7 +1,7 @@
 ---
 title: Guitar pick retrospective (Dunlop Tortex 1.0 copy)
 date: 2026-10-12
-status: modelled and sliced standing on a snap-off base, print pending
+status: modelled and sliced standing on a snap-off base, printed 2026-10-12 (no errors), inspection pending
 tags: [learning, 3d-print, petg, 0.2-nozzle, photo-trace]
 ---
 
@@ -151,3 +151,9 @@ mm past the first; kept, not shipped.
   PETG rule is no ironing until a coupon says otherwise.
 - Bottom finish comes from the plate; a Smooth PEI plate is the only route
   to a smooth bottom.
+
+## Print (2026-10-12)
+
+- Printed on the 0.2 mm nozzle, PETG Basic black, 250 C / 70 C, chamber 42 C, textured PEI, no slicer support, no ironing, 2-loop skirt. Finished 22:47 in the FINISH state with no HMS errors (read-only MQTT watch via `scripts/x2d-chamber-watch.sh`).
+- The pick layers ran at 12.4 s per layer (281 layers in 58 min), which is the 12 s PETG minimum layer time plus travel to the cooling column. When the minimum layer time dominates, the slicer estimate is accurate; the 1.4x under-run seen on the flat 0.2 slices does not apply.
+- Inspection pending: feel against the Tortex, whether the neck held through the whole print, the rear-face seam line, the sanded top rim.

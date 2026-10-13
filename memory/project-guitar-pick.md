@@ -1,18 +1,18 @@
 ---
 name: project-guitar-pick
-description: "Dunlop Tortex Standard 1.0 pick copy; mirrored 1.5 mm blended bevel with a rounded rim, printed STANDING on a snap-off base (Brian 2026-10-12), 3MF slice-verified 2 h 11 min; not printed"
+description: "Dunlop Tortex Standard 1.0 pick copy; mirrored 1.5 mm blended bevel with a rounded rim, printed STANDING on a snap-off base (Brian 2026-10-12), 3MF slice-verified 2 h 11 min; printed 2026-10-12 (finished 22:47, no errors), Brian's inspection pending"
 metadata:
   node_type: memory
   type: project
   originSessionId: 436656c6-ca45-4497-873c-df44f48e28f5
-  modified: 2026-10-12T22:30:00.000Z
+  modified: 2026-10-12T22:55:00.000Z
 ---
 
 Plain PETG copy of the Dunlop Tortex Standard 1.0 mm pick (351 shape), `projects/Guitar-pick/`. On 2026-10-11 Brian measured it at 26.19 x 30.38 x 1.0 mm; the outline was traced from his two caliper photos (`pipeline/trace_photo.py`) and he approved it on the sign-off page. The measured tip radius is 4.5 mm; the generic 351 SVG outline is 3.4 mm, so the generic shape is NOT a stand-in for the Dunlop.
 
 On 2026-10-12 Brian rejected the square edge ("the pick edges should be tapered"), saw round, chamfer and bevel drawn at scale, chose "like the bevel, but no noticeable line, so a curved lead in" (built as `soft`: 1.5 mm bevel dropping 0.35, crease blended R 5), then asked for it mirrored on both faces with no support material. A flat print's underside carries about 38 degrees at most (0.06 layers, 0.22 line: layer 2 at half a line), so flat and the mirrored 1.5 mm bevel are incompatible. Brian chose the stand-up print on a snap-off base ("smoothest surface for PETG") and the rim rounded too (R 0.15). `standup.py` builds the pick tip-up on a 0.22 x 0.3 mm neck along the top edge and shoulders, a saddle block, a plate and a 4 mm cooling column, one solid, 34.66 mm = 577 layers, with a 2 micron seam strip down the rear face that `pipeline/make_standup_3mf.py` paints as the seam region (`paint_seam="4"`). Research: a new Tortex Standard is die-stamped square and wears into a bevel; no published edge numbers.
 
-Print file `guitar-pick.3mf` (`pipeline/make_standup_3mf.py`): 0.2 mm nozzle, 0.06 mm layers, solid zig-zag, arachne, seam painted on the rear face centre line (all 402 pick loops within 0.8 mm; `seam_position back` alone walked along the face), no ironing, skirt. Slice: 577 layers, 2 h 11 min (the 12 s PETG minimum layer time dominates), 2.51 g of which 0.68 g is the pick, neck a single line, 0% overhang walls. Scarf seams produced nothing in the CLI, not shipped. Not printed as of 2026-10-12. The flat pipeline (`make_print_3mf.py`, sym variant) is kept.
+Print file `guitar-pick.3mf` (`pipeline/make_standup_3mf.py`): 0.2 mm nozzle, 0.06 mm layers, solid zig-zag, arachne, seam painted on the rear face centre line (all 402 pick loops within 0.8 mm; `seam_position back` alone walked along the face), no ironing, skirt. Slice: 577 layers, 2 h 11 min (the 12 s PETG minimum layer time dominates), 2.51 g of which 0.68 g is the pick, neck a single line, 0% overhang walls. Scarf seams produced nothing in the CLI, not shipped. Printed 2026-10-12 on the 0.2 nozzle, 250 C / 70 C, PETG Basic black, chamber 42 C: finished 22:47 in the FINISH state with no HMS errors. The pick layers ran at 12.4 s per layer (the 12 s minimum layer time plus travel), so the slicer estimate was accurate for this print. Brian's inspection pending: feel vs the Tortex, whether the neck held, the thumb edge after sanding. The flat pipeline (`make_print_3mf.py`, sym variant) is kept.
 
 **Why:** Brian wants it as smooth as possible, hence the 0.2 nozzle and the standing print (faces and bevels as walls, 0.014 mm steps on the bevel). Printed flat, any underside taper must stay about 38 degrees or steeper (each 0.06 layer's wall can hang about half a 0.22 line past the one below).
 

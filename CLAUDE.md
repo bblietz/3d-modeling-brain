@@ -30,7 +30,7 @@ Before using or ruling out any tool, confirm it against this list. Never say a t
 
 ## Printer: Bambu Lab X2D
 
-- Nozzles owned: 0.2 mm, 0.4 mm, 0.6 mm, and 0.6 mm high-flow ("speed nozzle"), all hardened steel. The 0.6 high-flow is normally installed (0.4 installed since 2026-08-06 for the Sharks nametag); confirm before applying wall-thickness rules if the choice matters, and when advising on best results say which nozzle fits the job (0.2 hairline detail at 3 to 4x time, 0.4 fine detail, 0.6 speed).
+- Nozzles owned: 0.2 mm, 0.4 mm, 0.6 mm, and 0.6 mm high-flow ("speed nozzle"), all hardened steel. The 0.6 high-flow is normally installed (0.2 installed since 2026-10-12 for the guitar pick); confirm before applying wall-thickness rules if the choice matters, and when advising on best results say which nozzle fits the job (0.2 hairline detail at 3 to 4x time, 0.4 fine detail, 0.6 speed).
 - Minimum wall = 2 perimeters: about 1.24 mm with a 0.6 nozzle, about 0.84 mm with the 0.4 nozzle.
 - Build volume 256 x 256 x 260 mm (235.5 x 256 x 256 mm for dual-nozzle prints). AMS 2 Pro: max 4 colors per print; the second nozzle is for support material and is only a low-accuracy 5th color.
 - Clearances: about 0.2 mm snug fit, 0.3 mm free fit.

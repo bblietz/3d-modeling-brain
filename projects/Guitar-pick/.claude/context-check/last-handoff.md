@@ -67,3 +67,9 @@ blended bevel with a rounded rim, printed STANDING on a snap-off base
 - No ironing on the first pick (vault PETG rule; this pick is the coupon).
 - Seam at the top centre, under the thumb.
 - Design work runs on Fable 5.1 only; stop before building otherwise.
+
+## Print status (2026-10-12)
+
+Brian swapped in the 0.2 nozzle and started `guitar-pick.3mf`. First status check: RUNNING, layer 274/577, 53%, 250 C / 70 C, chamber 44 C, no HMS errors. Result pending; after it finishes record the real print time, whether the neck held, and the feel versus the Tortex in the retrospective.
+
+Finished 22:47 (FINISH, no errors), pick layers at 12.4 s each, estimate accurate. Next: Brian cuts the neck at the block, sands the top rim flush on 400 then 800 grit, and reports feel vs the Tortex, the neck, the seam line and the sanded edge. Record those in the retrospective.

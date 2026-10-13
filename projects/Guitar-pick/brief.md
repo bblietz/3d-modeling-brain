@@ -1,6 +1,6 @@
 ---
 title: Guitar pick, Dunlop Tortex Standard 1.0 mm
-status: standing print built and sliced 2026-10-12 (mirrored 1.5 mm bevel, rounded rim, on a snap-off base), waiting on the print
+status: standing print built and sliced 2026-10-12 (mirrored 1.5 mm bevel, rounded rim, on a snap-off base), printed 2026-10-12 (finished 22:47, no errors), inspection pending
 created: 2026-10-11
 tags: [project, 3d-print, petg]
 ---
