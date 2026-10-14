@@ -13,6 +13,7 @@ Usage (from anywhere, vault venv):
   filament_budget.py table                                   all variants sliced so far, one line each
 Variants live in $SCRATCH/fil/<name>/ (print.3mf, sliced.3mf, result.json); `table` merges them into filament-variants.json.
   filament_budget.py regions <sliced.3mf> [--store]         body grams by region (solid face/base, drum core, supports by what they hold); --store writes it to result.json
+Region passes: up to 16 in parallel (about 0.5 GB and 15 s each since 2026-10-14; 28 of the old 9.7 GB version OOM-killed the box).
 """
 import json
 import math

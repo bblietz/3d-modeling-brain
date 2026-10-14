@@ -36,8 +36,10 @@ https://claude.ai/artifact/D2zPQ4v2W97wuq1hMqpYa6, base options https://claude.a
 - `filament_budget.py variant <name> key=value ...` slices a settings variant of holder-print.3mf into $SCRATCH/fil/<name>
   (vector keys stay vectors; `mod:`/`base:`/`face:` prefixes patch the modifiers); `table` merges the per-variant
   result.json files (never a shared file: the parallel slices raced on one); `regions <sliced>` needs the unsliced
-  print.3mf beside it (the sliced file bakes the part offsets into the mesh). Run region passes at most four at a time
-  (each loads the G-code and meshes; 28 at once got OOM-killed).
+  print.3mf beside it (the sliced file bakes the part offsets into the mesh). Run region passes up to 16 at a time:
+  since the chunked containment fix (2026-10-14) each peaks at about 0.5 GB and takes about 15 s; before it each peaked at
+  9.7 GB and 28 at once OOM-killed the whole box (2026-10-12). For a big batch wrap the loop so an overrun kills only slicer
+  jobs: `systemd-run --user --scope -p MemoryMax=44G -p MemoryHigh=40G -p MemorySwapMax=2G -p OOMPolicy=continue -- sh -c '...'`.
 - `filament_figures.py section|layer|bars` draws the toolpaths by region; `filament_options_page.py` builds the page.
 - Known dead ends: tower width does nothing; `wipe_tower_no_sparse_layers` is refused ("relative position of the model and
   the prime tower") with the tower beside the part, and at y 5 the tower is off the printable area; hollow and lightning
