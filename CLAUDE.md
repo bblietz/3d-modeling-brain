@@ -40,3 +40,4 @@ Before using or ruling out any tool, confirm it against this list. Never say a t
 
 - Use subagents whenever possible: codebase or file exploration, reference-image inspection, transcript mining, research, and independent parallel builds. Keep the main context lean; only conclusions belong in the main thread.
 - Batch independent subagents in parallel.
+- Heavy local jobs (slicer runs, G-code region passes, renders, anything over about 1 GB or one core each) never run as a bare shell loop. Cap the concurrency (`xargs -P`) and wrap the batch in a memory-capped scope so an overrun kills only those jobs, never the desktop or the trading services: `systemd-run --user --scope -p MemoryMax=44G -p MemoryHigh=40G -p MemorySwapMax=2G -p OOMPolicy=continue -- sh -c '...'`. On 2026-10-12 a loop of 28 region passes at 9.7 GB each OOM-killed the whole box, including brian's user manager and the live trading daemon.
