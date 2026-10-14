@@ -110,6 +110,21 @@ def modifier_meshes(sliced):
     return out
 
 
+def contains(mesh, pts, chunk=2000):
+    """Point-in-mesh test a chunk at a time, with near-vertical rays. trimesh without embree expands every call to roughly
+    60 to 150 KB per point: one pass over the holder's 314k sparse-infill points peaked at 9.7 GB (nine in parallel
+    OOM-killed the box on 2026-10-12). 2000 points per call keeps a pass under 1 GB, and a near-vertical ray (not exactly
+    +Z, so it never runs along a layer edge) shrinks each ray's candidate box, halving the time again: 0.5 GB, 12 s,
+    same result as mesh.contains() on every variant checked."""
+    import numpy as np
+    from trimesh.ray import ray_util
+    if len(pts) == 0:
+        return np.zeros(0, bool)
+    d = np.array([0.01, 0.013, 1.0])
+    d /= np.linalg.norm(d)
+    return np.concatenate([ray_util.contains_points(mesh.ray, c, check_direction=d) for c in np.array_split(pts, max(1, len(pts) // chunk))])
+
+
 def regions(sliced):
     """Body filament by where it is: the solid regions, the drum's sparse core, and the supports by what they hold up."""
     import numpy as np
@@ -125,7 +140,7 @@ def regions(sliced):
     where = np.array(["other"] * len(segs), dtype=object)
     for name, mesh in mods.items():
         sel = feat == "Sparse infill"
-        inside = mesh.contains(mid[sel])
+        inside = contains(mesh, mid[sel])
         idx = np.flatnonzero(sel)[inside]
         where[idx] = f"solid {name}"
     core = (feat == "Sparse infill") & (where == "other")

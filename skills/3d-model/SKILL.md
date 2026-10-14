@@ -270,7 +270,7 @@ Studio PROJECT 3MF instead, built with the locally installed CLI
    (knowledge/smooth-surfaces-x2d.md). Current hardware presets: machine
    `Bambu Lab X2D 0.6 nozzle`,
    process `0.18mm Balanced Quality @BBL X2D 0.6 nozzle` (finest for
-   0.6), filament `Bambu PLA Basic @BBL X2D`.
+   0.6), filament `Bambu PLA Basic @BBL X2D 0.6 nozzle` (Bambu Studio 02.08.02 split the X2D filament presets per nozzle; the bare `@BBL X2D` name no longer exists).
 3. ```bash
    bambu-studio --arrange 0 --assemble \
      --load-settings "flat-machine.json;flat-process.json" \

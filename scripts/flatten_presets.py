@@ -38,7 +38,7 @@ out_dir = sys.argv[1]
 presets = [
     ("machine", "Bambu Lab X2D 0.6 nozzle", "flat-machine.json"),
     ("process", "0.18mm Balanced Quality @BBL X2D 0.6 nozzle", "flat-process.json"),
-    ("filament", "Bambu PLA Basic @BBL X2D", "flat-filament.json"),
+    ("filament", "Bambu PLA Basic @BBL X2D 0.6 nozzle", "flat-filament.json"),
 ]
 for kind, name, fname in presets:
     merged = flatten(kind, name)
