@@ -44,3 +44,10 @@ Nothing is cut. Record actual ply thicknesses, the alcove's three widths, and th
 - The "same thickness" trap: the groove position now comes from the panel thickness (GY0 = back face + panel thickness - tongue), not from centering. Panels of 12 mm ply (nominal 1/2) make the groove front wall 6 mm.
 - 1/2 in box backs cannot take a bottom groove and Blum's 10 mm hook bore (12 - 10 = 2 mm skin). Bottom butts the back instead. Unverified against Blum's sheets.
 - Painted parts get their own white color in hero_shot.py and assembly_shots.py (PAINTED set); picture composites by Gemini are mood only and predate geometry changes.
+
+## 2026-10-23: a composite the client can sign off on
+
+- Gemini cannot hold a dimension given in words. "The wood top is 14 inches above the floor" produced a bench about 20 in tall (measured against its own 66 in width), twice. Treat any dimension in a prompt as decoration.
+- What works: camera-match the photo (`photo_match.py`: the alcove's four floor corners give distance, focal length, camera height and lateral offset in closed form; the 8 ft ceiling checks the fit to 2 in), z-buffer the CAD solids into the photo flat-shaded at true scale, and have Gemini photorealize that overlay with a prompt that forbids moving an edge (`render_in_room.py guided`). One call, $0.17, and the output's edges land on the projection.
+- Always verify: `photo_match.py check <image>` draws the projected outline over the output and measures the walnut panels in inches. A detector that looks for "dark" rows catches the overhang's shadow on white paint; it must test for brown (R well above B), not just dark.
+- The 4x corner crops with pixel ticks were the reliable way to read the floor corners; a first-dark-pixel column scan was fooled by the baseboard's shoe shadow.

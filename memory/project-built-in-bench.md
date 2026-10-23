@@ -20,4 +20,6 @@ Update 2026-10-09: Brian locked 1/2 walnut ply panels inset 1/4 (frames stay 3/4
 
 Finish decided 2026-10-09: Osmo Natural (clear, Brian confirmed) on the bare maple top and shelves; frames, plinth, strips painted white.
 
-Height lowered 2026-10-09 for the senior dog: wood top 14 in (seat 17 in with cushion), base 3 in, drawer box 8.5 in tall. Composites predate it.
+Height lowered 2026-10-09 for the senior dog: wood top 14 in (seat 17 in with cushion), base 3 in, drawer box 8.5 in tall.
+
+2026-10-23: the alcove picture is now dimensionally true: `photo_match.py` projects the CAD into the photo through a matched camera and the `guided` Gemini job only adds materials; `photo_match.py check` verifies the output against the projection (see [[feedback-photo-composite-cad-overlay]]). Brian: the client signs off on that picture, not on CAD drawings. Shop page Version 8 carries it. The shelves in it are a picture-only idea (10 in deep, undersides 20 in over the cushion then 14 in apart), not in the cut list.

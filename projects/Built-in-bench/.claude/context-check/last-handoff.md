@@ -31,4 +31,8 @@ State: build123d model `built_in_bench.py` passes all asserts; `cutlist.md/.csv`
 
 Decisions locked: 1/2 walnut ply panels inset 1/4 (back flush with the frame); frames, plinth, strips painted white (panels, top, shelves bare); every drawer box part is 1/2 9-ply Baltic birch (no back groove, bottom butts the back; locking-device screws #6 x 1/2). Pipeline rerun: EXPORT=1, part_drawings, hero_shot (CUSHION=0), assembly_shots, make_cutlist_page (now includes the alcove picture with shelves), make_pdf (20 pages), shop page republished as Version 4. Open: test-drill a scrap 1/2 BB back for the Blum hook bore (2 mm skin), site measurements, receptacle, the nook composite predates the inset.
 
+## Update 2026-10-23
+
+Height is 14 in top / 17 in seat (2026-10-09). Brian wants the room picture dimensionally true because the client signs off on it. Done: `photo_match.py` (camera match from the alcove's floor corners, CAD z-buffered into the photo at true scale, `check` mode measures Gemini's output against the projection) and the `guided` job in `render_in_room.py`; `images/bench-in-nook-guided.png` verified (edges on the projection, panel bottoms within 1/4 in); shop page Version 8 and the PDF carry it. The earlier wrong-height composites (`bench-in-nook-low*.png`) were deleted. Still open: site measurements, the receptacle, the Blum hook-bore scrap test, Brian's look at STILE_W, and the plinth (3 in) meeting the 4 in pilaster baseboards.
+
 Height lowered 2 in 2026-10-09 (top 14 in, base 3 in, box 8.5 in); pipeline rerun and shop page republished (Version 5). Osmo Natural (clear) on the maple top and shelves.
