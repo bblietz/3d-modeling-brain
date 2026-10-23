@@ -18,8 +18,11 @@ Jobs:
   guided   images/alcove-overlay.png (photo_match.py: the CAD bench and shelves projected into the alcove photo
            through a camera matched to it, at true scale) -> images/bench-in-nook-guided.png; Gemini only makes the
            flat CAD surfaces photoreal and may not move an edge. Verify with photo_match.py check <output>.
+  styled   images/bench-in-nook-guided.png (the verified picture) + images/concept-ai-bench-web.jpg (the client's
+           reference) -> images/bench-in-nook-styled.png; the dog, pillows, throw, shelf objects, dog bowls and rug
+           from the reference added, nothing else changed. Verify with photo_match.py check <output> again.
 
-Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|guided] [variant]
+Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|guided|styled] [variant]
 A variant name is appended to the output file so reruns do not overwrite earlier images.
 """
 import os
@@ -156,6 +159,35 @@ Materials and finish:
   white plinth in the glossy floor. Same lighting, white balance, grain and lens as the photo. Photorealistic, no CAD
   look."""
 
+STYLED_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove: white painted drawer frames around dark walnut
+panels with brass bar pulls, a maple top, one long oatmeal linen cushion, and three maple floating shelves above. Its
+geometry has been verified against the design and is final. Image 2 is the client's reference picture of a similar
+alcove bench with a golden retriever and accessories.
+
+Edit image 1 to add the dog and the accessories from image 2, and change nothing else. Do not move, resize, redraw or
+restyle the bench, the drawer fronts, the brass pulls, the cushion, the maple top, the shelves, the walls, the door, the
+floor, the pilasters or the camera: every edge that is in image 1 stays exactly where it is, at the same size.
+
+Add, placed naturally and at real-world scale (the bench is 66 inches wide, the cushion top is 17 inches above the floor):
+- The golden retriever from image 2, an older dog, lying on the cushion a little right of center, facing the camera,
+  relaxed with its head up, like in image 2. The dog rests entirely on the cushion and does not hang over its front edge.
+- Three throw pillows standing against the back wall like in image 2: a dark olive green velvet pillow and a cream and
+  grey striped linen pillow at the left end, a rust brown pillow at the right end, the dog between them.
+- A cream and grey woven throw blanket with fringe, folded on the cushion at the left end with one corner hanging just
+  over the cushion's front edge, not below the maple top's edge, so both drawer fronts stay fully visible.
+- The shelves styled like image 2, replacing the few objects on them now: a trailing pothos in a white pot at the left
+  end of the top shelf with vines hanging down, a lidded woven seagrass basket, a few hardcover books lying and standing,
+  a small framed landscape picture, two cream ceramic jars, a small wooden bowl, a second small potted plant, a woven
+  basket holding tennis balls on the bottom shelf, and a small white framed sign reading GOOD DOGS LIVE HERE leaning on
+  the bottom shelf. Everything stands on the shelves and does not hide the shelf front edges.
+- Two stainless steel dog bowls in a small wooden tray on the floor just outside the alcove, to the right of the right
+  pilaster, in the passage.
+- A natural jute rug on the floor in the foreground at the bottom of the frame, ending well in front of the bench so the
+  white plinth and the floor line under the bench stay fully visible.
+
+Keep the lighting exactly as it is in image 1; the new items cast soft natural shadows consistent with it. No recessed
+lights, no other new objects, no other changes. Photorealistic, matching image 1's grain, lens and white balance."""
+
 JOBS = {
     "bench": ((f"{PROJ}/images/space-photo-web.jpg", "image/jpeg"), (f"{PROJ}/images/hero.png", "image/png"),
               BENCH_PROMPT, "bench-in-nook"),
@@ -169,6 +201,8 @@ JOBS = {
     "white-inset": ((f"{PROJ}/images/bench-in-nook-white.png", "image/png"), (f"{PROJ}/images/hero.png", "image/png"),
                     WHITE_INSET_PROMPT, "bench-in-nook-white-inset"),
     "guided": ((f"{PROJ}/images/alcove-overlay.png", "image/png"), None, GUIDED_PROMPT, "bench-in-nook-guided"),
+    "styled": ((f"{PROJ}/images/bench-in-nook-guided.png", "image/png"),
+               (f"{PROJ}/images/concept-ai-bench-web.jpg", "image/jpeg"), STYLED_PROMPT, "bench-in-nook-styled"),
 }
 job = sys.argv[1] if len(sys.argv) > 1 else "bench"
 if job not in JOBS:

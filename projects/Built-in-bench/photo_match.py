@@ -249,11 +249,14 @@ def check(path):
     s_face = F / (D + ALCOVE_D_IN - (CASE_D + FACE_T) / IN)     # px per inch at the drawer faces
     for i in range(len(FRONT_X0)):
         pts = [project(*p) for p in lines[f"panel {i}"]]
-        u = int(round(pts[0][0] + (pts[1][0] - pts[0][0]) / 4))   # a quarter across: clear of the brass pull
         top_exp, bot_exp = pts[2][1], pts[0][1]
-        bot, top = dark_rows(arr, u, int(top_exp) - 60, int(bot_exp) + 60)   # dark rows: first is the panel top
+        for frac in (0.25, 0.75):   # a quarter in from either end: clear of the brass pull; a throw may hide one end
+            u = int(round(pts[0][0] + (pts[1][0] - pts[0][0]) * frac))
+            bot, top = dark_rows(arr, u, int(top_exp) - 60, int(bot_exp) + 60)   # dark rows: first is the panel top
+            if bot is not None:
+                break
         if bot is None:
-            print(f"panel {i}: no walnut found at column {u}")
+            print(f"panel {i}: no walnut found a quarter in from either end")
             continue
         print(f"panel {i} at x {u}: top y {bot} (projected {top_exp:.0f}, {(top_exp - bot) / s_face:+.2f} in), "
               f"bottom y {top} (projected {bot_exp:.0f}, {(bot_exp - top) / s_face:+.2f} in); "
