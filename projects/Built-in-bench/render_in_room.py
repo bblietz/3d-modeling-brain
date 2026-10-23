@@ -15,8 +15,12 @@ Jobs:
            bench with the 1/2 walnut panels visibly recessed 1/4 in below the white frames
   white-all  images/bench-in-nook-white.png -> images/bench-in-nook-white-all.png, the white bench with the
            drawer panels painted white too (all-white fronts, brass pulls, maple top and shelves bare)
+  low-bench  images/space-photo-web.jpg + images/hero.png -> images/bench-in-nook-low-bench.png, the white bench
+           at the lowered height drawn straight into the empty alcove (wood top 14 in, cushion top 17 in)
+  low-shelves  images/bench-in-nook-low-bench.png + images/concept-ai-bench-web.jpg -> images/bench-in-nook-low.png,
+           three 10 in deep maple shelves added
 
-Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset] [variant]
+Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|low-bench|low-shelves] [variant]
 A variant name is appended to the output file so reruns do not overwrite earlier images.
 """
 import os
@@ -126,6 +130,21 @@ raised profile or bevel. Do not change anything else: the white frames, plinth a
 the same places, the bare maple top, the cushion, the three maple shelves with their objects, the walls, floor,
 door, lighting and camera. Photorealistic, matching image 1's grain and white balance."""
 
+LOW_BENCH_PROMPT = BENCH_PROMPT.replace(
+    "the wood top is 16 inches above\n  the floor, the cushion top 19 inches.",
+    "the wood top is only 14 inches above\n  the floor, the cushion top 17 inches, a low seat.").replace(
+    "a pale clear-finished hard maple\n  frame only 1-1/2 inches wide around a dark chocolate walnut veneer panel, flush, with a thin 1/8 inch\n  shadow gap around each front.",
+    "a frame only 1-1/2 inches wide, PAINTED SMOOTH SATIN WHITE (no wood grain), around a dark chocolate walnut panel with visible grain, the panel\n  recessed about 1/4 inch behind the white frame like a shaker door, with a thin 1/8 inch shadow gap around each front. Each front is only 10 inches tall.").replace(
+    "A flush maple plinth 4 inches tall at the floor, in the same plane as the drawer fronts, in place of the\n  baseboard, which has been removed inside the alcove. Narrow maple strips at each wall.",
+    "A flush plinth only 3 inches tall at the floor, painted satin white, in the same plane as the drawer fronts, in place of the\n  baseboard, which has been removed inside the alcove (the pilasters keep their taller 4 inch baseboards). Narrow white painted strips at each wall.").replace(
+    "Clear satin finish: the maple reads pale blond, the walnut dark brown with visible grain.",
+    "The top stays bare clear-finished pale blond maple; the walnut panels are dark brown with visible grain; the frames, plinth and strips are white like the door.")
+assert LOW_BENCH_PROMPT.lower().count("white") > 4 and "14 inches" in LOW_BENCH_PROMPT and "10 inches tall" in LOW_BENCH_PROMPT and "3 inches tall" in LOW_BENCH_PROMPT
+
+LOW_SHELVES_PROMPT = SHELVES_PROMPT.replace(
+    "two walnut-and-maple drawers", "two drawers (white painted frames around walnut panels)").replace(
+    "the same pale blond maple as the bench's top and frames (not white oak,\n  not darker)", "the same pale blond maple as the bench's top (not white oak,\n  not darker)")
+
 JOBS = {
     "bench": ((f"{PROJ}/images/space-photo-web.jpg", "image/jpeg"), (f"{PROJ}/images/hero.png", "image/png"),
               BENCH_PROMPT, "bench-in-nook"),
@@ -138,6 +157,10 @@ JOBS = {
                   "bench-in-nook-white-all"),
     "white-inset": ((f"{PROJ}/images/bench-in-nook-white.png", "image/png"), (f"{PROJ}/images/hero.png", "image/png"),
                     WHITE_INSET_PROMPT, "bench-in-nook-white-inset"),
+    "low-bench": ((f"{PROJ}/images/space-photo-web.jpg", "image/jpeg"), (f"{PROJ}/images/hero.png", "image/png"),
+                  LOW_BENCH_PROMPT, "bench-in-nook-low-bench"),
+    "low-shelves": ((f"{PROJ}/images/bench-in-nook-low-bench.png", "image/png"),
+                    (f"{PROJ}/images/concept-ai-bench-web.jpg", "image/jpeg"), LOW_SHELVES_PROMPT, "bench-in-nook-low"),
 }
 job = sys.argv[1] if len(sys.argv) > 1 else "bench"
 if job not in JOBS:
