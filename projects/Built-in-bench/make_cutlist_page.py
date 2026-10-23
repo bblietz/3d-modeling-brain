@@ -125,7 +125,7 @@ def group_section(label, rows):
 
 
 HERO = "images/hero.png"
-NOOK = "images/bench-in-nook-white-web.jpg"    # AI composite of the white option in the alcove, with the shelves
+NOOK = "images/bench-in-nook-low-web.jpg"    # AI composite of the white option in the alcove, with the shelves
 
 
 def sub_figure(fname, caption):
@@ -294,7 +294,7 @@ PAGE = """<title>Built-in Bench Cut List</title>
     <p>Two drawers on Blum undermounts, white-painted maple frames around inset walnut panels, solid maple top. {total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
     <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
   </header>
-  <figure class="dwg nook" tabindex="0"><img src="{nook}" alt="the finished bench in the alcove, white frames with walnut panels, maple top, cushion and three maple shelves above"><figcaption>how it should look in the alcove: white frames, walnut panels, maple top, cushion, three maple shelves (an AI composite from the photo of the alcove, not a drawing; the shelves are not in this cut list); tap to zoom</figcaption></figure>
+  <figure class="dwg nook" tabindex="0"><img src="{nook}" alt="the finished bench in the alcove, white frames with walnut panels, maple top, cushion and three maple shelves above"><figcaption>how it should look in the alcove at the lowered height (seat 17 in with the cushion): white frames, walnut panels, maple top, cushion, three maple shelves (an AI composite from the photo of the alcove, not a drawing; the shelves are not in this cut list); tap to zoom</figcaption></figure>
 
   <div class="flag"><b>Measure the alcove at the floor, 16 in and 36 in, at the back wall and the pilaster faces, before cutting.</b> Cut the top, plinth and scribe strips long and scribe them. Confirm the low receptacle seen in the photo before cutting the back.</div>
 
