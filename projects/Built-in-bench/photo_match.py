@@ -57,10 +57,12 @@ SHELF_T = 1.5 * IN
 SHELF_Z0 = [SEAT_Z + CUSHION_H + 20 * IN + i * 14 * IN for i in range(3)]   # undersides: 20 in over the cushion, 14 apart
 
 # ---------------------------------------------------------------- dropped soffit with downlights (picture only)
-SOFFIT_DROP = 12 * IN                           # across the whole alcove, flush with the pilaster faces: ceiling at 7 ft
-LIGHT_DIA = 4 * IN                              # two recessed downlights in the soffit's underside
-LIGHT_X = [ALCOVE_W / 4, 3 * ALCOVE_W / 4]
-LIGHT_Y = ALCOVE_D / 2
+SOFFIT_DROP = 12 * IN                           # across the whole alcove: ceiling at 7 ft inside it
+SOFFIT_SETBACK = 3 * IN                         # its face 3 in behind the pilaster faces like the bench top, so each
+SOFFIT_D = ALCOVE_D - SOFFIT_SETBACK            # pilaster passes in front of its end (Brian 2026-10-23: flush read as
+LIGHT_DIA = 4 * IN                              # a beam running on over the hallway)
+LIGHT_X = [ALCOVE_W / 4, 3 * ALCOVE_W / 4]      # two recessed downlights in the soffit's underside
+LIGHT_Y = SOFFIT_D / 2
 
 # ---------------------------------------------------------------- camera
 # pinhole camera looking straight into the alcove: u = cx + f (X - Xc) / (D + d), v = cy + f (h - Z) / (D + d)
@@ -125,7 +127,7 @@ def color_of(name):
 
 def soffit_scene():
     z0 = CEILING_IN * IN - SOFFIT_DROP
-    items = [("soffit", _box(0, 0, z0, ALCOVE_W, ALCOVE_D, SOFFIT_DROP))]
+    items = [("soffit", _box(0, 0, z0, ALCOVE_W, SOFFIT_D, SOFFIT_DROP))]
     for i, x in enumerate(LIGHT_X):     # trim rings standing 1/4 in proud of the underside, so they z-buffer in front of it
         items.append((f"light_{i}", Pos(x, LIGHT_Y, z0 + 0.25 * IN) * Cylinder(LIGHT_DIA / 2, IN)))
     return items
@@ -217,8 +219,8 @@ def bench_outline():
         dz = ALCOVE_D_IN - SHELF_D / IN
         lines[f"shelf {i}"] = [(xl, dz, z0 / IN), (xr, dz, z0 / IN), (xr, dz, (z0 + SHELF_T) / IN),
                                (xl, dz, (z0 + SHELF_T) / IN), (xl, dz, z0 / IN)]
-    zs = CEILING_IN - SOFFIT_DROP / IN
-    lines["soffit face"] = [(xl, 0, zs), (xr, 0, zs), (xr, 0, CEILING_IN), (xl, 0, CEILING_IN), (xl, 0, zs)]
+    zs, ds = CEILING_IN - SOFFIT_DROP / IN, SOFFIT_SETBACK / IN
+    lines["soffit face"] = [(xl, ds, zs), (xr, ds, zs), (xr, ds, CEILING_IN), (xl, ds, CEILING_IN), (xl, ds, zs)]
     lines["soffit underside back"] = [(xl, ALCOVE_D_IN, zs), (xr, ALCOVE_D_IN, zs)]
     return lines
 

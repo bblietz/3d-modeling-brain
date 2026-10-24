@@ -222,16 +222,19 @@ No other new objects, no other changes. Photorealistic, matching image 1's grain
 SOFFIT_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove with two dogs on its cushion, pillows, a throw, three
 maple floating shelves with objects, dog bowls on the floor and a rug. Across the top of the alcove a DROPPED SOFFIT has
 been placed by CAD, flat-shaded, at its exact built size and position: a box 12 inches tall spanning the alcove from
-pilaster to pilaster and from the back wall out to the pilaster faces, its front face flush with the pilaster faces, so
-the alcove's ceiling is now 7 feet above the floor. In its underside are two 4 inch round recessed LED downlights, where
-the two pale discs are. Every edge of the soffit and the position of each light are correct and final.
+pilaster to pilaster and from the back wall out to 3 inches behind the pilaster faces, so its front face sits 3 inches
+inside the alcove like the bench top below it, each end dies into a pilaster's inner face, and a 3 inch strip of each
+pilaster's inner face shows in front of it; the alcove's ceiling is now 7 feet above the floor. In its underside are two
+4 inch round recessed LED downlights, where the two pale discs are. Every edge of the soffit and the position of each
+light are correct and final. The soffit stops at the pilasters: nothing continues past them over the hallway or the door.
 
 Turn the flat CAD surfaces into a photorealistic part of the photograph and change NOTHING else. The CAD box's light
 grey front face and darker grey underside are unpainted PLACEHOLDERS, not colors to keep: in the finished photograph the
 soffit is drywall, its front face painted the same cream as the walls around it, and its underside painted the same
 matte white as the room ceiling (not grey, not blue), so the alcove's lowered ceiling looks like ordinary painted ceiling
-drywall, with crisp corners where it meets the pilasters and the room ceiling and a soft shadow line along the
-underside's front edge. The two downlights are flush recessed fixtures with slim white trim rings, switched on: warm
+drywall, with a crisp corner where its ends meet the pilasters' inner faces, a crisp corner where its top meets the room
+ceiling, a soft shadow line along the underside's front edge, and the soft shadow it casts onto the strip of each
+pilaster's inner face in front of it and onto the back wall. The two downlights are flush recessed fixtures with slim white trim rings, switched on: warm
 white light pooling down the back wall over the shelves and the bench, soft highlights on the objects on the top shelf
 and on the dogs, consistent with the photo's daylight and not overpowering it. Do not move, resize or redraw the soffit, the lights, the bench, the
 dogs, the pillows, the throw, the shelves and their objects, the bowls, the rug, the walls, the door, the floor, the
