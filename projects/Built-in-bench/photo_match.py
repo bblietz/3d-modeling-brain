@@ -16,8 +16,11 @@ exact guide that Gemini only has to make photoreal (render_in_room.py, job
                            (resized to the photo) and measures where the walnut
                            panels and the bench's bottom edge landed, in pixels and
                            inches, against the projection
+  photo_match.py soffit F  z-buffers only the dropped soffit and its two downlights onto
+                           picture F (a Gemini output at its own size) and writes
+                           F-soffit-overlay.png, the guide for render_in_room.py soffit
 
-Usage: .venv/bin/python projects/Built-in-bench/photo_match.py [check <image>]
+Usage: .venv/bin/python projects/Built-in-bench/photo_match.py [check <image> | soffit <image>]
 """
 import math
 import os
@@ -33,6 +36,7 @@ PROJ = f"{VAULT}/projects/Built-in-bench"
 sys.path.insert(0, PROJ)
 from built_in_bench import *  # noqa: E402,F403
 from built_in_bench import INST, HW, _box  # noqa: E402
+from build123d import Cylinder, Pos  # noqa: E402
 
 PHOTO = f"{PROJ}/images/space-photo.png"
 OVERLAY = f"{PROJ}/images/alcove-overlay.png"
@@ -51,6 +55,12 @@ CEILING_IN = 96.0
 SHELF_D = 10 * IN
 SHELF_T = 1.5 * IN
 SHELF_Z0 = [SEAT_Z + CUSHION_H + 20 * IN + i * 14 * IN for i in range(3)]   # undersides: 20 in over the cushion, 14 apart
+
+# ---------------------------------------------------------------- dropped soffit with downlights (picture only)
+SOFFIT_DROP = 12 * IN                           # across the whole alcove, flush with the pilaster faces: ceiling at 7 ft
+LIGHT_DIA = 4 * IN                              # two recessed downlights in the soffit's underside
+LIGHT_X = [ALCOVE_W / 4, 3 * ALCOVE_W / 4]
+LIGHT_Y = ALCOVE_D / 2
 
 # ---------------------------------------------------------------- camera
 # pinhole camera looking straight into the alcove: u = cx + f (X - Xc) / (D + d), v = cy + f (h - Z) / (D + d)
@@ -96,9 +106,11 @@ MAPLE = (224, 198, 152)
 LINEN = (206, 194, 172)
 BRASS = (198, 152, 82)
 SHADOW = (58, 52, 46)        # case and boxes: only seen in the reveals, read as shadow lines
+LAMP = (255, 250, 228)
 COLOR = {
     "stile_": PAINT, "rail_": PAINT, "plinth": PAINT, "strip_": PAINT,
     "panel_": WALNUT, "top": MAPLE, "cushion": LINEN, "pull_": BRASS, "shelf_": MAPLE,
+    "soffit": PAINT, "light_": LAMP,
 }
 LIGHT = np.array([-0.3, -0.55, 0.78])     # toward the light, in (X, d, Z): from the room, above, a little left
 LIGHT /= np.linalg.norm(LIGHT)
@@ -111,24 +123,33 @@ def color_of(name):
     return SHADOW
 
 
+def soffit_scene():
+    z0 = CEILING_IN * IN - SOFFIT_DROP
+    items = [("soffit", _box(0, 0, z0, ALCOVE_W, ALCOVE_D, SOFFIT_DROP))]
+    for i, x in enumerate(LIGHT_X):     # trim rings standing 1/4 in proud of the underside, so they z-buffer in front of it
+        items.append((f"light_{i}", Pos(x, LIGHT_Y, z0 + 0.25 * IN) * Cylinder(LIGHT_DIA / 2, IN)))
+    return items
+
+
 def scene():
     items = list(INST) + list(HW)
     for i, z0 in enumerate(SHELF_Z0):
         items.append((f"shelf_{i}", _box(0, 0, z0, ALCOVE_W, SHELF_D, SHELF_T)))
-    return items
+    return items + soffit_scene()
 
 
-def render(photo):
-    """flat-shaded z-buffer render of the scene over the photo; returns the RGB array"""
+def render(photo, items=None, sx=1.0, sy=1.0):
+    """flat-shaded z-buffer render of the items (default: the whole scene) over the photo; sx, sy scale the
+    projection when the photo is a Gemini output at its own size rather than space-photo.png. Returns the RGB array."""
     img = np.asarray(photo.convert("RGB")).astype(np.float32)
     H, W, _ = img.shape
     zbuf = np.full((H, W), np.inf, dtype=np.float32)
     ntri = 0
-    for name, solid in scene():
+    for name, solid in (scene() if items is None else items):
         base = np.array(color_of(name), dtype=np.float32)
         verts, tris = solid.tessellate(0.4, 0.3)
         P = np.array([cad_to_cam((v.X, v.Y, v.Z)) for v in verts])          # (X, d, Z) inches
-        UV = np.array([project(*p) for p in P])
+        UV = np.array([project(*p) for p in P]) * (sx, sy)
         depth = D + P[:, 1]
         for a, b, c in tris:
             ntri += 1
@@ -140,7 +161,10 @@ def render(photo):
             view = np.array([XC, -D, HCAM]) - P[a]      # surface to camera
             if np.dot(n, view) < 0:
                 n = -n
-            shade = 0.58 + 0.42 * max(0.0, float(np.dot(n, LIGHT)))
+            if name == "soffit":    # painted drywall, nearly unshaded: Gemini keeps the overlay's colors, and a face
+                shade = 0.98 if abs(n[2]) < 0.5 else 0.92   # turned away from LIGHT came out as a grey-blue ceiling
+            else:
+                shade = 0.58 + 0.42 * max(0.0, float(np.dot(n, LIGHT)))
             col = np.clip(base * shade, 0, 255)
             (u0, v0), (u1, v1), (u2, v2) = UV[a], UV[b], UV[c]
             x0, x1 = int(max(0, math.floor(min(u0, u1, u2)))), int(min(W - 1, math.ceil(max(u0, u1, u2))))
@@ -193,6 +217,9 @@ def bench_outline():
         dz = ALCOVE_D_IN - SHELF_D / IN
         lines[f"shelf {i}"] = [(xl, dz, z0 / IN), (xr, dz, z0 / IN), (xr, dz, (z0 + SHELF_T) / IN),
                                (xl, dz, (z0 + SHELF_T) / IN), (xl, dz, z0 / IN)]
+    zs = CEILING_IN - SOFFIT_DROP / IN
+    lines["soffit face"] = [(xl, 0, zs), (xr, 0, zs), (xr, 0, CEILING_IN), (xl, 0, CEILING_IN), (xl, 0, zs)]
+    lines["soffit underside back"] = [(xl, ALCOVE_D_IN, zs), (xr, ALCOVE_D_IN, zs)]
     return lines
 
 
@@ -272,6 +299,14 @@ if __name__ == "__main__":
     report_camera()
     if len(sys.argv) > 2 and sys.argv[1] == "check":
         check(sys.argv[2])
+        sys.exit()
+    if len(sys.argv) > 2 and sys.argv[1] == "soffit":
+        pic = Image.open(sys.argv[2]).convert("RGB")
+        photo = Image.open(PHOTO)
+        out = render(pic, soffit_scene(), pic.width / photo.width, pic.height / photo.height)
+        dst = f"{os.path.splitext(sys.argv[2])[0]}-soffit-overlay.png"
+        Image.fromarray(out).save(dst)
+        print("wrote", os.path.relpath(dst, VAULT))
         sys.exit()
     photo = Image.open(PHOTO)
     wireframe(photo).save(WIREFRAME)
