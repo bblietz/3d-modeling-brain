@@ -49,7 +49,8 @@ BACK_L, BACK_R = (319, 971), (808, 968)       # back wall corners at the floor, 
 CEIL_Y = 243                                  # the back wall's top edge (ceiling "about 8 ft" per the brief)
 ALCOVE_W_IN = ALCOVE_W / IN
 ALCOVE_D_IN = ALCOVE_D / IN
-CEILING_IN = 96.0
+CEILING_IN = 98.5                             # measured through the camera: the pilaster tops (y 124) give 98.6 in, the back
+                                              # wall's top edge 98.0; at 96 a strip of ceiling showed above the soffit's face
 
 # ---------------------------------------------------------------- shelves (not in the cut list; picture only)
 SHELF_D = 10 * IN
@@ -57,12 +58,18 @@ SHELF_T = 1.5 * IN
 SHELF_Z0 = [SEAT_Z + CUSHION_H + 20 * IN + i * 14 * IN for i in range(3)]   # undersides: 20 in over the cushion, 14 apart
 
 # ---------------------------------------------------------------- dropped soffit with downlights (picture only)
-SOFFIT_DROP = 12 * IN                           # across the whole alcove: ceiling at 7 ft inside it
-SOFFIT_SETBACK = 3 * IN                         # its face 3 in behind the pilaster faces like the bench top, so each
-SOFFIT_D = ALCOVE_D - SOFFIT_SETBACK            # pilaster passes in front of its end (Brian 2026-10-23: flush read as
-LIGHT_DIA = 4 * IN                              # a beam running on over the hallway)
-LIGHT_X = [ALCOVE_W / 4, 3 * ALCOVE_W / 4]      # two recessed downlights in the soffit's underside
-LIGHT_Y = SOFFIT_D / 2
+# a bulkhead flush with the pilaster faces, as in the client's concept picture: one band across the top of the alcove and
+# of both pilasters (they stop at its underside like posts under a lintel), running on to the right over the hallway
+# opening past the edge of the frame; the door recess to the left keeps its full-height ceiling. Brian 2026-10-23: "the
+# soffit is flush with the front and then extends over the hallway"; a box between the pilasters, set back, was wrong.
+SOFFIT_DROP = 12 * IN                           # below the ceiling: about 7 ft 2-1/2 in clear inside the alcove
+PILASTER_W = 6 * IN                             # each pilaster's face, read off the photo (55 px at 9.4 px per in)
+HALL_RUN = 36 * IN                              # how far it runs on past the right pilaster (the frame edge is 14 in past it)
+SOFFIT_X0 = -PILASTER_W                         # CAD x: from the left pilaster's outer edge ...
+SOFFIT_W = ALCOVE_W + 2 * PILASTER_W + HALL_RUN # ... to beyond the right edge of the picture, 28 in deep throughout
+LIGHT_DIA = 4 * IN
+LIGHT_X = [ALCOVE_W / 4, 3 * ALCOVE_W / 4]      # two recessed downlights in the underside, over the alcove only
+LIGHT_Y = ALCOVE_D / 2
 
 # ---------------------------------------------------------------- camera
 # pinhole camera looking straight into the alcove: u = cx + f (X - Xc) / (D + d), v = cy + f (h - Z) / (D + d)
@@ -97,7 +104,7 @@ def report_camera():
     print(f"camera: {D:.1f} in from the pilaster faces, {HCAM:.1f} in up, {XC:+.1f} in from center; "
           f"f {F:.0f} px, principal point ({CX:.0f}, {CY:.0f})")
     _, v = project(0, ALCOVE_D_IN, CEILING_IN)
-    print(f"check: 8 ft ceiling projects to y {v:.0f}, photo shows {CEIL_Y} "
+    print(f"check: the {CEILING_IN:.1f} in ceiling projects to y {v:.0f} at the back wall, photo shows {CEIL_Y} "
           f"({(CEIL_Y - v) * (D + ALCOVE_D_IN) / F:+.1f} in at the back wall)")
 
 
@@ -127,7 +134,7 @@ def color_of(name):
 
 def soffit_scene():
     z0 = CEILING_IN * IN - SOFFIT_DROP
-    items = [("soffit", _box(0, 0, z0, ALCOVE_W, SOFFIT_D, SOFFIT_DROP))]
+    items = [("soffit", _box(SOFFIT_X0, 0, z0, SOFFIT_W, ALCOVE_D, SOFFIT_DROP))]
     for i, x in enumerate(LIGHT_X):     # trim rings standing 1/4 in proud of the underside, so they z-buffer in front of it
         items.append((f"light_{i}", Pos(x, LIGHT_Y, z0 + 0.25 * IN) * Cylinder(LIGHT_DIA / 2, IN)))
     return items
@@ -219,9 +226,10 @@ def bench_outline():
         dz = ALCOVE_D_IN - SHELF_D / IN
         lines[f"shelf {i}"] = [(xl, dz, z0 / IN), (xr, dz, z0 / IN), (xr, dz, (z0 + SHELF_T) / IN),
                                (xl, dz, (z0 + SHELF_T) / IN), (xl, dz, z0 / IN)]
-    zs, ds = CEILING_IN - SOFFIT_DROP / IN, SOFFIT_SETBACK / IN
-    lines["soffit face"] = [(xl, ds, zs), (xr, ds, zs), (xr, ds, CEILING_IN), (xl, ds, CEILING_IN), (xl, ds, zs)]
-    lines["soffit underside back"] = [(xl, ALCOVE_D_IN, zs), (xr, ALCOVE_D_IN, zs)]
+    zs = CEILING_IN - SOFFIT_DROP / IN
+    xs0, xs1 = xl + SOFFIT_X0 / IN, xl + (SOFFIT_X0 + SOFFIT_W) / IN
+    lines["soffit face"] = [(xs0, 0, zs), (xs1, 0, zs), (xs1, 0, CEILING_IN), (xs0, 0, CEILING_IN), (xs0, 0, zs)]
+    lines["soffit underside back"] = [(xs0, ALCOVE_D_IN, zs), (xs1, ALCOVE_D_IN, zs)]
     return lines
 
 

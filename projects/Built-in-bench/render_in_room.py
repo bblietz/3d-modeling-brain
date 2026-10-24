@@ -220,38 +220,42 @@ Keep the lighting exactly as it is in image 1; the dogs cast soft natural shadow
 No other new objects, no other changes. Photorealistic, matching image 1's grain, lens and white balance."""
 
 SOFFIT_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove with two dogs on its cushion, pillows, a throw, three
-maple floating shelves with objects, dog bowls on the floor and a rug. Across the top of the alcove a DROPPED SOFFIT has
-been placed by CAD, flat-shaded, at its exact built size and position: a box 12 inches tall spanning the alcove from
-pilaster to pilaster and from the back wall out to 3 inches behind the pilaster faces, so its front face sits 3 inches
-inside the alcove like the bench top below it, each end dies into a pilaster's inner face, and a 3 inch strip of each
-pilaster's inner face shows in front of it; the alcove's ceiling is now 7 feet above the floor. In its underside are two
-4 inch round recessed LED downlights, where the two pale discs are. Every edge of the soffit and the position of each
-light are correct and final. The soffit stops at the pilasters: nothing continues past them over the hallway or the door.
+maple floating shelves with objects, dog bowls on the floor and a rug. Across the top of the picture a DROPPED SOFFIT has
+been placed by CAD, flat-shaded, at its exact built size and position: a bulkhead hung from the ceiling whose front face
+is flush with the faces of the two pilasters, in the same plane as them. It is one continuous band from the outer edge
+of the left pilaster across the alcove, across the top of the right pilaster and on to the right over the hallway
+opening, out past the edge of the picture; both pilasters now stop at its underside, like posts under a lintel. Its
+underside runs back to the alcove's back wall; over the hallway opening it is the same depth, and beyond its back edge
+the room ceiling stays at its full height. To the left of the left pilaster, the recess with the door keeps its
+full-height ceiling. In its underside over the alcove are two round recessed LED downlights, where the two pale discs
+are. Every edge of the soffit and the position of each light are correct and final.
 
-Turn the flat CAD surfaces into a photorealistic part of the photograph and change NOTHING else. The CAD box's light
-grey front face and darker grey underside are unpainted PLACEHOLDERS, not colors to keep: in the finished photograph the
-soffit is drywall, its front face painted the same cream as the walls around it, and its underside painted the same
-matte white as the room ceiling (not grey, not blue), so the alcove's lowered ceiling looks like ordinary painted ceiling
-drywall, with a crisp corner where its ends meet the pilasters' inner faces, a crisp corner where its top meets the room
-ceiling, a soft shadow line along the underside's front edge, and the soft shadow it casts onto the strip of each
-pilaster's inner face in front of it and onto the back wall. The two downlights are flush recessed fixtures with slim white trim rings, switched on: warm
-white light pooling down the back wall over the shelves and the bench, soft highlights on the objects on the top shelf
-and on the dogs, consistent with the photo's daylight and not overpowering it. Do not move, resize or redraw the soffit, the lights, the bench, the
-dogs, the pillows, the throw, the shelves and their objects, the bowls, the rug, the walls, the door, the floor, the
-pilasters or the camera: every edge that is in image 1 stays exactly where it is, at the same size. Photorealistic, no
-CAD look, matching image 1's grain, lens and white balance."""
+Turn the flat CAD surfaces into a photorealistic part of the photograph and change NOTHING else. The CAD surfaces' flat
+colors are unpainted PLACEHOLDERS, not colors to keep: in the finished photograph the soffit is drywall, its front face
+painted the same cream as the walls and pilasters and continuous with the pilaster faces below it (one flat plane, at
+most a faint paint line where a pilaster meets it), and its underside painted the same matte white as the room ceiling
+(not grey, not blue), ordinary painted ceiling drywall with a crisp corner where its top meets the room ceiling, a soft
+shadow line along the underside's front edge, and the soft shadow it casts onto the alcove's back wall and side walls
+and onto the wall beyond the hallway opening. The two downlights are flush recessed fixtures with slim white trim rings,
+switched on: warm white light pooling down the back wall over the shelves and the bench, soft highlights on the objects
+on the top shelf and on the dogs, consistent with the photo's daylight and not overpowering it. Do not move, resize or
+redraw the soffit, the lights, the bench, the dogs, the pillows, the throw, the shelves and their objects, the sign, the
+bowls, the rug, the walls, the door, the floor, the pilasters or the camera: every edge that is in image 1 stays exactly
+where it is, at the same size. Photorealistic, no CAD look, matching image 1's grain, lens and white balance."""
 
 SOFFIT_PAINT_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove with two dogs on its cushion, shelves above, and a
-dropped soffit across the top of the alcove with two recessed downlights in its underside. Two surfaces of that soffit
-are wrongly colored and must be repainted; everything else is final.
+dropped soffit across the top of the picture, flush with the pilaster faces and running on over the hallway opening,
+with two recessed downlights in its underside over the alcove. Two surfaces of that soffit are wrongly colored and must
+be repainted; everything else is final.
 
-- The soffit's UNDERSIDE (the lowered ceiling plane inside the alcove, with the two downlights) is tinted pale blue-grey.
-  Repaint it the same warm matte white as the room ceiling above the alcove: plain painted ceiling drywall, slightly
-  shadowed toward its back edge, with a warm glow around each downlight. No blue, no grey tint.
-- The soffit's FRONT FACE (the flat beige band above the alcove opening, between the pilasters) looks like a flat
-  painted-on rectangle. Make it read as real drywall painted the same cream as the walls and pilasters, with the same
-  subtle light falloff and surface texture, a crisp corner where it meets the room ceiling and soft corners where it
-  meets the pilasters.
+- The soffit's UNDERSIDE (the lowered ceiling plane inside the alcove, with the two downlights, and its continuation
+  over the hallway opening) is tinted pale blue-grey. Repaint it the same warm matte white as the room ceiling: plain
+  painted ceiling drywall, slightly shadowed toward its back edge, with a warm glow around each downlight. No blue, no
+  grey tint.
+- The soffit's FRONT FACE (the flat beige band across the top of the picture, above the alcove, the pilasters and the
+  hallway opening) looks like a flat painted-on rectangle. Make it read as real drywall painted the same cream as the
+  walls and pilasters, in one plane with the pilaster faces below it, with the same subtle light falloff and surface
+  texture and a crisp corner where it meets the room ceiling.
 
 Keep both surfaces exactly where they are, at the same size, with the same edges. Keep the two downlights exactly where
 they are, switched on. Do not change the bench, the dogs, the pillows, the throw, the shelves and their objects, the
