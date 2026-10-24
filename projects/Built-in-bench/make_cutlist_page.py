@@ -125,7 +125,7 @@ def group_section(label, rows):
 
 
 HERO = "images/hero.png"
-NOOK = "images/bench-in-nook-styled-web.jpg"    # photo_match.py overlay made photoreal by Gemini (render_in_room.py guided), then styled with the client's reference items (styled)
+NOOK = "images/bench-in-nook-dogs-web.jpg"    # photo_match.py overlay made photoreal by Gemini (render_in_room.py guided), styled with the client's reference items (styled), their dogs added (dogs)
 
 
 def sub_figure(fname, caption):
@@ -294,7 +294,7 @@ PAGE = """<title>Built-in Bench Cut List</title>
     <p>Two drawers on Blum undermounts, white-painted maple frames around inset walnut panels, solid maple top. {total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
     <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
   </header>
-  <figure class="dwg nook" tabindex="0"><img src="{nook}" alt="the finished bench in the alcove, white frames with walnut panels, maple top, cushion, the client's golden retriever and accessories, three maple shelves above"><figcaption>the finished bench in the alcove at true size: the CAD model projected into the photo of the alcove through a camera matched to it, then given its materials by AI (white frames, walnut panels, maple top, cushion). Wood top 14 in, seat 17 in with the cushion. The dog, pillows, throw, shelf objects, bowls and rug are the styling from the client's reference picture, and the three maple shelves are a picture-only idea; none of that is in this cut list. Tap to zoom</figcaption></figure>
+  <figure class="dwg nook" tabindex="0"><img src="{nook}" alt="the finished bench in the alcove, white frames with walnut panels, maple top, cushion, Maizy and Franco on the cushion, accessories, three maple shelves above"><figcaption>the finished bench in the alcove at true size: the CAD model projected into the photo of the alcove through a camera matched to it, then given its materials by AI (white frames, walnut panels, maple top, cushion). Wood top 14 in, seat 17 in with the cushion. Maizy and Franco are drawn from their own photos; the pillows, throw, shelf objects, bowls and rug are the styling from the client's reference picture, and the three maple shelves are a picture-only idea; none of that is in this cut list. Tap to zoom</figcaption></figure>
 
   <div class="flag"><b>Measure the alcove at the floor, 16 in and 36 in, at the back wall and the pilaster faces, before cutting.</b> Cut the top, plinth and scribe strips long and scribe them. Confirm the low receptacle seen in the photo before cutting the back.</div>
 

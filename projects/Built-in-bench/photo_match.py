@@ -250,11 +250,15 @@ def check(path):
     for i in range(len(FRONT_X0)):
         pts = [project(*p) for p in lines[f"panel {i}"]]
         top_exp, bot_exp = pts[2][1], pts[0][1]
-        for frac in (0.25, 0.75):   # a quarter in from either end: clear of the brass pull; a throw may hide one end
+        # a quarter in from either end (clear of the brass pull); keep the column with the longest walnut run, since a
+        # throw or a paw hanging over one end leaves only a stripe of it there
+        best = (None, None, None)
+        for frac in (0.25, 0.75):
             u = int(round(pts[0][0] + (pts[1][0] - pts[0][0]) * frac))
             bot, top = dark_rows(arr, u, int(top_exp) - 60, int(bot_exp) + 60)   # dark rows: first is the panel top
-            if bot is not None:
-                break
+            if bot is not None and (best[0] is None or top - bot > best[2] - best[1]):
+                best = (u, bot, top)
+        u, bot, top = best
         if bot is None:
             print(f"panel {i}: no walnut found a quarter in from either end")
             continue

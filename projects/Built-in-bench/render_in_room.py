@@ -21,8 +21,11 @@ Jobs:
   styled   images/bench-in-nook-guided.png (the verified picture) + images/concept-ai-bench-web.jpg (the client's
            reference) -> images/bench-in-nook-styled.png; the dog, pillows, throw, shelf objects, dog bowls and rug
            from the reference added, nothing else changed. Verify with photo_match.py check <output> again.
+  dogs     images/bench-in-nook-styled.png + images/maizy.jpg + images/franco.jpg (the client's dogs)
+           -> images/bench-in-nook-dogs.png; the golden retriever replaced by Maizy and Franco, nothing else changed.
+           Verify with photo_match.py check <output> again.
 
-Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|guided|styled] [variant]
+Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|guided|styled|dogs] [variant]
 A variant name is appended to the output file so reruns do not overwrite earlier images.
 """
 import os
@@ -188,6 +191,28 @@ Add, placed naturally and at real-world scale (the bench is 66 inches wide, the 
 Keep the lighting exactly as it is in image 1; the new items cast soft natural shadows consistent with it. No recessed
 lights, no other new objects, no other changes. Photorealistic, matching image 1's grain, lens and white balance."""
 
+DOGS_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove with a golden retriever lying on its cushion, pillows,
+a throw, styled shelves above, dog bowls on the floor and a rug. Its geometry has been verified and is final. Images 2
+and 3 are photos of the client's two dogs, who live in this house.
+
+Edit image 1 so the golden retriever is REPLACED by these two dogs, and change nothing else. Remove the golden retriever
+completely. Do not move, resize, redraw or restyle the bench, the drawer fronts, the brass pulls, the cushion, the maple
+top, the shelves and their objects, the pillows, the throw, the dog bowls, the rug, the walls, the door, the floor, the
+pilasters or the camera: every edge that is in image 1 stays exactly where it is, at the same size.
+
+The two dogs, each a faithful likeness of the dog in its photo (same breed look, coat colors, markings, head shape,
+ears, collar), ignoring the people, the beach and the ball in the photos:
+- Maizy (image 2): a small senior terrier mix, chocolate brown and white with a white blaze down her face, brown ears,
+  a grey muzzle, a white chest and legs and a mostly white tail, short coat. She lies curled up on the cushion at the
+  left of center, next to the striped pillow, relaxed, head resting on her paws or turned toward the camera.
+- Franco (image 3): a large black Labrador mix with a short glossy black coat, a broad head, a leather collar with a
+  tag. He lies on the cushion right of center where the retriever was, chest down, head up, facing the camera, relaxed.
+- True relative size: Franco is a big dog, Maizy a small one, about half his length. Both rest entirely on the cushion
+  and do not hang over its front edge; both fit between the pillows on the 66 inch bench.
+
+Keep the lighting exactly as it is in image 1; the dogs cast soft natural shadows on the cushion consistent with it.
+No other new objects, no other changes. Photorealistic, matching image 1's grain, lens and white balance."""
+
 JOBS = {
     "bench": ((f"{PROJ}/images/space-photo-web.jpg", "image/jpeg"), (f"{PROJ}/images/hero.png", "image/png"),
               BENCH_PROMPT, "bench-in-nook"),
@@ -203,17 +228,19 @@ JOBS = {
     "guided": ((f"{PROJ}/images/alcove-overlay.png", "image/png"), None, GUIDED_PROMPT, "bench-in-nook-guided"),
     "styled": ((f"{PROJ}/images/bench-in-nook-guided.png", "image/png"),
                (f"{PROJ}/images/concept-ai-bench-web.jpg", "image/jpeg"), STYLED_PROMPT, "bench-in-nook-styled"),
+    "dogs": ((f"{PROJ}/images/bench-in-nook-styled.png", "image/png"), (f"{PROJ}/images/maizy.jpg", "image/jpeg"),
+             (f"{PROJ}/images/franco.jpg", "image/jpeg"), DOGS_PROMPT, "bench-in-nook-dogs"),
 }
 job = sys.argv[1] if len(sys.argv) > 1 else "bench"
 if job not in JOBS:
     sys.exit(f"unknown job {job!r}; use one of {list(JOBS)}")
 variant = sys.argv[2] if len(sys.argv) > 2 else ""
-img1, img2, PROMPT, stem = JOBS[job]
+*imgs, PROMPT, stem = JOBS[job]       # any number of (path, mime) inputs, None entries skipped
 OUT = f"{PROJ}/images/{stem}{('-' + variant) if variant else ''}.png"
 
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 parts = []
-for path, mime in [i for i in (img1, img2) if i]:
+for path, mime in [i for i in imgs if i]:
     with open(path, "rb") as f:
         parts.append(types.Part.from_bytes(data=f.read(), mime_type=mime))
 parts.append(PROMPT)
