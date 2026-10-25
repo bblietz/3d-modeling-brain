@@ -118,7 +118,7 @@ SHADOW = (58, 52, 46)        # case and boxes: only seen in the reveals, read as
 LAMP = (255, 250, 228)
 COLOR = {
     "stile_": PAINT, "rail_": PAINT, "plinth": PAINT, "strip_": PAINT,
-    "panel_": WALNUT, "top": MAPLE, "cushion": LINEN, "pull_": BRASS, "shelf_": MAPLE,
+    "panel_": WALNUT, "top": MAPLE, "cushion": LINEN, "pull_": BRASS, "shelf_": WALNUT,   # shelves walnut, Brian 2026-10-24
     "soffit": PAINT, "light_": LAMP,
 }
 LIGHT = np.array([-0.3, -0.55, 0.78])     # toward the light, in (X, d, Z): from the room, above, a little left

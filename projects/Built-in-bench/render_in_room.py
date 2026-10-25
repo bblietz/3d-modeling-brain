@@ -30,8 +30,12 @@ Jobs:
   soffit-paint  images/bench-in-nook-soffit.png -> images/bench-in-nook-soffit-paint.png; Gemini kept the overlay's
            grey underside as a blue-grey ceiling three times, so this pass repaints the soffit as drywall (underside
            ceiling white, face wall cream) and changes nothing else. Verify with photo_match.py check <output> again.
+  walnut-shelves  images/bench-in-nook-soffit-paint.png -> images/bench-in-nook-walnut-shelves.png; the three shelves
+           changed from maple to walnut matching the drawer panels (Brian 2026-10-24), nothing else changed. The earlier
+           stages were run with maple shelves; the overlay (photo_match.py) and the guided/styled/soffit prompts now say
+           walnut, so a rerun from guided gets walnut shelves without this pass. Verify with photo_match.py check <output>.
 
-Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|guided|styled|dogs|soffit|soffit-paint] [variant]
+Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|guided|styled|dogs|soffit|soffit-paint|walnut-shelves] [variant]
 A variant name is appended to the output file so reruns do not overwrite earlier images.
 """
 import os
@@ -161,15 +165,15 @@ Materials and finish:
 - The top is solid hard maple, pale blond with fine grain, clear satin finish, gently eased front edge; only its 3/4
   inch front edge shows under the cushion.
 - The cushion is one long boxed cushion in oatmeal linen with piped edges, slightly soft, covering the whole top.
-- The three shelves are solid hard maple like the top, 1-1/2 inch thick slabs floating on the back wall with no
-  visible brackets. Lightly styled: a few books, a small plant, a basket, a small framed picture, all standing on the
+- The three shelves are solid walnut like the drawer panels, dark chocolate brown with visible straight grain, clear
+  satin finish, 1-1/2 inch thick slabs floating on the back wall with no visible brackets. Lightly styled: a few books, a small plant, a basket, a small framed picture, all standing on the
   shelves without hiding their front edges. No words, no signs, no lights, no dog.
 - Soft contact shadows under the top's overhang, under the cushion and under the shelves; a faint reflection of the
   white plinth in the glossy floor. Same lighting, white balance, grain and lens as the photo. Photorealistic, no CAD
   look."""
 
 STYLED_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove: white painted drawer frames around dark walnut
-panels with brass bar pulls, a maple top, one long oatmeal linen cushion, and three maple floating shelves above. Its
+panels with brass bar pulls, a maple top, one long oatmeal linen cushion, and three walnut floating shelves above. Its
 geometry has been verified against the design and is final. Image 2 is the client's reference picture of a similar
 alcove bench with a golden retriever and accessories.
 
@@ -220,7 +224,7 @@ Keep the lighting exactly as it is in image 1; the dogs cast soft natural shadow
 No other new objects, no other changes. Photorealistic, matching image 1's grain, lens and white balance."""
 
 SOFFIT_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove with two dogs on its cushion, pillows, a throw, three
-maple floating shelves with objects, dog bowls on the floor and a rug. Across the top of the picture a DROPPED SOFFIT has
+walnut floating shelves with objects, dog bowls on the floor and a rug. Across the top of the picture a DROPPED SOFFIT has
 been placed by CAD, flat-shaded, at its exact built size and position: a bulkhead hung from the ceiling whose front face
 is flush with the faces of the two pilasters, in the same plane as them. It is one continuous band from the outer edge
 of the left pilaster across the alcove, across the top of the right pilaster and on to the right over the hallway
@@ -262,6 +266,23 @@ they are, switched on. Do not change the bench, the dogs, the pillows, the throw
 sign, the bowls, the rug, the walls, the door, the floor, the pilasters, the lighting or the camera. Photorealistic,
 matching image 1's grain, lens and white balance."""
 
+WALNUT_SHELVES_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove: white painted drawer frames around dark walnut
+panels with brass bar pulls, a maple top, a cushion with two dogs on it, pillows, a throw, three pale maple floating
+shelves above with objects on them, a dropped soffit with two downlights, dog bowls on the floor and a rug. Everything
+in it is final except the wood of the three shelves.
+
+Change the three floating shelves from pale maple to solid WALNUT, the same wood as the drawer panels below them: the
+same dark chocolate brown, the same straight grain, the same clear satin finish, not reddish like the floor. Every
+visible face of each shelf changes: the top face, the front edge and the underside. Each shelf stays exactly where it
+is, at the same size and thickness, with the same edges and the same shadows under it; the warm light from the
+downlights still falls on the top shelf.
+
+Change nothing else. Every object on the shelves (the trailing pothos, the books, the baskets, the framed picture, the
+jars, the wooden bowl, the plant, the sign reading GOOD DOGS LIVE HERE) stays exactly where it is, unchanged. The bench
+top stays pale maple. Do not change the bench, the drawer fronts, the brass pulls, the cushion, the dogs, the pillows,
+the throw, the soffit, the lights, the bowls, the rug, the walls, the door, the floor, the pilasters, the lighting or
+the camera. Photorealistic, matching image 1's grain, lens and white balance."""
+
 JOBS = {
     "bench": ((f"{PROJ}/images/space-photo-web.jpg", "image/jpeg"), (f"{PROJ}/images/hero.png", "image/png"),
               BENCH_PROMPT, "bench-in-nook"),
@@ -283,6 +304,8 @@ JOBS = {
                "bench-in-nook-soffit"),
     "soffit-paint": ((f"{PROJ}/images/bench-in-nook-soffit.png", "image/png"), SOFFIT_PAINT_PROMPT,
                      "bench-in-nook-soffit-paint"),
+    "walnut-shelves": ((f"{PROJ}/images/bench-in-nook-soffit-paint.png", "image/png"), WALNUT_SHELVES_PROMPT,
+                       "bench-in-nook-walnut-shelves"),
 }
 job = sys.argv[1] if len(sys.argv) > 1 else "bench"
 if job not in JOBS:
