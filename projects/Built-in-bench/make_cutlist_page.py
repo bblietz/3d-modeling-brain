@@ -125,7 +125,7 @@ def group_section(label, rows):
 
 
 HERO = "images/hero.png"
-NOOK = "images/bench-in-nook-no-collar-web.jpg"    # photo_match.py overlay made photoreal by Gemini (render_in_room.py guided), styled with the client's reference items (styled), their dogs (dogs), the dropped soffit and downlights (soffit, soffit-paint), panels painted white and bowls removed (white-fronts), Franco's collar removed (collar); the walnut-shelves and walnut-top pictures are the walnut option
+NOOK = "images/bench-in-nook-maple-top-web.jpg"    # photo_match.py overlay made photoreal by Gemini (render_in_room.py guided), styled with the client's reference items (styled), their dogs (dogs), the dropped soffit and downlights (soffit, soffit-paint), panels painted white and bowls removed (white-fronts), Franco's collar removed (collar), the maple top's edge restored (maple-top); the walnut-shelves and walnut-top pictures are the walnut option
 
 
 def sub_figure(fname, caption):

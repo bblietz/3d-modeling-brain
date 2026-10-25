@@ -47,6 +47,11 @@ Jobs:
   collar   images/bench-in-nook-white-fronts.png -> images/bench-in-nook-no-collar.png; Franco's collar and tag removed
            (Brian 2026-10-24), nothing else changed. The dogs prompt now says no collar, so a rerun needs no extra pass.
            Verify with photo_match.py check <output>.
+  (The white-fronts pass washed the maple top's front edge to near white, strip mean 217/196/207, so the top read as
+  painted; Brian: "top of the bench should be maple". A Gemini repaint of that strip made it saturated orange, re-rolled
+  the sign's lettering and warmed the whole picture, $0.155 wasted, so the edge is restored instead by
+  `photo_match.py topedge images/bench-in-nook-no-collar.png images/bench-in-nook-soffit-paint.png`, which copies the
+  projected band of the top's front edge from the earlier stage of the same chain, pixel for pixel. No Gemini.)
 
 Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|guided|styled|dogs|soffit|soffit-paint|walnut-shelves|walnut-top|white-fronts|collar] [variant]
 A variant name is appended to the output file so reruns do not overwrite earlier images.

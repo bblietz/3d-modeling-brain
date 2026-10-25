@@ -341,10 +341,40 @@ def brass_run(arr, v_lo, v_hi, u_lo, u_hi):
     return best
 
 
+def topedge(dst_path, src_path, out_path, up=4, down=3, feather=1.5):
+    """copy the band of the top's front edge (the projected quad between the top's front edge and its underside, wall
+    to wall) from src into dst and write out: restores a stage's correct edge after a later Gemini pass washed it out
+    (the white-fronts pass turned the maple edge near white). up/down widen the band in photo pixels to take in the
+    roundover's highlight above and the shadow line on the frames below; feather is the mask blur in photo pixels.
+    Both pictures must be the same size and from the same chain, so every other pixel already agrees."""
+    from PIL import ImageFilter
+    dst, src = Image.open(dst_path).convert("RGB"), Image.open(src_path).convert("RGB")
+    assert dst.size == src.size, (dst.size, src.size)
+    photo = Image.open(PHOTO)
+    sx, sy = dst.width / photo.width, dst.height / photo.height
+    lines = bench_outline()
+    (ul, vl), (ur, vr) = [project(*p) for p in lines["wood top front edge"]]
+    (bl, wl), (br, wr) = [project(*p) for p in lines["top underside"]]
+    poly = [(ul * sx, (vl - up) * sy), (ur * sx, (vr - up) * sy), (br * sx, (wr + down) * sy), (bl * sx, (wl + down) * sy)]
+    mask = Image.new("L", dst.size, 0)
+    ImageDraw.Draw(mask).polygon(poly, fill=255)
+    mask = mask.filter(ImageFilter.GaussianBlur(feather * sy))
+    Image.composite(src, dst, mask).save(out_path)
+    m = np.asarray(mask) > 128
+    for label, im in (("before", dst), ("source", src), ("after", Image.open(out_path))):
+        c = np.asarray(im)[m].mean(axis=0)
+        print(f"{label}: band mean RGB ({c[0]:.0f}, {c[1]:.0f}, {c[2]:.0f})")
+    print(f"band rows {min(vl, vr) - up:.0f} to {max(wl, wr) + down:.0f} at photo scale, {int(m.sum())} px replaced; wrote",
+          os.path.relpath(out_path, VAULT))
+
+
 if __name__ == "__main__":
     report_camera()
     if len(sys.argv) > 2 and sys.argv[1] == "check":
         check(sys.argv[2])
+        sys.exit()
+    if len(sys.argv) > 4 and sys.argv[1] == "topedge":
+        topedge(sys.argv[2], sys.argv[3], sys.argv[4])
         sys.exit()
     if len(sys.argv) > 2 and sys.argv[1] == "soffit":
         pic = Image.open(sys.argv[2]).convert("RGB")
