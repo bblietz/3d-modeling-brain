@@ -62,11 +62,11 @@
     "Half B (sockets)"
    ],
    "time": "7:02",
-   "seconds": 25300,
-   "gcode_estimate": "7h 1m 40s",
-   "grams": 367.9,
-   "metres": 122.35,
-   "used_g_per_filament": 367.9,
+   "seconds": 25318,
+   "gcode_estimate": "7h 1m 58s",
+   "grams": 367.8,
+   "metres": 122.34,
+   "used_g_per_filament": 367.8,
    "layers": 339,
    "top_z": 101.7,
    "nozzle_C": 250,
@@ -78,17 +78,16 @@
     236.79
    ],
    "feature_mm": {
-    "Outer wall": 49195.9,
-    "Inner wall": 44128.7,
-    "Internal solid infill": 16565.5,
-    "Top surface": 4136.8,
-    "Sparse infill": 4090.5,
+    "Outer wall": 49207.3,
+    "Inner wall": 44141.3,
+    "Internal solid infill": 16560.3,
+    "Top surface": 4122.3,
+    "Sparse infill": 4102.8,
     "Bottom surface": 3930.1,
-    "Floating vertical shell": 112.2,
+    "Floating vertical shell": 119.9,
     "Skirt": 110.0,
-    "Bridge": 76.5,
-    "Overhang wall": 4.3,
-    "Gap infill": 0.3
+    "Bridge": 46.8,
+    "Gap infill": 0.2
    }
   },
   {
@@ -128,8 +127,8 @@
   }
  ],
  "total_time": "7:19",
- "total_seconds": 26319,
- "total_grams": 373.2,
+ "total_seconds": 26337,
+ "total_grams": 373.1,
  "overrides": {
   "process": {
    "curr_bed_type": "Textured PEI Plate",

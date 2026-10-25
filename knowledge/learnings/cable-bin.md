@@ -54,6 +54,17 @@ two halves for the X2D, four bins.
   inside out); the corner radius must exceed the chamfer. R10 ends.
 - The build123d empty intersection returns None, not an empty shape; wrap
   volumes in a None-safe helper before asserting on them.
+- The first tails had a flat underside at z = 10: a 5 x 9 mm cantilever
+  printed over air, on the very face that seats the joint. The slice report
+  showed it only as 4 mm of "Overhang wall", easy to wave off. Fix: the
+  underside slopes at 50 degrees back to the joint face and B's socket gets
+  the matching sloped floor, so the hard stop is face to face and nothing in
+  A overhangs. Lesson: any feature that protrudes past a part's own
+  footprint needs a printable underside, and the bottom of the socket must
+  then stay a full wall away from the outer skin (asserted now).
+- A vertical sliding dovetail on an internal post sits inside the foot flare
+  zone at the bottom; start it above the flare or check the skin thickness
+  at its lowest outer corner.
 
 ## Walls that are exactly N lines wide: use Arachne
 

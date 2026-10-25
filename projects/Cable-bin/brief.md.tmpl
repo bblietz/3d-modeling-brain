@@ -31,9 +31,12 @@ https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
 - **Stacking** drop 5.0 mm, pitch 96.6 mm = 3.80 in; four bins 15.4 in tall.
   Posts stop 7 mm below the rim so the foot above clears them by 2 mm.
 - **Joint** two vertical dovetails (neck 5, head 9, depth 5 mm) on internal
-  posts 12 mm long x 15.5 mm deep, from z = 10 to 7 mm below the rim (84.6 mm
-  of engagement). Sockets closed at the bottom by B's floor: A drops onto B
-  to a hard stop, floors flush. Body clearance 0.15 mm per side; two crush
+  posts 12 mm long x 15.5 mm deep, up to 7 mm below the rim. The tail's
+  underside slopes at 50 degrees from z = 6.0 at the joint face to z = 12 at
+  the tip, so it prints unsupported off A's joint face; B's socket has the
+  matching sloped floor and is otherwise open at the top: A drops onto B to
+  a hard stop, floors flush. The socket's lowest corner keeps 2.29 mm of
+  wall to the flare skin (asserted). Body clearance 0.15 mm per side; two crush
   ribs per tail (R1 half-embedded cylinders, 0.35 mm proud, 0.5 mm lead-in)
   on the top 12 mm only, so the crush stroke is short. Dovetail centreline
   set 0.25 mm inboard of the lip's inner face so the tail passes the lip on
@@ -50,8 +53,9 @@ https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
 
 Bounding boxes of both halves and the assembled bin; one solid per part;
 tail and socket bodies clear (0 mm3 overlap without ribs); rib interference
-volume matches the analytic lens area (7.57 vs 7.52 mm3); tail rests on B's
-floor (lowering A 0.05 mm collides); the tail's full insertion path from
+volume matches the analytic lens area (7.57 vs 7.52 mm3); tail rests on the
+socket's sloped floor (lowering A 0.05 mm collides); the socket's bottom
+corner keeps a full wall of flare skin outside it; the tail's full insertion path from
 above the rim sweeps B without touching, lip included; B's lip intact at the
 joint; stacked pair clears at the pitch and collides when pressed 0.05 mm
 further (seat proven); STLs watertight with mesh volume within 1 % of B-rep.

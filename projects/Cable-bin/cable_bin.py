@@ -46,12 +46,12 @@ STACK_PITCH = H - DROP
 POST_L = 12.0           # post length along the bin (behind the joint face)
 POST_D = 15.5           # post depth into the bin from the wall's inner face
 POST_TOP_GAP = 7.0      # posts stop this far below the rim: the foot above needs DROP + 2
-SOCKET_Z = 10.0         # dovetail starts here, above the foot flare's inner chamfer
+SOCKET_Z = 12.0         # bottom of the tail TIP; the underside slopes down to the joint face
+TAIL_UNDER_DEG = 50.0   # underside slope, past 45 for margin: the tail prints over air without support
 DT_NECK = 5.0           # dovetail neck width at the joint face
 DT_HEAD = 9.0           # dovetail head width
 DT_DEPTH = 5.0          # dovetail length past the joint face
 DT_CLR = 0.15           # body clearance per side, the ribs own the fit
-TAIL_CHAMFER = 0.8      # lead-in on the tail's bottom end
 RIB_R = 1.0             # half-embedded cylinder rib
 RIB_PROUD = 0.35        # rib crest above the tail flank (0.20 interference)
 RIB_LEN = 12.0          # ribs only on the top RIB_LEN of the tail: short crush stroke
@@ -59,9 +59,12 @@ RIB_LEADIN = 0.5
 
 assert POST_TOP_GAP >= DROP + 2.0, "posts would hit the foot of the bin stacked above"
 assert R_CORNER > FLARE, "the foot chamfer must fit inside the corner radius"
+assert TAIL_UNDER_DEG > 45 + 2, "tail underside must be steeper than 45 degrees to print unsupported"
 
 POST_TOP = H - POST_TOP_GAP
-TAIL_H = POST_TOP - SOCKET_Z
+WEDGE_DROP = DT_DEPTH * math.tan(math.radians(TAIL_UNDER_DEG))
+TAIL_BOTTOM = SOCKET_Z - WEDGE_DROP            # underside height at the joint face (x = 0)
+TAIL_H = POST_TOP - TAIL_BOTTOM
 Y_WALL_IN = W / 2 - WALL                      # wall inner face
 Y_POST_IN = Y_WALL_IN - POST_D                # post inner face
 Y_LIP_IN = W / 2 - LIP_T                      # lip inner face: the tail must pass it on the way in
@@ -138,23 +141,37 @@ def rib_centres():
     return [(xm - d * nx, ym - d * ny), (xm - d * nx, -(ym - d * ny))]
 
 
+def under_wedge():
+    """Everything below the tails' sloped underside, in joint-local coordinates: the plane
+    rises from TAIL_BOTTOM at the joint face to SOCKET_Z at the tail tip."""
+    t = math.tan(math.radians(TAIL_UNDER_DEG))
+    x0, x1 = -2.0, DT_DEPTH + 2.0
+    poly = Polygon((x0, -1.0), (x1, -1.0), (x1, TAIL_BOTTOM + x1 * t), (x0, TAIL_BOTTOM + x0 * t), align=None)
+    return extrude(Plane.XZ * poly, 15, both=True)
+
+
+def dovetail_prism(clr, top):
+    """Dovetail profile (offset by clr) from the sloped underside up to z = top, centred on y = 0."""
+    p = Pos(0, 0, TAIL_BOTTOM) * extrude(tail_profile(clr), top - TAIL_BOTTOM)
+    return p - under_wedge()
+
+
 def tail(side, with_ribs=True):
-    t = extrude(tail_profile(0.0), TAIL_H)
-    t = chamfer(t.edges().group_by(Axis.Z)[0], TAIL_CHAMFER)
+    t = dovetail_prism(0.0, POST_TOP)
     if with_ribs:
         for (rx, ry) in rib_centres():
             rib = Cylinder(RIB_R, RIB_LEN, align=(Align.CENTER, Align.CENTER, Align.MIN))
             rib = chamfer(rib.edges().group_by(Axis.Z)[0], RIB_LEADIN)
-            t = t + Pos(rx, ry, TAIL_H - RIB_LEN) * rib
-    t = Pos(0, DT_YC, SOCKET_Z) * t
+            t = t + Pos(rx, ry, POST_TOP - RIB_LEN) * rib
+    t = Pos(0, DT_YC, 0) * t
     if side < 0:
         t = t.mirror(Plane.XZ)
     return t
 
 
 def socket(side):
-    s = extrude(tail_profile(DT_CLR), H + 1 - SOCKET_Z)
-    s = Pos(0, DT_YC, SOCKET_Z) * s
+    """Socket in B: the tail's clearance envelope, open at the top, floored by the same slope."""
+    s = Pos(0, DT_YC, 0) * dovetail_prism(DT_CLR, H + 1)
     if side < 0:
         s = s.mirror(Plane.XZ)
     return s
@@ -233,12 +250,13 @@ def main():
     # the tail's whole insertion path (straight down from above the rim) is free of B,
     # including B's lip, and B's lip is intact at the joint
     for side in (+1, -1):
-        path = extrude(tail_profile(0.0), H + 40 - SOCKET_Z)
-        path = Pos(0, DT_YC, SOCKET_Z) * path
+        path = Pos(0, DT_YC, 0) * dovetail_prism(0.0, H + 40)   # the tail swept straight up
         if side < 0:
             path = path.mirror(Plane.XZ)
         assert vol(path & half_b) < 1e-3, f"tail path blocked on side {side}"
     lip_probe = Pos(0, Y_LIP_IN, H - LIP_H) * Box(6, LIP_T - WALL, LIP_H, align=(Align.MIN, Align.MIN, Align.MIN))
+    skin = (W / 2 - FLARE + TAIL_BOTTOM) - (DT_YC + SOCKET_HALF_HEAD)   # flare skin outside the socket's bottom corner
+    assert skin >= WALL, f"socket breaks through the foot flare: {skin:.2f} mm of skin"
     lip_expect = 6 * ((LIP_T - WALL) * LIP_H - LIP_EDGE**2 / 2)   # band minus its top edge chamfer
     lip_got = vol(lip_probe & half_b)
     assert lip_got > 0.98 * lip_expect, f"B's lip is notched at the joint: {lip_got:.1f} of {lip_expect:.1f} mm3"
@@ -281,7 +299,8 @@ def main():
     print(f"drop {DROP:.2f} mm, stack pitch {STACK_PITCH:.2f} mm = {STACK_PITCH/IN:.3f} in, "
           f"4 stacked = {(3*STACK_PITCH + H)/IN:.2f} in")
     print(f"rib interference volume {overlap:.2f} mm3 (expected about {expected:.2f})")
-    print(f"tail height {TAIL_H:.1f} mm, socket centre y = {DT_YC:.2f}")
+    print(f"tail {TAIL_H:.1f} mm tall at the joint face (underside {TAIL_BOTTOM:.2f} to {SOCKET_Z:.1f} at the tip), "
+          f"socket centre y = {DT_YC:.2f}, flare skin outside the socket {skin:.2f} mm")
 
     if os.environ.get("SHOW"):
         from ocp_vscode import Camera, show
