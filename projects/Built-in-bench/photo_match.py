@@ -110,6 +110,7 @@ def report_camera():
 
 # ---------------------------------------------------------------- what to draw
 PAINT = (246, 244, 238)
+PANEL_PAINT = (234, 231, 223)   # the painted panel a shade below the frame so its recess reads in the overlay
 WALNUT = (88, 58, 38)
 MAPLE = (224, 198, 152)
 LINEN = (206, 194, 172)
@@ -118,7 +119,7 @@ SHADOW = (58, 52, 46)        # case and boxes: only seen in the reveals, read as
 LAMP = (255, 250, 228)
 COLOR = {
     "stile_": PAINT, "rail_": PAINT, "plinth": PAINT, "strip_": PAINT,
-    "panel_": WALNUT, "top": WALNUT, "cushion": LINEN, "pull_": BRASS, "shelf_": WALNUT,   # shelves and top walnut, Brian 2026-10-24
+    "panel_": PANEL_PAINT, "top": MAPLE, "cushion": LINEN, "pull_": BRASS, "shelf_": MAPLE,   # all-white fronts, maple top and shelves, Brian 2026-10-24
     "soffit": PAINT, "light_": LAMP,
 }
 LIGHT = np.array([-0.3, -0.55, 0.78])     # toward the light, in (X, d, Z): from the room, above, a little left
@@ -296,13 +297,48 @@ def check(path):
             if bot is not None and (best[0] is None or top - bot > best[2] - best[1]):
                 best = (u, bot, top)
         u, bot, top = best
-        if bot is None:
-            print(f"panel {i}: no walnut found a quarter in from either end")
+        if bot is None or (top - bot) / s_face < (FRONT_H - 2 * STILE_W) / IN / 2:
+            print(f"panel {i}: no walnut run of panel size a quarter in from either end (painted panels?), the pull check applies")
             continue
         print(f"panel {i} at x {u}: top y {bot} (projected {top_exp:.0f}, {(top_exp - bot) / s_face:+.2f} in), "
               f"bottom y {top} (projected {bot_exp:.0f}, {(bot_exp - top) / s_face:+.2f} in); "
               f"panel height {(top - bot) / s_face:.2f} in, designed {(FRONT_H - 2 * STILE_W) / IN:.2f}")
+    # the brass pulls, 8 in long and centered on each front: a true-scale check that works when the panels are painted
+    for i in range(len(FRONT_X0)):
+        fp = lines[f"front {i}"]
+        Xc, Zc = (fp[0][0] + fp[1][0]) / 2, (fp[0][2] + fp[2][2]) / 2
+        d_pull = fp[0][1] - 1.25                      # the bar stands 1 in off the face and is 1/2 in square
+        uc, vc = project(Xc, d_pull, Zc)
+        s_pull = F / (D + d_pull)
+        u0, u1 = project(Xc - 4, d_pull, Zc)[0], project(Xc + 4, d_pull, Zc)[0]
+        run = brass_run(arr, int(vc) - 6, int(vc) + 6, int(u0) - 30, int(u1) + 30)
+        if run is None:
+            print(f"pull {i}: no brass found near the projected bar")
+            continue
+        v, ua, ub = run
+        print(f"pull {i}: bar at y {v} from x {ua} to {ub} (projected y {vc:.0f}, x {u0:.0f} to {u1:.0f}; "
+              f"{(vc - v) / s_pull:+.2f} in up, {((ua + ub) / 2 - uc) / s_pull:+.2f} in across); "
+              f"length {(ub - ua + 1) / s_pull:.2f} in, designed 8.00")
     print(f"scale at the drawer faces: {s_face:.2f} px per in; 1 in of height error is {s_face:.0f} px")
+
+
+def brass_run(arr, v_lo, v_hi, u_lo, u_hi):
+    """the longest row-wise run of brass-colored pixels in the window; returns (row, u_start, u_end) or None. Gemini's
+    brass is a dull antique tone, about (170, 119, 98): red well above blue, green a little above it, mid-bright.
+    Walnut (about (130, 69, 61)) fails the brightness test, white paint and oatmeal linen fail the red-over-blue test."""
+    best = None
+    for v in range(v_lo, v_hi + 1):
+        row = arr[v, u_lo:u_hi].astype(int)
+        ok = (row[:, 0] > row[:, 2] + 40) & (row[:, 1] > row[:, 2] + 12) & (row.mean(axis=1) > 100)
+        start = None
+        for j, flag in enumerate(list(ok) + [False]):
+            if flag and start is None:
+                start = j
+            elif not flag and start is not None:
+                if best is None or j - start > best[2] - best[1] + 1:
+                    best = (v, u_lo + start, u_lo + j - 1)
+                start = None
+    return best
 
 
 if __name__ == "__main__":

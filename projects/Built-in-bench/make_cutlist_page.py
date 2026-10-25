@@ -24,18 +24,17 @@ PROJ = f"{VAULT}/projects/Built-in-bench"
 sys.path.insert(0, f"{VAULT}/scripts")
 from cutlist import inch_frac  # noqa: E402
 
-CASE_ORDER = ["solid walnut", "hard maple", "3/4 maple ply", "1/4 maple ply", "3/4 ply (any, hidden)"]
-DRAWER_ORDER = ["hard maple", "1/2 walnut ply", "1/2 Baltic birch"]
+CASE_ORDER = ["hard maple", "3/4 maple ply", "1/4 maple ply", "3/4 ply (any, hidden)"]
+DRAWER_ORDER = ["hard maple", "1/2 paint-grade panel", "1/2 Baltic birch"]
 CASE_LABEL = {
-    "solid walnut": "Solid walnut: top (bare)",
-    "hard maple": "Hard maple: nailer; plinth and scribe strips (painted white)",
+    "hard maple": "Hard maple: top (bare), nailer; plinth and scribe strips (painted white)",
     "3/4 maple ply": "3/4 in maple plywood (measure the sheet): ends, bottom, partition",
     "1/4 maple ply": "1/4 in maple plywood (measure the sheet): back",
     "3/4 ply (any, hidden)": "3/4 in plywood, any grade (hidden): base ladder",
 }
 DRAWER_LABEL = {
     "hard maple": "Drawer front frames, hard maple, painted white: stiles and rails",
-    "1/2 walnut ply": "Drawer front panels, 1/2 in walnut plywood, left bare (measure the sheet)",
+    "1/2 paint-grade panel": "Drawer front panels, 1/2 in MDF or paint-grade plywood (measure the sheet), painted white with the frames",
     "1/2 Baltic birch": "Drawer boxes: sides, fronts, backs and bottoms, 1/2 in 9-ply Baltic birch (measure the sheet)",
 }
 TEMPLATE_TAG = "not a plain rectangular blank"
@@ -56,7 +55,7 @@ from assembly_shots import STEPS  # noqa: E402  (file stem, title, prefixes, tex
 ASSEMBLY_DIR = "images/assembly"
 EXPLODED = f"{ASSEMBLY_DIR}/exploded.png"
 SUBS = [("drawer-exploded.png", "one drawer box, pulled apart: sides, 3/4 front and back, 1/2 bottom"),
-        ("front-exploded.png", "one drawer front, pulled apart: maple stiles and rails around the inset walnut panel")]
+        ("front-exploded.png", "one drawer front, pulled apart: maple stiles and rails around the inset panel, all painted white")]
 
 
 def is_drawer(part):
@@ -126,7 +125,7 @@ def group_section(label, rows):
 
 
 HERO = "images/hero.png"
-NOOK = "images/bench-in-nook-walnut-top-web.jpg"    # photo_match.py overlay made photoreal by Gemini (render_in_room.py guided), styled with the client's reference items (styled), their dogs (dogs), the dropped soffit and downlights (soffit, soffit-paint), shelves walnut (walnut-shelves), top walnut (walnut-top)
+NOOK = "images/bench-in-nook-no-collar-web.jpg"    # photo_match.py overlay made photoreal by Gemini (render_in_room.py guided), styled with the client's reference items (styled), their dogs (dogs), the dropped soffit and downlights (soffit, soffit-paint), panels painted white and bowls removed (white-fronts), Franco's collar removed (collar); the walnut-shelves and walnut-top pictures are the walnut option
 
 
 def sub_figure(fname, caption):
@@ -292,10 +291,10 @@ PAGE = """<title>Built-in Bench Cut List</title>
   <header>
     <p class="eyebrow">Built-in bench &middot; 66 x 28 in alcove</p>
     <h1>Built-in Bench Cut List</h1>
-    <p>Two drawers on Blum undermounts, white-painted maple frames around inset walnut panels, solid walnut top. {total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
+    <p>Two drawers on Blum undermounts, all-white frame-and-panel fronts (maple frames around inset paint-grade panels), solid maple top. {total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
     <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
   </header>
-  <figure class="dwg nook" tabindex="0"><img src="{nook}" alt="the finished bench in the alcove, white frames with walnut panels, walnut top, cushion, Maizy and Franco on the cushion, accessories, three walnut shelves above, a dropped soffit with two downlights"><figcaption>the finished bench in the alcove at true size: the CAD model projected into the photo of the alcove through a camera matched to it, then given its materials by AI (white frames, walnut panels, walnut top, cushion). Wood top 14 in, seat 17 in with the cushion. Maizy and Franco are drawn from their own photos; the pillows, throw, shelf objects, bowls and rug are the styling from the client's reference picture; the three walnut shelves and the 12 in dropped soffit with two 4 in recessed lights (flush with the pilaster faces and running on over the hallway opening as in that picture; the photo's ceiling measures about 8 ft 2-1/2 in, so the alcove's ceiling becomes about 7 ft 2-1/2 in) are picture-only ideas from that picture; none of that is in this cut list. Tap to zoom</figcaption></figure>
+  <figure class="dwg nook" tabindex="0"><img src="{nook}" alt="the finished bench in the alcove, all-white drawer fronts with brass pulls, maple top, cushion, Maizy and Franco on the cushion, accessories, three maple shelves above, a dropped soffit with two downlights"><figcaption>the finished bench in the alcove at true size: the CAD model projected into the photo of the alcove through a camera matched to it, then given its materials by AI (white frames and panels, maple top, cushion). Wood top 14 in, seat 17 in with the cushion. Maizy and Franco are drawn from their own photos; the pillows, throw, shelf objects and rug are the styling from the client's reference picture (the reference's dog bowls were dropped at Brian's request); the three maple shelves and the 12 in dropped soffit with two 4 in recessed lights (flush with the pilaster faces and running on over the hallway opening as in that picture; the photo's ceiling measures about 8 ft 2-1/2 in, so the alcove's ceiling becomes about 7 ft 2-1/2 in) are picture-only ideas from that picture; none of that is in this cut list. Tap to zoom</figcaption></figure>
 
   <div class="flag"><b>Measure the alcove at the floor, 16 in and 36 in, at the back wall and the pilaster faces, before cutting.</b> Cut the top, plinth and scribe strips long and scribe them. Confirm the low receptacle seen in the photo before cutting the back.</div>
 

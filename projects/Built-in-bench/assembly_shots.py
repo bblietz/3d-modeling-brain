@@ -64,7 +64,7 @@ STEPS = [
      "bottom at the front corners with #6 x 1/2 screws and set the boxes on the runners."),
     ("step-09", "Fronts and pulls",
      ("stile_", "rail_", "panel_", "pull_"),
-     "Glue up each 1/2 walnut panel in its maple frame, back faces flush so the panel sits 1/4 below the maple (groove "
+     "Glue up each 1/2 panel in its maple frame, back faces flush so the panel sits 1/4 below the maple (groove "
      "every piece first, then cut the tongues and tenons to fit). Prime and paint the frames white. Hang the fronts with 1/8 reveals all round, screwed from inside the box through oversize holes. "
      "Center the pulls."),
     ("step-10", "Top",
@@ -87,11 +87,11 @@ EXPLODE = {
 }
 
 COLORS = {
-    "hard maple": "#e2c48f", "solid walnut": "#5a3a24", "3/4 maple ply": "#e9d9b0", "1/4 maple ply": "#ecdfbc",
-    "3/4 ply (any, hidden)": "#cdbb94", "1/2 walnut ply": "#5a3a24", "1/2 Baltic birch": "#efe2bd",
+    "hard maple": "#e2c48f", "3/4 maple ply": "#e9d9b0", "1/4 maple ply": "#ecdfbc",
+    "3/4 ply (any, hidden)": "#cdbb94", "1/2 paint-grade panel": "#d9cbb0", "1/2 Baltic birch": "#efe2bd",
 }
 HW_COLORS = {"slide": "#8c8f94", "pull": "#b8903f", "cushion": "#c9bda8"}
-PAINTED = {"front_stile", "front_rail", "plinth", "scribe_strip"}   # painted white
+PAINTED = {"front_stile", "front_rail", "plinth", "scribe_strip", "front_panel"}   # painted white (panels too, Brian 2026-10-24)
 PAINT_WHITE = "#fbfbf8"
 DONE = "#dedad2"      # already in place
 STEM = {

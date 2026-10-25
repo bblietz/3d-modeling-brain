@@ -25,15 +25,14 @@ from ocp_vscode import Camera, save_screenshot, set_port, show  # noqa: E402
 OUT = os.environ.get("HERO_OUT", f"{PROJ}/images/hero.png")
 COLORS = {
     "hard maple": "#e2c48f",
-    "solid walnut": "#5a3a24",
     "3/4 maple ply": "#e9d9b0",
     "1/4 maple ply": "#ecdfbc",
     "3/4 ply (any, hidden)": "#cdbb94",
-    "1/2 walnut ply": "#5a3a24",
+    "1/2 paint-grade panel": "#d9cbb0",
     "1/2 Baltic birch": "#efe2bd",
 }
 HW_COLORS = {"slide": "#8c8f94", "pull": "#b8903f", "cushion": "#c9bda8"}
-PAINTED = {"front_stile", "front_rail", "plinth", "scribe_strip"}   # painted white (Brian, 2026-10-09)
+PAINTED = {"front_stile", "front_rail", "plinth", "scribe_strip", "front_panel"}   # painted white (Brian, 2026-10-09; panels too 2026-10-24)
 PAINT_WHITE = "#fbfbf8"
 
 # instance name -> registry part (names are built as <part stem>_<l|r|...>)

@@ -38,8 +38,17 @@ Jobs:
            maple to walnut (Brian 2026-10-24; a real design change, the cut list carries it). From this camera only the
            top's front edge shows, a thin strip under the cushion. The overlay and the earlier prompts say walnut too.
            Verify with photo_match.py check <output>.
+  white-fronts  images/bench-in-nook-soffit-paint.png -> images/bench-in-nook-white-fronts.png; the two walnut panels
+           painted white like their frames (Brian 2026-10-24: "white painted drawer fronts with maple bench top and
+           maple shelves"), the maple top and shelves of that stage kept, nothing else changed. The walnut-shelves and
+           walnut-top pictures are the walnut option, kept for comparison. The overlay and the guided/styled/dogs/soffit
+           prompts now describe this scheme. Verify with photo_match.py check <output> (it measures the brass pulls when
+           there is no walnut to measure).
+  collar   images/bench-in-nook-white-fronts.png -> images/bench-in-nook-no-collar.png; Franco's collar and tag removed
+           (Brian 2026-10-24), nothing else changed. The dogs prompt now says no collar, so a rerun needs no extra pass.
+           Verify with photo_match.py check <output>.
 
-Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|guided|styled|dogs|soffit|soffit-paint|walnut-shelves|walnut-top] [variant]
+Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|guided|styled|dogs|soffit|soffit-paint|walnut-shelves|walnut-top|white-fronts|collar] [variant]
 A variant name is appended to the output file so reruns do not overwrite earlier images.
 """
 import os
@@ -162,27 +171,28 @@ exactly as in the photo.
 Materials and finish:
 - The drawer frames (the pale border around each drawer front), the plinth strip at the floor and the narrow strips at
   the walls are painted smooth satin white enamel, the same white as the door and the baseboards, no wood grain.
-- Inside each white frame is a flat walnut veneer panel, dark chocolate brown with visible straight grain, recessed
-  1/4 inch behind the white frame, so a thin shadow runs along the top inside edge of the frame. One 8 inch brushed
-  brass bar pull centered on each panel, exactly where the brass bar is in image 1.
+- Inside each white frame is a flat panel painted the same satin white as the frame, recessed 1/4 inch behind the
+  frame, so a thin shadow runs along the top inside edge of the frame and fainter ones down the sides; the front reads
+  as a white frame around a recessed white panel, no wood grain. One 8 inch brushed brass bar pull centered on each
+  panel, exactly where the brass bar is in image 1.
 - A thin 1/8 inch shadow gap between the two drawer fronts and around them.
-- The top is solid walnut like the panels, dark chocolate brown with straight grain, clear satin finish, gently eased
-  front edge; only its 3/4 inch front edge shows under the cushion.
+- The top is solid hard maple, pale blond with fine grain, clear satin finish, gently eased front edge; only its 3/4
+  inch front edge shows under the cushion.
 - The cushion is one long boxed cushion in oatmeal linen with piped edges, slightly soft, covering the whole top.
-- The three shelves are solid walnut like the drawer panels, dark chocolate brown with visible straight grain, clear
-  satin finish, 1-1/2 inch thick slabs floating on the back wall with no visible brackets. Lightly styled: a few books, a small plant, a basket, a small framed picture, all standing on the
+- The three shelves are solid hard maple like the top, 1-1/2 inch thick slabs floating on the back wall with no
+  visible brackets. Lightly styled: a few books, a small plant, a basket, a small framed picture, all standing on the
   shelves without hiding their front edges. No words, no signs, no lights, no dog.
 - Soft contact shadows under the top's overhang, under the cushion and under the shelves; a faint reflection of the
   white plinth in the glossy floor. Same lighting, white balance, grain and lens as the photo. Photorealistic, no CAD
   look."""
 
-STYLED_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove: white painted drawer frames around dark walnut
-panels with brass bar pulls, a walnut top, one long oatmeal linen cushion, and three walnut floating shelves above. Its
+STYLED_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove: all-white frame-and-panel drawer fronts with brass
+bar pulls, a maple top, one long oatmeal linen cushion, and three maple floating shelves above. Its
 geometry has been verified against the design and is final. Image 2 is the client's reference picture of a similar
 alcove bench with a golden retriever and accessories.
 
 Edit image 1 to add the dog and the accessories from image 2, and change nothing else. Do not move, resize, redraw or
-restyle the bench, the drawer fronts, the brass pulls, the cushion, the walnut top, the shelves, the walls, the door, the
+restyle the bench, the drawer fronts, the brass pulls, the cushion, the maple top, the shelves, the walls, the door, the
 floor, the pilasters or the camera: every edge that is in image 1 stays exactly where it is, at the same size.
 
 Add, placed naturally and at real-world scale (the bench is 66 inches wide, the cushion top is 17 inches above the floor):
@@ -191,14 +201,12 @@ Add, placed naturally and at real-world scale (the bench is 66 inches wide, the 
 - Three throw pillows standing against the back wall like in image 2: a dark olive green velvet pillow and a cream and
   grey striped linen pillow at the left end, a rust brown pillow at the right end, the dog between them.
 - A cream and grey woven throw blanket with fringe, folded on the cushion at the left end with one corner hanging just
-  over the cushion's front edge, not below the walnut top's edge, so both drawer fronts stay fully visible.
+  over the cushion's front edge, not below the maple top's edge, so both drawer fronts stay fully visible.
 - The shelves styled like image 2, replacing the few objects on them now: a trailing pothos in a white pot at the left
   end of the top shelf with vines hanging down, a lidded woven seagrass basket, a few hardcover books lying and standing,
   a small framed landscape picture, two cream ceramic jars, a small wooden bowl, a second small potted plant, a woven
   basket holding tennis balls on the bottom shelf, and a small white framed sign reading GOOD DOGS LIVE HERE leaning on
   the bottom shelf. Everything stands on the shelves and does not hide the shelf front edges.
-- Two stainless steel dog bowls in a small wooden tray on the floor just outside the alcove, to the right of the right
-  pilaster, in the passage.
 - A natural jute rug on the floor in the foreground at the bottom of the frame, ending well in front of the bench so the
   white plinth and the floor line under the bench stay fully visible.
 
@@ -206,21 +214,21 @@ Keep the lighting exactly as it is in image 1; the new items cast soft natural s
 lights, no other new objects, no other changes. Photorealistic, matching image 1's grain, lens and white balance."""
 
 DOGS_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove with a golden retriever lying on its cushion, pillows,
-a throw, styled shelves above, dog bowls on the floor and a rug. Its geometry has been verified and is final. Images 2
+a throw, styled shelves above and a rug. Its geometry has been verified and is final. Images 2
 and 3 are photos of the client's two dogs, who live in this house.
 
 Edit image 1 so the golden retriever is REPLACED by these two dogs, and change nothing else. Remove the golden retriever
-completely. Do not move, resize, redraw or restyle the bench, the drawer fronts, the brass pulls, the cushion, the walnut
-top, the shelves and their objects, the pillows, the throw, the dog bowls, the rug, the walls, the door, the floor, the
+completely. Do not move, resize, redraw or restyle the bench, the drawer fronts, the brass pulls, the cushion, the maple
+top, the shelves and their objects, the pillows, the throw, the rug, the walls, the door, the floor, the
 pilasters or the camera: every edge that is in image 1 stays exactly where it is, at the same size.
 
 The two dogs, each a faithful likeness of the dog in its photo (same breed look, coat colors, markings, head shape,
-ears, collar), ignoring the people, the beach and the ball in the photos:
+ears), ignoring the people, the beach, the ball and any collars in the photos; neither dog wears a collar here:
 - Maizy (image 2): a small senior terrier mix, chocolate brown and white with a white blaze down her face, brown ears,
   a grey muzzle, a white chest and legs and a mostly white tail, short coat. She lies curled up on the cushion at the
   left of center, next to the striped pillow, relaxed, head resting on her paws or turned toward the camera.
-- Franco (image 3): a large black Labrador mix with a short glossy black coat, a broad head, a leather collar with a
-  tag. He lies on the cushion right of center where the retriever was, chest down, head up, facing the camera, relaxed.
+- Franco (image 3): a large black Labrador mix with a short glossy black coat, a broad head, no collar. He lies on the
+  cushion right of center where the retriever was, chest down, head up, facing the camera, relaxed.
 - True relative size: Franco is a big dog, Maizy a small one, about half his length. Both rest entirely on the cushion
   and do not hang over its front edge; both fit between the pillows on the 66 inch bench.
 
@@ -228,7 +236,7 @@ Keep the lighting exactly as it is in image 1; the dogs cast soft natural shadow
 No other new objects, no other changes. Photorealistic, matching image 1's grain, lens and white balance."""
 
 SOFFIT_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove with two dogs on its cushion, pillows, a throw, three
-walnut floating shelves with objects, dog bowls on the floor and a rug. Across the top of the picture a DROPPED SOFFIT has
+maple floating shelves with objects and a rug. Across the top of the picture a DROPPED SOFFIT has
 been placed by CAD, flat-shaded, at its exact built size and position: a bulkhead hung from the ceiling whose front face
 is flush with the faces of the two pilasters, in the same plane as them. It is one continuous band from the outer edge
 of the left pilaster across the alcove, across the top of the right pilaster and on to the right over the hallway
@@ -248,7 +256,7 @@ and onto the wall beyond the hallway opening. The two downlights are flush reces
 switched on: warm white light pooling down the back wall over the shelves and the bench, soft highlights on the objects
 on the top shelf and on the dogs, consistent with the photo's daylight and not overpowering it. Do not move, resize or
 redraw the soffit, the lights, the bench, the dogs, the pillows, the throw, the shelves and their objects, the sign, the
-bowls, the rug, the walls, the door, the floor, the pilasters or the camera: every edge that is in image 1 stays exactly
+rug, the walls, the door, the floor, the pilasters or the camera: every edge that is in image 1 stays exactly
 where it is, at the same size. Photorealistic, no CAD look, matching image 1's grain, lens and white balance."""
 
 SOFFIT_PAINT_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove with two dogs on its cushion, shelves above, and a
@@ -267,7 +275,7 @@ be repainted; everything else is final.
 
 Keep both surfaces exactly where they are, at the same size, with the same edges. Keep the two downlights exactly where
 they are, switched on. Do not change the bench, the dogs, the pillows, the throw, the shelves and their objects, the
-sign, the bowls, the rug, the walls, the door, the floor, the pilasters, the lighting or the camera. Photorealistic,
+sign, the rug, the walls, the door, the floor, the pilasters, the lighting or the camera. Photorealistic,
 matching image 1's grain, lens and white balance."""
 
 WALNUT_SHELVES_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove: white painted drawer frames around dark walnut
@@ -303,6 +311,41 @@ cushion's front edge where it is), the drawer fronts, the brass pulls, the white
 their objects, the sign, the soffit, the lights, the bowls, the rug, the walls, the door, the floor, the pilasters, the
 lighting or the camera. Photorealistic, matching image 1's grain, lens and white balance."""
 
+WHITE_FRONTS_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove: white painted drawer frames around dark walnut
+panels with brass bar pulls, a pale maple top under one long cushion with two dogs on it, pillows, a throw, three pale
+maple floating shelves above with objects on them, a dropped soffit with two downlights, dog bowls on the floor and a
+rug. Everything in it is final except the color of the two drawer panels and the dog bowls, which go away.
+
+Paint the two dark walnut panels inside the white drawer frames the same smooth satin white enamel as the frames around
+them, so each drawer front is all white: a white frame around a white panel, no wood grain anywhere on the fronts. The
+panels stay recessed behind the frames exactly as they are, so the thin shadow along the top inside edge of each frame
+and the fainter shadow lines down the sides remain and each front still reads as a frame around a recessed panel. The
+two brass bar pulls stay exactly where they are, the same size, unchanged. The thin shadow gap between the two fronts
+and around them stays.
+
+REMOVE the two stainless steel dog bowls and their wooden tray from the floor to the right of the right pilaster, in
+the passage, completely, and show the plain plank floor there, continuous with the floor around it, with nothing in
+their place.
+
+Change nothing else. Keep the pale maple top edge under the cushion and the three pale maple shelves as they are. Do
+not change the cushion, the dogs, the pillows, the throw (its corner still hangs over the cushion's front edge in front
+of the left drawer, where it is), the plinth, the shelves and their objects, the sign, the soffit, the lights, the rug,
+the walls, the door, the floor elsewhere, the pilasters, the lighting or the camera. Photorealistic, matching image 1's
+grain, lens and white balance."""
+
+COLLAR_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove with two dogs lying on its cushion: a small brown and
+white terrier mix at the left and a large black Labrador mix right of center. Everything in it is final except one
+thing: the black dog wears a leather collar with a tag around his neck.
+
+REMOVE the black dog's collar and its tag completely. His neck shows plain short glossy black fur, continuous with the
+rest of his coat, with the same highlights and shading as the fur around it, as if he never wore a collar. Do not move
+or redraw the dog otherwise: same pose, same head, same eyes, same size, same place on the cushion.
+
+Change nothing else: the small dog, the cushion, the pillows, the throw, the bench, the white drawer fronts, the brass
+pulls, the shelves and their objects, the sign, the soffit, the lights, the rug, the walls, the door, the floor, the
+pilasters, the lighting and the camera all stay exactly as they are. Photorealistic, matching image 1's grain, lens and
+white balance."""
+
 JOBS = {
     "bench": ((f"{PROJ}/images/space-photo-web.jpg", "image/jpeg"), (f"{PROJ}/images/hero.png", "image/png"),
               BENCH_PROMPT, "bench-in-nook"),
@@ -328,6 +371,9 @@ JOBS = {
                        "bench-in-nook-walnut-shelves"),
     "walnut-top": ((f"{PROJ}/images/bench-in-nook-walnut-shelves.png", "image/png"), WALNUT_TOP_PROMPT,
                    "bench-in-nook-walnut-top"),
+    "white-fronts": ((f"{PROJ}/images/bench-in-nook-soffit-paint.png", "image/png"), WHITE_FRONTS_PROMPT,
+                     "bench-in-nook-white-fronts"),
+    "collar": ((f"{PROJ}/images/bench-in-nook-white-fronts.png", "image/png"), COLLAR_PROMPT, "bench-in-nook-no-collar"),
 }
 job = sys.argv[1] if len(sys.argv) > 1 else "bench"
 if job not in JOBS:

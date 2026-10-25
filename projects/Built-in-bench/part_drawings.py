@@ -51,7 +51,7 @@ def dt(mm):
 
 
 P18, P12, P6 = "3/4 ply (measure)", "1/2 BB (measure)", "1/4 ply (measure)"
-PW12 = "1/2 walnut ply (measure)"
+PW12 = "1/2 MDF or paint-grade ply (measure)"
 
 
 def info(name):
@@ -627,7 +627,7 @@ def top_slab():
     s.dim_v(0, TS, 40 + 8)
     s.callout(1, TS - 1, f"{dt(ROUND)} R, top and bottom", ha="left")
     s.edge("left", "FRONT")
-    sheet(name, head(name, f"solid walnut {dt(TS)} thick, {dt(D)} deep x {dt(ALCOVE_W)} long"), [v, s],
+    sheet(name, head(name, f"hard maple {dt(TS)} thick, {dt(D)} deep x {dt(ALCOVE_W)} long"), [v, s],
           "Glue up from 4 or 5 boards, grain along the 66 in length. Floats: pocket screws up through the ends and the partition near the front, figure-8s on the nailer at the back.")
     pr = []
     for z in (TOP_Z0, TOP_Z0 + TS - 0.6):                              # the two front arrises are rounded
@@ -672,7 +672,7 @@ def front_stile():
     s.edge("bottom", "FRONT face")
 
     sheet(name, head(name, f"hard maple, {dt(STILE_W)} x {dt(FRONT_H)}, thickness: {P18}"),
-          [f, e, s], "All four the same; mill to the 3/4 maple ply's thickness so the fronts, plinth and strips share one plane. Set the groove from the 1/2 walnut panel: the groove's front wall is the panel's inset, so test-cut on scrap and measure. The rail tenon shows on the top end; Brian is fine with that. Painted white.")
+          [f, e, s], "All four the same; mill to the 3/4 maple ply's thickness so the fronts, plinth and strips share one plane. Set the groove from the 1/2 panel stock: the groove's front wall is the panel's inset, so test-cut on scrap and measure. The rail tenon shows on the top end; Brian is fine with that. Painted white.")
     pr = cut_probes(*g, "-x")
     pr += [wood(*g, "-y"), wood(*g, "+y"), runout(*g, "-z"), runout(*g, "+z")]
     return check(name, solid, pr)
@@ -771,7 +771,7 @@ def front_panel():
     s.dim_h(0, PANEL_T, 30 + 8, PW12)
     s.edge("left", "SHOW face")
 
-    sheet(name, head(name, f"1/2 walnut ply, {dt(PH)} x {dt(PW)} including tongues, grain horizontal"), [v, s],
+    sheet(name, head(name, f"1/2 MDF or paint-grade ply, {dt(PH)} x {dt(PW)} including tongues, painted white with the frame"), [v, s],
           "Rabbet the back edges with a straight bit or the bit set's tongue cutter so the tongue stays flush with the show face. "
           "The back goes in flush with the back of the frame. Glue in all round (plywood does not move).")
     pr = []

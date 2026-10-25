@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 """Built-in alcove bench: 66 x 28 in former wet bar, two full-width drawers on
-Blum TANDEM 563H undermounts, solid walnut top (maple until 2026-10-24) with a 3 in cushion.
+Blum TANDEM 563H undermounts, solid maple top with a 3 in cushion (walnut for part of 2026-10-24).
 
 Picks (Brian, 2026-10-06/07): wood top at 16 in (lowered to 14 in on 2026-10-09 for the senior dog; cushion top 17 in), flush base, frameless with
-full-overlay fronts, flat fronts built as a maple frame around a 1/2 walnut-ply
-panel (back flush with the frame, face inset 1/4 in) on a tongue-and-groove bit set, 8 in brass bar pulls, 3/4 in overhang
-with an eased edge, solid glued-up top (maple; walnut since 2026-10-24) set 3 in back from the pilaster
+full-overlay fronts, flat fronts built as a maple frame around a 1/2 in panel
+(back flush with the frame, face inset 1/4 in) on a tongue-and-groove bit set, 8 in brass bar pulls, 3/4 in overhang
+with an eased edge, solid glued-up maple top set 3 in back from the pilaster
 faces, one full-depth cushion, 21 in slides. Finish (2026-10-09): frames, plinth and
-scribe strips painted white; walnut panels, top and shelves bare.
+scribe strips painted white; top and shelves bare. Panels were 1/2 walnut ply left bare until
+2026-10-24, when Brian chose all-white fronts: the panels are painted with the frames, so paint-grade stock.
 
 Axes: X across the alcove, Y depth (0 at the back wall, +Y toward the room),
 Z up (0 at the floor). Right-handed, so X=0 is the pilaster wall on your RIGHT
@@ -68,7 +69,7 @@ BACK_SET = 0.25 * IN        # back panel groove this far in from the rear edge
 PLAY = 1.6                  # 1/16 in total play on housed panels
 TONGUE_T = 0.25 * IN        # front frames: tongue-and-groove bit set
 TONGUE_L = 0.375 * IN
-PANEL_T = T12                # 1/2 walnut ply (measures 12 mm): back flush with the frame, face inset FACE_T - PANEL_T
+PANEL_T = T12                # 1/2 panel (ply or MDF, measures 12 mm): back flush with the frame, face inset FACE_T - PANEL_T
 STILE_W = 1.5 * IN          # maple frame width on the fronts
 NAILER_H = 2.5 * IN
 STRIP_CUT = 2.0 * IN        # scribe strips ripped at 2 in, scribed to STRIP_W
@@ -147,11 +148,10 @@ def add(name, solid, qty, material, notes="", inst=None):
 
 
 MAPLE = "hard maple"
-WALNUT_S = "solid walnut"   # the top (Brian 2026-10-24; was hard maple)
 PLY18 = "3/4 maple ply"
 PLYBASE = "3/4 ply (any, hidden)"
 PLY6 = "1/4 maple ply"
-WALNUT = "1/2 walnut ply"
+PAINT_PANEL = "1/2 paint-grade panel"   # MDF or paint-grade ply, painted white with the frames (Brian 2026-10-24; was 1/2 walnut ply, bare)
 BB12 = "1/2 Baltic birch"
 
 # ================================================================ base frame (ladder, 3/4 ply)
@@ -228,15 +228,15 @@ add("plinth", plinth, 1, MAPLE,
     f"cut {inch(PLINTH_H + 0.375 * IN)} tall and scribe to the floor so the top edge sits {inch(GAP)} under the fronts; "
     "scribe the ends to the walls; grain horizontal; mill to the ply thickness; screwed to the base front rail; painted white")
 
-# ================================================================ top: solid walnut, floats on the nailer figure-8s
+# ================================================================ top: solid maple, floats on the nailer figure-8s
 top = _box(0, TOP_Y0, TOP_Z0, ALCOVE_W, TOP_Y1 - TOP_Y0, TS)
 top = fillet(top.edges().filter_by(Axis.X).group_by(Axis.Y)[-1], ROUND)
-add("top", top, 1, WALNUT_S,
+add("top", top, 1, MAPLE,
     f"glue up from 4 or 5 boards, grain along the 66 in; {inch(ROUND)} roundover on both front arrises; "
     f"scribe the ends to the walls; {inch(WALL_GAP)} gap at the back wall; pocket screws up through the ends "
     "and partition near the front, figure-8s on the nailer at the back")
 
-# ================================================================ drawer fronts: maple frame, walnut panel, T&G
+# ================================================================ drawer fronts: maple frame, inset panel, T&G, all painted white
 RL = FRONT_W - 2 * STILE_W + 2 * TONGUE_L     # rail length with stub tenons
 PW, PH = RL, FRONT_H - 2 * STILE_W + 2 * TONGUE_L
 GY0 = FACE_Y0 + PANEL_T - TONGUE_T            # groove / tongue plane: the groove front wall lands on the panel face
@@ -268,7 +268,7 @@ add("front_rail", _fl[2], 4, MAPLE,
     f"{inch(TONGUE_T)} x {inch(TONGUE_L)} groove on the inner edge, through; {inch(TONGUE_T)} x {inch(TONGUE_L)} "
     f"stub tenon on both ends (same bit); length includes both tenons; painted white",
     inst=[("rail_lb", _fl[2]), ("rail_lt", _fl[3]), ("rail_rb", _fr[2]), ("rail_rt", _fr[3])])
-add("front_panel", _fl[4], 2, WALNUT,
+add("front_panel", _fl[4], 2, PAINT_PANEL,
     f"{inch(TONGUE_T)} x {inch(TONGUE_L)} tongue on all four edges, flush with the show face (rabbet the BACK edges "
     f"{inch(PANEL_T - TONGUE_T)} deep); grain horizontal; size includes the tongues; back flush with the frame back, "
     f"face {inch(FACE_T - PANEL_T)} below the maple; glue in (plywood, no movement)",
