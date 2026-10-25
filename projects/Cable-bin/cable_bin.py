@@ -9,14 +9,17 @@ Stacking: the bottom FLARE mm of every bin is a 45 degree chamfer; it seats on
 the matching 45 degree chamfer of the lip at the top of the bin below, dropping
 DROP mm in. No overhang anywhere past 45 degrees.
 
+Lightening (Brian 2026-10-25, drawer bin): vertical rounded slots through both
+long walls, a finger scallop in each end wall, and 8 mm joint posts.
+
 Run:  .venv/bin/python projects/Cable-bin/cable_bin.py   (SHOW=1 pushes to the viewer)
 Writes STLs and renders beside this file; asserts self-check every run.
 """
 import math
 import os
 
-from build123d import (Align, Axis, Box, Cylinder, Plane, Polygon, Pos,
-                       RectangleRounded, chamfer, export_stl, extrude, fillet, offset)
+from build123d import (Align, Axis, Box, Cylinder, Plane, Polygon, Pos, RectangleRounded, Rot,
+                       chamfer, export_stl, extrude, fillet, offset)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 IN = 25.4
@@ -43,7 +46,7 @@ DROP = FLARE - LIP_T + LIP_EDGE
 STACK_PITCH = H - DROP
 
 # ---- joint -----------------------------------------------------------------
-POST_L = 12.0           # post length along the bin (behind the joint face)
+POST_L = 8.0            # post length along the bin (behind the joint face); 12 until 2026-10-25, weight
 POST_D = 15.5           # post depth into the bin from the wall's inner face
 POST_TOP_GAP = 7.0      # posts stop this far below the rim: the foot above needs DROP + 2
 SOCKET_Z = 12.0         # bottom of the tail TIP; the underside slopes down to the joint face
@@ -57,6 +60,23 @@ RIB_PROUD = 0.35        # rib crest above the tail flank (0.20 interference)
 RIB_LEN = 12.0          # ribs only on the top RIB_LEN of the tail: short crush stroke
 RIB_LEADIN = 0.5
 
+# ---- lightening: wall slots and end scallops (Brian 2026-10-25) ------------
+SLOT_W = 6.0            # slot width
+SLOT_PITCH = 14.0       # 8 mm web between slots
+SLOT_Z0 = 18.0          # slot bottom, clear of the inner foot chamfer
+SLOT_Z1 = 82.0          # slot top, clear of the lip's transition
+SLOT_X_MARGIN = 10.0    # web between the first slot and the post, and the last slot and the end corner
+SCOOP_R = 28.0          # finger scallop: a circle this big, centred SCOOP_RISE above the rim, in each end wall
+SCOOP_RISE = 10.0
+SCOOP_W = 2 * math.sqrt(SCOOP_R**2 - SCOOP_RISE**2)   # 52.3 wide at the rim
+SCOOP_DEPTH = SCOOP_R - SCOOP_RISE                    # 18 deep
+
+INNER_FLARE_TOP = FLARE + WALL * (math.sqrt(2) - 1)   # where the shell's inner foot chamfer meets the inner wall
+assert POST_L - DT_DEPTH - DT_CLR >= 2.5, "not enough post behind the socket head"
+assert SLOT_PITCH - SLOT_W >= 8.0, "slot webs under 8 mm"
+assert SLOT_Z0 >= INNER_FLARE_TOP + 8.0, "slots run into the foot"
+assert SLOT_Z1 <= H - LIP_H - (LIP_T - WALL) - 8.0, "slots run into the lip"
+assert SCOOP_W < W - 2 * R_CORNER - 10, "scallop runs into the end corners"
 assert POST_TOP_GAP >= DROP + 2.0, "posts would hit the foot of the bin stacked above"
 assert R_CORNER > FLARE, "the foot chamfer must fit inside the corner radius"
 assert TAIL_UNDER_DEG > 45 + 2, "tail underside must be steeper than 45 degrees to print unsupported"
@@ -107,6 +127,28 @@ def full_bin():
     lip = chamfer(inner_loop(lip.edges().group_by(Axis.Z)[0]), LIP_C)
     lip = chamfer(inner_loop(lip.edges().group_by(Axis.Z)[-1]), LIP_EDGE)
     return shell + lip, outer
+
+
+def slot_cutter():
+    """Vertical rounded slots through both long walls of both halves, one solid; also the slot count per wall."""
+    x_lo, x_hi = POST_L + SLOT_X_MARGIN, HALF_L - R_CORNER - SLOT_X_MARGIN
+    n = int((x_hi - x_lo - SLOT_W) // SLOT_PITCH) + 1
+    x0 = x_lo + (x_hi - x_lo - ((n - 1) * SLOT_PITCH + SLOT_W)) / 2 + SLOT_W / 2   # group centred in the zone
+    straight = SLOT_Z1 - SLOT_Z0 - SLOT_W
+    cap = Rot(90, 0, 0) * Cylinder(SLOT_W / 2, W + 2)                  # axis along Y, through both walls
+    one = Box(SLOT_W, W + 2, straight) + Pos(0, 0, straight / 2) * cap + Pos(0, 0, -straight / 2) * cap
+    cutter = None
+    for i in range(n):
+        for sx in (+1, -1):
+            s = Pos(sx * (x0 + i * SLOT_PITCH), 0, (SLOT_Z0 + SLOT_Z1) / 2) * one
+            cutter = s if cutter is None else cutter + s
+    return cutter, n
+
+
+def scallops():
+    """Finger scallop in each end wall: a cylinder along X, centred SCOOP_RISE above the rim."""
+    scoop = Rot(0, 90, 0) * Cylinder(SCOOP_R, 40)
+    return Pos(-L / 2, 0, H + SCOOP_RISE) * scoop + Pos(L / 2, 0, H + SCOOP_RISE) * scoop
 
 
 def post(side, x0, x1, outer):
@@ -179,6 +221,7 @@ def socket(side):
 
 def halves(with_ribs=True):
     whole, outer = full_bin()
+    whole = whole - slot_cutter()[0] - scallops()
     cut_a = Pos(0, 0, -1) * Box(L + 2, W + 2, H + 3, align=(Align.MAX, Align.CENTER, Align.MIN))
     cut_b = Pos(0, 0, -1) * Box(L + 2, W + 2, H + 3, align=(Align.MIN, Align.CENTER, Align.MIN))
     half_a = whole & cut_a
@@ -261,6 +304,21 @@ def main():
     lip_got = vol(lip_probe & half_b)
     assert lip_got > 0.98 * lip_expect, f"B's lip is notched at the joint: {lip_got:.1f} of {lip_expect:.1f} mm3"
 
+    # ---- lightening cuts -----------------------------------------------
+    plain_whole, _ = full_bin()
+    cutter, n_slots = slot_cutter()
+    slot_area = SLOT_W * (SLOT_Z1 - SLOT_Z0 - SLOT_W) + math.pi * (SLOT_W / 2)**2
+    slots_removed = vol(plain_whole & cutter)
+    slots_expect = 4 * n_slots * slot_area * WALL          # two halves, two walls, flat wall there
+    assert abs(slots_removed - slots_expect) < 0.01 * slots_expect, (slots_removed, slots_expect)
+    assert vol(cutter & (half_a + half_b)) < 1e-3, "a slot cuts a post or the slot cut did not take"
+    scoop_removed = vol(plain_whole & scallops())
+    assert scoop_removed > 0, "scallops missed the end walls"
+    for hx, half in ((-1, half_a), (+1, half_b)):      # each end wall's rim is gone over the scoop width, no more
+        rim = Pos(hx * (HALF_L - 1.0), 0, H - 0.5) * Box(2.0, W, 1.0)
+        kept, full = vol(rim & half), vol(rim & plain_whole)
+        assert abs(kept - (full - 2.0 * 1.0 * SCOOP_W)) < 0.02 * full, (kept, full)
+
     # ---- stacking ------------------------------------------------------
     bin_lower = half_a + half_b
     bin_upper = Pos(0, 0, STACK_PITCH) * bin_lower
@@ -299,6 +357,8 @@ def main():
     print(f"drop {DROP:.2f} mm, stack pitch {STACK_PITCH:.2f} mm = {STACK_PITCH/IN:.3f} in, "
           f"4 stacked = {(3*STACK_PITCH + H)/IN:.2f} in")
     print(f"rib interference volume {overlap:.2f} mm3 (expected about {expected:.2f})")
+    print(f"{n_slots} slots per wall, {slots_removed/1000:.1f} cm3 = {slots_removed/1000*1.26:.0f} g removed; "
+          f"scallops {SCOOP_W:.1f} wide x {SCOOP_DEPTH:.0f} deep, {scoop_removed/1000:.1f} cm3")
     print(f"tail {TAIL_H:.1f} mm tall at the joint face (underside {TAIL_BOTTOM:.2f} to {SOCKET_Z:.1f} at the tip), "
           f"socket centre y = {DT_YC:.2f}, flare skin outside the socket {skin:.2f} mm")
 

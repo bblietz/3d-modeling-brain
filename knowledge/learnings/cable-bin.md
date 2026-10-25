@@ -22,6 +22,11 @@ two halves for the X2D, four bins.
 - PLA Basic, 0.6 high-flow nozzle, 0.30 mm Standard, 2-line walls and floor
   (1.24 mm), wall_loops 3 so the lip and posts stay solid (Brian 2026-10-25:
   drawer bin, no real load; PETG and 3-line walls until then).
+- Lightening, Brian took both cuts 2026-10-25: 13 vertical 6 x 64 mm slots
+  per long wall per half at 14 mm pitch (z 18 to 82), a 52 x 18 mm finger
+  scallop in each end wall, 8 mm joint posts. Friction hold (no CA), scallop
+  ends and 3.80 in pitch confirmed by Brian the same day. Only the colour
+  is open.
 - Joint coupon on plate 2, printed first.
 
 ## What worked
@@ -33,6 +38,10 @@ two halves for the X2D, four bins.
 - **Joint posts clipped by the envelope** (`post & outer`) instead of
   positioning them clear of the flare; the dovetail then starts above the
   flare zone (z = 10) and the post below it fills the inner chamfer corner.
+- **Slot cut proven by volume**: the material removed by the slot cutter
+  equals slots x area x wall to 0.1 %, which proves every slot went through
+  a flat wall and none clipped a post, and the cutter's intersection with the
+  finished halves is empty.
 - **Geometry proofs instead of constants**: an empty intersection of the
   ribless A with B proves the body clearance; the ribbed overlap matches the
   analytic circular-segment volume; pressing the stacked pair 0.05 mm proves
@@ -80,6 +89,27 @@ wall count and the material, and put the grams on the page as a decision,
 not a footnote. Where the material goes in this bin (solid CAD volumes at
 1.24 mm): walls 50 %, floor 17 %, joint posts 26 %, lip 8 %; the slicer
 hollows the posts, so in the print they are closer to a fifth.
+
+## small_perimeter_threshold is a radius: it ate 1 h 43 min
+
+The slots cut 45 g and the first slice came back at 6 h 41 min, from
+4 h 58 min solid. Fewer, wider slots (`pipeline/slot_study.py`: 7 x 10 mm
+and 6 x 14 mm per wall) gave 6 h 16 and 6 h 14, so the number of wall
+islands was not the cause. `pipeline/layer_times.py` (M73 marks per layer
+band from a real slice) put the whole hour in the slot band: 232 min against
+129 min solid, the foot and lip bands unchanged. The G-code of one band layer
+showed 1147 mm at 30 mm/s against 231 mm in the solid bin. Cause: the PETG
+recipe's `small_perimeter_threshold` 10 with `small_perimeter_speed` 30 is a
+RADIUS in Bambu Studio, so every loop under 63 mm is "small", and every web
+between slots is a loop of 18 mm. The stock preset has threshold 0 (off) and
+50 %; the override is gone from this project, and the slotted bin now
+slices at 4 h 54 min / 240 g, faster than the 4 h 58 min solid one (the
+island travel costs less than the wall length the slots removed). Lessons:
+profile a surprising
+time by layer band before redesigning geometry (the tool is reusable:
+`layer_times.py <3mf> <plate> <outdir> [z edges]`), and treat any copied
+speed override as suspect on a part with many small closed loops (slots,
+grilles, lattices, lettering).
 
 ## Walls that are exactly N lines wide: use Arachne
 

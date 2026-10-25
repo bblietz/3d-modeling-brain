@@ -61,12 +61,12 @@
     "Half A (tails)",
     "Half B (sockets)"
    ],
-   "time": "4:58",
-   "seconds": 17882,
-   "gcode_estimate": "4h 58m 2s",
-   "grams": 284.6,
-   "metres": 93.91,
-   "used_g_per_filament": 284.6,
+   "time": "4:54",
+   "seconds": 17646,
+   "gcode_estimate": "4h 54m 6s",
+   "grams": 240.2,
+   "metres": 79.25,
+   "used_g_per_filament": 240.2,
    "layers": 339,
    "top_z": 101.7,
    "nozzle_C": 220,
@@ -78,16 +78,17 @@
     236.79
    ],
    "feature_mm": {
-    "Outer wall": 53190.8,
-    "Inner wall": 19492.5,
-    "Internal solid infill": 8596.5,
-    "Top surface": 4183.8,
-    "Sparse infill": 4106.4,
+    "Outer wall": 43119.4,
+    "Inner wall": 17131.2,
+    "Internal solid infill": 8848.1,
+    "Top surface": 4171.8,
     "Bottom surface": 4054.2,
-    "Floating vertical shell": 121.9,
+    "Sparse infill": 1678.0,
     "Skirt": 113.5,
-    "Bridge": 47.7,
-    "Gap infill": 0.4
+    "Floating vertical shell": 96.3,
+    "Bridge": 26.0,
+    "Overhang wall": 13.4,
+    "Gap infill": 0.3
    }
   },
   {
@@ -96,12 +97,12 @@
     "Coupon A",
     "Coupon B"
    ],
-   "time": "0:14",
-   "seconds": 828,
-   "gcode_estimate": "13m 48s",
-   "grams": 5.3,
-   "metres": 1.73,
-   "used_g_per_filament": 5.3,
+   "time": "0:11",
+   "seconds": 679,
+   "gcode_estimate": "11m 19s",
+   "grams": 4.2,
+   "metres": 1.4,
+   "used_g_per_filament": 4.2,
    "layers": 48,
    "top_z": 14.4,
    "nozzle_C": 220,
@@ -113,22 +114,22 @@
     140.2
    ],
    "feature_mm": {
-    "Inner wall": 803.4,
-    "Outer wall": 493.9,
-    "Sparse infill": 269.7,
-    "Internal solid infill": 69.1,
-    "Bridge": 23.5,
-    "Top surface": 21.8,
-    "Skirt": 21.8,
-    "Bottom surface": 21.0,
-    "Floating vertical shell": 9.9,
+    "Inner wall": 667.8,
+    "Outer wall": 496.8,
+    "Sparse infill": 120.2,
+    "Internal solid infill": 58.1,
+    "Skirt": 21.0,
+    "Bridge": 12.8,
+    "Top surface": 9.6,
+    "Bottom surface": 9.1,
+    "Floating vertical shell": 2.8,
     "Gap infill": 0.1
    }
   }
  ],
- "total_time": "5:12",
- "total_seconds": 18710,
- "total_grams": 289.9,
+ "total_time": "5:05",
+ "total_seconds": 18325,
+ "total_grams": 244.4,
  "overrides": {
   "process": {
    "curr_bed_type": "Textured PEI Plate",
@@ -145,8 +146,6 @@
    "top_one_wall_type": "not apply",
    "seam_gap": "0%",
    "top_surface_speed": "60",
-   "small_perimeter_speed": "30",
-   "small_perimeter_threshold": "10",
    "gap_infill_speed": "40",
    "initial_layer_speed": "30",
    "initial_layer_infill_speed": "50"

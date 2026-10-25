@@ -26,13 +26,17 @@ Resume with Fable 5.1 (design work). Read `projects/Cable-bin/brief.md` and
   (WALL 1.24), wall_loops 3 for the lip and posts, 20 % infill, 2-loop
   skirt, no brim, no ironing. (Brian 2026-10-25: drawer bin, no real load,
   PLA; the 3-line PETG version was 368 g / 7 h 02 min.)
+- Lightening, Brian took both cuts 2026-10-25: 13 vertical 6 x 64 mm slots
+  per long wall per half at 14 mm pitch (z 18 to 82), finger scallop 52 x
+  18 mm in each end wall, joint posts 8 mm. Friction hold (no CA), scallop
+  ends and 3.80 in pitch confirmed the same day.
 - Joint coupon on plate 2, printed before any bin.
+- No small_perimeter override in the 3MF (the PETG recipe's threshold 10 is
+  a radius and slowed every slot web to 30 mm/s: 1 h 43 min per bin).
 
 ## Waiting on Brian
 
-- Options page answers: friction vs CA drop; plain ends vs finger scallop;
-  3.80 vs 4.00 in pitch; weight (285 g as built, or slotted long walls about
-  30 g less and/or posts 12 to 8 mm about 15 g less); PLA colour.
+- PLA colour (display colour in the 3MF is black; any PLA Basic slot prints it).
 - Coupon fit report (firm thumb push over the last 12 mm, holds when lifted
   by either piece). Loose or jammed: change `RIB_PROUD` by 0.1 mm, rerun
   `cable_bin.py`, then `pipeline/make_print_3mf.py`.

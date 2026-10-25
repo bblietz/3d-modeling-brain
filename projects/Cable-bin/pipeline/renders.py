@@ -62,6 +62,7 @@ def main():
     render("bin-exploded", [(Pos(-30, 0, 0) * half_a, COL_A), (Pos(30, 0, 0) * half_b, COL_B)], rot=(60, 0, 30))
     render("bin-top", [(half_a, COL_A), (half_b, COL_B)], rot=(0, 0, 0), proj="o")
     render("bin-end", [(half_a, COL_A), (half_b, COL_B)], rot=(90, 0, 90), proj="o", size=(900, 900))
+    render("bin-side", [(half_a, COL_A), (half_b, COL_B)], rot=(90, 0, 0), proj="o", size=(1600, 520))
 
     # joint close-up at the +y wall, top 50 mm, seen from inside the bin
     zone = box(-30, 30, 14, W / 2 + 1, H - 50, H + 40)
@@ -87,12 +88,6 @@ def main():
     # four bins stacked, for scale
     stack4 = [(Pos(0, 0, i * cb.STACK_PITCH) * bin_, [COL_B, COL_U, COL_A, "#c98bd6"][i]) for i in range(4)]
     render("stack-four", stack4, rot=(70, 0, 30), size=(1000, 1200))
-
-    # option picture: finger scallop in each end wall
-    scoop = Cylinder(28, 40, align=(Align.CENTER, Align.CENTER, Align.CENTER))
-    scoop = Rot(0, 90, 0) * scoop
-    cut = Pos(-L / 2, 0, H + 10) * scoop + Pos(L / 2, 0, H + 10) * scoop
-    render("option-scallop", [(half_a - cut, COL_A), (half_b - cut, COL_B)], rot=(60, 0, 30))
 
     # coupon pair
     ca, cbn = cb.coupon_pieces(half_a, half_b)

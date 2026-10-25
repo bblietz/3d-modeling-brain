@@ -80,7 +80,7 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
 <div class="wrap">
   <div class="eyebrow">Sign-off · 2026-10-25 · Bambu Lab X2D, 0.6 high-flow nozzle, PLA</div>
   <h1>Stackable Cable Bin</h1>
-  <p class="lede">16&#190; &times; 4 &times; 4 in, printed as two halves that lock together at mid-length. Four bins, one plate each, plus a 14 min joint coupon to print first.</p>
+  <p class="lede">16&#190; &times; 4 &times; 4 in, printed as two halves that lock together at mid-length, with slotted long walls and a finger scallop in each end. Four bins, one plate each, plus a 11 min joint coupon to print first.</p>
 
   <figure>
     <img src="images/bin-assembled.png" alt="One assembled bin, half A in blue and half B in amber, seen from above the front corner">
@@ -93,7 +93,7 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
     <div class="cell"><div class="k">Inside depth</div><div class="v">3.93</div><div class="s">in, floor to rim</div></div>
     <div class="cell"><div class="k">Stack pitch</div><div class="v">3.80</div><div class="s">in; 4 bins stand 15.4 in</div></div>
     <div class="cell"><div class="k">Wall</div><div class="v">1.24</div><div class="s">mm, 2 lines; floor the same</div></div>
-    <div class="cell"><div class="k">Per bin</div><div class="v">285 g</div><div class="s">PLA, 4 h 58 min per plate</div></div>
+    <div class="cell"><div class="k">Per bin</div><div class="v">240 g</div><div class="s">PLA, 4 h 54 min per plate</div></div>
   </div>
 
   <h2>Why two halves</h2>
@@ -139,15 +139,15 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
   <table>
     <thead><tr><th>Plate</th><th>Objects</th><th>Time</th><th>PLA</th><th>Runs</th></tr></thead>
     <tbody>
-      <tr><td>1 · Bin</td><td><span class="swA"></span>Half A (tails), <span class="swB"></span>Half B (sockets)</td><td class="num">4 h 58 min</td><td class="num">285 g</td><td class="num">4</td></tr>
-      <tr><td>2 · Joint coupon</td><td>Coupon A, Coupon B</td><td class="num">14 min</td><td class="num">5 g</td><td class="num">1, first</td></tr>
-      <tr><td colspan="2"><strong>Four bins</strong></td><td class="num"><strong>20 h 06 min</strong></td><td class="num"><strong>1144 g</strong></td><td class="num">5 plates</td></tr>
+      <tr><td>1 · Bin</td><td><span class="swA"></span>Half A (tails), <span class="swB"></span>Half B (sockets)</td><td class="num">4 h 54 min</td><td class="num">240 g</td><td class="num">4</td></tr>
+      <tr><td>2 · Joint coupon</td><td>Coupon A, Coupon B</td><td class="num">11 min</td><td class="num">4 g</td><td class="num">1, first</td></tr>
+      <tr><td colspan="2"><strong>Four bins</strong></td><td class="num"><strong>19 h 48 min</strong></td><td class="num"><strong>965 g</strong></td><td class="num">5 plates</td></tr>
     </tbody>
   </table>
   </div>
   <figure>
     <img src="images/coupons.png" alt="The two joint coupon pieces">
-    <figcaption>Plate 2. A 14.5 mm slice of the joint carrying one ribbed tail and its socket. The crush-rib numbers were calibrated in PLA, the same material as the bin, so this is a 14 min confirmation of the fit before the first bin rather than an unknown.</figcaption>
+    <figcaption>Plate 2. A 14.5 mm slice of the joint carrying one ribbed tail and its socket. The crush-rib numbers were calibrated in PLA, the same material as the bin, so this is a 11 min confirmation of the fit before the first bin rather than an unknown.</figcaption>
   </figure>
   <ol>
     <li>Print plate 2. Push coupon A down into coupon B. It should take firm thumb pressure over the last 12 mm and stay put when you pick it up by either piece. Loose or jammed: tell me and the rib height changes by 0.1 mm.</li>
@@ -155,8 +155,8 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
     <li>Assemble: stand B on the bench, hold A level above it with the tails over the sockets, and push straight down until the rims are flush.</li>
   </ol>
 
-  <h2>Decisions to confirm</h2>
-  <p>Everything is built as the marked option. Answer only where you want something different.</p>
+  <h2>Decisions</h2>
+  <p>Decided 2026-10-25: friction hold, scallop ends, 3.80 in pitch, both weight cuts. Kept here for the record with the alternative each one beat. Only the colour is still open.</p>
   <div class="decisions">
 
     <div class="decision">
@@ -179,14 +179,13 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
       <h3>Ends <span class="tag">pulling a bin off a shelf</span></h3>
       <div class="opts">
         <div class="opt built">
-          <img src="images/bin-assembled.png" alt="Plain ends">
-          <div class="name">Plain ends <span class="tag ok">built</span></div>
-          <p>Full-height end walls. The lip is the grip.</p>
+          <img src="images/bin-end.png" alt="End view of the bin with the finger scallop in the end wall">
+          <div class="name">Finger scallop <span class="tag ok">built</span></div>
+          <p>A 2 in wide, &#190; in deep scoop in each end wall (a 28 mm radius centred 10 mm above the rim). Easier to pull from a tight drawer; the stack still seats on the long sides and the end corners.</p>
         </div>
         <div class="opt">
-          <img src="images/option-scallop.png" alt="Finger scallop in each end wall">
-          <div class="name">Finger scallop</div>
-          <p>A 2 in wide, &#190; in deep scoop in each end wall. Easier to pull from a tight shelf; cables near the end show.</p>
+          <div class="name">Plain ends</div>
+          <p>Full-height end walls, the lip as the grip. Not chosen.</p>
         </div>
       </div>
     </div>
@@ -207,22 +206,21 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
 
     <div class="decision">
       <h3>Weight <span class="tag">per bin</span></h3>
-      <p>The first version had 3-line walls in PETG: 368 g and 7 h 02 min per bin. You said the bins live in a drawer with three sides against its walls and carry no real load, and asked for PLA. Built now: 2-line walls (1.24 mm, the printer's minimum with the 0.6 nozzle) in PLA Basic, <strong>285 g and 4 h 58 min</strong>. Walls and floor are about two thirds of that, the four joint posts about a fifth, the lip under a tenth. Four bins take 1144 g, so two 1 kg spools.</p>
+      <p>Three steps down. The first version had 3-line walls in PETG: 368 g and 7 h 02 min per bin. For a drawer bin with no real load the walls went to 2 lines (1.24 mm) in PLA: 285 g and 4 h 58 min. Then you took both cuts: slotted long walls and 8 mm joint posts, with the scallops taking a little more. <strong>Built now: 240 g and 4 h 54 min per bin, 965 g for four.</strong></p>
+      <figure>
+        <img src="images/bin-side.png" alt="Side elevation of the bin showing the thirteen vertical slots in each half's long wall">
+        <figcaption>Side elevation. 13 vertical slots per long wall per half, 6 mm wide with rounded ends, 64 mm tall, on a 14 mm pitch with 8 mm webs. They start 10 mm past the joint post and stop 10 mm short of the end corners; the floor, the lip band and the foot stay solid. A cable end can poke through if pushed; in a drawer that is harmless.</figcaption>
+      </figure>
       <div class="opts">
         <div class="opt built">
-          <div class="name">285 g as built <span class="tag ok">built</span></div>
-          <p>2-line walls and floor, 3-line lip and posts, 20 % infill where there is room for any. Nothing else changes.</p>
+          <div class="name">Slots, scallops, 8 mm posts <span class="tag ok">built</span></div>
+          <p>Slot cut proven in the model: the removed volume equals the slot area times the wall to within 1 %, and no slot touches a post.</p>
         </div>
         <div class="opt">
-          <div class="name">Slotted long walls, about 30 g less</div>
-          <p>Vertical 6 mm slots along both long sides between the foot and the lip, an open crate look. Plugs cannot pass a 6 mm slot. I draw it before building if you want to see it.</p>
-        </div>
-        <div class="opt">
-          <div class="name">Shorter joint posts, about 15 g less</div>
-          <p>The four posts behind the dovetails shrink from 12 to 8 mm along the bin. Invisible from outside; the joint keeps its full depth.</p>
+          <div class="name">Solid walls, 12 mm posts</div>
+          <p>285 g and 4 h 58 min in PLA. Not chosen.</p>
         </div>
       </div>
-      <p class="q">Fine at 285 g, or take one or both cuts?</p>
     </div>
 
   </div>

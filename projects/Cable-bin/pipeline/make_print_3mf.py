@@ -78,10 +78,10 @@ SCALARS = {   # process scope, different_settings_to_system[0]
     "top_one_wall_type": "not apply",
     "seam_gap": "0%",
 }
-LISTS = {   # process scope, one value per extruder variant; slow small loops and a slow first layer
+LISTS = {   # process scope, one value per extruder variant; a slow first layer
+    # No small_perimeter override here: the PETG recipe's threshold 10 / 30 mm/s is a RADIUS (loops under 63 mm) and
+    # caught every web between the wall slots, 1147 mm per layer at 30 mm/s, 1 h 43 min per bin (layer_times.py found it).
     "top_surface_speed": "60",
-    "small_perimeter_speed": "30",
-    "small_perimeter_threshold": "10",
     "gap_infill_speed": "40",
     "initial_layer_speed": "30",
     "initial_layer_infill_speed": "50",

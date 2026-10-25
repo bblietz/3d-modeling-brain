@@ -1,7 +1,7 @@
 ---
 title: Stackable cable bin
 type: project
-status: CAD complete, 3MF sliced, awaiting Brian's sign-off (2026-10-25)
+status: CAD complete, 3MF sliced, decisions taken 2026-10-25, awaiting the colour and the coupon print
 printer: Bambu Lab X2D, 0.6 high-flow nozzle
 material: PLA Basic (PETG until 2026-10-25)
 tags: [bin, storage, stackable, dovetail, crush-ribs, pla, x2d]
@@ -33,7 +33,7 @@ https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
 - **Stacking** drop 5.0 mm, pitch 96.6 mm = 3.80 in; four bins 15.4 in tall.
   Posts stop 7 mm below the rim so the foot above clears them by 2 mm.
 - **Joint** two vertical dovetails (neck 5, head 9, depth 5 mm) on internal
-  posts 12 mm long x 15.5 mm deep, up to 7 mm below the rim. The tail's
+  posts 8 mm long x 15.5 mm deep (12 until the weight cut), up to 7 mm below the rim. The tail's
   underside slopes at 50 degrees from z = 6.0 at the joint face to z = 12 at
   the tip, so it prints unsupported off A's joint face; B's socket has the
   matching sloped floor and is otherwise open at the top: A drops onto B to
@@ -46,6 +46,14 @@ https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
 - **Holds** pull-apart and shear positively; lifting by B's end carries A on
   the socket floors; lifting by A's end relies on rib friction. A drop of CA
   in each socket makes it permanent (Brian's call, see options page).
+- **Lightening** (Brian took both cuts 2026-10-25): 13 vertical slots per
+  long wall per half, 6 x 64 mm with rounded ends on a 14 mm pitch (8 mm
+  webs), z 18 to 82, starting 10 mm past the joint post and stopping 10 mm
+  short of the end corners; a finger scallop in each end wall, 52 mm wide x
+  18 mm deep (R28 centred 10 mm above the rim, Brian picked it over plain
+  ends); joint posts 8 mm instead of 12. A cable end can poke through a slot
+  if pushed, harmless in a drawer. The floor, lip band and foot stay solid; the stack seats on the long
+  lips and the end corners.
 - **Coupon** plate 2 is a 14.5 mm slice of one post pair carrying the ribbed
   zone, to confirm the rib fit in a quarter of an hour before a 5 h bin. The
   crush-rib numbers are the PLA calibration from [[friction-fits-x2d]], and
@@ -61,7 +69,10 @@ socket's sloped floor (lowering A 0.05 mm collides); the socket's bottom
 corner keeps a full wall of flare skin outside it; the tail's full insertion path from
 above the rim sweeps B without touching, lip included; B's lip intact at the
 joint; stacked pair clears at the pitch and collides when pressed 0.05 mm
-further (seat proven); STLs watertight with mesh volume within 1 % of B-rep.
+further (seat proven); the slot cut removes exactly the analytic slot area
+times the wall (within 1 %) and touches no post; each end wall's rim is gone
+over the scoop width and no more; STLs watertight with mesh volume within
+1 % of B-rep.
 
 ## Print
 
@@ -72,7 +83,10 @@ further (seat proven); STLs watertight with mesh volume within 1 % of B-rep.
   no ironing. Built by `pipeline/make_print_3mf.py`. History: the classic
   generator sliced the first version's exactly-three-line 1.86 mm wall as two
   loops plus a loop of 50 mm/s gap fill per layer (8 h 18 min); Arachne made
-  it 7 h 02 min / 368 g in PETG; the 2-line PLA version is below.
+  it 7 h 02 min / 368 g in PETG; 2-line walls in PLA gave 4 h 58 min / 285 g;
+  the slots first sliced at 6 h 41 min because the PETG recipe's
+  `small_perimeter_threshold` 10 is a radius and slowed every slot web to
+  30 mm/s (see the retrospective); that override is gone.
 - Plate 1 (Half A + Half B): {{P1_TIME}}, {{P1_G}} g. Plate 2 (coupons):
   {{P2_TIME}}, {{P2_G}} g. Four bins: {{TOTAL_TIME}}, {{TOTAL_G}} g.
 - Orientation: floor down as modelled; nothing past 45 degrees.
@@ -92,8 +106,8 @@ further (seat proven); STLs watertight with mesh volume within 1 % of B-rep.
 
 ## Open
 
-- Brian's sign-off on the options page: joint hold (friction vs CA), plain
-  ends vs finger scallop, 3.80 vs 4.00 in stack pitch, wall weight, colour.
+- PLA colour. Everything else was decided 2026-10-25: friction hold (no
+  CA), scallop ends, 3.80 in pitch, both weight cuts.
 - Coupon print and fit report, then the first bin.
 - Open the 3MF in Bambu Studio once to confirm both plates render (GUI is
   ground truth for hand-authored plates).
