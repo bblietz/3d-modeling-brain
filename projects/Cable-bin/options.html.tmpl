@@ -1,0 +1,235 @@
+<title>Stackable Cable Bin</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column of pictures with short captions, a dimension strip in mono,
+   decisions at the end as picture cards with the built choice marked. */
+:root {
+  --bg: #f3f4f1;
+  --paper: #ffffff;
+  --fg: #1d2126;
+  --muted: #5d6670;
+  --line: #d7dbd4;
+  --a: #3f6fd1;        /* half A, tails */
+  --b: #c98a2c;        /* half B, sockets */
+  --ok: #2f8a5b;
+  --chip: #e8ebe4;
+  --display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #171a1e; --paper: #1f2328; --fg: #e8eaec; --muted: #a2aab3; --line: #343a41;
+    --a: #7ea2f0; --b: #e2a84e; --ok: #5cc08a; --chip: #2a3036; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #171a1e; --paper: #1f2328; --fg: #e8eaec; --muted: #a2aab3; --line: #343a41;
+  --a: #7ea2f0; --b: #e2a84e; --ok: #5cc08a; --chip: #2a3036; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.5; }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.1; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(34px, 6vw, 52px); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 28px; font-weight: 600; margin-top: 56px; padding-top: 18px; border-top: 2px solid var(--line); }
+h3 { font-size: 20px; font-weight: 600; }
+p { margin: 10px 0 0; max-width: 68ch; }
+.lede { color: var(--muted); font-size: 19px; margin-top: 8px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+figure { margin: 18px 0 0; }
+figure img { display: block; width: 100%; max-width: 100%; height: auto; background: #f8f8f8; border: 1px solid var(--line); border-radius: 4px; }
+figcaption { font-size: 15px; color: var(--muted); margin-top: 8px; max-width: 70ch; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-top: 18px; }
+.two figure { margin: 0; }
+.two figure img { aspect-ratio: auto; }
+.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; margin-top: 20px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--paper); overflow: hidden; }
+.cell { padding: 12px 14px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-width: 0; }
+.cell .k { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+.cell .v { font-family: var(--display); font-size: 24px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.cell .s { font-size: 14px; color: var(--muted); font-family: var(--mono); }
+.swA, .swB { display: inline-block; width: 0.8em; height: 0.8em; border-radius: 2px; vertical-align: -0.05em; margin-right: 0.35em; }
+.swA { background: var(--a); } .swB { background: var(--b); }
+table { border-collapse: collapse; width: 100%; margin-top: 16px; font-size: 16px; background: var(--paper); border: 1px solid var(--line); }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tablewrap { overflow-x: auto; }
+ol, ul { margin: 10px 0 0; padding-left: 22px; max-width: 68ch; }
+li { margin-top: 6px; }
+.decisions { display: grid; gap: 22px; margin-top: 20px; }
+.decision { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 18px; }
+.decision h3 { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 14px; }
+.opt { border: 1px solid var(--line); border-radius: 6px; padding: 12px; min-width: 0; }
+.opt.built { border-color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); }
+.opt img { width: 100%; max-width: 100%; height: auto; border-radius: 3px; border: 1px solid var(--line); background: #f8f8f8; }
+.opt .name { font-family: var(--display); font-size: 19px; font-weight: 600; margin-top: 8px; }
+.opt p { font-size: 15px; color: var(--muted); margin-top: 4px; }
+.tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; background: var(--chip); color: var(--muted); }
+.tag.ok { background: var(--ok); color: #fff; }
+.q { margin-top: 10px; font-weight: 600; }
+code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); padding: 1px 5px; border-radius: 3px; }
+.files { font-family: var(--mono); font-size: 14px; line-height: 1.7; margin-top: 12px; word-break: break-all; }
+.note { border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; margin-top: 16px; background: var(--paper); max-width: 70ch; }
+@media (prefers-reduced-motion: no-preference) { a { transition: color 120ms; } }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Sign-off · 2026-10-25 · Bambu Lab X2D, 0.6 high-flow nozzle, PETG</div>
+  <h1>Stackable Cable Bin</h1>
+  <p class="lede">16&#190; &times; 4 &times; 4 in, printed as two halves that lock together at mid-length. Four bins, one plate each, plus a ten-minute joint coupon to print first.</p>
+
+  <figure>
+    <img src="images/bin-assembled.png" alt="One assembled bin, half A in blue and half B in amber, seen from above the front corner">
+    <figcaption><span class="swA"></span>Half A carries the dovetail tails. <span class="swB"></span>Half B carries the sockets. Each half is 8&#8539; in long, so two sit side by side on the 256 mm bed.</figcaption>
+  </figure>
+
+  <div class="strip">
+    <div class="cell"><div class="k">Outside</div><div class="v">16&#190; &times; 4 &times; 4</div><div class="s">in, as asked</div></div>
+    <div class="cell"><div class="k">Inside, clear</div><div class="v">16.6 &times; 3.69</div><div class="s">in at the lip; 3.85 below it</div></div>
+    <div class="cell"><div class="k">Inside depth</div><div class="v">3.93</div><div class="s">in, floor to rim</div></div>
+    <div class="cell"><div class="k">Stack pitch</div><div class="v">3.80</div><div class="s">in; 4 bins stand 15.4 in</div></div>
+    <div class="cell"><div class="k">Wall</div><div class="v">1.86</div><div class="s">mm, 3 lines; floor the same</div></div>
+    <div class="cell"><div class="k">Per bin</div><div class="v">{{BIN_G}} g</div><div class="s">PETG, {{BIN_TIME}} per plate</div></div>
+  </div>
+
+  <h2>Why two halves</h2>
+  <p>The bed is 256 mm square and the bin is 425 mm long, so no orientation fits a one-piece bin. Cutting it once at mid-length gives two 212.7 mm halves. Both halves of one bin share a plate, so one print is one bin and the four bins are four runs of the same plate.</p>
+  <figure>
+    <img src="images/bin-exploded.png" alt="The two halves pulled apart along the bin's length">
+    <figcaption>The split face. The posts inside each wall at the joint carry the dovetails and also stiffen the long walls at mid-span, where a 17 in thin wall would otherwise bow.</figcaption>
+  </figure>
+
+  <h2>How the halves lock</h2>
+  <p>Half A drops straight down onto half B. Two vertical dovetail tails on A slide into sockets on B, one on each long wall. The sockets are closed at the bottom by B's floor, so A sits down on a hard stop with the floors flush and the rims level. The dovetails take the pull-apart and sideways loads. The grip comes from two crush ribs on the top 12 mm of each tail, the same recipe as the Build123d trial box lid: the tail body runs at a free 0.15 mm clearance and only the ribs touch, 0.2 mm deep.</p>
+  <div class="two">
+    <figure>
+      <img src="images/joint-lifted.png" alt="Half A lifted 30 mm above half B, tail hanging above its socket">
+      <figcaption>A lifted 30 mm. The thin ridge on the tail is one crush rib; it only engages over the last 12 mm of travel, so the halves push together by hand.</figcaption>
+    </figure>
+    <figure>
+      <img src="images/joint-assembled.png" alt="The joint closed, seen from inside the bin">
+      <figcaption>Seated. The posts stop 7 mm below the rim so the foot of the bin stacked above clears them.</figcaption>
+    </figure>
+  </div>
+  <figure>
+    <img src="images/joint-section-ribs.png" alt="Horizontal section through the rib zone, tail inside socket">
+    <figcaption>Horizontal cut through the rib zone. The light line around the tail is the 0.15 mm body clearance; the two small bumps on the slanted flanks are the ribs that bite the socket.</figcaption>
+  </figure>
+  <div class="note">What the joint holds and what it does not. Pull the halves apart lengthwise, push them sideways, or lift the bin by B's end, and the dovetails carry it. Lift a loaded bin by A's end alone and only the rib friction carries B's half. For a cable bin that is fine; a drop of CA in each socket makes it permanent. Pick below.</div>
+
+  <h2>How they stack</h2>
+  <p>The bottom 8 mm of every bin is a 45 degree flare. The top of every bin is a 4 mm thick lip with a matching 45 degree chamfer on its inner edge. Set one bin on another and the flare finds the chamfer and centres itself, dropping 5 mm in. Nothing overhangs past 45 degrees, so the whole bin prints without support, floor down.</p>
+  <div class="two">
+    <figure>
+      <img src="images/stack-four.png" alt="Four bins stacked">
+      <figcaption>Four bins stacked: 15.4 in tall at a 3.80 in pitch.</figcaption>
+    </figure>
+    <figure>
+      <img src="images/seat-section.png" alt="Section through the seat: upper bin's flare resting on the lower bin's lip chamfer">
+      <figcaption>Section through the seat. Lower bin in amber, upper bin in green. The upper flare rests face to face on the lip chamfer; the thin wall below it is the lower bin's lip.</figcaption>
+    </figure>
+  </div>
+
+  <h2>Print plan</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Plate</th><th>Objects</th><th>Time</th><th>PETG</th><th>Runs</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Bin</td><td><span class="swA"></span>Half A (tails), <span class="swB"></span>Half B (sockets)</td><td class="num">{{P1_TIME}}</td><td class="num">{{P1_G}} g</td><td class="num">4</td></tr>
+      <tr><td>2 · Joint coupon</td><td>Coupon A, Coupon B</td><td class="num">{{P2_TIME}}</td><td class="num">{{P2_G}} g</td><td class="num">1, first</td></tr>
+      <tr><td colspan="2"><strong>Four bins</strong></td><td class="num"><strong>{{TOTAL_TIME}}</strong></td><td class="num"><strong>{{TOTAL_G}} g</strong></td><td class="num">5 plates</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <figure>
+    <img src="images/coupons.png" alt="The two joint coupon pieces">
+    <figcaption>Plate 2. A 14.5 mm slice of the joint carrying one ribbed tail and its socket. The crush-rib numbers were calibrated in PLA; PETG prints its own fit, so this is the ten-minute check before committing a bin.</figcaption>
+  </figure>
+  <ol>
+    <li>Print plate 2. Push coupon A down into coupon B. It should take firm thumb pressure over the last 12 mm and stay put when you pick it up by either piece. Loose or jammed: tell me and the rib height changes by 0.1 mm.</li>
+    <li>Print plate 1 four times. Process is 0.30 mm Standard for the 0.6 nozzle, Arachne walls, 3 walls, 20 % infill, textured PEI at 70 C, the usual 2-loop skirt. Confirm Studio's Prepare tab shows the X2D 0.6 nozzle before slicing; do not re-select the printer preset.</li>
+    <li>Assemble: stand B on the bench, hold A level above it with the tails over the sockets, and push straight down until the rims are flush.</li>
+  </ol>
+
+  <h2>Decisions to confirm</h2>
+  <p>Everything is built as the marked option. Answer only where you want something different.</p>
+  <div class="decisions">
+
+    <div class="decision">
+      <h3>Joint hold <span class="tag">what keeps the halves together</span></h3>
+      <div class="opts">
+        <div class="opt built">
+          <img src="images/joint-plan.png" alt="Plan view of the dovetail joint">
+          <div class="name">Crush-rib friction <span class="tag ok">built</span></div>
+          <p>No glue, no hardware, comes apart with a straight pull. Lifting a loaded bin by A's end relies on the ribs.</p>
+        </div>
+        <div class="opt">
+          <img src="images/joint-plan.png" alt="Plan view of the dovetail joint">
+          <div class="name">Same joint plus a drop of CA</div>
+          <p>Identical print. One drop in each socket before the push. Permanent, holds either end.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <h3>Ends <span class="tag">pulling a bin off a shelf</span></h3>
+      <div class="opts">
+        <div class="opt built">
+          <img src="images/bin-assembled.png" alt="Plain ends">
+          <div class="name">Plain ends <span class="tag ok">built</span></div>
+          <p>Full-height end walls. The lip is the grip.</p>
+        </div>
+        <div class="opt">
+          <img src="images/option-scallop.png" alt="Finger scallop in each end wall">
+          <div class="name">Finger scallop</div>
+          <p>A 2 in wide, &#190; in deep scoop in each end wall. Easier to pull from a tight shelf; cables near the end show.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <h3>Stack pitch <span class="tag">height per bin in a stack</span></h3>
+      <div class="opts">
+        <div class="opt built">
+          <div class="name">3.80 in <span class="tag ok">built</span></div>
+          <p>Each bin is 4 in tall and drops 5 mm into the one below. Four bins stand 15.4 in.</p>
+        </div>
+        <div class="opt">
+          <div class="name">4.00 in exactly</div>
+          <p>If the stack has to come out at 16 in for four, each bin grows to 4.2 in tall. Say so and I rebuild.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <h3>Walls and weight <span class="tag">per bin</span></h3>
+      <div class="opts">
+        <div class="opt built">
+          <div class="name">3 lines, 1.86 mm <span class="tag ok">built</span></div>
+          <p>{{BIN_G}} g and {{BIN_TIME}} per bin in PETG Basic, which is flow-limited at 16 mm&sup3;/s on this nozzle. Stiff enough to lift loaded by one end.</p>
+        </div>
+        <div class="opt">
+          <div class="name">2 lines, 1.24 mm</div>
+          <p>Roughly a third lighter and faster, noticeably floppier at 4 in tall. Not recommended for a bin this long.</p>
+        </div>
+        <div class="opt">
+          <div class="name">Same walls, Bambu PETG HF</div>
+          <p>If you have PETG HF on hand its preset runs 21 mm&sup3;/s, about an hour and a half less per bin with the same part. Say which spool and I reslice.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <p class="q">Also: which PETG colour, and is one colour for all four fine?</p>
+
+  <h2>Files</h2>
+  <div class="files">
+    projects/Cable-bin/cable-bin.3mf &nbsp;(plate 1 bin, plate 2 coupon)<br>
+    projects/Cable-bin/cable-bin-half-a.stl · cable-bin-half-b.stl · cable-bin-coupon-a.stl · cable-bin-coupon-b.stl<br>
+    projects/Cable-bin/cable_bin.py &nbsp;(parametric source, self-checking)
+  </div>
+</div>

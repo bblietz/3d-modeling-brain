@@ -1,0 +1,165 @@
+{
+ "placement_mm": {
+  "Half A (tails)": {
+   "plate": 1,
+   "min_mm": [
+    19.14,
+    18.9,
+    0.0
+   ],
+   "max_mm": [
+    236.86,
+    120.5,
+    101.6
+   ]
+  },
+  "Half B (sockets)": {
+   "plate": 1,
+   "min_mm": [
+    21.64,
+    135.5,
+    0.0
+   ],
+   "max_mm": [
+    234.36,
+    237.1,
+    101.6
+   ]
+  },
+  "Coupon A": {
+   "plate": 2,
+   "min_mm": [
+    407.7,
+    119.32,
+    0.0
+   ],
+   "max_mm": [
+    427.7,
+    136.68,
+    14.5
+   ]
+  },
+  "Coupon B": {
+   "plate": 2,
+   "min_mm": [
+    447.7,
+    119.32,
+    0.0
+   ],
+   "max_mm": [
+    462.7,
+    136.68,
+    14.5
+   ]
+  }
+ },
+ "roundtrip": "2 plates, 4 objects, settings and placement survive bambu-studio --arrange 0 --export-3mf",
+ "plates": [
+  {
+   "name": "Bin",
+   "objects": [
+    "Half A (tails)",
+    "Half B (sockets)"
+   ],
+   "time": "7:02",
+   "seconds": 25300,
+   "gcode_estimate": "7h 1m 40s",
+   "grams": 367.9,
+   "metres": 122.35,
+   "used_g_per_filament": 367.9,
+   "layers": 339,
+   "top_z": 101.7,
+   "nozzle_C": 250,
+   "bed_C": 70,
+   "toolpath_xy_mm": [
+    17.8,
+    19.21,
+    236.55,
+    236.79
+   ],
+   "feature_mm": {
+    "Outer wall": 49195.9,
+    "Inner wall": 44128.7,
+    "Internal solid infill": 16565.5,
+    "Top surface": 4136.8,
+    "Sparse infill": 4090.5,
+    "Bottom surface": 3930.1,
+    "Floating vertical shell": 112.2,
+    "Skirt": 110.0,
+    "Bridge": 76.5,
+    "Overhang wall": 4.3,
+    "Gap infill": 0.3
+   }
+  },
+  {
+   "name": "Joint coupon",
+   "objects": [
+    "Coupon A",
+    "Coupon B"
+   ],
+   "time": "0:17",
+   "seconds": 1019,
+   "gcode_estimate": "16m 59s",
+   "grams": 5.3,
+   "metres": 1.75,
+   "used_g_per_filament": 5.3,
+   "layers": 48,
+   "top_z": 14.4,
+   "nozzle_C": 250,
+   "bed_C": 70,
+   "toolpath_xy_mm": [
+    96.67,
+    115.49,
+    159.33,
+    140.51
+   ],
+   "feature_mm": {
+    "Inner wall": 817.6,
+    "Outer wall": 484.6,
+    "Sparse infill": 269.0,
+    "Internal solid infill": 82.7,
+    "Bridge": 23.0,
+    "Top surface": 22.2,
+    "Bottom surface": 21.4,
+    "Skirt": 21.3,
+    "Floating vertical shell": 9.9,
+    "Gap infill": 0.1
+   }
+  }
+ ],
+ "total_time": "7:19",
+ "total_seconds": 26319,
+ "total_grams": 373.2,
+ "overrides": {
+  "process": {
+   "curr_bed_type": "Textured PEI Plate",
+   "brim_type": "no_brim",
+   "skirt_loops": "2",
+   "skirt_distance": "3",
+   "skirt_height": "1",
+   "skirt_per_object": "0",
+   "wall_loops": "3",
+   "wall_generator": "arachne",
+   "sparse_infill_density": "20%",
+   "sparse_infill_pattern": "gyroid",
+   "ironing_type": "no ironing",
+   "top_one_wall_type": "not apply",
+   "seam_gap": "0%",
+   "top_surface_speed": "60",
+   "small_perimeter_speed": "30",
+   "small_perimeter_threshold": "10",
+   "gap_infill_speed": "40",
+   "initial_layer_speed": "30",
+   "initial_layer_infill_speed": "50"
+  },
+  "filament": {
+   "textured_plate_temp": "70",
+   "textured_plate_temp_initial_layer": "70"
+  }
+ },
+ "presets": {
+  "machine": "Bambu Lab X2D 0.6 nozzle",
+  "process": "0.30mm Standard @BBL X2D 0.6 nozzle",
+  "filament": "Bambu PETG Basic @BBL X2D"
+ }
+}
