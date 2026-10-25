@@ -24,10 +24,11 @@ PROJ = f"{VAULT}/projects/Built-in-bench"
 sys.path.insert(0, f"{VAULT}/scripts")
 from cutlist import inch_frac  # noqa: E402
 
-CASE_ORDER = ["hard maple", "3/4 maple ply", "1/4 maple ply", "3/4 ply (any, hidden)"]
+CASE_ORDER = ["solid walnut", "hard maple", "3/4 maple ply", "1/4 maple ply", "3/4 ply (any, hidden)"]
 DRAWER_ORDER = ["hard maple", "1/2 walnut ply", "1/2 Baltic birch"]
 CASE_LABEL = {
-    "hard maple": "Hard maple: top (bare), nailer; plinth and scribe strips (painted white)",
+    "solid walnut": "Solid walnut: top (bare)",
+    "hard maple": "Hard maple: nailer; plinth and scribe strips (painted white)",
     "3/4 maple ply": "3/4 in maple plywood (measure the sheet): ends, bottom, partition",
     "1/4 maple ply": "1/4 in maple plywood (measure the sheet): back",
     "3/4 ply (any, hidden)": "3/4 in plywood, any grade (hidden): base ladder",
@@ -125,7 +126,7 @@ def group_section(label, rows):
 
 
 HERO = "images/hero.png"
-NOOK = "images/bench-in-nook-walnut-shelves-web.jpg"    # photo_match.py overlay made photoreal by Gemini (render_in_room.py guided), styled with the client's reference items (styled), their dogs (dogs), the dropped soffit and downlights (soffit, soffit-paint), shelves walnut (walnut-shelves)
+NOOK = "images/bench-in-nook-walnut-top-web.jpg"    # photo_match.py overlay made photoreal by Gemini (render_in_room.py guided), styled with the client's reference items (styled), their dogs (dogs), the dropped soffit and downlights (soffit, soffit-paint), shelves walnut (walnut-shelves), top walnut (walnut-top)
 
 
 def sub_figure(fname, caption):
@@ -291,10 +292,10 @@ PAGE = """<title>Built-in Bench Cut List</title>
   <header>
     <p class="eyebrow">Built-in bench &middot; 66 x 28 in alcove</p>
     <h1>Built-in Bench Cut List</h1>
-    <p>Two drawers on Blum undermounts, white-painted maple frames around inset walnut panels, solid maple top. {total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
+    <p>Two drawers on Blum undermounts, white-painted maple frames around inset walnut panels, solid walnut top. {total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
     <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
   </header>
-  <figure class="dwg nook" tabindex="0"><img src="{nook}" alt="the finished bench in the alcove, white frames with walnut panels, maple top, cushion, Maizy and Franco on the cushion, accessories, three walnut shelves above, a dropped soffit with two downlights"><figcaption>the finished bench in the alcove at true size: the CAD model projected into the photo of the alcove through a camera matched to it, then given its materials by AI (white frames, walnut panels, maple top, cushion). Wood top 14 in, seat 17 in with the cushion. Maizy and Franco are drawn from their own photos; the pillows, throw, shelf objects, bowls and rug are the styling from the client's reference picture; the three walnut shelves and the 12 in dropped soffit with two 4 in recessed lights (flush with the pilaster faces and running on over the hallway opening as in that picture; the photo's ceiling measures about 8 ft 2-1/2 in, so the alcove's ceiling becomes about 7 ft 2-1/2 in) are picture-only ideas from that picture; none of that is in this cut list. Tap to zoom</figcaption></figure>
+  <figure class="dwg nook" tabindex="0"><img src="{nook}" alt="the finished bench in the alcove, white frames with walnut panels, walnut top, cushion, Maizy and Franco on the cushion, accessories, three walnut shelves above, a dropped soffit with two downlights"><figcaption>the finished bench in the alcove at true size: the CAD model projected into the photo of the alcove through a camera matched to it, then given its materials by AI (white frames, walnut panels, walnut top, cushion). Wood top 14 in, seat 17 in with the cushion. Maizy and Franco are drawn from their own photos; the pillows, throw, shelf objects, bowls and rug are the styling from the client's reference picture; the three walnut shelves and the 12 in dropped soffit with two 4 in recessed lights (flush with the pilaster faces and running on over the hallway opening as in that picture; the photo's ceiling measures about 8 ft 2-1/2 in, so the alcove's ceiling becomes about 7 ft 2-1/2 in) are picture-only ideas from that picture; none of that is in this cut list. Tap to zoom</figcaption></figure>
 
   <div class="flag"><b>Measure the alcove at the floor, 16 in and 36 in, at the back wall and the pilaster faces, before cutting.</b> Cut the top, plinth and scribe strips long and scribe them. Confirm the low receptacle seen in the photo before cutting the back.</div>
 

@@ -19,12 +19,12 @@ project: Built-in bench 66 x 28 (frameless, two drawers)
 | 2 | base_long_rail | 23/32 x 3 x 62-19/32 | 3/4 ply (any, hidden) | front and back rails between the end rails; pocket screws or glue and screws |
 | 2 | base_end_rail | 23/32 x 3 x 23-1/2 | 3/4 ply (any, hidden) | ladder base, 3 tall; the end panels stand on these |
 | 1 | base_center_rail | 23/32 x 3 x 22-3/32 | 3/4 ply (any, hidden) | under the partition |
-| 1 | top | 3/4 x 24-5/8 x 66 | hard maple | glue up from 4 or 5 boards, grain along the 66 in; 1/8 roundover on both front arrises; scribe the ends to the walls; 3/8 gap at the back wall; pocket screws up through the ends and partition near the front, figure-8s on the nailer at the back |
 | 1 | plinth | 23/32 x 2-7/8 x 66 | hard maple | cut 3-1/4 tall and scribe to the floor so the top edge sits 1/8 under the fronts; scribe the ends to the walls; grain horizontal; mill to the ply thickness; screwed to the base front rail; painted white |
 | 1 | nailer | 3/4 x 2-1/2 x 62-19/32 | hard maple | on edge against the back panel, through the partition notch; four 5/8 figure-8 recesses 1/8 deep on the top edge, centered 1/4 in from the front face; screw through it and the back into the wall studs |
 | 4 | front_rail | 23/32 x 1-1/2 x 28-27/32 | hard maple | 1/4 x 3/8 groove on the inner edge, through; 1/4 x 3/8 stub tenon on both ends (same bit); length includes both tenons; painted white ; not a plain rectangular blank (89% of bounding box); needs a drawing or template |
 | 2 | scribe_strip | 23/32 x 1-23/32 x 10-1/4 | hard maple | rip at 2, scribe to the wall so the inner edge lands flush with the inside of the end panel (about 1-23/32); glue and biscuits to the end's front edge; mill to the ply thickness; painted white |
 | 4 | front_stile | 23/32 x 1-1/2 x 10-1/8 | hard maple | 1/4 x 3/8 groove on the inner edge, through, front wall 1/4 thick (set the fence from the panel ply); the rail tenons show on both ends (the top one is the visible one); painted white ; not a plain rectangular blank (91% of bounding box); needs a drawing or template |
+| 1 | top | 3/4 x 24-5/8 x 66 | solid walnut | glue up from 4 or 5 boards, grain along the 66 in; 1/8 roundover on both front arrises; scribe the ends to the walls; 3/8 gap at the back wall; pocket screws up through the ends and partition near the front, figure-8s on the nailer at the back |
 
 Inches rounded to the nearest 1/32.
 
@@ -35,7 +35,8 @@ Inches rounded to the nearest 1/32.
 - 1/4 maple ply: 1 part, 4.3 sq ft face area (no kerf/waste allowance)
 - 3/4 maple ply: 4 parts, 15.2 sq ft face area (no kerf/waste allowance)
 - 3/4 ply (any, hidden): 5 parts, 4.0 sq ft face area (no kerf/waste allowance)
-- hard maple: 13 parts, 15.6 sq ft face area (no kerf/waste allowance)
+- hard maple: 12 parts, 4.3 sq ft face area (no kerf/waste allowance)
+- solid walnut: 1 part, 11.3 sq ft face area (no kerf/waste allowance)
 
 ## Materials not cut
 

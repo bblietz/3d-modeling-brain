@@ -1,6 +1,6 @@
 ---
 name: project-built-in-bench
-description: "Built-in alcove bench (66 x 28 in former wet bar), two drawers on Blum 563H undermounts, maple frame + walnut ply fronts on a T&G bit set, solid maple top 3 in back from the pilasters; CAD, cut list and shop page built 2026-10-07, waiting on Brian's viewer look"
+description: "Built-in alcove bench (66 x 28 in former wet bar), two drawers on Blum 563H undermounts, maple frame + walnut ply fronts on a T&G bit set, solid walnut top (maple until 2026-10-24) 3 in back from the pilasters; CAD, cut list and shop page built 2026-10-07, waiting on Brian's viewer look"
 metadata:
   node_type: memory
   type: project
@@ -18,7 +18,7 @@ Status 2026-10-07: `built_in_bench.py` (build123d) passes all asserts; `cutlist.
 
 Update 2026-10-09: Brian locked 1/2 walnut ply panels inset 1/4 (frames stay 3/4 maple), frames/plinth/strips painted white (panels, top, shelves bare), and every drawer box part is 1/2 9-ply Baltic birch (no groove in the back, bottom butts it; the 10 mm Blum hook bore leaves a 2 mm skin, not verified against Blum, test-drill scrap). Shop page Version 4 carries the alcove picture with the shelves. See brief.md "Decisions 2026-10-09".
 
-Finish decided 2026-10-09: Osmo Natural (clear, Brian confirmed) on the bare maple top and shelves; frames, plinth, strips painted white. Shelves walnut since 2026-10-24 (Brian: "make the shelves walnut"), matching the drawer panels; still picture-only and bare under Osmo.
+Finish decided 2026-10-09: Osmo Natural (clear, Brian confirmed) on the bare maple top and shelves; frames, plinth, strips painted white. Shelves walnut since 2026-10-24 (Brian: "make the shelves walnut"), matching the drawer panels; still picture-only and bare under Osmo. The top is solid walnut too since 2026-10-24 (Brian: "the benchtop should also be walnut"): a real design change, material WALNUT_S ("solid walnut") in built_in_bench.py, cut list (top 3/4 x 24-5/8 x 66, 11.3 sq ft), drawings, hero and assembly images rebuilt; the only maple left bare is none (all hard maple is painted).
 
 Height lowered 2026-10-09 for the senior dog: wood top 14 in (seat 17 in with cushion), base 3 in, drawer box 8.5 in tall.
 

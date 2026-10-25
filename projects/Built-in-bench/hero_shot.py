@@ -25,6 +25,7 @@ from ocp_vscode import Camera, save_screenshot, set_port, show  # noqa: E402
 OUT = os.environ.get("HERO_OUT", f"{PROJ}/images/hero.png")
 COLORS = {
     "hard maple": "#e2c48f",
+    "solid walnut": "#5a3a24",
     "3/4 maple ply": "#e9d9b0",
     "1/4 maple ply": "#ecdfbc",
     "3/4 ply (any, hidden)": "#cdbb94",

@@ -87,7 +87,7 @@ EXPLODE = {
 }
 
 COLORS = {
-    "hard maple": "#e2c48f", "3/4 maple ply": "#e9d9b0", "1/4 maple ply": "#ecdfbc",
+    "hard maple": "#e2c48f", "solid walnut": "#5a3a24", "3/4 maple ply": "#e9d9b0", "1/4 maple ply": "#ecdfbc",
     "3/4 ply (any, hidden)": "#cdbb94", "1/2 walnut ply": "#5a3a24", "1/2 Baltic birch": "#efe2bd",
 }
 HW_COLORS = {"slide": "#8c8f94", "pull": "#b8903f", "cushion": "#c9bda8"}

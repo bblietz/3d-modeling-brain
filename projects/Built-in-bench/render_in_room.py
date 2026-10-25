@@ -34,8 +34,12 @@ Jobs:
            changed from maple to walnut matching the drawer panels (Brian 2026-10-24), nothing else changed. The earlier
            stages were run with maple shelves; the overlay (photo_match.py) and the guided/styled/soffit prompts now say
            walnut, so a rerun from guided gets walnut shelves without this pass. Verify with photo_match.py check <output>.
+  walnut-top  images/bench-in-nook-walnut-shelves.png -> images/bench-in-nook-walnut-top.png; the bench top changed from
+           maple to walnut (Brian 2026-10-24; a real design change, the cut list carries it). From this camera only the
+           top's front edge shows, a thin strip under the cushion. The overlay and the earlier prompts say walnut too.
+           Verify with photo_match.py check <output>.
 
-Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|guided|styled|dogs|soffit|soffit-paint|walnut-shelves] [variant]
+Usage: ~/.claude/skills/nanobanana/.venv/bin/python projects/Built-in-bench/render_in_room.py [bench|shelves|white|white-maple|white-all|white-inset|guided|styled|dogs|soffit|soffit-paint|walnut-shelves|walnut-top] [variant]
 A variant name is appended to the output file so reruns do not overwrite earlier images.
 """
 import os
@@ -162,8 +166,8 @@ Materials and finish:
   1/4 inch behind the white frame, so a thin shadow runs along the top inside edge of the frame. One 8 inch brushed
   brass bar pull centered on each panel, exactly where the brass bar is in image 1.
 - A thin 1/8 inch shadow gap between the two drawer fronts and around them.
-- The top is solid hard maple, pale blond with fine grain, clear satin finish, gently eased front edge; only its 3/4
-  inch front edge shows under the cushion.
+- The top is solid walnut like the panels, dark chocolate brown with straight grain, clear satin finish, gently eased
+  front edge; only its 3/4 inch front edge shows under the cushion.
 - The cushion is one long boxed cushion in oatmeal linen with piped edges, slightly soft, covering the whole top.
 - The three shelves are solid walnut like the drawer panels, dark chocolate brown with visible straight grain, clear
   satin finish, 1-1/2 inch thick slabs floating on the back wall with no visible brackets. Lightly styled: a few books, a small plant, a basket, a small framed picture, all standing on the
@@ -173,12 +177,12 @@ Materials and finish:
   look."""
 
 STYLED_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove: white painted drawer frames around dark walnut
-panels with brass bar pulls, a maple top, one long oatmeal linen cushion, and three walnut floating shelves above. Its
+panels with brass bar pulls, a walnut top, one long oatmeal linen cushion, and three walnut floating shelves above. Its
 geometry has been verified against the design and is final. Image 2 is the client's reference picture of a similar
 alcove bench with a golden retriever and accessories.
 
 Edit image 1 to add the dog and the accessories from image 2, and change nothing else. Do not move, resize, redraw or
-restyle the bench, the drawer fronts, the brass pulls, the cushion, the maple top, the shelves, the walls, the door, the
+restyle the bench, the drawer fronts, the brass pulls, the cushion, the walnut top, the shelves, the walls, the door, the
 floor, the pilasters or the camera: every edge that is in image 1 stays exactly where it is, at the same size.
 
 Add, placed naturally and at real-world scale (the bench is 66 inches wide, the cushion top is 17 inches above the floor):
@@ -187,7 +191,7 @@ Add, placed naturally and at real-world scale (the bench is 66 inches wide, the 
 - Three throw pillows standing against the back wall like in image 2: a dark olive green velvet pillow and a cream and
   grey striped linen pillow at the left end, a rust brown pillow at the right end, the dog between them.
 - A cream and grey woven throw blanket with fringe, folded on the cushion at the left end with one corner hanging just
-  over the cushion's front edge, not below the maple top's edge, so both drawer fronts stay fully visible.
+  over the cushion's front edge, not below the walnut top's edge, so both drawer fronts stay fully visible.
 - The shelves styled like image 2, replacing the few objects on them now: a trailing pothos in a white pot at the left
   end of the top shelf with vines hanging down, a lidded woven seagrass basket, a few hardcover books lying and standing,
   a small framed landscape picture, two cream ceramic jars, a small wooden bowl, a second small potted plant, a woven
@@ -206,7 +210,7 @@ a throw, styled shelves above, dog bowls on the floor and a rug. Its geometry ha
 and 3 are photos of the client's two dogs, who live in this house.
 
 Edit image 1 so the golden retriever is REPLACED by these two dogs, and change nothing else. Remove the golden retriever
-completely. Do not move, resize, redraw or restyle the bench, the drawer fronts, the brass pulls, the cushion, the maple
+completely. Do not move, resize, redraw or restyle the bench, the drawer fronts, the brass pulls, the cushion, the walnut
 top, the shelves and their objects, the pillows, the throw, the dog bowls, the rug, the walls, the door, the floor, the
 pilasters or the camera: every edge that is in image 1 stays exactly where it is, at the same size.
 
@@ -283,6 +287,22 @@ top stays pale maple. Do not change the bench, the drawer fronts, the brass pull
 the throw, the soffit, the lights, the bowls, the rug, the walls, the door, the floor, the pilasters, the lighting or
 the camera. Photorealistic, matching image 1's grain, lens and white balance."""
 
+WALNUT_TOP_PROMPT = """Image 1 is a photograph of a finished built-in bench in an alcove: white painted drawer frames around dark walnut
+panels with brass bar pulls, a solid wood top under one long cushion with two dogs on it, pillows, a throw, three walnut
+floating shelves above with objects on them, a dropped soffit with two downlights, dog bowls on the floor and a rug.
+Everything in it is final except the wood of the bench top.
+
+The bench top is pale maple; only its front edge shows, as a thin pale wood strip running the full width of the bench
+directly under the cushion and above the white drawer frames, with a gently rounded front edge. Change that top to
+solid WALNUT, the same wood as the drawer panels and the shelves: the same dark chocolate brown, the same straight
+grain, the same clear satin finish, not reddish like the floor. The strip stays exactly where it is, at the same
+thickness and length, with the same rounded edge and the same shadow it casts on the white frames below it.
+
+Change nothing else. Do not change the cushion, the dogs, the pillows, the throw (its corner still hangs over the
+cushion's front edge where it is), the drawer fronts, the brass pulls, the white frames, the plinth, the shelves and
+their objects, the sign, the soffit, the lights, the bowls, the rug, the walls, the door, the floor, the pilasters, the
+lighting or the camera. Photorealistic, matching image 1's grain, lens and white balance."""
+
 JOBS = {
     "bench": ((f"{PROJ}/images/space-photo-web.jpg", "image/jpeg"), (f"{PROJ}/images/hero.png", "image/png"),
               BENCH_PROMPT, "bench-in-nook"),
@@ -306,6 +326,8 @@ JOBS = {
                      "bench-in-nook-soffit-paint"),
     "walnut-shelves": ((f"{PROJ}/images/bench-in-nook-soffit-paint.png", "image/png"), WALNUT_SHELVES_PROMPT,
                        "bench-in-nook-walnut-shelves"),
+    "walnut-top": ((f"{PROJ}/images/bench-in-nook-walnut-shelves.png", "image/png"), WALNUT_TOP_PROMPT,
+                   "bench-in-nook-walnut-top"),
 }
 job = sys.argv[1] if len(sys.argv) > 1 else "bench"
 if job not in JOBS:

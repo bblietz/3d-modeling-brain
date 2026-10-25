@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """Built-in alcove bench: 66 x 28 in former wet bar, two full-width drawers on
-Blum TANDEM 563H undermounts, solid maple top with a 3 in cushion.
+Blum TANDEM 563H undermounts, solid walnut top (maple until 2026-10-24) with a 3 in cushion.
 
 Picks (Brian, 2026-10-06/07): wood top at 16 in (lowered to 14 in on 2026-10-09 for the senior dog; cushion top 17 in), flush base, frameless with
 full-overlay fronts, flat fronts built as a maple frame around a 1/2 walnut-ply
 panel (back flush with the frame, face inset 1/4 in) on a tongue-and-groove bit set, 8 in brass bar pulls, 3/4 in overhang
-with an eased edge, solid glued-up maple top set 3 in back from the pilaster
+with an eased edge, solid glued-up top (maple; walnut since 2026-10-24) set 3 in back from the pilaster
 faces, one full-depth cushion, 21 in slides. Finish (2026-10-09): frames, plinth and
 scribe strips painted white; walnut panels, top and shelves bare.
 
@@ -147,6 +147,7 @@ def add(name, solid, qty, material, notes="", inst=None):
 
 
 MAPLE = "hard maple"
+WALNUT_S = "solid walnut"   # the top (Brian 2026-10-24; was hard maple)
 PLY18 = "3/4 maple ply"
 PLYBASE = "3/4 ply (any, hidden)"
 PLY6 = "1/4 maple ply"
@@ -227,10 +228,10 @@ add("plinth", plinth, 1, MAPLE,
     f"cut {inch(PLINTH_H + 0.375 * IN)} tall and scribe to the floor so the top edge sits {inch(GAP)} under the fronts; "
     "scribe the ends to the walls; grain horizontal; mill to the ply thickness; screwed to the base front rail; painted white")
 
-# ================================================================ top: solid maple, floats on the nailer figure-8s
+# ================================================================ top: solid walnut, floats on the nailer figure-8s
 top = _box(0, TOP_Y0, TOP_Z0, ALCOVE_W, TOP_Y1 - TOP_Y0, TS)
 top = fillet(top.edges().filter_by(Axis.X).group_by(Axis.Y)[-1], ROUND)
-add("top", top, 1, MAPLE,
+add("top", top, 1, WALNUT_S,
     f"glue up from 4 or 5 boards, grain along the 66 in; {inch(ROUND)} roundover on both front arrises; "
     f"scribe the ends to the walls; {inch(WALL_GAP)} gap at the back wall; pocket screws up through the ends "
     "and partition near the front, figure-8s on the nailer at the back")

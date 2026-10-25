@@ -627,7 +627,7 @@ def top_slab():
     s.dim_v(0, TS, 40 + 8)
     s.callout(1, TS - 1, f"{dt(ROUND)} R, top and bottom", ha="left")
     s.edge("left", "FRONT")
-    sheet(name, head(name, f"hard maple {dt(TS)} thick, {dt(D)} deep x {dt(ALCOVE_W)} long"), [v, s],
+    sheet(name, head(name, f"solid walnut {dt(TS)} thick, {dt(D)} deep x {dt(ALCOVE_W)} long"), [v, s],
           "Glue up from 4 or 5 boards, grain along the 66 in length. Floats: pocket screws up through the ends and the partition near the front, figure-8s on the nailer at the back.")
     pr = []
     for z in (TOP_Z0, TOP_Z0 + TS - 0.6):                              # the two front arrises are rounded
