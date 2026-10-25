@@ -80,7 +80,7 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
 <div class="wrap">
   <div class="eyebrow">Sign-off · 2026-10-25 · Bambu Lab X2D, 0.6 high-flow nozzle, PLA</div>
   <h1>Stackable Cable Bin</h1>
-  <p class="lede">16&#190; &times; 4 &times; 4 in, printed as two halves that lock together at mid-length, with slotted long walls and a finger scallop in each end. Four bins, one plate each, plus a {{P2_TIME}} joint coupon to print first.</p>
+  <p class="lede">16&#190; &times; 4 &times; 4 in, printed as two halves that lock together at mid-length, with slotted long walls and a finger scallop in each end. Four bins, one plate each, plus a {{P2_TIME}} fit ladder to print first.</p>
 
   <figure>
     <img src="images/bin-assembled.png" alt="One assembled bin, half A in blue and half B in amber, seen from above the front corner">
@@ -140,18 +140,29 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
     <thead><tr><th>Plate</th><th>Objects</th><th>Time</th><th>PLA</th><th>Runs</th></tr></thead>
     <tbody>
       <tr><td>1 · Bin</td><td><span class="swA"></span>Half A (tails), <span class="swB"></span>Half B (sockets)</td><td class="num">{{P1_TIME}}</td><td class="num">{{P1_G}} g</td><td class="num">4</td></tr>
-      <tr><td>2 · Joint coupon</td><td>Coupon A, Coupon B</td><td class="num">{{P2_TIME}}</td><td class="num">{{P2_G}} g</td><td class="num">1, first</td></tr>
+      <tr><td>2 · Fit ladder</td><td>Four joint coupon pairs, marked 1 to 4 notches</td><td class="num">{{P2_TIME}}</td><td class="num">{{P2_G}} g</td><td class="num">1, first</td></tr>
       <tr><td colspan="2"><strong>Four bins</strong></td><td class="num"><strong>{{TOTAL_TIME}}</strong></td><td class="num"><strong>{{TOTAL_G}} g</strong></td><td class="num">5 plates</td></tr>
     </tbody>
   </table>
   </div>
   <figure>
-    <img src="images/coupons.png" alt="The two joint coupon pieces">
-    <figcaption>Plate 2. A 14.5 mm slice of the joint carrying one ribbed tail and its socket. The crush-rib numbers were calibrated in PLA, the same material as the bin, so this is a {{P2_TIME}} confirmation of the fit before the first bin rather than an unknown.</figcaption>
+    <img src="images/coupons.png" alt="Four joint coupon pairs in a row, each pair marked with one to four notches on the wall stub">
+    <figcaption>Plate 2, the fit ladder. Your first coupon was too tight at 0.15 mm body clearance and 0.20 mm rib crush. Four pairs now, each a 14.5 mm slice of the joint; the notch count on the wall stub names the pair and both pieces of a pair carry the same count. Every pair has a 0.25 mm free body so only the ribs touch, and the bed edges are chamfered so the first layer's elephant foot cannot add to the fit. The bin is built to pair 2 until you report.</figcaption>
   </figure>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Pair</th><th>Body clearance</th><th>Rib crush</th><th>Rib length</th><th>Expect</th></tr></thead>
+    <tbody>
+      <tr><td>1 notch</td><td class="num">0.25 mm</td><td class="num">0.15 mm</td><td class="num">12 mm</td><td>firmest of the four</td></tr>
+      <tr><td>2 notches <span class="tag ok">bin</span></td><td class="num">0.25 mm</td><td class="num">0.10 mm</td><td class="num">12 mm</td><td>the working guess</td></tr>
+      <tr><td>3 notches</td><td class="num">0.25 mm</td><td class="num">0.05 mm</td><td class="num">12 mm</td><td>probably loose; brackets the range</td></tr>
+      <tr><td>4 notches</td><td class="num">0.25 mm</td><td class="num">0.10 mm</td><td class="num">6 mm</td><td>pair 2 with half the grip length</td></tr>
+    </tbody>
+  </table>
+  </div>
   <ol>
-    <li>Print plate 2. Push coupon A down into coupon B. It should take firm thumb pressure over the last 12 mm and stay put when you pick it up by either piece. Loose or jammed: tell me and the rib height changes by 0.1 mm.</li>
-    <li>Print plate 1 four times. Process is 0.30 mm Standard for the 0.6 nozzle, Arachne walls, 3 walls, 20 % infill, textured PEI at 70 C, the usual 2-loop skirt. Confirm Studio's Prepare tab shows the X2D 0.6 nozzle before slicing; do not re-select the printer preset.</li>
+    <li>Print plate 2. Push each A down into the B with the same notch count. Tell me which pair takes firm thumb pressure over the last stretch and stays put when lifted by either piece; the bin's constants move to that pair.</li>
+    <li>Print plate 1 four times. Process is 0.30 mm Standard for the 0.6 nozzle, Arachne walls, 3 walls, 20 % infill, textured PEI at 55 C, the usual 2-loop skirt. Confirm Studio's Prepare tab shows the X2D 0.6 nozzle before slicing; do not re-select the printer preset.</li>
     <li>Assemble: stand B on the bench, hold A level above it with the tails over the sockets, and push straight down until the rims are flush.</li>
   </ol>
 

@@ -80,7 +80,7 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
 <div class="wrap">
   <div class="eyebrow">Sign-off · 2026-10-25 · Bambu Lab X2D, 0.6 high-flow nozzle, PLA</div>
   <h1>Stackable Cable Bin</h1>
-  <p class="lede">16&#190; &times; 4 &times; 4 in, printed as two halves that lock together at mid-length, with slotted long walls and a finger scallop in each end. Four bins, one plate each, plus a 11 min joint coupon to print first.</p>
+  <p class="lede">16&#190; &times; 4 &times; 4 in, printed as two halves that lock together at mid-length, with slotted long walls and a finger scallop in each end. Four bins, one plate each, plus a 28 min fit ladder to print first.</p>
 
   <figure>
     <img src="images/bin-assembled.png" alt="One assembled bin, half A in blue and half B in amber, seen from above the front corner">
@@ -93,7 +93,7 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
     <div class="cell"><div class="k">Inside depth</div><div class="v">3.93</div><div class="s">in, floor to rim</div></div>
     <div class="cell"><div class="k">Stack pitch</div><div class="v">3.80</div><div class="s">in; 4 bins stand 15.4 in</div></div>
     <div class="cell"><div class="k">Wall</div><div class="v">1.24</div><div class="s">mm, 2 lines; floor the same</div></div>
-    <div class="cell"><div class="k">Per bin</div><div class="v">240 g</div><div class="s">PLA, 4 h 54 min per plate</div></div>
+    <div class="cell"><div class="k">Per bin</div><div class="v">240 g</div><div class="s">PLA, 4 h 49 min per plate</div></div>
   </div>
 
   <h2>Why two halves</h2>
@@ -139,19 +139,30 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
   <table>
     <thead><tr><th>Plate</th><th>Objects</th><th>Time</th><th>PLA</th><th>Runs</th></tr></thead>
     <tbody>
-      <tr><td>1 · Bin</td><td><span class="swA"></span>Half A (tails), <span class="swB"></span>Half B (sockets)</td><td class="num">4 h 54 min</td><td class="num">240 g</td><td class="num">4</td></tr>
-      <tr><td>2 · Joint coupon</td><td>Coupon A, Coupon B</td><td class="num">11 min</td><td class="num">4 g</td><td class="num">1, first</td></tr>
-      <tr><td colspan="2"><strong>Four bins</strong></td><td class="num"><strong>19 h 48 min</strong></td><td class="num"><strong>965 g</strong></td><td class="num">5 plates</td></tr>
+      <tr><td>1 · Bin</td><td><span class="swA"></span>Half A (tails), <span class="swB"></span>Half B (sockets)</td><td class="num">4 h 49 min</td><td class="num">240 g</td><td class="num">4</td></tr>
+      <tr><td>2 · Fit ladder</td><td>Four joint coupon pairs, marked 1 to 4 notches</td><td class="num">28 min</td><td class="num">17 g</td><td class="num">1, first</td></tr>
+      <tr><td colspan="2"><strong>Four bins</strong></td><td class="num"><strong>19 h 46 min</strong></td><td class="num"><strong>976 g</strong></td><td class="num">5 plates</td></tr>
     </tbody>
   </table>
   </div>
   <figure>
-    <img src="images/coupons.png" alt="The two joint coupon pieces">
-    <figcaption>Plate 2. A 14.5 mm slice of the joint carrying one ribbed tail and its socket. The crush-rib numbers were calibrated in PLA, the same material as the bin, so this is a 11 min confirmation of the fit before the first bin rather than an unknown.</figcaption>
+    <img src="images/coupons.png" alt="Four joint coupon pairs in a row, each pair marked with one to four notches on the wall stub">
+    <figcaption>Plate 2, the fit ladder. Your first coupon was too tight at 0.15 mm body clearance and 0.20 mm rib crush. Four pairs now, each a 14.5 mm slice of the joint; the notch count on the wall stub names the pair and both pieces of a pair carry the same count. Every pair has a 0.25 mm free body so only the ribs touch, and the bed edges are chamfered so the first layer's elephant foot cannot add to the fit. The bin is built to pair 2 until you report.</figcaption>
   </figure>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Pair</th><th>Body clearance</th><th>Rib crush</th><th>Rib length</th><th>Expect</th></tr></thead>
+    <tbody>
+      <tr><td>1 notch</td><td class="num">0.25 mm</td><td class="num">0.15 mm</td><td class="num">12 mm</td><td>firmest of the four</td></tr>
+      <tr><td>2 notches <span class="tag ok">bin</span></td><td class="num">0.25 mm</td><td class="num">0.10 mm</td><td class="num">12 mm</td><td>the working guess</td></tr>
+      <tr><td>3 notches</td><td class="num">0.25 mm</td><td class="num">0.05 mm</td><td class="num">12 mm</td><td>probably loose; brackets the range</td></tr>
+      <tr><td>4 notches</td><td class="num">0.25 mm</td><td class="num">0.10 mm</td><td class="num">6 mm</td><td>pair 2 with half the grip length</td></tr>
+    </tbody>
+  </table>
+  </div>
   <ol>
-    <li>Print plate 2. Push coupon A down into coupon B. It should take firm thumb pressure over the last 12 mm and stay put when you pick it up by either piece. Loose or jammed: tell me and the rib height changes by 0.1 mm.</li>
-    <li>Print plate 1 four times. Process is 0.30 mm Standard for the 0.6 nozzle, Arachne walls, 3 walls, 20 % infill, textured PEI at 70 C, the usual 2-loop skirt. Confirm Studio's Prepare tab shows the X2D 0.6 nozzle before slicing; do not re-select the printer preset.</li>
+    <li>Print plate 2. Push each A down into the B with the same notch count. Tell me which pair takes firm thumb pressure over the last stretch and stays put when lifted by either piece; the bin's constants move to that pair.</li>
+    <li>Print plate 1 four times. Process is 0.30 mm Standard for the 0.6 nozzle, Arachne walls, 3 walls, 20 % infill, textured PEI at 55 C, the usual 2-loop skirt. Confirm Studio's Prepare tab shows the X2D 0.6 nozzle before slicing; do not re-select the printer preset.</li>
     <li>Assemble: stand B on the bench, hold A level above it with the tails over the sockets, and push straight down until the rims are flush.</li>
   </ol>
 
@@ -206,7 +217,7 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
 
     <div class="decision">
       <h3>Weight <span class="tag">per bin</span></h3>
-      <p>Three steps down. The first version had 3-line walls in PETG: 368 g and 7 h 02 min per bin. For a drawer bin with no real load the walls went to 2 lines (1.24 mm) in PLA: 285 g and 4 h 58 min. Then you took both cuts: slotted long walls and 8 mm joint posts, with the scallops taking a little more. <strong>Built now: 240 g and 4 h 54 min per bin, 965 g for four.</strong></p>
+      <p>Three steps down. The first version had 3-line walls in PETG: 368 g and 7 h 02 min per bin. For a drawer bin with no real load the walls went to 2 lines (1.24 mm) in PLA: 285 g and 4 h 58 min. Then you took both cuts: slotted long walls and 8 mm joint posts, with the scallops taking a little more. <strong>Built now: 240 g and 4 h 49 min per bin, 976 g for four.</strong></p>
       <figure>
         <img src="images/bin-side.png" alt="Side elevation of the bin showing the thirteen vertical slots in each half's long wall">
         <figcaption>Side elevation. 13 vertical slots per long wall per half, 6 mm wide with rounded ends, 64 mm tall, on a 14 mm pitch with 8 mm webs. They start 10 mm past the joint post and stop 10 mm short of the end corners; the floor, the lip band and the foot stay solid. A cable end can poke through if pushed; in a drawer that is harmless.</figcaption>

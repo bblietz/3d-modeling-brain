@@ -38,9 +38,10 @@ https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
   the tip, so it prints unsupported off A's joint face; B's socket has the
   matching sloped floor and is otherwise open at the top: A drops onto B to
   a hard stop, floors flush. The socket's lowest corner keeps 2.29 mm of
-  wall to the flare skin (asserted). Body clearance 0.15 mm per side; two crush
-  ribs per tail (R1 half-embedded cylinders, 0.35 mm proud, 0.5 mm lead-in)
-  on the top 12 mm only, so the crush stroke is short. Dovetail centreline
+  wall to the flare skin (asserted). Body clearance 0.25 mm per side (0.15
+  until Brian's first coupon came back too tight, 2026-10-25); two crush ribs
+  per tail (R1 half-embedded cylinders, 0.35 mm proud = 0.10 mm crush, 0.5 mm
+  lead-in) on the top 12 mm only, so the crush stroke is short. Dovetail centreline
   set 0.25 mm inboard of the lip's inner face so the tail passes the lip on
   the way in (first version notched B's lip; caught by the sweep check).
 - **Holds** pull-apart and shear positively; lifting by B's end carries A on
@@ -54,11 +55,16 @@ https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
   ends); joint posts 8 mm instead of 12. A cable end can poke through a slot
   if pushed, harmless in a drawer. The floor, lip band and foot stay solid; the stack seats on the long
   lips and the end corners.
-- **Coupon** plate 2 is a 14.5 mm slice of one post pair carrying the ribbed
-  zone, to confirm the rib fit in a quarter of an hour before a 5 h bin. The
-  crush-rib numbers are the PLA calibration from [[friction-fits-x2d]], and
-  the bin is PLA now, so the coupon is confirmation rather than a first data
-  point.
+- **Fit ladder** (plate 2). Brian's first coupon, body 0.15 and crush 0.20
+  from [[friction-fits-x2d]] (calibrated with the classic generator at
+  0.18 mm layers, eight ribs engaged over about 1 mm), was too tight here
+  (Arachne, 0.30 mm layers, four ribs engaged over 11.5 mm). Plate 2 now
+  carries four coupon pairs, 14.5 mm slices of the joint with the bed edges
+  chamfered 0.5 mm against the elephant foot and 1 to 4 notches on the wall
+  stubs: (1) body 0.25 / crush 0.15 / ribs 12 mm, (2) 0.25 / 0.10 / 12, the
+  bin as built, (3) 0.25 / 0.05 / 12, (4) 0.25 / 0.10 / 6. Brian reports the
+  pair that takes firm thumb pressure and holds; `DT_CLR`, `RIB_CRUSH` and
+  `RIB_LEN` move to that rung (an assert keeps the bin on a rung).
 
 ## Checks baked into `cable_bin.py`
 
@@ -87,8 +93,8 @@ over the scoop width and no more; STLs watertight with mesh volume within
   the slots first sliced at 6 h 41 min because the PETG recipe's
   `small_perimeter_threshold` 10 is a radius and slowed every slot web to
   30 mm/s (see the retrospective); that override is gone.
-- Plate 1 (Half A + Half B): 4 h 54 min, 240 g. Plate 2 (coupons):
-  11 min, 4 g. Four bins: 19 h 48 min, 965 g.
+- Plate 1 (Half A + Half B): 4 h 49 min, 240 g. Plate 2 (coupons):
+  28 min, 17 g. Four bins: 19 h 46 min, 976 g.
 - Orientation: floor down as modelled; nothing past 45 degrees.
 - Assembly: stand B, hold A level above with the tails over the sockets, push
   straight down until the rims are flush. Separate with a straight pull up.
@@ -108,6 +114,7 @@ over the scoop width and no more; STLs watertight with mesh volume within
 
 - PLA colour. Everything else was decided 2026-10-25: friction hold (no
   CA), scallop ends, 3.80 in pitch, both weight cuts.
-- Coupon print and fit report, then the first bin.
+- Fit ladder print and the pair that fits (the bin is pair 2 until then),
+  then the first bin.
 - Open the 3MF in Bambu Studio once to confirm both plates render (GUI is
   ground truth for hand-authored plates).

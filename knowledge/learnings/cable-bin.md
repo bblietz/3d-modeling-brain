@@ -27,7 +27,7 @@ two halves for the X2D, four bins.
   scallop in each end wall, 8 mm joint posts. Friction hold (no CA), scallop
   ends and 3.80 in pitch confirmed by Brian the same day. Only the colour
   is open.
-- Joint coupon on plate 2, printed first.
+- Fit ladder (four coupon pairs, 1 to 4 notches) on plate 2, printed first.
 
 ## What worked
 
@@ -134,6 +134,24 @@ which and say so on the sign-off page.
 
 ## Measured fits
 
-None yet. The crush-rib numbers (0.15 mm clearance, ribs 0.35 mm proud) are
-the PLA calibration from [[friction-fits-x2d]] and the bin is PLA, so the
-coupon on plate 2 is a confirmation; record the result here.
+**First coupon (2026-10-25): too tight.** Body clearance 0.15 mm, rib crush
+0.20 mm, two R1 ribs per tail over the top 12 mm, PLA Basic, 0.6 high-flow,
+Arachne, 0.30 mm layers. Brian: "the dovetail fit is too tight". Three
+reasons it should not have been trusted as a confirmation:
+
+- The [[friction-fits-x2d]] numbers were calibrated with the classic
+  generator at 0.18 mm layers, and the note itself says Arachne lays a
+  different rib bead. Arachne at 0.30 mm was a new calibration, not a check.
+- Total friction scales with engaged rib length. The lid that calibrated the
+  recipe engaged eight ribs over about 1.2 mm of straight wall; the bin
+  engages four ribs over 11.5 mm, roughly five times the contact at the same
+  crush.
+- The coupon stands its fit features on the bed, so the first layer's
+  elephant foot widened the tail's foot and narrowed the socket's mouth; the
+  bin's joint never touches the bed. Coupons now chamfer their bed edges.
+
+Second round is a fit ladder on plate 2 (`FIT_LADDER` in `cable_bin.py`):
+body 0.25 in all four pairs so only the ribs touch, crush 0.15 / 0.10 /
+0.05 at 12 mm ribs, and 0.10 at 6 mm ribs; pair i carries i notches. The
+bin is built to pair 2 until Brian reports. Record the winning pair here and
+in [[friction-fits-x2d]].

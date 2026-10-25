@@ -30,16 +30,20 @@ Resume with Fable 5.1 (design work). Read `projects/Cable-bin/brief.md` and
   per long wall per half at 14 mm pitch (z 18 to 82), finger scallop 52 x
   18 mm in each end wall, joint posts 8 mm. Friction hold (no CA), scallop
   ends and 3.80 in pitch confirmed the same day.
-- Joint coupon on plate 2, printed before any bin.
+- Fit ladder on plate 2 (four coupon pairs, 1 to 4 notches), printed before
+  any bin. First coupon at body 0.15 / crush 0.20 was too tight (Brian).
 - No small_perimeter override in the 3MF (the PETG recipe's threshold 10 is
   a radius and slowed every slot web to 30 mm/s: 1 h 43 min per bin).
 
 ## Waiting on Brian
 
 - PLA colour (display colour in the 3MF is black; any PLA Basic slot prints it).
-- Coupon fit report (firm thumb push over the last 12 mm, holds when lifted
-  by either piece). Loose or jammed: change `RIB_PROUD` by 0.1 mm, rerun
-  `cable_bin.py`, then `pipeline/make_print_3mf.py`.
+- The ladder pair that fits (firm thumb push, holds when lifted by either
+  piece). Set `DT_CLR`, `RIB_CRUSH`, `RIB_LEN` to that rung in `cable_bin.py`
+  (an assert keeps the bin on a rung of `FIT_LADDER`), rerun it, then
+  `pipeline/renders.py`, `pipeline/make_print_3mf.py`, `pipeline/fill_numbers.py`,
+  republish, commit. Record the winner in the retrospective and in
+  knowledge/friction-fits-x2d.md.
 - One GUI open of the 3MF to confirm both plates render.
 
 ## If a change is asked

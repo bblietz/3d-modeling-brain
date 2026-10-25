@@ -127,3 +127,15 @@ plate. Quote its print time from a real slice before printing it.
   slivers that inflate the measured bounding box.
 
 Related: [[printer-x2d]], [[build123d-trial]], [[smooth-surfaces-x2d]]
+
+## Data point: cable bin dovetails, 2026-10-25
+
+Sliding dovetail joint on [[cable-bin]] (learnings), PLA Basic, 0.6
+high-flow, **Arachne, 0.30 mm layers**, two R1 ribs per tail engaged over
+11.5 mm, two tails: the recipe's 0.15 mm body and 0.20 mm crush came out
+**too tight** (Brian, first coupon). Two differences from the calibration
+above: the generator and layer height (a different rib bead, as warned), and
+about five times the engaged rib length of the lid. The follow-up is a
+four-pair ladder on one plate, body 0.25 throughout, crush 0.15 / 0.10 /
+0.05 at 12 mm and 0.10 at 6 mm, bed edges chamfered 0.5 mm so a standing
+coupon's elephant foot cannot add to the fit. Record the winning pair here.

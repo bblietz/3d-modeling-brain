@@ -18,8 +18,12 @@ three sides against its walls, no load) and asked for PLA: 2-line walls
 285 g / 4 h 58; then he took both cuts: 13 vertical 6 x 64 mm slots per long
 wall per half, 8 mm joint posts, plus the finger scallop ends he picked:
 240 g / 4 h 54 min per bin, 965 g and 19 h 48 min for four. Friction hold
-and 3.80 in pitch confirmed. Plate 2 is an 11-minute joint coupon to print
-first. Only the PLA colour is open. Not printed.
+and 3.80 in pitch confirmed. Brian printed the first joint coupon: TOO
+TIGHT at body 0.15 / crush 0.20 (Arachne 0.30 mm is a new calibration, and
+four ribs over 11.5 mm is five times the recipe's contact). Bin now body
+0.25 / crush 0.10; plate 2 is a four-pair fit ladder (1 to 4 notches:
+crush 0.15 / 0.10 / 0.05 at 12 mm ribs, 0.10 at 6 mm) with bed chamfers.
+Waiting for the pair that fits, and the PLA colour.
 
 **Why:** the joint and stack are the two decisions that cost a reprint if
 wrong; both are proven in geometry. Every design decision is now Brian's.
