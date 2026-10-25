@@ -78,9 +78,9 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
 </style>
 
 <div class="wrap">
-  <div class="eyebrow">Sign-off · 2026-10-25 · Bambu Lab X2D, 0.6 high-flow nozzle, PETG</div>
+  <div class="eyebrow">Sign-off · 2026-10-25 · Bambu Lab X2D, 0.6 high-flow nozzle, PLA</div>
   <h1>Stackable Cable Bin</h1>
-  <p class="lede">16&#190; &times; 4 &times; 4 in, printed as two halves that lock together at mid-length. Four bins, one plate each, plus a ten-minute joint coupon to print first.</p>
+  <p class="lede">16&#190; &times; 4 &times; 4 in, printed as two halves that lock together at mid-length. Four bins, one plate each, plus a {{P2_TIME}} joint coupon to print first.</p>
 
   <figure>
     <img src="images/bin-assembled.png" alt="One assembled bin, half A in blue and half B in amber, seen from above the front corner">
@@ -92,8 +92,8 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
     <div class="cell"><div class="k">Inside, clear</div><div class="v">16.6 &times; 3.69</div><div class="s">in at the lip; 3.85 below it</div></div>
     <div class="cell"><div class="k">Inside depth</div><div class="v">3.93</div><div class="s">in, floor to rim</div></div>
     <div class="cell"><div class="k">Stack pitch</div><div class="v">3.80</div><div class="s">in; 4 bins stand 15.4 in</div></div>
-    <div class="cell"><div class="k">Wall</div><div class="v">1.86</div><div class="s">mm, 3 lines; floor the same</div></div>
-    <div class="cell"><div class="k">Per bin</div><div class="v">{{BIN_G}} g</div><div class="s">PETG, {{BIN_TIME}} per plate</div></div>
+    <div class="cell"><div class="k">Wall</div><div class="v">1.24</div><div class="s">mm, 2 lines; floor the same</div></div>
+    <div class="cell"><div class="k">Per bin</div><div class="v">{{BIN_G}} g</div><div class="s">PLA, {{BIN_TIME}} per plate</div></div>
   </div>
 
   <h2>Why two halves</h2>
@@ -137,7 +137,7 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
   <h2>Print plan</h2>
   <div class="tablewrap">
   <table>
-    <thead><tr><th>Plate</th><th>Objects</th><th>Time</th><th>PETG</th><th>Runs</th></tr></thead>
+    <thead><tr><th>Plate</th><th>Objects</th><th>Time</th><th>PLA</th><th>Runs</th></tr></thead>
     <tbody>
       <tr><td>1 · Bin</td><td><span class="swA"></span>Half A (tails), <span class="swB"></span>Half B (sockets)</td><td class="num">{{P1_TIME}}</td><td class="num">{{P1_G}} g</td><td class="num">4</td></tr>
       <tr><td>2 · Joint coupon</td><td>Coupon A, Coupon B</td><td class="num">{{P2_TIME}}</td><td class="num">{{P2_G}} g</td><td class="num">1, first</td></tr>
@@ -147,7 +147,7 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
   </div>
   <figure>
     <img src="images/coupons.png" alt="The two joint coupon pieces">
-    <figcaption>Plate 2. A 14.5 mm slice of the joint carrying one ribbed tail and its socket. The crush-rib numbers were calibrated in PLA; PETG prints its own fit, so this is the ten-minute check before committing a bin.</figcaption>
+    <figcaption>Plate 2. A 14.5 mm slice of the joint carrying one ribbed tail and its socket. The crush-rib numbers were calibrated in PLA, the same material as the bin, so this is a {{P2_TIME}} confirmation of the fit before the first bin rather than an unknown.</figcaption>
   </figure>
   <ol>
     <li>Print plate 2. Push coupon A down into coupon B. It should take firm thumb pressure over the last 12 mm and stay put when you pick it up by either piece. Loose or jammed: tell me and the rib height changes by 0.1 mm.</li>
@@ -206,25 +206,27 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
     </div>
 
     <div class="decision">
-      <h3>Walls and weight <span class="tag">per bin</span></h3>
+      <h3>Weight <span class="tag">per bin</span></h3>
+      <p>The first version had 3-line walls in PETG: 368 g and 7 h 02 min per bin. You said the bins live in a drawer with three sides against its walls and carry no real load, and asked for PLA. Built now: 2-line walls (1.24 mm, the printer's minimum with the 0.6 nozzle) in PLA Basic, <strong>{{BIN_G}} g and {{BIN_TIME}}</strong>. Walls and floor are about two thirds of that, the four joint posts about a fifth, the lip under a tenth. Four bins take {{TOTAL_G}} g, so two 1 kg spools.</p>
       <div class="opts">
         <div class="opt built">
-          <div class="name">3 lines, 1.86 mm <span class="tag ok">built</span></div>
-          <p>{{BIN_G}} g and {{BIN_TIME}} per bin in PETG Basic, which is flow-limited at 16 mm&sup3;/s on this nozzle. Stiff enough to lift loaded by one end.</p>
+          <div class="name">{{BIN_G}} g as built <span class="tag ok">built</span></div>
+          <p>2-line walls and floor, 3-line lip and posts, 20 % infill where there is room for any. Nothing else changes.</p>
         </div>
         <div class="opt">
-          <div class="name">2 lines, 1.24 mm</div>
-          <p>Roughly a third lighter and faster, noticeably floppier at 4 in tall. Not recommended for a bin this long.</p>
+          <div class="name">Slotted long walls, about 30 g less</div>
+          <p>Vertical 6 mm slots along both long sides between the foot and the lip, an open crate look. Plugs cannot pass a 6 mm slot. I draw it before building if you want to see it.</p>
         </div>
         <div class="opt">
-          <div class="name">Same walls, Bambu PETG HF</div>
-          <p>If you have PETG HF on hand its preset runs 21 mm&sup3;/s, about an hour and a half less per bin with the same part. Say which spool and I reslice.</p>
+          <div class="name">Shorter joint posts, about 15 g less</div>
+          <p>The four posts behind the dovetails shrink from 12 to 8 mm along the bin. Invisible from outside; the joint keeps its full depth.</p>
         </div>
       </div>
+      <p class="q">Fine at {{BIN_G}} g, or take one or both cuts?</p>
     </div>
 
   </div>
-  <p class="q">Also: which PETG colour, and is one colour for all four fine?</p>
+  <p class="q">Also: which PLA colour, and is one colour for all four fine?</p>
 
   <h2>Files</h2>
   <div class="files">

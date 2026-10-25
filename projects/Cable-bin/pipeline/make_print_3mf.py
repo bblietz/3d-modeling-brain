@@ -3,8 +3,8 @@
   plate 1 "Bin"           cable-bin-half-a.stl and cable-bin-half-b.stl, side by side along Y, 15 mm apart, centred
   plate 2 "Joint coupon"  cable-bin-coupon-a.stl and cable-bin-coupon-b.stl, side by side along X, 20 mm apart, centred
 
-Copied from projects/Skateboard-wall-holder/pipeline/make_print_3mf.py (X2D 0.6 nozzle, 0.30mm Standard, Bambu PETG
-Basic, Textured PEI, include-merging preset flattener, graft_slice for the verification slice, wall_loops 3, 20% gyroid,
+Copied from projects/Skateboard-wall-holder/pipeline/make_print_3mf.py (X2D 0.6 nozzle, 0.30mm Standard, PETG Basic
+there, PLA Basic here since 2026-10-25, Textured PEI, include-merging preset flattener, graft_slice for the verification slice, wall_loops 3, 20% gyroid,
 skirt and no brim, the PETG seam and top settings) with:
   several objects      the PARTS pattern of projects/Build123d-trial/pipeline/make_print_3mf.py: objects are matched by
                        the source filename carried in Metadata/model_settings.config, never by position, and every item
@@ -43,8 +43,8 @@ ROOT = os.path.expanduser("~/.config/BambuStudio/system/BBL")   # the 02.08.00.0
 
 MACHINE = "Bambu Lab X2D 0.6 nozzle"
 PROCESS = "0.30mm Standard @BBL X2D 0.6 nozzle"
-FILAMENT = "Bambu PETG Basic @BBL X2D"
-FILAMENT_COLOUR = "#000000"      # display only; any PETG Basic slot in the AMS prints it
+FILAMENT = "Bambu PLA Basic @BBL X2D 0.6 nozzle"   # PLA, not PETG: Brian 2026-10-25 (drawer bin, light duty)
+FILAMENT_COLOUR = "#000000"      # display only; any PLA Basic slot in the AMS prints it
 
 STEM = "cable-bin"
 OUT = f"{STEM}.3mf"
@@ -69,11 +69,11 @@ SCALARS = {   # process scope, different_settings_to_system[0]
     "skirt_distance": "3",
     "skirt_height": "1",
     "skirt_per_object": "0",        # one skirt around the plate, not one per half
-    "wall_loops": "3",              # the bin's 1.86 mm walls are three 0.62 mm lines
+    "wall_loops": "3",              # lip and posts get three 0.62 mm lines; Arachne fits two in the 1.24 mm wall
     "wall_generator": "arachne",    # classic turned the exactly-three-line wall into two loops plus slow gap fill
     "sparse_infill_density": "20%",
     "sparse_infill_pattern": "gyroid",
-    # PETG lessons from knowledge/learnings/sharks-nametag.md: no ironing, two top walls, closed seams
+    # kept from the PETG version (knowledge/learnings/sharks-nametag.md): no ironing, two top walls, closed seams
     "ironing_type": "no ironing",
     "top_one_wall_type": "not apply",
     "seam_gap": "0%",
@@ -86,9 +86,9 @@ LISTS = {   # process scope, one value per extruder variant; slow small loops an
     "initial_layer_speed": "30",
     "initial_layer_infill_speed": "50",
 }
-FILAMENT_LISTS = {   # filament scope, different_settings_to_system[1]: the PETG preset's textured-plate temperatures, pinned
-    "textured_plate_temp": "70",
-    "textured_plate_temp_initial_layer": "70",
+FILAMENT_LISTS = {   # filament scope, different_settings_to_system[1]: the PLA preset's textured-plate temperatures, pinned
+    "textured_plate_temp": "55",
+    "textured_plate_temp_initial_layer": "55",
 }
 
 

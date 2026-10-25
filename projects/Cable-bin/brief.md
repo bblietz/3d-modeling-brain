@@ -3,8 +3,8 @@ title: Stackable cable bin
 type: project
 status: CAD complete, 3MF sliced, awaiting Brian's sign-off (2026-10-25)
 printer: Bambu Lab X2D, 0.6 high-flow nozzle
-material: PETG Basic
-tags: [bin, storage, stackable, dovetail, crush-ribs, petg, x2d]
+material: PLA Basic (PETG until 2026-10-25)
+tags: [bin, storage, stackable, dovetail, crush-ribs, pla, x2d]
 ---
 
 # Stackable cable bin
@@ -21,7 +21,9 @@ https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
 - **Split** once at mid-length into two 212.725 mm halves: half A (dovetail
   tails) and half B (sockets). One plate holds A and B, so one print is one
   bin. Four runs of plate 1 give the four bins.
-- **Shell** 1.86 mm walls and floor (3 lines of the 0.6 nozzle), R10 outer
+- **Shell** 1.24 mm walls and floor (2 lines of the 0.6 nozzle, the printer
+  minimum; 1.86 mm until Brian said 2026-10-25 the bins sit in a drawer with
+  three sides against its walls and carry no real load), R10 outer
   vertical corners at the closed ends, uniform shell via `offset()`.
 - **Foot** the bottom 8 mm is a 45 degree flare (horizontal inset 8 mm). It is
   the stacking foot: it seats on the lip chamfer of the bin below.
@@ -45,9 +47,10 @@ https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
   the socket floors; lifting by A's end relies on rib friction. A drop of CA
   in each socket makes it permanent (Brian's call, see options page).
 - **Coupon** plate 2 is a 14.5 mm slice of one post pair carrying the ribbed
-  zone, to check the PETG rib fit in about ten minutes before a 4 h bin. The
-  crush-rib numbers are the PLA calibration from [[friction-fits-x2d]];
-  PETG is unvalidated.
+  zone, to confirm the rib fit in a quarter of an hour before a 5 h bin. The
+  crush-rib numbers are the PLA calibration from [[friction-fits-x2d]], and
+  the bin is PLA now, so the coupon is confirmation rather than a first data
+  point.
 
 ## Checks baked into `cable_bin.py`
 
@@ -62,15 +65,16 @@ further (seat proven); STLs watertight with mesh volume within 1 % of B-rep.
 
 ## Print
 
-- Process `0.30mm Standard @BBL X2D 0.6 nozzle`, filament `Bambu PETG Basic
-  @BBL X2D`, Arachne walls, 3 walls, 20 % infill, textured PEI 70 C, 2-loop
-  skirt, no brim, no ironing. Built by `pipeline/make_print_3mf.py`. The
-  classic generator sliced the exactly-three-line wall as two loops plus a
-  loop of 50 mm/s gap fill per layer (8 h 18 min); Arachne gives three beads
-  and no gap fill. PETG Basic is flow-limited at 16 mm3/s, so the bin is
-  about 5 h of pure extrusion; PETG HF (21 mm3/s) would save about 1.5 h.
-- Plate 1 (Half A + Half B): 7 h 02 min, 368 g. Plate 2 (coupons):
-  17 min, 5 g. Four bins: 28 h 25 min, 1476 g.
+- Process `0.30mm Standard @BBL X2D 0.6 nozzle`, filament `Bambu PLA Basic
+  @BBL X2D 0.6 nozzle` (220 C, textured PEI 55 C, 21 mm3/s), Arachne walls,
+  wall_loops 3 (the lip and posts get three lines; Arachne fits two beads in
+  the 1.24 mm wall with zero gap fill), 20 % gyroid, 2-loop skirt, no brim,
+  no ironing. Built by `pipeline/make_print_3mf.py`. History: the classic
+  generator sliced the first version's exactly-three-line 1.86 mm wall as two
+  loops plus a loop of 50 mm/s gap fill per layer (8 h 18 min); Arachne made
+  it 7 h 02 min / 368 g in PETG; the 2-line PLA version is below.
+- Plate 1 (Half A + Half B): 4 h 58 min, 285 g. Plate 2 (coupons):
+  14 min, 5 g. Four bins: 20 h 06 min, 1144 g.
 - Orientation: floor down as modelled; nothing past 45 degrees.
 - Assembly: stand B, hold A level above with the tails over the sockets, push
   straight down until the rims are flush. Separate with a straight pull up.

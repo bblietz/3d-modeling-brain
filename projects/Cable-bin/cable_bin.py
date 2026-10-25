@@ -28,7 +28,7 @@ H = 4.0 * IN            # 101.6 overall height, foot bottom to rim top
 HALF_L = L / 2          # 212.725 per half, fits the 256 mm bed
 
 # ---- shell -----------------------------------------------------------------
-WALL = 1.86             # 3 perimeters of the 0.6 nozzle; floor is the same
+WALL = 1.24             # 2 perimeters of the 0.6 nozzle, the printer minimum; floor is the same. Drawer bin, light duty (Brian 2026-10-25)
 R_CORNER = 10.0         # outer vertical corner radius at the closed ends (must exceed FLARE)
 FLARE = 8.0             # 45 degree foot chamfer height = horizontal inset
 
@@ -294,7 +294,7 @@ def main():
 
     vol_bin = half_a.volume + half_b.volume
     print(f"half A {half_a.volume/1000:.1f} cm3, half B {half_b.volume/1000:.1f} cm3, "
-          f"bin {vol_bin/1000:.1f} cm3 = {vol_bin/1000*1.27:.0f} g PETG at 100%")
+          f"bin {vol_bin/1000:.1f} cm3 = {vol_bin/1000*1.26:.0f} g PLA at 100%")
     print(f"coupons {coupon_a.volume/1000:.2f} + {coupon_b.volume/1000:.2f} cm3")
     print(f"drop {DROP:.2f} mm, stack pitch {STACK_PITCH:.2f} mm = {STACK_PITCH/IN:.3f} in, "
           f"4 stacked = {(3*STACK_PITCH + H)/IN:.2f} in")

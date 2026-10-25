@@ -3,7 +3,7 @@ title: Cable bin retrospective
 type: learning
 date: 2026-10-25
 status: CAD and slice done, not printed
-tags: [bin, split-print, dovetail, crush-ribs, stacking, build123d, petg]
+tags: [bin, split-print, dovetail, crush-ribs, stacking, build123d, pla]
 ---
 
 # Cable bin: what the build taught
@@ -19,7 +19,9 @@ two halves for the X2D, four bins.
   of each tail, sockets closed at the bottom by B's floor.
 - Stacking by a 45 degree foot flare seating on a 45 degree lip chamfer,
   drop 5 mm, pitch 3.80 in.
-- PETG Basic, 0.6 high-flow nozzle, 0.30 mm Standard, 3 walls.
+- PLA Basic, 0.6 high-flow nozzle, 0.30 mm Standard, 2-line walls and floor
+  (1.24 mm), wall_loops 3 so the lip and posts stay solid (Brian 2026-10-25:
+  drawer bin, no real load; PETG and 3-line walls until then).
 - Joint coupon on plate 2, printed first.
 
 ## What worked
@@ -66,6 +68,19 @@ two halves for the X2D, four bins.
   zone at the bottom; start it above the flare or check the skin thickness
   at its lowest outer corner.
 
+## Ask the load case before picking walls and material
+
+I defaulted a 17 in bin to 3-line walls and PETG for stiffness and put 368 g
+on the page; Brian's first reaction was that 368 g is a lot. The bins sit in
+a drawer with three sides against its walls and carry no torsional load, so
+2-line walls (the printer minimum) and PLA were right: 285 g and 4 h 58 min,
+23 % lighter and 30 % faster, with the same geometry proofs passing. Lesson:
+for storage parts ask where it lives and what it carries before choosing the
+wall count and the material, and put the grams on the page as a decision,
+not a footnote. Where the material goes in this bin (solid CAD volumes at
+1.24 mm): walls 50 %, floor 17 %, joint posts 26 %, lip 8 %; the slicer
+hollows the posts, so in the print they are closer to a fifth.
+
 ## Walls that are exactly N lines wide: use Arachne
 
 A 1.86 mm wall is exactly three 0.62 mm lines. The classic wall generator
@@ -75,7 +90,9 @@ length and the inner wall only 0.4 of it. `wall_generator` arachne gives
 three clean beads, zero gap fill, and 8 h 18 min became 7 h 02 min for the
 same plate. Either pick wall thicknesses a little OVER an integer number of
 lines (1.9 for three) or set Arachne, and read the feature breakdown of the
-slice before quoting a time.
+slice before quoting a time. The 2-line 1.24 mm wall sliced under Arachne
+with wall_loops still 3 also shows zero gap fill: Arachne fits two beads and
+leaves the three-loop setting to the lip and posts.
 
 ## A theorem worth remembering
 
@@ -88,5 +105,5 @@ which and say so on the sign-off page.
 ## Measured fits
 
 None yet. The crush-rib numbers (0.15 mm clearance, ribs 0.35 mm proud) are
-the PLA calibration from [[friction-fits-x2d]]. The coupon on plate 2 is the
-PETG data point; record the result here.
+the PLA calibration from [[friction-fits-x2d]] and the bin is PLA, so the
+coupon on plate 2 is a confirmation; record the result here.

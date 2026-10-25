@@ -30,12 +30,12 @@
    "plate": 2,
    "min_mm": [
     407.7,
-    119.32,
+    119.63,
     0.0
    ],
    "max_mm": [
     427.7,
-    136.68,
+    136.37,
     14.5
    ]
   },
@@ -43,12 +43,12 @@
    "plate": 2,
    "min_mm": [
     447.7,
-    119.32,
+    119.63,
     0.0
    ],
    "max_mm": [
     462.7,
-    136.68,
+    136.37,
     14.5
    ]
   }
@@ -61,16 +61,16 @@
     "Half A (tails)",
     "Half B (sockets)"
    ],
-   "time": "7:02",
-   "seconds": 25318,
-   "gcode_estimate": "7h 1m 58s",
-   "grams": 367.8,
-   "metres": 122.34,
-   "used_g_per_filament": 367.8,
+   "time": "4:58",
+   "seconds": 17882,
+   "gcode_estimate": "4h 58m 2s",
+   "grams": 284.6,
+   "metres": 93.91,
+   "used_g_per_filament": 284.6,
    "layers": 339,
    "top_z": 101.7,
-   "nozzle_C": 250,
-   "bed_C": 70,
+   "nozzle_C": 220,
+   "bed_C": 55,
    "toolpath_xy_mm": [
     17.8,
     19.21,
@@ -78,16 +78,16 @@
     236.79
    ],
    "feature_mm": {
-    "Outer wall": 49207.3,
-    "Inner wall": 44141.3,
-    "Internal solid infill": 16560.3,
-    "Top surface": 4122.3,
-    "Sparse infill": 4102.8,
-    "Bottom surface": 3930.1,
-    "Floating vertical shell": 119.9,
-    "Skirt": 110.0,
-    "Bridge": 46.8,
-    "Gap infill": 0.2
+    "Outer wall": 53190.8,
+    "Inner wall": 19492.5,
+    "Internal solid infill": 8596.5,
+    "Top surface": 4183.8,
+    "Sparse infill": 4106.4,
+    "Bottom surface": 4054.2,
+    "Floating vertical shell": 121.9,
+    "Skirt": 113.5,
+    "Bridge": 47.7,
+    "Gap infill": 0.4
    }
   },
   {
@@ -96,39 +96,39 @@
     "Coupon A",
     "Coupon B"
    ],
-   "time": "0:17",
-   "seconds": 1019,
-   "gcode_estimate": "16m 59s",
+   "time": "0:14",
+   "seconds": 828,
+   "gcode_estimate": "13m 48s",
    "grams": 5.3,
-   "metres": 1.75,
+   "metres": 1.73,
    "used_g_per_filament": 5.3,
    "layers": 48,
    "top_z": 14.4,
-   "nozzle_C": 250,
-   "bed_C": 70,
+   "nozzle_C": 220,
+   "bed_C": 55,
    "toolpath_xy_mm": [
     96.67,
-    115.49,
+    115.8,
     159.33,
-    140.51
+    140.2
    ],
    "feature_mm": {
-    "Inner wall": 817.6,
-    "Outer wall": 484.6,
-    "Sparse infill": 269.0,
-    "Internal solid infill": 82.7,
-    "Bridge": 23.0,
-    "Top surface": 22.2,
-    "Bottom surface": 21.4,
-    "Skirt": 21.3,
+    "Inner wall": 803.4,
+    "Outer wall": 493.9,
+    "Sparse infill": 269.7,
+    "Internal solid infill": 69.1,
+    "Bridge": 23.5,
+    "Top surface": 21.8,
+    "Skirt": 21.8,
+    "Bottom surface": 21.0,
     "Floating vertical shell": 9.9,
     "Gap infill": 0.1
    }
   }
  ],
- "total_time": "7:19",
- "total_seconds": 26337,
- "total_grams": 373.1,
+ "total_time": "5:12",
+ "total_seconds": 18710,
+ "total_grams": 289.9,
  "overrides": {
   "process": {
    "curr_bed_type": "Textured PEI Plate",
@@ -152,13 +152,13 @@
    "initial_layer_infill_speed": "50"
   },
   "filament": {
-   "textured_plate_temp": "70",
-   "textured_plate_temp_initial_layer": "70"
+   "textured_plate_temp": "55",
+   "textured_plate_temp_initial_layer": "55"
   }
  },
  "presets": {
   "machine": "Bambu Lab X2D 0.6 nozzle",
   "process": "0.30mm Standard @BBL X2D 0.6 nozzle",
-  "filament": "Bambu PETG Basic @BBL X2D"
+  "filament": "Bambu PLA Basic @BBL X2D 0.6 nozzle"
  }
 }
