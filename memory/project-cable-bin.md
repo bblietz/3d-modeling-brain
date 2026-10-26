@@ -1,17 +1,17 @@
 ---
 name: project-cable-bin
-description: "Stackable 16.75 x 4 x 4 in cable bin split into two dovetailed halves for the X2D; decisions taken 2026-10-25 (friction hold, scallop ends, 3.80 in pitch, slotted walls, 8 mm posts, PLA, 2-line walls); two-plate 3MF 4 h 54 min / 240 g per bin; awaiting the colour and the joint coupon print"
+description: "Stackable 16.75 x 4 x 4 in cable bin split into two dovetailed halves for the X2D; decisions taken 2026-10-25 (friction hold, scallop ends, 3.80 in pitch, slotted walls, 8 mm posts, PLA, 2-line walls); joint fit set from the printed ladder (pair 4: body 0.25, crush 0.10, ribs 6 mm); two-plate 3MF 4 h 50 min / 240 g per bin; awaiting only the PLA colour"
 metadata:
   node_type: memory
   type: project
   originSessionId: 57f36788-c5ae-4c4a-b01f-4b0e50546282
-  modified: 2026-10-25T22:30:00.000Z
+  modified: 2026-10-26T01:10:00.000Z
 ---
 
 Cable bin (projects/Cable-bin/): Brian asked 2026-10-25 for four stackable
 cable bins, 16.75 x 4 x 4 in, split to fit the X2D. Built the same day:
 half A (dovetail tails) and half B (sockets) on one plate, four runs for four
-bins; crush-rib friction hold on the top 12 mm of each tail; stacking by a
+bins; crush-rib friction hold on the top 6 mm of each tail; stacking by a
 45 degree foot flare on a lip chamfer, drop 5 mm, pitch 3.80 in. Weight
 history: 3-line PETG 368 g / 7 h 02; Brian said that was a lot (drawer bin,
 three sides against its walls, no load) and asked for PLA: 2-line walls
@@ -23,7 +23,9 @@ TIGHT at body 0.15 / crush 0.20 (Arachne 0.30 mm is a new calibration, and
 four ribs over 11.5 mm is five times the recipe's contact). Bin now body
 0.25 / crush 0.10; plate 2 is a four-pair fit ladder (1 to 4 notches:
 crush 0.15 / 0.10 / 0.05 at 12 mm ribs, 0.10 at 6 mm) with bed chamfers.
-Waiting for the pair that fits, and the PLA colour.
+Brian printed the ladder and picked pair 4 ("4 works the best"): RIB_LEN 12
+to 6, bin 4 h 50 min / 240 g, four bins 19 h 18 min / 960 g. Only the PLA
+colour is open; no bin printed yet.
 
 **Why:** the joint and stack are the two decisions that cost a reprint if
 wrong; both are proven in geometry. Every design decision is now Brian's.

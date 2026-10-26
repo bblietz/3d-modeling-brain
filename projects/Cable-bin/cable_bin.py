@@ -58,10 +58,10 @@ DT_CLR = 0.25           # body clearance per side over the 88 mm slide; the ribs
 RIB_R = 1.0             # half-embedded cylinder rib
 RIB_CRUSH = 0.10        # designed rib interference per side (0.20 was too tight: Brian's first coupon, 2026-10-25)
 RIB_PROUD = DT_CLR + RIB_CRUSH   # rib crest above the tail flank
-RIB_LEN = 12.0          # ribs only on the top RIB_LEN of the tail: short crush stroke
+RIB_LEN = 6.0           # ribs only on the top RIB_LEN of the tail: short crush stroke (12 until Brian's ladder pick, 2026-10-25)
 RIB_LEADIN = 0.5
-# Fit ladder on plate 2: (body clearance, rib crush, rib length), pair i carries i notches. The bin is built with the
-# constants above (pair 2); Brian reports the pair that takes firm thumb pressure and holds, and the constants move.
+# Fit ladder on plate 2: (body clearance, rib crush, rib length), pair i carries i notches. Brian printed it 2026-10-25
+# and picked pair 4 (firm thumb push, holds); the constants above are that rung. The ladder stays for the record.
 FIT_LADDER = [(0.25, 0.15, 12.0), (0.25, 0.10, 12.0), (0.25, 0.05, 12.0), (0.25, 0.10, 6.0)]
 COUPON_BED_CHAMFER = 0.5   # kills the elephant foot on the standing coupons' fit edges (the bin's joint never touches the bed)
 assert any(abs(c - DT_CLR) < 1e-9 and abs(k - RIB_CRUSH) < 1e-9 and abs(r - RIB_LEN) < 1e-9 for c, k, r in FIT_LADDER), \

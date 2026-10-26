@@ -22,11 +22,11 @@ def main():
     d = json.load(open(os.path.join(PROJ, "cable-bin-slice.json")))
     p1 = next(p for p in d["plates"] if p["name"] == "Bin")
     p2 = next(p for p in d["plates"] if p["name"] != "Bin")
-    four = 4 * p1["seconds"] + p2["seconds"]
+    four = 4 * p1["seconds"]   # the fit ladder (plate 2) is printed; four bins are four runs of plate 1
     values = {
         "P1_TIME": hm(p1["seconds"]), "P1_G": f"{p1['grams']:.0f}",
         "P2_TIME": hm(p2["seconds"]), "P2_G": f"{p2['grams']:.0f}",
-        "TOTAL_TIME": hm(four), "TOTAL_G": f"{4 * p1['grams'] + p2['grams']:.0f}",
+        "TOTAL_TIME": hm(four), "TOTAL_G": f"{4 * p1['grams']:.0f}",
         "BIN_TIME": hm(p1["seconds"]), "BIN_G": f"{p1['grams']:.0f}",
     }
     for fname in ("options.html", "brief.md"):

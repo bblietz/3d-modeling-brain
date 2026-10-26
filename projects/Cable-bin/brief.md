@@ -1,7 +1,7 @@
 ---
 title: Stackable cable bin
 type: project
-status: CAD complete, 3MF sliced, decisions taken 2026-10-25, awaiting the colour and the coupon print
+status: CAD complete, 3MF sliced, decisions taken 2026-10-25, joint fit set from the printed ladder (pair 4), awaiting the colour
 printer: Bambu Lab X2D, 0.6 high-flow nozzle
 material: PLA Basic (PETG until 2026-10-25)
 tags: [bin, storage, stackable, dovetail, crush-ribs, pla, x2d]
@@ -41,7 +41,8 @@ https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
   wall to the flare skin (asserted). Body clearance 0.25 mm per side (0.15
   until Brian's first coupon came back too tight, 2026-10-25); two crush ribs
   per tail (R1 half-embedded cylinders, 0.35 mm proud = 0.10 mm crush, 0.5 mm
-  lead-in) on the top 12 mm only, so the crush stroke is short. Dovetail centreline
+  lead-in) on the top 6 mm only (12 until the ladder; Brian picked pair 4,
+  2026-10-25), so the crush stroke is short. Dovetail centreline
   set 0.25 mm inboard of the lip's inner face so the tail passes the lip on
   the way in (first version notched B's lip; caught by the sweep check).
 - **Holds** pull-apart and shear positively; lifting by B's end carries A on
@@ -62,15 +63,16 @@ https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
   carries four coupon pairs, 14.5 mm slices of the joint with the bed edges
   chamfered 0.5 mm against the elephant foot and 1 to 4 notches on the wall
   stubs: (1) body 0.25 / crush 0.15 / ribs 12 mm, (2) 0.25 / 0.10 / 12, the
-  bin as built, (3) 0.25 / 0.05 / 12, (4) 0.25 / 0.10 / 6. Brian reports the
-  pair that takes firm thumb pressure and holds; `DT_CLR`, `RIB_CRUSH` and
-  `RIB_LEN` move to that rung (an assert keeps the bin on a rung).
+  first guess, (3) 0.25 / 0.05 / 12, (4) 0.25 / 0.10 / 6. Brian printed it
+  and picked pair 4 (2026-10-25): `RIB_LEN` went 12 to 6, body and crush
+  unchanged (an assert keeps the bin on a rung). The ladder stays on plate 2
+  for the record.
 
 ## Checks baked into `cable_bin.py`
 
 Bounding boxes of both halves and the assembled bin; one solid per part;
 tail and socket bodies clear (0 mm3 overlap without ribs); rib interference
-volume matches the analytic lens area (7.57 vs 7.52 mm3); tail rests on the
+volume matches the analytic lens area (1.30 vs 1.29 mm3); tail rests on the
 socket's sloped floor (lowering A 0.05 mm collides); the socket's bottom
 corner keeps a full wall of flare skin outside it; the tail's full insertion path from
 above the rim sweeps B without touching, lip included; B's lip intact at the
@@ -93,8 +95,9 @@ over the scoop width and no more; STLs watertight with mesh volume within
   the slots first sliced at 6 h 41 min because the PETG recipe's
   `small_perimeter_threshold` 10 is a radius and slowed every slot web to
   30 mm/s (see the retrospective); that override is gone.
-- Plate 1 (Half A + Half B): 4 h 49 min, 240 g. Plate 2 (coupons):
-  28 min, 17 g. Four bins: 19 h 46 min, 976 g.
+- Plate 1 (Half A + Half B): 4 h 50 min, 240 g. Plate 2 (fit ladder,
+  printed 2026-10-25): 28 min, 17 g. Four bins, four runs of
+  plate 1: 19 h 18 min, 960 g.
 - Orientation: floor down as modelled; nothing past 45 degrees.
 - Assembly: stand B, hold A level above with the tails over the sockets, push
   straight down until the rims are flush. Separate with a straight pull up.
@@ -103,9 +106,9 @@ over the scoop width and no more; STLs watertight with mesh volume within
 
 - `cable_bin.py` parametric source (build123d), self-checking, SHOW=1 pushes
   to the viewer.
-- `cable-bin-half-a.stl`, `cable-bin-half-b.stl`, `cable-bin-coupon-a.stl`,
-  `cable-bin-coupon-b.stl`.
-- `cable-bin.3mf` (plate 1 bin, plate 2 coupon), `cable-bin-slice.json`.
+- `cable-bin-half-a.stl`, `cable-bin-half-b.stl`, `cable-bin-coupon-1a.stl`
+  to `cable-bin-coupon-4b.stl` (the ladder).
+- `cable-bin.3mf` (plate 1 bin, plate 2 fit ladder), `cable-bin-slice.json`.
 - `pipeline/renders.py` (OpenSCAD renders into `images/`),
   `pipeline/make_print_3mf.py`.
 - `options.html` sign-off page.
@@ -114,7 +117,6 @@ over the scoop width and no more; STLs watertight with mesh volume within
 
 - PLA colour. Everything else was decided 2026-10-25: friction hold (no
   CA), scallop ends, 3.80 in pitch, both weight cuts.
-- Fit ladder print and the pair that fits (the bin is pair 2 until then),
-  then the first bin.
+- The first bin (plate 1), built to ladder pair 4.
 - Open the 3MF in Bambu Studio once to confirm both plates render (GUI is
   ground truth for hand-authored plates).

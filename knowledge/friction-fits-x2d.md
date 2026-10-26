@@ -138,4 +138,13 @@ above: the generator and layer height (a different rib bead, as warned), and
 about five times the engaged rib length of the lid. The follow-up is a
 four-pair ladder on one plate, body 0.25 throughout, crush 0.15 / 0.10 /
 0.05 at 12 mm and 0.10 at 6 mm, bed edges chamfered 0.5 mm so a standing
-coupon's elephant foot cannot add to the fit. Record the winning pair here.
+coupon's elephant foot cannot add to the fit.
+
+**Winner (Brian, 2026-10-25): pair 4, body 0.25 mm, crush 0.10 mm, ribs
+6 mm** (5.5 mm full depth after the 0.5 mm lead-in), two R1 ribs per tail,
+two tails, PLA Basic, Arachne, 0.30 mm layers, 0.6 high-flow. Pair 2, the
+same crush over 12 mm, was the pre-print guess and lost to the shorter rib.
+Sizing rule from the two calibrated parts so far: crush x total full-depth
+rib length about 2 mm2 gives a firm hand fit (lid 1.9, bin 2.2; the
+too-tight first bin coupon was 9.2). Treat it as a starting point and still
+print a ladder when the generator, layer height or engaged length changes.

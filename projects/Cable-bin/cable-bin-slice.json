@@ -139,9 +139,9 @@
     "Half A (tails)",
     "Half B (sockets)"
    ],
-   "time": "4:49",
-   "seconds": 17365,
-   "gcode_estimate": "4h 49m 25s",
+   "time": "4:50",
+   "seconds": 17373,
+   "gcode_estimate": "4h 49m 33s",
    "grams": 239.9,
    "metres": 79.16,
    "used_g_per_filament": 239.9,
@@ -156,12 +156,12 @@
     236.79
    ],
    "feature_mm": {
-    "Outer wall": 43130.1,
-    "Inner wall": 17036.2,
-    "Internal solid infill": 8834.2,
+    "Outer wall": 43129.1,
+    "Inner wall": 17034.6,
+    "Internal solid infill": 8834.3,
     "Top surface": 4171.7,
     "Bottom surface": 4054.2,
-    "Sparse infill": 1682.7,
+    "Sparse infill": 1682.5,
     "Skirt": 113.5,
     "Floating vertical shell": 96.9,
     "Bridge": 26.0,
@@ -182,8 +182,8 @@
     "Pair 4 B"
    ],
    "time": "0:28",
-   "seconds": 1702,
-   "gcode_estimate": "28m 22s",
+   "seconds": 1699,
+   "gcode_estimate": "28m 19s",
    "grams": 16.6,
    "metres": 5.49,
    "used_g_per_filament": 16.6,
@@ -212,7 +212,7 @@
   }
  ],
  "total_time": "5:18",
- "total_seconds": 19067,
+ "total_seconds": 19072,
  "total_grams": 256.5,
  "overrides": {
   "process": {

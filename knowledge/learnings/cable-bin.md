@@ -2,7 +2,7 @@
 title: Cable bin retrospective
 type: learning
 date: 2026-10-25
-status: CAD and slice done, not printed
+status: CAD and slice done, fit ladder printed, bins not yet
 tags: [bin, split-print, dovetail, crush-ribs, stacking, build123d, pla]
 ---
 
@@ -15,8 +15,8 @@ two halves for the X2D, four bins.
 
 - Two halves per bin, split at mid-length, A (tails) and B (sockets) on one
   plate; four runs of that plate.
-- Vertical sliding dovetails on internal posts, crush ribs on the top 12 mm
-  of each tail, sockets closed at the bottom by B's floor.
+- Vertical sliding dovetails on internal posts, crush ribs on the top 6 mm
+  of each tail (ladder pair 4), sockets closed at the bottom by B's floor.
 - Stacking by a 45 degree foot flare seating on a 45 degree lip chamfer,
   drop 5 mm, pitch 3.80 in.
 - PLA Basic, 0.6 high-flow nozzle, 0.30 mm Standard, 2-line walls and floor
@@ -27,7 +27,8 @@ two halves for the X2D, four bins.
   scallop in each end wall, 8 mm joint posts. Friction hold (no CA), scallop
   ends and 3.80 in pitch confirmed by Brian the same day. Only the colour
   is open.
-- Fit ladder (four coupon pairs, 1 to 4 notches) on plate 2, printed first.
+- Joint fit from the printed ladder, Brian 2026-10-25: pair 4, body 0.25,
+  crush 0.10, ribs 6 mm. The ladder stays on plate 2 for the record.
 
 ## What worked
 
@@ -152,6 +153,13 @@ reasons it should not have been trusted as a confirmation:
 
 Second round is a fit ladder on plate 2 (`FIT_LADDER` in `cable_bin.py`):
 body 0.25 in all four pairs so only the ribs touch, crush 0.15 / 0.10 /
-0.05 at 12 mm ribs, and 0.10 at 6 mm ribs; pair i carries i notches. The
-bin is built to pair 2 until Brian reports. Record the winning pair here and
-in [[friction-fits-x2d]].
+0.05 at 12 mm ribs, and 0.10 at 6 mm ribs; pair i carries i notches.
+
+**Ladder result (2026-10-25): pair 4.** Brian: "4 works the best", the
+6 mm ribs at 0.10 mm crush. The working guess (pair 2) had the same crush
+over 12 mm, so the lever was the engaged length, not the crush depth. Two
+data points now agree on a rough rule: crush times total full-depth rib
+length around 2 mm2 for a firm hand fit (lid: 8 ribs x 1.2 mm x 0.20 =
+1.9; bin: 4 ribs x 5.5 mm x 0.10 = 2.2; the too-tight first coupon was
+9.2 and pair 2 was 4.6). A rule of thumb from two parts, not a law; the
+bin's own numbers are recorded in [[friction-fits-x2d]].
