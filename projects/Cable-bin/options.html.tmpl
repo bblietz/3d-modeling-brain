@@ -80,7 +80,7 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
 <div class="wrap">
   <div class="eyebrow">Sign-off · 2026-10-25 · Bambu Lab X2D, 0.6 high-flow nozzle, PLA</div>
   <h1>Stackable Cable Bin</h1>
-  <p class="lede">16&#190; &times; 4 &times; 4 in, printed as two halves that lock together at mid-length, with slotted long walls and a finger scallop in each end. Four bins, one plate each. The joint fit comes from the ladder you printed: pair 4.</p>
+  <p class="lede">16&#190; &times; 4 &times; 4 in, printed as two halves that lock together at mid-length, with slotted long walls and a finger scallop in each end. Four bins, one plate each. The joint fit is pair 4 of the ladder you printed.</p>
 
   <figure>
     <img src="images/bin-assembled.png" alt="One assembled bin, half A in blue and half B in amber, seen from above the front corner">
@@ -140,28 +140,12 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
     <thead><tr><th>Plate</th><th>Objects</th><th>Time</th><th>PLA</th><th>Runs</th></tr></thead>
     <tbody>
       <tr><td>1 · Bin</td><td><span class="swA"></span>Half A (tails), <span class="swB"></span>Half B (sockets)</td><td class="num">{{P1_TIME}}</td><td class="num">{{P1_G}} g</td><td class="num">4</td></tr>
-      <tr><td>2 · Fit ladder</td><td>Four joint coupon pairs, marked 1 to 4 notches</td><td class="num">{{P2_TIME}}</td><td class="num">{{P2_G}} g</td><td class="num">printed</td></tr>
-      <tr><td colspan="2"><strong>Four bins</strong></td><td class="num"><strong>{{TOTAL_TIME}}</strong></td><td class="num"><strong>{{TOTAL_G}} g</strong></td><td class="num">4 plates</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <figure>
-    <img src="images/coupons.png" alt="Four joint coupon pairs in a row, each pair marked with one to four notches on the wall stub">
-    <figcaption>Plate 2, the fit ladder. Your first coupon was too tight at 0.15 mm body clearance and 0.20 mm rib crush. Four pairs now, each a 14.5 mm slice of the joint; the notch count on the wall stub names the pair and both pieces of a pair carry the same count. Every pair has a 0.25 mm free body so only the ribs touch, and the bed edges are chamfered so the first layer's elephant foot cannot add to the fit. Printed 2026-10-25: pair 4 fit best, and the bin is built to it. The plate stays in the file for the record.</figcaption>
-  </figure>
-  <div class="tablewrap">
-  <table>
-    <thead><tr><th>Pair</th><th>Body clearance</th><th>Rib crush</th><th>Rib length</th><th>Result</th></tr></thead>
-    <tbody>
-      <tr><td>1 notch</td><td class="num">0.25 mm</td><td class="num">0.15 mm</td><td class="num">12 mm</td><td>not chosen</td></tr>
-      <tr><td>2 notches</td><td class="num">0.25 mm</td><td class="num">0.10 mm</td><td class="num">12 mm</td><td>the working guess; not chosen</td></tr>
-      <tr><td>3 notches</td><td class="num">0.25 mm</td><td class="num">0.05 mm</td><td class="num">12 mm</td><td>not chosen</td></tr>
-      <tr><td>4 notches <span class="tag ok">bin</span></td><td class="num">0.25 mm</td><td class="num">0.10 mm</td><td class="num">6 mm</td><td>fit best; the bin is built to it</td></tr>
+      <tr><td colspan="2"><strong>Four bins</strong></td><td class="num"><strong>{{TOTAL_TIME}}</strong></td><td class="num"><strong>{{TOTAL_G}} g</strong></td><td class="num">4 runs</td></tr>
     </tbody>
   </table>
   </div>
   <ol>
-    <li>Plate 2 is done; skip it. Print plate 1 four times. Process is 0.30 mm Standard for the 0.6 nozzle, Arachne walls, 3 walls, 20 % infill, textured PEI at 55 C, the usual 2-loop skirt. Confirm Studio's Prepare tab shows the X2D 0.6 nozzle before slicing; do not re-select the printer preset.</li>
+    <li>Print the plate four times. Process is 0.30 mm Standard for the 0.6 nozzle, Arachne walls, 3 walls, 20 % infill, textured PEI at 55 C, the usual 2-loop skirt. Confirm Studio's Prepare tab shows the X2D 0.6 nozzle before slicing; do not re-select the printer preset.</li>
     <li>Assemble: stand B on the bench, hold A level above it with the tails over the sockets, and push straight down until the rims are flush.</li>
   </ol>
 
@@ -190,7 +174,7 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
       <div class="opts">
         <div class="opt built">
           <div class="name">Ladder pair 4 <span class="tag ok">built</span></div>
-          <p>Body 0.25 mm, rib crush 0.10 mm, ribs 6 mm. Your pick from the printed ladder: firm thumb pressure over the last stretch, holds when lifted.</p>
+          <p>Body 0.25 mm, rib crush 0.10 mm, ribs 6 mm. Your pick from the printed ladder: firm thumb pressure over the last stretch, holds when lifted. The coupons are out of the file now that the design is final.</p>
         </div>
         <div class="opt">
           <div class="name">Pairs 1 to 3, and the first coupon</div>
@@ -251,8 +235,8 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--chip); pad
 
   <h2>Files</h2>
   <div class="files">
-    projects/Cable-bin/cable-bin.3mf &nbsp;(plate 1 bin, plate 2 fit ladder, already printed)<br>
-    projects/Cable-bin/cable-bin-half-a.stl · cable-bin-half-b.stl · cable-bin-coupon-1a.stl … cable-bin-coupon-4b.stl<br>
+    projects/Cable-bin/cable-bin.3mf &nbsp;(one plate, both halves)<br>
+    projects/Cable-bin/cable-bin-half-a.stl · cable-bin-half-b.stl<br>
     projects/Cable-bin/cable_bin.py &nbsp;(parametric source, self-checking)
   </div>
 </div>

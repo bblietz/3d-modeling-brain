@@ -60,12 +60,9 @@ RIB_CRUSH = 0.10        # designed rib interference per side (0.20 was too tight
 RIB_PROUD = DT_CLR + RIB_CRUSH   # rib crest above the tail flank
 RIB_LEN = 6.0           # ribs only on the top RIB_LEN of the tail: short crush stroke (12 until Brian's ladder pick, 2026-10-25)
 RIB_LEADIN = 0.5
-# Fit ladder on plate 2: (body clearance, rib crush, rib length), pair i carries i notches. Brian printed it 2026-10-25
-# and picked pair 4 (firm thumb push, holds); the constants above are that rung. The ladder stays for the record.
-FIT_LADDER = [(0.25, 0.15, 12.0), (0.25, 0.10, 12.0), (0.25, 0.05, 12.0), (0.25, 0.10, 6.0)]
-COUPON_BED_CHAMFER = 0.5   # kills the elephant foot on the standing coupons' fit edges (the bin's joint never touches the bed)
-assert any(abs(c - DT_CLR) < 1e-9 and abs(k - RIB_CRUSH) < 1e-9 and abs(r - RIB_LEN) < 1e-9 for c, k, r in FIT_LADDER), \
-    "the bin's own fit must be one rung of the ladder"
+# The fit above is pair 4 of the printed ladder (2026-10-25: body 0.25 throughout, crush 0.15 / 0.10 / 0.05 at 12 mm ribs
+# and 0.10 at 6 mm; the first coupon at 0.15 / 0.20 was too tight). Coupons removed once the design was final; see
+# knowledge/learnings/cable-bin.md for the ladder.
 
 # ---- lightening: wall slots and end scallops (Brian 2026-10-25) ------------
 SLOT_W = 6.0            # slot width
@@ -227,7 +224,7 @@ def socket(side, clr=DT_CLR):
 
 
 def halves(with_ribs=True, clr=DT_CLR, proud=RIB_PROUD, rib_len=RIB_LEN):
-    """The two halves; the fit parameters default to the bin's own and are overridden for the ladder coupons."""
+    """The two halves; the fit parameters default to the bin's own."""
     whole, outer = full_bin()
     whole = whole - slot_cutter()[0] - scallops()
     cut_a = Pos(0, 0, -1) * Box(L + 2, W + 2, H + 3, align=(Align.MAX, Align.CENTER, Align.MIN))
@@ -240,34 +237,6 @@ def halves(with_ribs=True, clr=DT_CLR, proud=RIB_PROUD, rib_len=RIB_LEN):
     for side in (+1, -1):
         half_b = half_b - socket(side, clr)
     return half_a, half_b, whole, outer
-
-
-def coupon_pieces(half_a, half_b, notches=0):
-    """Joint coupon: a 14.5 mm tall slice of the +y post pair, carrying the ribbed
-    zone of one tail and its socket. Thin wall stub is the only substrate. The bed
-    edges get a chamfer so the elephant foot cannot tighten the fit, and the top
-    outer edge of each wall stub carries `notches` marks naming the ladder rung."""
-    z0, z1 = H - 23.0, H - 8.5
-    y0, y1 = Y_POST_IN - 1.0, W / 2 + 1.0
-    box_a = Pos(-15.0, y0, z0) * Box(15.0 + DT_DEPTH + 0.5, y1 - y0, z1 - z0,
-                                     align=(Align.MIN, Align.MIN, Align.MIN))
-    box_b = Pos(-1.0, y0, z0) * Box(16.0, y1 - y0, z1 - z0, align=(Align.MIN, Align.MIN, Align.MIN))
-    ca = half_a & box_a
-    cb = half_b & box_b
-    # stand them on the bed, each on its own origin
-    ca = Pos(0, -DT_YC, -z0) * ca
-    cb = Pos(0, -DT_YC, -z0) * cb
-    ca = chamfer(ca.edges().group_by(Axis.Z)[0], COUPON_BED_CHAMFER)
-    cb = chamfer(cb.edges().group_by(Axis.Z)[0], COUPON_BED_CHAMFER)
-    y_out = W / 2 - DT_YC                      # the outer wall face of a standing coupon
-    for i in range(notches):
-        for piece, x in ((ca, -14.5 + 2.0 * i), (cb, 9.0 + 2.0 * i)):
-            mark = Pos(x, y_out - 1.0, z1 - z0 - 1.2) * Box(1.0, 2.0, 2.0, align=(Align.MIN, Align.MIN, Align.MIN))
-            if piece is ca:
-                ca = ca - mark
-            else:
-                cb = cb - mark
-    return ca, cb
 
 
 def vol(shape):
@@ -351,18 +320,7 @@ def main():
     bb_whole = bin_lower.bounding_box()
     assert abs(bb_whole.size.X - L) < 0.01 and abs(bb_whole.size.Y - W) < 0.01 and abs(bb_whole.size.Z - H) < 0.01
 
-    # ---- fit ladder coupons ---------------------------------------------
     parts = {"cable-bin-half-a": half_a, "cable-bin-half-b": half_b}
-    ladder = []
-    for i, (clr, crush, rib_len) in enumerate(FIT_LADDER, start=1):
-        ha, hb, _, _ = halves(clr=clr, proud=clr + crush, rib_len=rib_len)
-        got = vol(ha & hb)
-        exp, slack = rib_overlap_expected(crush, rib_len)
-        assert 0.9 * exp < got < 1.1 * exp + slack, (i, got, exp)
-        ca, cb = coupon_pieces(ha, hb, notches=i)
-        parts[f"cable-bin-coupon-{i}a"] = one_solid(ca, f"coupon {i}A")
-        parts[f"cable-bin-coupon-{i}b"] = one_solid(cb, f"coupon {i}B")
-        ladder.append((i, clr, crush, rib_len, got))
     import trimesh
     if os.environ.get("NO_EXPORT"):
         parts = {}
@@ -376,9 +334,6 @@ def main():
     vol_bin = half_a.volume + half_b.volume
     print(f"half A {half_a.volume/1000:.1f} cm3, half B {half_b.volume/1000:.1f} cm3, "
           f"bin {vol_bin/1000:.1f} cm3 = {vol_bin/1000*1.26:.0f} g PLA at 100%")
-    for i, clr, crush, rib_len, got in ladder:
-        print(f"ladder pair {i}: body {clr:.2f}, crush {crush:.2f}, ribs {rib_len:.0f} mm, interference {got:.2f} mm3, "
-              f"coupons {parts[f'cable-bin-coupon-{i}a'].volume/1000:.2f} + {parts[f'cable-bin-coupon-{i}b'].volume/1000:.2f} cm3")
     print(f"drop {DROP:.2f} mm, stack pitch {STACK_PITCH:.2f} mm = {STACK_PITCH/IN:.3f} in, "
           f"4 stacked = {(3*STACK_PITCH + H)/IN:.2f} in")
     print(f"rib interference volume {overlap:.2f} mm3 (expected about {expected:.2f})")

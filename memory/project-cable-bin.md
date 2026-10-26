@@ -1,6 +1,6 @@
 ---
 name: project-cable-bin
-description: "Stackable 16.75 x 4 x 4 in cable bin split into two dovetailed halves for the X2D; decisions taken 2026-10-25 (friction hold, scallop ends, 3.80 in pitch, slotted walls, 8 mm posts, PLA, 2-line walls); joint fit set from the printed ladder (pair 4: body 0.25, crush 0.10, ribs 6 mm); two-plate 3MF 4 h 50 min / 240 g per bin; design closed, colour picked in Studio; no bin printed yet"
+description: "Stackable 16.75 x 4 x 4 in cable bin split into two dovetailed halves for the X2D; decisions taken 2026-10-25 (friction hold, scallop ends, 3.80 in pitch, slotted walls, 8 mm posts, PLA, 2-line walls); joint fit set from the printed ladder (pair 4: body 0.25, crush 0.10, ribs 6 mm); one-plate 3MF 4 h 50 min / 240 g per bin; coupons removed 2026-10-25; design closed, colour picked in Studio; no bin printed yet"
 metadata:
   node_type: memory
   type: project
@@ -21,11 +21,13 @@ wall per half, 8 mm joint posts, plus the finger scallop ends he picked:
 and 3.80 in pitch confirmed. Brian printed the first joint coupon: TOO
 TIGHT at body 0.15 / crush 0.20 (Arachne 0.30 mm is a new calibration, and
 four ribs over 11.5 mm is five times the recipe's contact). Bin now body
-0.25 / crush 0.10; plate 2 is a four-pair fit ladder (1 to 4 notches:
+0.25 / crush 0.10; plate 2 was a four-pair fit ladder (1 to 4 notches:
 crush 0.15 / 0.10 / 0.05 at 12 mm ribs, 0.10 at 6 mm) with bed chamfers.
 Brian printed the ladder and picked pair 4 ("4 works the best"): RIB_LEN 12
 to 6, bin 4 h 50 min / 240 g, four bins 19 h 18 min / 960 g. Brian picks
-the colour in Bambu Studio, so the design is closed; no bin printed yet.
+the colour in Bambu Studio, so the design is closed, and asked for the
+coupons to be removed: one plate now, the ladder recorded in the learnings
+note. No bin printed yet.
 
 **Why:** the joint and stack are the two decisions that cost a reprint if
 wrong; both are proven in geometry. Every design decision is now Brian's.

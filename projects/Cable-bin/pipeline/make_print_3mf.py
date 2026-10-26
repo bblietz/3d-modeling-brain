@@ -1,7 +1,8 @@
-"""Bambu Studio print 3MF for the cable bin: ONE project file, TWO plates, each verified by a real slice.
+"""Bambu Studio print 3MF for the cable bin: ONE project file, ONE plate, verified by a real slice.
 
   plate 1 "Bin"           cable-bin-half-a.stl and cable-bin-half-b.stl, side by side along Y, 15 mm apart, centred
-  plate 2 "Fit ladder"    cable-bin-coupon-{1..4}{a,b}.stl, the four coupon pairs in a row along X, 8 mm apart, centred
+
+(Plate 2 was the four-pair joint fit ladder until Brian picked pair 4 and the coupons were removed, 2026-10-25.)
 
 Copied from projects/Skateboard-wall-holder/pipeline/make_print_3mf.py (X2D 0.6 nozzle, 0.30mm Standard, PETG Basic
 there, PLA Basic here since 2026-10-25, Textured PEI, include-merging preset flattener, graft_slice for the verification slice, wall_loops 3, 20% gyroid,
@@ -18,7 +19,7 @@ skirt and no brim, the PETG seam and top settings) with:
 STLs are already in print orientation with their floor on z 0; nothing here rotates them.
 
 Usage:  .venv/bin/python projects/Cable-bin/pipeline/make_print_3mf.py
-Reads the four STLs; writes cable-bin.3mf and cable-bin-slice.json beside them. The slices run one at a time.
+Reads the two STLs; writes cable-bin.3mf and cable-bin-slice.json beside them. The slices run one at a time.
 Opening cable-bin.3mf in Bambu Studio is still the ground truth for the plates: a hand-authored plate has passed a CLI
 round trip before and rendered empty in the GUI.
 """
@@ -58,7 +59,6 @@ LAYER = 0.3
 # plate name, axis the parts line up along, gap between neighbours (mm), [(source stl, object name), ...]
 PLATES = [
     ("Bin", "y", 15.0, [("cable-bin-half-a.stl", "Half A (tails)"), ("cable-bin-half-b.stl", "Half B (sockets)")]),
-    ("Fit ladder", "x", 8.0, [(f"cable-bin-coupon-{i}{ab}.stl", f"Pair {i} {ab.upper()}") for i in (1, 2, 3, 4) for ab in ("a", "b")]),
 ]
 PARTS = {stl: label for _, _, _, items in PLATES for stl, label in items}
 
@@ -393,7 +393,7 @@ def verify(path, tmp, targets, ext):
     assert os.path.exists(f"{tmp}/roundtrip.3mf"), f"round trip failed rc={r.returncode}\n{r.stdout[-1500:]}"
     rt_files, rt_names = check_settings(f"{tmp}/roundtrip.3mf", "CLI round trip")
     check_placement(rt_files, rt_names, targets, ext, "CLI round trip")
-    result["roundtrip"] = f"2 plates, {len(PARTS)} objects, settings and placement survive bambu-studio --arrange 0 --export-3mf"
+    result["roundtrip"] = f"{len(PLATES)} plate(s), {len(PARTS)} objects, settings and placement survive bambu-studio --arrange 0 --export-3mf"
 
     # The CLI cannot slice its own project files (rc 156); graft_slice adds the GUI-only keys to a throwaway copy.
     # One slice process at a time (CLAUDE.md heavy-jobs rule).

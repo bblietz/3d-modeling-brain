@@ -56,17 +56,18 @@ https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
   ends); joint posts 8 mm instead of 12. A cable end can poke through a slot
   if pushed, harmless in a drawer. The floor, lip band and foot stay solid; the stack seats on the long
   lips and the end corners.
-- **Fit ladder** (plate 2). Brian's first coupon, body 0.15 and crush 0.20
+- **Fit ladder** (was plate 2). Brian's first coupon, body 0.15 and crush 0.20
   from [[friction-fits-x2d]] (calibrated with the classic generator at
   0.18 mm layers, eight ribs engaged over about 1 mm), was too tight here
-  (Arachne, 0.30 mm layers, four ribs engaged over 11.5 mm). Plate 2 now
-  carries four coupon pairs, 14.5 mm slices of the joint with the bed edges
+  (Arachne, 0.30 mm layers, four ribs engaged over 11.5 mm). Plate 2 then
+  carried four coupon pairs, 14.5 mm slices of the joint with the bed edges
   chamfered 0.5 mm against the elephant foot and 1 to 4 notches on the wall
   stubs: (1) body 0.25 / crush 0.15 / ribs 12 mm, (2) 0.25 / 0.10 / 12, the
   first guess, (3) 0.25 / 0.05 / 12, (4) 0.25 / 0.10 / 6. Brian printed it
   and picked pair 4 (2026-10-25): `RIB_LEN` went 12 to 6, body and crush
-  unchanged (an assert keeps the bin on a rung). The ladder stays on plate 2
-  for the record.
+  unchanged. The coupons were removed from the model and the 3MF the same
+  day at Brian's ask, the design being final; the retrospective keeps the
+  ladder.
 
 ## Checks baked into `cable_bin.py`
 
@@ -95,9 +96,8 @@ over the scoop width and no more; STLs watertight with mesh volume within
   the slots first sliced at 6 h 41 min because the PETG recipe's
   `small_perimeter_threshold` 10 is a radius and slowed every slot web to
   30 mm/s (see the retrospective); that override is gone.
-- Plate 1 (Half A + Half B): 4 h 50 min, 240 g. Plate 2 (fit ladder,
-  printed 2026-10-25): 28 min, 17 g. Four bins, four runs of
-  plate 1: 19 h 18 min, 960 g.
+- One plate (Half A + Half B): 4 h 50 min, 240 g. Four bins, four runs:
+  19 h 19 min, 960 g.
 - Orientation: floor down as modelled; nothing past 45 degrees.
 - Assembly: stand B, hold A level above with the tails over the sockets, push
   straight down until the rims are flush. Separate with a straight pull up.
@@ -106,9 +106,8 @@ over the scoop width and no more; STLs watertight with mesh volume within
 
 - `cable_bin.py` parametric source (build123d), self-checking, SHOW=1 pushes
   to the viewer.
-- `cable-bin-half-a.stl`, `cable-bin-half-b.stl`, `cable-bin-coupon-1a.stl`
-  to `cable-bin-coupon-4b.stl` (the ladder).
-- `cable-bin.3mf` (plate 1 bin, plate 2 fit ladder), `cable-bin-slice.json`.
+- `cable-bin-half-a.stl`, `cable-bin-half-b.stl`.
+- `cable-bin.3mf` (one plate), `cable-bin-slice.json`.
 - `pipeline/renders.py` (OpenSCAD renders into `images/`),
   `pipeline/make_print_3mf.py`.
 - `options.html` sign-off page.
@@ -118,6 +117,6 @@ over the scoop width and no more; STLs watertight with mesh volume within
 - Nothing in the design. Decided 2026-10-25: friction hold (no CA),
   scallop ends, 3.80 in pitch, both weight cuts, ladder pair 4. Colour is
   Brian's pick in Bambu Studio at print time.
-- The first bin (plate 1), built to ladder pair 4.
-- Open the 3MF in Bambu Studio once to confirm both plates render (GUI is
+- The first bin, built to ladder pair 4.
+- Open the 3MF in Bambu Studio once to confirm the plate renders (GUI is
   ground truth for hand-authored plates).

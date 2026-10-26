@@ -89,15 +89,5 @@ def main():
     stack4 = [(Pos(0, 0, i * cb.STACK_PITCH) * bin_, [COL_B, COL_U, COL_A, "#c98bd6"][i]) for i in range(4)]
     render("stack-four", stack4, rot=(70, 0, 30), size=(1000, 1200))
 
-    # fit ladder: four coupon pairs in a row, as on plate 2, pair i with i notches
-    pieces = []
-    for i, (clr, crush, rib_len) in enumerate(cb.FIT_LADDER, start=1):
-        ha, hb, _, _ = cb.halves(clr=clr, proud=clr + crush, rib_len=rib_len)
-        ca, cbn = cb.coupon_pieces(ha, hb, notches=i)
-        x, y = ((i - 1) % 2) * 62.0, -((i - 1) // 2) * 42.0     # 2 x 2, pairs 1 2 in the back row; A spans x -15..5.5, B 24..40
-        pieces += [(Pos(x, y, 0) * ca, COL_A), (Pos(x + 24.0, y, 0) * cbn, COL_B)]
-    render("coupons", pieces, rot=(60, 0, 200), size=(1400, 1000))   # from the outer-wall side: the notches show
-
-
 if __name__ == "__main__":
     main()

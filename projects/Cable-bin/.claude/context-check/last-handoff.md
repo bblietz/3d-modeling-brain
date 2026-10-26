@@ -5,12 +5,13 @@ Resume with Fable 5.1 (design work). Read `projects/Cable-bin/brief.md` and
 
 ## State
 
-- `cable_bin.py` builds half A (tails), half B (sockets) and the four-pair
-  fit ladder; all asserts pass; STLs exported beside it.
-- `pipeline/renders.py` writes the 16 inspection PNGs in `images/` through
+- `cable_bin.py` builds half A (tails) and half B (sockets); all asserts
+  pass; STLs exported beside it. The fit-ladder coupons were removed
+  2026-10-25 (design final); the ladder is in the retrospective.
+- `pipeline/renders.py` writes the 15 inspection PNGs in `images/` through
   OpenSCAD.
-- `pipeline/make_print_3mf.py` builds `cable-bin.3mf` (plate 1 bin, plate 2
-  fit ladder, printed) and `cable-bin-slice.json` with per-plate time and grams.
+- `pipeline/make_print_3mf.py` builds `cable-bin.3mf` (one plate, both
+  halves) and `cable-bin-slice.json` with time and grams.
 - `options.html` is the sign-off page (published as a private artifact:
   https://claude.ai/artifact/3QZNtCDUcGY7G7snwYpHRs).
 
@@ -40,10 +41,10 @@ Resume with Fable 5.1 (design work). Read `projects/Cable-bin/brief.md` and
 
 - Nothing in the design. Colour is Brian's pick in Bambu Studio (display
   colour in the 3MF is black; any PLA Basic slot prints it).
-- The first bin print (plate 1). If the full joint feels different from the
-  coupon, the fit constants `DT_CLR`, `RIB_CRUSH`, `RIB_LEN` must stay on a
-  rung of `FIT_LADDER` (asserted); add a rung rather than freelancing.
-- One GUI open of the 3MF to confirm both plates render.
+- The first bin print. If the full joint feels different from the coupon,
+  move `DT_CLR`, `RIB_CRUSH` or `RIB_LEN` and rebuild; the ladder that set
+  them is in knowledge/learnings/cable-bin.md.
+- One GUI open of the 3MF to confirm the plate renders.
 
 ## If a change is asked
 

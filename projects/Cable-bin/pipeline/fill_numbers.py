@@ -1,6 +1,6 @@
 """Fill the slice figures from cable-bin-slice.json into options.html and brief.md.
 
-Placeholders: {{P1_TIME}} {{P1_G}} {{P2_TIME}} {{P2_G}} {{TOTAL_TIME}} {{TOTAL_G}}
+Placeholders: {{P1_TIME}} {{P1_G}} {{TOTAL_TIME}} {{TOTAL_G}}
 {{BIN_TIME}} {{BIN_G}}. Already-filled files are rewritten from the templates
 kept beside them (*.tmpl), so the script is safe to rerun after a reslice.
 
@@ -21,11 +21,9 @@ def hm(seconds):
 def main():
     d = json.load(open(os.path.join(PROJ, "cable-bin-slice.json")))
     p1 = next(p for p in d["plates"] if p["name"] == "Bin")
-    p2 = next(p for p in d["plates"] if p["name"] != "Bin")
-    four = 4 * p1["seconds"]   # the fit ladder (plate 2) is printed; four bins are four runs of plate 1
+    four = 4 * p1["seconds"]
     values = {
         "P1_TIME": hm(p1["seconds"]), "P1_G": f"{p1['grams']:.0f}",
-        "P2_TIME": hm(p2["seconds"]), "P2_G": f"{p2['grams']:.0f}",
         "TOTAL_TIME": hm(four), "TOTAL_G": f"{4 * p1['grams']:.0f}",
         "BIN_TIME": hm(p1["seconds"]), "BIN_G": f"{p1['grams']:.0f}",
     }

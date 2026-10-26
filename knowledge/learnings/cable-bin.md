@@ -28,7 +28,8 @@ two halves for the X2D, four bins.
   ends and 3.80 in pitch confirmed by Brian the same day. Colour is picked
   in Bambu Studio at print time, not in the design.
 - Joint fit from the printed ladder, Brian 2026-10-25: pair 4, body 0.25,
-  crush 0.10, ribs 6 mm. The ladder stays on plate 2 for the record.
+  crush 0.10, ribs 6 mm. Coupons removed from the model and 3MF once the
+  design was final (Brian 2026-10-25); this note is the ladder's record.
 
 ## What worked
 
@@ -151,7 +152,8 @@ reasons it should not have been trusted as a confirmation:
   elephant foot widened the tail's foot and narrowed the socket's mouth; the
   bin's joint never touches the bed. Coupons now chamfer their bed edges.
 
-Second round is a fit ladder on plate 2 (`FIT_LADDER` in `cable_bin.py`):
+Second round was a four-pair fit ladder on plate 2 (since removed with the
+coupons):
 body 0.25 in all four pairs so only the ribs touch, crush 0.15 / 0.10 /
 0.05 at 12 mm ribs, and 0.10 at 6 mm ribs; pair i carries i notches.
 

@@ -25,113 +25,9 @@
     237.1,
     101.6
    ]
-  },
-  "Pair 1 A": {
-   "plate": 2,
-   "min_mm": [
-    337.2,
-    119.63,
-    0.0
-   ],
-   "max_mm": [
-    357.2,
-    136.37,
-    14.5
-   ]
-  },
-  "Pair 1 B": {
-   "plate": 2,
-   "min_mm": [
-    365.2,
-    119.63,
-    0.0
-   ],
-   "max_mm": [
-    380.2,
-    136.37,
-    14.5
-   ]
-  },
-  "Pair 2 A": {
-   "plate": 2,
-   "min_mm": [
-    388.2,
-    119.63,
-    0.0
-   ],
-   "max_mm": [
-    408.2,
-    136.37,
-    14.5
-   ]
-  },
-  "Pair 2 B": {
-   "plate": 2,
-   "min_mm": [
-    416.2,
-    119.63,
-    0.0
-   ],
-   "max_mm": [
-    431.2,
-    136.37,
-    14.5
-   ]
-  },
-  "Pair 3 A": {
-   "plate": 2,
-   "min_mm": [
-    439.2,
-    119.63,
-    0.0
-   ],
-   "max_mm": [
-    459.2,
-    136.37,
-    14.5
-   ]
-  },
-  "Pair 3 B": {
-   "plate": 2,
-   "min_mm": [
-    467.2,
-    119.63,
-    0.0
-   ],
-   "max_mm": [
-    482.2,
-    136.37,
-    14.5
-   ]
-  },
-  "Pair 4 A": {
-   "plate": 2,
-   "min_mm": [
-    490.2,
-    119.63,
-    0.0
-   ],
-   "max_mm": [
-    510.2,
-    136.37,
-    14.5
-   ]
-  },
-  "Pair 4 B": {
-   "plate": 2,
-   "min_mm": [
-    518.2,
-    119.63,
-    0.0
-   ],
-   "max_mm": [
-    533.2,
-    136.37,
-    14.5
-   ]
   }
  },
- "roundtrip": "2 plates, 10 objects, settings and placement survive bambu-studio --arrange 0 --export-3mf",
+ "roundtrip": "1 plate(s), 2 objects, settings and placement survive bambu-studio --arrange 0 --export-3mf",
  "plates": [
   {
    "name": "Bin",
@@ -140,8 +36,8 @@
     "Half B (sockets)"
    ],
    "time": "4:50",
-   "seconds": 17373,
-   "gcode_estimate": "4h 49m 33s",
+   "seconds": 17378,
+   "gcode_estimate": "4h 49m 38s",
    "grams": 239.9,
    "metres": 79.16,
    "used_g_per_filament": 239.9,
@@ -168,52 +64,11 @@
     "Overhang wall": 13.4,
     "Gap infill": 0.3
    }
-  },
-  {
-   "name": "Fit ladder",
-   "objects": [
-    "Pair 1 A",
-    "Pair 1 B",
-    "Pair 2 A",
-    "Pair 2 B",
-    "Pair 3 A",
-    "Pair 3 B",
-    "Pair 4 A",
-    "Pair 4 B"
-   ],
-   "time": "0:28",
-   "seconds": 1699,
-   "gcode_estimate": "28m 19s",
-   "grams": 16.6,
-   "metres": 5.49,
-   "used_g_per_filament": 16.6,
-   "layers": 48,
-   "top_z": 14.4,
-   "nozzle_C": 220,
-   "bed_C": 55,
-   "toolpath_xy_mm": [
-    26.52,
-    116.15,
-    229.48,
-    139.85
-   ],
-   "feature_mm": {
-    "Inner wall": 2621.7,
-    "Outer wall": 1982.9,
-    "Sparse infill": 479.6,
-    "Internal solid infill": 225.3,
-    "Skirt": 58.9,
-    "Bridge": 50.6,
-    "Top surface": 38.0,
-    "Bottom surface": 25.5,
-    "Floating vertical shell": 11.4,
-    "Gap infill": 0.2
-   }
   }
  ],
- "total_time": "5:18",
- "total_seconds": 19072,
- "total_grams": 256.5,
+ "total_time": "4:50",
+ "total_seconds": 17378,
+ "total_grams": 239.9,
  "overrides": {
   "process": {
    "curr_bed_type": "Textured PEI Plate",
