@@ -25,8 +25,8 @@ two halves for the X2D, four bins.
 - Lightening, Brian took both cuts 2026-10-25: 13 vertical 6 x 64 mm slots
   per long wall per half at 14 mm pitch (z 18 to 82), a 52 x 18 mm finger
   scallop in each end wall, 8 mm joint posts. Friction hold (no CA), scallop
-  ends and 3.80 in pitch confirmed by Brian the same day. Only the colour
-  is open.
+  ends and 3.80 in pitch confirmed by Brian the same day. Colour is picked
+  in Bambu Studio at print time, not in the design.
 - Joint fit from the printed ladder, Brian 2026-10-25: pair 4, body 0.25,
   crush 0.10, ribs 6 mm. The ladder stays on plate 2 for the record.
 

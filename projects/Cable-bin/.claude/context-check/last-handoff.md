@@ -38,7 +38,8 @@ Resume with Fable 5.1 (design work). Read `projects/Cable-bin/brief.md` and
 
 ## Waiting on Brian
 
-- PLA colour (display colour in the 3MF is black; any PLA Basic slot prints it).
+- Nothing in the design. Colour is Brian's pick in Bambu Studio (display
+  colour in the 3MF is black; any PLA Basic slot prints it).
 - The first bin print (plate 1). If the full joint feels different from the
   coupon, the fit constants `DT_CLR`, `RIB_CRUSH`, `RIB_LEN` must stay on a
   rung of `FIT_LADDER` (asserted); add a rung rather than freelancing.

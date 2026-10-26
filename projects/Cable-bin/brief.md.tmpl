@@ -1,7 +1,7 @@
 ---
 title: Stackable cable bin
 type: project
-status: CAD complete, 3MF sliced, decisions taken 2026-10-25, joint fit set from the printed ladder (pair 4), awaiting the colour
+status: CAD complete, 3MF sliced, decisions taken 2026-10-25, joint fit set from the printed ladder (pair 4), ready to print
 printer: Bambu Lab X2D, 0.6 high-flow nozzle
 material: PLA Basic (PETG until 2026-10-25)
 tags: [bin, storage, stackable, dovetail, crush-ribs, pla, x2d]
@@ -115,8 +115,9 @@ over the scoop width and no more; STLs watertight with mesh volume within
 
 ## Open
 
-- PLA colour. Everything else was decided 2026-10-25: friction hold (no
-  CA), scallop ends, 3.80 in pitch, both weight cuts.
+- Nothing in the design. Decided 2026-10-25: friction hold (no CA),
+  scallop ends, 3.80 in pitch, both weight cuts, ladder pair 4. Colour is
+  Brian's pick in Bambu Studio at print time.
 - The first bin (plate 1), built to ladder pair 4.
 - Open the 3MF in Bambu Studio once to confirm both plates render (GUI is
   ground truth for hand-authored plates).
