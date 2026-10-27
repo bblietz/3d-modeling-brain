@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Shop drawings for every cut-list part of the freestanding alcove bench (legs base).
+"""Shop drawings for every cut-list part of the freestanding alcove bench (post and panel, Brian's pick A 2026-10-26).
 
 Same machinery as projects/Built-in-bench/part_drawings.py. Every cut is
 written once as a world box from the constants in freestanding_bench.py; that
@@ -16,8 +16,8 @@ Inches only, to the nearest 1/32 (Brian 2026-09-28). A width sized to a
 sheet's thickness reads "3/4 ply (measure)" and is cut to the measured sheet.
 
 Usage: .venv/bin/python projects/Freestanding-bench/part_drawings.py
-Writes projects/Freestanding-bench/images/parts/<part>.png. Documents the legs
-base (BASE=legs, the model's default); the blades and gables bases have no sheets.
+Writes projects/Freestanding-bench/images/parts/<part>.png: the four corner posts, the housed ends and back,
+the notched case bottom, the partition and cleat, the top, the fronts and the drawer boxes.
 """
 import math
 import os
@@ -30,9 +30,7 @@ PROJ = f"{VAULT}/projects/Freestanding-bench"
 sys.path.insert(0, PROJ)
 sys.path.insert(0, f"{VAULT}/scripts")
 from freestanding_bench import *   # noqa: F401,F403  constants, solids and build123d names; runs the model's checks once
-from freestanding_bench import _box, part, vol, inch, PARTS, BASE  # noqa: E402
-
-assert BASE == "legs", f"the part sheets document the legs base; run without BASE (got {BASE!r})"
+from freestanding_bench import _box, part, vol, inch, PARTS  # noqa: E402
 
 import matplotlib  # noqa: E402
 matplotlib.use("Agg")
@@ -53,8 +51,9 @@ def dt(mm):
     return inch(mm)
 
 
-P18, P12, P6 = "3/4 ply (measure)", "1/2 BB (measure)", "1/4 ply (measure)"
+P18, P12, P12M = "3/4 ply (measure)", "1/2 BB (measure)", "1/2 ply (measure)"
 PW12 = "1/2 MDF or paint-grade ply (measure)"
+UM_SCREW_Z = (25.0, 37.0)   # Blum 563H runner front screw holes above the opening bottom (the drawer bench's values from the Blum sheet); not in the model
 
 
 def info(name):
@@ -359,124 +358,245 @@ def plain(name, right, up, title, note, sheet_note=None, edges=None):
     return P, v
 
 
-def legs():
-    name = "leg"
-    check_blank(name, LEG_X[0], LEG_Y[1], 0, LEG_SQ, LEG_SQ, CLEAR)
-    P, v = plain(name, "+y", "+z", "face view (all four faces are the same); top end up",
-                 "plain blank, no joinery",
-                 edges={"bottom": "bottom end (on the floor)", "top": "top end (against the case bottom)"})
-    sheet(name, head(name, f"hard maple, {dt(LEG_SQ)} x {dt(LEG_SQ)} x {dt(CLEAR)} tall; all four the same; bare under Osmo like the top"),
-          [v], f"No joinery: the rails pocket-screw into its faces and two #8 x 2 come down through the case bottom into its top end. "
-               f"Outer faces {dt(LEG_IN_X)} in from the case ends; the front legs stand {dt(LEG_IN_FRONT)} behind the case front edge, "
-               f"the back legs {dt(LEG_IN_BACK)} in from the case back, clear of the baseboard and its shoe. Ease the arrises lightly.")
-    return 0
+def _post_plan(P):
+    """plan outline of a post seen from its top end: the square less the four chamfers"""
+    c, w, h = CHAMFER, P.w, P.h
+    return sg.Polygon([(c, 0), (w - c, 0), (w, c), (w, h - c), (w - c, h), (c, h), (0, h - c), (0, c)])
 
 
-def _pockets(v, L, H, end_rows, top_cols, into_ends, into_case):
-    """Pocket-hole marks on a rail face: `end_rows` holes stacked at each end (into a leg) and `top_cols` holes
-    along the top edge (up into the case bottom). Not in the model: the jig sets them."""
-    r = 4.5
-    e = 0.9 * IN                                      # pocket center in from the end, where the jig puts it
-    for u in (e, L - e):
-        for i in range(end_rows):
-            v.bore(u, H * (i + 1) / (end_rows + 1), r, hidden=True)
-    for i in range(top_cols):
-        v.bore(L * (i + 1) / (top_cols + 1), H - 0.8 * IN, r, hidden=True)
-    v.callout(e, H * end_rows / (end_rows + 1), f"dashed: {end_rows} pocket holes at each end, into the legs ({into_ends})", ha="left")
-    v.callout(L / (top_cols + 1), H - 0.8 * IN, f"dashed: {top_cols} pocket holes along the top edge, pointing up into the case bottom ({into_case})",
-              ha="left")
+def _chamfer_probes(x, y, z0, z1):
+    """all four chamfers between z0 and z1: a 2 mm box hugging each corner edge is air, a 1 mm box just past the
+    chamfer face is wood (and clear of every groove: the grooves start SETBACK in, past CHAMFER)"""
+    pr = []
+    for cx, sx in ((x, 1), (x + POST, -1)):
+        for cy, sy in ((y, 1), (y + POST, -1)):
+            pr.append((_box(cx if sx > 0 else cx - 2, cy if sy > 0 else cy - 2, z0 + 1, 2, 2, z1 - z0 - 2), "empty"))
+            d = CHAMFER + 1.5
+            pr.append((_box(cx + d if sx > 0 else cx - d - 1, cy + 0.5 if sy > 0 else cy - 1.5, z0 + 1, 1, 1, z1 - z0 - 2), "solid"))
+    return pr
 
 
-def base_end_rail():
-    name = "base_end_rail"
-    assert_plain(name)
-    L = LEG_Y[1] - (LEG_Y[0] + LEG_SQ)
-    rx = LEG_X[0] + LEG_SQ / 2 - RAIL_T / 2
-    check_blank(name, rx, LEG_Y[0] + LEG_SQ, CLEAR - RAIL_H, RAIL_T, L, RAIL_H)
-    P = Face(part(name), "-y", "+z")        # the inside face (toward the middle of the bench): FRONT end at left
-    v = View(P.w, P.h, "INSIDE face (toward the middle of the bench); FRONT end at left, REAR end at right, top edge up")
-    _pockets(v, L, RAIL_H, 2, 3, "#8 x 1-1/4", "#8 x 1-1/4")
-    v.dim_h(0, L, v.top_y())
-    v.dim_v(0, RAIL_H, L + v.o(26))
-    v.edge("left", "FRONT end (against the front leg)")
-    v.edge("right", "REAR end (against the back leg)")
-    v.edge("top", "top edge (flush with the leg tops, under the case bottom)")
-    v.edge("bottom", f"bottom edge ({dt(CLEAR - RAIL_H)} off the floor)")
-    sheet(name, head(name, f"hard maple {dt(RAIL_T)} thick, {dt(RAIL_H)} tall x {dt(L)} long, on edge; both the same, pockets on the inside face"),
-          [v], f"Butts between the front and back legs at each end, centered on the {dt(LEG_SQ)} legs ({dt((LEG_SQ - RAIL_T) / 2)} shoulder each side). "
-               "Glue and pocket screws into the legs; the top-edge pockets pull the case bottom down onto the frame. Bare under Osmo.")
-    return 0
+def _groove_probes(g, floor, walls):
+    """a stopped post groove running out the top: air inside, wood past its floor, wood on both walls, wood below
+    its stopped end, air past the top end"""
+    pr = cut_probes(*g, floor)
+    pr += [wood(*g, w) for w in walls]
+    pr.append(wood(*g, "-z"))
+    pr.append(runout(*g, "+z"))
+    return pr
 
 
-def base_back_rail():
-    name = "base_back_rail"
-    assert_plain(name)
-    bx0, bx1 = LEG_X[0] + LEG_SQ, LEG_X[1]
-    L = bx1 - bx0
-    by = LEG_Y[0] + LEG_SQ / 2 - RAIL_T / 2
-    check_blank(name, bx0, by, CLEAR - RAIL_H, L, RAIL_T, RAIL_H)
-    P = Face(part(name), "-x", "+z")        # the FRONT face, seen from the room
-    v = View(P.w, P.h, "FRONT face (toward the room); top edge up")
-    _pockets(v, L, RAIL_H, 2, 4, "#8 x 1-1/4", "#8 x 1-1/4")
-    v.dim_h(0, L, v.top_y())
-    v.dim_v(0, RAIL_H, L + v.o(26))
-    v.edge("bottom", f"bottom edge ({dt(CLEAR - RAIL_H)} off the floor); both ends butt a back leg")
-    sheet(name, head(name, f"hard maple {dt(RAIL_T)} thick, {dt(RAIL_H)} tall x {dt(L)} long, on edge between the back legs"),
-          [v], f"Centered on the back legs ({dt((LEG_SQ - RAIL_T) / 2)} shoulder front and back), top edge flush with the leg tops. "
-               "No front rail: the robot vacuum drives in under the drawer fronts. Glue and pocket screws; bare under Osmo.")
-    return 0
+def post_front():
+    name = "post_front"
+    solid = part(name)
+    x, y, H = X0, YF0, TOP_Z0
+    check_blank(name, x, y, 0, POST, POST, H)
+    g = (x + SETBACK, y, GROOVE_STOP, T18, GROOVE_D, H - GROOVE_STOP)        # end-panel groove in the REAR face
+    holes = [(YF1 - RUNNER_SETBACK - dy, BOT_Z1 + dz) for dy, dz in zip(UM_SCREW_Y, UM_SCREW_Z)]
+
+    P = Face(solid, "+z", "-y")            # the INNER face, lying down: bottom end left, top end right, FRONT face along the bottom
+    a = View(H, POST, "A  INNER face (toward the drawers), lying down: bottom end at left, top end at right, FRONT face along the bottom")
+    for vv in (CHAMFER, POST - CHAMFER):
+        a.mark(0, vv, H, vv)
+    hs = [P.pt(x + POST, hy, hz) for hy, hz in holes]
+    for u, vv in hs:
+        a.bore(u, vv, 1.6, hidden=True)
+    a.callout(hs[1][0], hs[1][1], "dashed: the Blum runner's two front screw holes, #6 x 5/8, not in the model (see the note)", ha="center")
+    a.callout(H * 0.25, CHAMFER, f"dashed lines: the {dt(CHAMFER)} chamfers, all four vertical edges, full length", ha="left")
+    a.dim_h(0, hs[0][0], -a.o(20))
+    a.dim_h(0, hs[1][0], -a.o(44))
+    a.dim_v(0, hs[0][1], H + a.o(22))
+    a.dim_v(0, hs[1][1], H + a.o(46))
+    a.dim_v(0, POST, H + a.o(72))
+    a.dim_h(0, H, a.top_y())
+    a.edge("left", "bottom end (on the floor)")
+    a.edge("right", "top end (under the top)")
+    a.edge("bottom", "FRONT face")
+    a.edge("top", "REAR face (grooved for the end panel)", at=0.85)
+
+    R = Face(solid, "+z", "-x")            # the REAR face (toward the rear post), lying down: outer face along the top
+    b = View(H, POST, "B  REAR face (toward the rear post), lying down: bottom end at left, top end at right, OUTER face along the top")
+    b.groove(*R.rect(g))
+    for vv in (CHAMFER, POST - CHAMFER):
+        b.mark(0, vv, H, vv)
+    gu, gv, gw, gh = R.rect(g)
+    b.callout(gu + 55, gv + gh / 2, f"end-panel groove, stopped: {P18} x {dt(GROOVE_D)} deep, {dt(SETBACK)} from the OUTER face, out the top end",
+              ha="center")
+    b.dim_h(0, gu, -b.o(20))
+    b.dim_v(gv + gh, POST, H + b.o(22))
+    b.dim_v(gv, gv + gh, H + b.o(46), P18)
+    b.dim_v(0, POST, H + b.o(72))
+    b.dim_h(0, H, b.top_y())
+    b.edge("left", "bottom end")
+    b.edge("top", "OUTER face (toward the wall)", at=0.85)
+    b.edge("bottom", "INNER face")
+
+    T = Face(solid, "-x", "-y")            # top end from above: front face along the bottom, outer face at the right
+    c = View(POST, POST, "C  top end from above\n(FRONT face along the bottom, OUTER face at right)", shape=_post_plan(T), size="small")
+    c.notch(*T.rect(g))
+    tu, tv, tw, th = T.rect(g)
+    c.dim_h(0, CHAMFER, -8, dt(CHAMFER))
+    c.dim_h(tu + tw, POST, -8, dt(SETBACK))
+    c.dim_h(tu, tu + tw, -20, P18)
+    c.dim_v(tv, tv + th, POST + 8, dt(GROOVE_D))
+    c.edge("bottom", "FRONT face")
+    c.edge("right", "OUTER face")
+
+    sheet(name, head(name, f"soft maple {dt(POST)} x {dt(POST)} x {dt(H)} long (12/4, or 8/4 plus 4/4 glued up); left and right are mirror images"),
+          [a, b, c], "Drawn: the post at the right-hand end as you face the bench; the other front post is its mirror image (groove and holes "
+                     "on the opposite faces). Chamfer first, then rout the stopped groove: its end hides behind the end panel's un-housed "
+                     f"bottom, so it needs no squaring. Runner holes (Blum 563H sheet, drilled with the runner in hand): {dt(RUNNER_SETBACK + UM_SCREW_Y[0])} "
+                     f"and {dt(RUNNER_SETBACK + UM_SCREW_Y[1])} behind the FRONT face, {dt(UM_SCREW_Z[0])} and {dt(UM_SCREW_Z[1])} above the case "
+                     f"bottom's top face ({dt(BOT_Z1)} up). Bare under Osmo like the top.", stack=True)
+    pr = _chamfer_probes(x, y, 0, H) + _groove_probes(g, "+y", ("-x", "+x"))
+    return check(name, solid, pr)
+
+
+def post_rear():
+    name = "post_rear"
+    solid = part(name)
+    assert BASEBOARD_NOTCH, "the sheet draws the baseboard notch; run without BASEBOARD_NOTCH=0"
+    x, y, H = X0, YB0, TOP_Z0
+    check_blank(name, x, y, 0, POST, POST, H)
+    ge = (x + SETBACK, y + POST - GROOVE_D, GROOVE_STOP, T18, GROOVE_D, H - GROOVE_STOP)   # end-panel groove in the FRONT face
+    gb = (x + POST - GROOVE_D, y + SETBACK, GROOVE_STOP, GROOVE_D, T12, H - GROOVE_STOP)   # back groove in the INNER face
+    nt = (x, y, 0, POST, BB_NOTCH_D, BB_NOTCH_H)                                            # baseboard notch across the REAR face
+
+    P = Face(solid, "+z", "-y")            # the INNER face, lying down: front face along the bottom, rear face along the top
+    a = View(H, POST, "A  INNER face (toward the drawers), lying down: bottom end at left, top end at right, FRONT face along the bottom")
+    a.notch(*P.rect(nt))
+    a.groove(*P.rect(gb))
+    a.mark(0, CHAMFER, H, CHAMFER)
+    a.mark(BB_NOTCH_H, POST - CHAMFER, H, POST - CHAMFER)
+    gu, gv, gw, gh = P.rect(gb)
+    nu, nv, nw, nh = P.rect(nt)
+    a.callout(gu + 55, gv + gh / 2, f"back groove, stopped: {P12M} x {dt(GROOVE_D)} deep, {dt(SETBACK)} from the REAR face, out the top end",
+              ha="center")
+    a.callout(nw * 0.5, nv + nh / 2, f"baseboard notch across the REAR face: {dt(BB_NOTCH_D)} deep x {dt(BB_NOTCH_H)} tall (skip it if the "
+              "baseboard comes out)", ha="left")
+    a.dim_h(0, nw, -a.o(20))
+    a.dim_h(0, gu, -a.o(44))
+    a.dim_v(nv, POST, -a.o(22))
+    a.dim_v(gv + gh, POST, H + a.o(22))
+    a.dim_v(gv, gv + gh, H + a.o(46), P12M)
+    a.dim_v(0, POST, H + a.o(72))
+    a.dim_h(0, H, a.top_y())
+    a.edge("left", "bottom end (on the floor)")
+    a.edge("right", "top end (under the top)")
+    a.edge("bottom", "FRONT face (grooved for the end panel)")
+    a.edge("top", "REAR face (toward the wall)", at=0.85)
+
+    F = Face(solid, "+z", "+x")            # the FRONT face (toward the front post), lying down: outer face along the bottom
+    b = View(H, POST, "B  FRONT face (toward the front post), lying down: bottom end at left, top end at right, OUTER face along the bottom")
+    b.groove(*F.rect(ge))
+    for vv in (CHAMFER, POST - CHAMFER):
+        b.mark(0, vv, H, vv)
+    eu, ev, ew, eh = F.rect(ge)
+    b.callout(eu + 55, ev + eh / 2, f"end-panel groove, stopped: {P18} x {dt(GROOVE_D)} deep, {dt(SETBACK)} from the OUTER face, out the top end",
+              ha="center")
+    b.dim_h(0, eu, -b.o(20))
+    b.dim_v(0, ev, H + b.o(22))
+    b.dim_v(ev, ev + eh, H + b.o(46), P18)
+    b.dim_v(0, POST, H + b.o(72))
+    b.dim_h(0, H, b.top_y())
+    b.edge("left", "bottom end")
+    b.edge("bottom", "OUTER face (toward the wall)")
+    b.edge("top", "INNER face", at=0.85)
+
+    T = Face(solid, "-x", "-y")            # top end from above: front face along the bottom, outer face at the right
+    c = View(POST, POST, "C  top end from above\n(FRONT face along the bottom, OUTER face at right)", shape=_post_plan(T), size="small")
+    c.notch(*T.rect(ge))
+    c.notch(*T.rect(gb))
+    tu, tv, tw, th = T.rect(ge)
+    bu, bv, bw, bh = T.rect(gb)
+    c.dim_h(0, CHAMFER, -8, dt(CHAMFER))
+    c.dim_h(tu + tw, POST, -8, dt(SETBACK))
+    c.dim_h(tu, tu + tw, -20, P18)
+    c.dim_v(tv, tv + th, POST + 8, dt(GROOVE_D))
+    c.dim_v(bv + bh, POST, -8, dt(SETBACK))
+    c.dim_v(bv, bv + bh, -20, P12M)
+    c.edge("bottom", "FRONT face")
+    c.edge("right", "OUTER face")
+    c.edge("left", "INNER face")
+
+    sheet(name, head(name, f"soft maple {dt(POST)} x {dt(POST)} x {dt(H)} long; same blank and chamfer as post_front; left and right are mirror images"),
+          [a, b, c], "Drawn: the post at the right-hand end as you face the bench; the other rear post is its mirror image. Chamfer first, "
+                     "then rout the two stopped grooves; their ends hide behind the panels' un-housed bottoms and stay as the bit leaves them. "
+                     "The back groove is sized to the 1/2 maple ply, the end groove to the 3/4. The baseboard notch runs across the full rear "
+                     f"face at the floor; the bench stands {dt(WALL_GAP)} off the back wall with the notch over the baseboard and shoe. "
+                     "Bare under Osmo.", stack=True)
+    pr = _chamfer_probes(x, y, BB_NOTCH_H, H)
+    pr += _groove_probes(ge, "-y", ("-x", "+x")) + _groove_probes(gb, "-x", ("-y", "+y"))
+    pr.append((_box(x + 1, y + 1, 1, POST - 2, BB_NOTCH_D - 2, BB_NOTCH_H - 2), "empty"))
+    pr.append(wood(*nt, "+y"))
+    pr.append((_box(x + CHAMFER + 1, y + 1, BB_NOTCH_H + 0.5, POST - 2 * CHAMFER - 2, BB_NOTCH_D - 2, 1), "solid"))   # wood above, clear of the chamfers
+    pr += [runout(*nt, "-x"), runout(*nt, "+x"), runout(*nt, "-z"), runout(*nt, "-y")]
+    return check(name, solid, pr)
 
 
 def end_panel():
     name = "end"
     solid = part(name)
-    H = TOP_Z0 - BOT_Z0
-    check_blank(name, X0, CASE_Y0, BOT_Z0, T18, CASE_D - CASE_Y0, H)
-    rab = (END_IN_L - RABBET_D, CASE_Y0, BOT_Z0, RABBET_D, CASE_D - CASE_Y0, T18)
-    grv = (END_IN_L - BACK_GROOVE_D, BACK_Y0, BOT_Z0, BACK_GROOVE_D, T6, H)
+    H = TOP_Z0 - PANEL_Z0
+    L = END_Y1 - END_Y0
+    check_blank(name, END_X0, END_Y0, PANEL_Z0, T18, L, H)
+    rab = (END_IN_L - RABBET_D, END_Y0, PANEL_Z0, RABBET_D, L, T18)
+    notches = [(END_X0, END_Y0, PANEL_Z0, T18, GROOVE_D, NOTCH_H), (END_X0, END_Y1 - GROOVE_D, PANEL_Z0, T18, GROOVE_D, NOTCH_H)]
+    tz = TONGUE_Z0 - PANEL_Z0
 
     P = Face(solid, "+y", "+z")            # looking at the inside face: rear edge left, front edge right
-    L = P.w
     v = View(L, H, "A  INSIDE face (toward the drawers); REAR edge at left, FRONT edge at right, bottom edge down")
-    v.groove(*P.rect(rab))
-    v.groove(*P.rect(grv))
-    gu = P.rect(grv)[0]
-    v.callout(L * 0.6, T18 / 2, f"rabbet along the bottom edge, runs out both ends: {P18} tall x {dt(RABBET_D)} deep; the case bottom sits in it")
-    v.callout(gu + T6 / 2, H * 0.6, f"back groove, runs out top and bottom: {P6} wide x {dt(BACK_GROOVE_D)} deep, "
-                                    f"{dt(BACK_SET)} in from the REAR edge", ha="left")
+    for n in notches:
+        v.notch(*P.rect(n))
+    ru = P.rect(rab)
+    v.cutshape(sg.box(ru[0], ru[1], ru[0] + ru[2], ru[1] + ru[3]))
+    v.callout(L * 0.6, T18 / 2, f"rabbet along the bottom edge, through (it runs out through the notches): {P18} tall x {dt(RABBET_D)} deep; the case bottom sits in it")
+    v.callout(GROOVE_D / 2, NOTCH_H / 2, f"both bottom corners notched {dt(GROOVE_D)} x {dt(NOTCH_H)}: above the notch the end is housed {dt(GROOVE_D)} "
+              "in the post, below it the un-housed bottom butts the post face", ha="left")
+    v.dim_h(0, GROOVE_D, -v.o(20))
+    v.dim_v(0, NOTCH_H, -v.o(22))
     v.dim_v(0, T18, L + v.o(26), P18)
     v.dim_v(0, H, L + v.o(60))
     v.dim_h(0, L, v.top_y())
-    v.edge("left", "REAR edge")
-    v.edge("right", "FRONT edge")
+    v.edge("left", "REAR edge (in the rear post)")
+    v.edge("right", "FRONT edge (in the front post)")
 
-    S = Face(solid, "-x", "+z", win=(0, T18, 0, 50))       # front edge, looking back: inside face at left
-    a = View(S.w, S.h, "B  front edge, bottom corner\n(inside face at left)", size="small")
+    S = Face(solid, "-x", "+z", win=(0, T18, 0, 50))       # the bottom edge, seen from the front: inside face at left
+    a = View(S.w, S.h, "B  section near the bottom edge\n(inside face at left)", size="small")
     a.notch(*S.rect(rab))
     a.dim_h(0, RABBET_D, -8, dt(RABBET_D))
     a.dim_v(0, T18, T18 + 10, P18)
     a.edge("left", "inside face")
     a.edge("bottom", "bottom edge")
 
-    T = Face(solid, "+y", "-x", win=(0, 40, 0, T18))       # top end from above: inside face along the bottom
-    b = View(T.w, T.h, "C  top end from above, rear corner\n(inside face along the bottom)", size="small")
-    b.notch(*T.rect(grv))
-    b.dim_h(0, BACK_SET, T18 + 10)
-    b.dim_h(BACK_SET, BACK_SET + T6, -10, P6)
-    b.dim_v(0, BACK_GROOVE_D, T.w + 8, dt(BACK_GROOVE_D))
-    b.edge("left", "REAR edge")
-    b.edge("bottom", "inside face")
+    N = Face(solid, "+y", "+z", win=(0, 70, 0, 60))        # the rear bottom corner of the inside face
+    c = View(N.w, N.h, "C  rear bottom corner, inside face\n(the front corner is the same)", size="small")
+    c.notch(*N.rect(notches[0]))
+    ru = N.rect(rab)
+    c.cutshape(sg.box(ru[0], ru[1], ru[0] + ru[2], ru[1] + ru[3]))
+    c.mark(0, GROOVE_STOP - PANEL_Z0, GROOVE_D, GROOVE_STOP - PANEL_Z0)
+    c.dim_h(0, GROOVE_D, -8, dt(GROOVE_D))
+    c.dim_v(0, NOTCH_H, -8)
+    c.dim_v(0, T18, 70 + 8, P18)
+    c.dim_v(GROOVE_STOP - PANEL_Z0, tz, 70 + 22, dt(GROOVE_CLR))
+    c.edge("left", "REAR edge")
 
-    sheet(name, head(name, f"3/4 maple ply, {dt(H)} tall x {dt(L)} deep, face grain vertical, show face OUT; mirror pair (the other end is drawn mirror image, front edge at left)"),
-          [v, b, a], "Datums: the rear edge and the bottom edge. Cut the rabbet and the groove on the INSIDE face of each end; "
-                     "the two ends come out as a left and a right. The outside face shows: iron-on maple band on the FRONT and BOTTOM "
-                     "edges before painting; the groove runs out the bottom edge under the band's line, so band after grooving. Painted white.")
-    pr = cut_probes(*rab, "-x")
-    pr.append(wood(END_IN_L - RABBET_D, BACK_Y1 + 1, BOT_Z0, RABBET_D, CASE_D - BACK_Y1 - 1, T18, "+z"))   # wood above the rabbet
-    pr += [runout(*rab, "-y"), runout(*rab, "+y")]
-    pr += cut_probes(*grv, "-x")
-    up = (grv[0], grv[1], BOT_Z0 + T18 + 1, grv[3], grv[4], H - T18 - 1)
-    pr += [wood(*up, "-y"), wood(*up, "+y"), runout(*grv, "+z"), runout(*grv, "-z")]
+    sheet(name, head(name, f"3/4 maple ply, {dt(H)} tall x {dt(L)} long, face grain vertical, show face OUT; mirror pair (the other end is the mirror image)"),
+          [v, a, c], f"Housed {dt(GROOVE_D)} in each post with its outer face {dt(SETBACK)} behind the post faces and its top edge flush with the post "
+                     f"tops; the post grooves end {dt(GROOVE_CLR)} below the notch tops (dashed in C), behind the un-housed bottom, so nothing is "
+                     "squared. Datums: the rear edge and the bottom edge. Cut the rabbet on the INSIDE face; the two ends come out as a left and a "
+                     "right. Iron-on maple band on the BOTTOM edge (the front and rear edges sit inside the posts), then paint white.")
+    pr = []
+    for n, inward in zip(notches, ("+y", "-y")):
+        pr.append((_box(n[0] + 1, n[1] + 1, n[2] + 1, n[3] - 2, n[4] - 2, n[5] - 2), "empty"))
+        pr.append(wood(*n, "+z"))                                                                       # wood above the notch
+        ny = n[1] + GROOVE_D + 0.5 if inward == "+y" else n[1] - 1.5
+        pr.append((_box(END_X0 + 1, ny, PANEL_Z0 + T18 + 1, T18 - 2, 1, NOTCH_H - T18 - 2), "solid"))    # wood beside it, above the rabbet
+        pr += [runout(*n, "-x"), runout(*n, "+x"), runout(*n, "-z"), runout(*n, "-y" if inward == "+y" else "+y")]
+        pr.append((_box(END_X0 + 1, n[1] + 1, TONGUE_Z0 + 1, T18 - 2, GROOVE_D - 2, 20), "solid"))        # the housed tongue above
+    mid = (rab[0], END_Y0 + GROOVE_D + 1, rab[2], rab[3], L - 2 * GROOVE_D - 2, rab[5])
+    pr += cut_probes(*mid, "-x")
+    pr += [wood(*mid, "+z"), runout(*rab, "-y"), runout(*rab, "+y")]
     return check(name, solid, pr)
 
 
@@ -484,27 +604,35 @@ def bottom_panel():
     name = "bottom"
     solid = part(name)
     W = BOT_X1 - BOT_X0
-    check_blank(name, BOT_X0, CASE_Y0, BOT_Z0, W, CASE_D - CASE_Y0, T18)
+    D = CASE_D - BOT_Y0
+    check_blank(name, BOT_X0, BOT_Y0, BOT_Z0, W, D, T18)
     assert abs((BOT_X0 + BOT_X1) / 2 - XC) < 1e-9
-    grv = (BOT_X0, BACK_Y0, BOT_Z1 - BACK_GROOVE_D, W, T6, BACK_GROOVE_D)
+    across = POST_IN_L - BOT_X0
+    fd, rd = CASE_D - YF0, YB0 + POST - BOT_Y0
+    notches = [(BOT_X0, YF0, BOT_Z0, across, fd, T18), (BOT_X0, BOT_Y0, BOT_Z0, across, rd, T18),
+               (POST_IN_R, YF0, BOT_Z0, across, fd, T18), (POST_IN_R, BOT_Y0, BOT_Z0, across, rd, T18)]
     dado = (PART_X0, BACK_Y1, BOT_Z1 - DADO_D, T18, CASE_D - BACK_Y1, DADO_D)
 
     P = Face(solid, "-x", "-y")            # plan from above, FRONT edge toward the viewer (down the page)
-    D = P.h
     v = View(W, D, "A  TOP face, seen from above; FRONT edge along the bottom, REAR edge along the top")
-    v.groove(*P.rect(grv))
+    for n in notches:
+        v.notch(*P.rect(n))
     v.groove(*P.rect(dado))
-    gv = P.rect(grv)[1]
     du, dv, _, dh = P.rect(dado)
-    v.callout(W * 0.2, gv + T6 / 2, f"back groove, runs out both ends: {P6} wide x {dt(BACK_GROOVE_D)} deep, {dt(BACK_SET)} in from the REAR edge")
+    v.callout(W - across / 2, fd / 2, f"all four corners notched around the posts: {dt(across)} across x {dt(fd)} at the FRONT corners, "
+                                      f"{dt(rd)} at the REAR corners", ha="right")
     v.callout(du + T18 / 2, D * 0.45, f"partition dado, centered on the length: {P18} wide x {dt(DADO_D)} deep; "
-                                      "from the FRONT edge back into the back groove (stops there)")
+                                      f"from the FRONT edge back to {dt(RABBET_D)} short of the REAR edge (the strip that sits in the back's rabbet)")
+    v.dim_h(W - across, W, -v.o(22))
+    v.dim_v(0, fd, W + v.o(26))
+    v.dim_v(D - rd, D, W + v.o(26))
     v.dim_h(0, du, -v.o(22))
     v.dim_h(du, du + T18, -v.o(46), P18)
-    v.dim_v(0, dh, -v.o(22))
-    v.dim_v(0, D, W + v.o(26))
+    v.dim_v(dv, dv + dh, -v.o(22))
+    v.dim_v(0, D, W + v.o(50))
     v.dim_h(0, W, v.top_y())
     v.edge("bottom", "FRONT edge (hidden behind the drawer fronts)", at=0.22)
+    v.edge("top", f"REAR edge: sits {dt(RABBET_D)} in the back's rabbet")
     v.edge("left", "end: sits in the end panel's rabbet")
     v.edge("right", "end: sits in the end panel's rabbet")
 
@@ -517,23 +645,19 @@ def bottom_panel():
     a.dim_v(T18 - DADO_D, T18, S.w + 8, dt(DADO_D))
     a.edge("bottom", "bottom face")
 
-    E = Face(solid, "+y", "+z", win=(0, 40, 0, T18))
-    b = View(E.w, E.h, "C  end, rear corner\n(seen from the end)", size="small")
-    b.notch(*E.rect(grv))
-    b.dim_h(0, BACK_SET, T18 + 8)
-    b.dim_h(BACK_SET, BACK_SET + T6, -8, P6)
-    b.dim_v(T18 - BACK_GROOVE_D, T18, E.w + 8, dt(BACK_GROOVE_D))
-    b.edge("left", "REAR edge")
-
-    sheet(name, head(name, f"3/4 maple ply, {dt(D)} deep x {dt(W)} long, face grain along the length"), [v, a, b],
-          f"Both ends sit in the end panels' {dt(RABBET_D)} rabbets. Datums: the REAR edge and the left end. "
-          "The dado is centered: mark it from the middle of the blank. The base frame screws up into the underside.")
-    pr = cut_probes(*grv, "-z")
-    left = (BOT_X0, BACK_Y0, grv[2], PART_X0 - BOT_X0 - 1, T6, BACK_GROOVE_D)
-    pr += [wood(*left, "-y"), wood(*left, "+y"), runout(*grv, "-x"), runout(*grv, "+x")]
-    pr += cut_probes(*dado, "-z")
-    pr += [wood(*dado, "-x"), wood(*dado, "+x"), runout(*dado, "+y"), runout(*dado, "-y")]
-    pr.append((_box(PART_X0 + 1, BACK_Y0 - 1.5, dado[2] + 1, T18 - 2, 1, DADO_D - 2), "solid"))   # stops at the groove
+    sheet(name, head(name, f"3/4 maple ply, {dt(D)} deep x {dt(W)} long, face grain along the length"), [v, a],
+          f"Both ends sit in the end panels' {dt(RABBET_D)} rabbets and the rear edge in the back's; the corner notches clear the posts "
+          "(the rear ones also take in the strip in the back's rabbet). Datums: the FRONT edge and the left end. "
+          "The dado is centered: mark it from the middle of the blank.")
+    pr = cut_probes(*dado, "-z")
+    pr += [wood(*dado, "-x"), wood(*dado, "+x"), runout(*dado, "+y")]
+    pr.append((_box(PART_X0 + 1, BOT_Y0 + 1, dado[2] + 1, T18 - 2, RABBET_D - 2, DADO_D - 2), "solid"))   # stops short of the rear edge
+    for n in notches:
+        pr.append((_box(n[0] + 1, n[1] + 1, n[2] + 1, n[3] - 2, n[4] - 2, n[5] - 2), "empty"))
+        inx = "+x" if n[0] < XC else "-x"
+        iny = "-y" if n[1] > CASE_D / 2 else "+y"
+        pr += [wood(*n, inx), wood(*n, iny)]
+        pr += [runout(*n, "-x" if inx == "+x" else "+x"), runout(*n, "+y" if iny == "-y" else "-y"), runout(*n, "-z"), runout(*n, "+z")]
     return check(name, solid, pr)
 
 
@@ -542,30 +666,31 @@ def partition():
     solid = part(name)
     L, H = CASE_D - BACK_Y1, TOP_Z0 - PART_Z0
     check_blank(name, PART_X0, BACK_Y1, PART_Z0, T18, L, H)
-    nt = (PART_X0, BACK_Y1, NAILER_Z0, T18, TS, NAILER_H)
+    nt = (PART_X0, BACK_Y1, CLEAT_Z0, T18, TS, CLEAT_H)
     P = Face(solid, "+y", "+z")
     v = View(L, H, "side face (both faces are the same); REAR edge at left, FRONT edge at right")
     v.notch(*P.rect(nt))
-    v.callout(TS / 2, H - NAILER_H / 2, f"notch the top REAR corner, through: {dt(TS)} deep x {dt(NAILER_H)} tall; the nailer passes through it", row=1)
+    v.callout(TS / 2, H - CLEAT_H / 2, f"notch the top REAR corner, through: {dt(TS)} deep x {dt(CLEAT_H)} tall; the cleat passes through it", row=1)
     v.dim_h(0, TS, H + v.row_mm * 0.45)
-    v.dim_v(H - NAILER_H, H, -v.o(22))
+    v.dim_v(H - CLEAT_H, H, -v.o(22))
     v.dim_v(0, H, L + v.o(26))
     v.dim_h(0, L, v.top_y())
     v.edge("left", "REAR edge (against the back)")
-    v.edge("right", "FRONT edge")
+    v.edge("right", "FRONT edge (on the fronts' back faces: the runners mount to it)")
     v.edge("bottom", "bottom edge (in the dado)")
     sheet(name, head(name, f"3/4 maple ply, {dt(H)} tall x {dt(L)} deep, face grain vertical"), [v],
-          f"The bottom edge sits {dt(DADO_D)} deep in the bottom panel's dado; the rear edge stops against the back panel. Datums: the REAR edge and the top edge.")
+          f"The bottom edge sits {dt(DADO_D)} deep in the bottom panel's dado; the rear edge stops against the back panel. The partition-side "
+          "Blum runners mount to its faces the frameless way, fronts 3/32 behind its front edge. Datums: the REAR edge and the top edge.")
     pr = cut_probes(*nt, "+y")
     pr += [wood(*nt, "-z"), runout(*nt, "-y"), runout(*nt, "+z")]
     return check(name, solid, pr)
 
 
-def nailer():
-    name = "nailer"
+def cleat():
+    name = "cleat"
     solid = part(name)
-    L = END_IN_R - END_IN_L
-    check_blank(name, END_IN_L, NAILER_Y0, NAILER_Z0, L, TS, NAILER_H)
+    L = POST_IN_R - POST_IN_L
+    check_blank(name, POST_IN_L, CLEAT_Y0, CLEAT_Z0, L, TS, CLEAT_H)
     r = FIG8_DIA / 2
     chord = math.sqrt(r * r - FIG8_OFFSET ** 2)          # half-width of the opening on the front face
 
@@ -586,14 +711,15 @@ def nailer():
     t.edge("bottom", "FRONT face", at=0.95)
 
     F = Face(solid, "-x", "+z")            # front face, looking toward the back wall
-    f = View(L, NAILER_H, "B  FRONT face (toward the drawers); top edge up")
+    f = View(L, CLEAT_H, "B  FRONT face (toward the drawers); top edge up")
     for xc in FIG8_XS:
         u, _ = F.pt(xc, 0, 0)
-        f.groove(u - chord, NAILER_H - FIG8_DEPTH, 2 * chord, FIG8_DEPTH)
-    f.callout(sorted(F.pt(x, 0, 0)[0] for x in FIG8_XS)[2], NAILER_H - FIG8_DEPTH / 2,
+        f.groove(u - chord, CLEAT_H - FIG8_DEPTH, 2 * chord, FIG8_DEPTH)
+    f.callout(sorted(F.pt(x, 0, 0)[0] for x in FIG8_XS)[2], CLEAT_H - FIG8_DEPTH / 2,
               f"each recess shows here as a {dt(2 * chord)} wide opening in the top edge")
-    f.callout(L * 0.2, NAILER_H * 0.4, "no wall screws (freestanding): glue the rear face to the back panel, screw through the ends into its ends")
-    f.dim_v(0, NAILER_H, L + f.o(26))
+    f.callout(L * 0.1, CLEAT_H * 0.4, "both ends butt the rear posts' inner faces", ha="left")
+    f.callout(L * 0.5, CLEAT_H * 0.6, "glued to the back and screwed from this face: #8 x 1 countersunk, nothing through the back", ha="center")
+    f.dim_v(0, CLEAT_H, L + f.o(26))
     f.dim_h(0, L, f.top_y())
     f.edge("bottom", "bottom edge")
 
@@ -607,14 +733,15 @@ def nailer():
     d.dim_h(22 - chord, 22 + chord, -8, dt(2 * chord))
     d.edge("bottom", "FRONT face")
 
-    sheet(name, head(name, f"hard maple {dt(TS)} thick, {dt(NAILER_H)} tall x {dt(L)} long, on edge at the top back"),
+    sheet(name, head(name, f"soft maple {dt(TS)} thick, {dt(CLEAT_H)} tall x {dt(L)} long, on edge at the top back between the rear posts"),
           [t, f, d], "Recess positions are from the left end of view A (the layout is symmetric, so either end works). "
-                     "The recess must open through the FRONT face so the figure-8 swings out under the top.", stack=True)
+                     "The recess must open through the FRONT face so the figure-8 swings out under the top. It passes through the "
+                     "partition's notch.", stack=True)
     pr = []
     for xc in FIG8_XS:
         pr += cut_probes(xc - 3, FIG8_Y - 3, TOP_Z0 - FIG8_DEPTH, 6, 6, FIG8_DEPTH, "-z")
-        pr.append((_box(xc - chord + 1, NAILER_Y1 - 1, TOP_Z0 - FIG8_DEPTH + 0.5, 2 * chord - 2, 3, FIG8_DEPTH), "empty"))  # opens through
-        pr.append((_box(xc - 2, NAILER_Y0 + 0.5, TOP_Z0 - FIG8_DEPTH + 0.5, 4, 1, FIG8_DEPTH - 1), "solid"))              # rear wall
+        pr.append((_box(xc - chord + 1, CLEAT_Y1 - 1, TOP_Z0 - FIG8_DEPTH + 0.5, 2 * chord - 2, 3, FIG8_DEPTH), "empty"))   # opens through
+        pr.append((_box(xc - 2, CLEAT_Y0 + 0.5, TOP_Z0 - FIG8_DEPTH + 0.5, 4, 1, FIG8_DEPTH - 1), "solid"))               # rear wall
         pr.append((_box(xc + r + 0.5, FIG8_Y - 1, TOP_Z0 - FIG8_DEPTH + 0.5, 1, 2, FIG8_DEPTH - 1), "solid"))              # not wider
         pr.append((_box(xc + r - 1.5, FIG8_Y - 1, TOP_Z0 - FIG8_DEPTH + 0.5, 1, 2, FIG8_DEPTH), "empty"))                 # full dia
     return check(name, solid, pr)
@@ -622,13 +749,76 @@ def nailer():
 
 def back_panel():
     name = "back"
-    P, v = plain(name, "+x", "+z", "face view", "plain rectangle, no joinery")
-    check_blank(name, BOT_X0 + PLAY / 2, BACK_Y0, PART_Z0 + PLAY / 2, BOT_X1 - BOT_X0 - PLAY, T6, TOP_Z0 - PART_Z0 - PLAY)
-    v.edge("bottom", "bottom edge (in the bottom panel's groove)")
-    sheet(name, head(name, f"1/4 maple ply, {dt(P.h)} tall x {dt(P.w)} long"), [v],
-          f"Slides down the end grooves into the bottom groove; {dt(PLAY)} total play is already taken off both sizes. "
-          "Glue it in all round: with no wall screws it is what keeps the case square.")
-    return 0
+    solid = part(name)
+    H = TOP_Z0 - PANEL_Z0
+    L = BACK_X1 - BACK_X0
+    check_blank(name, BACK_X0, BACK_Y0, PANEL_Z0, L, T12, H)
+    rab = (BACK_X0, BACK_Y1 - RABBET_D, PANEL_Z0, L, RABBET_D, T18)
+    notches = [(BACK_X0, BACK_Y0, PANEL_Z0, GROOVE_D, T12, NOTCH_H), (BACK_X1 - GROOVE_D, BACK_Y0, PANEL_Z0, GROOVE_D, T12, NOTCH_H)]
+    brackets = [(POST_IN_L, BACK_Y1 - 1, BOT_Z1, 37.0, 1, 45.0), (POST_IN_R - 37.0, BACK_Y1 - 1, BOT_Z1, 37.0, 1, 45.0)]
+
+    P = Face(solid, "-x", "+z")            # the inside face, seen from the room: the low-X end (your right) at the right
+    v = View(L, H, "A  INSIDE face (toward the drawers), seen from the room; bottom edge down")
+    for n in notches:
+        v.notch(*P.rect(n))
+    ru = P.rect(rab)
+    v.cutshape(sg.box(ru[0], ru[1], ru[0] + ru[2], ru[1] + ru[3]))
+    for b in brackets:
+        v.hidden(*P.rect(b))
+    bu = P.rect(brackets[0])
+    v.callout(L * 0.4, T18 / 2, f"rabbet along the bottom edge, through (it runs out through the notches): {P18} tall x {dt(RABBET_D)} deep; the case bottom sits in it")
+    v.callout(GROOVE_D / 2, NOTCH_H / 2, f"both bottom corners notched {dt(GROOVE_D)} x {dt(NOTCH_H)}: housed {dt(GROOVE_D)} in the rear posts "
+              "above the notch, the un-housed bottom butts their inner faces", ha="left")
+    v.callout(bu[0] + bu[2] / 2, bu[1] + bu[3] / 2, "dashed: Blum rear bracket 295.3750.02 for each post-side runner, set from the runner (see the note)",
+              ha="right")
+    v.dim_h(0, GROOVE_D, -v.o(20))
+    v.dim_v(0, NOTCH_H, -v.o(22))
+    v.dim_v(0, T18, L + v.o(26), P18)
+    v.dim_v(0, H, L + v.o(60))
+    v.dim_h(0, L, v.top_y())
+    v.edge("bottom", "bottom edge")
+    v.edge("left", "end (in a rear post)")
+    v.edge("right", "end (in a rear post)")
+
+    S = Face(solid, "+y", "+z", win=(0, T12, 0, 50))       # the bottom edge seen from an end: inside face at right
+    a = View(S.w, S.h, "B  section near the bottom edge\n(inside face at right)", size="small")
+    a.notch(*S.rect(rab))
+    a.dim_h(T12 - RABBET_D, T12, -8, dt(RABBET_D))
+    a.dim_v(0, T18, T12 + 10, P18)
+    a.dim_h(0, T12, 50 + 8, P12M)
+    a.edge("right", "inside face")
+    a.edge("bottom", "bottom edge")
+
+    N = Face(solid, "-x", "+z", win=(0, 70, 0, 60))
+    c = View(N.w, N.h, "C  bottom corner, inside face\n(the other end is the same)", size="small")
+    c.notch(*N.rect(notches[1]))
+    ru = N.rect(rab)
+    c.cutshape(sg.box(ru[0], ru[1], ru[0] + ru[2], ru[1] + ru[3]))
+    c.mark(0, GROOVE_STOP - PANEL_Z0, GROOVE_D, GROOVE_STOP - PANEL_Z0)
+    c.dim_h(0, GROOVE_D, -8, dt(GROOVE_D))
+    c.dim_v(0, NOTCH_H, -8)
+    c.dim_v(0, T18, 70 + 8, P18)
+    c.dim_v(GROOVE_STOP - PANEL_Z0, NOTCH_H, 70 + 22, dt(GROOVE_CLR))
+    c.edge("left", "end (in the rear post)")
+
+    sheet(name, head(name, f"1/2 maple ply, {dt(H)} tall x {dt(L)} long, face grain vertical"), [v, a, c],
+          f"Housed {dt(GROOVE_D)} in each rear post, outer face {dt(SETBACK)} behind their rear faces, top edge flush with the post tops; "
+          f"the post grooves end {dt(GROOVE_CLR)} below the notch tops (dashed in C). Glue it in all round: with no wall screws it is what "
+          "keeps the case square. The cleat glues to this face along the top edge between the posts. The two rear brackets go on this face "
+          "at the rear of each post-side runner, located from the runner itself (not pre-drilled), #6 x 1/2 so the points stay inside the "
+          "1/2 ply. Datums: either end and the bottom edge.")
+    pr = []
+    for n, inward in zip(notches, ("+x", "-x")):
+        pr.append((_box(n[0] + 1, n[1] + 1, n[2] + 1, n[3] - 2, n[4] - 2, n[5] - 2), "empty"))
+        pr.append(wood(*n, "+z"))                                                                      # wood above the notch
+        nx = n[0] + GROOVE_D + 0.5 if inward == "+x" else n[0] - 1.5
+        pr.append((_box(nx, BACK_Y0 + 1, PANEL_Z0 + T18 + 1, 1, T12 - 2, NOTCH_H - T18 - 2), "solid"))   # wood beside it, above the rabbet
+        pr += [runout(*n, "-y"), runout(*n, "+y"), runout(*n, "-z"), runout(*n, "-x" if inward == "+x" else "+x")]
+        pr.append((_box(n[0] + 1, BACK_Y0 + 1, TONGUE_Z0 + 1, GROOVE_D - 2, T12 - 2, 20), "solid"))       # the housed tongue above
+    mid = (BACK_X0 + GROOVE_D + 1, rab[1], rab[2], L - 2 * GROOVE_D - 2, rab[4], rab[5])
+    pr += cut_probes(*mid, "-y")
+    pr += [wood(*mid, "+z"), runout(*rab, "-x"), runout(*rab, "+x")]
+    return check(name, solid, pr)
 
 
 def top_slab():
@@ -645,9 +835,9 @@ def top_slab():
     v.dim_h(0, TOP_W, v.top_y())
     v.dim_v(0, D, TOP_W + v.o(26))
     v.edge("bottom", "FRONT edge")
-    v.edge("top", "REAR edge: square, flush with the case back")
-    v.edge("left", f"end: overhangs the case {dt(END_OVERHANG)}")
-    v.edge("right", f"end: overhangs the case {dt(END_OVERHANG)}")
+    v.edge("top", "REAR edge: square, flush with the rear posts")
+    v.edge("left", f"end: overhangs the posts {dt(OVERHANG)}")
+    v.edge("right", f"end: overhangs the posts {dt(OVERHANG)}")
     c = sg.box(0, 0, 40, TS)
     for cy in (ROUND, TS - ROUND):
         corner = sg.box(0, 0 if cy < TS / 2 else TS - ROUND, ROUND, ROUND if cy < TS / 2 else TS)
@@ -657,9 +847,9 @@ def top_slab():
     s.callout(1, TS - 1, f"{dt(ROUND)} R, top and bottom", ha="left")
     s.edge("left", "FRONT")
     sheet(name, head(name, f"hard maple {dt(TS)} thick, {dt(D)} deep x {dt(TOP_W)} long"), [v, s],
-          f"Glue up from 4 or 5 boards, grain along the {dt(TOP_W)} length. Overhangs the case {dt(END_OVERHANG)} at each end and "
-          f"{dt(OVERHANG)} at the front, flush with the case back; {dt(SIDE_AIR)} of air to each wall. Floats: pocket screws up "
-          "through the ends and the partition near the front, figure-8s on the nailer at the back.")
+          f"Glue up from 4 or 5 boards, grain along the {dt(TOP_W)} length. Overhangs the posts {dt(OVERHANG)} at each end and at "
+          f"the front, flush with their rear faces; {dt(SIDE_AIR)} of air to each wall. Floats: pocket screws up "
+          "through the ends and the partition near the front, figure-8s on the cleat at the back.")
     xi, wi = TOP_X0 + ROUND + 0.5, TOP_W - 2 * ROUND - 1                 # the length clear of the end roundovers
     pr = []
     for z in (TOP_Z0, TOP_Z0 + TS - 0.6):                              # the two front arrises are rounded
@@ -820,7 +1010,7 @@ def front_panel():
 
 
 def _box_x0():
-    return END_IN_L + OPEN_W / 2 - BOX_W / 2      # left drawer, left side outer face
+    return POST_IN_L + OPEN_W / 2 - BOX_W / 2      # left drawer, left side outer face (the bay starts at the post's inner face)
 
 
 def drawer_side():
@@ -984,13 +1174,12 @@ def drawer_bottom():
 
 if __name__ == "__main__":
     n = 0
-    legs()
-    base_end_rail()
-    base_back_rail()
+    n += post_front()
+    n += post_rear()
     n += end_panel()
     n += bottom_panel()
     n += partition()
-    n += nailer()
+    n += cleat()
     n += back_panel()
     n += top_slab()
     n += front_stile()

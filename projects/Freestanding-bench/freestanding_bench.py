@@ -1,25 +1,28 @@
 #!/usr/bin/env python
-"""Freestanding bench for the 66 x 28 in former wet-bar alcove: the built-in bench's case (two drawers on Blum
-TANDEM 563H undermounts, all-white frame-and-panel fronts on a tongue-and-groove bit set, solid maple top, 3 in
-cushion) lifted onto a base that leaves CLEAR (5 in) of open floor under it for the robot vacuum, with finished ends,
-1 in of air to each wall and the alcove's baseboard left in place, so it slides in and out as a piece of furniture.
-The client asked for this on 2026-10-26; the built-in design stays untouched in projects/Built-in-bench in case they
-go back to it.
+"""Freestanding bench for the 66 x 28 in former wet-bar alcove: the built-in bench's drawers, all-white
+frame-and-panel fronts, solid maple top and 3 in cushion carried on four proud solid maple corner posts, the way the
+drawer bench (projects/Drawer-bench) is built, with CLEAR (5 in) of open floor under everything but the posts for the
+robot vacuum. The client asked for a freestanding bench with room for the Roomba on 2026-10-26; the built-in design
+stays untouched in projects/Built-in-bench in case they go back.
 
-What carried over unchanged (Brian's locked picks): wood top at 14 in (seat 17 in with the cushion), frameless case,
-full-overlay fronts built as a 1-1/2 in maple frame around a 1/2 in paint-grade panel inset 1/4 in, all painted
-white, 8 in brass bar pulls, 3/4 in overhang with an eased edge, solid glued-up maple top whose front edge is 3 in
-back from the pilaster faces, one full-depth cushion, 21 in slides, 1/2 in Baltic birch boxes, Osmo Natural on the
-bare maple. What changed: no plinth, no scribe strips, no wall screws; the case is 62-1/2 wide under a 64 in top
-(3/4 overhang at both ends), the back is 1/2 in from the wall, the ends are show faces (painted white, edges banded),
-the drawer boxes are 6-1/2 in tall instead of 8-1/2 (the 5 in of clear floor come out of the drawers, the seat
-height stays for the senior dog), and the base is one of three (BASE env var, default legs):
+Posts (Brian's pick A from the leg options, 2026-10-26): 2-1/2 in square soft maple, floor to the underside of the
+top, 3/8 in chamfer on all four vertical edges full length, straight to the floor. The painted 3/4 ply end panels and
+the 1/2 ply back are housed in stopped grooves in the posts, 1/2 in behind the post faces, with the panels' bottom
+corners notched so the housed tongue starts 1-1/2 in above the panel bottom and the groove end hides behind the
+un-housed bottom (the drawer bench's detail). The drawer fronts run between the front posts 1/4 in behind their faces
+with 1/8 reveals. The case bottom sits in rabbets in the ends and the back, notched around the posts. The drawer
+runners mount the drawer bench's way on the post side (front screws into the post's inner face, Blum rear bracket on
+the back) and the frameless way on the partition side.
 
-  legs    four 2 in square solid maple legs 2-1/2 in in from the ends in a C-frame of 3/4 x 2-1/2 maple rails: an
-          end rail front to back at each end and one back rail, no front rail, so the robot drives in under the
-          whole front; the legs sit 2 in inside the case back, clear of the baseboard and its shoe
-  blades  two 1-1/2 in solid maple blades on edge, front to back under the ends, with the same back rail
-  gables  the end panels run to the floor (notched at the back for the baseboard) with a stretcher at the back
+Room: the top is 64 x 24-3/4 (1 in of air to each wall, rear edge 1/4 in off the back wall, front edge 3 in back from
+the pilaster faces as before). The rear posts are notched at the floor for the alcove's baseboard and shoe (skip the
+notch if the baseboard comes out, BASEBOARD_NOTCH = False). The 1/4 in wall gap and the 1/2 in back are what let the
+21 in Blum runners keep their 557 mm inside depth behind fronts that sit 3 in back from the pilasters.
+
+What carried over unchanged (Brian's locked picks): wood top at 14 in (seat 17 in), 1-1/2 in maple frames around 1/2
+in paint-grade panels inset 1/4 in on the T&G bit set, all painted white, 8 in brass bar pulls, 3/4 in overhang past
+the posts with eased arrises, one full-depth cushion, 21 in Blum TANDEM 563H, 1/2 in Baltic birch boxes 6-1/2 in
+tall (the 5 in of clear floor come out of the drawers at the fixed seat height), Osmo Natural on the bare maple.
 
 Axes as in built_in_bench.py: X across the alcove (0 at the wall on your RIGHT when you face the bench from the
 room; _l/_r suffixes are model names, the bench is symmetric), Y depth (0 at the back wall, +Y toward the room),
@@ -27,7 +30,6 @@ Z up (0 at the floor). Units mm; inch constants are written as n * IN. One named
 placed instance in INST, hardware (slides, pulls, cushion) in HW for the viewer only.
 
 Run:  .venv/bin/python projects/Freestanding-bench/freestanding_bench.py
-      BASE=legs|blades|gables ...   pick the base (default legs)
       SHOW=reset ...   push to the OCP viewer (scripts/cad-viewer.sh)
       TMP_STL=path ... export an STL for scripts/render_stl.py
       EXPORT=1 ...     write cutlist.md/.csv and the STEP
@@ -43,8 +45,6 @@ sys.path.insert(0, f"{VAULT}/scripts")
 from cutlist import inch_frac, write_cut_list  # noqa: E402
 
 IN = 25.4
-BASE = os.environ.get("BASE", "legs")
-assert BASE in ("legs", "blades", "gables"), BASE
 
 
 def inch(mm):
@@ -57,61 +57,62 @@ ALCOVE_D = 28 * IN          # back wall to the pilaster faces (Y)
 TOP_SETBACK = 3 * IN        # top front edge back from the pilaster faces (as the built-in)
 BASEBOARD_H = 4 * IN        # the alcove's baseboard stays; it and its shoe stand about 1-1/4 in off the wall
 BASEBOARD_T = 1.25 * IN
+BASEBOARD_NOTCH = os.environ.get("BASEBOARD_NOTCH", "1") != "0"   # notch the rear posts over it (0 if it comes out)
 
 # ---------------------------------------------------------------- picks
 SEAT_Z = 14 * IN            # top face of the wood top (seat 17 in with the cushion, kept for the senior dog)
 CUSHION_H = 3 * IN
-CLEAR = 5 * IN              # floor to the underside of the case: the robot vacuum (tallest Roomba about 3.9 in)
+CLEAR = 5 * IN              # floor to the underside of everything but the posts: the robot vacuum (tallest Roomba 3.9 in)
 SIDE_AIR = 1.0 * IN         # top end to each wall, so the piece slides in and out
-WALL_GAP = 0.5 * IN         # case back and top rear edge to the back wall
-OVERHANG_MIN = 0.75 * IN    # 3/4 in overhang at the front (actual is derived below)
-END_OVERHANG = 0.75 * IN    # top past each case end
-GAP = 0.125 * IN            # reveal between the fronts and under the top
-END_REVEAL = 0.0625 * IN    # the fronts stop this short of the case ends
+WALL_GAP = 0.25 * IN        # rear posts and top rear edge to the back wall
+OVERHANG = 0.75 * IN        # top past the posts at the ends and the front; flush with the posts at the back
+GAP = 0.125 * IN            # reveals: fronts to posts, between the fronts, under the top
 ROUND = 0.125 * IN          # eased arrises of the top: front and both ends
 
 # ---------------------------------------------------------------- stock (actual, MEASURE)
-T18 = 18.0                  # 3/4 maple ply
-T12 = 12.0                  # 1/2 Baltic birch (drawer sides, bottoms) and the 1/2 paint-grade panels
-T6 = 6.35                   # 1/4 maple ply back (nominal; the groove is cut to the measured sheet)
-TS = 0.75 * IN              # solid maple: top, nailer, base rails
-FACE_T = T18                # everything in the front plane is milled to the ply
+T18 = 18.0                  # 3/4 maple ply: ends, bottom, partition
+T12 = 12.0                  # 1/2 Baltic birch (drawer boxes), 1/2 paint-grade panels, 1/2 maple ply back
+TS = 0.75 * IN              # solid maple: top, cleat
+FACE_T = T18                # the fronts are milled to the ply thickness
+
+# ---------------------------------------------------------------- posts (the drawer bench's construction)
+POST = 2.5 * IN             # square; soft maple, 12/4 or an 8/4 plus 4/4 glue-up
+CHAMFER = 0.375 * IN        # the four vertical edges, full length
+SETBACK = 0.5 * IN          # panel outer face behind the post face
+GROOVE_D = 0.375 * IN       # panels housed this deep in the posts
+NOTCH_H = 1.5 * IN          # panel bottom corners notched GROOVE_D x this: the housed tongue starts here
+GROOVE_CLR = 0.75 * IN      # post groove ends this far below the tongue start, hidden behind the un-housed bottom
+FRONT_SETBACK = 0.25 * IN   # drawer fronts behind the post faces
+BB_NOTCH_D = 1.5 * IN       # rear posts: notch over the baseboard and shoe, from the rear face
+BB_NOTCH_H = BASEBOARD_H + 0.5 * IN
 
 # ---------------------------------------------------------------- joinery
-RABBET_D = 0.25 * IN        # case bottom in the ends; drawer ends in the sides
+RABBET_D = 0.25 * IN        # case bottom in the ends and the back; drawer ends in the sides
 DADO_D = 0.25 * IN          # partition in the case bottom
-BACK_GROOVE_D = 0.25 * IN   # 1/4 back in the ends and bottom
-BACK_SET = 0.25 * IN        # back panel groove this far in from the rear edge
-PLAY = 1.6                  # 1/16 in total play on housed panels
+PLAY = 1.6                  # 1/16 in total play on housed panels (drawer bottoms)
 TONGUE_T = 0.25 * IN        # front frames: tongue-and-groove bit set
 TONGUE_L = 0.375 * IN
 PANEL_T = T12                # 1/2 panel (ply or MDF, measures 12 mm): back flush with the frame, face inset FACE_T - PANEL_T
 STILE_W = 1.5 * IN          # maple frame width on the fronts
-NAILER_H = 2.5 * IN
-
-# ---------------------------------------------------------------- base
-LEG_SQ = 2.0 * IN           # legs: solid maple, square
-LEG_IN_X = 2.5 * IN         # leg (or blade) outer face in from the case end
-LEG_IN_FRONT = 2.0 * IN     # leg front face behind the case front edge
-LEG_IN_BACK = 2.0 * IN      # leg rear face in from the case back (clears the baseboard and shoe)
-RAIL_H = 2.5 * IN           # base rails: 3/4 x 2-1/2 maple on edge, top edges flush with the leg tops
-RAIL_T = TS
-BLADE_T = 1.5 * IN          # blades: solid maple on edge
-NOTCH_D = BASEBOARD_T       # gables: notch at the rear bottom corner for the baseboard and shoe
-NOTCH_H = BASEBOARD_H + 0.5 * IN
+CLEAT_H = 2.5 * IN          # rear top cleat on the back's inner face: the top's figure-8s
 
 # ---------------------------------------------------------------- Blum TANDEM 563H, 21 in
 SLIDE_LEN = 21 * IN
+RUNNER_LEN = 547.0          # the runner body is longer than the nominal box: 471 for the 18 in class (drawer bench);
+                            # 547 assumes the same 14 mm for the 21 in class, VERIFY on the 563H5330B sheet
 UM_WIDTH_LOSS = 42.0        # inside drawer width = opening - 42
 UM_BOTTOM_CLEAR = 14.0      # opening bottom to drawer side bottom edge
 UM_TOP_CLEAR = 7.0          # drawer side top edge to opening top (Blum 2022/2025: opening - 21)
 UM_RECESS = 13.0            # drawer side bottom edge to underside of the bottom
-UM_FRONT_GAP = 1.5          # box front behind the case front edge
-UM_MIN_DEPTH = 557.0        # inside case depth for the 21 in runner
+UM_FRONT_GAP = 1.5          # box front behind the fronts' back faces
+UM_MIN_DEPTH = 557.0        # inside depth from the fronts' back faces to the back's inner face, frameless side
+UM_BRACKET_MIN, UM_BRACKET_MAX = 6.0, 48.0   # runner rear end to the back's inner face, rear-bracket side
+UM_SCREW_Y = (7.0, 34.0)    # runner front screw holes behind the runner front, into the post's inner face
+RUNNER_SETBACK = T12 + FACE_T - 11.5 + FRONT_SETBACK   # runner front behind the post face (Blum inset rule plus the setback)
 UM_HOOK_NOTCH_W, UM_HOOK_NOTCH_H = 35.0, 13.0   # from the side's inner face; flush with the bottom
 UM_HOOK_BORE = (6.0, 10.0, 7.0, 24.0)   # dia, depth, from side inner face, above side bottom
 
-# ---------------------------------------------------------------- figure-8 fasteners (nailer only)
+# ---------------------------------------------------------------- figure-8 fasteners (cleat only)
 FIG8_DIA = 0.625 * IN
 FIG8_DEPTH = 0.125 * IN
 FIG8_OFFSET = 0.25 * IN     # center this far in from the inner face (opens through it)
@@ -120,36 +121,45 @@ FIG8_OFFSET = 0.25 * IN     # center this far in from the inner face (opens thro
 TOP_X0 = SIDE_AIR                         # the top: 64 in between 1 in of air at each wall
 TOP_X1 = ALCOVE_W - SIDE_AIR
 TOP_W = TOP_X1 - TOP_X0
-X0 = TOP_X0 + END_OVERHANG                # end panel outer faces: 62-1/2 in case
-X1 = TOP_X1 - END_OVERHANG
-CASE_W = X1 - X0
-CASE_Y0 = WALL_GAP                        # case back (rear face of the ends and bottom)
-CASE_D = 23.5 * IN                        # back wall to the case front edge (as the built-in)
-FACE_Y0 = CASE_D                          # fronts sit on the case front
-FACE_Y1 = FACE_Y0 + FACE_T
+TOP_Y0 = WALL_GAP
 TOP_Y1 = ALCOVE_D - TOP_SETBACK           # 25 in from the back wall
-TOP_Y0 = WALL_GAP                         # flush with the case back (a rear overhang would cost Blum its 557 mm)
 TOP_D = TOP_Y1 - TOP_Y0
-OVERHANG = TOP_Y1 - FACE_Y1
 TOP_Z0 = SEAT_Z - TS
+X0 = TOP_X0 + OVERHANG                    # post outer faces
+X1 = TOP_X1 - OVERHANG
+XC = (X0 + X1) / 2
+POST_IN_L = X0 + POST                     # posts' inner faces: the drawer openings' outer sides
+POST_IN_R = X1 - POST
+YB0 = TOP_Y0                              # rear posts' rear faces, flush with the top's back edge
+YF1 = TOP_Y1 - OVERHANG                   # front posts' faces
+YF0 = YF1 - POST
+FACE_Y1 = YF1 - FRONT_SETBACK             # the fronts' faces
+FACE_Y0 = FACE_Y1 - FACE_T                # the fronts' back faces: the case front line
+CASE_D = FACE_Y0
+END_X0 = X0 + SETBACK                     # end panels: outer face
+END_IN_L = END_X0 + T18                   # inner faces
+END_IN_R = X1 - SETBACK - T18
+END_Y0 = YB0 + POST - GROOVE_D            # housed in the rear post ...
+END_Y1 = YF0 + GROOVE_D                   # ... and the front post
+BACK_Y0 = YB0 + SETBACK                   # the 1/2 back: outer face
+BACK_Y1 = BACK_Y0 + T12
+BACK_X0 = POST_IN_L - GROOVE_D            # housed in the rear posts
+BACK_X1 = POST_IN_R + GROOVE_D
 BOT_Z0 = CLEAR                            # case bottom's underside: the clear floor
 BOT_Z1 = BOT_Z0 + T18
 OPEN_H = TOP_Z0 - BOT_Z1
-END_Z0 = 0.0 if BASE == "gables" else CLEAR
-XC = (X0 + X1) / 2                        # partition center
+PANEL_Z0 = CLEAR                          # ends and back: bottom edge
+TONGUE_Z0 = PANEL_Z0 + NOTCH_H            # the housed tongue starts here
+GROOVE_STOP = TONGUE_Z0 - GROOVE_CLR      # the post grooves stop here, open at the top
 PART_X0 = XC - T18 / 2
-END_IN_L = X0 + T18                       # end inner face at low X
-END_IN_R = X1 - T18                       # end inner face at high X
-OPEN_W = PART_X0 - END_IN_L               # one bay
-FRONT_W = (CASE_W - 2 * END_REVEAL - GAP) / 2
-FRONT_Z0 = CLEAR                          # fronts cover the case bottom's edge, flush with its underside
+OPEN_W = PART_X0 - POST_IN_L              # one bay: post inner face to the partition
+FRONT_W = (POST_IN_R - POST_IN_L - 3 * GAP) / 2
+FRONT_Z0 = CLEAR                          # fronts flush with the case underside
 FRONT_H = TOP_Z0 - GAP - FRONT_Z0
-FRONT_X0 = [X0 + END_REVEAL, X0 + END_REVEAL + FRONT_W + GAP]
-BACK_Y0 = CASE_Y0 + BACK_SET
-BACK_Y1 = BACK_Y0 + T6
-NAILER_Y0 = BACK_Y1
-NAILER_Y1 = NAILER_Y0 + TS
-NAILER_Z0 = TOP_Z0 - NAILER_H
+FRONT_X0 = [POST_IN_L + GAP, POST_IN_L + 2 * GAP + FRONT_W]
+CLEAT_Y0 = BACK_Y1
+CLEAT_Y1 = CLEAT_Y0 + TS
+CLEAT_Z0 = TOP_Z0 - CLEAT_H
 
 PARTS = []
 INST = []
@@ -179,69 +189,118 @@ def add(name, solid, qty, material, notes="", inst=None):
 
 
 MAPLE = "hard maple"
+SOFT_MAPLE = "soft maple"
 PLY18 = "3/4 maple ply"
-PLY6 = "1/4 maple ply"
+PLY12 = "1/2 maple ply"
 PAINT_PANEL = "1/2 paint-grade panel"   # MDF or paint-grade ply, painted white with the frames (Brian 2026-10-24)
 BB12 = "1/2 Baltic birch"
 
-# ================================================================ case
-# ends: show faces now (painted white, front and bottom edges banded); bottom in a rabbet (a dado on a gable),
-# 1/4 back in a groove, through at the top
-end_l = _box(X0, CASE_Y0, END_Z0, T18, CASE_D - CASE_Y0, TOP_Z0 - END_Z0)
-if BASE == "gables":
-    end_l -= _box(END_IN_L - RABBET_D, CASE_Y0 - 1, BOT_Z0, RABBET_D + 1, CASE_D - CASE_Y0 + 2, T18)
-    end_l -= _box(END_IN_L - BACK_GROOVE_D, BACK_Y0, BOT_Z0, BACK_GROOVE_D + 1, T6, TOP_Z0 - BOT_Z0 + 2)
-    end_l -= _box(X0 - 1, CASE_Y0 - 1, -1, T18 + 2, NOTCH_D + 1, NOTCH_H + 1)
-    END_NOTE = (f"gable to the floor, face grain vertical; {inch(RABBET_D)} deep x {inch(T18)} (measure) dado across "
-                f"the inside face with its bottom {inch(BOT_Z0)} up for the case bottom; {inch(BACK_GROOVE_D)} deep x "
-                f"1/4 ply (measure) groove {inch(BACK_SET)} from the rear edge from the dado up through the top; notch "
-                f"{inch(NOTCH_D)} x {inch(NOTCH_H)} at the rear bottom corner for the baseboard and shoe; band the "
-                "front and bottom edges; painted white; mirror pair")
-else:
-    end_l -= _box(END_IN_L - RABBET_D, CASE_Y0 - 1, BOT_Z0 - 1, RABBET_D + 1, CASE_D - CASE_Y0 + 2, T18 + 1)
-    end_l -= _box(END_IN_L - BACK_GROOVE_D, BACK_Y0, BOT_Z0 - 1, BACK_GROOVE_D + 1, T6, TOP_Z0 - BOT_Z0 + 2)
-    END_NOTE = (f"show face out, face grain vertical; {inch(RABBET_D)} x {inch(T18)} (measure) rabbet along the bottom "
-                f"inside edge for the case bottom; {inch(BACK_GROOVE_D)} deep x 1/4 ply (measure) groove {inch(BACK_SET)} "
-                "from the rear edge, through; iron-on maple band on the front and bottom edges; painted white; mirror pair")
-end_r = mirror(end_l, Plane.YZ.offset(XC))
-add("end", end_l, 2, PLY18, END_NOTE, inst=[("end_l", end_l), ("end_r", end_r)])
+# ================================================================ posts
+# Chamfer the four vertical edges first, then cut the grooves, so the groove walls are clean. The end-panel groove is
+# on the face toward the other post of the same end, SETBACK in from the outer face; the rear posts also take the
+# back's groove on their inner face, SETBACK in from the rear face. Grooves stop at GROOVE_STOP and run out the top.
+def make_post(x, y, front):
+    """the low-X post; outer face at min X; front posts have their outer face at max Y, rear posts at min Y"""
+    p = _box(x, y, 0, POST, POST, TOP_Z0)
+    p = chamfer(p.edges().filter_by(Axis.Z), CHAMFER)
+    gh = TOP_Z0 - GROOVE_STOP + 1
+    gy = y - 1 if front else y + POST - GROOVE_D
+    p -= _box(x + SETBACK, gy, GROOVE_STOP, T18, GROOVE_D + 1, gh)
+    if not front:
+        p -= _box(x + POST - GROOVE_D, y + SETBACK, GROOVE_STOP, GROOVE_D + 1, T12, gh)
+        if BASEBOARD_NOTCH:
+            p -= _box(x - 1, y - 1, -1, POST + 2, BB_NOTCH_D + 1, BB_NOTCH_H + 1)
+    return p
 
-# bottom: between the ends in their rabbets, back groove, partition dado
+
+post_fl = make_post(X0, YF0, True)
+post_rl = make_post(X0, YB0, False)
+post_fr = mirror(post_fl, Plane.YZ.offset(XC))
+post_rr = mirror(post_rl, Plane.YZ.offset(XC))
+_POST_NOTE = (f"{inch(POST)} square x {inch(TOP_Z0)} (12/4 stock or an 8/4 plus 4/4 glue-up); {inch(CHAMFER)} chamfer on all "
+              f"four vertical edges, full length, cut before the grooves; end-panel groove {inch(T18)} wide (measure) x "
+              f"{inch(GROOVE_D)} deep on the face toward the other post of that end, {inch(SETBACK)} in from the outer face, "
+              f"from {inch(GROOVE_STOP)} up out the top (the end stays as the bit leaves it, the panel's notched bottom "
+              "covers it); bare under Osmo; left/right mirrored")
+add("post_front", post_fl, 2, SOFT_MAPLE,
+    _POST_NOTE + f"; the Blum runner front screws into the inner face, holes {inch(UM_SCREW_Y[0] + RUNNER_SETBACK)} and "
+    f"{inch(UM_SCREW_Y[1] + RUNNER_SETBACK)} behind the front face, #6 x 5/8",
+    inst=[("post_fl", post_fl), ("post_fr", post_fr)])
+add("post_rear", post_rl, 2, SOFT_MAPLE,
+    _POST_NOTE + f"; plus the back's groove {inch(T12)} wide (measure) x {inch(GROOVE_D)} deep on the inner face, "
+    f"{inch(SETBACK)} in from the rear face, same stop"
+    + (f"; notch {inch(BB_NOTCH_D)} deep x {inch(BB_NOTCH_H)} tall across the rear face at the floor for the baseboard "
+       "and shoe (skip it if the baseboard comes out)" if BASEBOARD_NOTCH else ""),
+    inst=[("post_rl", post_rl), ("post_rr", post_rr)])
+
+# the post is the box minus four chamfer prisms minus its grooves (and the notch): the chamfers never reach a groove
+_post_box = POST ** 2 * TOP_Z0 - 4 * 0.5 * CHAMFER ** 2 * TOP_Z0
+_gh = TOP_Z0 - GROOVE_STOP
+assert abs(post_fl.volume - (_post_box - T18 * GROOVE_D * _gh)) < 1e-2, post_fl.volume
+_notch = POST * BB_NOTCH_D * BB_NOTCH_H - 2 * 0.5 * CHAMFER ** 2 * BB_NOTCH_H if BASEBOARD_NOTCH else 0.0
+assert abs(post_rl.volume - (_post_box - T18 * GROOVE_D * _gh - T12 * GROOVE_D * _gh - _notch)) < 1e-2, post_rl.volume
+assert CHAMFER < SETBACK, "the chamfer would break into a groove"
+assert BB_NOTCH_D >= BASEBOARD_T + 0.25 * IN - WALL_GAP and BB_NOTCH_H >= BASEBOARD_H + 0.25 * IN
+
+# ================================================================ panels: ends (3/4) and back (1/2), housed in the posts
+# Bottom corners notched GROOVE_D x NOTCH_H so the housed tongue starts NOTCH_H up and the un-housed bottom butts the
+# post faces over the groove ends; a rabbet along the bottom inside edge takes the case bottom.
+end_l = _box(END_X0, END_Y0, PANEL_Z0, T18, END_Y1 - END_Y0, TOP_Z0 - PANEL_Z0)
+for _y in (END_Y0 - 1, END_Y1 - GROOVE_D):
+    end_l -= _box(END_X0 - 1, _y, PANEL_Z0 - 1, T18 + 2, GROOVE_D + 1, NOTCH_H + 1)
+end_l -= _box(END_IN_L - RABBET_D, -1, PANEL_Z0 - 1, RABBET_D + 1, ALCOVE_D + 2, T18 + 1)
+end_r = mirror(end_l, Plane.YZ.offset(XC))
+_NOTCH_NOTE = (f"both bottom corners notched {inch(GROOVE_D)} (from each end) x {inch(NOTCH_H)} tall: the housed tongue "
+               f"starts {inch(GROOVE_CLR)} above the post groove's end and the panel's bottom {inch(NOTCH_H)} butts the post faces")
+add("end", end_l, 2, PLY18,
+    f"show face out, face grain vertical, painted white (bottom edge banded); housed {inch(GROOVE_D)} in each post, "
+    f"outer face {inch(SETBACK)} behind the post faces, top edge flush with the post tops; " + _NOTCH_NOTE +
+    f"; {inch(RABBET_D)} x {inch(T18)} (measure) rabbet along the bottom inside edge for the case bottom, through; "
+    "mirror pair", inst=[("end_l", end_l), ("end_r", end_r)])
+
+back = _box(BACK_X0, BACK_Y0, PANEL_Z0, BACK_X1 - BACK_X0, T12, TOP_Z0 - PANEL_Z0)
+for _x in (BACK_X0 - 1, BACK_X1 - GROOVE_D):
+    back -= _box(_x, BACK_Y0 - 1, PANEL_Z0 - 1, GROOVE_D + 1, T12 + 2, NOTCH_H + 1)
+back -= _box(-1, BACK_Y1 - RABBET_D, PANEL_Z0 - 1, ALCOVE_W + 2, RABBET_D + 1, T18 + 1)
+add("back", back, 1, PLY12,
+    f"housed {inch(GROOVE_D)} in each rear post, outer face {inch(SETBACK)} behind their rear faces, top edge flush with "
+    "the post tops; " + _NOTCH_NOTE + f"; {inch(RABBET_D)} x {inch(T18)} (measure) rabbet along the bottom inside edge "
+    "for the case bottom, through; glued in (with no wall screws it is what keeps the case square); the Blum rear "
+    "brackets screw to its inside face with #6 x 1/2")
+
+# ================================================================ case bottom, partition, cleat
 BOT_X0 = END_IN_L - RABBET_D
 BOT_X1 = END_IN_R + RABBET_D
-bottom = _box(BOT_X0, CASE_Y0, BOT_Z0, BOT_X1 - BOT_X0, CASE_D - CASE_Y0, T18)
-bottom -= _box(BOT_X0 - 1, BACK_Y0, BOT_Z1 - BACK_GROOVE_D, BOT_X1 - BOT_X0 + 2, T6, BACK_GROOVE_D + 1)
+BOT_Y0 = BACK_Y1 - RABBET_D
+bottom = _box(BOT_X0, BOT_Y0, BOT_Z0, BOT_X1 - BOT_X0, CASE_D - BOT_Y0, T18)
+for _x0, _x1 in ((BOT_X0 - 1, POST_IN_L), (POST_IN_R, BOT_X1 + 1)):       # notched around the four posts
+    bottom -= _box(_x0, YF0, BOT_Z0 - 1, _x1 - _x0, ALCOVE_D, T18 + 2)
+    bottom -= _box(_x0, -1, BOT_Z0 - 1, _x1 - _x0, YB0 + POST + 1, T18 + 2)
 bottom -= _box(PART_X0, BACK_Y1, BOT_Z1 - DADO_D, T18, CASE_D - BACK_Y1 + 1, DADO_D + 1)
 add("bottom", bottom, 1, PLY18,
-    f"face grain across the {inch(CASE_W)}; {inch(BACK_GROOVE_D)} deep back groove {inch(BACK_SET)} from the rear edge; "
-    f"{inch(DADO_D)} deep x 3/4 ply (measure) dado for the partition, centered, from the back groove to the front edge; "
-    "front edge is covered by the drawer fronts; the base screws to its underside")
+    f"face grain across the {inch(BOT_X1 - BOT_X0)}; sits {inch(RABBET_D)} into the rabbets of both ends and the back; "
+    f"all four corners notched {inch(POST_IN_L - BOT_X0)} across x {inch(CASE_D - YF0)} (front) and "
+    f"{inch(YB0 + POST - BOT_Y0)} (rear) around the posts; {inch(DADO_D)} deep x 3/4 ply (measure) dado for the "
+    "partition, centered, from the back to the front edge; front edge covered by the drawer fronts")
 
-# partition: in the bottom dado, stops at the back panel, notched for the nailer
 PART_Z0 = BOT_Z1 - DADO_D
 partition = _box(PART_X0, BACK_Y1, PART_Z0, T18, CASE_D - BACK_Y1, TOP_Z0 - PART_Z0)
-partition -= _box(PART_X0 - 1, NAILER_Y0 - 1, NAILER_Z0, T18 + 2, TS + 1, NAILER_H + 1)
+partition -= _box(PART_X0 - 1, CLEAT_Y0 - 1, CLEAT_Z0, T18 + 2, TS + 1, CLEAT_H + 1)
 add("partition", partition, 1, PLY18,
-    f"face grain vertical; sits in the bottom dado and against the back panel; notch the top rear corner "
-    f"{inch(TS)} deep x {inch(NAILER_H)} tall for the nailer")
+    f"face grain vertical; sits in the bottom dado and against the back; front edge on the fronts' back faces (the "
+    f"partition-side runners mount to it the frameless way); notch the top rear corner {inch(TS)} deep x {inch(CLEAT_H)} "
+    "tall for the cleat")
 
-# nailer: solid maple on edge at the top back; figure-8s for the top; it ties the ends and stiffens the back
-nailer = _box(END_IN_L, NAILER_Y0, NAILER_Z0, END_IN_R - END_IN_L, TS, NAILER_H)
-FIG8_XS = [X0 + CASE_W * f for f in (0.15, 0.37, 0.63, 0.85)]
-FIG8_Y = NAILER_Y1 - FIG8_OFFSET
+cleat = _box(POST_IN_L, CLEAT_Y0, CLEAT_Z0, POST_IN_R - POST_IN_L, TS, CLEAT_H)
+FIG8_XS = [POST_IN_L + (POST_IN_R - POST_IN_L) * f for f in (0.15, 0.37, 0.63, 0.85)]
+FIG8_Y = CLEAT_Y1 - FIG8_OFFSET
 for xc in FIG8_XS:
-    nailer -= Pos(xc, FIG8_Y, TOP_Z0 - FIG8_DEPTH) * Cylinder(FIG8_DIA / 2, FIG8_DEPTH + 1,
-                                                              align=(Align.CENTER, Align.CENTER, Align.MIN))
-add("nailer", nailer, 1, MAPLE,
-    f"on edge against the back panel, through the partition notch; four {inch(FIG8_DIA)} figure-8 recesses "
-    f"{inch(FIG8_DEPTH)} deep on the top edge, centered {inch(FIG8_OFFSET)} in from the front face; "
-    "glued to the back, screwed through the ends into its ends (no wall screws: the piece is freestanding)")
-
-# back: 1/4 ply in the grooves, glued in (it is the shear panel that keeps a freestanding case square)
-back = _box(BOT_X0 + PLAY / 2, BACK_Y0, PART_Z0 + PLAY / 2,
-            BOT_X1 - BOT_X0 - PLAY, T6, TOP_Z0 - PART_Z0 - PLAY)
-add("back", back, 1, PLY6, "plain rectangle; slides down the end grooves into the bottom groove; glued in all round "
-    "(with no wall screws it is what keeps the case square)")
+    cleat -= Pos(xc, FIG8_Y, TOP_Z0 - FIG8_DEPTH) * Cylinder(FIG8_DIA / 2, FIG8_DEPTH + 1,
+                                                             align=(Align.CENTER, Align.CENTER, Align.MIN))
+add("cleat", cleat, 1, SOFT_MAPLE,
+    f"on edge against the back's inside face at the top, between the rear posts, through the partition notch; four "
+    f"{inch(FIG8_DIA)} figure-8 recesses {inch(FIG8_DEPTH)} deep on the top edge, centered {inch(FIG8_OFFSET)} in from the "
+    "front face; glued and screwed to the back from inside (#8 x 1 countersunk, nothing through the back)")
 
 # ================================================================ top: solid maple, pocket screws at the front, figure-8s at the back
 top = _box(TOP_X0, TOP_Y0, TOP_Z0, TOP_W, TOP_D, TS)
@@ -250,9 +309,9 @@ _ends = top.edges().filter_by(Axis.Y)
 top = fillet(_front + _ends, ROUND)
 add("top", top, 1, MAPLE,
     f"glue up from 4 or 5 boards, grain along the {inch(TOP_W)}; {inch(ROUND)} roundover on the front and both end "
-    f"arrises, top and bottom (the back edge stays square against the wall); overhangs the case {inch(END_OVERHANG)} at "
-    f"each end and {inch(OVERHANG)} at the front, flush with the case back; pocket screws up through the ends and "
-    "partition near the front, figure-8s on the nailer at the back")
+    f"arrises, top and bottom (the back edge stays square against the wall); overhangs the posts {inch(OVERHANG)} at "
+    "each end and the front, flush with their rear faces; pocket screws up through the ends and partition near the "
+    "front, figure-8s on the cleat at the back")
 
 # ================================================================ drawer fronts: maple frame, inset panel, T&G, all painted white
 RL = FRONT_W - 2 * STILE_W + 2 * TONGUE_L     # rail length with stub tenons
@@ -302,7 +361,7 @@ assert abs(_pb.max.Y - (GY0 + TONGUE_T)) < 1e-6, "tongue is not flush with the p
 # ================================================================ drawer boxes: Blum 563H
 BOX_W = OPEN_W - UM_WIDTH_LOSS + 2 * T12
 BOX_IN_W = OPEN_W - UM_WIDTH_LOSS
-BOX_H = 6.5 * IN            # was 8.5 in the built-in: the opening is 7-17/32 now, Blum allows opening minus 21 mm
+BOX_H = 6.5 * IN            # the opening is 7-17/32; Blum allows opening minus 21 mm
 BOX_D = SLIDE_LEN
 BOX_Z0 = BOT_Z1 + UM_BOTTOM_CLEAR
 BOX_Y1 = CASE_D - UM_FRONT_GAP
@@ -341,7 +400,7 @@ def make_drawer(bay_x0, sfx):
     return side, side_r, front, backp, bot
 
 
-_dl = make_drawer(END_IN_L, "l")
+_dl = make_drawer(POST_IN_L, "l")
 _dr = make_drawer(PART_X0 + T18, "r")
 add("drawer_side", _dl[0], 4, BB12,
     f"{inch(RABBET_D)} deep x 1/2 BB (measure) rabbet across both ends on the inside face; "
@@ -362,58 +421,8 @@ add("drawer_bottom", _dl[4], 2, BB12,
     f"plain rectangle: {inch(RABBET_D)} into the side and front grooves, butted to the back and glued to it; the Blum locking devices sit flush under it at the front corners (their screws go into the box front)",
     inst=[("dbot_l", _dl[4]), ("dbot_r", _dr[4])])
 
-# ================================================================ base
-BASE_NAMES = set()
-if BASE == "legs":
-    LEG_X = [X0 + LEG_IN_X, X1 - LEG_IN_X - LEG_SQ]                       # min X of the low-X and high-X legs
-    LEG_Y = [CASE_Y0 + LEG_IN_BACK, CASE_D - LEG_IN_FRONT - LEG_SQ]       # min Y of the back and front legs
-    leg = _box(LEG_X[0], LEG_Y[1], 0, LEG_SQ, LEG_SQ, CLEAR)
-    _dx, _dy = LEG_X[1] - LEG_X[0], LEG_Y[0] - LEG_Y[1]
-    add("leg", leg, 4, MAPLE,
-        f"{inch(LEG_SQ)} square, {inch(CLEAR)} tall; bare maple under Osmo like the top; glued and screwed to the case "
-        "bottom with two #8 x 2 down through it (under the drawer boxes), rails pocket-screwed into them",
-        inst=[("leg_lf", leg), ("leg_lb", Pos(0, _dy, 0) * leg), ("leg_rf", Pos(_dx, 0, 0) * leg),
-              ("leg_rb", Pos(_dx, _dy, 0) * leg)])
-    _ry0, _ry1 = LEG_Y[0] + LEG_SQ, LEG_Y[1]
-    _rx = LEG_X[0] + LEG_SQ / 2 - RAIL_T / 2
-    end_rail = _box(_rx, _ry0, CLEAR - RAIL_H, RAIL_T, _ry1 - _ry0, RAIL_H)
-    add("base_end_rail", end_rail, 2, MAPLE,
-        f"on edge between the front and back legs, centered on them, top edge flush with the leg tops; glue and two pocket "
-        "screws into each leg from the inside face; three pocket screws up into the case bottom",
-        inst=[("brail_end_l", end_rail), ("brail_end_r", Pos(_dx, 0, 0) * end_rail)])
-    _bx0, _bx1 = LEG_X[0] + LEG_SQ, LEG_X[1]
-    _by = LEG_Y[0] + LEG_SQ / 2 - RAIL_T / 2
-    back_rail = _box(_bx0, _by, CLEAR - RAIL_H, _bx1 - _bx0, RAIL_T, RAIL_H)
-    add("base_back_rail", back_rail, 1, MAPLE,
-        "on edge between the two back legs, centered on them, top edge flush with the leg tops; glue and two pocket "
-        "screws into each leg from the front face; four pocket screws up into the case bottom; no front rail, the "
-        "robot vacuum drives in under the fronts", inst=[("brail_back", back_rail)])
-    BASE_NAMES = {"leg_lf", "leg_lb", "leg_rf", "leg_rb", "brail_end_l", "brail_end_r", "brail_back"}
-elif BASE == "blades":
-    _bx = X0 + LEG_IN_X
-    _by0, _by1 = CASE_Y0 + LEG_IN_BACK, CASE_D - LEG_IN_FRONT
-    blade = _box(_bx, _by0, 0, BLADE_T, _by1 - _by0, CLEAR)
-    add("blade", blade, 2, MAPLE,
-        f"{inch(BLADE_T)} thick, {inch(CLEAR)} tall, on edge front to back, outer face {inch(LEG_IN_X)} in from the case "
-        "end; bare maple under Osmo like the top; glued and screwed to the case bottom with four #8 x 2 down through it",
-        inst=[("blade_l", blade), ("blade_r", mirror(blade, Plane.YZ.offset(XC)))])
-    _rx0, _rx1 = _bx + BLADE_T, X1 - LEG_IN_X - BLADE_T
-    _by = _by0 + 1.0 * IN
-    back_rail = _box(_rx0, _by, CLEAR - RAIL_H, _rx1 - _rx0, RAIL_T, RAIL_H)
-    add("base_back_rail", back_rail, 1, MAPLE,
-        "on edge between the blades 1 in in from their rear ends, top edge flush with the blade tops; glue and two pocket "
-        "screws into each blade; four pocket screws up into the case bottom", inst=[("brail_back", back_rail)])
-    BASE_NAMES = {"blade_l", "blade_r", "brail_back"}
-else:   # gables: the ends themselves; a stretcher between them at the bottom back
-    _by = CASE_Y0 + NOTCH_D + 0.5 * IN
-    back_rail = _box(END_IN_L, _by, CLEAR - RAIL_H, END_IN_R - END_IN_L, RAIL_T, RAIL_H)
-    add("base_back_rail", back_rail, 1, MAPLE,
-        "stretcher on edge between the gables under the case bottom, behind the baseboard notch; glue and pocket screws "
-        "into the gables and up into the case bottom", inst=[("brail_back", back_rail)])
-    BASE_NAMES = {"brail_back"}
-
 # ================================================================ hardware and soft goods (viewer only)
-for i, bay_x0 in enumerate((END_IN_L, PART_X0 + T18)):
+for i, bay_x0 in enumerate((POST_IN_L, PART_X0 + T18)):
     for side_x in (bay_x0, bay_x0 + OPEN_W - 37.0):
         HW.append((f"slide_{i}_{'l' if side_x == bay_x0 else 'r'}",
                    _box(side_x, BOX_Y0, BOT_Z1, 37.0, BOX_D, UM_BOTTOM_CLEAR - 1.0)))
@@ -440,10 +449,10 @@ for nh, h in HW:
 
 # layout
 assert abs(TOP_Y1 - (ALCOVE_D - 3 * IN)) < 1e-9
-assert OVERHANG_MIN - 1e-6 <= OVERHANG <= OVERHANG_MIN + 1.5, OVERHANG
-assert abs(FRONT_X0[0] - X0 - END_REVEAL) < 1e-9 and abs(X1 - (FRONT_X0[1] + FRONT_W) - END_REVEAL) < 1e-9
+assert abs(FRONT_X0[0] - POST_IN_L - GAP) < 1e-9 and abs(POST_IN_R - (FRONT_X0[1] + FRONT_W) - GAP) < 1e-9
 assert abs(FRONT_X0[1] - (FRONT_X0[0] + FRONT_W) - GAP) < 1e-9
 assert abs(TOP_Z0 - (FRONT_Z0 + FRONT_H) - GAP) < 1e-9 and abs(FRONT_Z0 - BOT_Z0) < 1e-9
+assert abs(FACE_Y1 - (YF1 - FRONT_SETBACK)) < 1e-9
 _all = Compound(children=[s for _, s in INST])
 _bbw = _all.bounding_box()
 assert abs(_bbw.min.X - TOP_X0) < 1e-6 and abs(_bbw.max.X - TOP_X1) < 1e-6, "the top is the widest part"
@@ -451,37 +460,57 @@ assert _bbw.min.X >= SIDE_AIR - 1e-6 and _bbw.max.X <= ALCOVE_W - SIDE_AIR + 1e-
 assert abs(_bbw.min.Y - WALL_GAP) < 1e-6 and abs(_bbw.max.Y - TOP_Y1) < 1e-6
 assert abs(_bbw.min.Z) < 1e-6 and abs(_bbw.max.Z - SEAT_Z) < 1e-6
 
-# the clear floor: everything except the base starts at CLEAR; the base meets the case bottom; the rails stay high
+# the clear floor: everything but the posts starts at CLEAR; the posts stand on the floor and reach the top
+POSTS = {"post_fl", "post_fr", "post_rl", "post_rr"}
 for n, s in INST:
     bb = s.bounding_box()
-    if n in BASE_NAMES:
-        assert abs(bb.max.Z - CLEAR) < 1e-6, f"{n} does not meet the case bottom"
-        assert bb.min.Z >= -1e-6, n
-        assert bb.min.Y >= CASE_Y0 + BASEBOARD_T - 1e-6, f"{n} stands on the baseboard"
-    elif BASE == "gables" and n.startswith("end_"):
-        assert abs(bb.min.Z) < 1e-6, n
+    if n in POSTS:
+        assert abs(bb.min.Z) < 1e-6 and abs(bb.max.Z - TOP_Z0) < 1e-6, n
     else:
         assert bb.min.Z >= CLEAR - 1e-6, f"{n} hangs below the clear floor"
-for n, s in INST:
-    if n.startswith("brail_"):
-        assert abs(s.bounding_box().min.Z - (CLEAR - RAIL_H)) < 1e-6, n
-if BASE == "legs":
-    assert LEG_Y[0] >= CASE_Y0 + BASEBOARD_T + 0.5 * IN, "back legs too close to the baseboard"
-    assert LEG_X[0] > TOP_X0 and LEG_X[1] + LEG_SQ < TOP_X1
-    # the leg screw spots are under the drawer boxes, not under the runners
-    assert LEG_X[0] > END_IN_L + 37.0 and LEG_X[1] + LEG_SQ < END_IN_R - 37.0, "a leg top sits under a runner"
-if BASE == "gables":
-    _notch_air = _box(X0 + 0.5, CASE_Y0 + 0.5, 0.5, T18 - 1, NOTCH_D - 1, NOTCH_H - 1)
-    assert vol(_notch_air & part("end")) < 1e-3, "baseboard notch not cut"
-    assert NOTCH_H >= BASEBOARD_H + 0.25 * IN and NOTCH_D >= BASEBOARD_T
+assert X0 >= BASEBOARD_T + 0.25 * IN, "the end posts stand on the side walls' baseboards"
+if BASEBOARD_NOTCH:   # the baseboard's envelope fits in the rear posts' notches
+    _bb_air = _box(X0 - 1, -1, 0.5, POST + 2, WALL_GAP + BASEBOARD_T - 0.5, BASEBOARD_H - 1)
+    assert vol(_bb_air & post_rl) < 1e-3, "baseboard notch too small"
+# the housed tongues: inside the panel, in a relieved post, and the un-housed bottoms on the post faces
+def housed(guest, host, probe):
+    assert vol(probe & guest) > probe.volume * 0.999, "probe not inside guest"
+    assert vol(probe & host) < 1e-6, "host not relieved for the guest"
+
+
+housed(part("end"), part("post_front"), _box(END_X0 + 0.3, END_Y1 - GROOVE_D + 0.3, (TONGUE_Z0 + TOP_Z0) / 2, T18 - 0.6, GROOVE_D - 0.6, 10))
+housed(part("end"), part("post_rear"), _box(END_X0 + 0.3, END_Y0 + 0.3, (TONGUE_Z0 + TOP_Z0) / 2, T18 - 0.6, GROOVE_D - 0.6, 10))
+housed(part("back"), part("post_rear"), _box(BACK_X0 + 0.3, BACK_Y0 + 0.3, (TONGUE_Z0 + TOP_Z0) / 2, GROOVE_D - 0.6, T12 - 0.6, 10))
+_butt = (end_l & _box(END_X0 - 1, -1, PANEL_Z0, T18 + 2, ALCOVE_D, NOTCH_H)).bounding_box()
+assert abs(_butt.min.Y - (YB0 + POST)) < 1e-6 and abs(_butt.max.Y - YF0) < 1e-6, "end's bottom not on the post faces"
+_butt = (back & _box(-1, BACK_Y0 - 1, PANEL_Z0, ALCOVE_W + 2, T12 + 2, NOTCH_H)).bounding_box()
+assert abs(_butt.min.X - POST_IN_L) < 1e-6 and abs(_butt.max.X - POST_IN_R) < 1e-6, "back's bottom not on the post faces"
+assert PANEL_Z0 <= GROOVE_STOP < TONGUE_Z0 and GROOVE_CLR >= T18 / 2 + 0.25 * IN
+# the post groove ends below the tongue and above the panel bottom: wood below GROOVE_STOP, air above
+_grv_air = _box(END_X0 + 0.3, END_Y1 - GROOVE_D + 0.3, GROOVE_STOP + 0.5, T18 - 0.6, GROOVE_D - 0.6, 2)
+assert vol(_grv_air & post_fl) < 1e-6, "front post groove does not reach GROOVE_STOP"
+_grv_wood = _box(END_X0 + 0.3, END_Y1 - GROOVE_D + 0.3, GROOVE_STOP - 2.5, T18 - 0.6, GROOVE_D - 0.6, 2)
+assert abs(vol(_grv_wood & post_fl) - _grv_wood.volume) < 1e-3, "front post groove runs below GROOVE_STOP"
+housed(part("bottom"), part("end"), _box(BOT_X0 + 0.5, (YB0 + POST + CASE_D) / 2, BOT_Z0 + 0.5, RABBET_D - 1, 10, T18 - 1))
+housed(part("bottom"), part("back"), _box(XC - 5, BOT_Y0 + 0.5, BOT_Z0 + 0.5, 10, RABBET_D - 1, T18 - 1))
+housed(part("partition"), part("bottom"), _box(PART_X0 + 0.5, CASE_D / 2, PART_Z0 + 0.5, T18 - 1, 10, DADO_D - 1))
+housed(part("cleat"), part("partition"), _box(PART_X0 + 0.5, CLEAT_Y0 + 0.5, CLEAT_Z0 + 0.5, T18 - 1, TS - 1, 10))
+# the bottom's notches clear the posts and the bottom reaches the posts' inner faces
+for pn in ("post_fl", "post_rl"):
+    assert vol(dict(INST)[pn] & bottom) < 1e-6
+assert abs((bottom & _box(POST_IN_L - 1, YF0 + 1, BOT_Z0, 2, 5, T18)).volume - 1 * 5 * T18) < 1e-3, "bottom short of the post's inner face"
 
 # Blum
 assert abs(BOX_IN_W - (OPEN_W - UM_WIDTH_LOSS)) < 1e-6
 assert abs(BOX_Z0 - BOT_Z1 - UM_BOTTOM_CLEAR) < 1e-6
 assert TOP_Z0 - (BOX_Z0 + BOX_H) >= UM_TOP_CLEAR, "box too tall for the opening"
 assert abs(BOX_D - SLIDE_LEN) < 1e-6
-assert CASE_D - BACK_Y1 >= UM_MIN_DEPTH, "case too shallow for the 21 in runner"
-assert BOX_Y0 > NAILER_Y1 and BOX_Y0 > BACK_Y1, "box hits the nailer or back"
+assert CASE_D - BACK_Y1 >= UM_MIN_DEPTH, f"case too shallow for the 21 in runner on the partition side: {CASE_D - BACK_Y1:.1f} < {UM_MIN_DEPTH}"
+_runner_rear = YF1 - RUNNER_SETBACK - RUNNER_LEN
+assert UM_BRACKET_MIN <= _runner_rear - BACK_Y1 <= UM_BRACKET_MAX, "rear bracket range on the post side"
+assert UM_BRACKET_MIN <= (YF1 - RUNNER_SETBACK - SLIDE_LEN) - BACK_Y1 <= UM_BRACKET_MAX, "rear bracket range if the runner is nominal length"
+assert UM_SCREW_Y[1] + RUNNER_SETBACK < POST, "runner front screws run past the post"
+assert BOX_Y0 > CLEAT_Y1 and BOX_Y0 > BACK_Y1, "box hits the cleat or back"
 assert T12 - UM_HOOK_BORE[1] >= 1.9, "hook bore would break through the back"   # a 2 mm skin; test-drill scrap first
 _dia, _depth, _off, _up = UM_HOOK_BORE
 _bx = _dl[0].bounding_box().min.X + T12 + _off
@@ -489,7 +518,6 @@ _probe_air = Pos(_bx, BOX_Y0 + 1, BOX_Z0 + _up) * Rot(-90, 0, 0) * Cylinder(_dia
 assert vol(_probe_air & part("drawer_back")) < 1e-3, "hook bore not cut"
 _probe_wood = _box(_bx - 1, BOX_Y0 + _depth + 0.3, BOX_Z0 + _up - 1, 2, T12 - _depth - 0.6, 2)
 assert abs(vol(_probe_wood & part("drawer_back")) - _probe_wood.volume) < 1e-3, "no wood between the bore and the back's front face"
-
 _sx = _dl[0].bounding_box().min.X + T12
 _notch_air = _box(_sx + 0.5, BOX_Y0 + 0.5, BOX_Z0 + 0.5, UM_HOOK_NOTCH_W - 1, T12 - 1, UM_HOOK_NOTCH_H - 1)
 assert vol(_notch_air & part("drawer_back")) < 1e-3, "rear notch not cut"
@@ -497,18 +525,6 @@ _notch_wood = _box(_sx + UM_HOOK_NOTCH_W + 0.3, BOX_Y0 + 0.5, BOX_Z0 + 0.5, 2, T
 assert abs(vol(_notch_wood & part("drawer_back")) - _notch_wood.volume) < 1e-3, "rear notch too wide"
 assert abs((BOX_Z0 + UM_RECESS) - (BOX_Z0 + UM_HOOK_NOTCH_H)) < 1e-6, "notch not flush with the bottom"
 
-
-# housed joints measured from the geometry
-def housed(guest, host, probe):
-    assert vol(probe & guest) > probe.volume * 0.999, "probe not inside guest"
-    assert vol(probe & host) < 1e-6, "host not relieved for the guest"
-
-
-housed(part("bottom"), part("end"), _box(BOT_X0 + 0.5, CASE_D / 2, BOT_Z0 + 0.5, RABBET_D - 1, 10, T18 - 1))
-housed(part("partition"), part("bottom"), _box(PART_X0 + 0.5, CASE_D / 2, PART_Z0 + 0.5, T18 - 1, 10, DADO_D - 1))
-housed(part("back"), part("end"), _box(BOT_X0 + PLAY / 2 + 0.2, BACK_Y0 + 0.5, (BOT_Z1 + TOP_Z0) / 2, 4, T6 - 1, 10))
-housed(part("back"), part("bottom"), _box(XC - 5, BACK_Y0 + 0.5, PART_Z0 + PLAY / 2 + 0.2, 10, T6 - 1, 4))
-housed(part("nailer"), part("partition"), _box(PART_X0 + 0.5, NAILER_Y0 + 0.5, NAILER_Z0 + 0.5, T18 - 1, TS - 1, 10))
 housed(part("front_panel"), part("front_stile"),
        _box(FRONT_X0[0] + STILE_W - TONGUE_L + 0.3, GY0 + 0.3, FRONT_Z0 + FRONT_H / 2, TONGUE_L - 0.6, TONGUE_T - 0.6, 10))
 housed(part("front_rail"), part("front_stile"),
@@ -529,17 +545,18 @@ assert abs(_bb_b.min.Y - _bb_k.max.Y) < 1e-6, "bottom does not butt the back"
 assert abs(part("front_stile").volume - (STILE_W * FACE_T * FRONT_H - TONGUE_L * TONGUE_T * FRONT_H)) < 1e-3
 assert abs(part("front_panel").volume - (PW * PH * TONGUE_T + (PW - 2 * TONGUE_L) * (PH - 2 * TONGUE_L) * (PANEL_T - TONGUE_T))) < 1e-3
 assert abs(part("drawer_bottom").volume - (BOX_W - 2 * (T12 - RABBET_D) - PLAY) * (BOTTOM_D - PLAY / 2) * T12) < 1e-3
-if BASE == "legs":
-    assert abs(part("leg").volume - LEG_SQ * LEG_SQ * CLEAR) < 1e-3
+_end_vol = (T18 * (END_Y1 - END_Y0) * (TOP_Z0 - PANEL_Z0) - 2 * GROOVE_D * T18 * NOTCH_H
+            - RABBET_D * T18 * (END_Y1 - END_Y0 - 2 * GROOVE_D))
+assert abs(part("end").volume - _end_vol) < 1e-3, part("end").volume
 
 assembly = Compound(children=[s for _, s in INST] + [s for _, s in HW])
 
 # ================================================================ outputs
 TMP = os.environ.get("TMP_STL")
 if TMP:
-    SUBSETS = {   # SUBSET=case|base|fronts|drawers|nocushion|drawer1 picks instances by name prefix for the renders
-        "case": ("end_", "bottom", "partition", "nailer", "back"),
-        "base": ("leg_", "brail_", "blade_"),
+    SUBSETS = {   # SUBSET=case|posts|fronts|drawers|nocushion|drawer1 picks instances by name prefix for the renders
+        "case": ("post_", "end_", "bottom", "partition", "cleat", "back"),
+        "posts": ("post_",),
         "fronts": ("stile_", "rail_", "panel_"),
         "front1": ("stile_l", "rail_l", "panel_l"),
         "drawers": ("dside_", "dfront_", "dback_", "dbot_"),
@@ -551,36 +568,28 @@ if TMP:
     export_stl(Compound(children=picked), TMP)
 
 if os.environ.get("EXPORT"):
-    BASE_LINES = {
-        "legs": [{"part": "Pocket screws #8 x 1-1/4 fine", "qty": 20, "unit": "ea", "material": "hardware",
-                  "notes": "base rails into the legs (2 per joint, 12) and up into the case bottom (10)"},
-                 {"part": "Wood screws #8 x 2", "qty": 8, "unit": "ea", "material": "hardware",
-                  "notes": "down through the case bottom into the leg tops, two per leg, under the drawer boxes"}],
-        "blades": [{"part": "Pocket screws #8 x 1-1/4 fine", "qty": 8, "unit": "ea", "material": "hardware",
-                    "notes": "back rail into the blades (4) and up into the case bottom (4)"},
-                   {"part": "Wood screws #8 x 2", "qty": 8, "unit": "ea", "material": "hardware",
-                    "notes": "down through the case bottom into the blades' top edges, four per blade"}],
-        "gables": [{"part": "Pocket screws #8 x 1-1/4 fine", "qty": 8, "unit": "ea", "material": "hardware",
-                    "notes": "stretcher into the gables (4) and up into the case bottom (4)"}],
-    }
     HARDWARE_LINES = [
         {"part": "Blum TANDEM plus BLUMOTION 563H, 21 in (563H5330B)", "qty": 2, "unit": "pair",
-         "material": "hardware", "notes": "one pair per drawer; 90 lb dynamic; runner front sits 3/32 behind the case front edge"},
+         "material": "hardware", "notes": "one pair per drawer; 90 lb dynamic; runner fronts 3/32 behind the fronts' back faces"},
+        {"part": "Blum rear mounting brackets 295.3750.02", "qty": 2, "unit": "ea", "material": "hardware",
+         "notes": "post-side runners: the runner front screws into the post's inner face (#6 x 5/8), the rear sits on a "
+                  "bracket screwed to the 1/2 back with #6 x 1/2; the partition-side runners mount to the partition as in a frameless case"},
         {"part": "Blum locking devices T51.1901 R and L", "qty": 2, "unit": "pair", "material": "hardware",
          "notes": "front corners under the drawer bottom, screwed into the 1/2 box front: use #6 x 1/2 so the points stay inside it"},
         {"part": "Brass bar pull, 8 in", "qty": 2, "unit": "ea", "material": "hardware",
          "notes": "break-away machine screws long enough for 1/2 panel + 1/2 box front"},
-        {"part": "Figure-8 tabletop fasteners", "qty": 4, "unit": "ea", "material": "hardware", "notes": "nailer to top"},
+        {"part": "Figure-8 tabletop fasteners", "qty": 4, "unit": "ea", "material": "hardware", "notes": "cleat to top"},
         {"part": "Pocket screws #8 x 1-1/4 fine", "qty": 6, "unit": "ea", "material": "hardware",
          "notes": "ends and partition to the top, near the front"},
-        *BASE_LINES[BASE],
+        {"part": "Wood screws #8 x 1", "qty": 6, "unit": "ea", "material": "hardware",
+         "notes": "cleat to the back from inside, countersunk; bottom to the partition from below"},
         {"part": "Iron-on maple edge banding, 13/16", "qty": 1, "unit": "roll", "material": "hardware",
-         "notes": f"the ends' front and bottom edges (about {inch(2 * ((TOP_Z0 - END_Z0) + (CASE_D - CASE_Y0)))} in all), painted with them"},
+         "notes": f"the ends' bottom edges (about {inch(2 * (END_Y1 - END_Y0))} in all), painted with them"},
         {"part": "Bench cushion", "qty": 1, "unit": "ea", "material": "soft goods",
          "notes": f"about {inch(TOP_W - 0.5 * IN)} x {inch(TOP_D)} x {inch(CUSHION_H)}, boxed"},
     ]
     write_cut_list(PARTS, f"{PROJ}/cutlist.md", csv_path=f"{PROJ}/cutlist.csv",
-                   title=f"Freestanding bench {inch(TOP_W)} x {inch(TOP_D)} (two drawers, {inch(CLEAR)} clear floor, {BASE})",
+                   title=f"Freestanding bench {inch(TOP_W)} x {inch(TOP_D)} on {inch(POST)} in posts (two drawers, {inch(CLEAR)} in clear floor)",
                    units="in", denom=32, extra_lines=HARDWARE_LINES)
     export_step(assembly, f"{PROJ}/freestanding_bench.step")
     print("exported cutlist + step")
@@ -591,8 +600,8 @@ if os.environ.get("SHOW"):
     show(*[s for _, s in INST + HW], names=[n for n, _ in INST + HW],
          reset_camera=(Camera.RESET if os.environ["SHOW"] == "reset" else Camera.KEEP))
 
-print("OK  base:", BASE, " parts:", [p["name"] for p in PARTS])
-print(f"top {inch(TOP_W)} x {inch(TOP_D)} at {inch(SEAT_Z)}  case {inch(CASE_W)} x {inch(CASE_D - CASE_Y0)} x {inch(TOP_Z0 - BOT_Z0)}  "
-      f"clear floor {inch(CLEAR)}  fronts {inch(FRONT_W)} x {inch(FRONT_H)}  overhang {inch(OVERHANG)}  "
-      f"opening {inch(OPEN_W)} x {inch(OPEN_H)}  box {inch(BOX_W)} x {inch(BOX_H)} x {inch(BOX_D)} "
-      f"(inside height {inch(BOX_H - UM_RECESS - T12)})")
+print("OK  parts:", [p["name"] for p in PARTS])
+print(f"top {inch(TOP_W)} x {inch(TOP_D)} at {inch(SEAT_Z)}  posts {inch(POST)} sq x {inch(TOP_Z0)}, outer faces {inch(X1 - X0)} apart  "
+      f"clear floor {inch(CLEAR)}  fronts {inch(FRONT_W)} x {inch(FRONT_H)}  opening {inch(OPEN_W)} x {inch(OPEN_H)}  "
+      f"box {inch(BOX_W)} x {inch(BOX_H)} x {inch(BOX_D)} (inside height {inch(BOX_H - UM_RECESS - T12)})  "
+      f"inside depth {CASE_D - BACK_Y1:.1f} mm (Blum 557)  bracket gap {YF1 - RUNNER_SETBACK - RUNNER_LEN - BACK_Y1:.1f} mm")

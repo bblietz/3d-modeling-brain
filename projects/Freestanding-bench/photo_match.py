@@ -29,11 +29,11 @@ VAULT = "/home/brian/ClaudeProjects/3d-modeling-brain"
 PROJ = f"{VAULT}/projects/Freestanding-bench"
 sys.path.insert(0, PROJ)
 from freestanding_bench import *  # noqa: E402,F403
-from freestanding_bench import INST, HW, _box, BASE  # noqa: E402
+from freestanding_bench import INST, HW, _box  # noqa: E402
 from build123d import Cylinder, Pos  # noqa: E402
 
 PHOTO = f"{PROJ}/images/space-photo.png"
-OVERLAY = f"{PROJ}/images/alcove-overlay-{BASE}.png"
+OVERLAY = f"{PROJ}/images/alcove-overlay.png"
 WIREFRAME = f"{PROJ}/images/alcove-wireframe.png"
 
 # ---------------------------------------------------------------- the photo (pixels, measured 2026-10-23)
@@ -106,7 +106,7 @@ LAMP = (255, 250, 228)
 COLOR = {
     "stile_": PAINT, "rail_": PAINT, "end_": PAINT,          # fronts and the show-face ends painted white
     "panel_": PANEL_PAINT, "top": MAPLE, "cushion": LINEN, "pull_": BRASS, "shelf_": MAPLE,
-    "leg_": MAPLE, "brail_": MAPLE, "blade_": MAPLE,          # the base is bare maple like the top
+    "post_": MAPLE,                                           # the corner posts are bare maple like the top
     "soffit": PAINT, "light_": LAMP,
 }
 LIGHT = np.array([-0.3, -0.55, 0.78])     # toward the light, in (X, d, Z): from the room, above, a little left
@@ -200,7 +200,7 @@ def bench_outline():
         "cushion top front": [(xl, d_front, z_cush), (xr, d_front, z_cush)],
         "wood top front edge": [(xl, d_front, z_top), (xr, d_front, z_top)],
         "top underside": [(xl, d_front, z_top - TS / IN), (xr, d_front, z_top - TS / IN)],
-        "case underside": [(X0 / IN - ALCOVE_W_IN / 2, d_face, z_clear), (X1 / IN - ALCOVE_W_IN / 2, d_face, z_clear)],
+        "case underside": [(POST_IN_L / IN - ALCOVE_W_IN / 2, d_face, z_clear), (POST_IN_R / IN - ALCOVE_W_IN / 2, d_face, z_clear)],
     }
     for i, x0 in enumerate(FRONT_X0):
         X0f = x0 / IN - ALCOVE_W_IN / 2
@@ -211,12 +211,13 @@ def bench_outline():
         s = STILE_W / IN
         lines[f"panel {i}"] = [(X0f + s, d_face, z0 + s), (X0f + w - s, d_face, z0 + s),
                                (X0f + w - s, d_face, z0 + h - s), (X0f + s, d_face, z0 + h - s), (X0f + s, d_face, z0 + s)]
-    for n, s in INST:                              # the base, as seen: front faces of the legs or blades
-        if n.startswith(("leg_", "blade_")):
+    for n, s in INST:                              # the front posts' faces, floor to the top's underside
+        if n.startswith("post_f"):
             bb = s.bounding_box()
             Xa, Xb = bb.min.X / IN - ALCOVE_W_IN / 2, bb.max.X / IN - ALCOVE_W_IN / 2
             df = ALCOVE_D_IN - bb.max.Y / IN
-            lines[n] = [(Xa, df, 0), (Xb, df, 0), (Xb, df, z_clear), (Xa, df, z_clear), (Xa, df, 0)]
+            zt = TOP_Z0 / IN
+            lines[n] = [(Xa, df, 0), (Xb, df, 0), (Xb, df, zt), (Xa, df, zt), (Xa, df, 0)]
     for i, z0 in enumerate(SHELF_Z0):
         dz = ALCOVE_D_IN - SHELF_D / IN
         xw0, xw1 = -ALCOVE_W_IN / 2, ALCOVE_W_IN / 2
@@ -278,9 +279,9 @@ def check(path):
         print(f"pull {i}: bar at y {v} from x {ua} to {ub} (projected y {vc:.0f}, x {u0:.0f} to {u1:.0f}; "
               f"{(vc - v) / s_pull:+.2f} in up, {((ua + ub) / 2 - uc) / s_pull:+.2f} in across); "
               f"length {(ub - ua + 1) / s_pull:.2f} in, designed 8.00")
-    # the front legs (or blades): a maple column where the projection says, between the floor and the case underside;
-    # the back legs are hidden behind the case from this camera, so they are not measured
-    for n in [n for n, _ in INST if n.startswith("blade_") or (n.startswith("leg_") and n.endswith("f"))]:
+    # the front posts: a maple column where the projection says, floor to the top's underside; the rear posts are
+    # hidden behind the case from this camera, so they are not measured
+    for n in [n for n, _ in INST if n.startswith("post_f")]:
         pts = [project(*p) for p in lines[n]]
         uc = (pts[0][0] + pts[1][0]) / 2
         v_top, v_bot = pts[2][1], pts[0][1]
@@ -302,7 +303,7 @@ def check(path):
         top_found, bot_found = v0 + best[0], v0 + best[1] - 1
         print(f"{n}: maple from y {top_found} to {bot_found} at x {uc:.0f} (projected {v_top:.0f} to {v_bot:.0f}; top "
               f"{(v_top - top_found) / s_leg:+.2f} in, foot {(v_bot - bot_found) / s_leg:+.2f} in); "
-              f"height {(bot_found - top_found + 1) / s_leg:.2f} in, designed {CLEAR / IN:.2f}")
+              f"height {(bot_found - top_found + 1) / s_leg:.2f} in, designed {TOP_Z0 / IN:.2f}")
     print(f"scale at the drawer faces: {s_face:.2f} px per in; 1 in of height error is {s_face:.0f} px")
 
 

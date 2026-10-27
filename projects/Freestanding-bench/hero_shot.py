@@ -29,21 +29,22 @@ from ocp_vscode import Camera, save_screenshot, set_port, show  # noqa: E402
 OUT = os.environ.get("HERO_OUT", f"{PROJ}/images/hero.png")
 COLORS = {
     "hard maple": "#e2c48f",
+    "soft maple": "#e2c48f",
     "3/4 maple ply": "#e9d9b0",
-    "1/4 maple ply": "#ecdfbc",
+    "1/2 maple ply": "#ecdfbc",
     "1/2 paint-grade panel": "#d9cbb0",
     "1/2 Baltic birch": "#efe2bd",
 }
 HW_COLORS = {"slide": "#8c8f94", "pull": "#b8903f", "cushion": "#c9bda8"}
-PAINTED = {"front_stile", "front_rail", "front_panel", "end"}   # painted white; the ends are show faces now
+PAINTED = {"front_stile", "front_rail", "front_panel", "end", "back"}   # painted white; the ends are show faces now
 PAINT_WHITE = "#fbfbf8"
 
-# instance name -> registry part (names are built as <part stem>_<l|r|...>)
+# instance name -> registry part (names are built as <part stem>_<l|r|...>, the posts by exact name)
 STEM = {
-    "end": "end", "bottom": "bottom", "partition": "partition", "nailer": "nailer", "back": "back", "top": "top",
+    "post_fl": "post_front", "post_fr": "post_front", "post_rl": "post_rear", "post_rr": "post_rear",
+    "end": "end", "bottom": "bottom", "partition": "partition", "cleat": "cleat", "back": "back", "top": "top",
     "stile": "front_stile", "rail": "front_rail", "panel": "front_panel",
     "dside": "drawer_side", "dfront": "drawer_front", "dback": "drawer_back", "dbot": "drawer_bottom",
-    "leg": "leg", "brail_end": "base_end_rail", "brail_back": "base_back_rail", "blade": "blade",
 }
 MATERIAL = {p["name"]: p["material"] for p in PARTS}
 

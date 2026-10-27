@@ -27,14 +27,15 @@ sys.path.insert(0, f"{VAULT}/scripts")
 from cutlist import inch_frac  # noqa: E402
 
 BUILT_IN_URL = "https://claude.ai/artifact/YQFcx4g5x64K83yhDHvGMf"   # the built-in design's shop page, kept
-OPTIONS_URL = "https://claude.ai/artifact/QLCHadrNJZDeDjqka9yond"                                                      # the base options page (legs, blades, gables); filled when published
+OPTIONS_URL = "https://claude.ai/artifact/QLCHadrNJZDeDjqka9yond"   # the base options page; records Brian's pick A (posts, 2026-10-26)
 
-CASE_ORDER = ["hard maple", "3/4 maple ply", "1/4 maple ply"]
+CASE_ORDER = ["soft maple", "hard maple", "3/4 maple ply", "1/2 maple ply"]
 DRAWER_ORDER = ["hard maple", "1/2 paint-grade panel", "1/2 Baltic birch"]
 CASE_LABEL = {
-    "hard maple": "Hard maple: top, nailer, legs and base rails (bare, Osmo Natural)",
-    "3/4 maple ply": "3/4 in maple plywood (measure the sheet): ends (show faces, painted white, edges banded), bottom, partition",
-    "1/4 maple ply": "1/4 in maple plywood (measure the sheet): back",
+    "soft maple": "Soft maple: posts and the rear cleat (posts bare, Osmo Natural)",
+    "hard maple": "Hard maple: top (bare, Osmo Natural)",
+    "3/4 maple ply": "3/4 in maple plywood (measure the sheet): ends (show faces, painted white, bottom edges banded), bottom, partition",
+    "1/2 maple ply": "1/2 in maple plywood (measure the sheet): back, housed in the rear posts",
 }
 DRAWER_LABEL = {
     "hard maple": "Drawer front frames, hard maple, painted white: stiles and rails",
@@ -53,35 +54,41 @@ def fi(mm):
 
 HARDWARE = [
     ("2 pair", "Blum TANDEM plus BLUMOTION 563H, 21 in (563H5330B)",
-     "one pair per drawer; 90 lb dynamic; runner front 3/32 behind the case front edge; no rear brackets in a frameless case"),
+     f"one pair per drawer; 90 lb dynamic; runner fronts {fi(M.UM_FRONT_GAP)} behind the fronts' back faces"),
+    ("2", "Blum rear mounting brackets 295.3750.02",
+     "post-side runners: the runner front screws into the post's inner face (#6 x 5/8), the rear sits on a bracket "
+     "screwed to the 1/2 back with #6 x 1/2; the partition-side runners mount to the partition as in a frameless case"),
     ("2 pair", "Blum locking devices T51.1901 R and L",
-     "front corners under the drawer bottom, screwed into the 1/2 box front with #6 x 1/2"),
+     "front corners under the drawer bottom, screwed into the 1/2 box front with #6 x 1/2 so the points stay inside it"),
     ("2", "Brass bar pull, 8 in",
      "centered on each front; break-away machine screws through the 1/2 panel plus the 1/2 box front"),
-    ("4", "Figure-8 tabletop fasteners", "nailer to top; recess centered 1/4 in from the front face so it opens through"),
+    ("4", "Figure-8 tabletop fasteners", "cleat to top; recess centered 1/4 in from the front face so it opens through"),
     ("6", "Pocket screws #8 x 1-1/4 fine", "ends and partition to the top, near the front"),
-    ("20", "Pocket screws #8 x 1-1/4 fine", "base rails into the legs (2 per joint, 12) and up into the case bottom (10)"),
-    ("8", "Wood screws #8 x 2", "down through the case bottom into the leg tops, two per leg, under the drawer boxes"),
+    ("6", "Wood screws #8 x 1", "cleat to the back from inside, countersunk; bottom to the partition from below"),
     ("8", "Wood screws #8 x 7/8", "fronts to the box fronts, through oversize holes, pre-drilled"),
     ("1 roll", "Iron-on maple edge banding, 13/16",
-     f"the ends' front and bottom edges, about {fi(2 * ((M.TOP_Z0 - M.END_Z0) + (M.CASE_D - M.CASE_Y0)))} in all, painted with them"),
+     f"the ends' bottom edges, about {fi(2 * (M.END_Y1 - M.END_Y0))} in all, painted with them"),
     ("1", "Bench cushion", f"about {fi(M.TOP_W - 0.5 * M.IN)} x {fi(M.TOP_D)} x {fi(M.CUSHION_H)}, boxed, the full depth of the top"),
 ]
 # the numbers that moved from the built-in design, read from the model so they cannot drift from the cut list
 MOVED = [
-    ("Clear floor under the case", f"{fi(M.CLEAR)} in (the tallest current Roomba is under 4 in)"),
-    ("Drawer box", f"{fi(M.BOX_H)} in tall, {fi(M.BOX_H - M.UM_RECESS - M.T12)} in inside (was 8-1/2 in)"),
-    ("Drawer fronts", f"{fi(M.FRONT_W)} x {fi(M.FRONT_H)} in (were 31-3/32 x 10-1/8)"),
-    ("Top", f"{fi(M.TOP_W)} x {fi(M.TOP_D)} in, {fi(M.SIDE_AIR)} in of air to each wall (was 66 x 24-5/8, wall to wall)"),
-    ("Case", f"{fi(M.CASE_W)} x {fi(M.CASE_D - M.CASE_Y0)} x {fi(M.TOP_Z0 - M.BOT_Z0)} in, back {fi(M.WALL_GAP)} in off the wall"),
-    ("Legs", f"{fi(M.LEG_SQ)} x {fi(M.LEG_SQ)} x {fi(M.CLEAR)} in, outer faces {fi(M.LEG_IN_X)} in from the case ends, "
-             f"{fi(M.LEG_IN_FRONT)} in behind the case front edge and {fi(M.LEG_IN_BACK)} in inside the case back"),
-    ("Overall", f"{fi(M.TOP_W)} x {fi(M.TOP_D)} x {fi(M.SEAT_Z + M.CUSHION_H)} in with the cushion; wood top at {fi(M.SEAT_Z)} in, seat {fi(M.SEAT_Z + M.CUSHION_H)} in, unchanged"),
+    ("Posts", f"{fi(M.POST)} x {fi(M.POST)} x {fi(M.TOP_Z0)} in soft maple, {fi(M.CHAMFER)} in chamfers, outer faces "
+              f"{fi(M.X1 - M.X0)} in apart; the rear posts notched {fi(M.BB_NOTCH_D)} x {fi(M.BB_NOTCH_H)} in at the floor "
+              "for the baseboard (skip it if the baseboard comes out)"),
+    ("Clear floor under the case", f"{fi(M.CLEAR)} in (the tallest current Roomba is under 4 in); only the posts reach the floor"),
+    ("Top", f"{fi(M.TOP_W)} x {fi(M.TOP_D)} in, {fi(M.SIDE_AIR)} in of air to each wall, rear edge {fi(M.WALL_GAP)} in off the "
+            "back wall (was 66 x 24-5/8, wall to wall)"),
+    ("Drawer fronts", f"{fi(M.FRONT_W)} x {fi(M.FRONT_H)} in between the front posts (were 31-3/32 x 10-1/8)"),
+    ("Drawer box", f"{fi(M.BOX_W)} x {fi(M.BOX_H)} x {fi(M.BOX_D)} in, {fi(M.BOX_H - M.UM_RECESS - M.T12)} in inside (was 8-1/2 in tall)"),
+    ("Runner depth", f"{M.CASE_D - M.BACK_Y1:.1f} mm from the fronts' back faces to the back's inside face against Blum's "
+                     f"{M.UM_MIN_DEPTH:.0f} for the 21 in runner; the rear bracket gap passes for a runner body of 533 to 547 mm"),
+    ("Overall", f"{fi(M.TOP_W)} x {fi(M.TOP_D)} x {fi(M.SEAT_Z + M.CUSHION_H)} in with the cushion; wood top at {fi(M.SEAT_Z)} in, "
+                f"seat {fi(M.SEAT_Z + M.CUSHION_H)} in, unchanged"),
 ]
 ASSEMBLY_DIR = "images/assembly"
 EXPLODED = f"{ASSEMBLY_DIR}/exploded.png"
 SUBS = {
-    "step-05": ("base-exploded.png", "the base frame, pulled apart: four 2 in square legs, two end rails and the back rail"),
+    "step-02": ("end-exploded.png", "one end, pulled apart: the front and rear posts with their stopped grooves, the end panel with its notched bottom corners"),
     "step-07": ("drawer-exploded.png", "one drawer box, pulled apart: sides, front, back and bottom, all 1/2 Baltic birch"),
     "step-08": ("front-exploded.png", "one drawer front, pulled apart: maple stiles and rails around the inset panel, all painted white"),
 }
@@ -154,16 +161,17 @@ def group_section(label, rows):
 
 
 HERO = "images/hero.png"
-NOOK = "images/bench-in-nook-guided-web.jpg"    # photo_match.py overlay made photoreal by Gemini (render_in_room.py guided); the styled picture with the dogs follows the base pick
-NOOK_ALT = ("the freestanding bench in the alcove: all-white drawer fronts with brass pulls, maple top, cushion, four maple legs "
-            "with clear floor under the case, the baseboard behind it, three maple shelves above, a dropped soffit with two downlights")
+NOOK = "images/bench-in-nook-dogs-web.jpg"    # photo_match.py overlay made photoreal by Gemini (render_in_room.py guided -> styled -> dogs)
+NOOK_ALT = ("the freestanding bench in the alcove: four proud maple corner posts floor to top, all-white drawer fronts with brass "
+            "pulls between them, maple top, cushion with Maizy and Franco on it, pillows and a throw, clear floor under the case, "
+            "three styled maple shelves above, a dropped soffit with two downlights, a jute rug in front")
 NOOK_CAPTION = ("the freestanding bench in the alcove at true size: the CAD model projected into the photo of the alcove through a "
-                "camera matched to it, then given its materials by AI (white ends, frames and panels, maple top, legs and rails, "
-                f"cushion). {fi(M.CLEAR)} in of clear floor under the case, the alcove's baseboard left in place, {fi(M.SIDE_AIR)} in of "
-                f"air to each wall. Wood top {fi(M.SEAT_Z)} in, seat {fi(M.SEAT_Z + M.CUSHION_H)} in with the cushion. No dogs or "
-                "props yet: the styled picture with Maizy, Franco and the client's accessories follows once the base is picked. The "
-                "three maple shelves and the 12 in dropped soffit with two 4 in recessed lights are picture-only ideas from the "
-                "client's reference picture; none of that is in this cut list. Tap to zoom")
+                "camera matched to it, then given its materials by AI (maple posts, white ends, frames and panels, maple top, "
+                f"cushion), then the client's dogs Maizy and Franco, the pillows, throw, shelf objects and rug from the reference "
+                f"picture. {fi(M.CLEAR)} in of clear floor under the case between the posts, the alcove's baseboard left in place, "
+                f"{fi(M.SIDE_AIR)} in of air to each wall. Wood top {fi(M.SEAT_Z)} in, seat {fi(M.SEAT_Z + M.CUSHION_H)} in with the "
+                "cushion. The three maple shelves and the 12 in dropped soffit with two 4 in recessed lights are picture-only ideas "
+                "from the client's reference picture; none of that is in this cut list. Tap to zoom")
 
 
 def sub_figure(fname, caption):
@@ -220,8 +228,9 @@ def build():
                        n_case=sum(r["qty"] for r in case), n_drawers=sum(r["qty"] for r in drawers), hero=HERO, nook=nook,
                        moved=moved, options=options, built_in=BUILT_IN_URL, exploded=EXPLODED, n_steps=len(STEPS),
                        clear=fi(M.CLEAR), top_w=fi(M.TOP_W), top_d=fi(M.TOP_D), air=fi(M.SIDE_AIR), seat=fi(M.SEAT_Z),
-                       seat_c=fi(M.SEAT_Z + M.CUSHION_H), box_h=fi(M.BOX_H), case_w=fi(M.CASE_W), wall_gap=fi(M.WALL_GAP),
-                       leg=fi(M.LEG_SQ), rail_t=fi(M.RAIL_T), rail_h=fi(M.RAIL_H), leg_in_back=fi(M.LEG_IN_BACK),
+                       seat_c=fi(M.SEAT_Z + M.CUSHION_H), box_h=fi(M.BOX_H), wall_gap=fi(M.WALL_GAP),
+                       post=fi(M.POST), chamfer=fi(M.CHAMFER), setback=fi(M.SETBACK), front_setback=fi(M.FRONT_SETBACK),
+                       bb_notch_d=fi(M.BB_NOTCH_D), bb_notch_h=fi(M.BB_NOTCH_H), bb_max=fi(M.WALL_GAP + M.BB_NOTCH_D - 0.25 * M.IN),
                        min_open=fi(M.TOP_W + 2 * M.SIDE_AIR))
 
 
@@ -345,12 +354,12 @@ PAGE = """<title>Freestanding Bench Cut List</title>
 </style>
 
 <div class="wrap">
-  <figure class="dwg hero" tabindex="0"><img src="{hero}" alt="the whole bench on its legs, front-left view from the CAD viewer"><figcaption>the whole bench, from the CAD viewer; tap to zoom</figcaption></figure>
+  <figure class="dwg hero" tabindex="0"><img src="{hero}" alt="the whole bench on its four corner posts, front-left view from the CAD viewer"><figcaption>the whole bench, from the CAD viewer; tap to zoom</figcaption></figure>
   <header>
     <p class="eyebrow">Freestanding bench &middot; {top_w} x {top_d} in &middot; {clear} in clear floor</p>
     <h1>Freestanding Bench Cut List</h1>
     <p>The client's change of 2026-10-26: the bench is now a freestanding piece with {clear} in of clear floor under it for the robot vacuum. The alcove's baseboard stays, the bench slides in with {air} in of air to each wall and its back {wall_gap} in off the wall. Kept from the built-in: all-white frame-and-panel fronts with brass pulls, the solid maple top at {seat} in (seat {seat_c} in with the cushion), two drawers on 21 in Blum 563H undermounts, 1/2 in Baltic birch boxes, Osmo Natural on the bare maple.</p>
-    <p>Changed: a {top_w} x {top_d} in top over a {case_w} in case, the case ends are show faces (painted white, edges banded), four {leg} in square maple legs on a C-frame of {rail_t} x {rail_h} in maple rails with no front rail, drawers {box_h} in tall instead of 8-1/2 (the {clear} in of floor come out of the drawers), no plinth, no scribe strips, no wall screws. The base style (legs, blades or gables) is Brian's pick on the {options}; this page documents the legs. The built-in design stays on <a href="{built_in}">its own shop page</a> in case the client goes back.</p>
+    <p>The base is decided: on 2026-10-26 Brian picked A of five leg options drawn from the drawer bench's legs. It is built the way that bench is: four proud {post} in square soft maple corner posts, floor to the underside of the top, {chamfer} in chamfers on all four vertical edges, the painted ends and the back housed in stopped grooves in the posts {setback} in behind the post faces, the drawer fronts running between the front posts {front_setback} in behind their faces. The earlier version on short legs under a box is superseded; the {options} records the pick. Drawers are {box_h} in tall instead of 8-1/2 (the {clear} in of floor come out of the drawers); no plinth, no scribe strips, no wall screws. The built-in design stays on <a href="{built_in}">its own shop page</a> in case the client goes back.</p>
     <p>{total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
     <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
   </header>
@@ -358,7 +367,7 @@ PAGE = """<title>Freestanding Bench Cut List</title>
 
   <div class="moved"><h2>Numbers that moved</h2><ul>{moved}</ul></div>
 
-  <div class="flag"><b>Measure the alcove at the floor, 16 in and 36 in, at the back wall and the pilaster faces, before cutting.</b> The piece is {top_w} in wide; if the opening is under {min_open} in anywhere, narrow the top. The baseboard stays: the back legs sit {leg_in_back} in inside the case back, so confirm the baseboard and shoe stand no more than 1-1/4 in off the wall. The low receptacle seen in the photo ends up behind the case; nothing can stay plugged into it.</div>
+  <div class="flag"><b>Measure the alcove at the floor, 16 in and 36 in, at the back wall and the pilaster faces, before cutting.</b> The piece is {top_w} in wide; if the opening is under {min_open} in anywhere, narrow the top. The baseboard stays: the rear posts are notched {bb_notch_d} x {bb_notch_h} in over it, so confirm the baseboard and shoe stand no more than {bb_max} in off the wall (if the baseboard comes out, skip the notch). The low receptacle seen in the photo ends up behind the case; nothing can stay plugged into it. Scrap-test the Blum hook bore in the 1/2 drawer backs (a 2 mm skin). Verify the 563H 21 in runner body length on Blum's sheet: the model assumes 547 mm and the rear bracket gap passes for 533 to 547.</div>
 
   <div class="big">
     <h2>Case<small>{n_case} pieces</small></h2>{case}
@@ -375,7 +384,7 @@ PAGE = """<title>Freestanding Bench Cut List</title>
 
   <div class="big">
     <h2>Assembly<small>{n_steps} steps, in order</small></h2>
-    <figure class="dwg hero" tabindex="0"><img src="{exploded}" alt="the whole bench pulled apart: base frame, case, back, partition, nailer, slides, drawer boxes, fronts, top, cushion"><figcaption>everything pulled apart along its assembly direction; tap to zoom</figcaption></figure>
+    <figure class="dwg hero" tabindex="0"><img src="{exploded}" alt="the whole bench pulled apart: posts, ends, back, cleat, bottom, partition, slides, drawer boxes, fronts, top, cushion"><figcaption>everything pulled apart along its assembly direction; tap to zoom</figcaption></figure>
     <ol class="steps">{notes}</ol>
   </div>
 

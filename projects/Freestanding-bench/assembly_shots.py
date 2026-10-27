@@ -5,10 +5,10 @@
 Writes images/assembly/exploded.png (the whole bench pulled apart), one
 step-NN.png per assembly step (parts added in that step in wood colors,
 everything already in place in pale grey), and three sub-assembly explosions
-(base frame, drawer box, drawer front). STEPS is also imported by
-make_cutlist_page.py, so the text and the pictures cannot drift apart.
-BASE=legs|blades|gables picks the base, as for the model; the STEPS text
-describes the legs base, which is what the shop page documents.
+(one end with its two posts, drawer box, drawer front). STEPS is also
+imported by make_cutlist_page.py, so the text and the pictures cannot drift
+apart. The bench stands on four proud corner posts (Brian's pick A,
+2026-10-26: the drawer bench's construction).
 
 Usage: .venv/bin/python projects/Freestanding-bench/assembly_shots.py
        ONLY=exploded|steps|subs to redo one group
@@ -24,41 +24,47 @@ VAULT = "/home/brian/ClaudeProjects/3d-modeling-brain"
 PROJ = f"{VAULT}/projects/Freestanding-bench"
 sys.path.insert(0, PROJ)
 from freestanding_bench import *  # noqa: E402,F403
-from freestanding_bench import INST, HW, BASE_NAMES, inch  # noqa: E402
+from freestanding_bench import INST, HW, inch  # noqa: E402
 
 OUT_DIR = f"{PROJ}/images/assembly"
 SETTLE = float(os.environ.get("SETTLE", "2.5"))
 
 # (file stem, title, instance-name prefixes added in this step, shop text); the numbers come from the model
 STEPS = [
-    ("step-01", "Ends and bottom",
-     ("end_", "bottom"),
-     f"Glue the case bottom into the rabbets along the bottom of both ends, rabbets and grooves facing in, grooves at "
-     f"the rear, show faces out: a {inch(CASE_W)} x {inch(CASE_D - CASE_Y0)} case, {inch(TOP_Z0 - BOT_Z0)} tall. Check for square."),
-    ("step-02", "Back",
-     ("back",),
-     "Slide the 1/4 back down the end grooves until it seats in the bottom groove and glue it all round. With no "
-     "wall screws it is what keeps the case square."),
-    ("step-03", "Partition",
+    ("step-01", "Posts",
+     ("post_",),
+     f"Four {inch(POST)} square soft maple posts, {inch(TOP_Z0)} long. Chamfer the four vertical edges {inch(CHAMFER)} "
+     f"first, full length, then cut the stopped grooves: the end-panel groove on the face toward the other post of that "
+     f"end, {inch(SETBACK)} in from the outer face, {inch(GROOVE_D)} deep, from {inch(GROOVE_STOP)} up and out the top; "
+     f"the rear posts also take the back's groove on the inner face, {inch(SETBACK)} in from the rear face, same stop. "
+     f"Notch the rear posts {inch(BB_NOTCH_D)} x {inch(BB_NOTCH_H)} across the rear face at the floor for the baseboard "
+     f"and shoe (skip it if the baseboard comes out). Drill the front posts' Blum runner screw holes on the inner face, "
+     f"{inch(UM_SCREW_Y[0] + RUNNER_SETBACK)} and {inch(UM_SCREW_Y[1] + RUNNER_SETBACK)} behind the front face."),
+    ("step-02", "End assemblies",
+     ("end_",),
+     f"Glue each end panel into its front and rear post: tongues in the grooves above the {inch(NOTCH_H)} notches, the "
+     f"notched bottom on the post faces, top edge flush with the post tops, show face out. Check that each end is square "
+     f"and both posts stand plumb before the glue sets."),
+    ("step-03", "Back and cleat",
+     ("back", "cleat"),
+     f"Slide the 1/2 back down the rear posts' grooves to join the two end assemblies, notched bottom on the post faces, "
+     f"and glue it: with no wall screws it is what keeps the case square. Glue the cleat inside along the back's top edge "
+     f"between the rear posts and screw it from the inside (#8 x 1, countersunk, nothing through the back)."),
+    ("step-04", "Bottom",
+     ("bottom",),
+     f"Slide the case bottom in from the front into the {inch(RABBET_D)} rabbets of both ends and the back, its corner "
+     f"notches around the four posts, and glue it. Its underside is the ceiling of the {inch(CLEAR)} in of clear floor; "
+     f"screw up through it into the partition after the next step."),
+    ("step-05", "Partition",
      ("partition",),
-     "Drop the partition into the dado in the bottom with its notch at the top rear, front edge flush with the ends. "
-     "Screw up through the bottom."),
-    ("step-04", "Nailer",
-     ("nailer",),
-     "Slide the nailer in on edge through the partition notch, tight against the back and flush with the panel tops. "
-     "Glue it to the back and screw through the ends into its ends. No wall screws: the piece is freestanding."),
-    ("step-05", "Base frame",
-     ("leg_", "brail_"),
-     f"Glue and pocket-screw the two {inch(RAIL_H)} in end rails between the front and back legs, centered on the legs "
-     f"with their top edges flush with the leg tops, and the back rail between the two back legs; no front rail. Turn "
-     f"the case over and set the frame on the case bottom: legs' outer faces {inch(LEG_IN_X)} in from the case ends, "
-     f"front legs {inch(LEG_IN_FRONT)} in behind the case front edge, back legs {inch(LEG_IN_BACK)} in inside the case "
-     f"back. Pocket screws up into the bottom, then two #8 x 2 down through the bottom into each leg top (they land under "
-     f"the drawer boxes). Turn it upright: {inch(CLEAR)} in of clear floor under the case."),
-    ("step-06", "Slides",
+     f"Drop the partition into the dado in the bottom, against the back, with its notch at the top rear around the cleat "
+     f"and its front edge on the fronts' back-face line, {inch(FRONT_SETBACK + FACE_T)} behind the post faces. Screw up "
+     f"through the bottom."),
+    ("step-06", "Slides and brackets",
      ("slide_",),
-     "Screw the Blum cabinet members to the ends and the partition, sitting on the case bottom, fronts 3/32 behind "
-     "the case front edge. Use the five marked holes per runner."),
+     f"Post-side runners: front screws into the posts' inner faces (#6 x 5/8), rears on Blum brackets screwed to the back "
+     f"with #6 x 1/2. Partition-side runners: screwed to the partition the frameless way. All four level on the case "
+     f"bottom, fronts {inch(UM_FRONT_GAP)} behind the fronts' back-face line."),
     ("step-07", "Drawer boxes",
      ("dside_", "dfront_", "dback_", "dbot_"),
      f"Glue each 1/2 birch box up around its bottom, {inch(BOX_H)} in tall: front and back in the side rabbets, bottom in "
@@ -69,41 +75,42 @@ STEPS = [
      ("stile_", "rail_", "panel_", "pull_"),
      f"Glue up each 1/2 panel in its maple frame, back faces flush so the panel sits {inch(FACE_T - PANEL_T)} below "
      f"the maple (groove every piece first, then cut the tongues and tenons to fit). Prime and paint the fronts and "
-     f"the case ends white. Hang the fronts {inch(END_REVEAL)} in from each case end, {inch(GAP)} apart and "
-     f"{inch(GAP)} under the top, bottoms flush with the case underside, screwed from inside the box through oversize "
-     "holes. Center the pulls."),
+     f"the ends white. Hang the fronts between the front posts: {inch(GAP)} to each post, {inch(GAP)} between them, "
+     f"{inch(GAP)} under the top, bottoms flush with the case underside, faces {inch(FRONT_SETBACK)} behind the post "
+     "faces, screwed from inside the box through oversize holes. Center the pulls."),
     ("step-09", "Top",
      ("top",),
-     f"Set the {inch(TOP_W)} x {inch(TOP_D)} top flush with the case back, overhanging {inch(END_OVERHANG)} at each "
-     f"end and {inch(OVERHANG)} at the front. Pocket screws up into it through the ends and partition near the front; "
-     "figure-8s on the nailer at the back so it can move. Osmo Natural on the top, legs and rails."),
+     f"Set the {inch(TOP_W)} x {inch(TOP_D)} top overhanging the posts {inch(OVERHANG)} at each end and the front, flush "
+     f"with their rear faces. Pocket screws up into it through the ends and partition near the front; figure-8s on the "
+     "cleat at the back so it can move. Osmo Natural on the top and the posts."),
     ("step-10", "Cushion",
      ("cushion",),
-     "Cushion on. Slide the bench into the alcove with its back 1/2 off the wall. Done."),
+     f"Cushion on. Slide the bench into the alcove with its back {inch(WALL_GAP)} off the wall, the rear posts over the "
+     "baseboard. Done."),
 ]
 
-# exploded offsets (mm) by instance prefix
+# exploded offsets (mm) by instance name or prefix
 EXPLODE = {
-    "cushion": (0, 0, 480), "top": (0, 0, 300), "nailer": (0, 0, 140), "partition": (0, 0, 160),
+    "cushion": (0, 0, 480), "top": (0, 0, 300), "cleat": (0, 0, 140), "partition": (0, 0, 160),
     "back": (0, -180, 0), "end_l": (-160, 0, 0), "end_r": (160, 0, 0),
-    "leg_": (0, 0, -220), "brail_": (0, 0, -220), "blade_": (0, 0, -220),
+    "post_fl": (-180, 0, 0), "post_rl": (-180, 0, 0), "post_fr": (180, 0, 0), "post_rr": (180, 0, 0),
     "stile_": (0, 500, 0), "rail_": (0, 500, 0), "panel_": (0, 500, 0), "pull_": (0, 580, 0),
     "dside_": (0, 220, 0), "dfront_": (0, 220, 0), "dback_": (0, 220, 0), "dbot_": (0, 220, 0),
 }
 
 COLORS = {
-    "hard maple": "#e2c48f", "3/4 maple ply": "#e9d9b0", "1/4 maple ply": "#ecdfbc",
+    "hard maple": "#e2c48f", "soft maple": "#e2c48f", "3/4 maple ply": "#e9d9b0", "1/2 maple ply": "#ecdfbc",
     "1/2 paint-grade panel": "#d9cbb0", "1/2 Baltic birch": "#efe2bd",
 }
 HW_COLORS = {"slide": "#8c8f94", "pull": "#b8903f", "cushion": "#c9bda8"}
-PAINTED = {"front_stile", "front_rail", "front_panel", "end"}   # painted white; the ends are show faces now
+PAINTED = {"front_stile", "front_rail", "front_panel", "end", "back"}   # painted white; the ends are show faces
 PAINT_WHITE = "#fbfbf8"
 DONE = "#dedad2"      # already in place
-STEM = {
-    "end": "end", "bottom": "bottom", "partition": "partition", "nailer": "nailer", "back": "back", "top": "top",
+STEM = {   # instance name (exact, or <stem>_...) -> registry part
+    "post_fl": "post_front", "post_fr": "post_front", "post_rl": "post_rear", "post_rr": "post_rear",
+    "end": "end", "bottom": "bottom", "partition": "partition", "cleat": "cleat", "back": "back", "top": "top",
     "stile": "front_stile", "rail": "front_rail", "panel": "front_panel",
     "dside": "drawer_side", "dfront": "drawer_front", "dback": "drawer_back", "dbot": "drawer_bottom",
-    "leg": "leg", "brail_end": "base_end_rail", "brail_back": "base_back_rail", "blade": "blade",
 }
 MATERIAL = {p["name"]: p["material"] for p in PARTS}
 ALL = list(INST) + list(HW)
@@ -178,18 +185,13 @@ def exploded():
 
 def sub_assemblies():
     D = dict(ALL)
-    # base frame: legs (or blades) spread out along X, rails dropped
-    off = {}
-    for n in sorted(BASE_NAMES):
-        if n.startswith("brail_"):
-            off[n] = (0, 0, -120)
-        else:
-            off[n] = (-120 if D[n].bounding_box().center().X < XC else 120, 0, 0)
-    items = [(n, Pos(*o) * D[n]) for n, o in off.items()]
-    base = Compound(children=[D[n] for n in off]).bounding_box()
-    t = (base.center().X, base.center().Y, base.center().Z - 60)
-    capture(items, [wood_color(n) for n in off], f"{OUT_DIR}/base-exploded.png",
-            (t[0] - 1500, t[1] + 1800, t[2] + 900), t, 1.2)
+    # one end: its two posts spread along Y so the stopped grooves face the viewer, the panel in place
+    off = {"post_fl": (0, 120, 0), "post_rl": (0, -120, 0), "end_l": (0, 0, 0)}
+    items = [(n, Pos(*o) * D[n] if any(o) else D[n]) for n, o in off.items()]
+    c = D["end_l"].bounding_box().center()
+    t = (c.X, c.Y, c.Z - 40)
+    capture(items, [wood_color(n) for n in off], f"{OUT_DIR}/end-exploded.png",
+            (t[0] - 1300, t[1] + 900, t[2] + 700), t, 1.4)     # from outside the low-X end, a little toward the room
     # drawer box: sides out, front and back forward/back, bottom down
     off = {"dside_ll": (-120, 0, 0), "dside_lr": (120, 0, 0), "dfront_l": (0, 140, 0), "dback_l": (0, -140, 0),
            "dbot_l": (0, 0, -110)}

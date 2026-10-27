@@ -32,6 +32,16 @@ Links: [[Freestanding-bench]] brief in `projects/Freestanding-bench/brief.md`, m
 - `photo_match.py check` measures the front legs as the longest warm, bright run in the leg's projected column; the back legs are hidden behind the case from this camera and are skipped. The pulls remain the height check (within 1/4 in again).
 - Crops for an options page: the viewer PNG cropped to its content, and the overlay cropped to the alcove at photo scale, both straight from the files the pipeline already makes.
 
+## 2026-10-26, round two: the legs were wrong
+
+- "Look at the legs for the other bench we designed and let's start there." A base I invented (short legs under a box) lost to the construction Brian already owns: the drawer bench's proud chamfered corner posts with the panels housed in them. Before inventing a base for a second piece, start from the one the first piece has; the vault holds it.
+- Five options of one construction (post size and foot) beat three different constructions. Brian picked by size (2-1/2 in for a 14 in piece); the foot details were not the question.
+- The superpowers visual companion worked for this: `leg_options.py` built a shell per option, the OCP viewer captured a full view and a foot close-up, the crops went into the companion's content folder as `/files/<name>` and one screen of five cards did it. `Plane.XZ` in build123d has its normal toward -Y, so a mirror "about Y = ymid" needs `Plane(origin=(0, ymid, 0), z_dir=(0, 1, 0))`, or the rear posts land far behind the bench.
+- Corner posts in an alcove stand where the baseboard is. With the top held 3 in back from the pilasters the 21 in runners need every millimetre behind the fronts, so the choices were: notch the rear posts over the baseboard (done, 1-1/2 x 4-1/2, skippable), a 1/2 in back instead of 3/4, and 1/4 in to the wall. Standing the bench off the baseboard would have meant 18 in runners. Check the slide depth before the post layout, not after.
+- The post-side runners mount the drawer bench's way (front screws into the post, Blum rear bracket on the back), the partition side the frameless way; the case bottom under the runners is notched around the posts. Two mounting styles on one drawer are fine as long as both references are level.
+- Gemini: props and the client's dogs in one pass with four input images made it rebuild the scene as the reference picture (cropped, built in, no posts), $0.172 gone; the check caught it (no pulls, no posts found). Two passes, each with one reference set, held every edge. Keep one job per reference set.
+- `check` on the styled picture reads the left pull short (5.8 in) because the throw's corner covers its end; the center offset says so (+1 in). Read the measurements against the styling before calling an error.
+
 ## Not yet measured
 
 Nothing is cut. Still to confirm on site: the opening at every height (the 64 in top needs 66 in everywhere), the baseboard and shoe projection (the model assumes under 1-1/4 in), the receptacle behind the case.
