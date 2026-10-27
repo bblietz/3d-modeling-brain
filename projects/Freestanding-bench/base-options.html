@@ -1,0 +1,187 @@
+<title>Bench Base Options</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #f6f2ea; --fg: #2a2520; --muted: #6b625a; --line: #d9d0c2; --card: #fffdf9;
+  --accent: #8a5a2b; --accent-ink: #fff; --pick: #e9dfcf; --maple: #e2c48f; --ok: #3f7a4a;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1d1a16; --fg: #ece5da; --muted: #a79d90; --line: #3d362e; --card: #26221d;
+    --accent: #d9a86a; --accent-ink: #1d1a16; --pick: #3a3128; --maple: #b28e52; --ok: #8cc79a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1d1a16; --fg: #ece5da; --muted: #a79d90; --line: #3d362e; --card: #26221d;
+  --accent: #d9a86a; --accent-ink: #1d1a16; --pick: #3a3128; --maple: #b28e52; --ok: #8cc79a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 "IBM Plex Sans", system-ui, sans-serif; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 28px 56px; padding-inline: 16px; }
+h1, h2, h3 { font-family: "Source Serif 4", Georgia, serif; text-wrap: balance; margin: 0; }
+h1 { font-size: 2rem; font-weight: 600; }
+h2 { font-size: 1.35rem; font-weight: 600; margin-top: 36px; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+p { max-width: 68ch; margin: 0.5rem 0; }
+.lede { color: var(--muted); font-size: 1.05rem; }
+.kicker { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 16px; margin: 18px 0 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+.facts div { min-width: 0; }
+.facts b { display: block; font-family: "IBM Plex Mono", monospace; font-size: 1.05rem; font-weight: 500; }
+.facts span { font-size: 0.82rem; color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-top: 16px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.card.rec { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
+.card img { width: 100%; max-width: 100%; display: block; background: #fff; }
+.card .room { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.card .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.card ul { margin: 0; padding-left: 18px; font-size: 0.93rem; }
+.card li { margin: 3px 0; }
+.tag { display: inline-block; font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); margin-left: 8px; vertical-align: middle; }
+.pick { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px; }
+.pick label { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); cursor: pointer; font-size: 0.95rem; }
+.pick label:has(input:checked) { background: var(--pick); border-color: var(--accent); }
+.pick input { accent-color: var(--accent); }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+.tbl { overflow-x: auto; margin-top: 10px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; font-size: 0.82rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+td.n { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.q { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--accent); border-radius: 10px; background: var(--card); }
+.q h3 { margin-bottom: 4px; }
+button { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+button.ghost { background: transparent; color: var(--fg); border-color: var(--line); }
+#out { margin-top: 10px; padding: 10px 12px; font-family: "IBM Plex Mono", monospace; font-size: 0.9rem; background: var(--pick); border-radius: 8px; white-space: pre-wrap; user-select: all; }
+figure { margin: 14px 0 0; }
+figure img { width: 100%; max-width: 100%; display: block; border-radius: 10px; border: 1px solid var(--line); }
+figcaption { font-size: 0.88rem; color: var(--muted); margin-top: 6px; max-width: 80ch; }
+.note { font-size: 0.9rem; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <div class="kicker">Alcove bench, round two</div>
+  <h1>Freestanding, with the floor open under it</h1>
+  <p class="lede">The client wants the bench to stand on its own and leave room for the robot vacuum underneath. Everything above the floor gap carries over from the built-in design: the white frame-and-panel fronts with brass pulls, the maple top at 14 in, the 17 in seat, the two drawers on 21 in Blum undermounts. What changes is how it stands, and that is the pick on this page. The built-in design stays on its own shop page in case they go back.</p>
+
+  <div class="facts">
+    <div><b>5 in</b><span>clear floor under the case</span></div>
+    <div><b>3.4 to 3.9 in</b><span>tallest Roombas, j7 to the new lidar models</span></div>
+    <div><b>64 x 24-1/2</b><span>top, 1 in of air to each wall</span></div>
+    <div><b>17 in</b><span>seat with the cushion, unchanged</span></div>
+    <div><b>6-1/2 in</b><span>drawer boxes, were 8-1/2</span></div>
+    <div><b>31-1/8 x 8-1/8</b><span>drawer fronts, were 31-3/32 x 10-1/8</span></div>
+  </div>
+  <p class="note">An inch of clearance over the tallest Roomba leaves room for a rug under the bench. The five inches come out of the drawers because the seat height stays for Maizy; see the question at the bottom if the client would rather raise the seat.</p>
+
+  <h2>Three ways to hold it up</h2>
+  <p>All three keep the same case, fronts, top and drawers. Pictures are the CAD model from the viewer (cushion off so the top shows) and the same model projected into the alcove photo at true scale through the matched camera, before Gemini touches it.</p>
+
+  <div class="cards">
+    <div class="card rec">
+      <img src="images/options/render-legs.png" alt="CAD render of the bench on four square maple legs with rails between them">
+      <img class="room" src="images/options/room-legs.jpg" alt="The legs bench projected into the alcove photo">
+      <div class="body">
+        <h3>A. Four maple legs <span class="tag">Recommended</span></h3>
+        <ul>
+          <li>2 x 2 solid maple legs, 5 in tall, set 2-1/2 in in from the ends and 2 in behind the front edge, so the top and case float past them.</li>
+          <li>A C-frame of 3/4 x 2-1/2 maple rails: one front to back at each end, one across the back, no front rail. Glue and pocket screws; the case screws down onto it.</li>
+          <li>The robot drives in under the whole front. The back legs sit 2 in inside the case back, clear of the baseboard and its shoe, so the bench pushes right up to the wall.</li>
+          <li>Reads as furniture: a credenza stance. Bare maple under Osmo to match the top; painted white is a one-line change.</li>
+          <li>Most parts of the three (4 legs, 3 rails), all straight cuts.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <img src="images/options/render-blades.png" alt="CAD render of the bench on two solid maple blade feet">
+      <img class="room" src="images/options/room-blades.jpg" alt="The blades bench projected into the alcove photo">
+      <div class="body">
+        <h3>B. Two maple blades</h3>
+        <ul>
+          <li>1-1/2 x 5 solid maple boards on edge, front to back under each end, in the same place as the legs, with the same back rail between them for racking.</li>
+          <li>Fewest parts: two blades and a rail. Screws down through the case bottom into the blade tops, four each.</li>
+          <li>Needs 8/4 maple for the blades (or two 3/4 boards laminated). Same clear floor, same path for the robot.</li>
+          <li>Reads heavier and more modern: a slab instead of a post at each end, a solid pale wedge under the white case.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <img src="images/options/render-gables.png" alt="CAD render of the bench with its end panels running to the floor">
+      <img class="room" src="images/options/room-gables.jpg" alt="The gables bench projected into the alcove photo">
+      <div class="body">
+        <h3>C. Ends to the floor</h3>
+        <ul>
+          <li>The painted end panels simply run to the floor; the case bottom sits in a dado 5 in up, and a stretcher at the bottom back ties the two ends.</li>
+          <li>Closest to the built-in look: a white box floating over a tunnel the robot enters from the front only.</li>
+          <li>Each end needs a notch at its back bottom corner for the baseboard and shoe (1-1/4 x 4-1/2), which makes it specific to this alcove and shows if the bench ever leaves it.</li>
+          <li>Banded ply edges at the floor take knocks from the vacuum; the other two keep the ply off the floor.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2>What the robot needs</h2>
+  <div class="tbl"><table>
+    <tr><th>Model</th><th>Height</th><th>Margin under 5 in</th></tr>
+    <tr><td>Roomba j7, Combo j7+, j9+</td><td class="n">3.4 in</td><td class="n">1.6 in</td></tr>
+    <tr><td>Roomba i7, 600 and 900 series</td><td class="n">3.6 in</td><td class="n">1.4 in</td></tr>
+    <tr><td>Roomba Plus 405, 505 (2025, lidar)</td><td class="n">about 3.3 to 3.9 in</td><td class="n">1.1 in or more</td></tr>
+    <tr><td>Roomba Max 705</td><td class="n">fits a 4 in gap</td><td class="n">about 1 in</td></tr>
+    <tr><td>Other lidar robots (Roborock, Dreame)</td><td class="n">3.8 to 4.0 in</td><td class="n">1.0 in</td></tr>
+  </table></div>
+  <p class="note">A rug under the bench takes 1/4 to 1/2 in of that margin. At 4-1/2 in the drawers would gain 1/2 in but a lidar model on a rug would scrape.</p>
+
+  <h2>How it reads in the room</h2>
+  <figure>
+    <img src="images/bench-in-nook-guided-web.jpg" alt="Photoreal picture of the legs version of the bench in the alcove, with the three maple shelves and the dropped soffit, no dogs or props yet">
+    <figcaption>Option A made photoreal from the true-scale overlay (one Gemini pass, checked: both pulls within 1/4 in of their projected height, legs on the floor where the projection puts them). The shelves and soffit are the picture-only ideas carried over. Maizy, Franco, the pillows and the rest follow once the base is picked, so they are not redrawn three times.</figcaption>
+  </figure>
+
+  <div class="q">
+    <h3>Pick</h3>
+    <p>Two choices, then copy the line below and paste it back to me.</p>
+    <div class="pick" id="base">
+      <label><input type="radio" name="base" value="A legs" checked> A. Four maple legs</label>
+      <label><input type="radio" name="base" value="B blades"> B. Two maple blades</label>
+      <label><input type="radio" name="base" value="C gables"> C. Ends to the floor</label>
+    </div>
+    <div class="pick" id="finish">
+      <label><input type="radio" name="finish" value="bare maple" checked> Base bare maple, like the top</label>
+      <label><input type="radio" name="finish" value="painted white"> Base painted white, like the case</label>
+    </div>
+    <p style="margin-top:14px"><b>Seat height.</b> The 17 in seat stays as drawn, so the drawers are 6-1/2 in tall (5-17/32 inside) instead of 8-1/2. Every inch added to the seat goes straight back into the drawers.</p>
+    <div class="pick" id="seat">
+      <label><input type="radio" name="seat" value="17 in seat, 14 in top" checked> Keep 17 in (Maizy)</label>
+      <label><input type="radio" name="seat" value="18 in seat, 15 in top"> 18 in, drawers 7-1/2</label>
+      <label><input type="radio" name="seat" value="19 in seat, 16 in top"> 19 in, drawers 8-1/2</label>
+    </div>
+    <p style="margin-top:14px"><button id="copy">Copy picks</button> <button class="ghost" id="show">Show</button></p>
+    <div id="out" hidden></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  function picks() {
+    const g = n => document.querySelector('input[name="' + n + '"]:checked').value;
+    return 'Freestanding bench picks: base ' + g('base') + '; base finish ' + g('finish') + '; seat ' + g('seat') + '.';
+  }
+  const out = document.getElementById('out');
+  function show() { out.textContent = picks(); out.hidden = false; }
+  document.getElementById('show').addEventListener('click', show);
+  document.getElementById('copy').addEventListener('click', function () {
+    const t = picks();
+    show();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(function () { out.textContent = t + '\n(copied)'; }, function () { select(); });
+    } else { select(); }
+  });
+  function select() {
+    const r = document.createRange(); r.selectNodeContents(out);
+    const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+})();
+</script>

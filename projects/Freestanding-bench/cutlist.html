@@ -1,0 +1,427 @@
+<title>Freestanding Bench Cut List</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f7f4ee; --surface: #fffdf9; --ink: #24201b; --muted: #6d655a; --line: #e3dccf;
+    --accent: #d96a12; --accent-ink: #8a4108;
+    --warn-bg: #fbe9d7; --warn-ink: #8a4108; --note-bg: #ece7dd; --note-ink: #4d463c;
+    --done: #9a9184; --paper: #f6f1e8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #1b1916; --surface: #24211d; --ink: #ece6dc; --muted: #a79e91; --line: #3a352e;
+      --accent: #f08a3a; --accent-ink: #f6b27e;
+      --warn-bg: #46301c; --warn-ink: #f4c79c; --note-bg: #302c26; --note-ink: #cfc6b8;
+      --done: #6f675c;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1b1916; --surface: #24211d; --ink: #ece6dc; --muted: #a79e91; --line: #3a352e;
+    --accent: #f08a3a; --accent-ink: #f6b27e;
+    --warn-bg: #46301c; --warn-ink: #f4c79c; --note-bg: #302c26; --note-ink: #cfc6b8;
+    --done: #6f675c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Archivo, "Helvetica Neue", Arial, sans-serif;
+         font-size: 16px; line-height: 1.45; padding-inline: 16px; padding-block: 24px 72px; }
+  .wrap { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-ink); font-weight: 600; margin: 0 0 6px; }
+  h1 { font-size: clamp(28px, 5vw, 38px); line-height: 1.08; margin: 0 0 10px; letter-spacing: -.01em; text-wrap: balance; }
+  header p { margin: 0; max-width: 62ch; color: var(--muted); font-size: 15px; }
+  header p + p { margin-top: 10px; }
+  header a, .foot a { color: var(--accent-ink); }
+  .status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 14px; font-size: 14px; }
+  .status .count { font-weight: 600; }
+  button.reset { font: inherit; font-size: 13px; color: var(--accent-ink); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  button.reset:focus-visible, .tick:focus-visible + .body, .dwg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .flag { background: var(--warn-bg); color: var(--warn-ink); border-radius: 8px; padding: 10px 14px; font-size: 14.5px; max-width: 72ch; }
+  .flag b { font-weight: 600; }
+  .moved { background: var(--note-bg); color: var(--note-ink); border-radius: 8px; padding: 12px 16px; max-width: 72ch; }
+  .moved h2 { font-size: 15px; margin: 0 0 6px; letter-spacing: .04em; text-transform: uppercase; }
+  .moved ul { margin: 0; padding-left: 18px; font-size: 14.5px; display: flex; flex-direction: column; gap: 3px; }
+  .moved b { font-weight: 600; color: var(--ink); }
+  .big { display: flex; flex-direction: column; gap: 18px; }
+  .big > h2 { font-size: 24px; margin: 0; padding-bottom: 8px; border-bottom: 3px solid var(--accent); }
+  .big > h2 small { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 10px; }
+  .group { display: flex; flex-direction: column; gap: 4px; }
+  .ghead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+  h3 { font-size: 18px; margin: 0; }
+  .gsum { font-size: 12.5px; color: var(--muted); }
+  ul.parts { list-style: none; margin: 0; padding: 0; }
+  .part { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); align-items: start; }
+  .tick { width: 22px; height: 22px; margin: 4px 0 0 2px; accent-color: var(--accent); cursor: pointer; }
+  .body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .part label { display: flex; flex-direction: column; gap: 4px; cursor: pointer; min-width: 0; }
+  .line1 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .qty { font-weight: 600; color: var(--accent-ink); }
+  .name { font-weight: 600; font-size: 15px; }
+  .chip { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--note-bg); color: var(--note-ink); }
+  .chip.warn { background: var(--warn-bg); color: var(--warn-ink); }
+  .dims { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+  .dims b { font-size: 21px; font-weight: 600; letter-spacing: -.01em; }
+  .note { margin: 0; font-size: 13.5px; color: var(--note-ink); overflow-wrap: anywhere; }
+  .dwg { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px; cursor: zoom-in; display: flex; flex-direction: column; gap: 4px; }
+  .dwg img { width: 100%; height: auto; display: block; }
+  .dwg figcaption { font-size: 11.5px; color: var(--muted); text-align: right; }
+  .hero { background: #fff; }
+  .hero img { border-radius: 4px; }
+  .tick:checked + .body { color: var(--done); }
+  .tick:checked + .body .name, .tick:checked + .body .dims b { text-decoration: line-through; text-decoration-thickness: 2px; }
+  .tick:checked + .body .qty, .tick:checked + .body .note { color: var(--done); }
+  .tick:checked + .body .dwg { opacity: .55; }
+  .hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .hw li { display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  .hw li div { display: flex; flex-direction: column; gap: 2px; }
+  .hqty { font-weight: 600; color: var(--accent-ink); }
+  .hnote { font-size: 13px; color: var(--muted); }
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: flex; flex-direction: column; }
+  .step { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px 20px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: start; }
+  .step .stext h3 { font-size: 17px; margin: 0 0 6px; }
+  .step .stext h3::before { counter-increment: step; content: counter(step) ". "; color: var(--accent-ink); }
+  .step .stext p { margin: 0; font-size: 14.5px; line-height: 1.5; }
+  .step .sfig { margin: 0; }
+  .step .sub { grid-column: 1 / -1; }
+  @media (max-width: 720px) { .step { grid-template-columns: 1fr; } }
+  .foot { font-size: 13px; color: var(--muted); max-width: 72ch; }
+  #lightbox { position: fixed; inset: 0; background: rgba(15, 12, 8, .9); display: none; place-items: center; padding: 12px; z-index: 10; cursor: zoom-out; overflow: auto; }
+  #lightbox.open { display: grid; }
+  #lightbox img { max-width: 100%; max-height: 94vh; background: var(--paper); border-radius: 6px; }
+  @media (max-width: 420px) { .dims b { font-size: 19px; } .hw li { grid-template-columns: 60px 1fr; } }
+  @media print {
+    @page { size: letter; margin: 0.5in 0.5in 0.6in; }
+    html, body { background: #fff; color: #000; font-size: 11pt; }
+    .wrap { max-width: none; padding: 0; margin: 0; gap: 14px; }
+    .tick, .status, figcaption, #lightbox, .reset { display: none !important; }
+    header p { max-width: none; }
+    .flag { border: 1px solid #c8782a; background: #fff3e6; break-inside: avoid; }
+    .moved { border: 1px solid #ccc; background: #f6f6f6; break-inside: avoid; }
+    .big { break-before: page; gap: 10px; }
+    .big > h2 { font-size: 20px; }
+    .keep { break-inside: avoid; }
+    .screen-only { display: none; }
+    .part { grid-template-columns: 1fr; gap: 6px; padding: 8px 0; break-inside: avoid; }
+    .part label { cursor: default; }
+    .dwg { border: 1px solid #ccc; padding: 4px; background: #fff; break-inside: avoid; cursor: default; }
+    .dwg img { max-height: 3.6in; width: auto; max-width: 100%; margin: 0 auto; }
+    .hero img { max-height: 5in; }
+    .nook { break-before: page; }
+    .nook img { max-height: 7.5in; }
+    .hw li { break-inside: avoid; }
+    .step { grid-template-columns: 1fr 1.3fr; break-inside: avoid; padding: 10px 0; }
+    .step .sfig img { max-height: 2.8in; }
+    .step .sub img { max-height: 3.6in; }
+    .foot { font-size: 9pt; }
+  }
+</style>
+
+<div class="wrap">
+  <figure class="dwg hero" tabindex="0"><img src="images/hero.png" alt="the whole bench on its legs, front-left view from the CAD viewer"><figcaption>the whole bench, from the CAD viewer; tap to zoom</figcaption></figure>
+  <header>
+    <p class="eyebrow">Freestanding bench &middot; 64 x 24-1/2 in &middot; 5 in clear floor</p>
+    <h1>Freestanding Bench Cut List</h1>
+    <p>The client's change of 2026-10-26: the bench is now a freestanding piece with 5 in of clear floor under it for the robot vacuum. The alcove's baseboard stays, the bench slides in with 1 in of air to each wall and its back 1/2 in off the wall. Kept from the built-in: all-white frame-and-panel fronts with brass pulls, the solid maple top at 14 in (seat 17 in with the cushion), two drawers on 21 in Blum 563H undermounts, 1/2 in Baltic birch boxes, Osmo Natural on the bare maple.</p>
+    <p>Changed: a 64 x 24-1/2 in top over a 62-1/2 in case, the case ends are show faces (painted white, edges banded), four 2 in square maple legs on a C-frame of 3/4 x 2-1/2 in maple rails with no front rail, drawers 6-1/2 in tall instead of 8-1/2 (the 5 in of floor come out of the drawers), no plinth, no scribe strips, no wall screws. The base style (legs, blades or gables) is Brian's pick on the <a href="https://claude.ai/artifact/QLCHadrNJZDeDjqka9yond">base options page</a>; this page documents the legs. The built-in design stays on <a href="https://claude.ai/artifact/YQFcx4g5x64K83yhDHvGMf">its own shop page</a> in case the client goes back.</p>
+    <p>34 pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
+    <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
+  </header>
+  <figure class="dwg nook" tabindex="0"><img src="images/bench-in-nook-guided-web.jpg" alt="the freestanding bench in the alcove: all-white drawer fronts with brass pulls, maple top, cushion, four maple legs with clear floor under the case, the baseboard behind it, three maple shelves above, a dropped soffit with two downlights"><figcaption>the freestanding bench in the alcove at true size: the CAD model projected into the photo of the alcove through a camera matched to it, then given its materials by AI (white ends, frames and panels, maple top, legs and rails, cushion). 5 in of clear floor under the case, the alcove&#x27;s baseboard left in place, 1 in of air to each wall. Wood top 14 in, seat 17 in with the cushion. No dogs or props yet: the styled picture with Maizy, Franco and the client&#x27;s accessories follows once the base is picked. The three maple shelves and the 12 in dropped soffit with two 4 in recessed lights are picture-only ideas from the client&#x27;s reference picture; none of that is in this cut list. Tap to zoom</figcaption></figure>
+
+  <div class="moved"><h2>Numbers that moved</h2><ul><li><b>Clear floor under the case</b> 5 in (the tallest current Roomba is under 4 in)</li><li><b>Drawer box</b> 6-1/2 in tall, 5-17/32 in inside (was 8-1/2 in)</li><li><b>Drawer fronts</b> 31-1/8 x 8-1/8 in (were 31-3/32 x 10-1/8)</li><li><b>Top</b> 64 x 24-1/2 in, 1 in of air to each wall (was 66 x 24-5/8, wall to wall)</li><li><b>Case</b> 62-1/2 x 23 x 8-1/4 in, back 1/2 in off the wall</li><li><b>Legs</b> 2 x 2 x 5 in, outer faces 2-1/2 in from the case ends, 2 in behind the case front edge and 2 in inside the case back</li><li><b>Overall</b> 64 x 24-1/2 x 17 in with the cushion; wood top at 14 in, seat 17 in, unchanged</li></ul></div>
+
+  <div class="flag"><b>Measure the alcove at the floor, 16 in and 36 in, at the back wall and the pilaster faces, before cutting.</b> The piece is 64 in wide; if the opening is under 66 in anywhere, narrow the top. The baseboard stays: the back legs sit 2 in inside the case back, so confirm the baseboard and shoe stand no more than 1-1/4 in off the wall. The low receptacle seen in the photo ends up behind the case; nothing can stay plugged into it.</div>
+
+  <div class="big">
+    <h2>Case<small>14 pieces</small></h2>
+    <section class="group">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Hard maple: top, nailer, legs and base rails (bare, Osmo Natural)</h3>
+          <span class="gsum mono">9 pieces &middot; 13.7 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-top" class="tick">
+        <div class="body">
+          <label for="cut-top">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">top</span></div>
+            <div class="dims mono"><b>3/4 x 24-1/2 x 64</b></div>
+            <p class="note">glue up from 4 or 5 boards, grain along the 64; 1/8 roundover on the front and both end arrises, top and bottom (the back edge stays square against the wall); overhangs the case 3/4 at each end and 25/32 at the front, flush with the case back; pocket screws up through the ends and partition near the front, figure-8s on the nailer at the back</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/top.png" alt="shop drawing of top" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+        </ul>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-nailer" class="tick">
+        <div class="body">
+          <label for="cut-nailer">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">nailer</span></div>
+            <div class="dims mono"><b>3/4 x 2-1/2 x 61-3/32</b></div>
+            <p class="note">on edge against the back panel, through the partition notch; four 5/8 figure-8 recesses 1/8 deep on the top edge, centered 1/4 in from the front face; glued to the back, screwed through the ends into its ends (no wall screws: the piece is freestanding)</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/nailer.png" alt="shop drawing of nailer" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-base_back_rail" class="tick">
+        <div class="body">
+          <label for="cut-base_back_rail">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">base_back_rail</span></div>
+            <div class="dims mono"><b>3/4 x 2-1/2 x 53-1/2</b></div>
+            <p class="note">on edge between the two back legs, centered on them, top edge flush with the leg tops; glue and two pocket screws into each leg from the front face; four pocket screws up into the case bottom; no front rail, the robot vacuum drives in under the fronts</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/base_back_rail.png" alt="shop drawing of base_back_rail" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-base_end_rail" class="tick">
+        <div class="body">
+          <label for="cut-base_end_rail">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">base_end_rail</span></div>
+            <div class="dims mono"><b>3/4 x 2-1/2 x 15</b></div>
+            <p class="note">on edge between the front and back legs, centered on them, top edge flush with the leg tops; glue and two pocket screws into each leg from the inside face; three pocket screws up into the case bottom</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/base_end_rail.png" alt="shop drawing of base_end_rail" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-leg" class="tick">
+        <div class="body">
+          <label for="cut-leg">
+            <div class="line1"><span class="qty mono">4&times;</span><span class="name mono">leg</span></div>
+            <div class="dims mono"><b>2 x 2 x 5</b></div>
+            <p class="note">2 square, 5 tall; bare maple under Osmo like the top; glued and screwed to the case bottom with two #8 x 2 down through it (under the drawer boxes), rails pocket-screwed into them</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/leg.png" alt="shop drawing of leg" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      </ul>
+    </section>
+    <section class="group">
+      <div class="keep">
+        <div class="ghead">
+          <h3>3/4 in maple plywood (measure the sheet): ends (show faces, painted white, edges banded), bottom, partition</h3>
+          <span class="gsum mono">4 pieces &middot; 13.7 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-bottom" class="tick">
+        <div class="body">
+          <label for="cut-bottom">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">bottom</span></div>
+            <div class="dims mono"><b>23/32 x 23 x 61-19/32</b></div>
+            <p class="note">face grain across the 62-1/2; 1/4 deep back groove 1/4 from the rear edge; 1/4 deep x 3/4 ply (measure) dado for the partition, centered, from the back groove to the front edge; front edge is covered by the drawer fronts; the base screws to its underside</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/bottom.png" alt="shop drawing of bottom" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+        </ul>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-end" class="tick">
+        <div class="body">
+          <label for="cut-end">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">end</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>23/32 x 8-1/4 x 23</b></div>
+            <p class="note">show face out, face grain vertical; 1/4 x 23/32 (measure) rabbet along the bottom inside edge for the case bottom; 1/4 deep x 1/4 ply (measure) groove 1/4 from the rear edge, through; iron-on maple band on the front and bottom edges; painted white; mirror pair</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/end.png" alt="shop drawing of end" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-partition" class="tick">
+        <div class="body">
+          <label for="cut-partition">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">partition</span></div>
+            <div class="dims mono"><b>23/32 x 7-25/32 x 22-1/2</b></div>
+            <p class="note">face grain vertical; sits in the bottom dado and against the back panel; notch the top rear corner 3/4 deep x 2-1/2 tall for the nailer</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/partition.png" alt="shop drawing of partition" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      </ul>
+    </section>
+    <section class="group">
+      <div class="keep">
+        <div class="ghead">
+          <h3>1/4 in maple plywood (measure the sheet): back</h3>
+          <span class="gsum mono">1 pieces &middot; 3.3 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-back" class="tick">
+        <div class="body">
+          <label for="cut-back">
+            <div class="line1"><span class="qty mono">1&times;</span><span class="name mono">back</span></div>
+            <div class="dims mono"><b>1/4 x 7-23/32 x 61-17/32</b></div>
+            <p class="note">plain rectangle; slides down the end grooves into the bottom groove; glued in all round (with no wall screws it is what keeps the case square)</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/back.png" alt="shop drawing of back" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <div class="big">
+    <h2>Drawers<small>20 pieces</small></h2>
+    <section class="group">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Drawer front frames, hard maple, painted white: stiles and rails</h3>
+          <span class="gsum mono">8 pieces &middot; 1.5 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-front_rail" class="tick">
+        <div class="body">
+          <label for="cut-front_rail">
+            <div class="line1"><span class="qty mono">4&times;</span><span class="name mono">front_rail</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>23/32 x 1-1/2 x 28-7/8</b></div>
+            <p class="note">1/4 x 3/8 groove on the inner edge, through; 1/4 x 3/8 stub tenon on both ends (same bit); length includes both tenons; painted white</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/front_rail.png" alt="shop drawing of front_rail" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+        </ul>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-front_stile" class="tick">
+        <div class="body">
+          <label for="cut-front_stile">
+            <div class="line1"><span class="qty mono">4&times;</span><span class="name mono">front_stile</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>23/32 x 1-1/2 x 8-1/8</b></div>
+            <p class="note">1/4 x 3/8 groove on the inner edge, through, front wall 1/4 thick (set the fence from the panel ply); the rail tenons show on both ends (the top one is the visible one); painted white</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/front_stile.png" alt="shop drawing of front_stile" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      </ul>
+    </section>
+    <section class="group">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Drawer front panels, 1/2 in MDF or paint-grade plywood (measure the sheet), painted white with the frames</h3>
+          <span class="gsum mono">2 pieces &middot; 2.4 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-front_panel" class="tick">
+        <div class="body">
+          <label for="cut-front_panel">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">front_panel</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>15/32 x 5-7/8 x 28-7/8</b></div>
+            <p class="note">1/4 x 3/8 tongue on all four edges, flush with the show face (rabbet the BACK edges 7/32 deep); grain horizontal; size includes the tongues; back flush with the frame back, face 1/4 below the maple; glue in (plywood, no movement)</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/front_panel.png" alt="shop drawing of front_panel" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+        </ul>
+      </div>
+    </section>
+    <section class="group">
+      <div class="keep">
+        <div class="ghead">
+          <h3>Drawer boxes: sides, fronts, backs and bottoms, 1/2 in 9-ply Baltic birch (measure the sheet)</h3>
+          <span class="gsum mono">10 pieces &middot; 17.2 sq ft face, no kerf or waste</span>
+        </div>
+        <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-drawer_front" class="tick">
+        <div class="body">
+          <label for="cut-drawer_front">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_front</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>15/32 x 6-1/2 x 29-1/32</b></div>
+            <p class="note">box front, sits in the side rabbets; 1/4 deep bottom groove to match the sides; the front screws to it from inside through 4 oversize holes: #8 x 7/8 in, pre-drilled, so the bite stays short of the face; the box front overlaps the top rail by 1-1/8 (best bite) and the panel field, but the bottom rail by only 1/4</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_front.png" alt="shop drawing of drawer_front" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+        </ul>
+      </div>
+      <ul class="parts">
+      <li class="part">
+        <input type="checkbox" id="cut-drawer_back" class="tick">
+        <div class="body">
+          <label for="cut-drawer_back">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_back</span></div>
+            <div class="dims mono"><b>15/32 x 6-1/2 x 29-1/32</b></div>
+            <p class="note">box back, sits in the side rabbets; no bottom groove (a groove would break into the hook bores), the bottom butts its front face; Blum notch 1-3/8 in from each side&#x27;s inner face x 1/2 tall at both bottom corners; hook bores 1/4 dia x 13/32 deep into the rear face, centered 9/32 in from each side&#x27;s inner face and 15/16 above the bottom edge (Blum 563H sheet)</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_back.png" alt="shop drawing of drawer_back" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-drawer_bottom" class="tick">
+        <div class="body">
+          <label for="cut-drawer_bottom">
+            <div class="line1"><span class="qty mono">2&times;</span><span class="name mono">drawer_bottom</span></div>
+            <div class="dims mono"><b>15/32 x 20-9/32 x 28-31/32</b></div>
+            <p class="note">plain rectangle: 1/4 into the side and front grooves, butted to the back and glued to it; the Blum locking devices sit flush under it at the front corners (their screws go into the box front)</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_bottom.png" alt="shop drawing of drawer_bottom" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      <li class="part">
+        <input type="checkbox" id="cut-drawer_side" class="tick">
+        <div class="body">
+          <label for="cut-drawer_side">
+            <div class="line1"><span class="qty mono">4&times;</span><span class="name mono">drawer_side</span><span class="chip warn">see drawing: not a plain rectangle</span></div>
+            <div class="dims mono"><b>15/32 x 6-1/2 x 21</b></div>
+            <p class="note">1/4 deep x 1/2 BB (measure) rabbet across both ends on the inside face; 1/4 deep x 1/2 BB (measure) bottom groove, underside 1/2 up from the bottom edge, through</p>
+          </label><figure class="dwg" tabindex="0"><img src="images/parts/drawer_side.png" alt="shop drawing of drawer_side" loading="lazy"><figcaption>tap to zoom</figcaption></figure>
+        </div>
+      </li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="big">
+    <h2>Hardware<small>from the design; not in the cut list</small></h2>
+    <ul class="hw"><li><span class="hqty mono">2 pair</span><div><b>Blum TANDEM plus BLUMOTION 563H, 21 in (563H5330B)</b><span class="hnote">one pair per drawer; 90 lb dynamic; runner front 3/32 behind the case front edge; no rear brackets in a frameless case</span></div></li><li><span class="hqty mono">2 pair</span><div><b>Blum locking devices T51.1901 R and L</b><span class="hnote">front corners under the drawer bottom, screwed into the 1/2 box front with #6 x 1/2</span></div></li><li><span class="hqty mono">2</span><div><b>Brass bar pull, 8 in</b><span class="hnote">centered on each front; break-away machine screws through the 1/2 panel plus the 1/2 box front</span></div></li><li><span class="hqty mono">4</span><div><b>Figure-8 tabletop fasteners</b><span class="hnote">nailer to top; recess centered 1/4 in from the front face so it opens through</span></div></li><li><span class="hqty mono">6</span><div><b>Pocket screws #8 x 1-1/4 fine</b><span class="hnote">ends and partition to the top, near the front</span></div></li><li><span class="hqty mono">20</span><div><b>Pocket screws #8 x 1-1/4 fine</b><span class="hnote">base rails into the legs (2 per joint, 12) and up into the case bottom (10)</span></div></li><li><span class="hqty mono">8</span><div><b>Wood screws #8 x 2</b><span class="hnote">down through the case bottom into the leg tops, two per leg, under the drawer boxes</span></div></li><li><span class="hqty mono">8</span><div><b>Wood screws #8 x 7/8</b><span class="hnote">fronts to the box fronts, through oversize holes, pre-drilled</span></div></li><li><span class="hqty mono">1 roll</span><div><b>Iron-on maple edge banding, 13/16</b><span class="hnote">the ends&#x27; front and bottom edges, about 62-1/2 in all, painted with them</span></div></li><li><span class="hqty mono">1</span><div><b>Bench cushion</b><span class="hnote">about 63-1/2 x 24-1/2 x 3, boxed, the full depth of the top</span></div></li></ul>
+  </div>
+
+  <div class="big">
+    <h2>Assembly<small>10 steps, in order</small></h2>
+    <figure class="dwg hero" tabindex="0"><img src="images/assembly/exploded.png" alt="the whole bench pulled apart: base frame, case, back, partition, nailer, slides, drawer boxes, fronts, top, cushion"><figcaption>everything pulled apart along its assembly direction; tap to zoom</figcaption></figure>
+    <ol class="steps"><li class="step"><div class="stext"><h3>Ends and bottom</h3><p>Glue the case bottom into the rabbets along the bottom of both ends, rabbets and grooves facing in, grooves at the rear, show faces out: a 62-1/2 x 23 case, 8-1/4 tall. Check for square.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-01.png" alt="Ends and bottom: parts added in this step in wood colors, the rest grey"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Back</h3><p>Slide the 1/4 back down the end grooves until it seats in the bottom groove and glue it all round. With no wall screws it is what keeps the case square.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-02.png" alt="Back: parts added in this step in wood colors, the rest grey"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Partition</h3><p>Drop the partition into the dado in the bottom with its notch at the top rear, front edge flush with the ends. Screw up through the bottom.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-03.png" alt="Partition: parts added in this step in wood colors, the rest grey"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Nailer</h3><p>Slide the nailer in on edge through the partition notch, tight against the back and flush with the panel tops. Glue it to the back and screw through the ends into its ends. No wall screws: the piece is freestanding.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-04.png" alt="Nailer: parts added in this step in wood colors, the rest grey"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Base frame</h3><p>Glue and pocket-screw the two 2-1/2 in end rails between the front and back legs, centered on the legs with their top edges flush with the leg tops, and the back rail between the two back legs; no front rail. Turn the case over and set the frame on the case bottom: legs&#x27; outer faces 2-1/2 in from the case ends, front legs 2 in behind the case front edge, back legs 2 in inside the case back. Pocket screws up into the bottom, then two #8 x 2 down through the bottom into each leg top (they land under the drawer boxes). Turn it upright: 5 in of clear floor under the case.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-05.png" alt="Base frame: parts added in this step in wood colors, the rest grey"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure><figure class="dwg sfig sub" tabindex="0"><img src="images/assembly/base-exploded.png" alt="the base frame, pulled apart: four 2 in square legs, two end rails and the back rail"><figcaption>the base frame, pulled apart: four 2 in square legs, two end rails and the back rail; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Slides</h3><p>Screw the Blum cabinet members to the ends and the partition, sitting on the case bottom, fronts 3/32 behind the case front edge. Use the five marked holes per runner.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-06.png" alt="Slides: parts added in this step in wood colors, the rest grey"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Drawer boxes</h3><p>Glue each 1/2 birch box up around its bottom, 6-1/2 in tall: front and back in the side rabbets, bottom in the side and front grooves with its underside 1/2 above the side edges, butted to the back and glued to it. Notches and hook bores at the rear (drill scrap first: the bore leaves a thin skin). Clip the locking devices under the bottom at the front corners with #6 x 1/2 screws and set the boxes on the runners.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-07.png" alt="Drawer boxes: parts added in this step in wood colors, the rest grey"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure><figure class="dwg sfig sub" tabindex="0"><img src="images/assembly/drawer-exploded.png" alt="one drawer box, pulled apart: sides, front, back and bottom, all 1/2 Baltic birch"><figcaption>one drawer box, pulled apart: sides, front, back and bottom, all 1/2 Baltic birch; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Fronts and pulls</h3><p>Glue up each 1/2 panel in its maple frame, back faces flush so the panel sits 1/4 below the maple (groove every piece first, then cut the tongues and tenons to fit). Prime and paint the fronts and the case ends white. Hang the fronts 1/16 in from each case end, 1/8 apart and 1/8 under the top, bottoms flush with the case underside, screwed from inside the box through oversize holes. Center the pulls.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-08.png" alt="Fronts and pulls: parts added in this step in wood colors, the rest grey"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure><figure class="dwg sfig sub" tabindex="0"><img src="images/assembly/front-exploded.png" alt="one drawer front, pulled apart: maple stiles and rails around the inset panel, all painted white"><figcaption>one drawer front, pulled apart: maple stiles and rails around the inset panel, all painted white; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Top</h3><p>Set the 64 x 24-1/2 top flush with the case back, overhanging 3/4 at each end and 25/32 at the front. Pocket screws up into it through the ends and partition near the front; figure-8s on the nailer at the back so it can move. Osmo Natural on the top, legs and rails.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-09.png" alt="Top: parts added in this step in wood colors, the rest grey"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure></li><li class="step"><div class="stext"><h3>Cushion</h3><p>Cushion on. Slide the bench into the alcove with its back 1/2 off the wall. Done.</p></div><figure class="dwg sfig" tabindex="0"><img src="images/assembly/step-10.png" alt="Cushion: parts added in this step in wood colors, the rest grey"><figcaption>new parts in wood colors; tap to zoom</figcaption></figure></li></ol>
+  </div>
+
+  <p class="foot">Generated 2026-10-26 from <span class="mono">projects/Freestanding-bench/cutlist.csv</span> and <span class="mono">images/parts/</span>, which <span class="mono">freestanding_bench.py</span> and <span class="mono">part_drawings.py</span> write on every export; every drawn cut is probed against the CAD solid before its sheet is written. The bench image at the top and the assembly pictures are screenshots of the CAD viewer (<span class="mono">hero_shot.py</span>, <span class="mono">assembly_shots.py</span>). Part names match the CAD viewer. The built-in version of this bench is at <a href="https://claude.ai/artifact/YQFcx4g5x64K83yhDHvGMf">its own page</a>.</p>
+</div>
+
+<div id="lightbox" role="dialog" aria-label="Enlarged drawing" aria-hidden="true"><img id="lightbox-img" alt=""></div>
+
+<script>
+  (function () {
+    var KEY = 'freestanding-bench-cutlist-ticks';
+    var ticks = document.querySelectorAll('.tick');
+    var count = document.getElementById('count');
+    function load() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; } }
+    function save(ids) { try { localStorage.setItem(KEY, JSON.stringify(ids)); } catch (e) {} }
+    function update() {
+      var ids = [];
+      ticks.forEach(function (t) { if (t.checked) ids.push(t.id); });
+      count.textContent = ids.length + ' of ' + ticks.length + ' rows cut';
+      save(ids);
+    }
+    var saved = load();
+    ticks.forEach(function (t) {
+      if (saved.indexOf(t.id) !== -1) t.checked = true;
+      t.addEventListener('change', update);
+    });
+    document.getElementById('reset').addEventListener('click', function () {
+      ticks.forEach(function (t) { t.checked = false; });
+      update();
+    });
+    update();
+
+    var box = document.getElementById('lightbox');
+    var img = document.getElementById('lightbox-img');
+    function open(fig) {
+      var src = fig.querySelector('img');
+      img.src = src.src; img.alt = src.alt;
+      box.classList.add('open'); box.setAttribute('aria-hidden', 'false');
+    }
+    function close() { box.classList.remove('open'); box.setAttribute('aria-hidden', 'true'); img.removeAttribute('src'); }
+    document.querySelectorAll('.dwg').forEach(function (fig) {
+      fig.addEventListener('click', function (e) { e.preventDefault(); open(fig); });
+      fig.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(fig); } });
+    });
+    box.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && box.classList.contains('open')) close(); });
+  })();
+</script>
