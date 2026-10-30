@@ -1,33 +1,36 @@
 ---
 title: Logodude handoff
-date: 2026-10-13
+date: 2026-10-30
 ---
 
-# Logodude handoff (2026-10-13, luggage tag)
+# Logodude handoff (2026-10-30, speaker cab logo size samples)
 
-State: luggage tag CAD signed off in the viewer; logodude-tag.3mf built and
-slice-verified (53 min, 20.5 g, 4 changes); badge files untouched; NOT printed.
+State: three size samples (2.5, 3, 3.5 in wide) built in `logodude_cab.py`,
+pushed to the viewer, exported, and shipped in ONE one-plate `logodude-cab.3mf`
+(1 h 42 min, 51.5 g, one filament change, every G-code proof passing). NOT
+printed. Brian picks the size from the prints; the mount comes after.
 
 ## Decisions already locked
-- 0.6 version (Brian 2026-10-13 after printing the 0.4 file through the 0.6):
-  NOZZLE=0.6 build, 3.5 in silhouette, tiers 3.0 / 0.9 / 0.66 on the 0.3 + 0.18
-  grid, caps 6.2 / 5.0 / 5.4 / 5.4 with the email under the name, own
-  logodude-tag-06.3mf and -06 STLs; the 0.4 files stay as they are.
-- Badge (2026-09-29): see the earlier handoff block in brief.md; logodude.3mf
-  and its pipeline are frozen.
-- Tag: new file logodude-tag.3mf (Brian: "create a new 3MF file, preserving
-  the work"), silhouette 3.00 in, 78.3 x 85.2 mm overall, 3.08 backer +
-  0.96 ink, round 13 mm eyelet with a 6 mm hole on the centroid axis.
-- Back text inlaid flush, 0.52 mm, Russo One, caps 4.4 / 4.0 / 4.0 / 3.5,
-  lines BLIETZ / 408.829.5860 / 415.407.5201 / bblietz@gmail.com, block
-  above the waist, mirrored so it reads from the back.
-- 0.4 nozzle (Brian would print 0.6, accepted 0.4 if under 1 h 15 min),
-  0.16mm Standard process, PETG Basic white + black, textured PEI 70 C,
-  arachne walls, skirt 2 loops, 100% zig-zag infill, no modifiers.
-- No fill-core modifier: all strokes are two-bead (0.86 to 1.10 mm).
+- The cab: the walnut 1x12 of projects/Cab-Blietz-1x12-hardwood (20 x 18 in,
+  Salt and Pepper cloth on a 12 x 40 mm frame, 5 mm cloth-to-baffle gap).
+  Front is grille cloth; "logo should screw on" (Brian 2026-10-28).
+- Sizes 2.5, 3 and 3.5 in WIDE (Brian 2026-10-30), after 5 to 7 in was "WAY
+  too big" and 3 to 4 in was drawn. Backer width is the size; margin scales
+  with the art (2.13 / 2.55 / 2.98 mm).
+- 0.4 nozzle, 0.16mm Standard, 3.08 backer + 0.96 ink, PETG Basic white +
+  black, the tag's locked keys; one plate, three objects, plain backs.
+- Mount not chosen. Options page (https://claude.ai/artifact/HSRyEMiocqN1SwRhsBAMQ8,
+  `pipeline/cab_logo_options.py`): A hidden M3 inserts screwed from behind
+  the frame strip (my pick), B #4 black heads in the hair into the strip,
+  C through the cloth to the baffle with 5 mm standoffs. A and B need the
+  logo to overlap the 40 mm strip band: the top-left corner, 10 mm in.
+- Badge, stand and tag files untouched.
 
 ## Next
-- Brian opens logodude-tag.3mf in Studio with the 0.4 nozzle preset selected
-  first; AMS mapping white / black; Flushing Volumes: Re-calculate.
-- After the print: knowledge/learnings/logodude.md (tag section: text
-  legibility at 3.5 mm caps, eyelet strength, inlay edge quality).
+- Brian prints logodude-cab.3mf (0.4 nozzle preset selected first, AMS
+  white / black, Flushing Volumes: Re-calculate) and picks a size.
+- Then: add the mount to `logodude_cab.py` for that size (A: two 10 mm bosses
+  with M3 heat-set insert holes on the back, spots from cab_logo_options.py's
+  band logic; ask whether Brian has inserts), confirm the grille position,
+  a mounted close-up render, one 3MF for the final logo, retrospective
+  knowledge/learnings/logodude.md after the print.

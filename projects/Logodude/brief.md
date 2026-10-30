@@ -212,3 +212,55 @@ mistake, then asked: "build the 3.5 in version for the .6".
   (Studio had re-profiled it to the 0.6's 0.30 mm process, 13 layers,
   38.7 g, seen in the device tab 2026-10-13 16:23); its letters and face
   lines were sliced under two 0.62 mm walls.
+
+## Speaker cab logo (2026-10-28 to 2026-10-30)
+
+Brian: "Let's create a logo dude that I can put on the front of my guitar
+speaker as a logo." Front is grille cloth (A); "logo should screw on". The
+cab is the walnut 1x12 of `projects/Cab-Blietz-1x12-hardwood` (20 x 18 in,
+Salt and Pepper cloth on a 12 x 40 mm birch frame, face 3 mm behind the shell
+edge, hook-and-loop to the baffle, which sits 5 mm behind the frame's back).
+
+- Options page `cab-logo-options.html` (`pipeline/cab_logo_options.py`, published
+  at https://claude.ai/artifact/HSRyEMiocqN1SwRhsBAMQ8): the logo at true
+  scale in the top-left corner of the grille, 10 mm in, with the 40 mm frame
+  strip and the speaker cutout drawn through the cloth, plus three mounts drawn
+  with their screw spots computed from the geometry (the shank at least 6 mm
+  inside the strip's edges): A hidden, M3 machine screws from behind the frame
+  strip into heat-set inserts in 10 mm bosses on the back; B #4 black flat heads
+  countersunk in the hair strokes into the strip (at 3.5 in the 5.5 mm head is
+  a touch wider than the 4 mm hair); C longer screws through the cloth and the
+  5 mm gap to the baffle with 5 mm standoffs (dimples the cloth under the logo).
+  The strip band is the only wood right behind the cloth, so A and B need the
+  logo to overlap it, which the corner position gives.
+- Size: version 1 drew 5, 6 and 7 in (Brian: "logo is WAY too big"); version 2
+  draws 3, 3.5 and 4 in. Then Brian (2026-10-30): "create a 2.5, 3 and 3.5 in
+  version of the logo dude and I will pick the size I want."
+- `logodude_cab.py` (build123d) imports `logodude.py` and rescales the badge so
+  the backer is WIDTH wide, the outline margin scaled with the art (3.5 mm at
+  the 104.5 mm badge): 2.5 in = 63.5 x 61.7 mm, margin 2.13, face strokes 0.73
+  to 0.91 mm, about 12 g; 3 in = 76.2 x 74.1, margin 2.55, strokes 0.88 to 1.09,
+  18 g; 3.5 in = 88.9 x 86.4, margin 2.98, strokes 1.02 to 1.28, 24 g. Tiers on
+  the 0.4 grid like the tag: 3.08 backer + 0.96 ink. Plain backs: the mount goes
+  onto the size Brian picks, since its spots depend on the size. `EXPORT=1`
+  writes `logodude-cab-{25,3,35}-{backer,ink}.stl` (all watertight, volumes
+  within 0.2% of the 2D area x height); `SHOW=1` pushes all three side by side.
+  Pushed to the viewer 2026-10-30. Gotcha: `EXPORT`/`SHOW` are popped from the
+  environment before importing `logodude.py`, or its own blocks run too.
+- Print file `logodude-cab.3mf` (`pipeline/make_cab_3mf.py`, adapted from the
+  tag pipeline, report `logodude-cab-slice.json`): ONE plate "Size samples",
+  three objects "Logo Dude 3.5 in" (62, 178), "3 in" (170, 178), "2.5 in"
+  (62, 78), each with parts backer (white, filament 1) and ink (black, 2);
+  X2D 0.4 nozzle, `0.16mm Standard @BBL X2D`, PETG Basic white + black, the
+  tag's locked keys (arachne, skirt 2, no brim, 100% zig-zag, elefant_foot 0),
+  prime tower at (110, 106.5), 12 mm from the nearest sample. Offline slice:
+  25 layers, 1 h 42 min, 47.3 g white + 4.3 g black = 51.5 g, ONE filament
+  change (L20 to black). G-code proofs: no black in layers 1 to 19, every black
+  move above the backer inside one of the three ink footprints, no white above
+  the backer, and every one of the 18 strokes (6 per sample) gets black on all
+  six ink layers (the 2.5 in eye, the thinnest, 204 moves). Studio: select the
+  0.4 nozzle preset BEFORE opening the file; AMS white / black; Flushing
+  Volumes: Re-calculate. Not printed; Brian picks the size from the prints.
+- Render `images/cab-samples.png`. Next: the mount (A or B from the options
+  page) designed onto the picked size, its inserts or screws confirmed with
+  Brian, and the logo's grille position (corner, 10 mm in) confirmed.

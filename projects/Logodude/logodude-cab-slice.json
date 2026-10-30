@@ -1,0 +1,244 @@
+{
+ "authored": true,
+ "round_trip": true,
+ "rc": 0,
+ "layers": 25,
+ "layer_height": 0.16,
+ "first_layer_height": 0.2,
+ "tiers_on_grid": {
+  "backer": true,
+  "ink": true
+ },
+ "time": {
+  "estimate": "1h 41m 58s",
+  "prediction_s": 6118,
+  "minutes": 102.0,
+  "h_m": "1 h 42 min"
+ },
+ "grams": {
+  "white (1)": 47.26,
+  "black (2)": 4.27,
+  "total": 51.53,
+  "header_weights": [
+   47.26,
+   4.27
+  ]
+ },
+ "grams_by_feature": {
+  "Sparse infill": 20.15,
+  "Internal solid infill": 20.1,
+  "Bottom surface": 2.81,
+  "Outer wall": 2.42,
+  "Top surface": 2.31,
+  "Inner wall": 2.18,
+  "Prime tower": 0.93,
+  "Skirt": 0.14,
+  "Floating vertical shell": 0.12,
+  "Gap infill": 0.02
+ },
+ "tool_changes": {
+  "start": "T0",
+  "count": 1,
+  "flushes": 1,
+  "changes": [
+   {
+    "layer": 20,
+    "z": 3.24,
+    "to": "T1"
+   }
+  ]
+ },
+ "tiers": {
+  "backer_layers": [
+   1,
+   19
+  ],
+  "ink_layers": [
+   20,
+   25
+  ],
+  "tops_mm": {
+   "backer": 3.08,
+   "ink": 4.04
+  }
+ },
+ "gcode_proofs": {
+  "black_ink_moves": 37851,
+  "black_ink_moves_per_sample": {
+   "Logo Dude 3.5 in": {
+    "moves": 14620,
+    "moves_per_stroke": [
+     432,
+     464,
+     1657,
+     1671,
+     6553,
+     8468
+    ]
+   },
+   "Logo Dude 3 in": {
+    "moves": 11717,
+    "moves_per_stroke": [
+     276,
+     277,
+     1248,
+     1331,
+     4901,
+     7101
+    ]
+   },
+   "Logo Dude 2.5 in": {
+    "moves": 11514,
+    "moves_per_stroke": [
+     204,
+     253,
+     923,
+     946,
+     3773,
+     8071
+    ]
+   }
+  },
+  "black_in_backer_layers": 0,
+  "white_above_backer": 0
+ },
+ "tower": {
+  "wipe_tower_xy": [
+   110.0,
+   106.5
+  ],
+  "brim_offsets_measured": [
+   -3.87,
+   -5.0,
+   30.84,
+   29.22
+  ],
+  "brim_offsets_used": [
+   -3.87,
+   -5.0,
+   30.84,
+   29.22
+  ],
+  "clearance": [
+   12.03,
+   101.5
+  ]
+ },
+ "bed_xy": [
+  0.0,
+  43.4,
+  211.8,
+  224.9
+ ],
+ "file": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Logodude/logodude-cab.3mf",
+ "nozzle": "0.4",
+ "presets": {
+  "machine": "Bambu Lab X2D 0.4 nozzle",
+  "process": "0.16mm Standard @BBL X2D",
+  "filament": "Bambu PETG Basic @BBL X2D 0.4 nozzle",
+  "colours": [
+   "#FFFFFF",
+   "#000000"
+  ],
+  "bed": "Textured PEI Plate",
+  "bed_temp": "70"
+ },
+ "plate": "Size samples",
+ "objects": [
+  {
+   "name": "Logo Dude 3.5 in",
+   "center": [
+    62.0,
+    178.0
+   ],
+   "parts": [
+    {
+     "stl": "logodude-cab-35-backer.stl",
+     "name": "backer (white)",
+     "filament": 1
+    },
+    {
+     "stl": "logodude-cab-35-ink.stl",
+     "name": "ink (black)",
+     "filament": 2
+    }
+   ]
+  },
+  {
+   "name": "Logo Dude 3 in",
+   "center": [
+    170.0,
+    178.0
+   ],
+   "parts": [
+    {
+     "stl": "logodude-cab-3-backer.stl",
+     "name": "backer (white)",
+     "filament": 1
+    },
+    {
+     "stl": "logodude-cab-3-ink.stl",
+     "name": "ink (black)",
+     "filament": 2
+    }
+   ]
+  },
+  {
+   "name": "Logo Dude 2.5 in",
+   "center": [
+    62.0,
+    78.0
+   ],
+   "parts": [
+    {
+     "stl": "logodude-cab-25-backer.stl",
+     "name": "backer (white)",
+     "filament": 1
+    },
+    {
+     "stl": "logodude-cab-25-ink.stl",
+     "name": "ink (black)",
+     "filament": 2
+    }
+   ]
+  }
+ ],
+ "locked_process_keys": {
+  "ironing_type": "no ironing",
+  "seam_gap": "0%",
+  "small_perimeter_speed": [
+   "30"
+  ],
+  "small_perimeter_threshold": [
+   "10"
+  ],
+  "gap_infill_speed": [
+   "40"
+  ],
+  "wall_distribution_count": "3",
+  "wall_transition_filter_deviation": "50%",
+  "min_feature_size": "10%",
+  "min_bead_width": "50%",
+  "wall_generator": "arachne",
+  "prime_tower_brim_width": "5",
+  "prime_tower_rib_wall": "1",
+  "prime_tower_fillet_wall": "1",
+  "top_shell_layers": "5",
+  "top_surface_speed": [
+   "60"
+  ],
+  "skirt_loops": "2",
+  "skirt_distance": "3",
+  "skirt_height": "1",
+  "initial_layer_speed": [
+   "30"
+  ],
+  "initial_layer_infill_speed": [
+   "50"
+  ],
+  "sparse_infill_density": "100%",
+  "sparse_infill_pattern": "zig-zag",
+  "brim_type": "no_brim",
+  "elefant_foot_compensation": "0"
+ }
+}
