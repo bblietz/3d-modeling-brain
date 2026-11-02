@@ -37,8 +37,8 @@ STEPS = [
      f"first, full length, then cut the stopped grooves: the end-panel groove on the face toward the other post of that "
      f"end, {inch(SETBACK)} in from the outer face, {inch(GROOVE_D)} deep, from {inch(GROOVE_STOP)} up and out the top; "
      f"the rear posts also take the back's groove on the inner face, {inch(SETBACK)} in from the rear face, same stop. "
-     f"Notch the rear posts {inch(BB_NOTCH_D)} x {inch(BB_NOTCH_H)} across the rear face at the floor for the baseboard "
-     f"and shoe (skip it if the baseboard comes out). Drill the front posts' Blum runner screw holes on the inner face, "
+     f"No notch: the rear posts stand {inch(YB0)} off the back wall, {inch(BB_CLEAR)} clear of the baseboard and shoe. "
+     f"Drill the front posts' Blum runner screw holes on the inner face, "
      f"{inch(UM_SCREW_Y[0] + RUNNER_SETBACK)} and {inch(UM_SCREW_Y[1] + RUNNER_SETBACK)} behind the front face."),
     ("step-02", "End assemblies",
      ("end_",),
@@ -80,13 +80,13 @@ STEPS = [
      "faces, screwed from inside the box through oversize holes. Center the pulls."),
     ("step-09", "Top",
      ("top",),
-     f"Set the {inch(TOP_W)} x {inch(TOP_D)} top overhanging the posts {inch(OVERHANG)} at each end and the front, flush "
-     f"with their rear faces. Pocket screws up into it through the ends and partition near the front; figure-8s on the "
+     f"Set the {inch(TOP_W)} x {inch(TOP_D)} top overhanging the posts {inch(END_OVERHANG)} at each end, {inch(OVERHANG)} "
+     f"at the front and {inch(REAR_OVERHANG)} at the back. Pocket screws up into it through the ends and partition near the front; figure-8s on the "
      "cleat at the back so it can move. Osmo Natural on the top and the posts."),
     ("step-10", "Cushion",
      ("cushion",),
-     f"Cushion on. Slide the bench into the alcove with its back {inch(WALL_GAP)} off the wall, the rear posts over the "
-     "baseboard. Done."),
+     f"Cushion on. Slide the bench into the alcove with the top {inch(WALL_GAP)} off the back wall and {inch(SIDE_AIR)} off "
+     "each side wall, the rear posts clear of the baseboard. Done."),
 ]
 
 # exploded offsets (mm) by instance name or prefix

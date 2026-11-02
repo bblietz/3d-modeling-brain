@@ -14,15 +14,18 @@ with 1/8 reveals. The case bottom sits in rabbets in the ends and the back, notc
 runners mount the drawer bench's way on the post side (front screws into the post's inner face, Blum rear bracket on
 the back) and the frameless way on the partition side.
 
-Room: the top is 64 x 24-3/4 (1 in of air to each wall, rear edge 1/4 in off the back wall, front edge 3 in back from
-the pilaster faces as before). The rear posts are notched at the floor for the alcove's baseboard and shoe (skip the
-notch if the baseboard comes out, BASEBOARD_NOTCH = False). The 1/4 in wall gap and the 1/2 in back are what let the
-21 in Blum runners keep their 557 mm inside depth behind fronts that sit 3 in back from the pilasters.
+Room: the top is 65-1/2 x 24-3/4, 1/4 in off the back wall and off each side wall, front edge 3 in back from the
+pilaster faces as before. The posts stand inside it: the rear posts 2 in off the back wall, clear of the alcove's
+baseboard and shoe (about 1-1/4 in, unmeasured) with no notch, so the top overhangs them 1-3/4 at the back, 1-1/2 at
+the ends and 3/4 at the front (Brian 2026-11-01: no notch, the top 1/4 in from the walls all round). Standing the
+posts off the baseboard costs the case 1-3/4 in of depth, so the drawers run on 18 in Blum 563H (Brian's pick over
+pulling the case forward or the baseboard out): inside depth 516 mm against Blum's 481 for the 18 in class, and the
+rear-bracket gap on the post side is what sets the 2 in (471 mm runner body plus the 48 mm bracket range).
 
 What carried over unchanged (Brian's locked picks): wood top at 14 in (seat 17 in), 1-1/2 in maple frames around 1/2
-in paint-grade panels inset 1/4 in on the T&G bit set, all painted white, 8 in brass bar pulls, 3/4 in overhang past
-the posts with eased arrises, one full-depth cushion, 21 in Blum TANDEM 563H, 1/2 in Baltic birch boxes 6-1/2 in
-tall (the 5 in of clear floor come out of the drawers at the fixed seat height), Osmo Natural on the bare maple.
+in paint-grade panels inset 1/4 in on the T&G bit set, all painted white, 8 in brass bar pulls, 3/4 in front overhang
+past the posts with eased arrises, one full-depth cushion, Blum TANDEM 563H undermounts, 1/2 in Baltic birch boxes
+6-1/2 in tall (the 5 in of clear floor come out of the drawers at the fixed seat height), Osmo Natural on the bare maple.
 
 Axes as in built_in_bench.py: X across the alcove (0 at the wall on your RIGHT when you face the bench from the
 room; _l/_r suffixes are model names, the bench is symmetric), Y depth (0 at the back wall, +Y toward the room),
@@ -55,17 +58,18 @@ def inch(mm):
 ALCOVE_W = 66 * IN          # between the pilasters (X, 0 at the wall on your right from the room)
 ALCOVE_D = 28 * IN          # back wall to the pilaster faces (Y)
 TOP_SETBACK = 3 * IN        # top front edge back from the pilaster faces (as the built-in)
-BASEBOARD_H = 4 * IN        # the alcove's baseboard stays; it and its shoe stand about 1-1/4 in off the wall
+BASEBOARD_H = 4 * IN        # the alcove's baseboard stays; it and its shoe stand about 1-1/4 in off the wall (MEASURE)
 BASEBOARD_T = 1.25 * IN
-BASEBOARD_NOTCH = os.environ.get("BASEBOARD_NOTCH", "1") != "0"   # notch the rear posts over it (0 if it comes out)
 
 # ---------------------------------------------------------------- picks
 SEAT_Z = 14 * IN            # top face of the wood top (seat 17 in with the cushion, kept for the senior dog)
 CUSHION_H = 3 * IN
 CLEAR = 5 * IN              # floor to the underside of everything but the posts: the robot vacuum (tallest Roomba 3.9 in)
-SIDE_AIR = 1.0 * IN         # top end to each wall, so the piece slides in and out
-WALL_GAP = 0.25 * IN        # rear posts and top rear edge to the back wall
-OVERHANG = 0.75 * IN        # top past the posts at the ends and the front; flush with the posts at the back
+SIDE_AIR = 0.25 * IN        # top end to each side wall (Brian 2026-11-01: 1/4 in to the walls all round)
+WALL_GAP = 0.25 * IN        # top rear edge to the back wall
+BB_CLEAR = 0.75 * IN        # rear posts clear of the baseboard-and-shoe estimate; the Blum rear bracket caps it (see checks)
+OVERHANG = 0.75 * IN        # top past the posts at the front
+END_OVERHANG = 1.5 * IN     # top past the posts at the ends (the posts stayed put when the top grew to the walls)
 GAP = 0.125 * IN            # reveals: fronts to posts, between the fronts, under the top
 ROUND = 0.125 * IN          # eased arrises of the top: front and both ends
 
@@ -83,8 +87,6 @@ GROOVE_D = 0.375 * IN       # panels housed this deep in the posts
 NOTCH_H = 1.5 * IN          # panel bottom corners notched GROOVE_D x this: the housed tongue starts here
 GROOVE_CLR = 0.75 * IN      # post groove ends this far below the tongue start, hidden behind the un-housed bottom
 FRONT_SETBACK = 0.25 * IN   # drawer fronts behind the post faces
-BB_NOTCH_D = 1.5 * IN       # rear posts: notch over the baseboard and shoe, from the rear face
-BB_NOTCH_H = BASEBOARD_H + 0.5 * IN
 
 # ---------------------------------------------------------------- joinery
 RABBET_D = 0.25 * IN        # case bottom in the ends and the back; drawer ends in the sides
@@ -96,16 +98,15 @@ PANEL_T = T12                # 1/2 panel (ply or MDF, measures 12 mm): back flus
 STILE_W = 1.5 * IN          # maple frame width on the fronts
 CLEAT_H = 2.5 * IN          # rear top cleat on the back's inner face: the top's figure-8s
 
-# ---------------------------------------------------------------- Blum TANDEM 563H, 21 in
-SLIDE_LEN = 21 * IN
-RUNNER_LEN = 547.0          # the runner body is longer than the nominal box: 471 for the 18 in class (drawer bench);
-                            # 547 assumes the same 14 mm for the 21 in class, VERIFY on the 563H5330B sheet
+# ---------------------------------------------------------------- Blum TANDEM 563H, 18 in (563H4570B)
+SLIDE_LEN = 18 * IN
+RUNNER_LEN = 471.0          # the runner body is longer than the nominal box: 471 measured on the drawer bench's 563H4570B
 UM_WIDTH_LOSS = 42.0        # inside drawer width = opening - 42
 UM_BOTTOM_CLEAR = 14.0      # opening bottom to drawer side bottom edge
 UM_TOP_CLEAR = 7.0          # drawer side top edge to opening top (Blum 2022/2025: opening - 21)
 UM_RECESS = 13.0            # drawer side bottom edge to underside of the bottom
 UM_FRONT_GAP = 1.5          # box front behind the fronts' back faces
-UM_MIN_DEPTH = 557.0        # inside depth from the fronts' back faces to the back's inner face, frameless side
+UM_MIN_DEPTH = 481.0        # inside depth from the fronts' back faces to the back's inner face, frameless side (557 for 21 in)
 UM_BRACKET_MIN, UM_BRACKET_MAX = 6.0, 48.0   # runner rear end to the back's inner face, rear-bracket side
 UM_SCREW_Y = (7.0, 34.0)    # runner front screw holes behind the runner front, into the post's inner face
 RUNNER_SETBACK = T12 + FACE_T - 11.5 + FRONT_SETBACK   # runner front behind the post face (Blum inset rule plus the setback)
@@ -118,19 +119,20 @@ FIG8_DEPTH = 0.125 * IN
 FIG8_OFFSET = 0.25 * IN     # center this far in from the inner face (opens through it)
 
 # ---------------------------------------------------------------- derived layout
-TOP_X0 = SIDE_AIR                         # the top: 64 in between 1 in of air at each wall
+TOP_X0 = SIDE_AIR                         # the top: 65-1/2 in between 1/4 in of air at each wall
 TOP_X1 = ALCOVE_W - SIDE_AIR
 TOP_W = TOP_X1 - TOP_X0
 TOP_Y0 = WALL_GAP
 TOP_Y1 = ALCOVE_D - TOP_SETBACK           # 25 in from the back wall
 TOP_D = TOP_Y1 - TOP_Y0
 TOP_Z0 = SEAT_Z - TS
-X0 = TOP_X0 + OVERHANG                    # post outer faces
-X1 = TOP_X1 - OVERHANG
+X0 = TOP_X0 + END_OVERHANG                # post outer faces, 1-3/4 in from the side walls
+X1 = TOP_X1 - END_OVERHANG
 XC = (X0 + X1) / 2
 POST_IN_L = X0 + POST                     # posts' inner faces: the drawer openings' outer sides
 POST_IN_R = X1 - POST
-YB0 = TOP_Y0                              # rear posts' rear faces, flush with the top's back edge
+YB0 = BASEBOARD_T + BB_CLEAR              # rear posts' rear faces, 2 in off the back wall, clear of the baseboard
+REAR_OVERHANG = YB0 - TOP_Y0              # the top past the rear posts, 1-3/4 in
 YF1 = TOP_Y1 - OVERHANG                   # front posts' faces
 YF0 = YF1 - POST
 FACE_Y1 = YF1 - FRONT_SETBACK             # the fronts' faces
@@ -208,8 +210,6 @@ def make_post(x, y, front):
     p -= _box(x + SETBACK, gy, GROOVE_STOP, T18, GROOVE_D + 1, gh)
     if not front:
         p -= _box(x + POST - GROOVE_D, y + SETBACK, GROOVE_STOP, GROOVE_D + 1, T12, gh)
-        if BASEBOARD_NOTCH:
-            p -= _box(x - 1, y - 1, -1, POST + 2, BB_NOTCH_D + 1, BB_NOTCH_H + 1)
     return p
 
 
@@ -228,19 +228,15 @@ add("post_front", post_fl, 2, SOFT_MAPLE,
     inst=[("post_fl", post_fl), ("post_fr", post_fr)])
 add("post_rear", post_rl, 2, SOFT_MAPLE,
     _POST_NOTE + f"; plus the back's groove {inch(T12)} wide (measure) x {inch(GROOVE_D)} deep on the inner face, "
-    f"{inch(SETBACK)} in from the rear face, same stop"
-    + (f"; notch {inch(BB_NOTCH_D)} deep x {inch(BB_NOTCH_H)} tall across the rear face at the floor for the baseboard "
-       "and shoe (skip it if the baseboard comes out)" if BASEBOARD_NOTCH else ""),
+    f"{inch(SETBACK)} in from the rear face, same stop; no notch, the post stands {inch(BB_CLEAR)} clear of the baseboard",
     inst=[("post_rl", post_rl), ("post_rr", post_rr)])
 
-# the post is the box minus four chamfer prisms minus its grooves (and the notch): the chamfers never reach a groove
+# the post is the box minus four chamfer prisms minus its grooves: the chamfers never reach a groove
 _post_box = POST ** 2 * TOP_Z0 - 4 * 0.5 * CHAMFER ** 2 * TOP_Z0
 _gh = TOP_Z0 - GROOVE_STOP
 assert abs(post_fl.volume - (_post_box - T18 * GROOVE_D * _gh)) < 1e-2, post_fl.volume
-_notch = POST * BB_NOTCH_D * BB_NOTCH_H - 2 * 0.5 * CHAMFER ** 2 * BB_NOTCH_H if BASEBOARD_NOTCH else 0.0
-assert abs(post_rl.volume - (_post_box - T18 * GROOVE_D * _gh - T12 * GROOVE_D * _gh - _notch)) < 1e-2, post_rl.volume
+assert abs(post_rl.volume - (_post_box - T18 * GROOVE_D * _gh - T12 * GROOVE_D * _gh)) < 1e-2, post_rl.volume
 assert CHAMFER < SETBACK, "the chamfer would break into a groove"
-assert BB_NOTCH_D >= BASEBOARD_T + 0.25 * IN - WALL_GAP and BB_NOTCH_H >= BASEBOARD_H + 0.25 * IN
 
 # ================================================================ panels: ends (3/4) and back (1/2), housed in the posts
 # Bottom corners notched GROOVE_D x NOTCH_H so the housed tongue starts NOTCH_H up and the un-housed bottom butts the
@@ -309,9 +305,9 @@ _ends = top.edges().filter_by(Axis.Y)
 top = fillet(_front + _ends, ROUND)
 add("top", top, 1, MAPLE,
     f"glue up from 4 or 5 boards, grain along the {inch(TOP_W)}; {inch(ROUND)} roundover on the front and both end "
-    f"arrises, top and bottom (the back edge stays square against the wall); overhangs the posts {inch(OVERHANG)} at "
-    "each end and the front, flush with their rear faces; pocket screws up through the ends and partition near the "
-    "front, figure-8s on the cleat at the back")
+    f"arrises, top and bottom (the back edge stays square against the wall); overhangs the posts {inch(END_OVERHANG)} at "
+    f"each end, {inch(OVERHANG)} at the front and {inch(REAR_OVERHANG)} at the back; pocket screws up through the ends "
+    "and partition near the front, figure-8s on the cleat at the back")
 
 # ================================================================ drawer fronts: maple frame, inset panel, T&G, all painted white
 RL = FRONT_W - 2 * STILE_W + 2 * TONGUE_L     # rail length with stub tenons
@@ -468,10 +464,15 @@ for n, s in INST:
         assert abs(bb.min.Z) < 1e-6 and abs(bb.max.Z - TOP_Z0) < 1e-6, n
     else:
         assert bb.min.Z >= CLEAR - 1e-6, f"{n} hangs below the clear floor"
-assert X0 >= BASEBOARD_T + 0.25 * IN, "the end posts stand on the side walls' baseboards"
-if BASEBOARD_NOTCH:   # the baseboard's envelope fits in the rear posts' notches
-    _bb_air = _box(X0 - 1, -1, 0.5, POST + 2, WALL_GAP + BASEBOARD_T - 0.5, BASEBOARD_H - 1)
-    assert vol(_bb_air & post_rl) < 1e-3, "baseboard notch too small"
+# the baseboard and shoe (estimate plus 1/4 in) along all three walls hit nothing: no notches anywhere
+_bb_t = BASEBOARD_T + 0.25 * IN
+for _env in (_box(-1, -1, -1, ALCOVE_W + 2, _bb_t + 1, BASEBOARD_H + 1),
+             _box(-1, -1, -1, _bb_t + 1, ALCOVE_D + 1, BASEBOARD_H + 1),
+             _box(ALCOVE_W - _bb_t, -1, -1, _bb_t + 1, ALCOVE_D + 1, BASEBOARD_H + 1)):
+    for n, s in INST:
+        assert vol(_env & s) < 1e-3, f"{n} stands in the baseboard"
+assert abs(YB0 - (BASEBOARD_T + BB_CLEAR)) < 1e-9 and abs(X0 - TOP_X0 - END_OVERHANG) < 1e-9
+assert abs(post_rl.bounding_box().min.Y - YB0) < 1e-6 and abs(TOP_Y0 + REAR_OVERHANG - YB0) < 1e-9
 # the housed tongues: inside the panel, in a relieved post, and the un-housed bottoms on the post faces
 def housed(guest, host, probe):
     assert vol(probe & guest) > probe.volume * 0.999, "probe not inside guest"
@@ -505,10 +506,9 @@ assert abs(BOX_IN_W - (OPEN_W - UM_WIDTH_LOSS)) < 1e-6
 assert abs(BOX_Z0 - BOT_Z1 - UM_BOTTOM_CLEAR) < 1e-6
 assert TOP_Z0 - (BOX_Z0 + BOX_H) >= UM_TOP_CLEAR, "box too tall for the opening"
 assert abs(BOX_D - SLIDE_LEN) < 1e-6
-assert CASE_D - BACK_Y1 >= UM_MIN_DEPTH, f"case too shallow for the 21 in runner on the partition side: {CASE_D - BACK_Y1:.1f} < {UM_MIN_DEPTH}"
+assert CASE_D - BACK_Y1 >= UM_MIN_DEPTH, f"case too shallow for the {inch(SLIDE_LEN)} in runner on the partition side: {CASE_D - BACK_Y1:.1f} < {UM_MIN_DEPTH}"
 _runner_rear = YF1 - RUNNER_SETBACK - RUNNER_LEN
-assert UM_BRACKET_MIN <= _runner_rear - BACK_Y1 <= UM_BRACKET_MAX, "rear bracket range on the post side"
-assert UM_BRACKET_MIN <= (YF1 - RUNNER_SETBACK - SLIDE_LEN) - BACK_Y1 <= UM_BRACKET_MAX, "rear bracket range if the runner is nominal length"
+assert UM_BRACKET_MIN <= _runner_rear - BACK_Y1 <= UM_BRACKET_MAX, f"rear bracket range on the post side: {_runner_rear - BACK_Y1:.1f} mm"
 assert UM_SCREW_Y[1] + RUNNER_SETBACK < POST, "runner front screws run past the post"
 assert BOX_Y0 > CLEAT_Y1 and BOX_Y0 > BACK_Y1, "box hits the cleat or back"
 assert T12 - UM_HOOK_BORE[1] >= 1.9, "hook bore would break through the back"   # a 2 mm skin; test-drill scrap first
@@ -569,7 +569,7 @@ if TMP:
 
 if os.environ.get("EXPORT"):
     HARDWARE_LINES = [
-        {"part": "Blum TANDEM plus BLUMOTION 563H, 21 in (563H5330B)", "qty": 2, "unit": "pair",
+        {"part": "Blum TANDEM plus BLUMOTION 563H, 18 in (563H4570B)", "qty": 2, "unit": "pair",
          "material": "hardware", "notes": "one pair per drawer; 90 lb dynamic; runner fronts 3/32 behind the fronts' back faces"},
         {"part": "Blum rear mounting brackets 295.3750.02", "qty": 2, "unit": "ea", "material": "hardware",
          "notes": "post-side runners: the runner front screws into the post's inner face (#6 x 5/8), the rear sits on a "
@@ -604,4 +604,5 @@ print("OK  parts:", [p["name"] for p in PARTS])
 print(f"top {inch(TOP_W)} x {inch(TOP_D)} at {inch(SEAT_Z)}  posts {inch(POST)} sq x {inch(TOP_Z0)}, outer faces {inch(X1 - X0)} apart  "
       f"clear floor {inch(CLEAR)}  fronts {inch(FRONT_W)} x {inch(FRONT_H)}  opening {inch(OPEN_W)} x {inch(OPEN_H)}  "
       f"box {inch(BOX_W)} x {inch(BOX_H)} x {inch(BOX_D)} (inside height {inch(BOX_H - UM_RECESS - T12)})  "
-      f"inside depth {CASE_D - BACK_Y1:.1f} mm (Blum 557)  bracket gap {YF1 - RUNNER_SETBACK - RUNNER_LEN - BACK_Y1:.1f} mm")
+      f"rear posts {inch(YB0)} off the wall, top past them {inch(REAR_OVERHANG)}  "
+      f"inside depth {CASE_D - BACK_Y1:.1f} mm (Blum {UM_MIN_DEPTH:.0f})  bracket gap {YF1 - RUNNER_SETBACK - RUNNER_LEN - BACK_Y1:.1f} mm")
