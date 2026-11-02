@@ -264,3 +264,34 @@ edge, hook-and-loop to the baffle, which sits 5 mm behind the frame's back).
 - Render `images/cab-samples.png`. Next: the mount (A or B from the options
   page) designed onto the picked size, its inserts or screws confirmed with
   Brian, and the logo's grille position (corner, 10 mm in) confirmed.
+
+### Resized to 1.5, 1.75 and 2 in (2026-11-01)
+
+Brian, on the 2.5 to 3.5 in set: "those seem too big, let's make a 1.5, 1.75
+and 2in version". Same `logodude_cab.py` (`WIDTHS=1.5,1.75,2` is now the
+default), same tiers, same pipeline; the 2.5/3/3.5 STLs were deleted (git has
+them at 51adb53) and `logodude-cab.3mf` rebuilt in place.
+
+- Sizes: 1.5 in = 38.1 x 37.0 mm, margin 1.28, face strokes 0.44 to 0.55 mm,
+  about 4 g; 1.75 in = 44.4 x 43.2, margin 1.49, strokes 0.51 to 0.64, 6 g;
+  2 in = 50.8 x 49.4, margin 1.70, strokes 0.58 to 0.73, 8 g. STLs
+  `logodude-cab-{15,175,2}-{backer,ink}.stl`, all watertight.
+- Nozzle: the face strokes are under two 0.42 mm beads at every size, so
+  arachne (`min_bead_width` 50% = 0.21) splits them into TWO THIN beads: the
+  1.5 in eyes print as two 0.27 mm beads, the 2 in eyes as two 0.34 mm beads
+  (measured from the sliced G-code, `images/cab-samples-ink-layer.png` draws
+  the top ink layer at true bead width); the hair gets 0.37 to 0.56 mm beads.
+  Every stroke gets black on all six ink layers. The 0.2 nozzle (0.22 mm
+  lines) would lay those same beads at its natural width; it is the better
+  tool for these sizes if the thin beads print rough, at a nozzle swap and
+  3 to 4x the time.
+- Print file `logodude-cab.3mf`: one plate "Size samples", objects "Logo Dude
+  2 in" (62, 178), "1.75 in" (170, 178), "1.5 in" (62, 78); 0.4 nozzle,
+  `0.16mm Standard @BBL X2D`, PETG Basic white + black, the tag's locked keys,
+  prime tower at (114.5, 116). Offline slice: 25 layers, 47 min, 16.7 g white +
+  1.6 g black = 18.4 g, one filament change (L20 to black); all G-code proofs
+  pass (per-stroke moves 1.5 in [218, 342, 666, 734, 2580, 4304]). Studio:
+  select the 0.4 nozzle preset BEFORE opening; AMS white / black; Flushing
+  Volumes: Re-calculate. Not printed.
+- The options page still draws 3, 3.5 and 4 in on the cab; redraw it at the
+  picked size when the mount is designed.

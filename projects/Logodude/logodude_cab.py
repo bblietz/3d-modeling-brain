@@ -1,14 +1,15 @@
 """Logo Dude for the front of the walnut 1x12 (Cab-Blietz-1x12-hardwood), size samples.
 
 Brian 2026-10-30: "create a 2.5, 3 and 3.5 in version of the logo dude and I will
-pick the size I want." Each is the badge (logodude.py: traced, cleaned, smoothed
+pick the size I want."; 2026-11-01: "those seem too big, let's make a 1.5, 1.75 and
+2in version". Each is the badge (logodude.py: traced, cleaned, smoothed
 ink on a die-cut white backer) rescaled so the backer is WIDTH in wide, with the
 outline margin scaled along with the art so every size keeps the badge's look.
 Plain backs: the screw mount (cab-logo-options.html, A or B) goes onto the size
 Brian picks, since its spots depend on the size. 0.4 nozzle grid like the tag:
 0.2 first layer + 0.16 layers. Print flat, ink up, two colours, one change.
 
-WIDTHS=2.5,3,3.5 (default) builds every size; EXPORT=1 writes
+WIDTHS=1.5,1.75,2 (default) builds every size; EXPORT=1 writes
 logodude-cab-<w>-{backer,ink}.stl per size, each centred on its own origin;
 SHOW=1 pushes all of them side by side to the viewer."""
 import os
@@ -22,7 +23,7 @@ sys.path.insert(0, str(HERE))
 EXPORT, SHOW = os.environ.pop("EXPORT", None), os.environ.pop("SHOW", None)   # not for logodude.py's own blocks
 import logodude as L  # noqa: E402  (builds the 4 in badge on import)
 
-WIDTHS_IN = [float(w) for w in os.environ.get("WIDTHS", "2.5,3,3.5").split(",")]
+WIDTHS_IN = [float(w) for w in os.environ.get("WIDTHS", "1.5,1.75,2").split(",")]
 BADGE_W = 104.5          # mm, the 4 in badge's width: the margin reference (3.5 mm at this width)
 BACKER_T = 3.08          # mm, 0.2 + 18 x 0.16
 INK_H = 0.96             # mm raised, 6 x 0.16

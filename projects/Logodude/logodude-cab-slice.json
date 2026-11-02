@@ -10,31 +10,31 @@
   "ink": true
  },
  "time": {
-  "estimate": "1h 41m 58s",
-  "prediction_s": 6118,
-  "minutes": 102.0,
-  "h_m": "1 h 42 min"
+  "estimate": "47m 23s",
+  "prediction_s": 2843,
+  "minutes": 47.4,
+  "h_m": "0 h 47 min"
  },
  "grams": {
-  "white (1)": 47.26,
-  "black (2)": 4.27,
-  "total": 51.53,
+  "white (1)": 16.73,
+  "black (2)": 1.62,
+  "total": 18.35,
   "header_weights": [
-   47.26,
-   4.27
+   16.73,
+   1.62
   ]
  },
  "grams_by_feature": {
-  "Sparse infill": 20.15,
-  "Internal solid infill": 20.1,
-  "Bottom surface": 2.81,
-  "Outer wall": 2.42,
-  "Top surface": 2.31,
-  "Inner wall": 2.18,
+  "Internal solid infill": 6.5,
+  "Sparse infill": 6.28,
+  "Outer wall": 1.35,
+  "Inner wall": 1.1,
   "Prime tower": 0.93,
-  "Skirt": 0.14,
-  "Floating vertical shell": 0.12,
-  "Gap infill": 0.02
+  "Bottom surface": 0.91,
+  "Top surface": 0.75,
+  "Skirt": 0.11,
+  "Floating vertical shell": 0.05,
+  "Gap infill": 0.01
  },
  "tool_changes": {
   "start": "T0",
@@ -63,39 +63,39 @@
   }
  },
  "gcode_proofs": {
-  "black_ink_moves": 37851,
+  "black_ink_moves": 23356,
   "black_ink_moves_per_sample": {
-   "Logo Dude 3.5 in": {
-    "moves": 14620,
+   "Logo Dude 2 in": {
+    "moves": 9038,
     "moves_per_stroke": [
-     432,
-     464,
-     1657,
-     1671,
-     6553,
-     8468
+     178,
+     203,
+     740,
+     778,
+     3088,
+     6247
     ]
    },
-   "Logo Dude 3 in": {
-    "moves": 11717,
+   "Logo Dude 1.75 in": {
+    "moves": 7706,
     "moves_per_stroke": [
-     276,
-     277,
-     1248,
-     1331,
-     4901,
-     7101
+     168,
+     211,
+     691,
+     743,
+     2749,
+     5239
     ]
    },
-   "Logo Dude 2.5 in": {
-    "moves": 11514,
+   "Logo Dude 1.5 in": {
+    "moves": 6612,
     "moves_per_stroke": [
-     204,
-     253,
-     923,
-     946,
-     3773,
-     8071
+     218,
+     342,
+     666,
+     734,
+     2580,
+     4304
     ]
    }
   },
@@ -104,8 +104,8 @@
  },
  "tower": {
   "wipe_tower_xy": [
-   110.0,
-   106.5
+   114.5,
+   116.0
   ],
   "brim_offsets_measured": [
    -3.87,
@@ -120,15 +120,15 @@
    29.22
   ],
   "clearance": [
-   12.03,
-   101.5
+   17.96,
+   110.63
   ]
  },
  "bed_xy": [
   0.0,
-  43.4,
-  211.8,
-  224.9
+  55.8,
+  195.9,
+  206.4
  ],
  "file": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Logodude/logodude-cab.3mf",
  "nozzle": "0.4",
@@ -146,57 +146,57 @@
  "plate": "Size samples",
  "objects": [
   {
-   "name": "Logo Dude 3.5 in",
+   "name": "Logo Dude 2 in",
    "center": [
     62.0,
     178.0
    ],
    "parts": [
     {
-     "stl": "logodude-cab-35-backer.stl",
+     "stl": "logodude-cab-2-backer.stl",
      "name": "backer (white)",
      "filament": 1
     },
     {
-     "stl": "logodude-cab-35-ink.stl",
+     "stl": "logodude-cab-2-ink.stl",
      "name": "ink (black)",
      "filament": 2
     }
    ]
   },
   {
-   "name": "Logo Dude 3 in",
+   "name": "Logo Dude 1.75 in",
    "center": [
     170.0,
     178.0
    ],
    "parts": [
     {
-     "stl": "logodude-cab-3-backer.stl",
+     "stl": "logodude-cab-175-backer.stl",
      "name": "backer (white)",
      "filament": 1
     },
     {
-     "stl": "logodude-cab-3-ink.stl",
+     "stl": "logodude-cab-175-ink.stl",
      "name": "ink (black)",
      "filament": 2
     }
    ]
   },
   {
-   "name": "Logo Dude 2.5 in",
+   "name": "Logo Dude 1.5 in",
    "center": [
     62.0,
     78.0
    ],
    "parts": [
     {
-     "stl": "logodude-cab-25-backer.stl",
+     "stl": "logodude-cab-15-backer.stl",
      "name": "backer (white)",
      "filament": 1
     },
     {
-     "stl": "logodude-cab-25-ink.stl",
+     "stl": "logodude-cab-15-ink.stl",
      "name": "ink (black)",
      "filament": 2
     }

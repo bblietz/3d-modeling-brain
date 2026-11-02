@@ -1,5 +1,6 @@
-"""Bambu Studio project 3MF for the Logo Dude CAB LOGO size samples (2026-10-30): logodude-cab.3mf, one plate,
-three objects (2.5, 3 and 3.5 in wide), so one print gives Brian all three to hold against the walnut 1x12.
+"""Bambu Studio project 3MF for the Logo Dude CAB LOGO size samples (2026-10-30, resized 2026-11-01): logodude-cab.3mf,
+one plate, three objects (1.5, 1.75 and 2 in wide; 2.5 to 3.5 "seem too big"), so one print gives Brian all three to
+hold against the walnut 1x12.
 
 Adapted from make_tag_3mf.py (the luggage tag, 0.4 nozzle mode), which is left untouched. Each object:
     backer (white, filament 1, z 0..3.08)        layers 1-19 on the 0.16 grid (0.2 first layer)
@@ -43,10 +44,10 @@ FILAMENT = "Bambu PETG Basic @BBL X2D 0.4 nozzle"
 BUILD = f"{PIPE}/build-cab"
 COLOURS = ["#FFFFFF", "#000000"]                  # filament n = position in this list
 PLATE = "Size samples"
-# the three objects: (name, STL tag, bed centre of the backer's bounding box); 3.5 and 3 across the top, 2.5 below
-OBJECTS = [{"name": "Logo Dude 3.5 in", "tag": "35", "center": (62.0, 178.0)},
-           {"name": "Logo Dude 3 in", "tag": "3", "center": (170.0, 178.0)},
-           {"name": "Logo Dude 2.5 in", "tag": "25", "center": (62.0, 78.0)}]
+# the three objects: (name, STL tag, bed centre of the backer's bounding box); 2 and 1.75 across the top, 1.5 below
+OBJECTS = [{"name": "Logo Dude 2 in", "tag": "2", "center": (62.0, 178.0)},
+           {"name": "Logo Dude 1.75 in", "tag": "175", "center": (170.0, 178.0)},
+           {"name": "Logo Dude 1.5 in", "tag": "15", "center": (62.0, 78.0)}]
 PARTS = [("backer", "backer (white)", 1), ("ink", "ink (black)", 2)]     # (key, part name, filament); backer = anchor
 OUT = f"{PROJECT}/logodude-cab.3mf"
 BED_TYPE = "Textured PEI Plate"
@@ -339,13 +340,13 @@ def verify(tower):
     assert not white_high, f"white extrusion above the backer: {len(white_high)} moves"
     assert white_low and all(z in {m[0] for m in white_low} for z in backer_layers), "a backer layer without white"
     assert all(z in {m[0] for m in black_ink} for z in ink_layers), "an ink layer without black"
-    # every sample gets ink on every ink layer (the 2.5 in eyes are the thinnest strokes in the file)
+    # every sample gets ink on every ink layer (the 1.5 in eyes are the thinnest strokes in the file)
     per_sample = {o["name"]: len(inside(black_ink, pads("ink")[i:i + 1])) for i, o in enumerate(OBJECTS)}
     for i, o in enumerate(OBJECTS):
         zs_here = {m[0] for m in inside(black_ink, pads("ink")[i:i + 1])}
         assert zs_here == set(ink_layers), f"{o['name']}: ink layers missing black: {sorted(set(ink_layers) - zs_here)}"
     # and every single stroke (hair, face outline, two eyes, nose, mouth) of every sample: the thinnest ones are the
-    # 2.5 in eyes at about 0.75 mm, under two 0.42 beads, so arachne must still lay something there on every layer
+    # 1.5 in eyes at about 0.45 mm, one 0.42 bead, so arachne must still lay something there on every layer
     thin = {}
     for o in OBJECTS:
         pieces = MESHES[(o["tag"], "ink")].split(only_watertight=True)
