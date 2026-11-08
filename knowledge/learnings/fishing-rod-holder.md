@@ -24,14 +24,18 @@ Garage joist rod storage. Brian's two notched 1x4 combs dropped a rod whenever a
 - The first comb concept needed three spliced pieces because 256 mm is 10 in; the hybrid on a wood backbone made the splice problem disappear. Long hanging parts should start from "what carries the length" (wood, rail, extrusion) before a splice design.
 - A late `Edit` that appended a function in the middle of `main()` silently swallowed the following block into the new function (indentation). Re-read the tail of a file after inserting a `def` into it.
 
+- **"Angled" has a direction.** Brian asked for an angled resting slot; I sloped the floor down toward the board (rod in the back corner). He meant the slot should lean away from the wood (rod tucked outward under the lip, coming back up the ramp to leave). Before building a tilt, state which way the low end goes in one sentence or draw both and ask. The rework cost one full cycle (CAD, renders, slice, page).
+- A build123d `fillet()` loop on hand-picked vertical edges worked but made the 2D check approximate its radii; constructing every fillet as an arc in the outline polygon (`rounded_outline`) and extruding that gave one source of truth for the CAD, the STL and the shapely checks. With a leaning slot the geometry is a handful of trig lines (`S_IN`, `X_C`, `S_OUT`, `X_LIP_TOP`), all derived from the lean, the slot width and the lip height.
+- The 3MF builder ran while the STL kept changing. Because it reads the constants and the STL at run time, re-running it on the final hook took 12 s plus the proof slice. Keep print-file builders parameter-free and re-runnable; never bake geometry numbers into them.
+
 ## Numbers
 
-- Hook 3-1/2 x 3-1/4 x 3/8 in; pocket 7/8 wide, lip 3/4 wide, lift to leave 1 in (lip 5/8 plus a 3/8 slope to the mouth), mouth 1-1/4 tall with 1/4 chamfers, back web 1/8 in so the rod never touches the board. Screws #8 x 1, 1 in from the board edge, 9/16 and 2-11/16 up from the hook bottom, 5 mm holes with a 10 mm 90 degree countersink.
-- PETG, 2 walls, 15% infill, 0.30 mm layers, 0.6 nozzle: 24.6 g, 33 min per hook (real slice). Eight hooks 197 g, 4 h 24 min.
-- Board layout drawn: hooks at 4 in pitch, bottoms at 4-5/8, 8-5/8, 12-5/8, 16-5/8 in below the joist on the 27 in board; 5 in pitch if reels stay on and line up.
+- Hook 4 x 3-1/4 x 3/8 in (tab 1-3/4 wide on the board, jaw 2-1/4 past the edge). Slot 7/8 wide leaning 35 degrees from vertical away from the wood, rounded bottom R 7/16 with its low point 5/8 up; ramp leaves the tab edge 1-7/8 up; lip top 1-7/8 sloping to a 2-1/4 tip, lip 0.58 at its thinnest; 1/8 web keeps the rod off the wood. Lift to leave 1.57 in for 1/4, 3/8 and 5/8 blanks (plain deep hook 1.00; the wrong-way angled floor 1.24). Screws #8 x 1, 1 in from the board edge, 9/16 and 2-11/16 up from the hook bottom, 5 mm holes with a 10 mm 90 degree countersink.
+- PETG, 2 walls, 15% gyroid, 0.30 mm layers, 0.6 nozzle: 26.2 g, 35 min per bare hook; in the 3MF with pads 30.6 g. `rod-hook.3mf`: 8 hooks on 2 plates of 4, 122.5 g / 2 h 51 and 2 h 49, total 245 g / 5 h 40. Pads: 0.87 plastic per volume vs 0.15 plain, all 16.
+- Board layout drawn: hooks at 4 in pitch, bottoms at 5, 9, 13, 17 in below the joist on the 27 in board (rods about 4-3/16 down); 5 in pitch if reels stay on and line up.
 
 ## Still to learn (after the print)
 
 - Does a 3/8 in PETG hook on two #8 screws shrug off a yank on a snagged rod? Expectation: yes by a wide margin.
-- Does the 1 in lift feel right overhead, or is the plain 5/8 hook (option A) easier to live with?
+- Does the up-the-ramp-then-out motion (1.57 in of lift) feel right overhead, or is it fiddly with a reel on?
 - Rod blank diameters at the hook positions, and whether the 7/8 pocket wants to be wider for butt sections.

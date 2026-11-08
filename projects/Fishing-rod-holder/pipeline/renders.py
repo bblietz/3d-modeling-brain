@@ -22,7 +22,9 @@ STL = PROJECT / "rod-hook.stl"
 
 JOIST_D, JOIST_T, PLY = 7.25, 1.5, 0.75
 BOARD_LEN, BOARD_ABOVE = 27.0, 7.0      # Brian's comb: 27 in overall, 7 in up the joist
-PITCH, FIRST = 4.0, 4.0                  # hooks every 4 in, first pocket floor 4 in below the joist
+PITCH, BOTTOM_FIRST = 4.0, 5.0           # hooks every 4 in, first hook's bottom edge 5 in below the joist
+SEAT = rh.seat_point(0.375)              # where a 3/8 blank rests, in hook coordinates (x, y up from the hook bottom)
+FIRST = BOTTOM_FIRST - SEAT[1]           # that rod's depth below the joist (about 4 in)
 
 
 def render(name, body, camera, size=(1400, 1000), projection="p"):
@@ -43,9 +45,11 @@ def render(name, body, camera, size=(1400, 1000), projection="p"):
 HOOK = f'color("#2f6fe4") import("{STL}");'
 
 
-def rod(d, length=8.0, x=rh.X_ARC, y=None):
-    y = rh.Y_FLOOR + d / 2 if y is None else y
-    return f'color("#333333") translate([{x * IN}, {y * IN}, {-length * IN / 2}]) cylinder(h={length * IN}, d={d * IN}, $fn=48);'
+def rod(d, length=8.0, x=None, y=None, color="#333333"):
+    sx, sy = rh.seat_point(d)
+    x = sx if x is None else x
+    y = sy if y is None else y
+    return f'color("{color}") translate([{x * IN}, {y * IN}, {-length * IN / 2}]) cylinder(h={length * IN}, d={d * IN}, $fn=48);'
 
 
 def board(length_in, y0_in):
@@ -69,10 +73,9 @@ rotate([90, 0, 0]) {{
     hooks = []
     board_top = BOARD_ABOVE                                  # y of the board top, joist bottom at y = 0
     for i in range(4):
-        floor_y = -(FIRST + PITCH * i)                      # pocket floor below the joist bottom
-        hook_y = floor_y - rh.Y_FLOOR                        # hook bottom edge
+        hook_y = -(BOTTOM_FIRST + PITCH * i)                 # hook bottom edge below the joist bottom
         hooks.append(f'translate([0, {hook_y * IN}, 0]) {HOOK}')
-        hooks.append(rod(0.375, length=14.0, y=floor_y + 0.375 / 2))
+        hooks.append(rod(0.375, length=14.0, y=hook_y + SEAT[1]))
     scene2 = f"""
 rotate([90, 0, 0]) {{
 {board(BOARD_LEN, BOARD_ABOVE - BOARD_LEN)}
@@ -114,13 +117,10 @@ def layout_figure():
     ax.add_patch(Rectangle((0, -BOARD_ABOVE), rh.BOARD_W, BOARD_LEN, fc="#e9d4ad", ec="#8a6a3c", lw=1.2, zorder=1))
     solid = rh.solid_2d()  # hook outline in hook coords (y up, bottom at 0)
     for i in range(4):
-        floor_depth = FIRST + PITCH * i
-        bottom_depth = floor_depth + rh.Y_FLOOR
+        bottom_depth = BOTTOM_FIRST + PITCH * i
         pts = [(x, bottom_depth - y) for x, y in solid.exterior.coords]
         ax.add_patch(MplPolygon(pts, closed=True, fc="#5b8def", ec="#2b4f9e", lw=1.0, zorder=3))
-        for ring in solid.interiors:
-            ax.add_patch(MplPolygon([(x, bottom_depth - y) for x, y in ring.coords], closed=True, fc="white", ec="#2b4f9e", lw=0.8, zorder=3.1))
-        ax.add_patch(Circle((rh.X_ARC, floor_depth - 0.375 / 2), 0.375 / 2, fc="#333333", ec="black", lw=0.8, zorder=5))
+        ax.add_patch(Circle((SEAT[0], bottom_depth - SEAT[1]), 0.375 / 2, fc="#333333", ec="black", lw=0.8, zorder=5))
         for sy in rh.SCREW_Y:
             ax.add_patch(Circle((rh.SCREW_X, bottom_depth - sy), 0.2, fc="#e5e7eb", ec="#1f2430", lw=0.8, zorder=6))
             ax.add_patch(Circle((rh.SCREW_X, bottom_depth - sy), 0.1, fc="#1f2430", ec="#1f2430", zorder=6.1))
@@ -130,20 +130,20 @@ def layout_figure():
     # dimensions
     ax.annotate("", xy=(rh.BOARD_W + 5.2, 0), xytext=(rh.BOARD_W + 5.2, BOARD_LEN - BOARD_ABOVE), arrowprops=dict(arrowstyle="<->", lw=0.9), zorder=8)
     ax.text(rh.BOARD_W + 5.05, (BOARD_LEN - BOARD_ABOVE) * 0.8, "20 in hang,\nas now", fontsize=8.5, va="center", ha="right")
-    ax.annotate("", xy=(-2.9, FIRST), xytext=(-2.9, FIRST + PITCH), arrowprops=dict(arrowstyle="<->", lw=0.9), zorder=8)
-    ax.text(-3.05, FIRST + PITCH / 2, f"{PITCH:g} in\npitch", fontsize=8.5, va="center", ha="right")
-    ax.annotate("", xy=(-2.9, 0), xytext=(-2.9, FIRST), arrowprops=dict(arrowstyle="<->", lw=0.9), zorder=8)
-    ax.text(-3.05, FIRST / 2, f"{FIRST:g}", fontsize=8.5, va="center", ha="right")
+    ax.annotate("", xy=(-2.9, BOTTOM_FIRST), xytext=(-2.9, BOTTOM_FIRST + PITCH), arrowprops=dict(arrowstyle="<->", lw=0.9), zorder=8)
+    ax.text(-3.05, BOTTOM_FIRST + PITCH / 2, f"{PITCH:g} in\npitch", fontsize=8.5, va="center", ha="right")
+    ax.annotate("", xy=(-2.9, 0), xytext=(-2.9, BOTTOM_FIRST), arrowprops=dict(arrowstyle="<->", lw=0.9), zorder=8)
+    ax.text(-3.05, BOTTOM_FIRST / 2, f"{frac(BOTTOM_FIRST)} to the\nfirst hook's\nbottom", fontsize=8.5, va="center", ha="right")
     ax.text(0.1, -BOARD_ABOVE + 0.9, "1x4, 27 in,\n7 in up the joist", fontsize=8.5, color="#8a6a3c")
     ax.text(rh.BOARD_W + 0.7, -JOIST_D / 2, "2x8 joist", fontsize=8.5, color="#8a6a3c", va="center")
-    ax.text(rh.BOARD_W + 0.7, FIRST + rh.Y_FLOOR - rh.SCREW_Y[1] - 0.05, f"two #8 x 1 screws per hook,\n{frac(rh.SCREW_X)} in from the board edge,\n{frac(rh.SCREW_Y[0])} and {frac(rh.SCREW_Y[1])} up from\nthe hook's bottom edge", fontsize=7.5, va="top", color="#1f2430")
-    ax.text(-rh.CANT - 0.1, FIRST + 3 * PITCH + 1.2, f"hooks reach\n{frac(rh.CANT)} past\nthe edge", fontsize=8, ha="right", va="top", color="#2b4f9e")
-    ax.text(rh.BOARD_W + 0.7, FIRST + 1.5 * PITCH + 1.0, "hook bottoms at\n" + ", ".join(frac(FIRST + PITCH * i + rh.Y_FLOOR) for i in range(4)) + "\nbelow the joist", fontsize=7.5, va="top", color="#1f2430")
+    ax.text(rh.BOARD_W + 0.7, BOTTOM_FIRST - rh.SCREW_Y[1] - 0.05, f"two #8 x 1 screws per hook,\n{frac(rh.SCREW_X)} in from the board edge,\n{frac(rh.SCREW_Y[0])} and {frac(rh.SCREW_Y[1])} up from\nthe hook's bottom edge", fontsize=7.5, va="top", color="#1f2430")
+    ax.text(-rh.CANT - 0.1, BOTTOM_FIRST + 3 * PITCH + 0.6, f"jaws reach\n{frac(rh.CANT)} past\nthe edge", fontsize=8, ha="right", va="top", color="#2b4f9e")
+    ax.text(rh.BOARD_W + 0.7, BOTTOM_FIRST + PITCH + 0.5, "hook bottoms at\n" + ", ".join(frac(BOTTOM_FIRST + PITCH * i) for i in range(4)) + "\nbelow the joist;\nrods rest about\n" + frac(FIRST) + " in down, then\nevery " + frac(PITCH), fontsize=7.5, va="top", color="#1f2430")
     ax.set_xlim(-6.2, rh.BOARD_W + 5.9)
     ax.set_ylim(BOARD_LEN - BOARD_ABOVE + 1.0, -JOIST_D - PLY - 0.8)
     ax.set_aspect("equal")
     ax.axis("off")
-    ax.set_title("Where the hooks go: 4 rods at 4 in, first floor 4 in below the joist", fontsize=10.5, loc="left")
+    ax.set_title(f"Where the hooks go: 4 rods at {frac(PITCH)} in, first hook bottom {frac(BOTTOM_FIRST)} in below the joist", fontsize=10.5, loc="left")
     fig.tight_layout()
     out = IMAGES / "board-layout.png"
     fig.savefig(out, facecolor="white")
@@ -153,10 +153,11 @@ def layout_figure():
 
 def pocket_face_on():
     """3. retention close-up: the hook face on, orthographic, with a 5/8 and a 3/8 rod in the pocket."""
+    s3 = rh.seat_point(0.375)
     scene3 = f"""
 {HOOK}
 {rod(0.625, length=1.0)}
-color("#888888") translate([{rh.X_ARC * IN}, {(rh.Y_FLOOR + 0.375 / 2) * IN}, {rh.T * IN}]) cylinder(h={0.3 * IN}, d={0.375 * IN}, $fn=48);
+color("#888888") translate([{s3[0] * IN}, {s3[1] * IN}, {rh.T * IN}]) cylinder(h={0.3 * IN}, d={0.375 * IN}, $fn=48);
 """
     render("pocket-face-on", scene3, "0,0,0,0,0,0,0", size=(1200, 1000), projection="o")
 

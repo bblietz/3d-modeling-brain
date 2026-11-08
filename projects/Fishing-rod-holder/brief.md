@@ -2,7 +2,7 @@
 type: project
 project: Fishing-rod-holder
 created: 2026-11-07
-status: Deep hook on a 1x4 built, checked and exported 2026-11-07 (rod_hook.py, rod-hook.stl, PETG 24.6 g per hook); 3MF with solid pads built by pipeline/make_print_3mf.py; not printed.
+status: Open-J hook with a slot leaning away from the wood, built, checked and exported 2026-11-07 (rod_hook.py, rod-hook.stl, PETG 26.2 g per hook); rod-hook.3mf with solid pads, 8 hooks on 2 plates, 245 g / 5 h 40; not printed.
 printer: Bambu Lab X2D
 material: PETG
 tags: [3d-print, garage, fishing, storage]
@@ -18,6 +18,8 @@ What fails (Brian, same day): "rods fall out when minimal force is applied. They
 
 Picks (Brian, same day, from the options page): "use the deep hook design. For decision 2, combine the approach. Make individual deep hooks, that can be screwed into a 1x4 piece of wood."
 
+Rework (Brian, same day, after seeing the first hook): "make the bottom resting part of the hook have a slot that is angled to help keep the rod there better" and "remove the top most part of the device that is not over the wood. It isn't needed." Then, on the first attempt: "you did the opposite angle for the slot. The slot should angle away from the wood."
+
 ## What exists today (read from the photo)
 
 - Unfinished garage ceiling: exposed joists with a plywood floor above, looks like 2x8 at 16 in on center (to confirm; the 7 in of board above the joist bottom matches a 7-1/4 in 2x8 almost exactly).
@@ -31,25 +33,29 @@ A half-round notch cut into a vertical edge has its lowest point at the board ed
 
 ## Design as built (2026-11-07)
 
-`rod_hook.py` (build123d, algebra mode; constants in inches, CAD in mm). One printed hook per rod, screwed to the face of a 1x4 that hangs from the joist like the wooden combs.
+`rod_hook.py` (build123d, algebra mode; constants in inches, CAD in mm; the outline is one polygon with every fillet constructed as an arc, so the 2D checks use the very points the CAD extrudes). One printed hook per rod, screwed to the face of a 1x4 that hangs from the joist like the wooden combs. An open J: a tab over the board and a jaw past its edge.
 
-- Hook 3-1/2 x 3-1/4 x 3/8 in, corners R 1/4. It reaches 1-3/4 in past the board edge; the rod lies in the pocket beside the wood with a 1/8 in web between the pocket's back wall and the board edge, so no blank ever touches the board.
-- Deep-hook pocket: pocket 7/8 wide (U bottom R 7/16), floor 5/8 above the hook's bottom edge; lip 3/4 wide, its top 5/8 above the floor; the channel floor slopes up 3/8 from the lip to the mouth, so the mouth floor is 1 in above the pocket floor (the lift to leave) and a rod rolls into the pocket by itself; mouth 1-1/4 tall at the mouth; 1/4 in chamfers at both mouth corners.
+- Hook 4 x 3-1/4 x 3/8 in, corners R 1/4. The tab is 1-3/4 wide and 3-1/4 tall on the board face; its outer edge stands 1/8 past the board edge so no blank ever touches the wood. The jaw reaches 2-1/4 past the board edge.
+- Slot: 7/8 wide, leaning 35 degrees from vertical away from the wood as it goes down, rounded bottom R 7/16 with its low point 5/8 above the hook's bottom edge. The slot's inner wall (the ramp) leaves the tab's outer edge at 1-7/8 up and runs down and outward; the rod drops in at the top, slides down the ramp away from the board and rests at the bottom, its centre 1.23 in out from the board edge, with the lip's top edge 0.035 in inboard of that centre. To leave it has to come back up the ramp toward the board, then over the lip tip.
+- Lip: top 1-7/8 up at the slot, sloping up 3/8 to the tip at 2-1/4 (a rod set on the lip rolls in); 0.58 in thick beside the slot's bottom; tip and slot edges R 1/8.
+- No top bar: the jaw stops at the lip top, the tab carries on to 3-1/4.
 - Screws: two #8 x 1 in, 1 in from the board edge, 9/16 and 2-11/16 up from the hook's bottom edge; 5 mm through holes with a 90 degree countersink to 10 mm on the front face.
 - Print orientation: flat, back face on the bed, countersinks up. No overhangs.
-- Board layout (drawn, `images/board-layout.png`): hooks at 4 in pitch, bottoms at 4-5/8, 8-5/8, 12-5/8 and 16-5/8 in below the joist on the 27 in board (7 in up the joist, 20 in hang as now). 5 in pitch if reels stay on and line up.
+- Board layout (drawn, `images/board-layout.png`): hooks at 4 in pitch, bottoms at 5, 9, 13 and 17 in below the joist on the 27 in board (7 in up the joist, 20 in hang as now); rods rest about 4-3/16 in down, then every 4. 5 in pitch if reels stay on and line up.
 
-Checks baked into the script (all pass, `rod-hook-report.json`): one solid, bounding box, seated rods of 1/4, 3/8 and 5/8 in intersect neither the hook nor the board, the hook sits flat on the board face, mouth clears a 5/8 blank by 5/8, walls at or above 1.24 mm, exported STL watertight (50.8 cm3). Pose-space hold check (`escape_lift`): the rod centre must rise 1.00 in for every blank size before any path to the outside opens, and every size can get in and out with no height limit.
+Checks baked into the script (all pass, `rod-hook-report.json`): one solid, bounding box, rods of 1/4, 3/8 and 5/8 in seated at the slot's low point touch neither the hook's walls nor the board, the hook sits flat on the board face, slot clears a 5/8 blank by 1/4, walls at or above 1.24 mm, exported STL watertight (55.1 cm3). Pose-space hold check (`escape_lift`): the rod centre must rise 1.57 in for every blank size before any path to the outside opens (1.00 on the plain deep hook, 1.24 on the first angled-floor attempt), and every size can get in and out with no height limit.
+
+Rework history, same day: the first angled slot had its floor dropping toward the board (rod in the back corner, 30 degrees, lift 1.24); Brian wanted the opposite, so the slot became a channel leaning away from the wood.
 
 ## Print
 
-- PETG, 2 walls, 15% infill, 0.30mm Standard, 0.6 nozzle, 2-loop skirt: 24.6 g, 33 min per hook (real slice, `rod-hook-slice-petg.json`). Eight hooks 197 g, 4 h 24 min.
-- `rod-hook.3mf`: Bambu project file, eight hooks, a 100% infill modifier pad (22 mm) at every screw hole, proven in the sliced G-code (`rod-hook-3mf-report.json`). Brian opens it once in Bambu Studio to confirm the plates.
+- PETG, 2 walls, 15% infill, 0.30mm Standard, 0.6 nozzle, 2-loop skirt: 26.2 g, 35 min per bare hook (real slice, `rod-hook-slice-petg.json`).
+- `rod-hook.3mf` (`pipeline/make_print_3mf.py`, report `rod-hook-3mf-report.json`): Bambu project file, eight hooks on two plates of four in a 2 x 2 grid, 122.5 g / 2 h 51 and 122.5 g / 2 h 49, total 245 g / 5 h 40 (30.6 g per hook with the pads). A 100% infill modifier pad (22 mm, inset 0.2 mm from both faces, wholly inside the body: 0.0 mm3 outside against the CAD and the STL) at every screw hole; G-code proof over 10 mid-height layers: 0.87 plastic per volume inside every pad against 0.15 in the plain hook. Round trip through `bambu-studio --arrange 0 --export-3mf` preserved 2 plates, 8 objects, 16 modifiers, the overrides and `different_settings_to_system`. Brian opens it once in Bambu Studio to confirm both plates show.
 - Mirrored hook: not built; one flag away if a board needs hooks on both edges.
 
 ## Options round (2026-11-07, kept for the record)
 
-Published page: https://claude.ai/artifact/MuJqbgWZjUNzqSTMLFRt4H (now with the Decided banner and the built section on top). Concept slice quotes (PETG, 2 walls, 15%): three-piece printed comb 154 g / 3 h 08 per comb; cap over an existing notch 19.6 g / 28 min. Pocket options drawn: A hook (5/8 lift), B deep hook (1 in lift, picked), C snap clip. Build options drawn: A printed comb in three pieces, B caps on the wood combs; Brian took the blend.
+Published page: https://claude.ai/artifact/MuJqbgWZjUNzqSTMLFRt4H (Version 3: Decided banner, the built hook with renders, checks, drilling guide and print file on top; concept round below). Concept slice quotes (PETG, 2 walls, 15%): three-piece printed comb 154 g / 3 h 08 per comb; cap over an existing notch 19.6 g / 28 min. Pocket options drawn: A hook (5/8 lift), B deep hook (1 in lift, picked), C snap clip. Build options drawn: A printed comb in three pieces, B caps on the wood combs; Brian took the blend.
 
 ## Open
 

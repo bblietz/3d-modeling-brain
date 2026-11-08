@@ -53,55 +53,54 @@ def g(x):
 hook_g, hook_min = HOOK_SLICE["grams"], HOOK_SLICE["minutes"]
 lifts = HOOK["escape_lift_in"]
 if THREE_MF:
-    plates = THREE_MF.get("plates", [])
+    plates = THREE_MF.get("plates_sliced", [])
     plate_rows = "".join(
-        f'<tr><td>Plate {p["plate"]}</td><td class="num">{p["hooks"]}</td><td class="num">{g(p["grams"])}</td><td class="num">{hm(int(p["minutes"]))}</td></tr>'
+        f'<tr><td>Plate {p["plate"]}</td><td class="num">{len(p["hooks"])}</td><td class="num">{g(p["grams"])}</td><td class="num">{hm(int(p["minutes"]))}</td></tr>'
         for p in plates)
-    total_row = f'<tr><td><strong>Total</strong></td><td class="num">{THREE_MF.get("hooks", "")}</td><td class="num"><strong>{g(THREE_MF.get("grams", 0))}</strong></td><td class="num"><strong>{hm(int(THREE_MF.get("minutes", 0)))}</strong></td></tr>'
-    pad = THREE_MF.get("pad_density", {})
-    pad_line = (f'Solid pads proven in the sliced G-code: {pad.get("pad", "?")} plastic fraction inside a pad against {pad.get("plain", "?")} in the plain plate.'
-                if pad else "")
+    total_row = f'<tr><td><strong>Total</strong></td><td class="num">{THREE_MF.get("copies", "")}</td><td class="num"><strong>{g(THREE_MF.get("total_grams", 0))}</strong></td><td class="num"><strong>{hm(int(THREE_MF.get("total_minutes", 0)))}</strong></td></tr>'
+    pad_line = (f'Solid pads proven in the sliced G-code: {THREE_MF["pad_fill_min"]:.2f} plastic per volume inside every pad against {THREE_MF["plain_fill_max"]:.2f} in the plain hook.'
+                if "pad_fill_min" in THREE_MF else "")
     three_mf_html = f"""
   <div class="tablewrap"><table>
   <tr><th>Print file</th><th>Hooks</th><th>Grams</th><th>Time</th></tr>
   {plate_rows}{total_row}
   </table></div>
-  <p style="font-size:14px;color:var(--muted)"><code>rod-hook.3mf</code>, one project file, {len(plates)} plate{"s" if len(plates) != 1 else ""}. PETG, 2 walls, 15% gyroid, 0.30 mm layers, 2-loop skirt. {pad_line} Open it in Bambu Studio once to confirm the plates show.</p>"""
+  <p style="font-size:14px;color:var(--muted)"><code>rod-hook.3mf</code>, one project file, {len(plates)} plate{"s" if len(plates) != 1 else ""}, four hooks each in a 2 x 2 grid. PETG, 2 walls, 15% gyroid, 0.30 mm layers, 2-loop skirt; the pads add about 4 g per hook over the bare slice. {pad_line} Open it in Bambu Studio once to confirm both plates show.</p>"""
 else:
     three_mf_html = '<p style="font-size:14px;color:var(--muted)">The print file (<code>rod-hook.3mf</code>, 8 hooks with solid screw pads) is being built; numbers land here when it is sliced.</p>'
 
 BANNER = f"""
 <section class="decided">
   <div class="eyebrow">Decided 2026-11-07</div>
-  <p><strong>Deep hook pocket, as individual printed hooks screwed to a 1x4.</strong> Brian's words: "use the deep hook design ... make individual deep hooks, that can be screwed into a 1x4 piece of wood." PETG. The hook is built and checked below; the concept rounds are kept underneath for the record.</p>
+  <p><strong>Deep hook, as individual printed hooks screwed to a 1x4, with a slot that leans away from the wood and no top bar.</strong> Brian's words: "use the deep hook design ... make individual deep hooks, that can be screwed into a 1x4 piece of wood", then "make the bottom resting part of the hook have a slot that is angled to help keep the rod there better", "remove the top most part of the device that is not over the wood", and "the slot should angle away from the wood." PETG. The hook is built and checked below; the concept round is kept underneath for the record.</p>
 </section>"""
 
 BUILT = f"""
 <h2>Built · the rod hook</h2>
-<p>One printed part, {HOOK["size_in"][0]:g} x {HOOK["size_in"][1]:g} x {HOOK["size_in"][2]:g} in (3-1/2 x 3-1/4 x 3/8). It screws to the face of a 1x4 with two #8 x 1 in screws, 1 in from the board edge, and reaches 1-3/4 in past the edge. The rod lies in the pocket beside the wood and never touches it. The board hangs from the joist exactly as your combs do.</p>
+<p>One printed part, {HOOK["size_in"][0]:g} x {HOOK["size_in"][1]:g} x {HOOK["size_in"][2]:g} in (4 x 3-1/4 x 3/8), an open J. The tab screws to the face of a 1x4 with two #8 x 1 in screws, 1 in from the board edge. The jaw reaches {HOOK["jaw_reach_in"]:g} in past the edge and carries the slot, which leans {HOOK["slot_lean_deg"]:g} degrees away from the wood as it goes down: the rod drops in at the top, slides down the ramp away from the board and comes to rest under the lip's edge. To leave it has to come back up the ramp toward the board, then over the lip tip. The lip top slopes up to the tip, so a rod set on the lip rolls in. The top bar over the mouth is gone. The rod lies beside the wood and never touches it; the board hangs from the joist exactly as your combs do.</p>
 <div class="row">
-  <figure>{built_img("hook-on-board.png", "One hook screwed to the face of a 1x4, a 3/8 in rod seated in the deep pocket")}<figcaption>The hook on its board, 3/8 in rod seated. Mouth away from the board; the rod rolls down into the pocket.</figcaption></figure>
+  <figure>{built_img("hook-on-board.png", "One open-J hook screwed to the face of a 1x4, a 3/8 in rod resting at the bottom of its leaning slot")}<figcaption>The hook on its board, 3/8 in rod at the bottom of the slot, under the lip's edge. Lip tip 2-1/4 in up, tab 3-1/4.</figcaption></figure>
   <figure>{built_img("board-in-place.png", "Four hooks on a 27 in 1x4 hanging from a 2x8 joist, four rods seated")}<figcaption>Four hooks on your 27 in board, 7 in up the joist, 20 in hang as now.</figcaption></figure>
 </div>
 <div class="row">
-  <figure>{built_img("pocket-face-on.png", "Face-on view of the hook with a 5/8 in and a 3/8 in rod in the pocket and two countersunk screw holes")}<figcaption>Face on, from the real part: a 5/8 in blank (dark) and a 3/8 in blank (grey) in the same pocket, two countersunk holes.</figcaption></figure>
+  <figure>{built_img("pocket-face-on.png", "Face-on view of the hook with a 5/8 in and a 3/8 in rod at the bottom of the leaning slot and two countersunk screw holes")}<figcaption>Face on, from the real part: a 5/8 in blank (dark) and a 3/8 in blank (grey) at the bottom of the slot, two countersunk holes. The slot leans away from the board going down.</figcaption></figure>
   <div class="card">
     <h3>Checks baked into the script</h3>
     <ul>
-      <li><strong>Hold.</strong> Pose-space check: the rod centre must rise <span class="num">{lifts["0.25"]:.2f}</span> in (1/4 blank), <span class="num">{lifts["0.375"]:.2f}</span> in (3/8) and <span class="num">{lifts["0.625"]:.2f}</span> in (5/8) before any path to the outside opens. A bump moves a rod millimetres.</li>
-      <li><strong>Way in.</strong> Every blank size reaches the pocket from outside with no limit on height, so nothing is trapped either way.</li>
-      <li><strong>Clearances.</strong> Seated rods of all three sizes intersect neither the hook nor the board; the hook sits flat on the board face.</li>
-      <li><strong>Printable.</strong> Flat on the bed, no overhangs; thinnest wall 1/8 in (3.2 mm) against the 1.24 mm minimum; countersinks open upward at 45 degrees.</li>
+      <li><strong>Hold.</strong> Pose-space check: the rod centre must rise <span class="num">{lifts["0.25"]:.2f}</span> in (1/4 blank), <span class="num">{lifts["0.375"]:.2f}</span> in (3/8) and <span class="num">{lifts["0.625"]:.2f}</span> in (5/8) before any path to the outside opens; the plain deep hook gave 1.00. A bump moves a rod millimetres, and a hop lands it back on the ramp, which slides it home.</li>
+      <li><strong>Way in.</strong> Every blank size reaches the slot from outside with no limit on height, so nothing is trapped either way.</li>
+      <li><strong>Clearances.</strong> Seated rods of all three sizes touch neither the hook's walls beyond their resting contact nor the board; the hook sits flat on the board face.</li>
+      <li><strong>Printable.</strong> Flat on the bed, no overhangs; thinnest wall 1/8 in (3.2 mm) against the 1.24 mm minimum, lip {HOOK["lip_min_in"]:.2f} in at its thinnest; countersinks open upward at 45 degrees.</li>
       <li><strong>Exported STL</strong> is watertight, one solid, {HOOK["stl_volume_cm3"]} cm3.</li>
     </ul>
   </div>
 </div>
-<figure>{built_img("board-layout.png", "Drilling guide: a 27 in 1x4 with four hooks at 4 in pitch, screw positions and hook bottoms dimensioned")}<figcaption>Drilling guide for the board: hooks at 4 in, bottoms at 4-5/8, 8-5/8, 12-5/8 and 16-5/8 in below the joist; screws 1 in from the edge, 9/16 and 2-11/16 in up from each hook's bottom. Use 5 in if reels stay on and line up.</figcaption></figure>
+<figure>{built_img("board-layout.png", "Drilling guide: a 27 in 1x4 with four hooks at 4 in pitch, screw positions and hook bottoms dimensioned")}<figcaption>Drilling guide for the board: hooks at 4 in, bottoms at 5, 9, 13 and 17 in below the joist (rods rest about 4 in down, then every 4); screws 1 in from the edge, 9/16 and 2-11/16 in up from each hook's bottom. Use 5 in if reels stay on and line up.</figcaption></figure>
 <div class="cards">
   <div class="card pick"><span class="tag">Per hook</span><h3>{g(hook_g)} · {hm(hook_min)}</h3>
     <ul><li>PETG, 2 walls, 15% infill, 0.30 mm layers, real slice.</li><li>Eight hooks (two boards of four): {g(8 * hook_g)}, {hm(8 * hook_min)}.</li><li>Your seven notches' worth: {g(7 * hook_g)}.</li></ul></div>
   <div class="card"><span class="tag">Lighter</span><h3>Not worth it</h3>
-    <ul><li>The part is already 3/8 in; thinner loses the countersink depth.</li><li>PLA would save {g(hook_g - hook_g * PLA_RHO / PETG_RHO)} per hook and creep on a hot ceiling.</li></ul></div>
+    <ul><li>The part is already 3/8 in; thinner loses the countersink depth.</li><li>PLA would save {hook_g - hook_g * PLA_RHO / PETG_RHO:.1f} g per hook and creep on a hot ceiling.</li></ul></div>
 </div>
 {three_mf_html}
 <h3 style="margin-top:24px">Files</h3>
@@ -219,7 +218,7 @@ code {{ font-family: var(--mono); font-size: 0.92em; }}
     <ul><li>Level mouth: slide the rod in, let it drop.</li><li>Any blank from 1/4 to 5/8 in sits in the 7/8 in pocket.</li><li>No moving parts, nothing to relax over the years.</li></ul></div>
   <div class="card pick"><span class="tag">Picked</span><h3>B · Deep hook</h3>
     <div class="big">1 in<small>lift to leave</small></div>
-    <ul><li>Mouth higher than the lip: the rod rolls into the pocket by itself.</li><li>Harder to lift out overhead; each pocket is 3/8 in taller, so the comb grows or the pitch does.</li></ul></div>
+    <ul><li>Mouth higher than the lip: the rod rolls into the pocket by itself.</li><li>Harder to lift out overhead; each pocket is 3/8 in taller, so the comb grows or the pitch does.</li><li>Then reworked on Brian's ask into the open J with the angled slot (built section above).</li></ul></div>
   <div class="card"><span class="tag warn">Fit per rod size</span><h3>C · Snap clip</h3>
     <div class="big">Grips<small>every direction</small></div>
     <ul><li>PETG spring fingers close over the blank.</li><li>Fits 5/16 to 7/16 in blanks only; thinner rods rattle, thicker ones will not go in.</li><li>Springs relax in a hot garage.</li></ul></div>
