@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
-"""Bambu Studio print 3MF for the rod hook: ONE project file, N copies (default 8) of rod-hook.stl, four to a plate,
-every copy with its own two 100% infill modifier pads at the screw holes, verified by a real slice of every plate.
+"""Bambu Studio print 3MF for the rod hook: ONE project file, ONE plate, N copies (default 10) of rod-hook.stl standing
+on their 4 in bottom edge in a row, every copy with its own two 100% infill modifier pads at the screw holes, verified
+by a real slice.
 
-    .venv/bin/python projects/Fishing-rod-holder/pipeline/make_print_3mf.py [--copies 8] [--scratch DIR]
+    .venv/bin/python projects/Fishing-rod-holder/pipeline/make_print_3mf.py [--copies 10] [--scratch DIR]
 
 Writes rod-hook.3mf and rod-hook-3mf-report.json beside the STL. Plumbing only: the STL is not touched.
+
+rod-hook.stl is the PRINT frame (rod_hook.standing): x along the bed from the jaw tip (0 to W), y the thickness (0 to T,
+the countersinks open at y 0), z up (0 to H); the screw holes run along y at x = (CANT + SCREW_X) in, z = SCREW_Y in.
+rod-hook-model.stl is the flat model frame for the renders and is never sliced. Every number here is read from
+rod_hook.py at run time (CANT and H are derived there).
 
 The recipe is the vault's (memory/feedback-stl-to-bambu-3mf.md), not a new one:
   presets     the include-merging flattener of projects/Cable-bin/pipeline/make_print_3mf.py over the installed BBL bundle;
@@ -12,21 +18,22 @@ The recipe is the vault's (memory/feedback-stl-to-bambu-3mf.md), not a new one:
               (the three slice_stls.py quotes with). The overrides are written into the flattened process copy before the
               export AND into the 3MF's project_settings plus different_settings_to_system[0], or Studio's GUI resets them
   export      bambu-studio --arrange 1 ... --export-3mf raw.3mf rod-hook-1.stl ... rod-hook-N.stl: one object per copy (a
-              modifier belongs to an object, instances would share one). The CLI opens a new plate every four hooks by
-              itself (measured 2026-11-07: two plates of four, unrotated, but packed 2 mm apart), so its plate blocks and
-              plate assignment are kept and only the item transforms are rewritten
-  placement   every item transform is written here from the file's own geometry, a 2 x 2 grid per plate, GAP apart,
-              centred on the bed (the Cable-bin pattern: the arranger is not trusted)
+              modifier belongs to an object, instances would share one). Bambu's own first plate block is kept; if the
+              arranger opened more plates they are merged into it (the flat version measured 2026-11-07: the CLI opens
+              plates by itself but packs 2 mm apart, so its transforms are never kept)
+  placement   every item transform is written here from the file's own geometry: one row along y, GAP between the faces
+              of neighbours, centred on the bed, nothing rotated (the Cable-bin pattern: the arranger is not trusted)
   screw pads  projects/Skateboard-wall-holder/pipeline/make_print_3mf.py's modifier parts through the Sharks helpers
-              (fillcore_mod.inject_modifier): per copy two cylinders PAD_D across, PAD_INSET under the back and front
-              faces, the screw hole and its countersink cleared by HOLE_CLEAR, sparse_infill_density 100%. Proven wholly
-              inside the body twice, build123d against the CAD and OpenSCAD against the STL
-              (memory/feedback-modifiers-inside-the-body.md), then proven solid in the sliced G-code by plastic per volume
-              against a plain window of the same size (knowledge/learnings/nacs-wall-holder.md)
+              (fillcore_mod.inject_modifier): per copy two discs PAD_D across with their axis along y, PAD_INSET inside
+              both faces, the screw hole and its countersink cleared by HOLE_CLEAR, sparse_infill_density 100%. Built in
+              the model frame, stood up with rod_hook.standing like the STL, proven wholly inside the body twice, build123d
+              against the CAD and OpenSCAD against the STL (memory/feedback-modifiers-inside-the-body.md), then proven solid
+              in the sliced G-code by plastic per volume against a plain window of the same size
+              (knowledge/learnings/nacs-wall-holder.md)
   slice       the CLI cannot slice its own export (rc 156), so projects/Sharks-nametag/pipeline/graft_slice.py adds the
               GUI-only keys to a throwaway copy; one plate at a time, the whole run re-executed inside the memory-capped
               systemd scope (CLAUDE.md, heavy local jobs)
-Opening rod-hook.3mf in Bambu Studio is still the ground truth for the plates and for how the modifiers look.
+Opening rod-hook.3mf in Bambu Studio is still the ground truth for how the plate and the modifiers look.
 """
 import argparse
 import json
@@ -61,24 +68,26 @@ FILAMENT_COLOUR = "#2F6FE4"
 STEM = "rod-hook"
 OUT = f"{STEM}.3mf"
 REPORT = f"{STEM}-3mf-report.json"
-COPIES = 8
+COPIES = 10
 LAYER = 0.3
 BED = 256.0
 BED_CENTRE = (128.0, 128.0)
 BED_TYPE = "Textured PEI Plate"
-PLATE_STRIDE = BED * 1.2         # 307.2: Studio's plate grid, two columns, rows in negative Y (knowledge/printer-x2d.md)
-PLATE_COLS = 2
-GRID = (2, 2)                    # hooks per plate: columns along x, rows along y
-GAP = 20.0                       # between neighbouring hooks (the arranger's 2 mm leaves no room for the skirts)
+GRID = (1, 10)                   # hooks per plate: columns along x, rows along y (a standing hook is W x T on the bed)
+GAP = 13.5                       # between the faces of neighbouring hooks (asked: at least 12); pitch GAP + T
 
 PAD_D = 22.0                     # solid infill this wide around each screw hole
-PAD_INSET = 0.2                  # the pad stops this far inside the back and front faces
+PAD_INSET = 0.2                  # the pad stops this far inside the two faces (y 0 and y T in the print frame)
 HOLE_CLEAR = 0.6                 # the hole and countersink are cleared by one 0.6 line, so nothing shows through the hole in Studio
-PAD_NAMES = ("pad-bottom", "pad-top")      # by the hook's own y: the lower screw, the upper screw
+PAD_NAMES = ("pad-bottom", "pad-top")      # the lower screw, the upper screw (z in the print frame)
 PAD_KEYS = {"sparse_infill_density": "100%"}
-WIN = 6.0                        # G-code density window, mm square
-WIN_DX = 7.0                     # window centre this far from the hole centre toward the tab's edge: off the hole's walls, inside the pad
-BAND = 1.5                       # layers within this of the hook's mid-height
+WALL = 2 * 0.62                  # two 0.62 mm lines: the hook's walls on both faces
+# G-code density windows: x within WIN_X of the hole centre, the core of the thickness (CORE_INSET inside both faces,
+# so no wall lines), layers from WIN_DZ[0] to WIN_DZ[1] below and above the hole centre (off the hole, its countersink
+# and their walls, inside the PAD_D / 2 disc), against the same window at the height midway between the holes
+WIN_X = 4.0
+CORE_INSET = WALL + 0.26
+WIN_DZ = (5.0, 9.5)
 
 SCALARS = {   # process scope, different_settings_to_system[0]
     "curr_bed_type": BED_TYPE,
@@ -127,11 +136,14 @@ def write_presets(d):
 
 # --------------------------------------------------------------------------------------------------------- geometry
 def hook_geometry():
-    """The hook's constants and CAD from rod_hook.py (the STL is exported in that same frame): thickness, the hole
-    centres (lower screw first), hole and countersink diameters, and the CAD solid."""
+    """The hook from rod_hook.py: thickness T, the screw holes in the model frame (x, y) and in the print frame (x, z),
+    lower screw first, the hole and countersink diameters, the CAD solid (model frame) and the standing transform."""
     import rod_hook as M
-    holes = sorted(((M.SCREW_X * M.IN, y * M.IN) for y in M.SCREW_Y), key=lambda h: h[1])
-    return {"T": M.T * M.IN, "holes": holes, "hole_d": M.HOLE_D, "csk_d": M.CSK_D, "cad": M.build_hook()}
+    ys = sorted(M.SCREW_Y)
+    return {"T": M.T * M.IN, "W": M.W * M.IN, "H": M.H * M.IN,
+            "model_holes": [(M.SCREW_X * M.IN, y * M.IN) for y in ys],
+            "holes": [((M.CANT + M.SCREW_X) * M.IN, y * M.IN) for y in ys],
+            "hole_d": M.HOLE_D, "csk_d": M.CSK_D, "cad": M.build_hook(), "standing": M.standing}
 
 
 def scad_volume(scad, out):
@@ -149,13 +161,14 @@ def scad_volume(scad, out):
 
 
 def build_pads(d, geo):
-    """One pad per screw hole: a PAD_D cylinder from PAD_INSET over the back face to PAD_INSET under the front face,
-    the hole and its 90 degree countersink cleared by HOLE_CLEAR. Each is proven wholly inside the CAD body (volume
-    outside 0), exported to STL, and the pair is proven again against rod-hook.stl with OpenSCAD."""
+    """One pad per screw hole, built in the model frame like the hook: a PAD_D cylinder along the hole's axis from
+    PAD_INSET over the back face to PAD_INSET under the front face, the hole and its 90 degree countersink cleared by
+    HOLE_CLEAR. Proven wholly inside the CAD body (volume outside 0), stood up with rod_hook.standing, exported to STL,
+    and the pair proven again against rod-hook.stl with OpenSCAD."""
     from build123d import Cone, Cylinder, Pos, export_stl
     T, hook = geo["T"], geo["cad"]
     pads = []
-    for name, (hx, hy) in zip(PAD_NAMES, geo["holes"]):
+    for name, (hx, hy), (px, pz) in zip(PAD_NAMES, geo["model_holes"], geo["holes"]):
         pad = Pos(hx, hy, T / 2) * Cylinder(PAD_D / 2, T - 2 * PAD_INSET)
         pad -= Pos(hx, hy, T / 2) * Cylinder(geo["hole_d"] / 2 + HOLE_CLEAR, T + 2)
         # rod_hook.py's countersink is a 90 degree cone with its apex csk_d / 2 under the front face; the same cone pushed
@@ -167,13 +180,13 @@ def build_pads(d, geo):
         outside = pad.volume - inside
         assert abs(outside) < 1e-3, f"{name}: {outside:.4f} mm3 of the pad lies outside the CAD body"
         path = f"{d}/{name}.stl"
-        export_stl(pad, path)
+        export_stl(geo["standing"](pad), path)
         m = trimesh.load(path)
         assert m.is_watertight and len(m.split()) == 1, f"{name}: the pad mesh is not one closed body"
         lo, hi = m.bounds
-        assert abs(lo[2] - PAD_INSET) < 1e-3 and abs(hi[2] - (T - PAD_INSET)) < 1e-3, m.bounds
-        assert np.allclose((lo + hi) / 2, [hx, hy, T / 2], atol=0.02), m.bounds
-        pads.append({"name": name, "path": path, "centre_stl_mm": [round(hx, 3), round(hy, 3), round(T / 2, 4)],
+        assert abs(lo[1] - PAD_INSET) < 1e-3 and abs(hi[1] - (T - PAD_INSET)) < 1e-3, f"{name}: y span {lo[1]:.3f}..{hi[1]:.3f}"
+        assert np.allclose((lo + hi) / 2, [px, T / 2, pz], atol=0.02), f"{name}: centre {(lo + hi) / 2}, hole at {(px, pz)}"
+        pads.append({"name": name, "path": path, "centre_print_mm": [round(px, 4), round(T / 2, 4), round(pz, 4)],
                      "volume_mm3": round(float(m.volume), 1), "outside_cad_mm3": round(float(abs(outside)), 6)})
     body = f"{PROJECT}/{STEM}.stl"
     both = " ".join(f'import("{p["path"]}");' for p in pads)
@@ -206,9 +219,8 @@ def matrix(transform):
     return m
 
 
-def world_components(files):
-    """{object id: [(sub id, lo, hi), ...]}: every component of every build item in world mm, from the meshes and
-    transforms in the 3MF itself (item transform x component transform x the mesh's own coordinates)."""
+def components(files):
+    """{object id: (item transform, [(sub id, component transform, vertices), ...])} for every build item."""
     main = files["3D/3dmodel.model"].decode()
     comps = {oid: re.findall(r'<component p:path="([^"]+)" objectid="(\d+)"(?: [^>]*?transform="([^"]*)")?', body)
              for oid, body in re.findall(r'<object id="(\d+)"[^>]*>(.*?)</object>', main, re.S)}
@@ -218,17 +230,37 @@ def world_components(files):
         for path, sub_id, comp_t in comps[oid]:
             sub = files[path.lstrip("/")].decode()
             mesh = re.search(rf'<object id="{sub_id}"[^>]*>(.*?)</object>', sub, re.S).group(1)
-            v = np.array(re.findall(r'<vertex x="([^"]+)" y="([^"]+)" z="([^"]+)"', mesh), dtype=float)
-            w = (matrix(tr) @ matrix(comp_t) @ np.c_[v, np.ones(len(v))].T).T[:, :3]
-            parts.append((sub_id, w.min(axis=0), w.max(axis=0)))
-        out[oid] = parts
+            parts.append((sub_id, comp_t, np.array(re.findall(r'<vertex x="([^"]+)" y="([^"]+)" z="([^"]+)"', mesh), dtype=float)))
+        out[oid] = (tr, parts)
     return out
 
 
-def world_bounds(files):
-    """{object id: (lo, hi)} over all of an object's components."""
-    return {oid: (np.min([lo for _, lo, _ in parts], axis=0), np.max([hi for _, _, hi in parts], axis=0))
-            for oid, parts in world_components(files).items()}
+def world_components(files):
+    """{object id: [(sub id, lo, hi), ...]}: every component of every build item in world mm, from the meshes and
+    transforms in the 3MF itself (item transform x component transform x the mesh's own coordinates)."""
+    out = {}
+    for oid, (tr, parts) in components(files).items():
+        boxes = []
+        for sub_id, comp_t, v in parts:
+            w = (matrix(tr) @ matrix(comp_t) @ np.c_[v, np.ones(len(v))].T).T[:, :3]
+            boxes.append((sub_id, w.min(axis=0), w.max(axis=0)))
+        out[oid] = boxes
+    return out
+
+
+def object_bounds(files):
+    """{object id: (lo, hi)} in the object's own frame (component transforms only, no item transform); asserts the
+    component transforms carry no rotation, so an identity item rotation prints the mesh as the STL has it."""
+    out = {}
+    for oid, (_, parts) in components(files).items():
+        pts = []
+        for sub_id, comp_t, v in parts:
+            m = matrix(comp_t)
+            assert np.allclose(m[:3, :3], np.eye(3)), f"component {sub_id} of object {oid} is rotated: {m[:3, :3]}"
+            pts.append((m @ np.c_[v, np.ones(len(v))].T).T[:, :3])
+        pts = np.vstack(pts)
+        out[oid] = (pts.min(axis=0), pts.max(axis=0))
+    return out
 
 
 def object_names(msc):
@@ -258,68 +290,68 @@ def plate_name(numbers):
     return f"Hooks {n[0]}-{n[-1]}" if n == list(range(n[0], n[-1] + 1)) else "Hooks " + ", ".join(map(str, n))
 
 
-def plate_origin(p):
-    """Bed origin of plate p, 0-indexed, in the 3MF's world frame."""
-    return (p % PLATE_COLS) * PLATE_STRIDE, -(p // PLATE_COLS) * PLATE_STRIDE
-
-
 def slot_centre(slot, ext):
-    """Plate-local bed (x, y) of the footprint centre of grid slot `slot`: columns along x, rows from the back."""
+    """Bed (x, y) of the footprint centre of grid slot `slot`: columns along x, rows from the back."""
     col, row = slot % GRID[0], slot // GRID[0]
     return (BED_CENTRE[0] + (col - (GRID[0] - 1) / 2) * (ext[0] + GAP),
             BED_CENTRE[1] + ((GRID[1] - 1) / 2 - row) * (ext[1] + GAP))
 
 
-def expected_targets(names, plates, ext):
-    """{object id: (plate 0-indexed, slot, bed x, bed y)} from the plate membership and the hooks' numbers."""
+def expected_targets(names, ext):
+    """{object id: (slot, bed x, bed y)}: the hooks in number order down the row."""
     by_id = {oid: name for name, oid in names.items()}
-    out = {}
-    for p, (_, members) in enumerate(plates):
-        assert len(members) <= GRID[0] * GRID[1], f"plate {p + 1} carries {len(members)} hooks, the {GRID[0]} x {GRID[1]} grid holds {GRID[0] * GRID[1]}"
-        for slot, oid in enumerate(sorted(members, key=lambda o: hook_number(by_id[o]))):
-            out[oid] = (p, slot, *slot_centre(slot, ext))
-    return out
+    assert len(names) <= GRID[0] * GRID[1], f"{len(names)} hooks, the {GRID[0]} x {GRID[1]} grid holds {GRID[0] * GRID[1]}"
+    return {oid: (slot, *slot_centre(slot, ext)) for slot, oid in enumerate(sorted(names.values(), key=lambda o: hook_number(by_id[o])))}
 
 
 # ------------------------------------------------------------------------------------------------------------ author
 def author(src, dst, n):
-    """Keep the CLI's plates, re-place every copy in its plate's grid, name the objects and plates, apply the overrides,
-    pin the filament to extruder 1, colour it."""
+    """One plate: Bambu's own first plate block with every object in it (the arranger's other plates merged away),
+    every copy placed in the row from its own geometry, the objects and the plate named, the overrides applied, the
+    filament pinned to extruder 1 and coloured."""
     entries = read_all(src)
     files = {i.filename: data for i, data in entries}
     model = files["3D/3dmodel.model"].decode()
     msc = files["Metadata/model_settings.config"].decode()
     names = object_names(msc)
     assert set(names) == {f"{label(i)}.stl" for i in range(1, n + 1)}, f"objects in the export: {sorted(names)}"
-    plates = plate_members(msc)
-    assert [pid for pid, _ in plates] == list(range(1, len(plates) + 1)), plates
-    assert sorted(o for _, m in plates for o in m) == sorted(names.values()), "every object must sit on exactly one plate"
+    by_id = {oid: name for name, oid in names.items()}
     ext = trimesh.load(f"{PROJECT}/{STEM}.stl").extents
-    targets = expected_targets(names, plates, ext)
+    targets = expected_targets(names, ext)
 
     # item transforms: identity rotation, translation chosen so the object's own bounds land on target with floor on z 0
-    bounds = world_bounds(files)
+    bounds = object_bounds(files)
     def move(m):
         oid = re.search(r'objectid="(\d+)"', m.group(1)).group(1)
-        p, _, cx, cy = targets[oid]
-        ox, oy = plate_origin(p)
+        _, cx, cy = targets[oid]
         lo, hi = bounds[oid]
-        t = [float(v) for v in m.group(2).split()]
-        assert np.allclose(t[:9], [1, 0, 0, 0, 1, 0, 0, 0, 1]), f"the export rotated object {oid}: {t[:9]}"
-        shift = (ox + cx - (lo[0] + hi[0]) / 2, oy + cy - (lo[1] + hi[1]) / 2, -lo[2])
-        return m.group(1) + 'transform="1 0 0 0 1 0 0 0 1 %.6g %.6g %.6g"' % tuple(t[9 + i] + shift[i] for i in range(3))
+        return m.group(1) + 'transform="1 0 0 0 1 0 0 0 1 %.6g %.6g %.6g"' % (cx - (lo[0] + hi[0]) / 2, cy - (lo[1] + hi[1]) / 2, -lo[2])
     model, moved = re.subn(r'(<item [^>]*?)transform="([^"]*)"', move, model)
     assert moved == n, (moved, n)
 
+    # one plate block: the first one's own metadata, a model_instance per object with the CLI's identify_id
+    blocks = re.findall(r"  <plate>.*?</plate>\n", msc, re.S)
+    assert blocks and "".join(blocks) in msc, "plate blocks missing or not contiguous"
+    inst = dict(re.findall(r'<metadata key="object_id" value="(\d+)"/>\s*<metadata key="instance_id" value="0"/>\s*'
+                           r'<metadata key="identify_id" value="(\d+)"/>', msc))
+    head = [l for l in blocks[0].split("<model_instance>")[0].splitlines() if "<metadata" in l]
+    assert any('key="plater_id" value="1"' in l for l in head), blocks[0]
+    head = [l.replace('key="plater_name" value=""', f'key="plater_name" value="{plate_name(map(hook_number, names))}"')
+             .replace('key="filament_map_mode" value="Auto For Flush"', 'key="filament_map_mode" value="Manual"') for l in head]
+    ident = max([int(v) for v in inst.values()] + [100])
+    plate = ["  <plate>", *head]
+    for oid in sorted(names.values(), key=lambda o: hook_number(by_id[o])):
+        if oid not in inst:
+            ident += 11
+            inst[oid] = str(ident)
+        plate += ["    <model_instance>", f'      <metadata key="object_id" value="{oid}"/>', '      <metadata key="instance_id" value="0"/>',
+                  f'      <metadata key="identify_id" value="{inst[oid]}"/>', "    </model_instance>"]
+    plate.append("  </plate>")
+    msc = msc.replace("".join(blocks), "\n".join(plate) + "\n")
     for src_name in names:
         msc = msc.replace(f'key="name" value="{src_name}"', f'key="name" value="{src_name[:-4]}"')
-    msc = msc.replace('key="filament_map_mode" value="Auto For Flush"', 'key="filament_map_mode" value="Manual"')
-    by_id = {oid: name for name, oid in names.items()}
-    pnames = {pid: plate_name([hook_number(by_id[o]) for o in members]) for pid, members in plates}
-    def rename_plate(m):
-        pid = int(re.search(r'<metadata key="plater_id" value="(\d+)"/>', m.group(0)).group(1))
-        return m.group(0).replace('key="plater_name" value=""', f'key="plater_name" value="{pnames[pid]}"')
-    msc = re.sub(r"<plate>.*?</plate>", rename_plate, msc, flags=re.S)
+    seq = json.loads(files["Metadata/filament_sequence.json"])
+    seq = {"plate_1": seq.get("plate_1", {"nozzle_sequence": [], "optimal_assignment": [], "sequence": []})}
 
     cfg = json.loads(files["Metadata/project_settings.config"])
     cfg.update(SCALARS)
@@ -334,7 +366,9 @@ def author(src, dst, n):
     cfg["filament_map_mode"], cfg["filament_map"], cfg["filament_nozzle_map"] = "Manual", ["1"], ["1"]
     cfg["filament_colour"] = cfg["filament_multi_colour"] = [FILAMENT_COLOUR]
     write_all(dst, entries, {"3D/3dmodel.model": model.encode(), "Metadata/model_settings.config": msc.encode(),
-                             "Metadata/project_settings.config": json.dumps(cfg, indent=4).encode()})
+                             "Metadata/project_settings.config": json.dumps(cfg, indent=4).encode(),
+                             "Metadata/filament_sequence.json": json.dumps(seq).encode()})
+    return len(blocks)
 
 
 def add_screw_pads(path, pads):
@@ -389,10 +423,9 @@ def check_settings(path, what, n):
     names = object_names(msc)
     assert set(names) == {label(i) for i in range(1, n + 1)}, f"{what}: object names {sorted(names)}"
     plates = plate_members(msc)
-    assert [pid for pid, _ in plates] == list(range(1, len(plates) + 1)), f"{what}: plate ids {[pid for pid, _ in plates]}"
-    assert sorted(o for _, m in plates for o in m) == sorted(names.values()), f"{what}: objects and plate membership disagree"
-    for blk in re.findall(r"<plate>(.*?)</plate>", msc, re.S):
-        assert 'key="filament_map_mode" value="Manual"' in blk, f"{what}: a plate block is not in Manual filament map mode"
+    assert [pid for pid, _ in plates] == [1], f"{what}: plate ids {[pid for pid, _ in plates]}, expected the one plate"
+    assert sorted(plates[0][1]) == sorted(names.values()), f"{what}: the plate lists {plates[0][1]}, the objects are {sorted(names.values())}"
+    assert 'key="filament_map_mode" value="Manual"' in re.search(r"<plate>.*?</plate>", msc, re.S).group(0), f"{what}: plate filament map mode"
     for name, oid in names.items():
         block = re.search(rf'<object id="{oid}">.*?</object>', msc, re.S).group(0)
         assert len(re.findall(r'<part [^>]*subtype="normal_part"', block)) == 1, f"{what}: {name} normal parts"
@@ -408,11 +441,11 @@ def check_settings(path, what, n):
     return files, names, plates
 
 
-def check_placement(files, names, plates, ext, what):
-    """Every hook unrotated, floor on z 0, footprint centred on its grid slot inside its plate's cell, neighbours exactly
+def check_placement(files, names, ext, what):
+    """Every hook unrotated, floor on z 0, footprint centred on its slot of the row inside the bed, neighbours exactly
     GAP apart, by the 3MF's own geometry. Returns the per-hook world boxes."""
     comps = world_components(files)
-    targets = expected_targets(names, plates, ext)
+    targets = expected_targets(names, ext)
     by_id = {oid: name for name, oid in names.items()}
     assert set(comps) == set(by_id), f"{what}: build items {sorted(comps)} vs objects {sorted(by_id)}"
     result, boxes = {}, {}
@@ -420,26 +453,25 @@ def check_placement(files, names, plates, ext, what):
         body = [c for c in parts if np.allclose(c[2] - c[1], ext, atol=0.01)]
         assert len(body) == 1, f"{what}: {by_id[oid]} has no component with the STL's extents {ext}: rotated?"
         lo, hi = body[0][1], body[0][2]
-        p, slot, cx, cy = targets[oid]
-        ox, oy = plate_origin(p)
-        assert abs((lo[0] + hi[0]) / 2 - (ox + cx)) < 0.01 and abs((lo[1] + hi[1]) / 2 - (oy + cy)) < 0.01, f"{what}: {by_id[oid]} not at {(ox + cx, oy + cy)}: {lo} {hi}"
+        slot, cx, cy = targets[oid]
+        assert abs((lo[0] + hi[0]) / 2 - cx) < 0.01 and abs((lo[1] + hi[1]) / 2 - cy) < 0.01, f"{what}: {by_id[oid]} not at {(cx, cy)}: {lo} {hi}"
         assert abs(lo[2]) < 0.01, f"{what}: {by_id[oid]} floor at z {lo[2]:.3f}"
-        assert lo[0] >= ox + 5 and lo[1] >= oy + 5 and hi[0] <= ox + BED - 5 and hi[1] <= oy + BED - 5, f"{what}: {by_id[oid]} within 5 mm of plate {p + 1}'s edge: {lo} {hi}"
-        boxes[(p, slot)] = (lo, hi)
-        result[by_id[oid]] = {"plate": p + 1, "slot": slot, "min_mm": [round(float(v), 2) for v in lo], "max_mm": [round(float(v), 2) for v in hi]}
-    for (p, slot), (lo, hi) in boxes.items():
-        if slot % GRID[0] != GRID[0] - 1 and (p, slot + 1) in boxes:
-            got = boxes[(p, slot + 1)][0][0] - hi[0]
-            assert abs(got - GAP) < 0.01, f"{what}: plate {p + 1} slots {slot} and {slot + 1} are {got:.2f} mm apart in x, expected {GAP}"
-        if (p, slot + GRID[0]) in boxes:
-            got = lo[1] - boxes[(p, slot + GRID[0])][1][1]
-            assert abs(got - GAP) < 0.01, f"{what}: plate {p + 1} slots {slot} and {slot + GRID[0]} are {got:.2f} mm apart in y, expected {GAP}"
+        assert lo[0] >= 5 and lo[1] >= 5 and hi[0] <= BED - 5 and hi[1] <= BED - 5, f"{what}: {by_id[oid]} within 5 mm of the bed's edge: {lo} {hi}"
+        boxes[slot] = (lo, hi)
+        result[by_id[oid]] = {"plate": 1, "slot": slot, "min_mm": [round(float(v), 2) for v in lo], "max_mm": [round(float(v), 2) for v in hi]}
+    for slot, (lo, hi) in boxes.items():
+        if slot % GRID[0] != GRID[0] - 1 and slot + 1 in boxes:
+            got = boxes[slot + 1][0][0] - hi[0]
+            assert abs(got - GAP) < 0.01, f"{what}: slots {slot} and {slot + 1} are {got:.2f} mm apart in x, expected {GAP}"
+        if slot + GRID[0] in boxes:
+            got = lo[1] - boxes[slot + GRID[0]][1][1]
+            assert abs(got - GAP) < 0.01, f"{what}: slots {slot} and {slot + GRID[0]} are {got:.2f} mm apart in y, expected {GAP}"
     return result
 
 
 def check_modifiers(files, names, geo, ext, what):
     """Every object carries exactly two extra components whose world boxes are the two pads: centred on the hook's screw
-    holes, PAD_D square, PAD_INSET inside the body's back and front faces and well inside its outline (the 3MF's own geometry)."""
+    holes, PAD_D across in x and z, PAD_INSET inside both faces in y and well inside the outline (the 3MF's own geometry)."""
     comps = world_components(files)
     stl_lo = trimesh.load(f"{PROJECT}/{STEM}.stl").bounds[0]
     T = geo["T"]
@@ -450,14 +482,14 @@ def check_modifiers(files, names, geo, ext, what):
         assert len(body) == 1 and len(pads) == len(PAD_NAMES), f"{what}: {name} has {len(parts)} components"
         blo, bhi = body[0][1], body[0][2]
         origin = blo - stl_lo
-        for pname, (hx, hy) in zip(PAD_NAMES, geo["holes"]):
-            want = origin + [hx, hy, T / 2]
+        for pname, (hx, hz) in zip(PAD_NAMES, geo["holes"]):
+            want = origin + [hx, T / 2, hz]
             hit = [c for c in pads if np.allclose((c[1] + c[2]) / 2, want, atol=0.05)]
             assert len(hit) == 1, f"{what}: {name}: no modifier centred on its {pname} hole at {want}"
             lo, hi = hit[0][1], hit[0][2]
-            assert np.allclose(hi - lo, [PAD_D, PAD_D, T - 2 * PAD_INSET], atol=0.1), f"{what}: {name} {pname} box {hi - lo}"
-            assert lo[2] >= blo[2] + PAD_INSET - 1e-3 and hi[2] <= bhi[2] - PAD_INSET + 1e-3, f"{what}: {name} {pname} reaches a face: z {lo[2]:.3f}..{hi[2]:.3f}"
-            assert (lo[:2] >= blo[:2] + 1).all() and (hi[:2] <= bhi[:2] - 1).all(), f"{what}: {name} {pname} reaches the outline"
+            assert np.allclose(hi - lo, [PAD_D, T - 2 * PAD_INSET, PAD_D], atol=0.1), f"{what}: {name} {pname} box {hi - lo}"
+            assert lo[1] >= blo[1] + PAD_INSET - 1e-3 and hi[1] <= bhi[1] - PAD_INSET + 1e-3, f"{what}: {name} {pname} reaches a face: y {lo[1]:.3f}..{hi[1]:.3f}"
+            assert lo[0] >= blo[0] + 1 and hi[0] <= bhi[0] - 1 and lo[2] >= blo[2] + 1 and hi[2] <= bhi[2] - 1, f"{what}: {name} {pname} reaches the outline"
 
 
 # ------------------------------------------------------------------------------------------------------------- G-code
@@ -497,39 +529,41 @@ def clip_fraction(x0, y0, x1, y1, w):
     return max(0.0, t1 - t0)
 
 
-def plastic_density(gcode, windows, z_lo, z_hi):
-    """Plastic per volume (mm3 of filament per mm3 of window) in each (x0, y0, x1, y1) window over the layers whose
-    height lies in [z_lo, z_hi]. Every extrusion move (G1, and G2/G3 as its chord) is clipped to the window and its E
+def plastic_density(gcode, windows):
+    """Plastic per volume (mm3 of filament per mm3 of window) in each window (x0, y0, x1, y1, z0, z1) over the layers
+    whose height lies in [z0, z1]. Every extrusion move (G1, and G2/G3 as its chord) is clipped to the window and its E
     split by the clipped fraction: midpoint tests fail on long solid lines (knowledge/learnings/nacs-wall-holder.md)."""
     assert re.search(r"^; use_relative_e_distances = 1$", gcode, re.M), "E is not relative, the per-move E sums are meaningless"
     area = math.pi * (1.75 / 2) ** 2
-    used, layers = {k: 0.0 for k in windows}, set()
-    z, x, y, inband = 0.0, 0.0, 0.0, False
+    used, layers = {k: 0.0 for k in windows}, {k: 0 for k in windows}
+    active, x, y = [], 0.0, 0.0
     for line in gcode.splitlines():
         if line.startswith("; Z_HEIGHT:"):
             z = float(line.split(":")[1])
-            inband = z_lo <= z <= z_hi
-            if inband:
-                layers.add(round(z, 3))
+            active = [(k, w) for k, w in windows.items() if w[4] <= z <= w[5]]
+            for k, _ in active:
+                layers[k] += 1
         elif line[:3] in ("G0 ", "G1 ", "G2 ", "G3 "):
             mx, my, me = re.search(r" X([-0-9.]+)", line), re.search(r" Y([-0-9.]+)", line), re.search(r" E([-0-9.]+)", line)
             nx, ny = (float(mx.group(1)) if mx else x), (float(my.group(1)) if my else y)
-            if inband and me and float(me.group(1)) > 0 and (mx or my):
+            if active and me and float(me.group(1)) > 0 and (mx or my):
                 e = float(me.group(1))
-                for k, w in windows.items():
+                for k, w in active:
+                    if max(x, nx) < w[0] or min(x, nx) > w[2] or max(y, ny) < w[1] or min(y, ny) > w[3]:
+                        continue
                     f = clip_fraction(x, y, nx, ny, w)
                     if f:
                         used[k] += e * f
             x, y = nx, ny
-    assert layers, f"no layers between z {z_lo} and {z_hi}"
-    return {k: round(used[k] * area / ((w[2] - w[0]) * (w[3] - w[1]) * LAYER * len(layers)), 3) for k, w in windows.items()}, len(layers)
+    assert all(layers.values()), f"a window has no layers: {layers}"
+    return ({k: round(used[k] * area / ((w[2] - w[0]) * (w[3] - w[1]) * LAYER * layers[k]), 3) for k, w in windows.items()}, layers)
 
 
 def hhmm(seconds):
     return "%d:%02d" % divmod(round(seconds / 60), 60)
 
 
-def slice_plate(path, tmp, p, geo, ext, placement):
+def slice_plate(path, tmp, p, geo, placement):
     """A real slice of plate p (1-indexed) through graft_slice: grams and time from slice_info.config, the settings that
     matter read back from the G-code, and the pads proven solid against a plain window of the same size in every hook."""
     hooks = sorted((name for name, box in placement.items() if box["plate"] == p), key=hook_number)
@@ -566,21 +600,24 @@ def slice_plate(path, tmp, p, geo, ext, placement):
     feature_mm, xy, z_top = gcode_stats(gcode)
     assert "Brim" not in feature_mm and "Skirt" in feature_mm, f"plate {p}: expected a skirt and no brim: {feature_mm}"
     assert xy[0] >= 0 and xy[1] >= 0 and xy[2] <= BED and xy[3] <= BED, f"plate {p}: toolpaths leave the bed: {xy}"
-    assert abs(z_top - geo["T"]) <= LAYER + 1e-6, f"plate {p}: the sliced top is at z {z_top}, the hook is {geo['T']} mm"
+    assert abs(z_top - geo["H"]) <= LAYER + 1e-6, f"plate {p}: the sliced top is at z {z_top}, the hook is {geo['H']} mm tall"
 
-    # the pads: plastic per volume in a WIN square beside each screw hole (inside the pad, off the hole's walls) against
-    # the same square midway between the screws, over the layers within BAND of mid-height; G-code is plate-local
-    ox, oy = plate_origin(p - 1)
+    # the pads: plastic per volume beside each hole (x within WIN_X of its centre, the core of the thickness, the layers
+    # WIN_DZ below and above the hole's centre) against the same window at the height midway between the holes
     stl_lo = trimesh.load(f"{PROJECT}/{STEM}.stl").bounds[0]
+    T, half = geo["T"], (WIN_DZ[1] - WIN_DZ[0]) / 2
+    z_plain = sum(hz for _, hz in geo["holes"]) / len(geo["holes"])
     windows = {}
     for name in hooks:
         origin = np.array(placement[name]["min_mm"]) - stl_lo          # the STL frame's origin on the bed
-        for pname, (hx, hy) in zip(PAD_NAMES, geo["holes"]):
-            cx, cy = origin[0] + hx + WIN_DX - ox, origin[1] + hy - oy
-            windows[f"{name}/{pname}"] = (cx - WIN / 2, cy - WIN / 2, cx + WIN / 2, cy + WIN / 2)
-        cx, cy = origin[0] + geo["holes"][0][0] - ox, origin[1] + (geo["holes"][0][1] + geo["holes"][1][1]) / 2 - oy
-        windows[f"{name}/plain"] = (cx - WIN / 2, cy - WIN / 2, cx + WIN / 2, cy + WIN / 2)
-    fill, n_layers = plastic_density(gcode, windows, geo["T"] / 2 - BAND, geo["T"] / 2 + BAND)
+        for pname, (hx, hz) in zip(PAD_NAMES, geo["holes"]):
+            xy_box = (origin[0] + hx - WIN_X, origin[1] + CORE_INSET, origin[0] + hx + WIN_X, origin[1] + T - CORE_INSET)
+            windows[f"{name}/{pname}/below"] = (*xy_box, origin[2] + hz - WIN_DZ[1], origin[2] + hz - WIN_DZ[0])
+            windows[f"{name}/{pname}/above"] = (*xy_box, origin[2] + hz + WIN_DZ[0], origin[2] + hz + WIN_DZ[1])
+        hx = geo["holes"][0][0]
+        windows[f"{name}/plain"] = (origin[0] + hx - WIN_X, origin[1] + CORE_INSET, origin[0] + hx + WIN_X, origin[1] + T - CORE_INSET,
+                                    origin[2] + z_plain - half, origin[2] + z_plain + half)
+    fill, n_layers = plastic_density(gcode, windows)
     pad_fill = {k: v for k, v in fill.items() if not k.endswith("/plain")}
     plain_fill = {k: v for k, v in fill.items() if k.endswith("/plain")}
     assert min(pad_fill.values()) >= 0.7, f"plate {p}: a screw pad is not solid: {fill}"
@@ -590,7 +627,9 @@ def slice_plate(path, tmp, p, geo, ext, placement):
             "gcode_estimate": res["time"], "grams": round(grams, 1), "metres": round(used_m, 2), "used_g_per_filament": round(used_g, 1),
             "layers": res["layers"], "top_z": z_top, "nozzle_C": int(temp), "bed_C": int(bed), "toolpath_xy_mm": xy,
             "feature_mm": feature_mm,
-            "pad_fill": {"window_mm": WIN, "layers": n_layers, "z_band": [round(geo["T"] / 2 - BAND, 3), round(geo["T"] / 2 + BAND, 3)],
+            "pad_fill": {"window": f"x within {WIN_X} mm of the hole, y {CORE_INSET} to {round(T - CORE_INSET, 3)} (the core between the walls), "
+                                   f"layers {WIN_DZ[0]} to {WIN_DZ[1]} mm below and above the hole centre; plain: the same at z {z_plain} +/- {half}",
+                         "layers_per_window": {k: n_layers[k] for k in list(n_layers)[:5]},
                          "pads_min": min(pad_fill.values()), "pads_max": max(pad_fill.values()),
                          "plain_min": min(plain_fill.values()), "plain_max": max(plain_fill.values()), "per_window": fill}}
 
@@ -600,7 +639,7 @@ def verify(path, tmp, geo, n):
     one at a time. A round trip alone does not prove sliceability."""
     ext = trimesh.load(f"{PROJECT}/{STEM}.stl").extents
     files, names, plates = check_settings(path, "authored file", n)
-    placement = check_placement(files, names, plates, ext, "authored file")
+    placement = check_placement(files, names, ext, "authored file")
     check_modifiers(files, names, geo, ext, "authored file")
     result = {"plates": len(plates), "hooks_per_plate": [len(m) for _, m in plates], "placement_mm": placement}
 
@@ -610,12 +649,12 @@ def verify(path, tmp, geo, n):
     rt_files, rt_names, rt_plates = check_settings(f"{tmp}/roundtrip.3mf", "CLI round trip", n)
     members = lambda nm, pl: [sorted(k for k, v in nm.items() if v in m) for _, m in pl]   # by name: the CLI renumbers ids
     assert members(rt_names, rt_plates) == members(names, plates), f"the round trip changed the plates: {members(rt_names, rt_plates)}"
-    check_placement(rt_files, rt_names, rt_plates, ext, "CLI round trip")
+    check_placement(rt_files, rt_names, ext, "CLI round trip")
     check_modifiers(rt_files, rt_names, geo, ext, "CLI round trip")
-    result["roundtrip"] = (f"{len(rt_plates)} plates, {n} objects with {2 * n} modifier parts, overrides, "
+    result["roundtrip"] = (f"{len(rt_plates)} plate, {n} objects with {2 * n} modifier parts, overrides, "
                            f"different_settings_to_system and placement survive bambu-studio --arrange 0 --export-3mf")
 
-    result["plates_sliced"] = [slice_plate(path, tmp, p, geo, ext, placement) for p in range(1, len(plates) + 1)]
+    result["plates_sliced"] = [slice_plate(path, tmp, p, geo, placement) for p in range(1, len(plates) + 1)]
     secs = sum(pl["seconds"] for pl in result["plates_sliced"])
     grams = sum(pl["grams"] for pl in result["plates_sliced"])
     result.update({"total_time": hhmm(secs), "total_minutes": round(secs / 60), "total_grams": round(grams, 1),
@@ -627,11 +666,11 @@ def verify(path, tmp, geo, n):
 # -------------------------------------------------------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--copies", type=int, default=COPIES, help="how many hooks (default 8)")
+    ap.add_argument("--copies", type=int, default=COPIES, help=f"how many hooks (default {COPIES}, at most {GRID[0] * GRID[1]} on the one plate)")
     ap.add_argument("--scratch", default=None, help="work dir for presets, STL copies, pads and the slices (default: a fresh temp dir)")
     args = ap.parse_args()
     n = args.copies
-    assert n >= 1, n
+    assert 1 <= n <= GRID[0] * GRID[1], n
 
     os.environ["PATH"] = f"{os.path.expanduser('~/.local/bin')}:{os.environ.get('PATH', '')}"   # bambu-studio is called by name
     if SCOPE_MARK not in os.environ and shutil.which("systemd-run"):
@@ -650,28 +689,31 @@ def main():
     for c in copies:
         shutil.copy(f"{PROJECT}/{STEM}.stl", f"{scratch}/{c}")
     # --export-3mf must be a bare filename; an absolute path alongside --outputdir makes the CLI exit 243 without writing.
-    # --arrange 1 makes the CLI open plates and write their blocks; its transforms are overwritten in author().
+    # --arrange 1 makes the CLI write plate blocks with a model_instance per object; its transforms are overwritten in author().
     cmd = ["bambu-studio", "--arrange", "1", "--load-settings", "machine.json;process.json", "--load-filaments", "filament.json",
            "--export-3mf", "raw.3mf", "--outputdir", ".", *copies]
     r = subprocess.run(cmd, cwd=scratch, capture_output=True, text=True, timeout=600)
     assert os.path.exists(f"{scratch}/raw.3mf"), f"CLI export failed rc={r.returncode}\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
 
     geo = hook_geometry()
+    stl = trimesh.load(f"{PROJECT}/{STEM}.stl")
+    assert np.allclose(stl.extents, [geo["W"], geo["T"], geo["H"]], atol=0.01), f"rod-hook.stl {stl.extents} is not the standing print frame W x T x H"
     pads, mesh_proof = build_pads(scratch, geo)
-    author(f"{scratch}/raw.3mf", final, n)
+    cli_plates = author(f"{scratch}/raw.3mf", final, n)
     n_mods = add_screw_pads(final, pads)
-    result = {"file": final, "copies": n, "command": " ".join(cmd) + f"   (cwd {scratch})",
+    result = {"file": final, "copies": n, "command": " ".join(cmd) + f"   (cwd {scratch})", "cli_arranged_plates": cli_plates,
               "presets": {"machine": MACHINE, "process": PROCESS, "filament": FILAMENT}, "overrides": SCALARS,
-              "filament_colour": FILAMENT_COLOUR,
-              "screw_pads": {"per_hook": len(pads), "total": n_mods, "diameter_mm": PAD_D, "z_mm": [PAD_INSET, round(geo["T"] - PAD_INSET, 4)],
-                             "hole_clearance_mm": HOLE_CLEAR, "keys": PAD_KEYS, "pads": pads, "proof_vs_stl": mesh_proof}}
+              "filament_colour": FILAMENT_COLOUR, "row_pitch_mm": round(geo["T"] + GAP, 3), "gap_mm": GAP,
+              "screw_pads": {"per_hook": len(pads), "total": n_mods, "axis": "y, through the thickness", "diameter_mm": PAD_D,
+                             "span_y_mm": [PAD_INSET, round(geo["T"] - PAD_INSET, 4)], "hole_clearance_mm": HOLE_CLEAR,
+                             "keys": PAD_KEYS, "pads": pads, "proof_vs_stl": mesh_proof}}
     result.update(verify(final, scratch, geo, n))
     with open(f"{PROJECT}/{REPORT}", "w") as f:
         json.dump(result, f, indent=1)
     print(final)
     print(json.dumps({k: v for k, v in result.items() if k not in ("placement_mm", "plates_sliced")}, indent=1))
     for pl in result["plates_sliced"]:
-        print(f"plate {pl['plate']}: {', '.join(pl['hooks'])}: {pl['grams']} g, {pl['time']} ({pl['minutes']} min), "
+        print(f"plate {pl['plate']}: {len(pl['hooks'])} hooks: {pl['grams']} g, {pl['time']} ({pl['minutes']} min), "
               f"pads {pl['pad_fill']['pads_min']}..{pl['pad_fill']['pads_max']} vs plain {pl['pad_fill']['plain_min']}..{pl['pad_fill']['plain_max']}")
     print(f"total {result['total_grams']} g, {result['total_time']} ({result['total_minutes']} min); report {PROJECT}/{REPORT}")
     return 0

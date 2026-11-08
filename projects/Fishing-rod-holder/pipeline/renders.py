@@ -18,7 +18,7 @@ IMAGES = PROJECT / "images"
 SCRATCH = Path("/tmp/claude-1000/-home-brian--claude-spares-spare-OJ6Ifx/3f3590ae-4308-446d-b672-0d51f52c10fb/scratchpad/hook")
 OPENSCAD = Path.home() / ".local/bin/openscad"
 IN = rh.IN
-STL = PROJECT / "rod-hook.stl"
+STL = PROJECT / "rod-hook-model.stl"   # the model frame (y up); rod-hook.stl is the standing print frame
 
 JOIST_D, JOIST_T, PLY = 7.25, 1.5, 0.75
 BOARD_LEN, BOARD_ABOVE = 27.0, 7.0      # Brian's comb: 27 in overall, 7 in up the joist

@@ -65,14 +65,14 @@ if THREE_MF:
   <tr><th>Print file</th><th>Hooks</th><th>Grams</th><th>Time</th></tr>
   {plate_rows}{total_row}
   </table></div>
-  <p style="font-size:14px;color:var(--muted)"><code>rod-hook.3mf</code>, one project file, {len(plates)} plate{"s" if len(plates) != 1 else ""}, up to four hooks each in a 2 x 2 grid. PETG, 2 walls, 15% gyroid, 0.30 mm layers, 2-loop skirt; the pads add about 4 g per hook over the bare slice. {pad_line} Open it in Bambu Studio once to confirm all the plates show.</p>"""
+  <p style="font-size:14px;color:var(--muted)"><code>rod-hook.3mf</code>, one project file, {len(plates)} plate{"s" if len(plates) != 1 else ""}, the hooks standing on their bottom edges. PETG, 2 walls, 15% gyroid, 0.30 mm layers, 2-loop skirt, no brim (add one in Studio if a standing hook ever lifts); the pads add a few grams per hook over the bare slice. {pad_line} Open it in Bambu Studio once to confirm the plate shows.</p>"""
 else:
     three_mf_html = '<p style="font-size:14px;color:var(--muted)">The print file (<code>rod-hook.3mf</code>, 10 hooks with solid screw pads) is being built; numbers land here when it is sliced.</p>'
 
 BANNER = f"""
 <section class="decided">
   <div class="eyebrow">Decided 2026-11-07</div>
-  <p><strong>Deep hook, as individual printed hooks screwed to a 1x4, with a slot that leans away from the wood and no top bar.</strong> Brian's words: "use the deep hook design ... make individual deep hooks, that can be screwed into a 1x4 piece of wood", then "make the bottom resting part of the hook have a slot that is angled to help keep the rod there better", "remove the top most part of the device that is not over the wood", "the slot should angle away from the wood", and "5 holders should fit in the 20 in. There should be no space between each hook as it sits on the wood." PETG. The hook is built and checked below; the concept round is kept underneath for the record.</p>
+  <p><strong>Deep hook, as individual printed hooks screwed to a 1x4, with a slot that leans away from the wood and no top bar.</strong> Brian's words: "use the deep hook design ... make individual deep hooks, that can be screwed into a 1x4 piece of wood", then "make the bottom resting part of the hook have a slot that is angled to help keep the rod there better", "remove the top most part of the device that is not over the wood", "the slot should angle away from the wood", "5 holders should fit in the 20 in. There should be no space between each hook as it sits on the wood", and "print these vertically so there can be much more in a single print." PETG. The hook is built and checked below; the concept round is kept underneath for the record.</p>
 </section>"""
 
 BUILT = f"""
@@ -90,7 +90,7 @@ BUILT = f"""
       <li><strong>Hold.</strong> Pose-space check: the rod centre must rise <span class="num">{lifts["0.25"]:.2f}</span> in (1/4 blank), <span class="num">{lifts["0.375"]:.2f}</span> in (3/8) and <span class="num">{lifts["0.625"]:.2f}</span> in (5/8) before any path to the outside opens; the plain deep hook gave 1.00. A bump moves a rod millimetres, and a hop lands it back on the ramp, which slides it home.</li>
       <li><strong>Way in.</strong> Every blank size reaches the slot from outside with no limit on height, so nothing is trapped either way.</li>
       <li><strong>Clearances.</strong> Seated rods of all three sizes touch neither the hook's walls beyond their resting contact nor the board; the hook sits flat on the board face.</li>
-      <li><strong>Printable.</strong> Flat on the bed, no overhangs; thinnest wall 1/8 in (3.2 mm) against the 1.24 mm minimum, lip {HOOK["lip_min_in"]:.2f} in at its thinnest; countersinks open upward at 45 degrees.</li>
+      <li><strong>Printable standing.</strong> The hook prints on its 4 in bottom edge, face vertical, so ten fit one plate. Steepest unsupported surface: {HOOK["max_overhang_deg_from_vertical"]:g} degrees from vertical (the slot lean), under the 45 degree limit; bottom corners made square so the whole edge sits on the bed; the screw holes print sideways (5 mm bridges, fine). Thinnest wall 1/8 in (3.2 mm) against the 1.24 mm minimum, lip {HOOK["lip_min_in"]:.2f} in at its thinnest. Layers run across the hook, so a sideways yank on the lip loads the layer bond; at rod loads that is a 3x margin.</li>
       <li><strong>Exported STL</strong> is watertight, one solid, {HOOK["stl_volume_cm3"]} cm3.</li>
     </ul>
   </div>
@@ -98,7 +98,7 @@ BUILT = f"""
 <figure>{built_img("board-layout.png", "Drilling guide: a 27 in 1x4 with five hooks butted at 4 in, screw positions and hook bottoms dimensioned")}<figcaption>Drilling guide for the board: five hooks butted, 4 in each, bottoms at 4, 8, 12, 16 and 20 in below the joist (the top hook starts at the joist; rods rest about 3-3/16 in down, then every 4); screws 1 in from the edge, 9/16 and 3-7/16 in up from each hook's bottom. Reels left on and in line would want 5 in, which means four hooks with gaps; say so if that is the case.</figcaption></figure>
 <div class="cards">
   <div class="card pick"><span class="tag">Per hook</span><h3>{g(hook_g)} · {hm(hook_min)}</h3>
-    <ul><li>PETG, 2 walls, 15% infill, 0.30 mm layers, real slice of the bare hook.</li><li>Ten hooks (two boards of five): {g(10 * hook_g)}, {hm(10 * hook_min)} before the screw pads.</li></ul></div>
+    <ul><li>PETG, 2 walls, 15% infill, 0.30 mm layers, real slice of one bare hook standing.</li><li>Ten hooks (two boards of five) print together on one plate; the plate numbers below are the real ones, since standing parts share every layer.</li></ul></div>
   <div class="card"><span class="tag">Lighter</span><h3>Not worth it</h3>
     <ul><li>The part is already 3/8 in; thinner loses the countersink depth.</li><li>PLA would save {hook_g - hook_g * PLA_RHO / PETG_RHO:.1f} g per hook and creep on a hot ceiling.</li></ul></div>
 </div>
@@ -106,7 +106,7 @@ BUILT = f"""
 <h3 style="margin-top:24px">Files</h3>
 <ul>
   <li><code>projects/Fishing-rod-holder/rod_hook.py</code>: the parametric CAD with the checks; <code>rod-hook-report.json</code> is its output.</li>
-  <li><code>rod-hook.stl</code>: one hook in print orientation (back face down).</li>
+  <li><code>rod-hook.stl</code>: one hook in print orientation (standing on its bottom edge); <code>rod-hook-model.stl</code> is the same hook lying flat, for the renders.</li>
   <li><code>rod-hook.3mf</code>: the Bambu project file with solid pads at every screw hole.</li>
   <li>Mirror image: not needed for one board edge; say so if a board needs hooks on both edges.</li>
 </ul>

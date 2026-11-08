@@ -1,8 +1,8 @@
 {
  "rod-hook.stl": {
-  "grams": 30.0,
-  "minutes": 39,
-  "time_text": "0h 39m",
+  "grams": 33.2,
+  "minutes": 79,
+  "time_text": "1h 19m",
   "material": "petg",
   "walls": 2,
   "infill": 15

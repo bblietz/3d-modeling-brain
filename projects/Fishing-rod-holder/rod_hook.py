@@ -9,7 +9,10 @@ better" and "remove the top most part of the device that is not over the wood."
 Then: "you did the opposite angle for the slot. The slot should angle away from
 the wood." And: "5 holders should fit in the 20 in. There should be no space
 between each hook as it sits on the wood." So the hook is 4 in tall and five of
-them, butted, fill the board's 20 in hang.
+them, butted, fill the board's 20 in hang. And: "can you print these vertically
+so there can be much more in a single print": the print STL stands the hook on
+its 4 in bottom edge (face vertical, holes horizontal); the slot walls lean 35
+degrees, under the 45 degree overhang limit, so nothing needs support.
 
 So the hook is an open J: a tab that screws to the board face (two #8), and a
 jaw that reaches past the board edge carrying a slot that leans away from the
@@ -23,7 +26,9 @@ hangs from the joist the way the wooden combs do.
 Coordinates (inches in the constants, mm in the CAD): x along the board width,
 x = 0 at the board edge the jaw reaches past, positive onto the board; y up,
 y = 0 at the hook's bottom edge; z the hook thickness, z = 0 against the board.
-The rod runs along z. Print orientation: as modelled, back face on the bed.
+The rod runs along z. `rod-hook-model.stl` is this frame (for the scene renders);
+`rod-hook.stl` is the print frame: standing on the bottom edge, x along the bed
+from the jaw tip, y the thickness, z up.
 
 Run from the vault root:
   .venv/bin/python projects/Fishing-rod-holder/rod_hook.py          # build, check, export
@@ -34,7 +39,7 @@ import math
 import os
 from pathlib import Path
 
-from build123d import Box, Cone, Cylinder, Polygon, Pos, export_stl, extrude
+from build123d import Axis, Box, Cone, Cylinder, Location, Polygon, Pos, export_stl, extrude
 from shapely.geometry import Point, Polygon as SPoly, box as sbox
 
 PROJECT = Path(__file__).resolve().parent
@@ -57,9 +62,11 @@ BELOW = 0.625      # material under the slot's lowest point
 Y_LIP = 1.875      # lip top at its inner edge (where the slot opens)
 LIP_SLOPE = 0.375  # lip top climbs this much toward its tip: a rod set on the lip rolls in
 LIP_MIN = 0.5      # lip thickness at its thinnest, beside the slot's bottom
-CORNER_R = 0.25    # outside corners
+CORNER_R = 0.25    # top corners of the tab
+FOOT_R = 0.0       # bottom corners square: a rounded bottom edge is an overhang on a standing print
 TIP_R = 0.125      # lip tip and the slot's top edges
 RAMP_R = 0.125     # where the tab edge turns into the slot's ramp
+MAX_OVERHANG = 45.0  # degrees from vertical the printer manages without support
 
 X_BACK = -WEB                          # the tab's outer edge
 R_SLOT = SLOT_W / 2
@@ -100,7 +107,7 @@ def outline_points():
     """Sharp outline (inches, y up), counterclockwise from the jaw's bottom tip.
     Returns the points and the fillet radius to apply at each (0 for the arc)."""
     pts = [(-CANT, 0.0), (TAB, 0.0), (TAB, H), (X_BACK, H), (X_BACK, Y_LIP)]
-    radii = [CORNER_R, CORNER_R, CORNER_R, CORNER_R, RAMP_R]
+    radii = [FOOT_R, FOOT_R, CORNER_R, CORNER_R, RAMP_R]
     arc = slot_arc()
     pts += arc
     radii += [0.0] * len(arc)
@@ -125,6 +132,33 @@ def build_hook():
         cone_h = CSK_D / 2 + 0.3
         hook -= Pos(SCREW_X * IN, y * IN, T * IN + 0.3 - cone_h / 2) * Cone(0.0, cone_h, cone_h)
     return hook
+
+
+def standing(hook):
+    """The print frame: stand the hook on its bottom edge. Model y (up) becomes z,
+    the thickness lies along y, the jaw tip is at x = 0."""
+    return hook.rotate(Axis.X, 90).moved(Location((CANT * IN, T * IN, 0)))
+
+
+def overhang_report(stl_path):
+    """Steepest unsupported downward-facing surface in the print frame, in degrees from
+    vertical, ignoring the bed face and the horizontal screw holes (small bridges)."""
+    import numpy as np
+    import trimesh
+    m = trimesh.load(str(stl_path))
+    n = m.face_normals
+    c = m.triangles_center
+    down = n[:, 2] < -1e-3
+    off_bed = c[:, 2] > 0.5
+    # the hole axes run along y at (x, z) = (CANT + SCREW_X, SCREW_Y) in the print frame
+    near_hole = np.zeros(len(c), dtype=bool)
+    for y in SCREW_Y:
+        hx, hz = (CANT + SCREW_X) * IN, y * IN
+        near_hole |= np.hypot(c[:, 0] - hx, c[:, 2] - hz) < CSK_D / 2 + 0.5
+    sel = down & off_bed & ~near_hole
+    # angle of the surface from vertical: 90 minus the angle between the normal and straight down
+    from_vertical = 90.0 - np.degrees(np.arccos(np.clip(-n[sel, 2], -1, 1)))
+    return float(from_vertical.max()) if sel.any() else 0.0
 
 
 def board_stub(length=6.0):
@@ -266,13 +300,26 @@ def checks(hook):
 if __name__ == "__main__":
     hook = build_hook()
     report = checks(hook)
+    model_stl = PROJECT / "rod-hook-model.stl"
+    export_stl(hook, str(model_stl))
     stl = PROJECT / "rod-hook.stl"
-    export_stl(hook, str(stl))
+    up = standing(hook)
+    bb = up.bounding_box()
+    assert abs(bb.min.Z) < 1e-6 and abs(bb.min.X) < 1e-6 and abs(bb.min.Y) < 1e-6, "standing hook is not on the bed at the origin"
+    assert abs(bb.size.Z - H * IN) < 0.01 and abs(bb.size.Y - T * IN) < 0.01, "standing hook has the wrong footprint"
+    export_stl(up, str(stl))
     import trimesh
     m = trimesh.load(str(stl))
     assert m.is_watertight, "exported STL is not watertight"
     report["stl"] = str(stl)
+    report["model_stl"] = str(model_stl)
+    report["print_orientation"] = "standing on the 4 in bottom edge, face vertical, holes horizontal"
+    report["footprint_mm"] = [round(bb.size.X, 1), round(bb.size.Y, 1)]
+    report["height_mm"] = round(bb.size.Z, 1)
     report["stl_volume_cm3"] = round(m.volume / 1000, 1)
+    overhang = overhang_report(stl)
+    report["max_overhang_deg_from_vertical"] = round(overhang, 1)
+    assert overhang <= MAX_OVERHANG, f"standing print overhangs {overhang:.1f} degrees from vertical"
     (PROJECT / "rod-hook-report.json").write_text(json.dumps(report, indent=1))
     print(json.dumps(report, indent=1))
     if os.environ.get("SHOW"):

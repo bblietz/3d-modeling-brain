@@ -4,7 +4,7 @@
   4.0,
   0.375
  ],
- "volume_cm3": 63.7,
+ "volume_cm3": 63.9,
  "jaw_height_in": {
   "at the lip": 1.875,
   "at the tip": 2.25
@@ -49,5 +49,13 @@
   ]
  },
  "stl": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Fishing-rod-holder/rod-hook.stl",
- "stl_volume_cm3": 63.7
+ "model_stl": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Fishing-rod-holder/rod-hook-model.stl",
+ "print_orientation": "standing on the 4 in bottom edge, face vertical, holes horizontal",
+ "footprint_mm": [
+  101.6,
+  9.5
+ ],
+ "height_mm": 101.6,
+ "stl_volume_cm3": 63.9,
+ "max_overhang_deg_from_vertical": 35.0
 }
