@@ -1,0 +1,34 @@
+{
+ "comb-mount.stl": {
+  "grams": 48.0,
+  "minutes": 59,
+  "time_text": "0h 59m",
+  "material": "petg",
+  "walls": 2,
+  "infill": 15
+ },
+ "comb-module.stl": {
+  "grams": 55.6,
+  "minutes": 68,
+  "time_text": "1h 8m",
+  "material": "petg",
+  "walls": 2,
+  "infill": 15
+ },
+ "comb-end-module.stl": {
+  "grams": 50.6,
+  "minutes": 61,
+  "time_text": "1h 1m",
+  "material": "petg",
+  "walls": 2,
+  "infill": 15
+ },
+ "cap.stl": {
+  "grams": 19.6,
+  "minutes": 28,
+  "time_text": "0h 28m",
+  "material": "petg",
+  "walls": 2,
+  "infill": 15
+ }
+}
