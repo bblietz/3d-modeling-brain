@@ -1,10 +1,10 @@
 {
  "size_in": [
   4.0,
-  3.25,
+  4.0,
   0.375
  ],
- "volume_cm3": 55.1,
+ "volume_cm3": 63.7,
  "jaw_height_in": {
   "at the lip": 1.875,
   "at the tip": 2.25
@@ -44,10 +44,10 @@
    ],
    [
     1.0,
-    2.6875
+    3.4375
    ]
   ]
  },
  "stl": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Fishing-rod-holder/rod-hook.stl",
- "stl_volume_cm3": 55.1
+ "stl_volume_cm3": 63.7
 }

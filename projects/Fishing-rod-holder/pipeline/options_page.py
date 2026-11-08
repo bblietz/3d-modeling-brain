@@ -65,22 +65,22 @@ if THREE_MF:
   <tr><th>Print file</th><th>Hooks</th><th>Grams</th><th>Time</th></tr>
   {plate_rows}{total_row}
   </table></div>
-  <p style="font-size:14px;color:var(--muted)"><code>rod-hook.3mf</code>, one project file, {len(plates)} plate{"s" if len(plates) != 1 else ""}, four hooks each in a 2 x 2 grid. PETG, 2 walls, 15% gyroid, 0.30 mm layers, 2-loop skirt; the pads add about 4 g per hook over the bare slice. {pad_line} Open it in Bambu Studio once to confirm both plates show.</p>"""
+  <p style="font-size:14px;color:var(--muted)"><code>rod-hook.3mf</code>, one project file, {len(plates)} plate{"s" if len(plates) != 1 else ""}, up to four hooks each in a 2 x 2 grid. PETG, 2 walls, 15% gyroid, 0.30 mm layers, 2-loop skirt; the pads add about 4 g per hook over the bare slice. {pad_line} Open it in Bambu Studio once to confirm all the plates show.</p>"""
 else:
-    three_mf_html = '<p style="font-size:14px;color:var(--muted)">The print file (<code>rod-hook.3mf</code>, 8 hooks with solid screw pads) is being built; numbers land here when it is sliced.</p>'
+    three_mf_html = '<p style="font-size:14px;color:var(--muted)">The print file (<code>rod-hook.3mf</code>, 10 hooks with solid screw pads) is being built; numbers land here when it is sliced.</p>'
 
 BANNER = f"""
 <section class="decided">
   <div class="eyebrow">Decided 2026-11-07</div>
-  <p><strong>Deep hook, as individual printed hooks screwed to a 1x4, with a slot that leans away from the wood and no top bar.</strong> Brian's words: "use the deep hook design ... make individual deep hooks, that can be screwed into a 1x4 piece of wood", then "make the bottom resting part of the hook have a slot that is angled to help keep the rod there better", "remove the top most part of the device that is not over the wood", and "the slot should angle away from the wood." PETG. The hook is built and checked below; the concept round is kept underneath for the record.</p>
+  <p><strong>Deep hook, as individual printed hooks screwed to a 1x4, with a slot that leans away from the wood and no top bar.</strong> Brian's words: "use the deep hook design ... make individual deep hooks, that can be screwed into a 1x4 piece of wood", then "make the bottom resting part of the hook have a slot that is angled to help keep the rod there better", "remove the top most part of the device that is not over the wood", "the slot should angle away from the wood", and "5 holders should fit in the 20 in. There should be no space between each hook as it sits on the wood." PETG. The hook is built and checked below; the concept round is kept underneath for the record.</p>
 </section>"""
 
 BUILT = f"""
 <h2>Built · the rod hook</h2>
-<p>One printed part, {HOOK["size_in"][0]:g} x {HOOK["size_in"][1]:g} x {HOOK["size_in"][2]:g} in (4 x 3-1/4 x 3/8), an open J. The tab screws to the face of a 1x4 with two #8 x 1 in screws, 1 in from the board edge. The jaw reaches {HOOK["jaw_reach_in"]:g} in past the edge and carries the slot, which leans {HOOK["slot_lean_deg"]:g} degrees away from the wood as it goes down: the rod drops in at the top, slides down the ramp away from the board and comes to rest under the lip's edge. To leave it has to come back up the ramp toward the board, then over the lip tip. The lip top slopes up to the tip, so a rod set on the lip rolls in. The top bar over the mouth is gone. The rod lies beside the wood and never touches it; the board hangs from the joist exactly as your combs do.</p>
+<p>One printed part, {HOOK["size_in"][0]:g} x {HOOK["size_in"][1]:g} x {HOOK["size_in"][2]:g} in (4 x 4 x 3/8), an open J. Five of them butted end to end fill the board's 20 in hang with no gap, so the tab is 4 in tall and the rods land every 4 in. The tab screws to the face of a 1x4 with two #8 x 1 in screws, 1 in from the board edge. The jaw reaches {HOOK["jaw_reach_in"]:g} in past the edge and carries the slot, which leans {HOOK["slot_lean_deg"]:g} degrees away from the wood as it goes down: the rod drops in at the top, slides down the ramp away from the board and comes to rest under the lip's edge. To leave it has to come back up the ramp toward the board, then over the lip tip. The lip top slopes up to the tip, so a rod set on the lip rolls in. The top bar over the mouth is gone. The rod lies beside the wood and never touches it; the board hangs from the joist exactly as your combs do.</p>
 <div class="row">
-  <figure>{built_img("hook-on-board.png", "One open-J hook screwed to the face of a 1x4, a 3/8 in rod resting at the bottom of its leaning slot")}<figcaption>The hook on its board, 3/8 in rod at the bottom of the slot, under the lip's edge. Lip tip 2-1/4 in up, tab 3-1/4.</figcaption></figure>
-  <figure>{built_img("board-in-place.png", "Four hooks on a 27 in 1x4 hanging from a 2x8 joist, four rods seated")}<figcaption>Four hooks on your 27 in board, 7 in up the joist, 20 in hang as now.</figcaption></figure>
+  <figure>{built_img("hook-on-board.png", "One open-J hook screwed to the face of a 1x4, a 3/8 in rod resting at the bottom of its leaning slot")}<figcaption>The hook on its board, 3/8 in rod at the bottom of the slot, under the lip's edge. Lip tip 2-1/4 in up, tab 4.</figcaption></figure>
+  <figure>{built_img("board-in-place.png", "Five hooks butted on a 27 in 1x4 hanging from a 2x8 joist, five rods seated")}<figcaption>Five hooks butted on your 27 in board, 7 in up the joist, filling the 20 in hang.</figcaption></figure>
 </div>
 <div class="row">
   <figure>{built_img("pocket-face-on.png", "Face-on view of the hook with a 5/8 in and a 3/8 in rod at the bottom of the leaning slot and two countersunk screw holes")}<figcaption>Face on, from the real part: a 5/8 in blank (dark) and a 3/8 in blank (grey) at the bottom of the slot, two countersunk holes. The slot leans away from the board going down.</figcaption></figure>
@@ -95,10 +95,10 @@ BUILT = f"""
     </ul>
   </div>
 </div>
-<figure>{built_img("board-layout.png", "Drilling guide: a 27 in 1x4 with four hooks at 4 in pitch, screw positions and hook bottoms dimensioned")}<figcaption>Drilling guide for the board: hooks at 4 in, bottoms at 5, 9, 13 and 17 in below the joist (rods rest about 4 in down, then every 4); screws 1 in from the edge, 9/16 and 2-11/16 in up from each hook's bottom. Use 5 in if reels stay on and line up.</figcaption></figure>
+<figure>{built_img("board-layout.png", "Drilling guide: a 27 in 1x4 with five hooks butted at 4 in, screw positions and hook bottoms dimensioned")}<figcaption>Drilling guide for the board: five hooks butted, 4 in each, bottoms at 4, 8, 12, 16 and 20 in below the joist (the top hook starts at the joist; rods rest about 3-3/16 in down, then every 4); screws 1 in from the edge, 9/16 and 3-7/16 in up from each hook's bottom. Reels left on and in line would want 5 in, which means four hooks with gaps; say so if that is the case.</figcaption></figure>
 <div class="cards">
   <div class="card pick"><span class="tag">Per hook</span><h3>{g(hook_g)} · {hm(hook_min)}</h3>
-    <ul><li>PETG, 2 walls, 15% infill, 0.30 mm layers, real slice.</li><li>Eight hooks (two boards of four): {g(8 * hook_g)}, {hm(8 * hook_min)}.</li><li>Your seven notches' worth: {g(7 * hook_g)}.</li></ul></div>
+    <ul><li>PETG, 2 walls, 15% infill, 0.30 mm layers, real slice of the bare hook.</li><li>Ten hooks (two boards of five): {g(10 * hook_g)}, {hm(10 * hook_min)} before the screw pads.</li></ul></div>
   <div class="card"><span class="tag">Lighter</span><h3>Not worth it</h3>
     <ul><li>The part is already 3/8 in; thinner loses the countersink depth.</li><li>PLA would save {hook_g - hook_g * PLA_RHO / PETG_RHO:.1f} g per hook and creep on a hot ceiling.</li></ul></div>
 </div>
@@ -281,13 +281,12 @@ code {{ font-family: var(--mono); font-size: 0.92em; }}
     <label class="opt"><input type="radio" name="material" id="mat-petg" value="PETG" checked> PETG</label>
     <label class="opt"><input type="radio" name="material" id="mat-pla" value="PLA"> PLA</label>
     <label class="opt"><input type="radio" name="material" id="mat-asa" value="ASA"> ASA</label></fieldset>
-  <fieldset><legend>Rods per comb</legend>
-    <label class="opt"><input type="radio" name="rods" id="rods-2" value="2"> 2 (mount + end module, hang 9 in)</label>
-    <label class="opt"><input type="radio" name="rods" id="rods-4" value="4" checked> 4 (hang 17 in)</label>
-    <label class="opt"><input type="radio" name="rods" id="rods-6" value="6"> 6 (hang 25 in, or a second pair)</label></fieldset>
+  <fieldset><legend>Hooks per board</legend>
+    <label class="opt"><input type="radio" name="rods" id="rods-5" value="5 butted, 4 in each" checked> 5 butted, 4 in each, filling the 20 in (decided)</label>
+    <label class="opt"><input type="radio" name="rods" id="rods-4" value="4 with gaps, 5 in pitch"> 4 with gaps at a 5 in pitch (reels on and in line)</label></fieldset>
   <fieldset><legend>Reels</legend>
-    <label class="opt"><input type="radio" name="reels" id="reels-off" value="reels come off" checked> Reels come off, 4 in pitch</label>
-    <label class="opt"><input type="radio" name="reels" id="reels-on" value="reels stay on, 5 in pitch"> Reels stay on, 5 in pitch</label></fieldset>
+    <label class="opt"><input type="radio" name="reels" id="reels-off" value="reels come off" checked> Reels come off</label>
+    <label class="opt"><input type="radio" name="reels" id="reels-on" value="reels stay on"> Reels stay on</label></fieldset>
   <p style="margin-top:16px"><button id="copy">Copy picks</button> <button class="ghost" id="show">Show</button></p>
   <div id="out" hidden></div>
 </div>
@@ -298,7 +297,7 @@ code {{ font-family: var(--mono); font-size: 0.92em; }}
 <script>
 (function () {{
   function v(n) {{ var el = document.querySelector('input[name="' + n + '"]:checked'); return el ? el.value : '?'; }}
-  function picks() {{ return 'Rod holder picks: pocket ' + v('pocket') + '; build ' + v('build') + '; material ' + v('material') + '; rods per comb ' + v('rods') + '; ' + v('reels') + '.'; }}
+  function picks() {{ return 'Rod holder picks: pocket ' + v('pocket') + '; build ' + v('build') + '; material ' + v('material') + '; hooks per board ' + v('rods') + '; ' + v('reels') + '.'; }}
   var out = document.getElementById('out');
   function show() {{ out.textContent = picks(); out.hidden = false; }}
   function select() {{ var r = document.createRange(); r.selectNodeContents(out); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }}

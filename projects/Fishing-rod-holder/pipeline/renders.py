@@ -22,9 +22,11 @@ STL = PROJECT / "rod-hook.stl"
 
 JOIST_D, JOIST_T, PLY = 7.25, 1.5, 0.75
 BOARD_LEN, BOARD_ABOVE = 27.0, 7.0      # Brian's comb: 27 in overall, 7 in up the joist
-PITCH, BOTTOM_FIRST = 4.0, 5.0           # hooks every 4 in, first hook's bottom edge 5 in below the joist
+N_HOOKS = rh.HOOKS_PER_BOARD             # five hooks butted fill the hang
+PITCH = rh.H                             # no gap between hooks: pitch is the hook height
+BOTTOM_FIRST = rh.H                      # the top hook starts at the joist bottom
 SEAT = rh.seat_point(0.375)              # where a 3/8 blank rests, in hook coordinates (x, y up from the hook bottom)
-FIRST = BOTTOM_FIRST - SEAT[1]           # that rod's depth below the joist (about 4 in)
+FIRST = BOTTOM_FIRST - SEAT[1]           # that rod's depth below the joist
 
 
 def render(name, body, camera, size=(1400, 1000), projection="p"):
@@ -72,7 +74,7 @@ rotate([90, 0, 0]) {{
     # 2. four hooks on a 27 in board hanging from the joist, rods seated, from below
     hooks = []
     board_top = BOARD_ABOVE                                  # y of the board top, joist bottom at y = 0
-    for i in range(4):
+    for i in range(N_HOOKS):
         hook_y = -(BOTTOM_FIRST + PITCH * i)                 # hook bottom edge below the joist bottom
         hooks.append(f'translate([0, {hook_y * IN}, 0]) {HOOK}')
         hooks.append(rod(0.375, length=14.0, y=hook_y + SEAT[1]))
@@ -116,7 +118,7 @@ def layout_figure():
     ax.add_patch(Rectangle((-3.5, -JOIST_D), 10.5, JOIST_D, fc="#d8b98a", ec="#8a6a3c", lw=1.0, zorder=0))
     ax.add_patch(Rectangle((0, -BOARD_ABOVE), rh.BOARD_W, BOARD_LEN, fc="#e9d4ad", ec="#8a6a3c", lw=1.2, zorder=1))
     solid = rh.solid_2d()  # hook outline in hook coords (y up, bottom at 0)
-    for i in range(4):
+    for i in range(N_HOOKS):
         bottom_depth = BOTTOM_FIRST + PITCH * i
         pts = [(x, bottom_depth - y) for x, y in solid.exterior.coords]
         ax.add_patch(MplPolygon(pts, closed=True, fc="#5b8def", ec="#2b4f9e", lw=1.0, zorder=3))
@@ -133,17 +135,17 @@ def layout_figure():
     ax.annotate("", xy=(-2.9, BOTTOM_FIRST), xytext=(-2.9, BOTTOM_FIRST + PITCH), arrowprops=dict(arrowstyle="<->", lw=0.9), zorder=8)
     ax.text(-3.05, BOTTOM_FIRST + PITCH / 2, f"{PITCH:g} in\npitch", fontsize=8.5, va="center", ha="right")
     ax.annotate("", xy=(-2.9, 0), xytext=(-2.9, BOTTOM_FIRST), arrowprops=dict(arrowstyle="<->", lw=0.9), zorder=8)
-    ax.text(-3.05, BOTTOM_FIRST / 2, f"{frac(BOTTOM_FIRST)} to the\nfirst hook's\nbottom", fontsize=8.5, va="center", ha="right")
+    ax.text(-3.05, BOTTOM_FIRST / 2, f"{frac(BOTTOM_FIRST)}: the top\nhook starts\nat the joist", fontsize=8.5, va="center", ha="right")
     ax.text(0.1, -BOARD_ABOVE + 0.9, "1x4, 27 in,\n7 in up the joist", fontsize=8.5, color="#8a6a3c")
     ax.text(rh.BOARD_W + 0.7, -JOIST_D / 2, "2x8 joist", fontsize=8.5, color="#8a6a3c", va="center")
     ax.text(rh.BOARD_W + 0.7, BOTTOM_FIRST - rh.SCREW_Y[1] - 0.05, f"two #8 x 1 screws per hook,\n{frac(rh.SCREW_X)} in from the board edge,\n{frac(rh.SCREW_Y[0])} and {frac(rh.SCREW_Y[1])} up from\nthe hook's bottom edge", fontsize=7.5, va="top", color="#1f2430")
-    ax.text(-rh.CANT - 0.1, BOTTOM_FIRST + 3 * PITCH + 0.6, f"jaws reach\n{frac(rh.CANT)} past\nthe edge", fontsize=8, ha="right", va="top", color="#2b4f9e")
-    ax.text(rh.BOARD_W + 0.7, BOTTOM_FIRST + PITCH + 0.5, "hook bottoms at\n" + ", ".join(frac(BOTTOM_FIRST + PITCH * i) for i in range(4)) + "\nbelow the joist;\nrods rest about\n" + frac(FIRST) + " in down, then\nevery " + frac(PITCH), fontsize=7.5, va="top", color="#1f2430")
+    ax.text(-rh.CANT - 0.1, BOTTOM_FIRST + (N_HOOKS - 1) * PITCH - 2.4, f"jaws reach\n{frac(rh.CANT)} past\nthe edge", fontsize=8, ha="right", va="top", color="#2b4f9e")
+    ax.text(rh.BOARD_W + 0.7, BOTTOM_FIRST + PITCH + 0.5, "hook bottoms at\n" + ", ".join(frac(BOTTOM_FIRST + PITCH * i) for i in range(N_HOOKS)) + "\nbelow the joist, no gaps;\nrods rest about\n" + frac(FIRST) + " in down, then\nevery " + frac(PITCH), fontsize=7.5, va="top", color="#1f2430")
     ax.set_xlim(-6.2, rh.BOARD_W + 5.9)
     ax.set_ylim(BOARD_LEN - BOARD_ABOVE + 1.0, -JOIST_D - PLY - 0.8)
     ax.set_aspect("equal")
     ax.axis("off")
-    ax.set_title(f"Where the hooks go: 4 rods at {frac(PITCH)} in, first hook bottom {frac(BOTTOM_FIRST)} in below the joist", fontsize=10.5, loc="left")
+    ax.set_title(f"Where the hooks go: {N_HOOKS} hooks butted, {frac(PITCH)} in each, filling the {frac(rh.HANG)} in hang", fontsize=10.5, loc="left")
     fig.tight_layout()
     out = IMAGES / "board-layout.png"
     fig.savefig(out, facecolor="white")

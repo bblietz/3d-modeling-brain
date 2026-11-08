@@ -7,7 +7,9 @@ resting part of the hook have a slot that is angled to help keep the rod there
 better" and "remove the top most part of the device that is not over the wood."
 
 Then: "you did the opposite angle for the slot. The slot should angle away from
-the wood."
+the wood." And: "5 holders should fit in the 20 in. There should be no space
+between each hook as it sits on the wood." So the hook is 4 in tall and five of
+them, butted, fill the board's 20 in hang.
 
 So the hook is an open J: a tab that screws to the board face (two #8), and a
 jaw that reaches past the board edge carrying a slot that leans away from the
@@ -45,7 +47,9 @@ BOARD_T = 0.75
 # ---- the hook --------------------------------------------------------------------
 T = 0.375          # hook thickness (3/8)
 TAB = 1.75         # how far the tab reaches onto the board face (screws live here)
-H = 3.25           # tab height, over the board
+HANG = 20.0        # the board's hang below the joist (Brian's combs)
+HOOKS_PER_BOARD = 5
+H = HANG / HOOKS_PER_BOARD   # tab height: five hooks butted fill the hang, 4 in each
 WEB = 0.125        # the tab's outer edge past the board edge, so the rod never rubs the wood
 SLOT_W = 0.875     # slot width, measured across the slot; blanks are 1/4 to 5/8
 SLOT_LEAN = 35.0   # degrees from vertical; the slot's bottom sits away from the wood
