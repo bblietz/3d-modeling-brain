@@ -1,0 +1,31 @@
+{
+ "size_in": [
+  3.5,
+  3.25,
+  0.375
+ ],
+ "volume_cm3": 50.8,
+ "escape_lift_in": {
+  "0.25": 0.998,
+  "0.375": 0.998,
+  "0.625": 0.998
+ },
+ "lift_to_leave_in": 1.0,
+ "screws_mm": {
+  "hole": 5.0,
+  "countersink": 10.0,
+  "depth": 2.5,
+  "positions_in": [
+   [
+    1.0,
+    0.5625
+   ],
+   [
+    1.0,
+    2.6875
+   ]
+  ]
+ },
+ "stl": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Fishing-rod-holder/rod-hook.stl",
+ "stl_volume_cm3": 50.8
+}

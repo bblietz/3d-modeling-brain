@@ -12,15 +12,24 @@ from pathlib import Path
 
 PROJECT = Path("/home/brian/ClaudeProjects/3d-modeling-brain/projects/Fishing-rod-holder")
 IMAGES = PROJECT / "images" / "concepts"
+BUILT_IMAGES = PROJECT / "images"
 SLICE = json.loads((PROJECT / "concepts-slice-petg.json").read_text())
+HOOK = json.loads((PROJECT / "rod-hook-report.json").read_text())
+HOOK_SLICE = json.loads((PROJECT / "rod-hook-slice-petg.json").read_text())["rod-hook.stl"]
+THREE_MF = PROJECT / "rod-hook-3mf-report.json"
+THREE_MF = json.loads(THREE_MF.read_text()) if THREE_MF.exists() else None
 OUT = PROJECT / "options.html"
 
 PETG_RHO, PLA_RHO, ASA_RHO = 1.27, 1.24, 1.07
 
 
-def img(name, alt):
-    data = base64.b64encode((IMAGES / name).read_bytes()).decode()
+def img(name, alt, folder=IMAGES):
+    data = base64.b64encode((folder / name).read_bytes()).decode()
     return f'<img src="data:image/png;base64,{data}" alt="{alt}">'
+
+
+def built_img(name, alt):
+    return img(name, alt, BUILT_IMAGES)
 
 
 def hm(minutes):
@@ -40,6 +49,69 @@ two_rod_min = mount["minutes"] + end["minutes"]
 def g(x):
     return f"{x:.0f} g"
 
+
+hook_g, hook_min = HOOK_SLICE["grams"], HOOK_SLICE["minutes"]
+lifts = HOOK["escape_lift_in"]
+if THREE_MF:
+    plates = THREE_MF.get("plates", [])
+    plate_rows = "".join(
+        f'<tr><td>Plate {p["plate"]}</td><td class="num">{p["hooks"]}</td><td class="num">{g(p["grams"])}</td><td class="num">{hm(int(p["minutes"]))}</td></tr>'
+        for p in plates)
+    total_row = f'<tr><td><strong>Total</strong></td><td class="num">{THREE_MF.get("hooks", "")}</td><td class="num"><strong>{g(THREE_MF.get("grams", 0))}</strong></td><td class="num"><strong>{hm(int(THREE_MF.get("minutes", 0)))}</strong></td></tr>'
+    pad = THREE_MF.get("pad_density", {})
+    pad_line = (f'Solid pads proven in the sliced G-code: {pad.get("pad", "?")} plastic fraction inside a pad against {pad.get("plain", "?")} in the plain plate.'
+                if pad else "")
+    three_mf_html = f"""
+  <div class="tablewrap"><table>
+  <tr><th>Print file</th><th>Hooks</th><th>Grams</th><th>Time</th></tr>
+  {plate_rows}{total_row}
+  </table></div>
+  <p style="font-size:14px;color:var(--muted)"><code>rod-hook.3mf</code>, one project file, {len(plates)} plate{"s" if len(plates) != 1 else ""}. PETG, 2 walls, 15% gyroid, 0.30 mm layers, 2-loop skirt. {pad_line} Open it in Bambu Studio once to confirm the plates show.</p>"""
+else:
+    three_mf_html = '<p style="font-size:14px;color:var(--muted)">The print file (<code>rod-hook.3mf</code>, 8 hooks with solid screw pads) is being built; numbers land here when it is sliced.</p>'
+
+BANNER = f"""
+<section class="decided">
+  <div class="eyebrow">Decided 2026-11-07</div>
+  <p><strong>Deep hook pocket, as individual printed hooks screwed to a 1x4.</strong> Brian's words: "use the deep hook design ... make individual deep hooks, that can be screwed into a 1x4 piece of wood." PETG. The hook is built and checked below; the concept rounds are kept underneath for the record.</p>
+</section>"""
+
+BUILT = f"""
+<h2>Built · the rod hook</h2>
+<p>One printed part, {HOOK["size_in"][0]:g} x {HOOK["size_in"][1]:g} x {HOOK["size_in"][2]:g} in (3-1/2 x 3-1/4 x 3/8). It screws to the face of a 1x4 with two #8 x 1 in screws, 1 in from the board edge, and reaches 1-3/4 in past the edge. The rod lies in the pocket beside the wood and never touches it. The board hangs from the joist exactly as your combs do.</p>
+<div class="row">
+  <figure>{built_img("hook-on-board.png", "One hook screwed to the face of a 1x4, a 3/8 in rod seated in the deep pocket")}<figcaption>The hook on its board, 3/8 in rod seated. Mouth away from the board; the rod rolls down into the pocket.</figcaption></figure>
+  <figure>{built_img("board-in-place.png", "Four hooks on a 27 in 1x4 hanging from a 2x8 joist, four rods seated")}<figcaption>Four hooks on your 27 in board, 7 in up the joist, 20 in hang as now.</figcaption></figure>
+</div>
+<div class="row">
+  <figure>{built_img("pocket-face-on.png", "Face-on view of the hook with a 5/8 in and a 3/8 in rod in the pocket and two countersunk screw holes")}<figcaption>Face on, from the real part: a 5/8 in blank (dark) and a 3/8 in blank (grey) in the same pocket, two countersunk holes.</figcaption></figure>
+  <div class="card">
+    <h3>Checks baked into the script</h3>
+    <ul>
+      <li><strong>Hold.</strong> Pose-space check: the rod centre must rise <span class="num">{lifts["0.25"]:.2f}</span> in (1/4 blank), <span class="num">{lifts["0.375"]:.2f}</span> in (3/8) and <span class="num">{lifts["0.625"]:.2f}</span> in (5/8) before any path to the outside opens. A bump moves a rod millimetres.</li>
+      <li><strong>Way in.</strong> Every blank size reaches the pocket from outside with no limit on height, so nothing is trapped either way.</li>
+      <li><strong>Clearances.</strong> Seated rods of all three sizes intersect neither the hook nor the board; the hook sits flat on the board face.</li>
+      <li><strong>Printable.</strong> Flat on the bed, no overhangs; thinnest wall 1/8 in (3.2 mm) against the 1.24 mm minimum; countersinks open upward at 45 degrees.</li>
+      <li><strong>Exported STL</strong> is watertight, one solid, {HOOK["stl_volume_cm3"]} cm3.</li>
+    </ul>
+  </div>
+</div>
+<figure>{built_img("board-layout.png", "Drilling guide: a 27 in 1x4 with four hooks at 4 in pitch, screw positions and hook bottoms dimensioned")}<figcaption>Drilling guide for the board: hooks at 4 in, bottoms at 4-5/8, 8-5/8, 12-5/8 and 16-5/8 in below the joist; screws 1 in from the edge, 9/16 and 2-11/16 in up from each hook's bottom. Use 5 in if reels stay on and line up.</figcaption></figure>
+<div class="cards">
+  <div class="card pick"><span class="tag">Per hook</span><h3>{g(hook_g)} · {hm(hook_min)}</h3>
+    <ul><li>PETG, 2 walls, 15% infill, 0.30 mm layers, real slice.</li><li>Eight hooks (two boards of four): {g(8 * hook_g)}, {hm(8 * hook_min)}.</li><li>Your seven notches' worth: {g(7 * hook_g)}.</li></ul></div>
+  <div class="card"><span class="tag">Lighter</span><h3>Not worth it</h3>
+    <ul><li>The part is already 3/8 in; thinner loses the countersink depth.</li><li>PLA would save {g(hook_g - hook_g * PLA_RHO / PETG_RHO)} per hook and creep on a hot ceiling.</li></ul></div>
+</div>
+{three_mf_html}
+<h3 style="margin-top:24px">Files</h3>
+<ul>
+  <li><code>projects/Fishing-rod-holder/rod_hook.py</code>: the parametric CAD with the checks; <code>rod-hook-report.json</code> is its output.</li>
+  <li><code>rod-hook.stl</code>: one hook in print orientation (back face down).</li>
+  <li><code>rod-hook.3mf</code>: the Bambu project file with solid pads at every screw hole.</li>
+  <li>Mirror image: not needed for one board edge; say so if a board needs hooks on both edges.</li>
+</ul>
+"""
 
 html = f"""<title>Rafter Rod Holder</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -104,6 +176,10 @@ button.ghost {{ background: transparent; color: var(--accent-ink); border: 1px s
 button:focus-visible, input:focus-visible {{ outline: 2px solid var(--accent); outline-offset: 2px; }}
 #out {{ margin-top: 12px; font-family: var(--mono); font-size: 14px; white-space: pre-wrap; background: var(--bg); border: 1px dashed var(--line); padding: 10px 12px; border-radius: 4px; }}
 .assume {{ columns: 2; column-gap: 32px; font-size: 15px; }}
+.decided {{ margin-top: 24px; background: var(--tag); border-left: 4px solid var(--accent); border-radius: 4px; padding: 14px 18px; }}
+.decided p {{ margin: 6px 0 0; max-width: 80ch; }}
+.history {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 8px; }}
+.history .eyebrow {{ margin-top: 16px; }}
 @media (max-width: 640px) {{ .assume {{ columns: 1; }} h2 {{ margin-top: 40px; }} }}
 footer {{ margin-top: 56px; font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }}
 code {{ font-family: var(--mono); font-size: 0.92em; }}
@@ -113,8 +189,14 @@ code {{ font-family: var(--mono); font-size: 0.92em; }}
 <header>
   <div class="eyebrow">Options · 2026-11-07 · Bambu X2D, 0.6 nozzle</div>
   <h1>Rafter Rod Holder</h1>
-  <p>A printed replacement for the two notched 1x4 combs on your garage joists. Your rods stay put until you pull a neighbour, then any bump drops one. Everything below is drawn to scale from one parameter file; the grams and times are from real slices (PETG, 2 walls, 15% infill, 0.30 mm layers). Pick with the buttons at the bottom.</p>
+  <p>A printed replacement for the two notched 1x4 combs on your garage joists. Your rods stay put until you pull a neighbour, then any bump drops one. Everything below is drawn to scale from one parameter file; the grams and times are from real slices (PETG, 2 walls, 15% infill, 0.30 mm layers).</p>
 </header>
+{BANNER}
+{BUILT}
+
+<div class="history">
+<div class="eyebrow">How we got here · the concept round, 2026-11-07</div>
+</div>
 
 <h2>Why they fall out</h2>
 <p>A half-round cut into a vertical edge has its lowest point at the edge. The rod rolls down the arc and rests at the mouth with nothing in front of it. A hook pocket puts the floor inside the plate behind a lip, so a rod has to rise over the lip before it can leave.</p>
@@ -132,10 +214,10 @@ code {{ font-family: var(--mono); font-size: 0.92em; }}
 <h2>Decision 1 · Pocket shape</h2>
 <figure>{img("pockets.png", "Three pocket shapes at one scale: hook pocket, deep hook, snap clip")}</figure>
 <div class="cards">
-  <div class="card pick"><span class="tag">Recommended</span><h3>A · Hook pocket</h3>
+  <div class="card"><h3>A · Hook pocket</h3>
     <div class="big">5/8 in<small>lift to leave</small></div>
     <ul><li>Level mouth: slide the rod in, let it drop.</li><li>Any blank from 1/4 to 5/8 in sits in the 7/8 in pocket.</li><li>No moving parts, nothing to relax over the years.</li></ul></div>
-  <div class="card"><h3>B · Deep hook</h3>
+  <div class="card pick"><span class="tag">Picked</span><h3>B · Deep hook</h3>
     <div class="big">1 in<small>lift to leave</small></div>
     <ul><li>Mouth higher than the lip: the rod rolls into the pocket by itself.</li><li>Harder to lift out overhead; each pocket is 3/8 in taller, so the comb grows or the pitch does.</li></ul></div>
   <div class="card"><span class="tag warn">Fit per rod size</span><h3>C · Snap clip</h3>
@@ -144,9 +226,10 @@ code {{ font-family: var(--mono); font-size: 0.92em; }}
 </div>
 
 <h2>Decision 2 · What gets printed</h2>
+<p><span class="tag">Picked: a blend</span> Individual printed hooks on a plain 1x4: B's wood backbone and screw-on pieces, without the old notches, and A's pocket in every hook.</p>
 <figure>{img("build.png", "Left: the printed comb exploded into mount, module and end module. Right: printed caps screwed over the notches of the existing wood comb")}</figure>
 <div class="cards">
-  <div class="card pick"><span class="tag">Recommended</span><h3>A · Printed comb, three pieces</h3>
+  <div class="card"><h3>A · Printed comb, three pieces</h3>
     <div class="big num">{g(comb_g)}<small>per comb, {hm(comb_min)}</small></div>
     <div class="num" style="color:var(--muted)">pair: {g(pair_g)}, {hm(pair_min)}</div>
     <ul><li>Mount {g(mount["grams"])}, module {g(module["grams"])}, end module {g(end["grams"])}; every piece lies flat on the bed.</li>
@@ -185,14 +268,16 @@ code {{ font-family: var(--mono); font-size: 0.92em; }}
 </ul>
 
 <h2>Your picks</h2>
+<p style="font-size:14px;color:var(--muted)">Pocket and build are decided (above). The buttons stay for the open items: material, rods per comb, reels.</p>
 <div class="picks">
   <fieldset><legend>Pocket shape</legend>
-    <label class="opt"><input type="radio" name="pocket" id="pocket-a" value="A hook pocket" checked> A · Hook pocket, 5/8 in lift</label>
-    <label class="opt"><input type="radio" name="pocket" id="pocket-b" value="B deep hook"> B · Deep hook, 1 in lift</label>
+    <label class="opt"><input type="radio" name="pocket" id="pocket-a" value="A hook pocket"> A · Hook pocket, 5/8 in lift</label>
+    <label class="opt"><input type="radio" name="pocket" id="pocket-b" value="B deep hook" checked> B · Deep hook, 1 in lift (decided)</label>
     <label class="opt"><input type="radio" name="pocket" id="pocket-c" value="C snap clip"> C · Snap clip</label></fieldset>
   <fieldset><legend>What gets printed</legend>
-    <label class="opt"><input type="radio" name="build" id="build-a" value="A printed comb" checked> A · Printed comb in three pieces</label>
-    <label class="opt"><input type="radio" name="build" id="build-b" value="B caps on the wood combs"> B · Caps on the wood combs</label></fieldset>
+    <label class="opt"><input type="radio" name="build" id="build-a" value="A printed comb"> A · Printed comb in three pieces</label>
+    <label class="opt"><input type="radio" name="build" id="build-b" value="B caps on the wood combs"> B · Caps on the wood combs</label>
+    <label class="opt"><input type="radio" name="build" id="build-c" value="individual hooks on a 1x4" checked> Individual hooks on a 1x4 (decided)</label></fieldset>
   <fieldset><legend>Material</legend>
     <label class="opt"><input type="radio" name="material" id="mat-petg" value="PETG" checked> PETG</label>
     <label class="opt"><input type="radio" name="material" id="mat-pla" value="PLA"> PLA</label>
