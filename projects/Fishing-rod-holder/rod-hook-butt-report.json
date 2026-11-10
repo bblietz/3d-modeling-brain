@@ -1,0 +1,67 @@
+{
+ "variant": "butt",
+ "holds": "the grip, about 1-7/8 in (2 in opening)",
+ "size_in": [
+  4.5,
+  4.0,
+  0.375
+ ],
+ "volume_cm3": 58.3,
+ "slot_w_in": 2.0,
+ "jaw_height_in": {
+  "at the lip": 1.625,
+  "at the tip": 1.75
+ },
+ "jaw_reach_in": 2.75,
+ "slot_lean_deg": 10.0,
+ "floor_in": 0.3125,
+ "hood_in": -0.96,
+ "lip_min_in": 0.554,
+ "seat_in": {
+  "1.5": [
+   -1.19,
+   1.063
+  ],
+  "1.75": [
+   -1.193,
+   1.189
+  ],
+  "1.875": [
+   -1.194,
+   1.251
+  ]
+ },
+ "exit_gap_in": 2.25,
+ "exit_gap_asked_in": 2.0,
+ "escape_lift_in": {
+  "1.5": 1.405,
+  "1.75": 1.405,
+  "1.875": 1.405
+ },
+ "lift_to_leave_in": 1.438,
+ "screws_mm": {
+  "hole": 5.0,
+  "countersink": 10.0,
+  "depth": 2.5,
+  "positions_in": [
+   [
+    1.0,
+    0.5625
+   ],
+   [
+    1.0,
+    3.4375
+   ]
+  ]
+ },
+ "stl": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Fishing-rod-holder/rod-hook-butt.stl",
+ "model_stl": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Fishing-rod-holder/rod-hook-butt-model.stl",
+ "print_orientation": "standing on the 4 in bottom edge, face vertical, holes horizontal",
+ "footprint_mm": [
+  114.3,
+  9.5
+ ],
+ "height_mm": 101.6,
+ "stl_volume_cm3": 58.3,
+ "max_overhang_deg_from_vertical": 10.0
+}

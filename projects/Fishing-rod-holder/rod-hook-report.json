@@ -1,16 +1,20 @@
 {
+ "variant": "tip",
+ "holds": "the blank, 1/4 to 5/8 in",
  "size_in": [
   4.0,
   4.0,
   0.375
  ],
  "volume_cm3": 63.9,
+ "slot_w_in": 0.875,
  "jaw_height_in": {
   "at the lip": 1.875,
   "at the tip": 2.25
  },
  "jaw_reach_in": 2.25,
  "slot_lean_deg": 35.0,
+ "floor_in": 0.625,
  "hood_in": 0.035,
  "lip_min_in": 0.584,
  "seat_in": {
@@ -27,6 +31,8 @@
    0.938
   ]
  },
+ "exit_gap_in": 1.75,
+ "exit_gap_asked_in": 1.0,
  "escape_lift_in": {
   "0.25": 1.571,
   "0.375": 1.571,

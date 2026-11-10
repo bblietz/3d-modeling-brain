@@ -2,7 +2,7 @@
 type: project
 project: Fishing-rod-holder
 created: 2026-11-07
-status: Open-J hook, 4 x 4 x 3/8, slot leaning away from the wood, five butted per 20 in board, printed standing; built, checked and exported 2026-11-07 (rod_hook.py, rod-hook.stl); rod-hook.3mf with solid pads, 10 hooks on ONE plate, 373 g / 8 h 10; not printed.
+status: Two open-J hooks in one file, 4 in tall, five butted per 20 in board, printed standing; tip hook 4 x 4 (7/8 slot, 35 degrees) built 2026-11-07, butt hook 4-1/2 x 4 (2 in slot for the grip, 10 degrees, 2-1/4 in to get the butt in under the hook above) built 2026-11-09; rod-hook.3mf with solid pads, TWO plates (10 tip 373 g / 8 h 10, 10 butt 347 g / 7 h 46); not printed.
 printer: Bambu Lab X2D
 material: PETG
 tags: [3d-print, garage, fishing, storage]
@@ -19,6 +19,8 @@ What fails (Brian, same day): "rods fall out when minimal force is applied. They
 Picks (Brian, same day, from the options page): "use the deep hook design. For decision 2, combine the approach. Make individual deep hooks, that can be screwed into a 1x4 piece of wood."
 
 Rework (Brian, same day, after seeing the first hook): "make the bottom resting part of the hook have a slot that is angled to help keep the rod there better" and "remove the top most part of the device that is not over the wood. It isn't needed." Then, on the first attempt: "you did the opposite angle for the slot. The slot should angle away from the wood." Then: "5 holders should fit in the 20 in. There should be no space between each hook as it sits on the wood." Then: "can you print these vertically so there can be much more in a single print."
+
+Second version (Brian, 2026-11-09): "There should be 2 versions of the holder. One that we already have is for the rod tip end. The rod butt end should be able to accommodate a 2 in rod handle. The rods I have are 1 7/8 in or so. Make it a 2 in opening." Then: "make both versions in the same file, vertical." Then: "the holders will stack on top of each other, make sure there is 2 in of room to get the butt in" (the stacked gap over the butt hook's lip tip is 2-1/4; the script asserts it at 2 or more).
 
 ## What exists today (read from the photo)
 
@@ -48,26 +50,37 @@ Checks baked into the script (all pass, `rod-hook-report.json`): one solid, boun
 
 Rework history, same day: the first angled slot had its floor dropping toward the board (rod in the back corner, 30 degrees, lift 1.24); Brian wanted the opposite, so the slot became a channel leaning away from the wood.
 
+### Butt hook (2026-11-09)
+
+Same file, same tab, screws, thickness, height and print orientation; `rod_hook.py` now holds both as `TIP` and `BUTT` (a `Hook` object each; the shared numbers stay module constants). The butt hook holds the grip: 2 in opening for Brian's 1-7/8 in handles.
+
+- The 4 in pitch rules the shape. A 1-7/8 grip has to pass between the lip tip and the hook butted 4 in above (the top hook has the joist there instead), so the lip tip can be at most 4 minus the grip minus clearance. Tip at 1-3/4: a 2-1/4 in gap, 3/8 to spare on a 1-7/8 grip and 1/4 on a 2 in one. The lip top starts at 1-5/8 at the slot and climbs 1/8 to the tip (a grip set on the lip still rolls in). What is left under that for the slot is 1-5/8: a 5/16 floor, the R 1 bottom, and a 10 degree lean, the most that leaves the lip a straight inner face above its R 1/8 corner (3/8 floor and 10 degrees left no room for that round; 35 degrees would need about 7 in of hook).
+- Hook 4-1/2 x 4 x 3/8 in (jaw reach 2-3/4, lip 0.55 at its thinnest), 58.3 cm3. Seated 1-7/8 grip centre 1.25 in up and 1.19 in out from the board edge, 1/16 clear of each wall.
+- Hold: pose-space lift 1.405 in for 1-1/2, 1-3/4 and 1-7/8 grips (the tip hook gives 1.571 for its blanks), the path being up the 10 degree channel, over the lip tip, under the hook above. The checks now put the hooks above and below and the board in the obstacle set for both versions (the tip hook's numbers did not move), and assert the gap over the tip at a quarter inch past the biggest rod.
+- Standing print: footprint 114.3 x 9.5 mm, 101.6 tall; steepest overhang 10 degrees (the slot's outer wall); 30.9 g, 1 h 18 bare in PETG (the tip hook 33.2 g, 1 h 19: the 2 in pocket removes more than the extra half inch adds).
+- The hood is gone on this one (the lip's top edge sits 0.96 in outboard of the grip centre): the hold is all lift, which is the only thing a near-vertical 2 in slot can offer in 4 in of height.
+
 ## Print
 
 - PETG, 2 walls, 15% infill, 0.30mm Standard, 0.6 nozzle, 2-loop skirt: 33.2 g, 1 h 19 per bare hook standing alone (real slice, `rod-hook-slice-petg.json`; the same hook lying flat was 30.0 g, 39 min, so standing costs time per hook but packs ten on a plate).
-- `rod-hook.3mf` (`pipeline/make_print_3mf.py`, default 10 copies, report `rod-hook-3mf-report.json`): Bambu project file, ten hooks (two boards of five) standing in one row along the bed's y axis on ONE plate, 23 mm pitch, 13.5 mm between faces: 372.8 g, 8 h 10 min, 339 layers (37.3 g and 49 min per hook, pads included). Earlier flat version for comparison: three plates, 343 g, 7 h 48. A 100% infill modifier pad (22 mm, axis along the horizontal hole, inset 0.2 mm from both faces, wholly inside the body: 0.0 mm3 outside against the CAD and the STL) at every screw hole; G-code proof in the core of the thickness 5 to 9.5 mm above and below each hole centre: 0.875 to 0.89 plastic per volume inside every pad against 0.14 in the plain hook. Round trip through `bambu-studio --arrange 0 --export-3mf` preserved the plate, 10 objects, 20 modifiers, the overrides and `different_settings_to_system`. No brim; add one in Studio if a standing hook ever lifts. Brian opens it once in Bambu Studio to confirm the plate shows.
+- `rod-hook.3mf` (`pipeline/make_print_3mf.py`, default 10 copies per hook, report `rod-hook-3mf-report.json`): ONE Bambu project file, TWO plates (Brian 2026-11-09: "make both versions in the same file, vertical"). Plate 1 "tip hooks 1-10": ten tip hooks standing in one row along the bed's y axis, 23 mm pitch, 13.5 mm between faces, 372.8 g, 8 h 10, 339 layers (37.3 g, 49 min per hook with pads; the transforms are byte-identical to the one-plate file of 2026-11-07). Plate 2 "butt hooks 1-10": ten butt hooks the same way, 346.9 g, 7 h 46 (34.7 g, 47 min per hook). Both plates: 719.7 g, 15 h 56. A 100% infill modifier pad (22 mm, axis along the horizontal hole, inset 0.2 mm from both faces, wholly inside the body: 0.0 mm3 outside against the CAD and the STL, built per variant since the butt hook's holes sit 1/2 in further along the standing part) at every screw hole; G-code proof in the core of the thickness 5 to 9.5 mm above and below each hole centre: 0.875 to 0.89 (plate 1) and 0.872 to 0.888 (plate 2) plastic per volume inside every pad against 0.14 in the plain hook. Plates are authored by the script (the CLI's own arrange packed all twenty onto one plate): one plate block per variant, plate 2's items offset 307.2 mm along x. Round trip through `bambu-studio --arrange 0 --export-3mf` preserved 2 plates, 20 objects, 40 modifiers, the plate names, the overrides and `different_settings_to_system`. No brim; add one in Studio if a standing hook ever lifts. Brian opens it once in Bambu Studio to confirm both plates show. Earlier versions for the record: flat tip hooks on three plates 343 g / 7 h 48; standing tip hooks on one plate 372.8 g / 8 h 10.
 - Mirrored hook: not built; one flag away if a board needs hooks on both edges.
 
 ## Options round (2026-11-07, kept for the record)
 
-Published page: https://claude.ai/artifact/MuJqbgWZjUNzqSTMLFRt4H (Version 5: Decided banner, the built hook with renders, checks, drilling guide and the one-plate print file on top; concept round below). Concept slice quotes (PETG, 2 walls, 15%): three-piece printed comb 154 g / 3 h 08 per comb; cap over an existing notch 19.6 g / 28 min. Pocket options drawn: A hook (5/8 lift), B deep hook (1 in lift, picked), C snap clip. Build options drawn: A printed comb in three pieces, B caps on the wood combs; Brian took the blend.
+Published page: https://claude.ai/artifact/MuJqbgWZjUNzqSTMLFRt4H (Version 6: Decided banner, both hooks built with renders, the stacked-gap close-up, checks, the two-board drilling guide and the two-plate print file on top; concept round below). Concept slice quotes (PETG, 2 walls, 15%): three-piece printed comb 154 g / 3 h 08 per comb; cap over an existing notch 19.6 g / 28 min. Pocket options drawn: A hook (5/8 lift), B deep hook (1 in lift, picked), C snap clip. Build options drawn: A printed comb in three pieces, B caps on the wood combs; Brian took the blend.
 
 ## Open
 
-1. Reels on or off (five butted hooks at 4 in assume reels off or staggered), and the comb spacing along the rods. Hook count is settled at five per board, ten in the 3MF.
+1. Reels on or off (five butted hooks at 4 in assume reels off or staggered; with the butt hook holding the grip, a reel left on points away from the board), and the comb spacing along the rods. Hook count is settled at five per board, ten of each in the 3MF.
+1b. Grip sizes: the butt hook's 2 in opening leaves 1/16 per side on a 1-7/8 grip; a fatter foregrip or a reel seat over 2 in will not go in, and the 2-1/4 in gap over the lip tip is what a grip passes through on the way in. Measure the fattest grip before printing ten.
 2. Joist size (assumed 2x8) only matters for the board, which is Brian's.
 3. Copy of the photo into `images/` (it exists only in the chat so far).
 4. After the print: real blank fit in the 7/8 pocket and the feel of the 1 in lift (retrospective in `knowledge/learnings/fishing-rod-holder.md`).
 
 ## Files
 
-- `rod_hook.py` (canonical CAD with asserts and the SHOW viewer push), `rod-hook.stl`, `rod-hook.3mf`, `rod-hook-report.json`, `rod-hook-slice-petg.json`, `rod-hook-3mf-report.json`
+- `rod_hook.py` (canonical CAD for both hooks with asserts and the SHOW viewer push), tip hook `rod-hook.stl` / `rod-hook-model.stl` / `rod-hook-report.json` / `rod-hook-slice-petg.json`, butt hook `rod-hook-butt.stl` / `rod-hook-butt-model.stl` / `rod-hook-butt-report.json` / `rod-hook-butt-slice-petg.json`, the one print file `rod-hook.3mf` with `rod-hook-3mf-report.json`
 - `pipeline/concepts.py` (concept geometry and drawings), `pipeline/renders.py` (OpenSCAD scenes of the real STL and the board layout), `pipeline/slice_stls.py` (STL to grams and time), `pipeline/options_page.py` (page generator), `pipeline/make_print_3mf.py` (project 3MF with pads)
 - `images/` (hook-on-board, board-in-place, pocket-face-on, board-layout, hook-check-views), `images/concepts/` (options round)
 - `options.html` (published page), `concepts-slice-petg.json`

@@ -15,7 +15,9 @@ IMAGES = PROJECT / "images" / "concepts"
 BUILT_IMAGES = PROJECT / "images"
 SLICE = json.loads((PROJECT / "concepts-slice-petg.json").read_text())
 HOOK = json.loads((PROJECT / "rod-hook-report.json").read_text())
+BUTT = json.loads((PROJECT / "rod-hook-butt-report.json").read_text())
 HOOK_SLICE = json.loads((PROJECT / "rod-hook-slice-petg.json").read_text())["rod-hook.stl"]
+BUTT_SLICE = json.loads((PROJECT / "rod-hook-butt-slice-petg.json").read_text())["rod-hook-butt.stl"]
 THREE_MF = PROJECT / "rod-hook-3mf-report.json"
 THREE_MF = json.loads(THREE_MF.read_text()) if THREE_MF.exists() else None
 OUT = PROJECT / "options.html"
@@ -51,13 +53,17 @@ def g(x):
 
 
 hook_g, hook_min = HOOK_SLICE["grams"], HOOK_SLICE["minutes"]
+butt_g, butt_min = BUTT_SLICE["grams"], BUTT_SLICE["minutes"]
 lifts = HOOK["escape_lift_in"]
+blifts = BUTT["escape_lift_in"]
+VARIANT_LABEL = {"tip": "tip hooks", "butt": "butt hooks"}
 if THREE_MF:
     plates = THREE_MF.get("plates_sliced", [])
     plate_rows = "".join(
-        f'<tr><td>Plate {p["plate"]}</td><td class="num">{len(p["hooks"])}</td><td class="num">{g(p["grams"])}</td><td class="num">{hm(int(p["minutes"]))}</td></tr>'
+        f'<tr><td>Plate {p["plate"]} · {VARIANT_LABEL.get(p.get("variant", ""), "hooks")}</td><td class="num">{len(p["hooks"])}</td><td class="num">{g(p["grams"])}</td><td class="num">{hm(int(p["minutes"]))}</td></tr>'
         for p in plates)
-    total_row = f'<tr><td><strong>Total</strong></td><td class="num">{THREE_MF.get("copies", "")}</td><td class="num"><strong>{g(THREE_MF.get("total_grams", 0))}</strong></td><td class="num"><strong>{hm(int(THREE_MF.get("total_minutes", 0)))}</strong></td></tr>'
+    total_hooks = sum(len(p["hooks"]) for p in plates)
+    total_row = f'<tr><td><strong>Total</strong></td><td class="num">{total_hooks}</td><td class="num"><strong>{g(THREE_MF.get("total_grams", 0))}</strong></td><td class="num"><strong>{hm(int(THREE_MF.get("total_minutes", 0)))}</strong></td></tr>'
     pad_line = (f'Solid pads proven in the sliced G-code: {THREE_MF["pad_fill_min"]:.2f} plastic per volume inside every pad against {THREE_MF["plain_fill_max"]:.2f} in the plain hook.'
                 if "pad_fill_min" in THREE_MF else "")
     three_mf_html = f"""
@@ -65,49 +71,64 @@ if THREE_MF:
   <tr><th>Print file</th><th>Hooks</th><th>Grams</th><th>Time</th></tr>
   {plate_rows}{total_row}
   </table></div>
-  <p style="font-size:14px;color:var(--muted)"><code>rod-hook.3mf</code>, one project file, {len(plates)} plate{"s" if len(plates) != 1 else ""}, the hooks standing on their bottom edges. PETG, 2 walls, 15% gyroid, 0.30 mm layers, 2-loop skirt, no brim (add one in Studio if a standing hook ever lifts); the pads add a few grams per hook over the bare slice. {pad_line} Open it in Bambu Studio once to confirm the plate shows.</p>"""
+  <p style="font-size:14px;color:var(--muted)"><code>rod-hook.3mf</code>, one project file, {len(plates)} plate{"s" if len(plates) != 1 else ""}: the tip hooks on one, the butt hooks on the other, all standing on their bottom edges, each plate one print. PETG, 2 walls, 15% gyroid, 0.30 mm layers, 2-loop skirt, no brim (add one in Studio if a standing hook ever lifts); the pads add a few grams per hook over the bare slice. {pad_line} Open it in Bambu Studio once to confirm both plates show.</p>"""
 else:
-    three_mf_html = '<p style="font-size:14px;color:var(--muted)">The print file (<code>rod-hook.3mf</code>, 10 hooks with solid screw pads) is being built; numbers land here when it is sliced.</p>'
+    three_mf_html = '<p style="font-size:14px;color:var(--muted)">The print file (<code>rod-hook.3mf</code>, ten of each hook with solid screw pads, a plate per kind) is being built; numbers land here when it is sliced.</p>'
 
 BANNER = f"""
 <section class="decided">
-  <div class="eyebrow">Decided 2026-11-07</div>
-  <p><strong>Deep hook, as individual printed hooks screwed to a 1x4, with a slot that leans away from the wood and no top bar.</strong> Brian's words: "use the deep hook design ... make individual deep hooks, that can be screwed into a 1x4 piece of wood", then "make the bottom resting part of the hook have a slot that is angled to help keep the rod there better", "remove the top most part of the device that is not over the wood", "the slot should angle away from the wood", "5 holders should fit in the 20 in. There should be no space between each hook as it sits on the wood", and "print these vertically so there can be much more in a single print." PETG. The hook is built and checked below; the concept round is kept underneath for the record.</p>
+  <div class="eyebrow">Decided 2026-11-07 · second hook 2026-11-09</div>
+  <p><strong>Deep hook, as individual printed hooks screwed to a 1x4, with a slot that leans away from the wood and no top bar; two versions, one for the tip end and one with a 2 in opening for the grip.</strong> Brian's words: "use the deep hook design ... make individual deep hooks, that can be screwed into a 1x4 piece of wood", then "make the bottom resting part of the hook have a slot that is angled to help keep the rod there better", "remove the top most part of the device that is not over the wood", "the slot should angle away from the wood", "5 holders should fit in the 20 in. There should be no space between each hook as it sits on the wood", "print these vertically so there can be much more in a single print", and on 2026-11-09: "There should be 2 versions of the holder. One that we already have is for the rod tip end. The rod butt end should be able to accommodate a 2 in rod handle. The rods I have are 1 7/8 in or so. Make it a 2 in opening ... make both versions in the same file, vertical." PETG. Both hooks are built and checked below; the concept round is kept underneath for the record.</p>
 </section>"""
 
 BUILT = f"""
-<h2>Built · the rod hook</h2>
-<p>One printed part, {HOOK["size_in"][0]:g} x {HOOK["size_in"][1]:g} x {HOOK["size_in"][2]:g} in (4 x 4 x 3/8), an open J. Five of them butted end to end fill the board's 20 in hang with no gap, so the tab is 4 in tall and the rods land every 4 in. The tab screws to the face of a 1x4 with two #8 x 1 in screws, 1 in from the board edge. The jaw reaches {HOOK["jaw_reach_in"]:g} in past the edge and carries the slot, which leans {HOOK["slot_lean_deg"]:g} degrees away from the wood as it goes down: the rod drops in at the top, slides down the ramp away from the board and comes to rest under the lip's edge. To leave it has to come back up the ramp toward the board, then over the lip tip. The lip top slopes up to the tip, so a rod set on the lip rolls in. The top bar over the mouth is gone. The rod lies beside the wood and never touches it; the board hangs from the joist exactly as your combs do.</p>
+<h2>Built · two rod hooks, one file</h2>
+<p>Two printed hooks share one tab: 4 in tall, 3/8 thick, two #8 x 1 in screws 1 in from the board edge, five butted end to end filling a board's 20 in hang so the rods land every 4 in. The <strong>tip hook</strong> ({HOOK["size_in"][0]:g} x {HOOK["size_in"][1]:g} in) carries a 7/8 in slot leaning {HOOK["slot_lean_deg"]:g} degrees for the blank; the <strong>butt hook</strong> ({BUTT["size_in"][0]:g} x {BUTT["size_in"][1]:g} in) a 2 in slot leaning {BUTT["slot_lean_deg"]:g} degrees for the grip (your handles are about 1-7/8). A rod lies across a tip board at one joist and a butt board at another, as on your combs. Both are open Js: the rod drops in at the top, slides down the ramp away from the board and rests at the bottom; to leave it has to come back up toward the board, over the lip tip and under the hook above. The lip top slopes up to its tip, so a rod set on it rolls in. Nothing touches the wood; the boards hang from the joists exactly as your combs do.</p>
 <div class="row">
-  <figure>{built_img("hook-on-board.png", "One open-J hook screwed to the face of a 1x4, a 3/8 in rod resting at the bottom of its leaning slot")}<figcaption>The hook on its board, 3/8 in rod at the bottom of the slot, under the lip's edge. Lip tip 2-1/4 in up, tab 4.</figcaption></figure>
-  <figure>{built_img("board-in-place.png", "Five hooks butted on a 27 in 1x4 hanging from a 2x8 joist, five rods seated")}<figcaption>Five hooks butted on your 27 in board, 7 in up the joist, filling the 20 in hang.</figcaption></figure>
+  <figure>{built_img("hook-on-board.png", "The tip hook screwed to the face of a 1x4, a 3/8 in rod resting at the bottom of its leaning slot")}<figcaption><strong>Tip hook</strong> on its board, 3/8 in blank at the bottom of the 35 degree slot, under the lip's edge. Lip tip 2-1/4 in up, jaw {HOOK["jaw_reach_in"]:g} in past the edge.</figcaption></figure>
+  <figure>{built_img("butt-hook-on-board.png", "The butt hook screwed to the face of a 1x4, a 1-7/8 in grip resting in its 2 in slot")}<figcaption><strong>Butt hook</strong> on its board, 1-7/8 in grip in the 2 in slot. Lip tip 1-3/4 in up so the grip passes under the hook above; jaw {BUTT["jaw_reach_in"]:g} in past the edge.</figcaption></figure>
 </div>
 <div class="row">
-  <figure>{built_img("pocket-face-on.png", "Face-on view of the hook with a 5/8 in and a 3/8 in rod at the bottom of the leaning slot and two countersunk screw holes")}<figcaption>Face on, from the real part: a 5/8 in blank (dark) and a 3/8 in blank (grey) at the bottom of the slot, two countersunk holes. The slot leans away from the board going down.</figcaption></figure>
+  <figure>{built_img("pocket-face-on.png", "Face-on view of the tip hook with a 5/8 in and a 3/8 in rod at the bottom of the leaning slot and two countersunk screw holes")}<figcaption>Tip hook face on, from the real part: a 5/8 in blank (dark) and a 3/8 in blank (grey) at the bottom of the slot, two countersunk holes. The slot leans away from the board going down.</figcaption></figure>
+  <figure>{built_img("butt-pocket-face-on.png", "Face-on view of the butt hook with a 1-7/8 in grip seated, the same grip faint at the top of its way out, and the next hook above drawn faint")}<figcaption>Butt hook face on with the hook butted above drawn faint: the grip seated (solid) and at the top of its way out (faint), through the {BUTT["exit_gap_in"]:g} in gap over the lip tip. It has to rise {blifts["1.875"]:.2f} in before that path opens.</figcaption></figure>
+</div>
+<div class="row">
   <div class="card">
-    <h3>Checks baked into the script</h3>
+    <h3>Why the butt hook looks the way it does</h3>
     <ul>
-      <li><strong>Hold.</strong> Pose-space check: the rod centre must rise <span class="num">{lifts["0.25"]:.2f}</span> in (1/4 blank), <span class="num">{lifts["0.375"]:.2f}</span> in (3/8) and <span class="num">{lifts["0.625"]:.2f}</span> in (5/8) before any path to the outside opens; the plain deep hook gave 1.00. A bump moves a rod millimetres, and a hop lands it back on the ramp, which slides it home.</li>
-      <li><strong>Way in.</strong> Every blank size reaches the slot from outside with no limit on height, so nothing is trapped either way.</li>
-      <li><strong>Clearances.</strong> Seated rods of all three sizes touch neither the hook's walls beyond their resting contact nor the board; the hook sits flat on the board face.</li>
-      <li><strong>Printable standing.</strong> The hook prints on its 4 in bottom edge, face vertical, so ten fit one plate. Steepest unsupported surface: {HOOK["max_overhang_deg_from_vertical"]:g} degrees from vertical (the slot lean), under the 45 degree limit; bottom corners made square so the whole edge sits on the bed; the screw holes print sideways (5 mm bridges, fine). Thinnest wall 1/8 in (3.2 mm) against the 1.24 mm minimum, lip {HOOK["lip_min_in"]:.2f} in at its thinnest. Layers run across the hook, so a sideways yank on the lip loads the layer bond; at rod loads that is a 3x margin.</li>
-      <li><strong>Exported STL</strong> is watertight, one solid, {HOOK["stl_volume_cm3"]} cm3.</li>
+      <li>The 4 in pitch is the budget. A 1-7/8 grip must pass between the lip tip and the hook stacked 4 in above (the top hook has the joist there), so the tip sits at 1-3/4: a <strong>{BUTT["exit_gap_in"]:g} in gap</strong> to get the butt in, against the 2 in you asked for (the script fails under {BUTT["exit_gap_asked_in"]:g}); 3/8 to spare on your grips, 1/4 on a 2 in one.</li>
+      <li>Under that: a 5/16 floor, the 2 in rounded bottom, and a {BUTT["slot_lean_deg"]:g} degree lean, the most that still leaves the lip a straight inner face. The tip hook's 35 degrees with a 2 in slot would want a 7 in hook.</li>
+      <li>So the hold here is all lift: {blifts["1.875"]:.2f} in up the near-vertical slot before the grip can come over the lip. Same mechanism, same bump tolerance, no hood.</li>
+      <li>The opening is 2 in as asked: 1/16 clear of each wall on a 1-7/8 grip. Measure your fattest grip (and any reel seat the hook lands on) before printing ten; the slot width is one constant.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Checks baked into the script, both hooks</h3>
+    <ul>
+      <li><strong>Hold.</strong> Pose-space check with the hooks above and below and the board in the way: the rod centre must rise <span class="num">{lifts["0.25"]:.2f}</span> in (1/4 blank), <span class="num">{lifts["0.375"]:.2f}</span> in (3/8) and <span class="num">{lifts["0.625"]:.2f}</span> in (5/8) in the tip hook, <span class="num">{blifts["1.5"]:.2f}</span> in (1-1/2 grip), <span class="num">{blifts["1.75"]:.2f}</span> in (1-3/4) and <span class="num">{blifts["1.875"]:.2f}</span> in (1-7/8) in the butt hook, before any path to the outside opens; the plain deep hook gave 1.00. A bump moves a rod millimetres, and a hop lands it back on the ramp, which slides it home.</li>
+      <li><strong>Way in.</strong> Every size reaches its slot from outside past the hook butted above, so nothing is trapped either way; the gap over the lip tip is {HOOK["exit_gap_in"]:g} in on the tip hook and {BUTT["exit_gap_in"]:g} on the butt hook.</li>
+      <li><strong>Clearances.</strong> Seated rods and grips touch neither the hook's walls beyond their resting contact nor the board; the hooks sit flat on the board face.</li>
+      <li><strong>Printable standing.</strong> Both print on the 4 in bottom edge, face vertical, ten to a plate. Steepest unsupported surface: {HOOK["max_overhang_deg_from_vertical"]:g} degrees from vertical on the tip hook (the slot lean), {BUTT["max_overhang_deg_from_vertical"]:g} on the butt hook, under the 45 degree limit; bottom corners square so the whole edge sits on the bed; the screw holes print sideways (5 mm bridges, fine). Thinnest wall 1/8 in (3.2 mm) against the 1.24 mm minimum; lips {HOOK["lip_min_in"]:.2f} and {BUTT["lip_min_in"]:.2f} in at their thinnest. Layers run across the hook, so a sideways yank on a lip loads the layer bond; at rod loads that is a 3x margin.</li>
+      <li><strong>Exported STLs</strong> are watertight, one solid each, {HOOK["stl_volume_cm3"]} and {BUTT["stl_volume_cm3"]} cm3.</li>
     </ul>
   </div>
 </div>
-<figure>{built_img("board-layout.png", "Drilling guide: a 27 in 1x4 with five hooks butted at 4 in, screw positions and hook bottoms dimensioned")}<figcaption>Drilling guide for the board: five hooks butted, 4 in each, bottoms at 4, 8, 12, 16 and 20 in below the joist (the top hook starts at the joist; rods rest about 3-3/16 in down, then every 4); screws 1 in from the edge, 9/16 and 3-7/16 in up from each hook's bottom. Reels left on and in line would want 5 in, which means four hooks with gaps; say so if that is the case.</figcaption></figure>
+<figure>{built_img("board-in-place.png", "Two 27 in 1x4 boards hanging from two 2x8 joists, five tip hooks on one and five butt hooks on the other, five rods lying across with their grips in the butt hooks")}<figcaption>Both boards in place: the tip board at one joist, the butt board at another (drawn 32 in apart; the real spacing is whatever your joists give), five rods across, grips in the butt hooks.</figcaption></figure>
+<figure>{built_img("board-layout.png", "Drilling guide: two 27 in 1x4 boards side by side, five hooks butted at 4 in on each, screw positions and hook bottoms dimensioned, the same on both")}<figcaption>Drilling guide, both boards: five hooks butted, 4 in each, bottoms at 4, 8, 12, 16 and 20 in below the joist (the top hook starts at the joist); screws 1 in from the edge, 9/16 and 3-7/16 in up from each hook's bottom, identical on the tip and the butt board. Reels left on and in line would want 5 in, which means four hooks with gaps; say so if that is the case.</figcaption></figure>
 <div class="cards">
-  <div class="card pick"><span class="tag">Per hook</span><h3>{g(hook_g)} · {hm(hook_min)}</h3>
-    <ul><li>PETG, 2 walls, 15% infill, 0.30 mm layers, real slice of one bare hook standing.</li><li>Ten hooks (two boards of five) print together on one plate; the plate numbers below are the real ones, since standing parts share every layer.</li></ul></div>
+  <div class="card pick"><span class="tag">Tip hook</span><h3>{g(hook_g)} · {hm(hook_min)}</h3>
+    <ul><li>PETG, 2 walls, 15% infill, 0.30 mm layers, real slice of one bare hook standing.</li><li>Ten (two boards of five) print together on plate 1; the plate numbers below are the real ones, since standing parts share every layer.</li></ul></div>
+  <div class="card pick"><span class="tag">Butt hook</span><h3>{g(butt_g)} · {hm(butt_min)}</h3>
+    <ul><li>Same settings; the 2 in pocket removes more plastic than the extra half inch of width adds.</li><li>Ten on plate 2.</li></ul></div>
   <div class="card"><span class="tag">Lighter</span><h3>Not worth it</h3>
-    <ul><li>The part is already 3/8 in; thinner loses the countersink depth.</li><li>PLA would save {hook_g - hook_g * PLA_RHO / PETG_RHO:.1f} g per hook and creep on a hot ceiling.</li></ul></div>
+    <ul><li>The parts are already 3/8 in; thinner loses the countersink depth.</li><li>PLA would save {hook_g - hook_g * PLA_RHO / PETG_RHO:.1f} g per hook and creep on a hot ceiling.</li></ul></div>
 </div>
 {three_mf_html}
 <h3 style="margin-top:24px">Files</h3>
 <ul>
-  <li><code>projects/Fishing-rod-holder/rod_hook.py</code>: the parametric CAD with the checks; <code>rod-hook-report.json</code> is its output.</li>
-  <li><code>rod-hook.stl</code>: one hook in print orientation (standing on its bottom edge); <code>rod-hook-model.stl</code> is the same hook lying flat, for the renders.</li>
-  <li><code>rod-hook.3mf</code>: the Bambu project file with solid pads at every screw hole.</li>
+  <li><code>projects/Fishing-rod-holder/rod_hook.py</code>: the parametric CAD for both hooks with the checks; <code>rod-hook-report.json</code> and <code>rod-hook-butt-report.json</code> are its outputs.</li>
+  <li><code>rod-hook.stl</code> and <code>rod-hook-butt.stl</code>: one hook each in print orientation (standing on its bottom edge); the <code>-model.stl</code> files are the same hooks lying flat, for the renders.</li>
+  <li><code>rod-hook.3mf</code>: the one Bambu project file, plate 1 the tip hooks, plate 2 the butt hooks, solid pads at every screw hole.</li>
   <li>Mirror image: not needed for one board edge; say so if a board needs hooks on both edges.</li>
 </ul>
 """
@@ -186,9 +207,9 @@ code {{ font-family: var(--mono); font-size: 0.92em; }}
 
 <main>
 <header>
-  <div class="eyebrow">Options · 2026-11-07 · Bambu X2D, 0.6 nozzle</div>
+  <div class="eyebrow">Options · 2026-11-07, butt hook added 2026-11-09 · Bambu X2D, 0.6 nozzle</div>
   <h1>Rafter Rod Holder</h1>
-  <p>A printed replacement for the two notched 1x4 combs on your garage joists. Your rods stay put until you pull a neighbour, then any bump drops one. Everything below is drawn to scale from one parameter file; the grams and times are from real slices (PETG, 2 walls, 15% infill, 0.30 mm layers).</p>
+  <p>A printed replacement for the two notched 1x4 combs on your garage joists. Your rods stay put until you pull a neighbour, then any bump drops one. Everything below is drawn to scale from one parameter file; the grams and times are from real slices (PETG, 2 walls, 15% infill, 0.30 mm layers). Two hooks now: one for the tip end of the rod, one with a 2 in opening for the grip.</p>
 </header>
 {BANNER}
 {BUILT}

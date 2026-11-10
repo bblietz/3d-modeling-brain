@@ -1,0 +1,10 @@
+{
+ "rod-hook-butt.stl": {
+  "grams": 30.9,
+  "minutes": 78,
+  "time_text": "1h 18m",
+  "material": "petg",
+  "walls": 2,
+  "infill": 15
+ }
+}
