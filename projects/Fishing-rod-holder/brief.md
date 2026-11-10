@@ -2,7 +2,7 @@
 type: project
 project: Fishing-rod-holder
 created: 2026-11-07
-status: Two open-J hooks in one file, 4 in tall, five butted per 20 in board, printed standing; tip hook 4 x 4 (7/8 slot, 35 degrees) built 2026-11-07, butt hook 4-1/2 x 4 (2 in slot for the grip, 10 degrees, 2-1/4 in to get the butt in under the hook above) built 2026-11-09; 1/32 roundover on the front edges, back face and bottom edge flat (2026-11-09); rod-hook.3mf with solid pads, ONE plate, five pairs (359 g / 7 h 56); not printed.
+status: Two open-J hooks in one file, 4 in tall, five butted per 20 in board, printed standing (orientation confirmed by Brian 2026-11-10); tip hook 4 x 4 (7/8 slot, 35 degrees) built 2026-11-07, butt hook 4-1/2 x 4 (2 in slot for the grip, 10 degrees, 2-1/4 in to get the butt in under the hook above) built 2026-11-09; 1/32 roundover on the front edges, back face and bottom edge flat (2026-11-09); rod-hook.3mf with solid pads, ONE plate, five pairs (359 g / 7 h 56); not printed.
 printer: Bambu Lab X2D
 material: PETG
 tags: [3d-print, garage, fishing, storage]
@@ -22,7 +22,7 @@ Rework (Brian, same day, after seeing the first hook): "make the bottom resting 
 
 Second version (Brian, 2026-11-09): "There should be 2 versions of the holder. One that we already have is for the rod tip end. The rod butt end should be able to accommodate a 2 in rod handle. The rods I have are 1 7/8 in or so. Make it a 2 in opening." Then: "make both versions in the same file, vertical." Then: "the holders will stack on top of each other, make sure there is 2 in of room to get the butt in" (the stacked gap over the butt hook's lip tip is 2-1/4; the script asserts it at 2 or more).
 
-Count and edges (Brian, 2026-11-09, later): "there should only be 5 pairs" (five tip hooks and five butt hooks, all on one plate). "all edges should have a very slight roundover", then "do not add a round over to the back of the part. Use this flat surface to print the part vertically" (read as: the back face against the board and the bottom edge the standing print sits on stay flat and square; the 1/32 roundover goes on the front face's edges; if the second sentence meant lying the hook on its back to print, that is a layout change, 4 per plate on 3 plates, not a CAD one).
+Count and edges (Brian, 2026-11-09, later): "there should only be 5 pairs" (five tip hooks and five butt hooks, all on one plate). "all edges should have a very slight roundover", then "do not add a round over to the back of the part. Use this flat surface to print the part vertically" (read as: the back face against the board and the bottom edge the standing print sits on stay flat and square; the 1/32 roundover goes on the front face's edges). Asked whether the second sentence meant standing on the square bottom edge or lying on the flat back, Brian confirmed (2026-11-10): "Keep standing". The hooks print standing, one plate, as built.
 
 ## What exists today (read from the photo)
 
@@ -44,7 +44,7 @@ A half-round notch cut into a vertical edge has its lowest point at the board ed
 - Lip: top 1-7/8 up at the slot, sloping up 3/8 to the tip at 2-1/4 (a rod set on the lip rolls in); 0.58 in thick beside the slot's bottom; tip and slot edges R 1/8.
 - No top bar: the jaw stops at the lip top, the tab carries on to 4.
 - Screws: two #8 x 1 in, 1 in from the board edge, 9/16 and 3-7/16 up from the hook's bottom edge; 5 mm through holes with a 90 degree countersink to 10 mm on the front face.
-- Print orientation: standing on the 4 in bottom edge, face vertical, screw holes horizontal (Brian: print vertically so many fit one plate). Footprint 101.6 x 9.5 mm, 101.6 tall. The steepest overhang is the 35 degree slot lean (the script reads the exported STL layer by layer at 0.3 mm, the way the slicer does, and fails past 45); the bottom edge is flat and square so the print stands on a full strip; the 5 mm holes print as short bridges.
+- Print orientation: standing on the 4 in bottom edge, face vertical, screw holes horizontal (Brian: print vertically so many fit one plate; confirmed 2026-11-10, "Keep standing", over lying on the flat back). Footprint 101.6 x 9.5 mm, 101.6 tall. The steepest overhang is the 35 degree slot lean (the script reads the exported STL layer by layer at 0.3 mm, the way the slicer does, and fails past 45); the bottom edge is flat and square so the print stands on a full strip; the 5 mm holes print as short bridges.
 - Edges (2026-11-09): a 1/32 in roundover on the front face's outline and the countersink rims, in one kernel fillet over the true-arc outline; the back face (against the board) and the bottom strip are left square, as Brian asked. The exported STLs are re-saved without the zero-area triangles the fillet's tessellation leaves, so they stay watertight. `rod-hook.stl` is the standing print frame, `rod-hook-model.stl` the flat model frame for the renders. Tradeoff: layers run across the hook, so a sideways yank on the lip loads the layer bond; at rod loads the margin is about 3x.
 - Board layout (drawn, `images/board-layout.png`): five hooks butted, the top one starting at the joist bottom, bottoms at 4, 8, 12, 16 and 20 in below the joist on the 27 in board (7 in up the joist, 20 in hang as now); rods rest about 3-3/16 in down, then every 4. Reels left on and in line would want a 5 in pitch, which means four hooks with gaps.
 - Stacked, the hook above's bottom edge sits 1-3/4 in over the lip tip below it (4 minus 2-1/4), so a 5/8 blank still passes over the tip with 1-1/8 to spare, and the 1.57 in escape lift fits under it.
@@ -77,7 +77,6 @@ Published page: https://claude.ai/artifact/MuJqbgWZjUNzqSTMLFRt4H (Version 7: De
 
 1. Reels on or off (five butted hooks at 4 in assume reels off or staggered; with the butt hook holding the grip, a reel left on points away from the board), and the comb spacing along the rods. Hook count is settled at five per board, five of each in the 3MF.
 1b. Grip sizes: the butt hook's 2 in opening leaves 1/16 per side on a 1-7/8 grip; a fatter foregrip or a reel seat over 2 in will not go in, and the 2-1/4 in gap over the lip tip is what a grip passes through on the way in. Measure the fattest grip before printing the five.
-1c. Print orientation reading: "Use this flat surface to print the part vertically" was built as standing on the square bottom edge (one plate). If Brian meant the hooks lying on their flat backs, the 3MF goes to a 2 x 2 grid, 4 per plate, 3 plates, about 6-1/2 h in all, and the roundover on the bottom edge comes back.
 2. Joist size (assumed 2x8) only matters for the board, which is Brian's.
 3. Copy of the photo into `images/` (it exists only in the chat so far).
 4. After the print: real blank fit in the 7/8 pocket and the feel of the 1 in lift (retrospective in `knowledge/learnings/fishing-rod-holder.md`).
