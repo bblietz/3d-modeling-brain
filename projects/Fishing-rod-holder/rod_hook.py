@@ -25,6 +25,13 @@ top of each other, make sure there is 2 in of room to get the butt in." So:
         leaves the lip a straight inner face above its R 1/8 corner. Hold: about 1-7/16 in
         of lift (the tip hook: 1-9/16).
 
+Later that day: "all edges should have a very slight roundover", then "do not add a round
+over to the back of the part. Use this flat surface to print the part vertically." So the
+front face's outline and the countersink rims are rounded EDGE_R (1/32); the back face
+(against the board) and the bottom strip the standing print sits on stay flat and square.
+The outline is built from lines and true arcs so the kernel can roll that fillet around
+it, and the overhang check reads the standing print layer by layer, as the slicer does.
+
 Each hook is an open J: a tab that screws to the board face (two #8), and a jaw
 that reaches past the board edge carrying a slot that leans away from the wood
 as it goes down (SLOT_LEAN from vertical). The rod drops in at the top, slides
@@ -50,7 +57,7 @@ import math
 import os
 from pathlib import Path
 
-from build123d import Axis, Box, Cone, Cylinder, Location, Polygon, Pos, export_stl, extrude
+from build123d import Axis, Box, Cone, Cylinder, Line, Location, Pos, ThreePointArc, Wire, export_stl, extrude, fillet, make_face
 from shapely.affinity import translate as stranslate
 from shapely.geometry import Point, Polygon as SPoly, box as sbox
 from shapely.ops import unary_union
@@ -71,9 +78,13 @@ H = HANG / HOOKS_PER_BOARD   # tab height: five hooks butted fill the hang, 4 in
 WEB = 0.125        # the tab's outer edge past the board edge, so the rod never rubs the wood
 LIP_MIN = 0.5      # lip thickness at its thinnest, beside the slot's bottom
 CORNER_R = 0.25    # top corners of the tab
-FOOT_R = 0.0       # bottom corners square: a rounded bottom edge is an overhang on a standing print
+FOOT_R = 0.0       # bottom corners square: the bottom strip is the flat surface the standing print sits on (Brian 2026-11-09)
 TIP_R = 0.125      # lip tip and the slot's top edges
 RAMP_R = 0.125     # where the tab edge turns into the slot's ramp
+EDGE_R = 1 / 32    # the roundover on the front face's edges (Brian 2026-11-09: "very slight"); the back face and the bottom
+                   # strip stay square ("do not add a round over to the back of the part. Use this flat surface to print
+                   # the part vertically")
+LAYER_H = 0.3      # mm, the layers the 3MF prints with (0.30mm Standard); the overhang check reads the print at this pitch
 MAX_OVERHANG = 45.0  # degrees from vertical the printer manages without support
 EXIT_MARGIN = 0.25   # room past the biggest rod between the lip tip and the hook butted above
 
@@ -118,37 +129,50 @@ class Hook:
         self.HOOD = self.X_LIP_TOP - self.X_C               # how far the lip's top edge reaches inboard of the resting rod's centre
 
     # ---- outline ------------------------------------------------------------------------
-    def slot_arc(self, n=32):
-        """The slot's rounded bottom, from the ramp's tangent point around the low point to the outer wall's."""
-        a0 = -self.PHI                     # the inner (ramp) tangent, measured from +x
-        a1 = -self.PHI - math.pi           # the outer tangent
-        return [(self.X_C + self.R_SLOT * math.cos(a0 + (a1 - a0) * k / n), self.Y_C + self.R_SLOT * math.sin(a0 + (a1 - a0) * k / n))
-                for k in range(n + 1)]
+    def outline_items(self):
+        """The sharp outline (inches, y up), counterclockwise from the jaw's bottom tip: each corner with
+        the fillet radius to apply at it, and the slot's rounded bottom as the arc it is, from the ramp's
+        tangent point (the inner one, at -PHI from +x) around the low point to the outer wall's."""
+        return [("corner", (-self.CANT, 0.0), FOOT_R), ("corner", (TAB, 0.0), FOOT_R),
+                ("corner", (TAB, H), CORNER_R), ("corner", (self.X_BACK, H), CORNER_R),
+                ("corner", (self.X_BACK, self.Y_LIP), RAMP_R),
+                ("arc", (self.X_C, self.Y_C), self.R_SLOT, -self.PHI, -math.pi, 32),
+                ("corner", (self.X_LIP_TOP, self.Y_LIP), TIP_R), ("corner", (-self.CANT, self.Y_TIP), TIP_R)]
 
-    def outline_points(self):
-        """Sharp outline (inches, y up), counterclockwise from the jaw's bottom tip.
-        Returns the points and the fillet radius to apply at each (0 for the arc)."""
-        pts = [(-self.CANT, 0.0), (TAB, 0.0), (TAB, H), (self.X_BACK, H), (self.X_BACK, self.Y_LIP)]
-        radii = [FOOT_R, FOOT_R, CORNER_R, CORNER_R, RAMP_R]
-        arc = self.slot_arc()
-        pts += arc
-        radii += [0.0] * len(arc)
-        pts += [(self.X_LIP_TOP, self.Y_LIP), (-self.CANT, self.Y_TIP)]
-        radii += [TIP_R, TIP_R]
-        return pts, radii
+    def path(self):
+        """The outline with its corners rounded: points and true arcs, what the CAD builds and the checks sample."""
+        return rounded_path(self.outline_items())
 
     def final_outline(self):
-        pts, radii = self.outline_points()
-        return rounded_outline(pts, {i: r for i, r in enumerate(radii) if r > 0})
+        """The outline as points (every arc sampled, tangent points exact), for the 2D checks and the drawings."""
+        return path_points(self.path())
 
     # ---- solids -------------------------------------------------------------------------
     def build(self):
-        hook = extrude(Polygon(*mm(self.final_outline()), align=None), T * IN)
+        hook = extrude(path_face(self.path()), T * IN, dir=(0, 0, 1))
         for y in SCREW_Y:
             hook -= Pos(SCREW_X * IN, y * IN, T * IN / 2) * Cylinder(HOLE_D / 2, T * IN + 2)
             cone_h = CSK_D / 2 + 0.3
             hook -= Pos(SCREW_X * IN, y * IN, T * IN + 0.3 - cone_h / 2) * Cone(0.0, cone_h, cone_h)
-        return hook
+        return self.round_edges(hook)
+
+    def round_edges(self, hook):
+        """The front face's outline and the countersink rims rounded over EDGE_R, less the stretch along the
+        bottom: the back face (z = 0, against the board) and the bottom strip (y = 0, the bed of the standing
+        print) stay flat and square, so their edges and the two bottom corners are left alone. The outline's
+        other corners are already arcs, so their vertical edges are smooth and are not filleted."""
+        front = [e for e in hook.edges().group_by(Axis.Z)[-1] if e.center().Y > 1e-6]
+        rounded = fillet(front, EDGE_R * IN)
+        assert len(rounded.solids()) == 1, f"{self.name}: the roundover broke the hook into {len(rounded.solids())} solids"
+        assert hook.volume - rounded.volume > 0, f"{self.name}: the roundover removed nothing"
+        # the two flat surfaces: the back face keeps its full outline; the bottom strip stays one flat face and loses only
+        # the two slivers where the front side edges' rounds run out across its front corners
+        back0, back1 = hook.faces().group_by(Axis.Z)[0], rounded.faces().group_by(Axis.Z)[0]
+        assert len(back1) == 1 and abs(back1[0].area - back0[0].area) < 1e-6, f"{self.name}: the roundover touched the back face"
+        foot0, foot1 = hook.faces().group_by(Axis.Y)[0], rounded.faces().group_by(Axis.Y)[0]
+        sliver = (1 - math.pi / 4) * (EDGE_R * IN) ** 2
+        assert len(foot1) == 1 and 0 <= foot0[0].area - foot1[0].area <= 2 * sliver + 1e-6, f"{self.name}: the roundover touched the bottom strip"
+        return rounded
 
     def standing(self, hook):
         """The print frame: stand the hook on its bottom edge. Model y (up) becomes z,
@@ -156,24 +180,32 @@ class Hook:
         return hook.rotate(Axis.X, 90).moved(Location((self.CANT * IN, T * IN, 0)))
 
     def overhang_report(self, stl_path):
-        """Steepest unsupported downward-facing surface in the print frame, in degrees from
-        vertical, ignoring the bed face and the horizontal screw holes (small bridges)."""
+        """Steepest overhang of the standing print, in degrees from vertical, read layer by layer the way the
+        slicer sees it: each LAYER_H layer's outline against the one below, the step between them being the
+        overhang (facet normals overstate a small round: a quarter-round inside two layers faces straight down
+        yet prints as a 40 degree step). The first layer sits on the bed and the screw holes are 5 mm horizontal
+        bridges, so neither counts."""
         import numpy as np
         import trimesh
         m = trimesh.load(str(stl_path))
-        n = m.face_normals
-        c = m.triangles_center
-        down = n[:, 2] < -1e-3
-        off_bed = c[:, 2] > 0.5
-        # the hole axes run along y at (x, z) = (CANT + SCREW_X, SCREW_Y) in the print frame
-        near_hole = np.zeros(len(c), dtype=bool)
-        for y in SCREW_Y:
-            hx, hz = (self.CANT + SCREW_X) * IN, y * IN
-            near_hole |= np.hypot(c[:, 0] - hx, c[:, 2] - hz) < CSK_D / 2 + 0.5
-        sel = down & off_bed & ~near_hole
-        # angle of the surface from vertical: 90 minus the angle between the normal and straight down
-        from_vertical = 90.0 - np.degrees(np.arccos(np.clip(-n[sel, 2], -1, 1)))
-        return float(from_vertical.max()) if sel.any() else 0.0
+        n_layers = int(round(H * IN / LAYER_H))
+        heights = [(k + 0.5) * LAYER_H for k in range(n_layers)]
+        sections = m.section_multiplane(plane_origin=[0, 0, 0], plane_normal=[0, 0, 1], heights=heights)
+        layers = [unary_union(s.polygons_full) if s is not None else SPoly() for s in sections]
+        lo, hi = m.bounds
+        assert np.allclose(unary_union(layers).bounds, [lo[0], lo[1], hi[0], hi[1]], atol=1.0), "the sections are not in the STL's x, y"
+        holes = [((self.CANT + SCREW_X) * IN, y * IN) for y in SCREW_Y]   # hole axes along y at (x, z) in the print frame
+        worst = 0.0
+        for k in range(1, n_layers):
+            z, below, cur = heights[k], layers[k - 1], layers[k]
+            over = cur.difference(below.buffer(0.02))
+            for hx, hz in holes:
+                if abs(z - hz) < CSK_D / 2 + 2 * LAYER_H:
+                    over = over.difference(sbox(hx - CSK_D / 2 - 1, -1, hx + CSK_D / 2 + 1, T * IN + 1))
+            pieces = [g for g in getattr(over, "geoms", [over]) if g.geom_type == "Polygon" and not g.is_empty]
+            if pieces:
+                worst = max(worst, max(below.distance(Point(p)) for g in pieces for p in g.exterior.coords))
+        return math.degrees(math.atan2(worst, LAYER_H))
 
     def rod_probe(self, d, length=6.0):
         """A rod seated at the lowest point of the slot, running along z through the hook and past the board."""
@@ -293,14 +325,14 @@ class Hook:
         report = self.checks(hook)
         model_stl = PROJECT / f"{self.stem}-model.stl"
         export_stl(hook, str(model_stl))
+        clean_stl(model_stl)
         stl = PROJECT / f"{self.stem}.stl"
         up = self.standing(hook)
         bb = up.bounding_box()
         assert abs(bb.min.Z) < 1e-6 and abs(bb.min.X) < 1e-6 and abs(bb.min.Y) < 1e-6, f"{self.name}: standing hook is not on the bed at the origin"
         assert abs(bb.size.Z - H * IN) < 0.01 and abs(bb.size.Y - T * IN) < 0.01, f"{self.name}: standing hook has the wrong footprint"
         export_stl(up, str(stl))
-        import trimesh
-        m = trimesh.load(str(stl))
+        m = clean_stl(stl)
         assert m.is_watertight, f"{self.name}: exported STL is not watertight"
         report["stl"] = str(stl)
         report["model_stl"] = str(model_stl)
@@ -310,6 +342,9 @@ class Hook:
         report["stl_volume_cm3"] = round(m.volume / 1000, 1)
         overhang = self.overhang_report(stl)
         report["max_overhang_deg_from_vertical"] = round(overhang, 1)
+        report["overhang_check"] = f"layer by layer at {LAYER_H} mm, holes and the first layer left out"
+        report["edge_round_in"] = EDGE_R
+        report["flat_faces"] = "the back face (against the board) and the bottom strip (the bed of the standing print)"
         assert overhang <= MAX_OVERHANG, f"{self.name}: standing print overhangs {overhang:.1f} degrees from vertical"
         (PROJECT / f"{self.stem}-report.json").write_text(json.dumps(report, indent=1))
         return hook, report
@@ -325,17 +360,27 @@ VARIANTS = {"tip": TIP, "butt": BUTT}
 SHOW_ROD = {"tip": 0.375, "butt": 1.875}   # what each hook is drawn holding
 
 
-def rounded_outline(pts, radii, n=24):
-    """Replace each filleted vertex by its tangent points and arc (convex or concave alike),
-    the same construction the CAD's fillet() performs, so the 2D checks match the solid."""
+def arc_point(c, r, a):
+    return (c[0] + r * math.cos(a), c[1] + r * math.sin(a))
+
+
+def rounded_path(items, n=24):
+    """Items are ("corner", point, radius) and ("arc", centre, radius, start angle, sweep, points). Every
+    corner with a radius becomes its fillet arc (tangent points and centre worked out here, convex or concave
+    alike), so the CAD builds the outline from lines and true arcs and the 2D checks sample those same arcs:
+    one geometry. Returns the closed path as ("pt", point) and ("arc", ...) items in order."""
+    base = [("pt", it[1]) if it[0] == "corner" else it for it in items]
+    first = lambda it: it[1] if it[0] == "pt" else arc_point(it[1], it[2], it[3])
+    last = lambda it: it[1] if it[0] == "pt" else arc_point(it[1], it[2], it[3] + it[4])
     out = []
-    count = len(pts)
-    for i, p in enumerate(pts):
-        r = radii.get(i, 0.0)
+    count = len(items)
+    for i, it in enumerate(items):
+        r = it[2] if it[0] == "corner" else 0.0
         if r <= 0:
-            out.append(p)
+            out.append(base[i])
             continue
-        p0, p1 = pts[i - 1], pts[(i + 1) % count]
+        p = it[1]
+        p0, p1 = last(base[i - 1]), first(base[(i + 1) % count])
         v0 = (p0[0] - p[0], p0[1] - p[1])
         v1 = (p1[0] - p[0], p1[1] - p[1])
         l0, l1 = math.hypot(*v0), math.hypot(*v1)
@@ -352,8 +397,49 @@ def rounded_outline(pts, radii, n=24):
         ang_a = math.atan2(a[1] - c[1], a[0] - c[0])
         ang_b = math.atan2(b[1] - c[1], b[0] - c[0])
         delta = (ang_b - ang_a + math.pi) % (2 * math.pi) - math.pi
-        out += [(c[0] + r * math.cos(ang_a + delta * k / n), c[1] + r * math.sin(ang_a + delta * k / n)) for k in range(n + 1)]
+        out.append(("arc", c, r, ang_a, delta, n))
     return out
+
+
+def path_points(path):
+    """The path as a polygon: each arc sampled at its number of points, the tangent points exact."""
+    pts = []
+    for it in path:
+        if it[0] == "pt":
+            pts.append(it[1])
+        else:
+            c, r, a0, delta, n = it[1:]
+            pts += [arc_point(c, r, a0 + delta * k / n) for k in range(n + 1)]
+    return pts
+
+
+def path_face(path):
+    """The path as a build123d face in mm: a line between neighbouring items, a true arc for each arc."""
+    edges = []
+    for i, it in enumerate(path):
+        nxt = path[(i + 1) % len(path)]
+        if it[0] == "arc":
+            c, r, a0, delta, _ = it[1:]
+            a, mid, b = (arc_point(c, r, a0 + delta * f) for f in (0.0, 0.5, 1.0))
+            edges.append(ThreePointArc(*mm([a, mid, b])))
+            end = b
+        else:
+            end = it[1]
+        start = nxt[1] if nxt[0] == "pt" else arc_point(nxt[1], nxt[2], nxt[3])
+        if math.dist(end, start) > 1e-9:
+            edges.append(Line(*mm([end, start])))
+    return make_face(Wire(edges))
+
+
+def clean_stl(path):
+    """Re-save an exported STL without degenerate triangles: the spherical corner blends of the roundover
+    tessellate with a zero-area triangle at each pole, which reads as an open edge. Returns the clean mesh."""
+    import trimesh
+    m = trimesh.load(str(path))
+    m.update_faces(m.nondegenerate_faces())
+    m.remove_unreferenced_vertices()
+    m.export(str(path))
+    return m
 
 
 def mm(pts):

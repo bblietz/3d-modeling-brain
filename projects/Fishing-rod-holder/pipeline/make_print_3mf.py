@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Bambu Studio print 3MF for the rod hooks: ONE project file, TWO plates, N copies (default 10) of each hook standing on
-its 4 in bottom edge in a row: plate 1 the tip hooks (rod-hook.stl), plate 2 the butt hooks (rod-hook-butt.stl), every
-copy with its own two 100% infill modifier pads at the screw holes, verified by a real slice of each plate.
+"""Bambu Studio print 3MF for the rod hooks: ONE project file, ONE plate, N copies (default 5: Brian 2026-11-09, "there
+should only be 5 pairs") of each hook standing on its 4 in bottom edge in one row, the tip hooks (rod-hook.stl) at the
+back of the row and the butt hooks (rod-hook-butt.stl) in front, every copy with its own two 100% infill modifier pads at
+the screw holes, verified by a real slice of the plate. PLATES says which plate each variant prints on; a variant per
+plate (the 2026-11-09 two-plate file) is the same script with {"tip": 1, "butt": 2}.
 
-    .venv/bin/python projects/Fishing-rod-holder/pipeline/make_print_3mf.py [--copies 10] [--scratch DIR]
+    .venv/bin/python projects/Fishing-rod-holder/pipeline/make_print_3mf.py [--copies 5] [--scratch DIR]
 
 Writes rod-hook.3mf and rod-hook-3mf-report.json beside the STLs. Plumbing only: the STLs are not touched. --copies is
-per variant: 10 puts ten tip hooks on plate 1 and ten butt hooks on plate 2.
+per variant: 5 puts five tip hooks and five butt hooks on the plate.
 
 <stem>.stl is the PRINT frame (Hook.standing): x along the bed from the jaw tip (0 to W), y the thickness (0 to T, the
 countersinks open at y 0), z up (0 to H); the screw holes run along y at x = (CANT + SCREW_X) in, z = SCREW_Y in, with
@@ -21,10 +23,11 @@ The recipe is the vault's (memory/feedback-stl-to-bambu-3mf.md), not a new one:
   export      bambu-studio --arrange 1 ... --export-3mf raw.3mf rod-hook-1.stl ... rod-hook-butt-N.stl: one object per copy
               (a modifier belongs to an object, instances would share one). --arrange 1 makes the CLI write a plate block
               with a model_instance (and identify_id) per object; whatever plates its arranger opened (it packs 2 mm apart
-              and may open plates of its own), they are read only for that metadata and rewritten as one plate per
-              variant, in Studio's plate grid: plate p's bed origin is (p - 1) * 307.2 mm along x (knowledge/printer-x2d.md)
-  placement   every item transform is written here from the file's own geometry: one row along y per plate, GAP between
-              the faces of neighbours, centred on its plate, nothing rotated (the Cable-bin pattern: the arranger is not trusted)
+              and may open plates of its own), they are read only for that metadata and rewritten as the plates PLATES
+              names, in Studio's plate grid: plate p's bed origin is (p - 1) * 307.2 mm along x (knowledge/printer-x2d.md)
+  placement   every item transform is written here from the file's own geometry: one row along y per plate, the variants
+              in PLATES order from the back, GAP between the faces of neighbours, centred on its plate, nothing rotated
+              (the Cable-bin pattern: the arranger is not trusted)
   screw pads  projects/Skateboard-wall-holder/pipeline/make_print_3mf.py's modifier parts through the Sharks helpers
               (fillcore_mod.inject_modifier): per copy two discs PAD_D across with their axis along y, PAD_INSET inside
               both faces, the screw hole and its countersink cleared by HOLE_CLEAR, sparse_infill_density 100%. Built per
@@ -35,7 +38,7 @@ The recipe is the vault's (memory/feedback-stl-to-bambu-3mf.md), not a new one:
   slice       the CLI cannot slice its own export (rc 156), so projects/Sharks-nametag/pipeline/graft_slice.py adds the
               GUI-only keys to a throwaway copy; one plate at a time (the G-code of each plate is plate-local), the whole
               run re-executed inside the memory-capped systemd scope (CLAUDE.md, heavy local jobs)
-Opening rod-hook.3mf in Bambu Studio is still the ground truth for how the two plates and the modifiers look.
+Opening rod-hook.3mf in Bambu Studio is still the ground truth for how the plate and the modifiers look.
 """
 import argparse
 import json
@@ -69,8 +72,8 @@ FILAMENT_COLOUR = "#2F6FE4"
 
 OUT = "rod-hook.3mf"
 REPORT = "rod-hook-3mf-report.json"
-PLATES = ("tip", "butt")         # rod_hook.VARIANTS in plate order: plate 1 the tip hooks, plate 2 the butt hooks
-COPIES = 10                      # per variant
+PLATES = {"tip": 1, "butt": 1}   # rod_hook.VARIANTS in row order and the plate each prints on: one plate, tip hooks at the back
+COPIES = 5                       # per variant: five pairs (Brian 2026-11-09)
 LAYER = 0.3
 BED = 256.0
 BED_CENTRE = (128.0, 128.0)
@@ -106,8 +109,8 @@ SCALARS = {   # process scope, different_settings_to_system[0]
 SCOPE = ["systemd-run", "--user", "--scope", "-p", "MemoryMax=44G", "-p", "MemoryHigh=40G",
          "-p", "MemorySwapMax=2G", "-p", "OOMPolicy=continue", "--"]
 SCOPE_MARK = "ROD_HOOK_3MF_IN_SCOPE"
-NOTE = ("Open rod-hook.3mf once in Bambu Studio to confirm both plates show: plate 1 the tip hooks, plate 2 the butt hooks. "
-        "The GUI is the ground truth for the plate layout and the modifiers.")
+NOTE = ("Open rod-hook.3mf once in Bambu Studio to confirm the plate shows all ten hooks in one row: five tip hooks at the back, "
+        "five butt hooks in front. The GUI is the ground truth for the plate layout and the modifiers.")
 
 
 # ------------------------------------------------------------------------------------------------------------ presets
@@ -150,6 +153,7 @@ def hook_geometry(variant, plate, n):
     v = M.VARIANTS[variant]
     ys = sorted(M.SCREW_Y)
     stl = trimesh.load(f"{PROJECT}/{v.stem}.stl")
+    assert M.LAYER_H == LAYER, f"rod_hook.py checks the standing print at {M.LAYER_H} mm layers, this file slices at {LAYER}"
     geo = {"variant": variant, "stem": v.stem, "plate": plate, "n": n, "T": M.T * M.IN, "W": v.W * M.IN, "H": M.H * M.IN,
            "model_holes": [(M.SCREW_X * M.IN, y * M.IN) for y in ys],
            "holes": [((v.CANT + M.SCREW_X) * M.IN, y * M.IN) for y in ys],
@@ -308,10 +312,24 @@ def roster(names, geos):
     return {oid: variant_of(name, geos) for name, oid in names.items()}
 
 
-def plate_name(variant, numbers):
-    n = sorted(numbers)
-    span = str(n[0]) if len(n) == 1 else f"{n[0]}-{n[-1]}" if n == list(range(n[0], n[-1] + 1)) else ", ".join(map(str, n))
-    return f"{variant} hooks {span}"
+def plate_rows(who, geos):
+    """{plate: [(variant, hook number, object id), ...]} in row order: the variants in PLATES order from the back of
+    the plate, each variant's hooks in number order."""
+    rows = {}
+    for v, g in geos.items():
+        mine = sorted((num, oid) for oid, (vv, num) in who.items() if vv == v)
+        rows.setdefault(g["plate"], []).extend((v, num, oid) for num, oid in mine)
+    return rows
+
+
+def plate_name(row):
+    """'tip hooks 1-5, butt hooks 1-5': each variant on the plate with its hook numbers, in row order."""
+    parts = []
+    for v in dict.fromkeys(v for v, _, _ in row):
+        n = sorted(num for vv, num, _ in row if vv == v)
+        span = str(n[0]) if len(n) == 1 else f"{n[0]}-{n[-1]}" if n == list(range(n[0], n[-1] + 1)) else ", ".join(map(str, n))
+        parts.append(f"{v} hooks {span}")
+    return ", ".join(parts)
 
 
 def plate_origin(p):
@@ -327,22 +345,22 @@ def slot_centre(slot, ext):
 
 
 def expected_targets(names, geos):
-    """{object id: (plate, slot, world x, world y)}: each variant's hooks in number order down the row on its plate."""
-    who = roster(names, geos)
+    """{object id: (plate, slot, world x, world y)}: each plate's row from the back, the variants in PLATES order and
+    each variant's hooks in number order; every hook centred in x on its plate (the two hooks differ in width)."""
+    assert len({round(g["T"], 3) for g in geos.values()}) == 1, "the variants differ in thickness, the row pitch would not be uniform"
     out = {}
-    for v, g in geos.items():
-        mine = sorted((num, oid) for oid, (vv, num) in who.items() if vv == v)
-        assert len(mine) <= GRID[0] * GRID[1], f"{len(mine)} {v} hooks, the {GRID[0]} x {GRID[1]} grid holds {GRID[0] * GRID[1]}"
-        ox, oy = plate_origin(g["plate"])
-        for slot, (_, oid) in enumerate(mine):
-            cx, cy = slot_centre(slot, g["ext"])
-            out[oid] = (g["plate"], slot, ox + cx, oy + cy)
+    for p, row in plate_rows(roster(names, geos), geos).items():
+        assert len(row) <= GRID[0] * GRID[1], f"{len(row)} hooks on plate {p}, the {GRID[0]} x {GRID[1]} grid holds {GRID[0] * GRID[1]}"
+        ox, oy = plate_origin(p)
+        for slot, (v, _, oid) in enumerate(row):
+            cx, cy = slot_centre(slot, geos[v]["ext"])
+            out[oid] = (p, slot, ox + cx, oy + cy)
     return out
 
 
 # ------------------------------------------------------------------------------------------------------------ author
 def author(src, dst, geos):
-    """One plate per variant: the CLI's first plate block lends its metadata to every plate, each object goes on its
+    """The plates PLATES names: the CLI's first plate block lends its metadata to every plate, each object goes on its
     variant's plate (the arranger's own plates and transforms are discarded) and is placed in that plate's row from its
     own geometry; the objects and the plates are named, the overrides applied, the filament pinned to extruder 1 and
     coloured. Returns how many plates the CLI's arranger had opened."""
@@ -375,14 +393,14 @@ def author(src, dst, geos):
     assert any('key="plater_id" value="1"' in l for l in head), blocks[0]
     ident = max([int(v) for v in inst.values()] + [100])
     plates = []
-    for v, g in geos.items():
-        mine = sorted((num, oid) for oid, (vv, num) in who.items() if vv == v)
+    rows = plate_rows(who, geos)
+    for p, row in rows.items():
         plate = ["  <plate>"]
         for l in head:
-            l = re.sub(r'key="plater_id" value="\d+"', f'key="plater_id" value="{g["plate"]}"', l)
-            l = l.replace('key="plater_name" value=""', f'key="plater_name" value="{plate_name(v, [num for num, _ in mine])}"')
+            l = re.sub(r'key="plater_id" value="\d+"', f'key="plater_id" value="{p}"', l)
+            l = l.replace('key="plater_name" value=""', f'key="plater_name" value="{plate_name(row)}"')
             plate.append(l.replace('key="filament_map_mode" value="Auto For Flush"', 'key="filament_map_mode" value="Manual"'))
-        for _, oid in mine:
+        for _, _, oid in row:
             if oid not in inst:
                 ident += 11
                 inst[oid] = str(ident)
@@ -394,8 +412,7 @@ def author(src, dst, geos):
     for src_name in names:
         msc = msc.replace(f'key="name" value="{src_name}"', f'key="name" value="{src_name[:-4]}"')
     seq = json.loads(files["Metadata/filament_sequence.json"])
-    seq = {f"plate_{g['plate']}": seq.get(f"plate_{g['plate']}", {"nozzle_sequence": [], "optimal_assignment": [], "sequence": []})
-           for g in geos.values()}
+    seq = {f"plate_{p}": seq.get(f"plate_{p}", {"nozzle_sequence": [], "optimal_assignment": [], "sequence": []}) for p in rows}
 
     cfg = json.loads(files["Metadata/project_settings.config"])
     cfg.update(SCALARS)
@@ -470,14 +487,14 @@ def check_settings(path, what, geos):
     assert set(names) == {label(g["stem"], i) for g in geos.values() for i in range(1, g["n"] + 1)}, f"{what}: object names {sorted(names)}"
     who = roster(names, geos)
     plates = plate_members(msc)
-    want_ids = [g["plate"] for g in geos.values()]
-    assert [pid for pid, _ in plates] == want_ids, f"{what}: plate ids {[pid for pid, _ in plates]}, expected {want_ids}"
+    rows = plate_rows(who, geos)
+    assert [pid for pid, _ in plates] == list(rows), f"{what}: plate ids {[pid for pid, _ in plates]}, expected {list(rows)}"
     blocks = re.findall(r"<plate>(.*?)</plate>", msc, re.S)
-    for (pid, members), blk, (v, g) in zip(plates, blocks, geos.items()):
-        mine = sorted(oid for oid, (vv, _) in who.items() if vv == v)
-        assert sorted(members) == mine, f"{what}: plate {pid} lists {sorted(members)}, the {v} hooks are {mine}"
+    for (pid, members), blk in zip(plates, blocks):
+        mine = sorted(oid for _, _, oid in rows[pid])
+        assert sorted(members) == mine, f"{what}: plate {pid} lists {sorted(members)}, expected {mine}"
         assert 'key="filament_map_mode" value="Manual"' in blk, f"{what}: plate {pid} filament map mode"
-        want = plate_name(v, [num for oid, (vv, num) in who.items() if vv == v])
+        want = plate_name(rows[pid])
         got = re.search(r'key="plater_name" value="([^"]*)"', blk).group(1)
         assert got == want, f"{what}: plate {pid} is named {got!r}, expected {want!r}"
     for name, oid in names.items():
@@ -625,12 +642,13 @@ def hhmm(seconds):
 
 
 def slice_plate(path, tmp, p, geos, placement):
-    """A real slice of plate p (1-indexed, one variant) through graft_slice: grams and time from slice_info.config, the
-    settings that matter read back from the G-code, and the pads proven solid against a plain window of the same size
-    in every hook. The G-code of a plate is plate-local, so the windows drop the plate's world origin."""
-    g = next(g for g in geos.values() if g["plate"] == p)
-    hooks = sorted((name for name, box in placement.items() if box["plate"] == p), key=lambda nm: variant_of(nm, geos)[1])
-    assert hooks and all(placement[nm]["variant"] == g["variant"] for nm in hooks), f"plate {p}: {hooks} are not all {g['variant']} hooks"
+    """A real slice of plate p (1-indexed) through graft_slice: grams and time from slice_info.config, the settings that
+    matter read back from the G-code, and the pads proven solid against a plain window of the same size in every hook,
+    each hook's windows from its own variant's holes. The G-code of a plate is plate-local, so the windows drop the
+    plate's world origin."""
+    hooks = sorted((name for name, box in placement.items() if box["plate"] == p), key=lambda nm: placement[nm]["slot"])
+    assert hooks, f"plate {p} is empty"
+    by_variant = {v: [nm for nm in hooks if placement[nm]["variant"] == v] for v in geos if any(placement[nm]["variant"] == v for nm in hooks)}
     out = f"{tmp}/sliced-plate{p}.3mf"
     res = graft_slice(path, out, plate=p)
     log = open(res["log"]).read() if res.get("log") and os.path.exists(res["log"]) else ""
@@ -664,31 +682,35 @@ def slice_plate(path, tmp, p, geos, placement):
     feature_mm, xy, z_top = gcode_stats(gcode)
     assert "Brim" not in feature_mm and "Skirt" in feature_mm, f"plate {p}: expected a skirt and no brim: {feature_mm}"
     assert xy[0] >= 0 and xy[1] >= 0 and xy[2] <= BED and xy[3] <= BED, f"plate {p}: toolpaths leave the bed: {xy}"
-    assert abs(z_top - g["H"]) <= LAYER + 1e-6, f"plate {p}: the sliced top is at z {z_top}, the hook is {g['H']} mm tall"
+    tallest = max(geos[v]["H"] for v in by_variant)
+    assert abs(z_top - tallest) <= LAYER + 1e-6, f"plate {p}: the sliced top is at z {z_top}, the hooks are {tallest} mm tall"
 
     # the pads: plastic per volume beside each hole (x within WIN_X of its centre, the core of the thickness, the layers
     # WIN_DZ below and above the hole's centre) against the same window at the height midway between the holes
     ox, oy = plate_origin(p)
-    T, half = g["T"], (WIN_DZ[1] - WIN_DZ[0]) / 2
-    z_plain = sum(hz for _, hz in g["holes"]) / len(g["holes"])
+    T, half = geos[next(iter(by_variant))]["T"], (WIN_DZ[1] - WIN_DZ[0]) / 2
+    z_plain = {v: sum(hz for _, hz in geos[v]["holes"]) / len(geos[v]["holes"]) for v in by_variant}
     windows = {}
     for name in hooks:
+        g = geos[placement[name]["variant"]]
         origin = np.array(placement[name]["min_mm"]) - g["stl_lo"] - [ox, oy, 0.0]      # the STL frame's origin on the plate's bed
         for pname, (hx, hz) in zip(PAD_NAMES, g["holes"]):
             xy_box = (origin[0] + hx - WIN_X, origin[1] + CORE_INSET, origin[0] + hx + WIN_X, origin[1] + T - CORE_INSET)
             windows[f"{name}/{pname}/below"] = (*xy_box, origin[2] + hz - WIN_DZ[1], origin[2] + hz - WIN_DZ[0])
             windows[f"{name}/{pname}/above"] = (*xy_box, origin[2] + hz + WIN_DZ[0], origin[2] + hz + WIN_DZ[1])
-        hx = g["holes"][0][0]
+        hx, zp = g["holes"][0][0], z_plain[g["variant"]]
         windows[f"{name}/plain"] = (origin[0] + hx - WIN_X, origin[1] + CORE_INSET, origin[0] + hx + WIN_X, origin[1] + T - CORE_INSET,
-                                    origin[2] + z_plain - half, origin[2] + z_plain + half)
+                                    origin[2] + zp - half, origin[2] + zp + half)
     fill, n_layers = plastic_density(gcode, windows)
     pad_fill = {k: v for k, v in fill.items() if not k.endswith("/plain")}
     plain_fill = {k: v for k, v in fill.items() if k.endswith("/plain")}
     assert min(pad_fill.values()) >= 0.7, f"plate {p}: a screw pad is not solid: {fill}"
     assert max(plain_fill.values()) <= 0.4, f"plate {p}: a hook is not sparse between the pads, a modifier leaked: {fill}"
     assert min(pad_fill.values()) >= 3 * max(plain_fill.values()), f"plate {p}: pads barely denser than the plain hook: {fill}"
-    return {"plate": p, "variant": g["variant"], "hooks": hooks, "time": hhmm(seconds), "minutes": round(seconds / 60), "seconds": seconds,
+    return {"plate": p, "variants": {v: len(nms) for v, nms in by_variant.items()}, "hooks": hooks,
+            "time": hhmm(seconds), "minutes": round(seconds / 60), "seconds": seconds,
             "gcode_estimate": res["time"], "grams": round(grams, 1), "metres": round(used_m, 2), "used_g_per_filament": round(used_g, 1),
+            "grams_per_hook": round(grams / len(hooks), 1), "minutes_per_hook": round(seconds / 60 / len(hooks)),
             "layers": res["layers"], "top_z": z_top, "nozzle_C": int(temp), "bed_C": int(bed), "toolpath_xy_mm": xy,
             "feature_mm": feature_mm,
             "pad_fill": {"window": f"x within {WIN_X} mm of the hole, y {CORE_INSET} to {round(T - CORE_INSET, 3)} (the core between the walls), "
@@ -725,16 +747,13 @@ def verify(path, tmp, geos):
     result["roundtrip"] = (f"{len(rt_plates)} plates, {n_obj} objects with {2 * n_obj} modifier parts, overrides, "
                            f"different_settings_to_system, plate names and placement survive bambu-studio --arrange 0 --export-3mf")
 
-    result["plates_sliced"] = [slice_plate(path, tmp, p, geos, placement) for p in range(1, len(plates) + 1)]
+    result["plates_sliced"] = [slice_plate(path, tmp, p, geos, placement) for p, _ in plates]
     secs = sum(pl["seconds"] for pl in result["plates_sliced"])
     grams = sum(pl["grams"] for pl in result["plates_sliced"])
     result.update({"total_time": hhmm(secs), "total_minutes": round(secs / 60), "total_grams": round(grams, 1),
                    "pad_fill_min": min(pl["pad_fill"]["pads_min"] for pl in result["plates_sliced"]),
                    "plain_fill_max": max(pl["pad_fill"]["plain_max"] for pl in result["plates_sliced"]),
-                   "variants": {pl["variant"]: {"plate": pl["plate"], "hooks": len(pl["hooks"]), "grams": pl["grams"], "time": pl["time"],
-                                                "minutes": pl["minutes"], "grams_per_hook": round(pl["grams"] / len(pl["hooks"]), 1),
-                                                "minutes_per_hook": round(pl["seconds"] / 60 / len(pl["hooks"]))}
-                                for pl in result["plates_sliced"]}})
+                   "variants": {v: {"plate": g["plate"], "hooks": g["n"]} for v, g in geos.items()}})
     return result
 
 
@@ -760,7 +779,7 @@ def main():
     os.makedirs(scratch, exist_ok=True)
     final = f"{PROJECT}/{OUT}"
     write_presets(scratch)
-    geos = {v: hook_geometry(v, p, n) for p, v in enumerate(PLATES, start=1)}
+    geos = {v: hook_geometry(v, p, n) for v, p in PLATES.items()}
     copies = []
     for g in geos.values():
         for i in range(1, n + 1):
@@ -793,7 +812,8 @@ def main():
     print(final)
     print(json.dumps({k: v for k, v in result.items() if k not in ("placement_mm", "plates_sliced", "screw_pads")}, indent=1))
     for pl in result["plates_sliced"]:
-        print(f"plate {pl['plate']} ({pl['variant']}): {len(pl['hooks'])} hooks: {pl['grams']} g, {pl['time']} ({pl['minutes']} min), "
+        kinds = ", ".join(f"{k} {v}" for v, k in pl["variants"].items())
+        print(f"plate {pl['plate']} ({kinds}): {len(pl['hooks'])} hooks: {pl['grams']} g, {pl['time']} ({pl['minutes']} min), "
               f"pads {pl['pad_fill']['pads_min']}..{pl['pad_fill']['pads_max']} vs plain {pl['pad_fill']['plain_min']}..{pl['pad_fill']['plain_max']}")
     print(f"total {result['total_grams']} g, {result['total_time']} ({result['total_minutes']} min); report {PROJECT}/{REPORT}")
     return 0
