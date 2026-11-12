@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Rod hooks: printed deep hooks that screw to the face of a 1x4, two versions in one file.
+"""Rod hooks: printed deep hooks that screw to the face of a 1x4, three versions in one file.
 
 Brian's picks, 2026-11-07: "use the deep hook design ... make individual deep
 hooks that can be screwed into a 1x4 piece of wood." Then: "make the bottom
@@ -32,6 +32,16 @@ front face's outline and the countersink rims are rounded EDGE_R (1/32); the bac
 The outline is built from lines and true arcs so the kernel can roll that fillet around
 it, and the overhang check reads the standing print layer by layer, as the slicer does.
 
+2026-11-11: "The 2" version is fine. Let's create a 1.5" version. But with the 1.5" make
+sure to incorporate the angled slot like in the original design." And: "the 3MF file
+should have all 3 versions in it." So a third hook:
+
+  SLIM  1-1/2 in slot leaning 35 degrees, the tip hook's lean, for slimmer grips (about 1 to
+        1-3/8 in). The same budget, and here it leaves room for the lean: the lip is the tip
+        hook's (top at 1-7/8 climbing to a 2-1/4 tip, a 1-3/4 in gap under the hook above),
+        the floor is the 2 in hook's 5/16, and the 1-1/2 in bottom still has a straight
+        leaning wall above it on both sides. Hold: about 1-7/8 in of lift.
+
 Each hook is an open J: a tab that screws to the board face (two #8), and a jaw
 that reaches past the board edge carrying a slot that leans away from the wood
 as it goes down (SLOT_LEAN from vertical). The rod drops in at the top, slides
@@ -46,11 +56,12 @@ x = 0 at the board edge the jaw reaches past, positive onto the board; y up,
 y = 0 at the hook's bottom edge; z the hook thickness, z = 0 against the board.
 The rod runs along z. `<stem>-model.stl` is this frame (for the scene renders);
 `<stem>.stl` is the print frame: standing on the bottom edge, x along the bed
-from the jaw tip, y the thickness, z up. Stems: rod-hook (tip), rod-hook-butt.
+from the jaw tip, y the thickness, z up. Stems: rod-hook (tip), rod-hook-butt (2 in),
+rod-hook-slim (1-1/2 in).
 
 Run from the vault root:
-  .venv/bin/python projects/Fishing-rod-holder/rod_hook.py          # build, check, export both
-  SHOW=reset .venv/bin/python projects/Fishing-rod-holder/rod_hook.py  # also push both to the OCP viewer
+  .venv/bin/python projects/Fishing-rod-holder/rod_hook.py          # build, check, export all three
+  SHOW=reset .venv/bin/python projects/Fishing-rod-holder/rod_hook.py  # also push all three to the OCP viewer
 """
 import json
 import math
@@ -69,7 +80,7 @@ IN = 25.4
 BOARD_W = 3.5
 BOARD_T = 0.75
 
-# ---- shared by both hooks ----------------------------------------------------------
+# ---- shared by all the hooks -------------------------------------------------------
 T = 0.375          # hook thickness (3/8)
 TAB = 1.75         # how far the tab reaches onto the board face (screws live here)
 HANG = 20.0        # the board's hang below the joist (Brian's combs)
@@ -99,8 +110,9 @@ CSK_DEPTH = (CSK_D - HOLE_D) / 2       # 2.5 mm
 class Hook:
     """One version of the hook: the slot and lip numbers, and everything derived from them."""
 
-    def __init__(self, name, stem, holds, slot_w, slot_lean, below, y_lip, lip_slope, rod_dias, slot_margin, min_lift, min_exit_gap):
+    def __init__(self, name, stem, holds, slot_w, slot_lean, below, y_lip, lip_slope, rod_dias, slot_margin, min_lift, min_exit_gap, label=None):
         self.name, self.stem, self.holds = name, stem, holds
+        self.label = label or name      # what Brian calls it: "<label> hook" in the plate names, the page and the viewer
         self.MIN_EXIT_GAP = min_exit_gap  # room between the lip tip and the hook butted above, Brian's floor
         self.SLOT_W = slot_w            # slot width, measured across the slot
         self.SLOT_LEAN = slot_lean      # degrees from vertical; the slot's bottom sits away from the wood
@@ -217,16 +229,19 @@ class Hook:
         """The hook outline as a shapely polygon: the very points the CAD extrudes."""
         return SPoly(self.final_outline()).buffer(0)
 
-    def obstacles(self):
+    def obstacles(self, neighbour=None):
         """What a rod must not pass through: this hook, the hooks butted above and below it (the top
-        hook has the joist above instead, the same ceiling), and the board."""
+        hook has the joist above instead, the same ceiling), and the board. The neighbours are this
+        hook's own kind unless another is named: the hooks share the height, the tab and the screws,
+        so one board can carry a mix."""
         s = self.solid_2d()
+        n = (neighbour or self).solid_2d()
         board = sbox(0, -H - 4, BOARD_W + 4, 2 * H + 4)
-        return unary_union([s, stranslate(s, 0, H), stranslate(s, 0, -H), board])
+        return unary_union([s, stranslate(n, 0, H), stranslate(n, 0, -H), board])
 
-    def free_space(self, r):
+    def free_space(self, r, neighbour=None):
         big = sbox(-self.CANT - 4, -4, TAB + 4, H + 4)
-        return big.difference(self.obstacles()).buffer(-r)
+        return big.difference(self.obstacles(neighbour)).buffer(-r)
 
     def seat_point(self, d):
         """Lowest position of the centre of a rod of diameter d anywhere inside the slot."""
@@ -242,12 +257,12 @@ class Hook:
                     lowest = (x, y)
         return lowest
 
-    def escape_lift(self, d):
+    def escape_lift(self, d, neighbour=None):
         """Smallest rise of the rod centre that lets a rod of diameter d reach the outside.
         The centre of a disc of radius r can be anywhere the free space survives an erosion by r.
         Binary-search the ceiling on the centre's height."""
         r = d / 2
-        free = self.free_space(r)
+        free = self.free_space(r, neighbour)
         sx, sy = self.seat_point(d)
         seat = Point(sx, sy + 0.002)
         outside = Point(-self.CANT - 2.5, sy)
@@ -271,7 +286,7 @@ class Hook:
 
     # ---- checks and export ---------------------------------------------------------------
     def checks(self, hook):
-        report = {"variant": self.name, "holds": self.holds}
+        report = {"variant": self.name, "label": self.label, "holds": self.holds}
         assert len(hook.solids()) == 1, f"{self.name}: hook is not one solid"
         bb = hook.bounding_box()
         size = (bb.size.X / IN, bb.size.Y / IN, bb.size.Z / IN)
@@ -305,6 +320,7 @@ class Hook:
         report["exit_gap_asked_in"] = self.MIN_EXIT_GAP
         assert exit_gap >= max(self.ROD_DIAS) + EXIT_MARGIN - 1e-9, f"{self.name}: only {exit_gap:.3f} in between the lip tip and the hook above"
         # Brian, 2026-11-09: "the holders will stack on top of each other, make sure there is 2 in of room to get the butt in"
+        # (each hook carries its own floor: 2 in is the 2 in hook's; the 1-1/2 in hook's is its opening)
         assert exit_gap >= self.MIN_EXIT_GAP - 1e-9, f"{self.name}: {exit_gap:.3f} in between the lip tip and the hook above, asked {self.MIN_EXIT_GAP}"
         # pose-space hold: every rod needs at least MIN_LIFT of rise before it can leave, and every rod can leave
         report["escape_lift_in"] = {}
@@ -312,6 +328,13 @@ class Hook:
             lift = self.escape_lift(d)
             report["escape_lift_in"][str(d)] = round(lift, 3)
             assert lift >= self.MIN_LIFT, f"{self.name}: {d} in rod escapes with only {lift:.2f} in of lift"
+        # the same with each of the other hooks butted above and below, since one board can carry a mix
+        report["escape_lift_mixed_in"] = {}
+        for other in VARIANTS.values():
+            if other is not self:
+                lift = min(self.escape_lift(d, other) for d in self.ROD_DIAS)
+                report["escape_lift_mixed_in"][other.label] = round(lift, 3)
+                assert lift >= self.MIN_LIFT, f"{self.name}: only {lift:.2f} in of lift with {other.label} hooks above and below"
         # wall minimums for the 0.6 nozzle (2 perimeters = 1.24 mm)
         assert WEB * IN >= 1.24 and LIP_MIN * IN >= 1.24 and self.BELOW * IN >= 1.24
         report["lift_to_leave_in"] = round(self.Y_TIP - self.Y_REST, 3)
@@ -355,9 +378,15 @@ TIP = Hook("tip", "rod-hook", "the blank, 1/4 to 5/8 in",
            rod_dias=(0.25, 0.375, 0.625), slot_margin=0.25, min_lift=1.4, min_exit_gap=1.0)
 BUTT = Hook("butt", "rod-hook-butt", "the grip, about 1-7/8 in (2 in opening)",
             slot_w=2.0, slot_lean=10.0, below=0.3125, y_lip=1.625, lip_slope=0.125,
-            rod_dias=(1.5, 1.75, 1.875), slot_margin=0.125, min_lift=1.25, min_exit_gap=2.0)
-VARIANTS = {"tip": TIP, "butt": BUTT}
-SHOW_ROD = {"tip": 0.375, "butt": 1.875}   # what each hook is drawn holding
+            rod_dias=(1.5, 1.75, 1.875), slot_margin=0.125, min_lift=1.25, min_exit_gap=2.0, label="2 in")
+# the 1-1/2 in hook (Brian 2026-11-11): the tip hook's lean and lip heights around a 1-1/2 in bottom on the 2 in hook's
+# floor. The exit gap floor is the opening itself (Brian gave no number for this one); 1-3/4 is what it gets.
+SLIM = Hook("slim", "rod-hook-slim", "a slimmer grip, about 1 to 1-3/8 in (1-1/2 in opening)",
+            slot_w=1.5, slot_lean=35.0, below=0.3125, y_lip=1.875, lip_slope=0.375,
+            rod_dias=(1.0, 1.25, 1.375), slot_margin=0.125, min_lift=1.5, min_exit_gap=1.5, label="1.5 in")   # his word for it; no slash, it goes into the plate name
+VARIANTS = {"tip": TIP, "butt": BUTT, "slim": SLIM}
+SHOW_ROD = {"tip": 0.375, "butt": 1.875, "slim": 1.25}   # what each hook is drawn holding
+SHOW_NAME = {"tip": "rod 3/8", "butt": "grip 1-7/8", "slim": "grip 1-1/4"}
 
 
 def arc_point(c, r, a):
@@ -461,9 +490,11 @@ if __name__ == "__main__":
               f"overhang {r['max_overhang_deg_from_vertical']} deg, footprint {r['footprint_mm']} mm")
     if os.environ.get("SHOW"):
         from ocp_vscode import Camera, show
-        off = Pos(8.0 * IN, 0, 0)          # the butt hook on its own board stub, 8 in to the right
-        show(hooks["tip"], off * hooks["butt"], board_stub(), off * board_stub(),
-             TIP.rod_probe(SHOW_ROD["tip"]), off * BUTT.rod_probe(SHOW_ROD["butt"]),
-             names=["tip hook", "butt hook", "1x4", "1x4 (butt end)", "rod 3/8", "grip 1-7/8"],
-             colors=["#2f6fe4", "#2f6fe4", "#c9a46e", "#c9a46e", "#333333", "#8b5a2b"],
+        parts, names, colors = [], [], []
+        for i, (name, v) in enumerate(VARIANTS.items()):   # each hook on its own board stub, 8 in apart
+            off = Pos(8.0 * i * IN, 0, 0)
+            parts += [off * hooks[name], off * board_stub(), off * v.rod_probe(SHOW_ROD[name])]
+            names += [f"{v.label} hook", f"1x4 ({v.label})", SHOW_NAME[name]]
+            colors += ["#2f6fe4", "#c9a46e", "#333333" if name == "tip" else "#8b5a2b"]
+        show(*parts, names=names, colors=colors,
              reset_camera=Camera.RESET if os.environ["SHOW"] == "reset" else Camera.KEEP)

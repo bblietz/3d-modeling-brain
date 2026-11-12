@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Bambu Studio print 3MF for the rod hooks: ONE project file, ONE plate, N copies (default 5: Brian 2026-11-09, "there
-should only be 5 pairs") of each hook standing on its 4 in bottom edge in one row, the tip hooks (rod-hook.stl) at the
-back of the row and the butt hooks (rod-hook-butt.stl) in front, every copy with its own two 100% infill modifier pads at
-the screw holes, verified by a real slice of the plate. PLATES says which plate each variant prints on; a variant per
-plate (the 2026-11-09 two-plate file) is the same script with {"tip": 1, "butt": 2}.
+should only be 5 pairs") of each of the three hooks (Brian 2026-11-11, "the 3MF file should have all 3 versions in it")
+standing on its 4 in bottom edge: at the back five rows of a tip hook (rod-hook.stl, left) and a 1.5 in hook
+(rod-hook-slim.stl, right) end to end, in front five rows of one 2 in hook (rod-hook-butt.stl), every copy with its own
+two 100% infill modifier pads at the screw holes, verified by a real slice of the plate. PLATES is the layout as data:
+each plate's kinds of row from the back; another split over plates is an edit of that one constant.
 
     .venv/bin/python projects/Fishing-rod-holder/pipeline/make_print_3mf.py [--copies 5] [--scratch DIR]
 
-Writes rod-hook.3mf and rod-hook-3mf-report.json beside the STLs. Plumbing only: the STLs are not touched. --copies is
-per variant: 5 puts five tip hooks and five butt hooks on the plate.
+Writes rod-hook.3mf and rod-hook-3mf-report.json beside the STLs and images/plate-layout.png (the sliced first layer
+from above). Plumbing only: the STLs are not touched. --copies is per variant: 5 puts five of each hook on the plate.
 
 <stem>.stl is the PRINT frame (Hook.standing): x along the bed from the jaw tip (0 to W), y the thickness (0 to T, the
 countersinks open at y 0), z up (0 to H); the screw holes run along y at x = (CANT + SCREW_X) in, z = SCREW_Y in, with
@@ -25,9 +26,13 @@ The recipe is the vault's (memory/feedback-stl-to-bambu-3mf.md), not a new one:
               with a model_instance (and identify_id) per object; whatever plates its arranger opened (it packs 2 mm apart
               and may open plates of its own), they are read only for that metadata and rewritten as the plates PLATES
               names, in Studio's plate grid: plate p's bed origin is (p - 1) * 307.2 mm along x (knowledge/printer-x2d.md)
-  placement   every item transform is written here from the file's own geometry: one row along y per plate, the variants
-              in PLATES order from the back, GAP between the faces of neighbours, centred on its plate, nothing rotated
-              (the Cable-bin pattern: the arranger is not trusted)
+  placement   every item transform is written here from the file's own geometry: each plate's rows from the back as
+              PLATES lists them, GAP between the faces of neighbouring rows and between the ends of the two hooks of a
+              row, rows and block centred on the plate, nothing rotated (the Cable-bin pattern: the arranger is not
+              trusted). The paired rows reach into the left 20.5 mm of the bed, which only extruder 1 (the main nozzle,
+              where the filament is pinned) can print: the slice is the proof, not the arithmetic. With the filament
+              on extruder 2 the CLI refuses this plate (rc -66, "Some filaments cannot be mapped to correct extruders",
+              tried 2026-11-11); the ten-hook plate, nothing left of x 20.5, sliced on either
   screw pads  projects/Skateboard-wall-holder/pipeline/make_print_3mf.py's modifier parts through the Sharks helpers
               (fillcore_mod.inject_modifier): per copy two discs PAD_D across with their axis along y, PAD_INSET inside
               both faces, the screw hole and its countersink cleared by HOLE_CLEAR, sparse_infill_density 100%. Built per
@@ -41,6 +46,7 @@ The recipe is the vault's (memory/feedback-stl-to-bambu-3mf.md), not a new one:
 Opening rod-hook.3mf in Bambu Studio is still the ground truth for how the plate and the modifiers look.
 """
 import argparse
+import itertools
 import json
 import math
 import os
@@ -72,16 +78,20 @@ FILAMENT_COLOUR = "#2F6FE4"
 
 OUT = "rod-hook.3mf"
 REPORT = "rod-hook-3mf-report.json"
-PLATES = {"tip": 1, "butt": 1}   # rod_hook.VARIANTS in row order and the plate each prints on: one plate, tip hooks at the back
-COPIES = 5                       # per variant: five pairs (Brian 2026-11-09)
+# The layout: plate -> its kinds of row from the back, each kind once per copy; a row is the rod_hook.VARIANTS named,
+# standing end to end from the left. One plate (Brian 2026-11-11, "the 3MF file should have all 3 versions in it"): five
+# rows of a tip and a 1.5 in hook, then five rows of one 2 in hook, which stand where they stood in the ten-hook file.
+# A plate of tip and 2 in hooks and a plate of 1.5 in hooks is {1: (("tip",), ("butt",)), 2: (("slim",),)}
+PLATES = {1: (("tip", "slim"), ("butt",))}
+COPIES = 5                       # per variant: five of each hook (Brian 2026-11-09)
 LAYER = 0.3
 BED = 256.0
 BED_CENTRE = (128.0, 128.0)
 BED_TYPE = "Textured PEI Plate"
 PLATE_STRIDE = BED * 1.2         # 307.2: Studio's plate grid, two columns, rows in negative y (knowledge/printer-x2d.md)
 PLATE_COLS = 2
-GRID = (1, 10)                   # hooks per plate: columns along x, rows along y (a standing hook is W x T on the bed)
-GAP = 13.5                       # between the faces of neighbouring hooks (asked: at least 12); pitch GAP + T
+GAP = 13.5                       # between neighbouring hooks, face to face across the rows and end to end in a row (asked: at least 12); row pitch GAP + T
+MARGIN = 5.0                     # every hook stays this far inside the bed
 
 PAD_D = 22.0                     # solid infill this wide around each screw hole
 PAD_INSET = 0.2                  # the pad stops this far inside the two faces (y 0 and y T in the print frame)
@@ -109,8 +119,8 @@ SCALARS = {   # process scope, different_settings_to_system[0]
 SCOPE = ["systemd-run", "--user", "--scope", "-p", "MemoryMax=44G", "-p", "MemoryHigh=40G",
          "-p", "MemorySwapMax=2G", "-p", "OOMPolicy=continue", "--"]
 SCOPE_MARK = "ROD_HOOK_3MF_IN_SCOPE"
-NOTE = ("Open rod-hook.3mf once in Bambu Studio to confirm the plate shows all ten hooks in one row: five tip hooks at the back, "
-        "five butt hooks in front. The GUI is the ground truth for the plate layout and the modifiers.")
+NOTE = ("Open rod-hook.3mf once in Bambu Studio to confirm the plate shows all fifteen hooks: at the back five rows of a tip hook "
+        "(left) and a 1.5 in hook (right), in front five rows of one 2 in hook. The GUI is the ground truth for the plate layout and the modifiers.")
 
 
 # ------------------------------------------------------------------------------------------------------------ presets
@@ -146,15 +156,15 @@ def write_presets(d):
 # --------------------------------------------------------------------------------------------------------- geometry
 def hook_geometry(variant, plate, n):
     """One variant of rod_hook.py (rod_hook.VARIANTS[variant]) with the plate it prints on and its copy count: its stem,
-    thickness T, width W, height H, the screw holes in the model frame (x, y) and in the print frame (x, z), lower screw
-    first, the hole and countersink diameters, the CAD solid (model frame), the standing transform, and its print STL's
-    extents, minimum corner and centre."""
+    its label (what the plate name and the picture call it), thickness T, width W, height H, the screw holes in the model
+    frame (x, y) and in the print frame (x, z), lower screw first, the hole and countersink diameters, the CAD solid
+    (model frame), the standing transform, and its print STL's extents, minimum corner and centre."""
     import rod_hook as M
     v = M.VARIANTS[variant]
     ys = sorted(M.SCREW_Y)
     stl = trimesh.load(f"{PROJECT}/{v.stem}.stl")
     assert M.LAYER_H == LAYER, f"rod_hook.py checks the standing print at {M.LAYER_H} mm layers, this file slices at {LAYER}"
-    geo = {"variant": variant, "stem": v.stem, "plate": plate, "n": n, "T": M.T * M.IN, "W": v.W * M.IN, "H": M.H * M.IN,
+    geo = {"variant": variant, "stem": v.stem, "label": v.label, "plate": plate, "n": n, "T": M.T * M.IN, "W": v.W * M.IN, "H": M.H * M.IN,
            "model_holes": [(M.SCREW_X * M.IN, y * M.IN) for y in ys],
            "holes": [((v.CANT + M.SCREW_X) * M.IN, y * M.IN) for y in ys],
            "hole_d": M.HOLE_D, "csk_d": M.CSK_D, "cad": v.build(), "standing": v.standing,
@@ -312,23 +322,48 @@ def roster(names, geos):
     return {oid: variant_of(name, geos) for name, oid in names.items()}
 
 
+def layout(geos):
+    """{(variant, hook number): (plate, row, col, bed x, bed y)}: the footprint centre of every hook on its own plate's
+    bed, from PLATES. A plate's rows run from the back, each kind of row once per copy (so hook i of a variant is in the
+    i-th row of its kind), GAP between the faces of neighbouring rows, the block centred in y; the hooks of a row stand
+    end to end from the left, GAP between their ends, the row centred in x. Asserts that every plate's rows fit its bed."""
+    T = {round(g["T"], 3) for g in geos.values()}
+    assert len(T) == 1, "the variants differ in thickness, the row pitch would not be uniform"
+    room, out = BED - 2 * MARGIN, {}
+    for p, kinds in PLATES.items():
+        rows = [[(v, i) for v in kind] for kind in kinds for i in range(1, geos[kind[0]]["n"] + 1)]
+        deep = len(rows) * max(T) + (len(rows) - 1) * GAP
+        assert deep <= room, (f"plate {p}: {len(rows)} rows are {deep:g} mm deep, the bed holds {room:g} mm "
+                              f"({MARGIN:g} mm clear at both edges): too many copies for this layout")
+        for r, row in enumerate(rows):
+            long = sum(geos[v]["ext"][0] for v, _ in row) + (len(row) - 1) * GAP
+            assert long <= room, (f"plate {p}: a row of {' + '.join(geos[v]['label'] for v, _ in row)} hooks is {long:g} mm long, "
+                                  f"the bed holds {room:g} mm ({MARGIN:g} mm clear at both edges)")
+            x = -long / 2
+            for c, (v, i) in enumerate(row):
+                w, t = geos[v]["ext"][:2]
+                out[(v, i)] = (p, r, c, BED_CENTRE[0] + (x + w / 2), BED_CENTRE[1] + ((len(rows) - 1) / 2 - r) * (t + GAP))
+                x += w + GAP
+    return out
+
+
 def plate_rows(who, geos):
-    """{plate: [(variant, hook number, object id), ...]} in row order: the variants in PLATES order from the back of
-    the plate, each variant's hooks in number order."""
-    rows = {}
-    for v, g in geos.items():
-        mine = sorted((num, oid) for oid, (vv, num) in who.items() if vv == v)
-        rows.setdefault(g["plate"], []).extend((v, num, oid) for num, oid in mine)
+    """{plate: [(variant, hook number, object id), ...]} in layout order: back to front, left to right."""
+    spots = layout(geos)
+    rows = {p: [] for p in PLATES}
+    for oid in sorted(who, key=lambda o: spots[who[o]][:3]):
+        rows[spots[who[oid]][0]].append((*who[oid], oid))
     return rows
 
 
-def plate_name(row):
-    """'tip hooks 1-5, butt hooks 1-5': each variant on the plate with its hook numbers, in row order."""
+def plate_name(row, geos):
+    """'tip hooks 1-5, 1.5 in hooks 1-5, 2 in hooks 1-5': each variant on the plate by its label with its hook numbers,
+    the variants in the order they first appear (back to front, left to right)."""
     parts = []
     for v in dict.fromkeys(v for v, _, _ in row):
         n = sorted(num for vv, num, _ in row if vv == v)
         span = str(n[0]) if len(n) == 1 else f"{n[0]}-{n[-1]}" if n == list(range(n[0], n[-1] + 1)) else ", ".join(map(str, n))
-        parts.append(f"{v} hooks {span}")
+        parts.append(f"{geos[v]['label']} hooks {span}")
     return ", ".join(parts)
 
 
@@ -337,32 +372,22 @@ def plate_origin(p):
     return ((p - 1) % PLATE_COLS) * PLATE_STRIDE, -((p - 1) // PLATE_COLS) * PLATE_STRIDE
 
 
-def slot_centre(slot, ext):
-    """Plate-local bed (x, y) of the footprint centre of grid slot `slot`: columns along x, rows from the back."""
-    col, row = slot % GRID[0], slot // GRID[0]
-    return (BED_CENTRE[0] + (col - (GRID[0] - 1) / 2) * (ext[0] + GAP),
-            BED_CENTRE[1] + ((GRID[1] - 1) / 2 - row) * (ext[1] + GAP))
-
-
 def expected_targets(names, geos):
-    """{object id: (plate, slot, world x, world y)}: each plate's row from the back, the variants in PLATES order and
-    each variant's hooks in number order; every hook centred in x on its plate (the two hooks differ in width)."""
-    assert len({round(g["T"], 3) for g in geos.values()}) == 1, "the variants differ in thickness, the row pitch would not be uniform"
-    out = {}
-    for p, row in plate_rows(roster(names, geos), geos).items():
-        assert len(row) <= GRID[0] * GRID[1], f"{len(row)} hooks on plate {p}, the {GRID[0]} x {GRID[1]} grid holds {GRID[0] * GRID[1]}"
+    """{object id: (plate, row, col, world x, world y)}: layout() by object id, each plate's bed at its place in
+    Studio's plate grid."""
+    spots, out = layout(geos), {}
+    for oid, hook in roster(names, geos).items():
+        p, r, c, x, y = spots[hook]
         ox, oy = plate_origin(p)
-        for slot, (v, _, oid) in enumerate(row):
-            cx, cy = slot_centre(slot, geos[v]["ext"])
-            out[oid] = (p, slot, ox + cx, oy + cy)
+        out[oid] = (p, r, c, ox + x, oy + y)
     return out
 
 
 # ------------------------------------------------------------------------------------------------------------ author
 def author(src, dst, geos):
     """The plates PLATES names: the CLI's first plate block lends its metadata to every plate, each object goes on its
-    variant's plate (the arranger's own plates and transforms are discarded) and is placed in that plate's row from its
-    own geometry; the objects and the plates are named, the overrides applied, the filament pinned to extruder 1 and
+    variant's plate (the arranger's own plates and transforms are discarded) and is placed where layout() puts it, from
+    its own geometry; the objects and the plates are named, the overrides applied, the filament pinned to extruder 1 and
     coloured. Returns how many plates the CLI's arranger had opened."""
     entries = read_all(src)
     files = {i.filename: data for i, data in entries}
@@ -377,7 +402,7 @@ def author(src, dst, geos):
     bounds = object_bounds(files)
     def move(m):
         oid = re.search(r'objectid="(\d+)"', m.group(1)).group(1)
-        _, _, cx, cy = targets[oid]
+        *_, cx, cy = targets[oid]
         lo, hi = bounds[oid]
         return m.group(1) + 'transform="1 0 0 0 1 0 0 0 1 %.6g %.6g %.6g"' % (cx - (lo[0] + hi[0]) / 2, cy - (lo[1] + hi[1]) / 2, -lo[2])
     model, moved = re.subn(r'(<item [^>]*?)transform="([^"]*)"', move, model)
@@ -398,7 +423,7 @@ def author(src, dst, geos):
         plate = ["  <plate>"]
         for l in head:
             l = re.sub(r'key="plater_id" value="\d+"', f'key="plater_id" value="{p}"', l)
-            l = l.replace('key="plater_name" value=""', f'key="plater_name" value="{plate_name(row)}"')
+            l = l.replace('key="plater_name" value=""', f'key="plater_name" value="{plate_name(row, geos)}"')
             plate.append(l.replace('key="filament_map_mode" value="Auto For Flush"', 'key="filament_map_mode" value="Manual"'))
         for _, _, oid in row:
             if oid not in inst:
@@ -494,7 +519,7 @@ def check_settings(path, what, geos):
         mine = sorted(oid for _, _, oid in rows[pid])
         assert sorted(members) == mine, f"{what}: plate {pid} lists {sorted(members)}, expected {mine}"
         assert 'key="filament_map_mode" value="Manual"' in blk, f"{what}: plate {pid} filament map mode"
-        want = plate_name(rows[pid])
+        want = plate_name(rows[pid], geos)
         got = re.search(r'key="plater_name" value="([^"]*)"', blk).group(1)
         assert got == want, f"{what}: plate {pid} is named {got!r}, expected {want!r}"
     for name, oid in names.items():
@@ -513,8 +538,10 @@ def check_settings(path, what, geos):
 
 
 def check_placement(files, names, geos, what):
-    """Every hook unrotated, floor on z 0, footprint centred on its slot of its plate's row inside that plate's bed,
-    neighbours exactly GAP apart, by the 3MF's own geometry. Returns the per-hook world boxes."""
+    """Every hook unrotated, floor on z 0, footprint centred on its place in its row and at least MARGIN inside its
+    plate's bed; neighbouring rows exactly GAP apart in y, the hooks of a row exactly GAP apart in x and the row centred
+    on the bed; no two hooks of a plate overlapping or closer than GAP. All by the 3MF's own geometry. Returns the
+    per-hook world boxes."""
     comps = world_components(files)
     targets = expected_targets(names, geos)
     who = roster(names, geos)
@@ -527,21 +554,29 @@ def check_placement(files, names, geos, what):
         body = [c for c in parts if np.allclose(c[2] - c[1], ext, atol=0.01)]
         assert len(body) == 1, f"{what}: {by_id[oid]} has no component with the STL's extents {ext}: rotated?"
         lo, hi = body[0][1], body[0][2]
-        p, slot, cx, cy = targets[oid]
+        p, row, col, cx, cy = targets[oid]
         ox, oy = plate_origin(p)
         assert abs((lo[0] + hi[0]) / 2 - cx) < 0.01 and abs((lo[1] + hi[1]) / 2 - cy) < 0.01, f"{what}: {by_id[oid]} not at {(cx, cy)}: {lo} {hi}"
         assert abs(lo[2]) < 0.01, f"{what}: {by_id[oid]} floor at z {lo[2]:.3f}"
-        assert lo[0] >= ox + 5 and lo[1] >= oy + 5 and hi[0] <= ox + BED - 5 and hi[1] <= oy + BED - 5, \
-            f"{what}: {by_id[oid]} within 5 mm of plate {p}'s edge: {lo} {hi}"
-        boxes[(p, slot)] = (lo, hi)
-        result[by_id[oid]] = {"variant": v, "plate": p, "slot": slot, "min_mm": [round(float(x), 2) for x in lo], "max_mm": [round(float(x), 2) for x in hi]}
-    for (p, slot), (lo, hi) in boxes.items():
-        if slot % GRID[0] != GRID[0] - 1 and (p, slot + 1) in boxes:
-            got = boxes[(p, slot + 1)][0][0] - hi[0]
-            assert abs(got - GAP) < 0.01, f"{what}: plate {p} slots {slot} and {slot + 1} are {got:.2f} mm apart in x, expected {GAP}"
-        if (p, slot + GRID[0]) in boxes:
-            got = lo[1] - boxes[(p, slot + GRID[0])][1][1]
-            assert abs(got - GAP) < 0.01, f"{what}: plate {p} slots {slot} and {slot + GRID[0]} are {got:.2f} mm apart in y, expected {GAP}"
+        assert lo[0] >= ox + MARGIN and lo[1] >= oy + MARGIN and hi[0] <= ox + BED - MARGIN and hi[1] <= oy + BED - MARGIN, \
+            f"{what}: {by_id[oid]} within {MARGIN:g} mm of plate {p}'s edge: {lo} {hi}"
+        boxes[(p, row, col)] = (by_id[oid], lo, hi)
+        result[by_id[oid]] = {"variant": v, "plate": p, "row": row, "col": col, "min_mm": [round(float(x), 2) for x in lo], "max_mm": [round(float(x), 2) for x in hi]}
+    for (a, (na, alo, ahi)), (b, (nb, blo, bhi)) in itertools.combinations(sorted(boxes.items()), 2):
+        if a[0] != b[0]:
+            continue
+        if a[1] == b[1] and b[2] == a[2] + 1:
+            got = blo[0] - ahi[0]
+            assert abs(got - GAP) < 0.01, f"{what}: {na} and {nb}, neighbours in a row, are {got:.2f} mm apart in x, expected {GAP}"
+        if b[1] == a[1] + 1:
+            got = alo[1] - bhi[1]
+            assert abs(got - GAP) < 0.01, f"{what}: {na} and {nb}, in neighbouring rows, are {got:.2f} mm apart in y, expected {GAP}"
+        clear = max(blo[0] - ahi[0], alo[0] - bhi[0], blo[1] - ahi[1], alo[1] - bhi[1])   # the wider of the x and y gaps; negative when the boxes overlap
+        assert clear > GAP - 0.01, f"{what}: {na} and {nb} overlap or stand closer than {GAP} mm: {clear:.2f}"
+    for p, row in sorted({k[:2] for k in boxes}):
+        mine = [box for k, box in boxes.items() if k[:2] == (p, row)]
+        mid = (min(lo[0] for _, lo, _ in mine) + max(hi[0] for _, _, hi in mine)) / 2 - plate_origin(p)[0]
+        assert abs(mid - BED_CENTRE[0]) < 0.01, f"{what}: plate {p} row {row} is centred on x {mid:.2f}, the bed's centre is {BED_CENTRE[0]}"
     return result
 
 
@@ -572,20 +607,25 @@ def check_modifiers(files, names, geos, what):
 
 # ------------------------------------------------------------------------------------------------------------- G-code
 def gcode_stats(gcode):
-    """Extruded filament (mm) per G-code feature, the xy extent of all extrusion moves, and the top layer height."""
-    used, feat, x, y, z_top, box = {}, "", 0.0, 0.0, 0.0, [1e9, 1e9, -1e9, -1e9]
+    """Extruded filament (mm) per G-code feature, the xy extent of all extrusion moves, the top layer height, and the
+    first layer's extrusion moves as (x0, y0, x1, y1, feature), G2/G3 as their chords."""
+    used, feat, x, y, z_top, box, layer, first = {}, "", 0.0, 0.0, 0.0, [1e9, 1e9, -1e9, -1e9], 0, []
     for line in gcode.splitlines():
         if line.startswith("; FEATURE:"):
             feat = line.split(":", 1)[1].strip()
         elif line.startswith("; Z_HEIGHT:"):
             z_top = max(z_top, float(line.split(":")[1]))
+            layer += 1
         elif line[:3] in ("G0 ", "G1 ", "G2 ", "G3 "):
             mx, my, me = re.search(r" X([-0-9.]+)", line), re.search(r" Y([-0-9.]+)", line), re.search(r" E([-0-9.]+)", line)
+            x0, y0 = x, y
             x, y = (float(mx.group(1)) if mx else x), (float(my.group(1)) if my else y)
             if feat and me and float(me.group(1)) > 0 and (mx or my):
                 used[feat] = used.get(feat, 0.0) + float(me.group(1))
                 box[0], box[1], box[2], box[3] = min(box[0], x), min(box[1], y), max(box[2], x), max(box[3], y)
-    return {k: round(v, 1) for k, v in sorted(used.items(), key=lambda kv: -kv[1])}, [round(v, 2) for v in box], z_top
+                if layer == 1:
+                    first.append((x0, y0, x, y, feat))
+    return {k: round(v, 1) for k, v in sorted(used.items(), key=lambda kv: -kv[1])}, [round(v, 2) for v in box], z_top, first
 
 
 def clip_fraction(x0, y0, x1, y1, w):
@@ -645,8 +685,8 @@ def slice_plate(path, tmp, p, geos, placement):
     """A real slice of plate p (1-indexed) through graft_slice: grams and time from slice_info.config, the settings that
     matter read back from the G-code, and the pads proven solid against a plain window of the same size in every hook,
     each hook's windows from its own variant's holes. The G-code of a plate is plate-local, so the windows drop the
-    plate's world origin."""
-    hooks = sorted((name for name, box in placement.items() if box["plate"] == p), key=lambda nm: placement[nm]["slot"])
+    plate's world origin. Returns the plate's report and its first layer's extrusion moves (for the picture)."""
+    hooks = sorted((name for name, box in placement.items() if box["plate"] == p), key=lambda nm: (placement[nm]["row"], placement[nm]["col"]))
     assert hooks, f"plate {p} is empty"
     by_variant = {v: [nm for nm in hooks if placement[nm]["variant"] == v] for v in geos if any(placement[nm]["variant"] == v for nm in hooks)}
     out = f"{tmp}/sliced-plate{p}.3mf"
@@ -679,9 +719,14 @@ def slice_plate(path, tmp, p, geos, placement):
               "skirt_height", "brim_type", "curr_bed_type"):
         v = SCALARS.get(k, f"{LAYER:g}")
         assert re.search(rf"^; {k} = {re.escape(v)}$", gcode, re.M), f"plate {p}: {k} = {v} is not in the sliced G-code"
-    feature_mm, xy, z_top = gcode_stats(gcode)
+    feature_mm, xy, z_top, first = gcode_stats(gcode)
     assert "Brim" not in feature_mm and "Skirt" in feature_mm, f"plate {p}: expected a skirt and no brim: {feature_mm}"
     assert xy[0] >= 0 and xy[1] >= 0 and xy[2] <= BED and xy[3] <= BED, f"plate {p}: toolpaths leave the bed: {xy}"
+    ends = np.array([s[:4] for s in first]).reshape(-1, 2)
+    first_xy = [round(float(v), 2) for v in (*ends.min(axis=0), *ends.max(axis=0))]
+    sliced_cfg = json.loads(zs.read("Metadata/project_settings.config"))
+    extruder = {k: sliced_cfg.get(k) for k in ("filament_map_mode", "filament_map", "filament_nozzle_map", "master_extruder_id",
+                                                "physical_extruder_map", "extruder_type", "extruder_printable_area")}
     tallest = max(geos[v]["H"] for v in by_variant)
     assert abs(z_top - tallest) <= LAYER + 1e-6, f"plate {p}: the sliced top is at z {z_top}, the hooks are {tallest} mm tall"
 
@@ -707,17 +752,61 @@ def slice_plate(path, tmp, p, geos, placement):
     assert min(pad_fill.values()) >= 0.7, f"plate {p}: a screw pad is not solid: {fill}"
     assert max(plain_fill.values()) <= 0.4, f"plate {p}: a hook is not sparse between the pads, a modifier leaked: {fill}"
     assert min(pad_fill.values()) >= 3 * max(plain_fill.values()), f"plate {p}: pads barely denser than the plain hook: {fill}"
-    return {"plate": p, "variants": {v: len(nms) for v, nms in by_variant.items()}, "hooks": hooks,
+    report = {"plate": p, "variants": {v: len(nms) for v, nms in by_variant.items()}, "hooks": hooks,
             "time": hhmm(seconds), "minutes": round(seconds / 60), "seconds": seconds,
             "gcode_estimate": res["time"], "grams": round(grams, 1), "metres": round(used_m, 2), "used_g_per_filament": round(used_g, 1),
             "grams_per_hook": round(grams / len(hooks), 1), "minutes_per_hook": round(seconds / 60 / len(hooks)),
             "layers": res["layers"], "top_z": z_top, "nozzle_C": int(temp), "bed_C": int(bed), "toolpath_xy_mm": xy,
-            "feature_mm": feature_mm,
+            "first_layer_xy_mm": first_xy, "extruder": extruder, "feature_mm": feature_mm,
             "pad_fill": {"window": f"x within {WIN_X} mm of the hole, y {CORE_INSET} to {round(T - CORE_INSET, 3)} (the core between the walls), "
                                    f"layers {WIN_DZ[0]} to {WIN_DZ[1]} mm below and above the hole centre; plain: the same at z {z_plain} +/- {half}",
                          "layers_per_window": {k: n_layers[k] for k in list(n_layers)[:5]},
                          "pads_min": min(pad_fill.values()), "pads_max": max(pad_fill.values()),
                          "plain_min": min(plain_fill.values()), "plain_max": max(plain_fill.values()), "per_window": fill}}
+    return report, first
+
+
+def draw_plates(first, placement, geos):
+    """images/plate-layout.png: every plate's bed from above with the printer's front at the bottom, the first layer's
+    extrusion paths from the sliced G-code (so the skirts show) and each group of hooks named beside the rows it stands
+    in. No dimensions: Brian reads inches only and the picture needs none."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.collections import LineCollection
+    from matplotlib.patches import Rectangle
+
+    ink, words = "#1f2430", {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 10: "ten", 15: "fifteen", 20: "twenty"}
+    fig, axes = plt.subplots(1, len(first), figsize=(8.2 * len(first), 6.4), dpi=150, squeeze=False)
+    for ax, (p, segs) in zip(axes[0], first.items()):
+        ox, oy = plate_origin(p)
+        ax.add_patch(Rectangle((0, 0), BED, BED, fc="#f4f5f7", ec=ink, lw=1.2))
+        for skirt, colour in ((True, "#8a93a3"), (False, FILAMENT_COLOUR)):
+            ax.add_collection(LineCollection([((a, b), (c, d)) for a, b, c, d, f in segs if (f == "Skirt") == skirt], colors=colour, linewidths=0.7))
+        for v, g in geos.items():
+            mine = [b for b in placement.values() if b["plate"] == p and b["variant"] == v]
+            if not mine:
+                continue
+            x0, x1 = min(b["min_mm"][0] for b in mine) - ox, max(b["max_mm"][0] for b in mine) - ox
+            y0, y1 = min(b["min_mm"][1] for b in mine) - oy, max(b["max_mm"][1] for b in mine) - oy
+            side = -1 if (x0 + x1) / 2 <= BED_CENTRE[0] else 1      # the group is named in the margin on its own side of the bed
+            xb = BED_CENTRE[0] + side * (BED / 2 + 10)
+            ax.plot([xb - side * 4, xb, xb, xb - side * 4], [y0, y0, y1, y1], color=ink, lw=1.0)   # a bracket over the group's rows
+            ax.text(xb + side * 5, (y0 + y1) / 2, f"{g['label']} hooks", ha="right" if side < 0 else "left", va="center", fontsize=10.5, color=ink)
+        ax.text(BED_CENTRE[0], -9, "front of the printer", ha="center", va="top", fontsize=10.5, color=ink)
+        ax.set_title(f"plate {p}", fontsize=9.5, color=ink)
+        ax.set_xlim(-82, BED + 82)
+        ax.set_ylim(-26, BED + 6)
+        ax.set_aspect("equal")
+        ax.axis("off")
+    n_hooks = len(placement)
+    fig.suptitle(f"{OUT}: {words.get(len(first), len(first))} plate{'s' * (len(first) > 1)}, {words.get(n_hooks, n_hooks)} hooks",
+                 fontsize=10.5, x=0.02, ha="left", color=ink)
+    fig.tight_layout()
+    out = f"{PROJECT}/images/plate-layout.png"
+    fig.savefig(out, facecolor="white")
+    plt.close(fig)
+    return out
 
 
 def verify(path, tmp, geos):
@@ -747,24 +836,26 @@ def verify(path, tmp, geos):
     result["roundtrip"] = (f"{len(rt_plates)} plates, {n_obj} objects with {2 * n_obj} modifier parts, overrides, "
                            f"different_settings_to_system, plate names and placement survive bambu-studio --arrange 0 --export-3mf")
 
-    result["plates_sliced"] = [slice_plate(path, tmp, p, geos, placement) for p, _ in plates]
+    sliced = [slice_plate(path, tmp, p, geos, placement) for p, _ in plates]
+    result["plates_sliced"] = [report for report, _ in sliced]
     secs = sum(pl["seconds"] for pl in result["plates_sliced"])
     grams = sum(pl["grams"] for pl in result["plates_sliced"])
     result.update({"total_time": hhmm(secs), "total_minutes": round(secs / 60), "total_grams": round(grams, 1),
                    "pad_fill_min": min(pl["pad_fill"]["pads_min"] for pl in result["plates_sliced"]),
                    "plain_fill_max": max(pl["pad_fill"]["plain_max"] for pl in result["plates_sliced"]),
-                   "variants": {v: {"plate": g["plate"], "hooks": g["n"]} for v, g in geos.items()}})
+                   "variants": {v: {"label": g["label"], "stem": g["stem"], "plate": g["plate"], "hooks": g["n"]} for v, g in geos.items()},
+                   "picture": draw_plates({report["plate"]: first for report, first in sliced}, placement, geos)})
     return result
 
 
 # -------------------------------------------------------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--copies", type=int, default=COPIES, help=f"hooks per variant (default {COPIES}, at most {GRID[0] * GRID[1]} on a plate)")
+    ap.add_argument("--copies", type=int, default=COPIES, help=f"hooks per variant (default {COPIES}); it stops before any export when the rows do not fit the bed")
     ap.add_argument("--scratch", default=None, help="work dir for presets, STL copies, pads and the slices (default: a fresh temp dir)")
     args = ap.parse_args()
     n = args.copies
-    assert 1 <= n <= GRID[0] * GRID[1], n
+    assert n >= 1, n
 
     os.environ["PATH"] = f"{os.path.expanduser('~/.local/bin')}:{os.environ.get('PATH', '')}"   # bambu-studio is called by name
     if SCOPE_MARK not in os.environ and shutil.which("systemd-run"):
@@ -779,7 +870,10 @@ def main():
     os.makedirs(scratch, exist_ok=True)
     final = f"{PROJECT}/{OUT}"
     write_presets(scratch)
-    geos = {v: hook_geometry(v, p, n) for v, p in PLATES.items()}
+    listed = [(v, p) for p, kinds in PLATES.items() for kind in kinds for v in kind]
+    assert len(dict(listed)) == len(listed), f"a variant is in PLATES twice, its hooks are numbered 1 to {n} once: {PLATES}"
+    geos = {v: hook_geometry(v, p, n) for v, p in listed}
+    layout(geos)   # stops here, before the export, when the copies do not fit the bed
     copies = []
     for g in geos.values():
         for i in range(1, n + 1):
@@ -800,6 +894,8 @@ def main():
     T = next(iter(geos.values()))["T"]
     result = {"file": final, "copies": n, "copies_are": "per variant", "objects": len(copies), "command": " ".join(cmd) + f"   (cwd {scratch})",
               "cli_arranged_plates": cli_plates, "plates_authored": {v: g["plate"] for v, g in geos.items()},
+              "layout": {str(p): [list(kind) for kind in kinds] for p, kinds in PLATES.items()},
+              "layout_is": "plate -> its kinds of row from the back, each kind once per copy; the hooks of a row stand end to end from the left",
               "presets": {"machine": MACHINE, "process": PROCESS, "filament": FILAMENT}, "overrides": SCALARS,
               "filament_colour": FILAMENT_COLOUR, "row_pitch_mm": round(T + GAP, 3), "gap_mm": GAP, "plate_stride_mm": PLATE_STRIDE,
               "screw_pads": {"per_hook": len(PAD_NAMES), "total": n_mods, "axis": "y, through the thickness", "diameter_mm": PAD_D,

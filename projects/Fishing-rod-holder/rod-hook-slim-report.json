@@ -1,0 +1,75 @@
+{
+ "variant": "slim",
+ "label": "1.5 in",
+ "holds": "a slimmer grip, about 1 to 1-3/8 in (1-1/2 in opening)",
+ "size_in": [
+  4.625,
+  4.0,
+  0.375
+ ],
+ "volume_cm3": 63.5,
+ "slot_w_in": 1.5,
+ "jaw_height_in": {
+  "at the lip": 1.875,
+  "at the tip": 2.25
+ },
+ "jaw_reach_in": 2.875,
+ "slot_lean_deg": 35.0,
+ "floor_in": 0.3125,
+ "hood_in": -0.347,
+ "lip_min_in": 0.516,
+ "seat_in": {
+  "1.0": [
+   -1.615,
+   0.813
+  ],
+  "1.25": [
+   -1.612,
+   0.938
+  ],
+  "1.375": [
+   -1.611,
+   1.001
+  ]
+ },
+ "exit_gap_in": 1.75,
+ "exit_gap_asked_in": 1.5,
+ "escape_lift_in": {
+  "1.0": 1.874,
+  "1.25": 1.874,
+  "1.375": 1.873
+ },
+ "escape_lift_mixed_in": {
+  "tip": 1.873,
+  "2 in": 1.873
+ },
+ "lift_to_leave_in": 1.938,
+ "screws_mm": {
+  "hole": 5.0,
+  "countersink": 10.0,
+  "depth": 2.5,
+  "positions_in": [
+   [
+    1.0,
+    0.5625
+   ],
+   [
+    1.0,
+    3.4375
+   ]
+  ]
+ },
+ "stl": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Fishing-rod-holder/rod-hook-slim.stl",
+ "model_stl": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Fishing-rod-holder/rod-hook-slim-model.stl",
+ "print_orientation": "standing on the 4 in bottom edge, face vertical, holes horizontal",
+ "footprint_mm": [
+  117.5,
+  9.5
+ ],
+ "height_mm": 101.6,
+ "stl_volume_cm3": 63.5,
+ "max_overhang_deg_from_vertical": 35.0,
+ "overhang_check": "layer by layer at 0.3 mm, holes and the first layer left out",
+ "edge_round_in": 0.03125,
+ "flat_faces": "the back face (against the board) and the bottom strip (the bed of the standing print)"
+}

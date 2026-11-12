@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-"""OpenSCAD scene renders of the real hook STLs (the model frame, y up), both versions:
+"""OpenSCAD scene renders of the real hook STLs (the model frame, y up), all three versions:
 each hook on a 1x4 with its rod, the tip board and the butt board hanging from two
-joists with five rods spanning them, and orthographic face-on close-ups of each
-pocket for the retention check. Plus a to-scale matplotlib drilling guide for both
-boards.
+joists with five rods spanning them (the butt board carries a mix of the two grip
+hooks), and orthographic face-on close-ups of each pocket for the retention check.
+Plus a to-scale matplotlib drilling guide, a board per hook.
 
 Run from the vault root after rod_hook.py:
   .venv/bin/python projects/Fishing-rod-holder/pipeline/renders.py
@@ -11,6 +11,8 @@ Run from the vault root after rod_hook.py:
 import subprocess
 import sys
 from pathlib import Path
+
+from shapely.geometry import Point
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import rod_hook as rh  # noqa: E402
@@ -20,10 +22,10 @@ IMAGES = PROJECT / "images"
 SCRATCH = Path("/tmp/claude-1000/-home-brian--claude-spares-spare-OJ6Ifx/3f3590ae-4308-446d-b672-0d51f52c10fb/scratchpad/hook")
 OPENSCAD = Path.home() / ".local/bin/openscad"
 IN = rh.IN
-TIP, BUTT = rh.TIP, rh.BUTT
+TIP, BUTT, SLIM = rh.TIP, rh.BUTT, rh.SLIM
 # the model frame (y up); <stem>.stl is the standing print frame, never used for a scene
 STL = {v.name: PROJECT / f"{v.stem}-model.stl" for v in rh.VARIANTS.values()}
-BLANK_D, GRIP_D = rh.SHOW_ROD["tip"], rh.SHOW_ROD["butt"]   # 3/8 blank in the tip hook, 1-7/8 grip in the butt hook
+BLANK_D, GRIP_D, SLIM_D = rh.SHOW_ROD["tip"], rh.SHOW_ROD["butt"], rh.SHOW_ROD["slim"]   # 3/8 blank in the tip hook, 1-7/8 grip in the 2 in hook, 1-1/4 grip in the 1.5 in hook
 HOOK_COLOR, ROD_COLOR, GRIP_COLOR = "#2f6fe4", "#333333", "#b98b5a"   # the grip is cork
 
 JOIST_D, JOIST_T, PLY = 7.25, 1.5, 0.75
@@ -33,12 +35,11 @@ GRIP_LEN = 10.0                          # of grip drawn in the two-board scene
 N_HOOKS = rh.HOOKS_PER_BOARD             # five hooks butted fill the hang
 PITCH = rh.H                             # no gap between hooks: pitch is the hook height
 BOTTOM_FIRST = rh.H                      # the top hook starts at the joist bottom
+GRIP_BOARD = [BUTT] * 3 + [SLIM] * 2     # the butt board's hooks from the top: an example mix, they butt alike (same height, tab and screws)
+assert len(GRIP_BOARD) == N_HOOKS
 SEAT_TIP = TIP.seat_point(BLANK_D)       # where a 3/8 blank rests, in hook coordinates (x, y up from the hook bottom)
-SEAT_BUTT = BUTT.seat_point(GRIP_D)      # where a 1-7/8 grip rests in the butt hook: about 0.44 in higher than the blank
 FIRST_TIP = BOTTOM_FIRST - SEAT_TIP[1]   # the top blank's depth below the joist
-FIRST_BUTT = BOTTOM_FIRST - SEAT_BUTT[1]  # the top grip centre's depth below the joist
-EXIT_GAP = rh.H - BUTT.Y_TIP             # between the butt hook's lip tip and the hook butted above: 2-1/4, Brian asked for 2
-GAP_COLOR = "#d7263d"                    # the dimension bar for that gap
+GAP_COLOR = "#d7263d"                    # the dimension bar for the gap between a grip hook's lip tip and the hook butted above
 
 
 def render(name, body, camera, size=(1400, 1000), projection="p"):
@@ -93,9 +94,10 @@ rotate([90, 0, 0]) {{
 
 
 def boards_in_place():
-    """2. the tip board and the butt board hanging from two joists, five hooks butted on each,
-    and five rods spanning them: a blank seated in the tip hook running back to a grip seated
-    in the butt hook. The tip board is nearer the camera."""
+    """2. the tip board and the butt board hanging from two joists, five hooks butted on each
+    (tip hooks on one, GRIP_BOARD's mix on the other), and five rods spanning them: a blank
+    seated in the tip hook running back to a grip seated in the hook it is in. The tip board
+    is nearer the camera."""
     z_tip, z_butt = 0.0, -JOIST_GAP
     parts = []
     for z0 in (z_tip, z_butt):
@@ -103,15 +105,17 @@ def boards_in_place():
         parts.append(f'color("#c9a46e") translate([-{4 * IN}, 0, {(z0 - rh.BOARD_T - JOIST_T) * IN}]) cube([{12 * IN}, {JOIST_D * IN}, {JOIST_T * IN}]);')
     parts.append(f'color("#e8d6b3") translate([-{4 * IN}, {JOIST_D * IN}, {(z_butt - 8) * IN}]) cube([{12 * IN}, {PLY * IN}, {(JOIST_GAP + 16) * IN}]);')
     grip_near = z_butt + rh.T / 2 + GRIP_LEN / 2      # the grip is centred on the butt hook; this is its end toward the tip board
-    for i in range(N_HOOKS):
+    for i, grip_hook in enumerate(GRIP_BOARD):
         hook_y = -(BOTTOM_FIRST + PITCH * i)            # hook bottom edge below the joist bottom, the same on both boards
+        d = rh.SHOW_ROD[grip_hook.name]
+        seat = grip_hook.seat_point(d)                  # where this hook's grip rests: each of the three hooks has its own seat
         parts.append(hook(TIP, dy=hook_y, dz=z_tip))
-        parts.append(hook(BUTT, dy=hook_y, dz=z_butt))
-        # the blank: from 4 in past the tip hook back to the grip's end, tilted the 0.44 in between the two seat heights
+        parts.append(hook(grip_hook, dy=hook_y, dz=z_butt))
+        # the blank: from 4 in past the tip hook back to the grip's end, tilted by the difference between the two seats
         a = (SEAT_TIP[0], hook_y + SEAT_TIP[1], z_tip + rh.T + 4.0)
-        b = (SEAT_BUTT[0], hook_y + SEAT_BUTT[1], grip_near)
+        b = (seat[0], hook_y + seat[1], grip_near)
         parts.append(f'color("{ROD_COLOR}") hull() {{ translate({pt(a)}) sphere(d={BLANK_D * IN}, $fn=24); translate({pt(b)}) sphere(d={BLANK_D * IN}, $fn=24); }}')
-        parts.append(rod(BUTT, GRIP_D, length=GRIP_LEN, y=hook_y + SEAT_BUTT[1], z=z_butt + rh.T / 2, color=GRIP_COLOR))
+        parts.append(rod(grip_hook, d, length=GRIP_LEN, y=hook_y + seat[1], z=z_butt + rh.T / 2, color=GRIP_COLOR))
     scene = f"""
 rotate([90, 0, 0]) {{
 {chr(10).join(parts)}
@@ -125,6 +129,7 @@ def main():
     IMAGES.mkdir(exist_ok=True)
     hook_on_board(TIP, BLANK_D, ROD_COLOR, "hook-on-board")
     hook_on_board(BUTT, GRIP_D, GRIP_COLOR, "butt-hook-on-board")
+    hook_on_board(SLIM, SLIM_D, GRIP_COLOR, "slim-hook-on-board")
     boards_in_place()
     layout_figure()
 
@@ -144,15 +149,17 @@ def frac(x):
 
 
 def layout_figure():
-    """To-scale drilling guide: the two 27 in boards side by side at one scale, five hooks
-    butted on each, screw positions, a 3/8 blank in the tip hooks and a 1-7/8 grip in the butt hooks."""
+    """To-scale drilling guide: three 27 in boards side by side at one scale, a board per hook, five hooks
+    butted on each, screw positions, a 3/8 blank in the tip hooks, a 1-7/8 grip in the 2 in hooks and a
+    1-1/4 grip in the 1.5 in hooks."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.patches import Circle, Polygon as MplPolygon, Rectangle
 
-    DX = 14.0   # the butt board's offset on the page; it hangs from a different joist
-    fig, ax = plt.subplots(figsize=(11.0, 11.5), dpi=150)
+    DX = 14.0   # from one board to the next on the page: the tip board, then the butt board twice, once per grip hook
+    X_END = 2 * DX + rh.BOARD_W   # the last board's far edge
+    fig, ax = plt.subplots(figsize=(16.2, 11.5), dpi=150)   # 11 in wide held two boards; the same scale for three
     # depth below the joist bottom grows downward on the page
     ink = dict(fontsize=8.5, color="#1f2430")
 
@@ -179,43 +186,46 @@ def layout_figure():
         ax.text(x0 - variant.CANT - 0.1, BOTTOM_FIRST + (N_HOOKS - 1) * PITCH - 2.4, f"jaws reach\n{frac(variant.CANT)} past\nthe edge",
                 fontsize=8, ha="right", va="top", color="#2b4f9e")
 
-    panel(0.0, TIP, BLANK_D, ROD_COLOR, f"Tip board: tip hooks,\n{frac(BLANK_D)} blank drawn at its seat")
-    panel(DX, BUTT, GRIP_D, GRIP_COLOR, f"Butt board: butt hooks,\n{frac(GRIP_D)} grip drawn at its seat")
+    panel(0.0, TIP, BLANK_D, ROD_COLOR, f"Tip board: {TIP.label} hooks,\n{frac(BLANK_D)} blank drawn at its seat")
+    panel(DX, BUTT, GRIP_D, GRIP_COLOR, f"Butt board: {BUTT.label} hooks,\n{frac(GRIP_D)} grip drawn at its seat")
+    panel(2 * DX, SLIM, SLIM_D, GRIP_COLOR, f"Butt board: {SLIM.label} hooks,\n{frac(SLIM_D)} grip drawn at its seat")
     # dimensions, once each
-    ax.annotate("", xy=(DX + rh.BOARD_W + 5.2, 0), xytext=(DX + rh.BOARD_W + 5.2, BOARD_LEN - BOARD_ABOVE), arrowprops=dict(arrowstyle="<->", lw=0.9), zorder=8)
-    ax.text(DX + rh.BOARD_W + 5.05, (BOARD_LEN - BOARD_ABOVE) * 0.8, "20 in hang,\nas now", fontsize=8.5, va="center", ha="right")
+    ax.annotate("", xy=(X_END + 5.2, 0), xytext=(X_END + 5.2, BOARD_LEN - BOARD_ABOVE), arrowprops=dict(arrowstyle="<->", lw=0.9), zorder=8)
+    ax.text(X_END + 5.05, (BOARD_LEN - BOARD_ABOVE) * 0.8, "20 in hang,\nas now", fontsize=8.5, va="center", ha="right")
     ax.annotate("", xy=(-2.9, BOTTOM_FIRST), xytext=(-2.9, BOTTOM_FIRST + PITCH), arrowprops=dict(arrowstyle="<->", lw=0.9), zorder=8)
     ax.text(-3.05, BOTTOM_FIRST + PITCH / 2, f"{PITCH:g} in\npitch", fontsize=8.5, va="center", ha="right")
     ax.annotate("", xy=(-2.9, 0), xytext=(-2.9, BOTTOM_FIRST), arrowprops=dict(arrowstyle="<->", lw=0.9), zorder=8)
     ax.text(-3.05, BOTTOM_FIRST / 2, f"{frac(BOTTOM_FIRST)}: the top\nhook starts\nat the joist", fontsize=8.5, va="center", ha="right")
-    # the room to get the grip in: between the second butt hook's lip tip and the hook above it
-    gx = DX - BUTT.CANT - 0.35
-    lip_depth, above_depth = BOTTOM_FIRST + PITCH - BUTT.Y_TIP, BOTTOM_FIRST
-    ax.annotate("", xy=(gx, above_depth), xytext=(gx, lip_depth), arrowprops=dict(arrowstyle="<->", lw=0.9, color=GAP_COLOR), zorder=8)
-    for depth in (lip_depth, above_depth):
-        ax.plot([gx - 0.15, DX - BUTT.CANT + 0.05], [depth, depth], color=GAP_COLOR, lw=0.6, zorder=8)
-    ax.text(gx - 0.2, (lip_depth + above_depth) / 2, f"{frac(EXIT_GAP)} in to get\nthe grip in\n(asked {BUTT.MIN_EXIT_GAP:g})",
-            fontsize=8, va="center", ha="right", color=GAP_COLOR)
-    # callouts, once, in the gap between the boards
+    # on each grip board: the room to get the grip in, between the second hook's lip tip and the hook above it (Brian asked
+    # 2 in for the 2 in hook and gave no number for the 1.5 in hook), and where the grips rest
+    for x0, v, d, note in ((DX, BUTT, GRIP_D, f"(asked {BUTT.MIN_EXIT_GAP:g})"), (2 * DX, SLIM, SLIM_D, f"(grips to {frac(max(SLIM.ROD_DIAS))})")):
+        gx = x0 - v.CANT - 0.35
+        lip_depth, above_depth = BOTTOM_FIRST + PITCH - v.Y_TIP, BOTTOM_FIRST
+        ax.annotate("", xy=(gx, above_depth), xytext=(gx, lip_depth), arrowprops=dict(arrowstyle="<->", lw=0.9, color=GAP_COLOR), zorder=8)
+        for depth in (lip_depth, above_depth):
+            ax.plot([gx - 0.15, x0 - v.CANT + 0.05], [depth, depth], color=GAP_COLOR, lw=0.6, zorder=8)
+        ax.text(gx - 0.2, (lip_depth + above_depth) / 2, f"{frac(rh.H - v.Y_TIP)} in to get\nthe grip in\n{note}",
+                fontsize=8, va="center", ha="right", color=GAP_COLOR)
+        ax.text(x0 + rh.BOARD_W + 0.7, BOTTOM_FIRST + 2 * PITCH + 0.5,
+                f"grip centres rest about\n{frac(BOTTOM_FIRST - v.seat_point(d)[1])} in down,\nthen every {frac(PITCH)}",
+                fontsize=7.5, va="top", color="#1f2430")
+    # callouts, once, in the gap between the first two boards
     gap_x = rh.BOARD_W + 0.7
     ax.text(gap_x, BOTTOM_FIRST - rh.SCREW_Y[1] - 0.05,
-            f"two #8 x 1 screws per hook,\n{frac(rh.SCREW_X)} in from the board edge,\n{frac(rh.SCREW_Y[0])} and {frac(rh.SCREW_Y[1])} up from\nthe hook's bottom edge,\nsame on both boards",
+            f"two #8 x 1 screws per hook,\n{frac(rh.SCREW_X)} in from the board edge,\n{frac(rh.SCREW_Y[0])} and {frac(rh.SCREW_Y[1])} up from\nthe hook's bottom edge,\nsame for all three hooks",
             fontsize=7.5, va="top", color="#1f2430")
     ax.text(gap_x, BOTTOM_FIRST + 2 * PITCH + 0.5,
-            "hook bottoms at\n" + ", ".join(frac(BOTTOM_FIRST + PITCH * i) for i in range(N_HOOKS)) + "\nbelow the joist, no gaps,\non both boards",
+            "hook bottoms at\n" + ", ".join(frac(BOTTOM_FIRST + PITCH * i) for i in range(N_HOOKS)) + "\nbelow the joist, no gaps,\non every board",
             fontsize=7.5, va="top", color="#1f2430")
     ax.text(gap_x, BOTTOM_FIRST + 3 * PITCH + 0.5,
             f"blanks rest about\n{frac(FIRST_TIP)} in down,\nthen every {frac(PITCH)}",
             fontsize=7.5, va="top", color="#1f2430")
-    ax.text(DX + rh.BOARD_W + 0.7, BOTTOM_FIRST + 2 * PITCH + 0.5,
-            f"grip centres rest about\n{frac(FIRST_BUTT)} in down,\nthen every {frac(PITCH)}",
-            fontsize=7.5, va="top", color="#1f2430")
-    ax.set_xlim(-6.2, DX + rh.BOARD_W + 5.9)
+    ax.set_xlim(-6.2, X_END + 5.9)
     ax.set_ylim(BOARD_LEN - BOARD_ABOVE + 1.0, -JOIST_D - PLY - 1.9)
     ax.set_aspect("equal")
     ax.axis("off")
     n_words = {4: "four", 5: "five", 6: "six"}.get(N_HOOKS, str(N_HOOKS))
-    ax.set_title(f"Where the hooks go: two boards, {n_words} hooks butted on each, {frac(PITCH)} in pitch, same screw layout", fontsize=10.5, loc="left")
+    ax.set_title(f"Where the hooks go: {n_words} hooks butted on each board, {frac(PITCH)} in pitch, same screw layout for all three hooks", fontsize=10.5, loc="left")
     fig.tight_layout()
     out = IMAGES / "board-layout.png"
     fig.savefig(out, facecolor="white")
@@ -234,32 +244,39 @@ color("#888888") translate([{s3[0] * IN}, {s3[1] * IN}, {rh.T * IN}]) cylinder(h
     render("pocket-face-on", scene3, "0,0,0,0,0,0,0", size=(1200, 1000), projection="o")
 
 
-def butt_pocket_face_on():
-    """The butt hook face on, orthographic: the 1-7/8 grip seated (solid cork), the same grip at
-    its escape pose (translucent, centre over the lip tip, risen by the escape lift) and the hook
-    butted above (translucent, only its lower part drawn) so the gap the grip leaves through shows."""
-    sx, sy = SEAT_BUTT
-    lift = BUTT.escape_lift(GRIP_D)
-    ex, ey = -BUTT.CANT, sy + lift             # the escape pose: centre over the lip tip
-    upper_show = 2.0                           # inches of the hook above to draw
-    # the 2-1/4 gap as a bar beside the lifted grip, from the lip tip's height to the hook above, with ticks back to the tip
-    bx, bw, bz = -BUTT.CANT - GRIP_D / 2 - 0.3, 0.06, rh.T + 0.3
+def grip_pocket_face_on(variant, d, ey, name):
+    """A grip hook face on, orthographic: a grip of diameter d seated (solid cork), the same grip on
+    its way out (translucent, centre over the lip tip at height ey) and the hook butted above
+    (translucent, only its lower part drawn) so the gap the grip leaves through shows."""
+    sx, sy = variant.seat_point(d)
+    ex = -variant.CANT                         # on its way out: centre over the lip tip
+    # neither grip cuts plastic: both centres lie where a rod this size can be, with the hooks butted above and below in the way
+    free = variant.free_space(d / 2)
+    assert free.distance(Point(sx, sy)) < 1e-6, f"{name}: the seated grip is {free.distance(Point(sx, sy)):.4f} in out of the free space"   # the seat is on its boundary
+    assert free.contains(Point(ex, ey)), f"{name}: the grip on its way out at ({ex:.3f}, {ey:.3f}) cuts into a hook"
+    gap = rh.H - variant.Y_TIP                 # between the lip tip and the hook butted above
+    upper_show = variant.Y_TIP + 0.25          # inches of the hook above to draw: its whole lip
+    # the gap as a bar beside the lifted grip, from the lip tip's height to the hook above, with ticks back to the tip
+    bx, bw, bz = -variant.CANT - d / 2 - 0.3, 0.06, rh.T + 0.3
     scene = f"""
-{hook(BUTT)}
-{rod(BUTT, GRIP_D, length=1.0, color=GRIP_COLOR)}
-color("{GAP_COLOR}") translate([{(bx - bw / 2) * IN}, {BUTT.Y_TIP * IN}, {bz * IN}]) cube([{bw * IN}, {EXIT_GAP * IN}, 1]);
-color("{GAP_COLOR}") translate([{(bx - bw / 2) * IN}, {(BUTT.Y_TIP - bw / 2) * IN}, {bz * IN}]) cube([{(-BUTT.CANT - bx + bw) * IN}, {bw * IN}, 1]);
-color("{GAP_COLOR}") translate([{(bx - bw / 2) * IN}, {(rh.H - bw / 2) * IN}, {bz * IN}]) cube([{(-BUTT.CANT - bx + bw) * IN}, {bw * IN}, 1]);
-color("{GRIP_COLOR}", 0.4) translate([{ex * IN}, {ey * IN}, {-0.5 * IN}]) cylinder(h={1.0 * IN}, d={GRIP_D * IN}, $fn=96);
+{hook(variant)}
+{rod(variant, d, length=1.0, color=GRIP_COLOR)}
+color("{GAP_COLOR}") translate([{(bx - bw / 2) * IN}, {variant.Y_TIP * IN}, {bz * IN}]) cube([{bw * IN}, {gap * IN}, 1]);
+color("{GAP_COLOR}") translate([{(bx - bw / 2) * IN}, {(variant.Y_TIP - bw / 2) * IN}, {bz * IN}]) cube([{(-variant.CANT - bx + bw) * IN}, {bw * IN}, 1]);
+color("{GAP_COLOR}") translate([{(bx - bw / 2) * IN}, {(rh.H - bw / 2) * IN}, {bz * IN}]) cube([{(-variant.CANT - bx + bw) * IN}, {bw * IN}, 1]);
+color("{GRIP_COLOR}", 0.4) translate([{ex * IN}, {ey * IN}, {-0.5 * IN}]) cylinder(h={1.0 * IN}, d={d * IN}, $fn=96);
 color("{HOOK_COLOR}", 0.35) intersection() {{
-  translate([0, {rh.H * IN}, 0]) import("{STL["butt"]}");
+  translate([0, {rh.H * IN}, 0]) import("{STL[variant.name]}");
   translate([{-10 * IN}, {rh.H * IN - 0.01}, -10]) cube([{20 * IN}, {upper_show * IN}, 20]);
 }}
 """
-    render("butt-pocket-face-on", scene, "0,0,0,0,0,0,0", size=(1100, 1200), projection="o")
+    render(name, scene, "0,0,0,0,0,0,0", size=(1100, 1200), projection="o")
 
 
 if __name__ == "__main__":
     main()
     pocket_face_on()
-    butt_pocket_face_on()
+    # the 2 in hook: its 1-7/8 grip at the escape pose, risen from its seat by the escape lift
+    grip_pocket_face_on(BUTT, GRIP_D, BUTT.seat_point(GRIP_D)[1] + BUTT.escape_lift(GRIP_D), "butt-pocket-face-on")
+    # the 1.5 in hook: its biggest grip (1-3/8), up the lean and over the lip, in the middle of the gap under the hook above
+    grip_pocket_face_on(SLIM, max(SLIM.ROD_DIAS), (SLIM.Y_TIP + rh.H) / 2, "slim-pocket-face-on")

@@ -1,5 +1,6 @@
 {
  "variant": "butt",
+ "label": "2 in",
  "holds": "the grip, about 1-7/8 in (2 in opening)",
  "size_in": [
   4.5,
@@ -37,6 +38,10 @@
   "1.5": 1.405,
   "1.75": 1.405,
   "1.875": 1.405
+ },
+ "escape_lift_mixed_in": {
+  "tip": 1.405,
+  "1.5 in": 1.405
  },
  "lift_to_leave_in": 1.438,
  "screws_mm": {

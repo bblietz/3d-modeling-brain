@@ -1,0 +1,10 @@
+{
+ "rod-hook-slim.stl": {
+  "grams": 33.3,
+  "minutes": 79,
+  "time_text": "1h 19m",
+  "material": "petg",
+  "walls": 2,
+  "infill": 15
+ }
+}

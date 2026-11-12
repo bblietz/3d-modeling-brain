@@ -2,13 +2,26 @@
  "file": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Fishing-rod-holder/rod-hook.3mf",
  "copies": 5,
  "copies_are": "per variant",
- "objects": 10,
- "command": "bambu-studio --arrange 1 --load-settings machine.json;process.json --load-filaments filament.json --export-3mf raw.3mf --outputdir . rod-hook-1.stl rod-hook-2.stl rod-hook-3.stl rod-hook-4.stl rod-hook-5.stl rod-hook-butt-1.stl rod-hook-butt-2.stl rod-hook-butt-3.stl rod-hook-butt-4.stl rod-hook-butt-5.stl   (cwd /tmp/rod-hook-3mf-5vzp1l9d)",
+ "objects": 15,
+ "command": "bambu-studio --arrange 1 --load-settings machine.json;process.json --load-filaments filament.json --export-3mf raw.3mf --outputdir . rod-hook-1.stl rod-hook-2.stl rod-hook-3.stl rod-hook-4.stl rod-hook-5.stl rod-hook-slim-1.stl rod-hook-slim-2.stl rod-hook-slim-3.stl rod-hook-slim-4.stl rod-hook-slim-5.stl rod-hook-butt-1.stl rod-hook-butt-2.stl rod-hook-butt-3.stl rod-hook-butt-4.stl rod-hook-butt-5.stl   (cwd /tmp/claude-1000/-home-brian--claude-spares-spare-OJ6Ifx/3f3590ae-4308-446d-b672-0d51f52c10fb/scratchpad/plate3/run)",
  "cli_arranged_plates": 1,
  "plates_authored": {
   "tip": 1,
+  "slim": 1,
   "butt": 1
  },
+ "layout": {
+  "1": [
+   [
+    "tip",
+    "slim"
+   ],
+   [
+    "butt"
+   ]
+  ]
+ },
+ "layout_is": "plate -> its kinds of row from the back, each kind once per copy; the hooks of a row stand end to end from the left",
  "presets": {
   "machine": "Bambu Lab X2D 0.6 nozzle",
   "process": "0.30mm Standard @BBL X2D 0.6 nozzle",
@@ -30,7 +43,7 @@
  "plate_stride_mm": 307.2,
  "screw_pads": {
   "per_hook": 2,
-  "total": 20,
+  "total": 30,
   "axis": "y, through the thickness",
   "diameter_mm": 22.0,
   "span_y_mm": [
@@ -46,7 +59,7 @@
     {
      "name": "pad-bottom",
      "file": "rod-hook-pad-bottom.stl",
-     "path": "/tmp/rod-hook-3mf-5vzp1l9d/rod-hook-pad-bottom.stl",
+     "path": "/tmp/claude-1000/-home-brian--claude-spares-spare-OJ6Ifx/3f3590ae-4308-446d-b672-0d51f52c10fb/scratchpad/plate3/run/rod-hook-pad-bottom.stl",
      "centre_print_mm": [
       82.55,
       4.7625,
@@ -58,9 +71,35 @@
     {
      "name": "pad-top",
      "file": "rod-hook-pad-top.stl",
-     "path": "/tmp/rod-hook-3mf-5vzp1l9d/rod-hook-pad-top.stl",
+     "path": "/tmp/claude-1000/-home-brian--claude-spares-spare-OJ6Ifx/3f3590ae-4308-446d-b672-0d51f52c10fb/scratchpad/plate3/run/rod-hook-pad-top.stl",
      "centre_print_mm": [
       82.55,
+      4.7625,
+      87.3125
+     ],
+     "volume_mm3": 3111.5,
+     "outside_cad_mm3": 0.0
+    }
+   ],
+   "slim": [
+    {
+     "name": "pad-bottom",
+     "file": "rod-hook-slim-pad-bottom.stl",
+     "path": "/tmp/claude-1000/-home-brian--claude-spares-spare-OJ6Ifx/3f3590ae-4308-446d-b672-0d51f52c10fb/scratchpad/plate3/run/rod-hook-slim-pad-bottom.stl",
+     "centre_print_mm": [
+      98.425,
+      4.7625,
+      14.2875
+     ],
+     "volume_mm3": 3111.5,
+     "outside_cad_mm3": 0.0
+    },
+    {
+     "name": "pad-top",
+     "file": "rod-hook-slim-pad-top.stl",
+     "path": "/tmp/claude-1000/-home-brian--claude-spares-spare-OJ6Ifx/3f3590ae-4308-446d-b672-0d51f52c10fb/scratchpad/plate3/run/rod-hook-slim-pad-top.stl",
+     "centre_print_mm": [
+      98.425,
       4.7625,
       87.3125
      ],
@@ -72,7 +111,7 @@
     {
      "name": "pad-bottom",
      "file": "rod-hook-butt-pad-bottom.stl",
-     "path": "/tmp/rod-hook-3mf-5vzp1l9d/rod-hook-butt-pad-bottom.stl",
+     "path": "/tmp/claude-1000/-home-brian--claude-spares-spare-OJ6Ifx/3f3590ae-4308-446d-b672-0d51f52c10fb/scratchpad/plate3/run/rod-hook-butt-pad-bottom.stl",
      "centre_print_mm": [
       95.25,
       4.7625,
@@ -84,7 +123,7 @@
     {
      "name": "pad-top",
      "file": "rod-hook-butt-pad-top.stl",
-     "path": "/tmp/rod-hook-3mf-5vzp1l9d/rod-hook-butt-pad-top.stl",
+     "path": "/tmp/claude-1000/-home-brian--claude-spares-spare-OJ6Ifx/3f3590ae-4308-446d-b672-0d51f52c10fb/scratchpad/plate3/run/rod-hook-butt-pad-top.stl",
      "centre_print_mm": [
       95.25,
       4.7625,
@@ -101,6 +140,11 @@
     "inside_stl_mm3": 6222.9,
     "pads_mm3": 6223.0
    },
+   "slim": {
+    "outside_stl_mm3": 0.0,
+    "inside_stl_mm3": 6222.9,
+    "pads_mm3": 6223.0
+   },
    "butt": {
     "outside_stl_mm3": 0.0,
     "inside_stl_mm3": 6222.9,
@@ -108,10 +152,10 @@
    }
   }
  },
- "note": "Open rod-hook.3mf once in Bambu Studio to confirm the plate shows all ten hooks in one row: five tip hooks at the back, five butt hooks in front. The GUI is the ground truth for the plate layout and the modifiers.",
+ "note": "Open rod-hook.3mf once in Bambu Studio to confirm the plate shows all fifteen hooks: at the back five rows of a tip hook (left) and a 1.5 in hook (right), in front five rows of one 2 in hook. The GUI is the ground truth for the plate layout and the modifiers.",
  "plates": 1,
  "hooks_per_plate": [
-  10
+  15
  ],
  "rows_mm": {
   "tip": {
@@ -119,8 +163,21 @@
    "hooks": 5,
    "pitch_mm": 23.025,
    "x_mm": [
-    77.2,
-    178.8
+    11.71,
+    113.31
+   ],
+   "y_mm": [
+    134.75,
+    236.37
+   ]
+  },
+  "slim": {
+   "plate": 1,
+   "hooks": 5,
+   "pitch_mm": 23.025,
+   "x_mm": [
+    126.81,
+    244.29
    ],
    "y_mm": [
     134.75,
@@ -142,10 +199,91 @@
   }
  },
  "placement_mm": {
+  "rod-hook-slim-1": {
+   "variant": "slim",
+   "plate": 1,
+   "row": 0,
+   "col": 1,
+   "min_mm": [
+    126.81,
+    226.85,
+    0.0
+   ],
+   "max_mm": [
+    244.29,
+    236.37,
+    101.6
+   ]
+  },
+  "rod-hook-slim-2": {
+   "variant": "slim",
+   "plate": 1,
+   "row": 1,
+   "col": 1,
+   "min_mm": [
+    126.81,
+    203.82,
+    0.0
+   ],
+   "max_mm": [
+    244.29,
+    213.35,
+    101.6
+   ]
+  },
+  "rod-hook-slim-3": {
+   "variant": "slim",
+   "plate": 1,
+   "row": 2,
+   "col": 1,
+   "min_mm": [
+    126.81,
+    180.8,
+    0.0
+   ],
+   "max_mm": [
+    244.29,
+    190.32,
+    101.6
+   ]
+  },
+  "rod-hook-slim-4": {
+   "variant": "slim",
+   "plate": 1,
+   "row": 3,
+   "col": 1,
+   "min_mm": [
+    126.81,
+    157.78,
+    0.0
+   ],
+   "max_mm": [
+    244.29,
+    167.3,
+    101.6
+   ]
+  },
+  "rod-hook-slim-5": {
+   "variant": "slim",
+   "plate": 1,
+   "row": 4,
+   "col": 1,
+   "min_mm": [
+    126.81,
+    134.75,
+    0.0
+   ],
+   "max_mm": [
+    244.29,
+    144.27,
+    101.6
+   ]
+  },
   "rod-hook-butt-1": {
    "variant": "butt",
    "plate": 1,
-   "slot": 5,
+   "row": 5,
+   "col": 0,
    "min_mm": [
     70.85,
     111.72,
@@ -160,7 +298,8 @@
   "rod-hook-butt-2": {
    "variant": "butt",
    "plate": 1,
-   "slot": 6,
+   "row": 6,
+   "col": 0,
    "min_mm": [
     70.85,
     88.7,
@@ -175,7 +314,8 @@
   "rod-hook-butt-3": {
    "variant": "butt",
    "plate": 1,
-   "slot": 7,
+   "row": 7,
+   "col": 0,
    "min_mm": [
     70.85,
     65.67,
@@ -190,7 +330,8 @@
   "rod-hook-butt-4": {
    "variant": "butt",
    "plate": 1,
-   "slot": 8,
+   "row": 8,
+   "col": 0,
    "min_mm": [
     70.85,
     42.65,
@@ -205,7 +346,8 @@
   "rod-hook-butt-5": {
    "variant": "butt",
    "plate": 1,
-   "slot": 9,
+   "row": 9,
+   "col": 0,
    "min_mm": [
     70.85,
     19.62,
@@ -220,14 +362,15 @@
   "rod-hook-1": {
    "variant": "tip",
    "plate": 1,
-   "slot": 0,
+   "row": 0,
+   "col": 0,
    "min_mm": [
-    77.2,
+    11.71,
     226.85,
     0.0
    ],
    "max_mm": [
-    178.8,
+    113.31,
     236.37,
     101.6
    ]
@@ -235,14 +378,15 @@
   "rod-hook-2": {
    "variant": "tip",
    "plate": 1,
-   "slot": 1,
+   "row": 1,
+   "col": 0,
    "min_mm": [
-    77.2,
+    11.71,
     203.82,
     0.0
    ],
    "max_mm": [
-    178.8,
+    113.31,
     213.35,
     101.6
    ]
@@ -250,14 +394,15 @@
   "rod-hook-3": {
    "variant": "tip",
    "plate": 1,
-   "slot": 2,
+   "row": 2,
+   "col": 0,
    "min_mm": [
-    77.2,
+    11.71,
     180.8,
     0.0
    ],
    "max_mm": [
-    178.8,
+    113.31,
     190.32,
     101.6
    ]
@@ -265,14 +410,15 @@
   "rod-hook-4": {
    "variant": "tip",
    "plate": 1,
-   "slot": 3,
+   "row": 3,
+   "col": 0,
    "min_mm": [
-    77.2,
+    11.71,
     157.78,
     0.0
    ],
    "max_mm": [
-    178.8,
+    113.31,
     167.3,
     101.6
    ]
@@ -280,73 +426,108 @@
   "rod-hook-5": {
    "variant": "tip",
    "plate": 1,
-   "slot": 4,
+   "row": 4,
+   "col": 0,
    "min_mm": [
-    77.2,
+    11.71,
     134.75,
     0.0
    ],
    "max_mm": [
-    178.8,
+    113.31,
     144.27,
     101.6
    ]
   }
  },
- "roundtrip": "1 plates, 10 objects with 20 modifier parts, overrides, different_settings_to_system, plate names and placement survive bambu-studio --arrange 0 --export-3mf",
+ "roundtrip": "1 plates, 15 objects with 30 modifier parts, overrides, different_settings_to_system, plate names and placement survive bambu-studio --arrange 0 --export-3mf",
  "plates_sliced": [
   {
    "plate": 1,
    "variants": {
     "tip": 5,
+    "slim": 5,
     "butt": 5
    },
    "hooks": [
     "rod-hook-1",
+    "rod-hook-slim-1",
     "rod-hook-2",
+    "rod-hook-slim-2",
     "rod-hook-3",
+    "rod-hook-slim-3",
     "rod-hook-4",
+    "rod-hook-slim-4",
     "rod-hook-5",
+    "rod-hook-slim-5",
     "rod-hook-butt-1",
     "rod-hook-butt-2",
     "rod-hook-butt-3",
     "rod-hook-butt-4",
     "rod-hook-butt-5"
    ],
-   "time": "7:56",
-   "minutes": 476,
-   "seconds": 28545,
-   "gcode_estimate": "7h 55m 45s",
-   "grams": 359.2,
-   "metres": 119.47,
-   "used_g_per_filament": 359.2,
-   "grams_per_hook": 35.9,
+   "time": "12:00",
+   "minutes": 720,
+   "seconds": 43222,
+   "gcode_estimate": "12h 0m 22s",
+   "grams": 545.9,
+   "metres": 181.56,
+   "used_g_per_filament": 545.9,
+   "grams_per_hook": 36.4,
    "minutes_per_hook": 48,
    "layers": 339,
    "top_z": 101.7,
    "nozzle_C": 250,
    "bed_C": 70,
    "toolpath_xy_mm": [
-    67.02,
+    7.88,
     15.79,
-    188.98,
+    248.12,
     240.21
    ],
+   "first_layer_xy_mm": [
+    7.88,
+    15.79,
+    248.12,
+    240.21
+   ],
+   "extruder": {
+    "filament_map_mode": "Manual",
+    "filament_map": [
+     "1"
+    ],
+    "filament_nozzle_map": [
+     "1"
+    ],
+    "master_extruder_id": "1",
+    "physical_extruder_map": [
+     "1",
+     "0"
+    ],
+    "extruder_type": [
+     "Direct Drive",
+     "Bowden"
+    ],
+    "extruder_printable_area": [
+     "0x0,256x0,256x256,0x256",
+     "20.5x0,256x0,256x256,20.5x256"
+    ]
+   },
    "feature_mm": {
-    "Sparse infill": 48146.3,
-    "Outer wall": 33427.0,
-    "Inner wall": 32012.0,
-    "Internal solid infill": 2304.5,
-    "Floating vertical shell": 1267.4,
-    "Bottom surface": 887.7,
-    "Bridge": 705.4,
-    "Top surface": 623.7,
-    "Skirt": 88.4,
-    "Overhang wall": 7.0,
-    "Gap infill": 2.1
+    "Sparse infill": 72932.5,
+    "Outer wall": 50875.9,
+    "Inner wall": 48715.8,
+    "Internal solid infill": 3572.8,
+    "Floating vertical shell": 2043.4,
+    "Bottom surface": 1371.7,
+    "Bridge": 1012.6,
+    "Top surface": 916.7,
+    "Skirt": 109.3,
+    "Overhang wall": 10.5,
+    "Gap infill": 2.6
    },
    "pad_fill": {
-    "window": "x within 4.0 mm of the hole, y 1.5 to 8.025 (the core between the walls), layers 5.0 to 9.5 mm below and above the hole centre; plain: the same at z {'tip': 50.8, 'butt': 50.8} +/- 2.25",
+    "window": "x within 4.0 mm of the hole, y 1.5 to 8.025 (the core between the walls), layers 5.0 to 9.5 mm below and above the hole centre; plain: the same at z {'tip': 50.8, 'slim': 50.8, 'butt': 50.8} +/- 2.25",
     "layers_per_window": {
      "rod-hook-1/pad-bottom/below": 15,
      "rod-hook-1/pad-bottom/above": 15,
@@ -356,7 +537,7 @@
     },
     "pads_min": 0.873,
     "pads_max": 0.89,
-    "plain_min": 0.139,
+    "plain_min": 0.138,
     "plain_max": 0.14,
     "per_window": {
      "rod-hook-1/pad-bottom/below": 0.885,
@@ -364,26 +545,51 @@
      "rod-hook-1/pad-top/below": 0.875,
      "rod-hook-1/pad-top/above": 0.88,
      "rod-hook-1/plain": 0.139,
+     "rod-hook-slim-1/pad-bottom/below": 0.885,
+     "rod-hook-slim-1/pad-bottom/above": 0.889,
+     "rod-hook-slim-1/pad-top/below": 0.875,
+     "rod-hook-slim-1/pad-top/above": 0.879,
+     "rod-hook-slim-1/plain": 0.138,
      "rod-hook-2/pad-bottom/below": 0.885,
      "rod-hook-2/pad-bottom/above": 0.89,
      "rod-hook-2/pad-top/below": 0.875,
      "rod-hook-2/pad-top/above": 0.88,
      "rod-hook-2/plain": 0.139,
+     "rod-hook-slim-2/pad-bottom/below": 0.885,
+     "rod-hook-slim-2/pad-bottom/above": 0.889,
+     "rod-hook-slim-2/pad-top/below": 0.875,
+     "rod-hook-slim-2/pad-top/above": 0.879,
+     "rod-hook-slim-2/plain": 0.138,
      "rod-hook-3/pad-bottom/below": 0.885,
      "rod-hook-3/pad-bottom/above": 0.89,
      "rod-hook-3/pad-top/below": 0.875,
      "rod-hook-3/pad-top/above": 0.88,
      "rod-hook-3/plain": 0.139,
+     "rod-hook-slim-3/pad-bottom/below": 0.885,
+     "rod-hook-slim-3/pad-bottom/above": 0.889,
+     "rod-hook-slim-3/pad-top/below": 0.875,
+     "rod-hook-slim-3/pad-top/above": 0.879,
+     "rod-hook-slim-3/plain": 0.138,
      "rod-hook-4/pad-bottom/below": 0.885,
      "rod-hook-4/pad-bottom/above": 0.89,
      "rod-hook-4/pad-top/below": 0.875,
      "rod-hook-4/pad-top/above": 0.88,
      "rod-hook-4/plain": 0.139,
+     "rod-hook-slim-4/pad-bottom/below": 0.885,
+     "rod-hook-slim-4/pad-bottom/above": 0.889,
+     "rod-hook-slim-4/pad-top/below": 0.875,
+     "rod-hook-slim-4/pad-top/above": 0.879,
+     "rod-hook-slim-4/plain": 0.138,
      "rod-hook-5/pad-bottom/below": 0.885,
      "rod-hook-5/pad-bottom/above": 0.89,
      "rod-hook-5/pad-top/below": 0.875,
      "rod-hook-5/pad-top/above": 0.88,
      "rod-hook-5/plain": 0.139,
+     "rod-hook-slim-5/pad-bottom/below": 0.885,
+     "rod-hook-slim-5/pad-bottom/above": 0.889,
+     "rod-hook-slim-5/pad-top/below": 0.875,
+     "rod-hook-slim-5/pad-top/above": 0.879,
+     "rod-hook-slim-5/plain": 0.138,
      "rod-hook-butt-1/pad-bottom/below": 0.884,
      "rod-hook-butt-1/pad-bottom/above": 0.888,
      "rod-hook-butt-1/pad-top/below": 0.873,
@@ -413,19 +619,30 @@
    }
   }
  ],
- "total_time": "7:56",
- "total_minutes": 476,
- "total_grams": 359.2,
+ "total_time": "12:00",
+ "total_minutes": 720,
+ "total_grams": 545.9,
  "pad_fill_min": 0.873,
  "plain_fill_max": 0.14,
  "variants": {
   "tip": {
+   "label": "tip",
+   "stem": "rod-hook",
+   "plate": 1,
+   "hooks": 5
+  },
+  "slim": {
+   "label": "1.5 in",
+   "stem": "rod-hook-slim",
    "plate": 1,
    "hooks": 5
   },
   "butt": {
+   "label": "2 in",
+   "stem": "rod-hook-butt",
    "plate": 1,
    "hooks": 5
   }
- }
+ },
+ "picture": "/home/brian/ClaudeProjects/3d-modeling-brain/projects/Fishing-rod-holder/images/plate-layout.png"
 }
