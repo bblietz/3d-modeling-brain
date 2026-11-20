@@ -41,7 +41,7 @@ Common board lengths: 1830 / 2440 / 3050mm (6 / 8 / 10 ft).
 
 ## Cutting and fits
 
-- Saw kerf: assume 3mm for layout/yield checks until measured.
+- Saw kerf: 1/8 in (3.2 mm). Brian 2026-11-20: all his circular blades are standard 1/8 in kerf; use it for every layout and yield check.
 - Dado / groove: cut to MEASURED stock thickness; test cut in scrap
   first. A snug dado needs no clearance number, it needs a test cut.
 - Sliding fit (removable shelf in a housing): ~+0.5mm.

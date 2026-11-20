@@ -46,7 +46,7 @@ Roomba heights: j7 and Combo j7+ 3.4 in, i7 and the 600/900 series 3.6 in, the 2
 ## Deliverables
 
 - Options page: https://claude.ai/artifact/QLCHadrNJZDeDjqka9yond (Version 2: decided banner, the five posts, the superseded bases).
-- Shop page: https://claude.ai/artifact/K37nFPcZU75QxRSvEAmfLL (`cutlist.html`, with the PDF, hero, assembly and part images), documenting the post version.
+- Shop page: https://claude.ai/artifact/K37nFPcZU75QxRSvEAmfLL (`cutlist.html`, with the PDF, hero, assembly and part images), documenting the post version. Since 2026-11-20 (Version 4) it carries a Lumber to buy section from `lumber_list.py`: 5 hard maple 1x6 x 8 ft (top strips and front frames), 1 soft maple 1x6 (cleat), one 4 x 8 sheet each of 3/4 maple ply, 1/2 maple ply (back plus the painted panels) and 1/2 Baltic birch, about 4 bd ft of 12/4 soft maple for the posts; shelf-packed with Brian's 1/8 in kerf, full sheets only.
 
 ## Open
 

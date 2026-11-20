@@ -46,6 +46,7 @@ TEMPLATE_TAG = "not a plain rectangular blank"
 sys.path.insert(0, PROJ)
 from assembly_shots import STEPS  # noqa: E402  (file stem, title, prefixes, text); runs the model's checks once
 import freestanding_bench as M  # noqa: E402
+from lumber_list import lumber_lines  # noqa: E402
 
 
 def fi(mm):
@@ -204,6 +205,11 @@ def build():
         f'<li><span class="hqty mono">{html.escape(q)}</span><div><b>{html.escape(what)}</b><span class="hnote">{html.escape(note)}</span></div></li>'
         for q, what, note in HARDWARE)
     moved = "".join(f'<li><b>{html.escape(k)}</b> {html.escape(v)}</li>' for k, v in MOVED)
+    lumber = "".join(
+        f'<li><span class="hqty mono">{html.escape(q)}</span><div><b>{html.escape(stock)}</b><span class="hnote">{html.escape(what)}</span>'
+        + ("".join(f'<span class="hnote unit">{html.escape(d)}</span>' for d in descs))
+        + '</div></li>'
+        for q, stock, what, descs in lumber_lines(M.PARTS))
     steps = []
     for stem, title, _prefixes, text in STEPS:
         img = f"{ASSEMBLY_DIR}/{stem}.png"
@@ -229,7 +235,7 @@ def build():
         nook = ""
     options = (f'<a href="{OPTIONS_URL}">base options page</a>' if OPTIONS_URL else "base options page")
     today = date.today().isoformat()
-    return PAGE.format(case=case_html, drawers=drawer_html, hardware=hw, notes=notes, total=total_pieces, today=today,
+    return PAGE.format(case=case_html, drawers=drawer_html, hardware=hw, lumber=lumber, notes=notes, total=total_pieces, today=today,
                        n_case=sum(r["qty"] for r in case), n_drawers=sum(r["qty"] for r in drawers), hero=HERO, nook=nook,
                        moved=moved, options=options, built_in=BUILT_IN_URL, exploded=EXPLODED, n_steps=len(STEPS),
                        clear=fi(M.CLEAR), top_w=fi(M.TOP_W), top_d=fi(M.TOP_D), air=fi(M.SIDE_AIR), seat=fi(M.SEAT_Z),
@@ -318,6 +324,7 @@ PAGE = """<title>Freestanding Bench Cut List</title>
   .hw li div {{ display: flex; flex-direction: column; gap: 2px; }}
   .hqty {{ font-weight: 600; color: var(--accent-ink); }}
   .hnote {{ font-size: 13px; color: var(--muted); }}
+  .hnote.unit {{ padding-left: 12px; }}
   ol.steps {{ margin: 0; padding: 0; list-style: none; counter-reset: step; display: flex; flex-direction: column; }}
   .step {{ display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px 20px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: start; }}
   .step .stext h3 {{ font-size: 17px; margin: 0 0 6px; }}
@@ -373,6 +380,12 @@ PAGE = """<title>Freestanding Bench Cut List</title>
   <div class="moved"><h2>Numbers that moved</h2><ul>{moved}</ul></div>
 
   <div class="flag"><b>Measure the alcove at the floor, 16 in and 36 in, at the back wall and the pilaster faces, before cutting.</b> The piece is {top_w} in wide; if the opening is under {min_open} in anywhere, narrow the top. The baseboard stays: the rear posts stand {post_wall} in off the back wall with {bb_clear} in to spare over a {bb_t} in baseboard and shoe, so measure how far they stand off the wall; the posts have no notch. The low receptacle seen in the photo ends up behind the case; nothing can stay plugged into it. Scrap-test the Blum hook bore in the 1/2 drawer backs (a 2 mm skin).</div>
+
+  <div class="big">
+    <h2>Lumber to buy<small>1x6 x 8 ft maple boards and full 4 x 8 sheets</small></h2>
+    <ul class="hw">{lumber}</ul>
+    <p class="foot">Packed from the cut list by the page builder (<span class="mono">lumber_list.py</span>): longest pieces first, a 1/8 in kerf between them, solid parts along the board's grain, the top as five strips a hair over 5 in wide and an inch over length for the glue-up. A shelf layout wastes a little against a careful one, so these counts are safe rather than minimal; the share of each board or sheet the parts take is in brackets.</p>
+  </div>
 
   <div class="big">
     <h2>Case<small>{n_case} pieces</small></h2>{case}
