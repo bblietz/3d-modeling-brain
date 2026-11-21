@@ -721,7 +721,7 @@ def cleat():
     d.dim_h(22 - chord, 22 + chord, -8, dt(2 * chord))
     d.edge("bottom", "FRONT face")
 
-    sheet(name, head(name, f"soft maple {dt(TS)} thick, {dt(CLEAT_H)} tall x {dt(L)} long, on edge at the top back between the rear posts"),
+    sheet(name, head(name, f"poplar {dt(TS)} thick, {dt(CLEAT_H)} tall x {dt(L)} long, on edge at the top back between the rear posts"),
           [t, f, d], "Recess positions are from the left end of view A (the layout is symmetric, so either end works). "
                      "The recess must open through the FRONT face so the figure-8 swings out under the top. It passes through the "
                      "partition's notch.", stack=True)

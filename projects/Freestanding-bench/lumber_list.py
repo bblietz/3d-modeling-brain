@@ -8,7 +8,8 @@ thicker than a board (the posts) become face-glued layers, each a planing allowa
 the part: four 3/4 layers make 3 in, planed to 2-1/2 square. Parts wider than a board (the top) become a glue-up
 of strips, each a jointing allowance wider than its share and an inch longer for squaring the ends. Pieces are
 shelf-packed onto each unit of stock, longest first, with a saw kerf between them: a shelf runs across the width
-of the board or sheet and is as long as its longest piece. Solid parts keep their length along the board (grain);
+of the board or sheet and is as long as its longest piece; within a shelf, shorter pieces go end to end in a
+strip already ripped at least as wide. Solid parts keep their length along the board (grain);
 sheet parts may turn. The 1/2 paint-grade ply panels come out of the 1/2 birch ply sheet with the back. Shelf packing wastes a little against
 a careful layout, so a count here is safe, not minimal.
 
@@ -34,8 +35,8 @@ LAM_EXTRA = 0.125 * IN           # extra width on each post layer, planed off af
 # material -> (kind, stock name, note); kind "board" packs onto 1x6 boards, "sheet" onto 4 x 8 sheets;
 # a material may point at another's stock to share it
 STOCK = {
-    "soft maple": ("board", "Soft maple 1x6 x 8 ft (3/4 x 5-1/2 actual)", "the top glue-up, the cleat, and the posts as four glued layers each"),
-    "poplar": ("board", "Poplar 1x6 x 8 ft (3/4 x 5-1/2 actual)", "the drawer-front frames, painted white"),
+    "soft maple": ("board", "Soft maple 1x6 x 8 ft (3/4 x 5-1/2 actual)", "the top glue-up and the posts as four glued layers each"),
+    "poplar": ("board", "Poplar 1x6 x 8 ft (3/4 x 5-1/2 actual)", "the drawer-front frames, painted white, and the rear cleat"),
     "3/4 birch ply": ("sheet", "3/4 birch plywood, paint grade, 4 x 8", "ends, bottom, partition"),
     "1/2 birch ply": ("sheet", "1/2 birch plywood, paint grade, 4 x 8", "the back and the two drawer-front panels"),
     "1/2 paint-grade ply": "1/2 birch ply",
@@ -87,15 +88,25 @@ def pack(pieces, W, L):
                 if pw > W + 1e-6:
                     continue
                 for shelf in unit["shelves"]:
-                    if pl <= shelf["len"] + 1e-6 and shelf["used"] + KERF + pw <= W + 1e-6:
+                    if pl > shelf["len"] + 1e-6:
+                        continue
+                    for col in shelf["cols"]:     # end to end in a strip already ripped at least this wide
+                        if pw <= col[0] + 1e-6 and col[1] + KERF + pl <= shelf["len"] + 1e-6:
+                            col[1] += KERF + pl
+                            shelf["pieces"].append((name, pw, pl))
+                            placed = True
+                            break
+                    if not placed and shelf["used"] + KERF + pw <= W + 1e-6:
                         shelf["used"] += KERF + pw
+                        shelf["cols"].append([pw, pl])
                         shelf["pieces"].append((name, pw, pl))
                         placed = True
+                    if placed:
                         break
                 if placed:
                     break
                 if sum(s["len"] for s in unit["shelves"]) + KERF * len(unit["shelves"]) + pl <= L + 1e-6:
-                    unit["shelves"].append({"len": pl, "used": pw, "pieces": [(name, pw, pl)]})
+                    unit["shelves"].append({"len": pl, "used": pw, "cols": [[pw, pl]], "pieces": [(name, pw, pl)]})
                     placed = True
                     break
             if placed:
@@ -107,7 +118,7 @@ def pack(pieces, W, L):
                     pw, pl = o
                     break
             assert pw <= W + 1e-6 and pl <= L + 1e-6, f"{name} {fi(w)} x {fi(l)} does not fit a {fi(W)} x {fi(L)} unit"
-            units.append({"shelves": [{"len": pl, "used": pw, "pieces": [(name, pw, pl)]}]})
+            units.append({"shelves": [{"len": pl, "used": pw, "cols": [[pw, pl]], "pieces": [(name, pw, pl)]}]})
     for u in units:
         u["pieces"] = [p for s in u["shelves"] for p in s["pieces"]]
         u["yield"] = sum(pw * pl for _, pw, pl in u["pieces"]) / (W * L)

@@ -294,7 +294,7 @@ FIG8_Y = CLEAT_Y1 - FIG8_OFFSET
 for xc in FIG8_XS:
     cleat -= Pos(xc, FIG8_Y, TOP_Z0 - FIG8_DEPTH) * Cylinder(FIG8_DIA / 2, FIG8_DEPTH + 1,
                                                              align=(Align.CENTER, Align.CENTER, Align.MIN))
-add("cleat", cleat, 1, SOFT_MAPLE,
+add("cleat", cleat, 1, POPLAR,   # Brian 2026-11-20: off the poplar board, saves a maple board
     f"on edge against the back's inside face at the top, between the rear posts, through the partition notch; four "
     f"{inch(FIG8_DIA)} figure-8 recesses {inch(FIG8_DEPTH)} deep on the top edge, centered {inch(FIG8_OFFSET)} in from the "
     "front face; glued and screwed to the back from inside (#8 x 1 countersunk, nothing through the back)")

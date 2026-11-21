@@ -29,10 +29,11 @@ from cutlist import inch_frac  # noqa: E402
 BUILT_IN_URL = "https://claude.ai/artifact/YQFcx4g5x64K83yhDHvGMf"   # the built-in design's shop page, kept
 OPTIONS_URL = "https://claude.ai/artifact/QLCHadrNJZDeDjqka9yond"   # the base options page; records Brian's pick A (posts, 2026-10-26)
 
-CASE_ORDER = ["soft maple", "3/4 birch ply", "1/2 birch ply"]
+CASE_ORDER = ["soft maple", "poplar", "3/4 birch ply", "1/2 birch ply"]
 DRAWER_ORDER = ["poplar", "1/2 paint-grade ply", "1/2 Baltic birch"]
 CASE_LABEL = {
-    "soft maple": "Soft maple: posts, the rear cleat and the top (posts and top bare, Osmo Natural)",
+    "soft maple": "Soft maple: posts and the top (bare, Osmo Natural)",
+    "poplar": "Poplar: the rear cleat (hidden)",
     "3/4 birch ply": "3/4 in birch plywood, paint grade (measure the sheet): ends (show faces, painted white, bottom edges banded), bottom, partition",
     "1/2 birch ply": "1/2 in birch plywood, paint grade (measure the sheet): back, housed in the rear posts",
 }

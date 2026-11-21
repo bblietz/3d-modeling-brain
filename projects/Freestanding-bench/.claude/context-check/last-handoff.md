@@ -13,7 +13,7 @@ State: Version 3 of the post design (2026-11-01). Brian asked for the baseboard 
 - Everything above the floor gap from the built-in: 14 in top / 17 in seat, white frame-and-panel fronts (1-1/2 maple frames, 1/2 paint-grade panels inset 1/4, T&G), 8 in brass pulls, solid maple top 3 in back from the pilasters with a 3/4 front overhang and a 1/8 roundover, one cushion, 1/2 Baltic birch boxes, Osmo Natural on bare maple.
 - Brian 2026-10-26: the legs are the drawer bench's construction (proud chamfered corner posts, panels housed in them, fronts between them), size A, 2-1/2 in square.
 - Brian 2026-11-01: no notch in the rear posts; the top 1/4 in from the walls all round (65-1/2 wide); 18 in Blum 563H instead of 21 in (his pick over pulling the case 1-1/2 in forward or taking the baseboard out).
-- Brian 2026-11-20: no hard maple, every solid part soft maple; posts laminated from four 3/4 layers of 1x6 (no 12/4), not hollow; poplar front frames with paint-grade ply panels; paint-grade birch ply for the case; 1/8 in kerf on all his blades; lumber list assumes 1x6 x 8 ft boards and full 4 x 8 sheets (shop page Version 5).
+- Brian 2026-11-20: no hard maple, every solid part soft maple; posts laminated from four 3/4 layers of 1x6 (no 12/4), not hollow; poplar front frames and cleat, paint-grade ply panels; paint-grade birch ply for the case; 1/8 in kerf on all his blades; lumber list assumes 1x6 x 8 ft boards and full 4 x 8 sheets (shop page Version 6).
 - The built-in design stays as is (`projects/Built-in-bench/`, shop page Version 18) in case the client goes back.
 
 ## My calls (change via constants if Brian objects)
