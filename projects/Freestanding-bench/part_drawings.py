@@ -1104,7 +1104,13 @@ def drawer_back():
         v.bore(u, w, dia / 2)
     v.callout(nw / 2, nh / 2, f"Blum notch, both bottom corners, through: {dt(nw)} from the blank's end x {dt(nh)} tall", ha="left")
     v.callout(bu[1], up, f"Blum hook bore, both ends: {dt(dia)} dia x {dt(depth)} deep into this face", ha="right")
-    v.callout(L * 0.5, UM_RECESS + T12 / 2, f"no bottom groove: the bottom butts this part's front (inside) face")
+    for u in BACK_SCREW_U:
+        v.bore(u, BACK_SCREW_UP, 9 / 64 * IN / 2)
+    v.callout(BACK_SCREW_U[1], BACK_SCREW_UP, f"{len(BACK_SCREW_U)} screw holes, 9/64 through, countersunk this face, "
+              f"{dt(BACK_SCREW_UP)} up: #6 x 1 into the bottom's edge", ha="left")
+    for i, u in enumerate(BACK_SCREW_U):
+        v.dim_h(0, u, -v.o(22 + 14 * i))
+    v.dim_v(0, BACK_SCREW_UP, L + v.o(22))
     v.dim_v(0, BOX_H, L + v.o(50))
     v.dim_h(0, L, v.top_y())
     v.edge("bottom", "bottom edge")
@@ -1129,7 +1135,9 @@ def drawer_back():
     s.edge("left", "REAR face")
 
     sheet(name, head(name, f"{P12}, {dt(BOX_H)} tall x {dt(L)} long (box back)"), [v, c, s],
-          f"No bottom groove: the bottom butts this part's front face, and each hook bore leaves only a {dt(T12 - depth)} skin of wood behind it, "
+          f"No bottom groove: the bottom butts this part's front face, glued, and the 4 screws pull it tight (drill the 3/32 pilots into its edge "
+          "through these holes at glue-up, square to the face). "
+          f"Each hook bore leaves only a {dt(T12 - depth)} skin of wood behind it, "
           "so test-drill scrap first. Both ends sit in the sides' rabbets. Datums: the blank's own ends and bottom edge.")
     pr = []
     for n, toward in zip(notches, ("+x", "-x")):

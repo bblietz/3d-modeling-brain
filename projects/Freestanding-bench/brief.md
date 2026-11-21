@@ -12,7 +12,7 @@ The second design for the 66 x 28 in former wet-bar alcove. On 2026-10-26 the cl
 
 ## What carried over from the built-in (Brian's locked picks)
 
-Wood top at 14 in, seat 17 in with the 3 in cushion (kept for Maizy, the senior dog). Full-overlay-style fronts built as a 1-1/2 in maple frame around a 1/2 in paint-grade panel inset 1/4 in on the tongue-and-groove bit set, all painted white. 8 in brass bar pulls. 3/4 in overhang with a 1/8 roundover. Solid glued-up maple top with its front edge 3 in back from the pilaster faces. One full-depth cushion. 21 in Blum TANDEM 563H undermounts with every Blum rule from the built-in brief. Drawer boxes of 1/2 in 9-ply Baltic birch (no groove in the back, bottom butts it). Osmo Natural on the bare maple. The picture-only shelves and dropped soffit stay in the room picture.
+Wood top at 14 in, seat 17 in with the 3 in cushion (kept for Maizy, the senior dog). Full-overlay-style fronts built as a 1-1/2 in maple frame around a 1/2 in paint-grade panel inset 1/4 in on the tongue-and-groove bit set, all painted white. 8 in brass bar pulls. 3/4 in overhang with a 1/8 roundover. Solid glued-up maple top with its front edge 3 in back from the pilaster faces. One full-depth cushion. 21 in Blum TANDEM 563H undermounts with every Blum rule from the built-in brief. Drawer boxes of 1/2 in 9-ply Baltic birch (no groove in the back, bottom butts it, glued and, since 2026-11-21, screwed through the back with four #6 x 1 at 3/4 in up, Brian: "add the screws"). Osmo Natural on the bare maple. The picture-only shelves and dropped soffit stay in the room picture.
 
 ## How it stands: the drawer bench's legs (Brian, 2026-10-26)
 
@@ -50,7 +50,7 @@ Roomba heights: j7 and Combo j7+ 3.4 in, i7 and the 600/900 series 3.6 in, the 2
 ## Deliverables
 
 - Options page: https://claude.ai/artifact/QLCHadrNJZDeDjqka9yond (Version 2: decided banner, the five posts, the superseded bases).
-- Shop page: https://claude.ai/artifact/K37nFPcZU75QxRSvEAmfLL (`cutlist.html`, with the PDF, hero, assembly and part images), documenting the post version. Since 2026-11-20 it carries a Lumber to buy section from `lumber_list.py`, shelf-packed with Brian's 1/8 in kerf, full sheets only. Version 7 (2026-11-20, pocket-screw case): 5 soft maple 1x6 x 8 ft (top strips, 16 post layers), 1 poplar 1x6 x 8 ft (front frames and the cleat), one 4 x 8 sheet of 3/4 paint-grade birch ply (ends, back, bottom, partition) and one of 1/2 Baltic birch (the boxes and the two front panels, which moved there when the 3/4 back left the 1/2 birch sheet with nothing else on it).
+- Shop page: https://claude.ai/artifact/K37nFPcZU75QxRSvEAmfLL (`cutlist.html`, with the PDF, hero, assembly and part images), documenting the post version. Since 2026-11-20 it carries a Lumber to buy section from `lumber_list.py`, shelf-packed with Brian's 1/8 in kerf, full sheets only. Version 8 (2026-11-21) adds the drawer-back screws; Version 7 (2026-11-20, pocket-screw case): 5 soft maple 1x6 x 8 ft (top strips, 16 post layers), 1 poplar 1x6 x 8 ft (front frames and the cleat), one 4 x 8 sheet of 3/4 paint-grade birch ply (ends, back, bottom, partition) and one of 1/2 Baltic birch (the boxes and the two front panels, which moved there when the 3/4 back left the 1/2 birch sheet with nothing else on it).
 
 ## Open
 

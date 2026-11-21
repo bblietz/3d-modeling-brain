@@ -78,8 +78,8 @@ STEPS = [
     ("step-07", "Drawer boxes",
      ("dside_", "dfront_", "dback_", "dbot_"),
      f"Glue each 1/2 Baltic birch box up around its bottom, {inch(BOX_H)} in tall: front and back in the side rabbets, bottom in "
-     f"the side and front grooves with its underside {inch(UM_RECESS)} above the side edges, butted to the back and "
-     "glued to it. Notches and hook bores at the rear (drill scrap first: the bore leaves a thin skin). Clip the "
+     f"the side and front grooves with its underside {inch(UM_RECESS)} above the side edges, butted to the back, "
+     f"glued and screwed through the back with {len(BACK_SCREW_U)} #6 x 1 (pre-drill 3/32 into the bottom's edge, countersink). Notches and hook bores at the rear (drill scrap first: the bore leaves a thin skin). Clip the "
      "locking devices under the bottom at the front corners with #6 x 1/2 screws and set the boxes on the runners."),
     ("step-08", "Fronts and pulls",
      ("stile_", "rail_", "panel_", "pull_"),

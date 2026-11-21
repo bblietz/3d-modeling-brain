@@ -361,6 +361,10 @@ BOX_Y1 = CASE_D - UM_FRONT_GAP
 BOX_Y0 = BOX_Y1 - BOX_D
 END_LEN = BOX_W - 2 * (T12 - RABBET_D)      # drawer front and back length (1/2 Baltic birch, in the side rabbets)
 BOTTOM_D = BOX_D - 2 * T12 + RABBET_D        # bottom: 1/4 into the front groove, butted to the back (no back groove)
+# the bottom butts the back (no groove, the hook bores are in the way), so it is glued and screwed through the back
+# (Brian 2026-11-21: "add the screws"): #6 x 1, pre-drilled, countersunk, on the bottom's center line
+BACK_SCREW_U = [END_LEN * f for f in (1 / 8, 3 / 8, 5 / 8, 7 / 8)]   # from the back blank's end
+BACK_SCREW_UP = UM_RECESS + T12 / 2                                  # above the back's bottom edge
 BITE_TOP = (BOX_Z0 + BOX_H) - (FRONT_Z0 + FRONT_H - STILE_W)   # box front overlap on the top rail
 BITE_BOT = (FRONT_Z0 + STILE_W) - BOX_Z0                       # and on the bottom rail
 
@@ -406,12 +410,14 @@ add("drawer_front", _dl[2], 2, BB12,
     inst=[("dfront_l", _dl[2]), ("dfront_r", _dr[2])])
 add("drawer_back", _dl[3], 2, BB12,
     f"box back, sits in the side rabbets; no bottom groove (a groove would break into the hook bores), the bottom butts "
-    f"its front face; Blum notch {inch(UM_HOOK_NOTCH_W)} in from each side's inner face x {inch(UM_HOOK_NOTCH_H)} tall at both bottom corners; hook bores "
+    f"its front face, glued, and {len(BACK_SCREW_U)} #6 x 1 screws through this part into the bottom's edge, "
+    f"countersunk in the rear face, {inch(BACK_SCREW_UP)} above the bottom edge at {', '.join(inch(u) for u in BACK_SCREW_U)} "
+    f"from the left end (3/32 pilot into the edge); Blum notch {inch(UM_HOOK_NOTCH_W)} in from each side's inner face x {inch(UM_HOOK_NOTCH_H)} tall at both bottom corners; hook bores "
     f"{inch(UM_HOOK_BORE[0])} dia x {inch(UM_HOOK_BORE[1])} deep into the rear face, centered "
     f"{inch(UM_HOOK_BORE[2])} in from each side's inner face and {inch(UM_HOOK_BORE[3])} above the bottom edge (Blum 563H sheet)",
     inst=[("dback_l", _dl[3]), ("dback_r", _dr[3])])
 add("drawer_bottom", _dl[4], 2, BB12,
-    f"plain rectangle: {inch(RABBET_D)} into the side and front grooves, butted to the back and glued to it; the Blum locking devices sit flush under it at the front corners (their screws go into the box front)",
+    f"plain rectangle: {inch(RABBET_D)} into the side and front grooves, butted to the back, glued and screwed through it ({len(BACK_SCREW_U)} #6 x 1 into this edge); the Blum locking devices sit flush under it at the front corners (their screws go into the box front)",
     inst=[("dbot_l", _dl[4]), ("dbot_r", _dr[4])])
 
 # ================================================================ hardware and soft goods (viewer only)
@@ -526,6 +532,15 @@ _runner_rear = YF1 - RUNNER_SETBACK - RUNNER_LEN
 assert UM_BRACKET_MIN <= _runner_rear - BACK_Y1 <= UM_BRACKET_MAX, f"rear bracket range on the post side: {_runner_rear - BACK_Y1:.1f} mm"
 assert UM_SCREW_Y[1] + RUNNER_SETBACK < POST, "runner front screws run past the post"
 assert BOX_Y0 > CLEAT_Y1 and BOX_Y0 > BACK_Y1, "box hits the cleat or back"
+for _dr_ in (_dl, _dr):                       # back-to-bottom screws: in the bottom's edge, clear of the bores and notches
+    _bb = _dr_[3].bounding_box()
+    for _u in BACK_SCREW_U:
+        _p = Vector(_bb.min.X + _u, BOX_Y0 + T12 + 8, BOX_Z0 + BACK_SCREW_UP)
+        assert _dr_[4].is_inside(_p), "back screw misses the bottom"
+        assert _dr_[3].is_inside(Vector(_p.X, BOX_Y0 + T12 / 2, _p.Z)), "back screw is not in solid back"
+        assert min(abs(_u - (RABBET_D + UM_HOOK_BORE[2])), abs(_u - (END_LEN - RABBET_D - UM_HOOK_BORE[2]))) > 1.5 * IN
+        assert _u > UM_HOOK_NOTCH_W + RABBET_D + 0.5 * IN and _u < END_LEN - UM_HOOK_NOTCH_W - RABBET_D - 0.5 * IN
+assert BACK_SCREW_UP - 2.0 > UM_RECESS and BACK_SCREW_UP + 2.0 < UM_RECESS + T12, "back screw off the bottom's thickness"
 assert T12 - UM_HOOK_BORE[1] >= 1.9, "hook bore would break through the back"   # a 2 mm skin; test-drill scrap first
 _dia, _depth, _off, _up = UM_HOOK_BORE
 _bx = _dl[0].bounding_box().min.X + T12 + _off
@@ -587,7 +602,7 @@ if os.environ.get("EXPORT"):
          "material": "hardware", "notes": "one pair per drawer; 90 lb dynamic; runner fronts 3/32 behind the fronts' back faces"},
         {"part": "Blum rear mounting brackets 295.3750.02", "qty": 2, "unit": "ea", "material": "hardware",
          "notes": "post-side runners: the runner front screws into the post's inner face (#6 x 5/8), the rear sits on a "
-                  "bracket screwed to the 1/2 back with #6 x 1/2; the partition-side runners mount to the partition as in a frameless case"},
+                  "bracket screwed to the 3/4 back with #6 x 1/2; the partition-side runners mount to the partition as in a frameless case"},
         {"part": "Blum locking devices T51.1901 R and L", "qty": 2, "unit": "pair", "material": "hardware",
          "notes": "front corners under the drawer bottom, screwed into the 1/2 box front: use #6 x 1/2 so the points stay inside it"},
         {"part": "Brass bar pull, 8 in", "qty": 2, "unit": "ea", "material": "hardware",
@@ -601,6 +616,8 @@ if os.environ.get("EXPORT"):
          f"({2 * len(BOT_PH_Y)}) and the back ({len(BOT_PH_X)}), partition to the back ({len(PART_PH_Z)})"},
         {"part": "Wood screws #8 x 1", "qty": 4, "unit": "ea", "material": "hardware",
          "notes": "cleat to the back from inside, countersunk"},
+        {"part": "Wood screws #6 x 1", "qty": 2 * len(BACK_SCREW_U), "unit": "ea", "material": "hardware",
+         "notes": f"drawer backs into the bottoms' rear edges ({len(BACK_SCREW_U)} a drawer), countersunk, pre-drilled 3/32"},
         {"part": "Wood screws #8 x 2", "qty": len(PART_SCREW_Y), "unit": "ea", "material": "hardware",
          "notes": "up through the bottom into the partition's edge, countersunk, pre-drilled"},
         {"part": "Iron-on maple edge banding, 13/16", "qty": 1, "unit": "roll", "material": "hardware",
