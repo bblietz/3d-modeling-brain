@@ -10,7 +10,8 @@ of strips, each a jointing allowance wider than its share and an inch longer for
 shelf-packed onto each unit of stock, longest first, with a saw kerf between them: a shelf runs across the width
 of the board or sheet and is as long as its longest piece; within a shelf, shorter pieces go end to end in a
 strip already ripped at least as wide. Solid parts keep their length along the board (grain);
-sheet parts may turn. The 1/2 paint-grade ply panels come out of the 1/2 birch ply sheet with the back. Shelf packing wastes a little against
+sheet parts may turn. The two 1/2 drawer-front panels come out of the Baltic birch sheet with the boxes (the 3/4 back left the 1/2 birch
+sheet with nothing else on it, 2026-11-20). Shelf packing wastes a little against
 a careful layout, so a count here is safe, not minimal.
 
 Run:  .venv/bin/python projects/Freestanding-bench/lumber_list.py   (prints the list; make_cutlist_page imports it)
@@ -37,10 +38,9 @@ LAM_EXTRA = 0.125 * IN           # extra width on each post layer, planed off af
 STOCK = {
     "soft maple": ("board", "Soft maple 1x6 x 8 ft (3/4 x 5-1/2 actual)", "the top glue-up and the posts as four glued layers each"),
     "poplar": ("board", "Poplar 1x6 x 8 ft (3/4 x 5-1/2 actual)", "the drawer-front frames, painted white, and the rear cleat"),
-    "3/4 birch ply": ("sheet", "3/4 birch plywood, paint grade, 4 x 8", "ends, bottom, partition"),
-    "1/2 birch ply": ("sheet", "1/2 birch plywood, paint grade, 4 x 8", "the back and the two drawer-front panels"),
-    "1/2 paint-grade ply": "1/2 birch ply",
-    "1/2 Baltic birch": ("sheet", "1/2 Baltic birch, 4 x 8", "the four drawer boxes (a 5 x 5 sheet holds them too)"),
+    "3/4 birch ply": ("sheet", "3/4 birch plywood, paint grade, 4 x 8", "ends, back, bottom, partition"),
+    "1/2 paint-grade ply": "1/2 Baltic birch",
+    "1/2 Baltic birch": ("sheet", "1/2 Baltic birch, 4 x 8", "the four drawer boxes and the two drawer-front panels (a 5 x 5 sheet holds them too)"),
 }
 
 

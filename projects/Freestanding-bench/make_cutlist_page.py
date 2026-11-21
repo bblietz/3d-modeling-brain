@@ -29,17 +29,16 @@ from cutlist import inch_frac  # noqa: E402
 BUILT_IN_URL = "https://claude.ai/artifact/YQFcx4g5x64K83yhDHvGMf"   # the built-in design's shop page, kept
 OPTIONS_URL = "https://claude.ai/artifact/QLCHadrNJZDeDjqka9yond"   # the base options page; records Brian's pick A (posts, 2026-10-26)
 
-CASE_ORDER = ["soft maple", "poplar", "3/4 birch ply", "1/2 birch ply"]
+CASE_ORDER = ["soft maple", "poplar", "3/4 birch ply"]
 DRAWER_ORDER = ["poplar", "1/2 paint-grade ply", "1/2 Baltic birch"]
 CASE_LABEL = {
     "soft maple": "Soft maple: posts and the top (bare, Osmo Natural)",
     "poplar": "Poplar: the rear cleat (hidden)",
-    "3/4 birch ply": "3/4 in birch plywood, paint grade (measure the sheet): ends (show faces, painted white, bottom edges banded), bottom, partition",
-    "1/2 birch ply": "1/2 in birch plywood, paint grade (measure the sheet): back, housed in the rear posts",
+    "3/4 birch ply": "3/4 in birch plywood, paint grade (measure the sheet): ends (show faces, painted white, bottom edges banded), back, bottom, partition",
 }
 DRAWER_LABEL = {
     "poplar": "Drawer front frames, poplar, painted white: stiles and rails",
-    "1/2 paint-grade ply": "Drawer front panels, 1/2 in paint-grade birch plywood (measure the sheet), painted white with the frames",
+    "1/2 paint-grade ply": "Drawer front panels, 1/2 in plywood cut from the Baltic birch sheet (measure it), painted white with the frames",
     "1/2 Baltic birch": "Drawer boxes: sides, fronts, backs and bottoms, 1/2 in 9-ply Baltic birch (measure the sheet)",
 }
 TEMPLATE_TAG = "not a plain rectangular blank"
@@ -76,6 +75,10 @@ MOVED = [
     ("Posts", f"{fi(M.POST)} x {fi(M.POST)} x {fi(M.TOP_Z0)} in soft maple, {fi(M.CHAMFER)} in chamfers, outer faces "
               f"{fi(M.X1 - M.X0)} in apart; no notch, the rear posts stand {fi(M.YB0)} in off the back wall, "
               f"{fi(M.BB_CLEAR)} in clear of the baseboard and shoe"),
+    ("Case joints", "glue and Kreg pocket screws throughout (Brian 2026-11-20): the ends and the back butt the posts, "
+                    f"{fi(M.SETBACK)} in behind the post faces, pocket-screwed from inside; the bottom butts the ends and the "
+                    "back, pocket-screwed from underneath; the partition stands on the bottom and is pocket-screwed to the "
+                    "back. No grooves, notches, rabbets or dado; the back is 3/4 in now (was 1/2)"),
     ("Clear floor under the case", f"{fi(M.CLEAR)} in (the tallest current Roomba is under 4 in); only the posts reach the floor"),
     ("Top", f"{fi(M.TOP_W)} x {fi(M.TOP_D)} in, {fi(M.SIDE_AIR)} in of air to each side wall, rear edge {fi(M.WALL_GAP)} in off the "
             f"back wall; overhangs the posts {fi(M.END_OVERHANG)} in at the ends, {fi(M.OVERHANG)} in at the front and "
@@ -92,9 +95,9 @@ MOVED = [
 ASSEMBLY_DIR = "images/assembly"
 EXPLODED = f"{ASSEMBLY_DIR}/exploded.png"
 SUBS = {
-    "step-02": ("end-exploded.png", "one end, pulled apart: the front and rear posts with their stopped grooves, the end panel with its notched bottom corners"),
+    "step-02": ("end-exploded.png", "one end, pulled apart: the front and rear posts and the plain end panel that butts them, pocket-screwed from inside"),
     "step-07": ("drawer-exploded.png", "one drawer box, pulled apart: sides, front, back and bottom, all 1/2 Baltic birch"),
-    "step-08": ("front-exploded.png", "one drawer front, pulled apart: maple stiles and rails around the inset panel, all painted white"),
+    "step-08": ("front-exploded.png", "one drawer front, pulled apart: poplar stiles and rails around the inset panel, all painted white"),
 }
 
 
@@ -371,8 +374,8 @@ PAGE = """<title>Freestanding Bench Cut List</title>
     <p class="eyebrow">Freestanding bench &middot; {top_w} x {top_d} in &middot; {clear} in clear floor</p>
     <h1>Freestanding Bench Cut List</h1>
     <p>The client's change of 2026-10-26: the bench is now a freestanding piece with {clear} in of clear floor under it for the robot vacuum. The alcove's baseboard stays: the top slides in {air} in off each side wall and {wall_gap} in off the back wall, and the posts stand inside it, the rear pair {post_wall} in off the back wall, clear of the baseboard with no notch (Brian, 2026-11-01). Kept from the built-in: all-white frame-and-panel fronts with brass pulls, the solid maple top at {seat} in (seat {seat_c} in with the cushion), two drawers on Blum 563H undermounts (18 in now: standing the posts off the baseboard is what the case depth paid for), 1/2 in Baltic birch boxes, Osmo Natural on the bare maple.</p>
-    <p>The base is decided: on 2026-10-26 Brian picked A of five leg options drawn from the drawer bench's legs. It is built the way that bench is: four proud {post} in square soft maple corner posts, floor to the underside of the top, {chamfer} in chamfers on all four vertical edges, the painted ends and the back housed in stopped grooves in the posts {setback} in behind the post faces, the drawer fronts running between the front posts {front_setback} in behind their faces. The earlier version on short legs under a box is superseded; the {options} records the pick. Drawers are {box_h} in tall instead of 8-1/2 (the {clear} in of floor come out of the drawers); no plinth, no scribe strips, no wall screws. The built-in design stays on <a href="{built_in}">its own shop page</a> in case the client goes back.</p>
-    <p>{total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
+    <p>The base is decided: on 2026-10-26 Brian picked A of five leg options drawn from the drawer bench's legs. It is built the way that bench is: four proud {post} in square soft maple corner posts, floor to the underside of the top, {chamfer} in chamfers on all four vertical edges, the painted ends and the back butted to the posts {setback} in behind the post faces and pocket-screwed from inside (Brian swapped the drawer bench's stopped grooves for Kreg pocket screws on 2026-11-20), the drawer fronts running between the front posts {front_setback} in behind their faces. The earlier version on short legs under a box is superseded; the {options} records the pick. Drawers are {box_h} in tall instead of 8-1/2 (the {clear} in of floor come out of the drawers); no plinth, no scribe strips, no wall screws. The built-in design stays on <a href="{built_in}">its own shop page</a> in case the client goes back.</p>
+    <p>{total} pieces: the case first, then the drawers, each grouped by material in cutting order. Inches to the nearest 1/32. Every part has a shop drawing with its pocket holes, grooves, rabbets, notches and bores located from the blank's own edges.<span class="screen-only"> Tap a drawing to zoom. Tap a row to tick it off; ticks stay on this phone only.</span></p>
     <div class="status"><span class="count" id="count"></span><button class="reset" id="reset" type="button">Clear ticks</button></div>
   </header>
   {nook}

@@ -30,7 +30,6 @@ OUT = os.environ.get("HERO_OUT", f"{PROJ}/images/hero.png")
 COLORS = {
     "soft maple": "#e2c48f", "poplar": "#e6dcc0",
     "3/4 birch ply": "#e9d9b0",
-    "1/2 birch ply": "#ecdfbc",
     "1/2 paint-grade ply": "#d9cbb0",
     "1/2 Baltic birch": "#efe2bd",
 }

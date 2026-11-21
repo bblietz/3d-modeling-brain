@@ -34,33 +34,42 @@ STEPS = [
     ("step-01", "Posts",
      ("post_",),
      f"Four {inch(POST)} square soft maple posts, {inch(TOP_Z0)} long, each glued up from four 3/4 layers of 1x6 "
-     f"(2-5/8 x 14-1/4 blanks) and planed square, glue lines on the side faces (front and back show face grain). Chamfer the four vertical edges {inch(CHAMFER)} "
-     f"first, full length, then cut the stopped grooves: the end-panel groove on the face toward the other post of that "
-     f"end, {inch(SETBACK)} in from the outer face, {inch(GROOVE_D)} deep, from {inch(GROOVE_STOP)} up and out the top; "
-     f"the rear posts also take the back's groove on the inner face, {inch(SETBACK)} in from the rear face, same stop. "
+     f"(2-5/8 x 14-1/4 blanks) and planed square, glue lines on the side faces (front and back show face grain). Chamfer "
+     f"the four vertical edges {inch(CHAMFER)}, full length; no grooves, the panels butt the posts. "
      f"No notch: the rear posts stand {inch(YB0)} off the back wall, {inch(BB_CLEAR)} clear of the baseboard and shoe. "
      f"Drill the front posts' Blum runner screw holes on the inner face, "
-     f"{inch(UM_SCREW_Y[0] + RUNNER_SETBACK)} and {inch(UM_SCREW_Y[1] + RUNNER_SETBACK)} behind the front face."),
+     f"{inch(UM_SCREW_Y[0] + RUNNER_SETBACK)} and {inch(UM_SCREW_Y[1] + RUNNER_SETBACK)} behind the front face. "
+     f"Before any glue-up, drill every Kreg pocket for 3/4 stock: ends {inch(END_PH_Z[0] - PANEL_Z0)} and "
+     f"{inch(END_PH_Z[1] - PANEL_Z0)} up at both vertical edges, back {inch(BACK_PH_Z[0] - PANEL_Z0)} and "
+     f"{inch(BACK_PH_Z[1] - PANEL_Z0)} up at both ends, partition {inch(PART_PH_Z[0] - PART_Z0)} and "
+     f"{inch(PART_PH_Z[1] - PART_Z0)} up at the rear edge, the bottom's underside along both end edges and the rear "
+     "edge, all on the inside or underside faces; plus the top-attachment pockets along the top edges of the ends and "
+     "partition near the front."),
     ("step-02", "End assemblies",
      ("end_",),
-     f"Glue each end panel into its front and rear post: tongues in the grooves above the {inch(NOTCH_H)} notches, the "
-     f"notched bottom on the post faces, top edge flush with the post tops, show face out. Check that each end is square "
-     f"and both posts stand plumb before the glue sets."),
+     f"Clamp a {inch(SETBACK)} spacer to each post face so the end panel's outer face lands {inch(SETBACK)} behind it, "
+     f"then glue and pocket-screw each end to its front and rear post ({inch(PH_SCREW)} fine-thread screws), top edge "
+     f"flush with the post tops, show face out, pockets inside. Check that each end is square and both posts stand "
+     f"plumb before the glue sets."),
     ("step-03", "Back and cleat",
      ("back", "cleat"),
-     f"Slide the 1/2 back down the rear posts' grooves to join the two end assemblies, notched bottom on the post faces, "
-     f"and glue it: with no wall screws it is what keeps the case square. Glue the cleat inside along the back's top edge "
-     f"between the rear posts and screw it from the inside (#8 x 1, countersunk, nothing through the back)."),
+     f"Join the two end assemblies with the 3/4 back between the rear posts' inner faces, the same {inch(SETBACK)} spacer "
+     f"behind it, top edge flush, glued and pocket-screwed from inside (pockets above the Blum rear-bracket line): with "
+     f"no wall screws it is what keeps the case square. Glue the cleat inside along the back's top edge between the rear "
+     f"posts, over nothing (the back's pockets stop below it), and screw it from the inside (#8 x 1, countersunk, "
+     f"nothing through the back)."),
     ("step-04", "Bottom",
      ("bottom",),
-     f"Slide the case bottom in from the front into the {inch(RABBET_D)} rabbets of both ends and the back, its corner "
-     f"notches around the four posts, and glue it. Its underside is the ceiling of the {inch(CLEAR)} in of clear floor; "
-     f"screw up through it into the partition after the next step."),
+     f"With the case upside down on the bench, lower the bottom in between the ends and against the back, its corner "
+     f"notches around the four posts, its underside flush with the panels' bottom edges. Glue and pocket-screw it from "
+     f"the underside into the ends ({len(BOT_PH_Y)} a side) and the back ({len(BOT_PH_X)}), coarse-thread screws. Its "
+     f"underside is the ceiling of the {inch(CLEAR)} in of clear floor."),
     ("step-05", "Partition",
      ("partition",),
-     f"Drop the partition into the dado in the bottom, against the back, with its notch at the top rear around the cleat "
-     f"and its front edge on the fronts' back-face line, {inch(FRONT_SETBACK + FACE_T)} behind the post faces. Screw up "
-     f"through the bottom."),
+     f"Turn the case upright. Stand the partition on the bottom, centered, against the back, with its notch at the top "
+     f"rear around the cleat and its front edge on the fronts' back-face line, {inch(FRONT_SETBACK + FACE_T)} behind the "
+     f"post faces. Glue it, pocket-screw it to the back, then turn the case over again and drive {len(PART_SCREW_Y)} #8 x 2 "
+     f"countersunk screws up through the bottom into its edge (pre-drill on the center line)."),
     ("step-06", "Slides and brackets",
      ("slide_",),
      f"Post-side runners: front screws into the posts' inner faces (#6 x 5/8), rears on Blum brackets screwed to the back "
@@ -68,14 +77,14 @@ STEPS = [
      f"bottom, fronts {inch(UM_FRONT_GAP)} behind the fronts' back-face line."),
     ("step-07", "Drawer boxes",
      ("dside_", "dfront_", "dback_", "dbot_"),
-     f"Glue each 1/2 birch box up around its bottom, {inch(BOX_H)} in tall: front and back in the side rabbets, bottom in "
+     f"Glue each 1/2 Baltic birch box up around its bottom, {inch(BOX_H)} in tall: front and back in the side rabbets, bottom in "
      f"the side and front grooves with its underside {inch(UM_RECESS)} above the side edges, butted to the back and "
      "glued to it. Notches and hook bores at the rear (drill scrap first: the bore leaves a thin skin). Clip the "
      "locking devices under the bottom at the front corners with #6 x 1/2 screws and set the boxes on the runners."),
     ("step-08", "Fronts and pulls",
      ("stile_", "rail_", "panel_", "pull_"),
-     f"Glue up each 1/2 panel in its maple frame, back faces flush so the panel sits {inch(FACE_T - PANEL_T)} below "
-     f"the maple (groove every piece first, then cut the tongues and tenons to fit). Prime and paint the fronts and "
+     f"Glue up each 1/2 plywood panel in its poplar frame, back faces flush so the panel sits {inch(FACE_T - PANEL_T)} below "
+     f"the frame (groove every piece first, then cut the tongues and tenons to fit). Prime and paint the fronts and "
      f"the ends white. Hang the fronts between the front posts: {inch(GAP)} to each post, {inch(GAP)} between them, "
      f"{inch(GAP)} under the top, bottoms flush with the case underside, faces {inch(FRONT_SETBACK)} behind the post "
      "faces, screwed from inside the box through oversize holes. Center the pulls."),
@@ -100,7 +109,7 @@ EXPLODE = {
 }
 
 COLORS = {
-    "soft maple": "#e2c48f", "poplar": "#e6dcc0", "3/4 birch ply": "#e9d9b0", "1/2 birch ply": "#ecdfbc",
+    "soft maple": "#e2c48f", "poplar": "#e6dcc0", "3/4 birch ply": "#e9d9b0",
     "1/2 paint-grade ply": "#d9cbb0", "1/2 Baltic birch": "#efe2bd",
 }
 HW_COLORS = {"slide": "#8c8f94", "pull": "#b8903f", "cushion": "#c9bda8"}

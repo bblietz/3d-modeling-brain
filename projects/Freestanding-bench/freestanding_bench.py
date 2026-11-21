@@ -6,11 +6,13 @@ robot vacuum. The client asked for a freestanding bench with room for the Roomba
 stays untouched in projects/Built-in-bench in case they go back.
 
 Posts (Brian's pick A from the leg options, 2026-10-26): 2-1/2 in square soft maple, floor to the underside of the
-top, 3/8 in chamfer on all four vertical edges full length, straight to the floor. The painted 3/4 ply end panels and
-the 1/2 ply back are housed in stopped grooves in the posts, 1/2 in behind the post faces, with the panels' bottom
-corners notched so the housed tongue starts 1-1/2 in above the panel bottom and the groove end hides behind the
-un-housed bottom (the drawer bench's detail). The drawer fronts run between the front posts 1/4 in behind their faces
-with 1/8 reveals. The case bottom sits in rabbets in the ends and the back, notched around the posts. The drawer
+top, 3/8 in chamfer on all four vertical edges full length, straight to the floor. Every case joint is glue and Kreg
+pocket screws (Brian 2026-11-20: "i have a kreg, switch all the case joints"; it replaced the drawer bench's stopped
+grooves and notched panel corners, the bottom's rabbets and the partition dado): the painted 3/4 ply ends and the 3/4
+ply back butt the posts 1/2 in behind the post faces, pocket-screwed from their inside faces; the bottom butts the
+ends and the back, pocket-screwed from its underside, notched around the posts; the partition stands on the bottom,
+screwed up through it, and is pocket-screwed to the back. The drawer fronts run between the front posts 1/4 in behind
+their faces with 1/8 reveals. The drawer
 runners mount the drawer bench's way on the post side (front screws into the post's inner face, Blum rear bracket on
 the back) and the frameless way on the partition side.
 
@@ -74,23 +76,19 @@ GAP = 0.125 * IN            # reveals: fronts to posts, between the fronts, unde
 ROUND = 0.125 * IN          # eased arrises of the top: front and both ends
 
 # ---------------------------------------------------------------- stock (actual, MEASURE)
-T18 = 18.0                  # 3/4 birch ply: ends, bottom, partition
-T12 = 12.0                  # 1/2 Baltic birch (drawer boxes), 1/2 paint-grade ply panels, 1/2 birch ply back
+T18 = 18.0                  # 3/4 birch ply: ends, back, bottom, partition
+T12 = 12.0                  # 1/2 Baltic birch (drawer boxes), 1/2 paint-grade ply panels
 TS = 0.75 * IN              # solid maple: top, cleat
 FACE_T = T18                # the fronts are milled to the ply thickness
 
 # ---------------------------------------------------------------- posts (the drawer bench's construction)
 POST = 2.5 * IN             # square; soft maple, four 3/4 layers of 1x6 glued and planed (Brian 2026-11-20: no 12/4 to be had)
 CHAMFER = 0.375 * IN        # the four vertical edges, full length
-SETBACK = 0.5 * IN          # panel outer face behind the post face
-GROOVE_D = 0.375 * IN       # panels housed this deep in the posts
-NOTCH_H = 1.5 * IN          # panel bottom corners notched GROOVE_D x this: the housed tongue starts here
-GROOVE_CLR = 0.75 * IN      # post groove ends this far below the tongue start, hidden behind the un-housed bottom
+SETBACK = 0.5 * IN          # panel outer face behind the post face (set it with a 1/2 in spacer block when screwing)
 FRONT_SETBACK = 0.25 * IN   # drawer fronts behind the post faces
 
 # ---------------------------------------------------------------- joinery
-RABBET_D = 0.25 * IN        # case bottom in the ends and the back; drawer ends in the sides
-DADO_D = 0.25 * IN          # partition in the case bottom
+RABBET_D = 0.25 * IN        # drawer boxes: the ends in the sides, the bottom in its groove
 PLAY = 1.6                  # 1/16 in total play on housed panels (drawer bottoms)
 TONGUE_T = 0.25 * IN        # front frames: tongue-and-groove bit set
 TONGUE_L = 0.375 * IN
@@ -112,6 +110,12 @@ UM_SCREW_Y = (7.0, 34.0)    # runner front screw holes behind the runner front, 
 RUNNER_SETBACK = T12 + FACE_T - 11.5 + FRONT_SETBACK   # runner front behind the post face (Blum inset rule plus the setback)
 UM_HOOK_NOTCH_W, UM_HOOK_NOTCH_H = 35.0, 13.0   # from the side's inner face; flush with the bottom
 UM_HOOK_BORE = (6.0, 10.0, 7.0, 24.0)   # dia, depth, from side inner face, above side bottom
+
+# ---------------------------------------------------------------- Kreg pocket holes (every case joint, glued too)
+PH_REACH = 1.75 * IN        # a pocket's recess runs this far in from the edge on the drilled face
+PH_R = 0.1875 * IN          # half the 3/8 in step bore
+PH_SCREW = 1.25 * IN        # Kreg screws for 3/4 stock: fine thread into the maple posts, coarse into ply
+UM_RUNNER_H = 45.0          # runner and rear bracket height above the bottom (the bracket sheet's 45 mm, conservative)
 
 # ---------------------------------------------------------------- figure-8 fasteners (cleat only)
 FIG8_DIA = 0.625 * IN
@@ -141,18 +145,16 @@ CASE_D = FACE_Y0
 END_X0 = X0 + SETBACK                     # end panels: outer face
 END_IN_L = END_X0 + T18                   # inner faces
 END_IN_R = X1 - SETBACK - T18
-END_Y0 = YB0 + POST - GROOVE_D            # housed in the rear post ...
-END_Y1 = YF0 + GROOVE_D                   # ... and the front post
-BACK_Y0 = YB0 + SETBACK                   # the 1/2 back: outer face
-BACK_Y1 = BACK_Y0 + T12
-BACK_X0 = POST_IN_L - GROOVE_D            # housed in the rear posts
-BACK_X1 = POST_IN_R + GROOVE_D
+END_Y0 = YB0 + POST                       # butts the rear post's front face ...
+END_Y1 = YF0                              # ... and the front post's rear face
+BACK_Y0 = YB0 + SETBACK                   # the 3/4 back: outer face
+BACK_Y1 = BACK_Y0 + T18
+BACK_X0 = POST_IN_L                       # butts the rear posts' inner faces
+BACK_X1 = POST_IN_R
 BOT_Z0 = CLEAR                            # case bottom's underside: the clear floor
 BOT_Z1 = BOT_Z0 + T18
 OPEN_H = TOP_Z0 - BOT_Z1
-PANEL_Z0 = CLEAR                          # ends and back: bottom edge
-TONGUE_Z0 = PANEL_Z0 + NOTCH_H            # the housed tongue starts here
-GROOVE_STOP = TONGUE_Z0 - GROOVE_CLR      # the post grooves stop here, open at the top
+PANEL_Z0 = CLEAR                          # ends and back: bottom edge, flush with the bottom's underside
 PART_X0 = XC - T18 / 2
 OPEN_W = PART_X0 - POST_IN_L              # one bay: post inner face to the partition
 FRONT_W = (POST_IN_R - POST_IN_L - 3 * GAP) / 2
@@ -193,25 +195,16 @@ def add(name, solid, qty, material, notes="", inst=None):
 MAPLE = "soft maple"           # Brian 2026-11-20: "no hard maple, all soft"; top and front frames too
 SOFT_MAPLE = "soft maple"
 PLY18 = "3/4 birch ply"     # paint grade: painted or hidden, so no maple face (Brian 2026-11-20)
-PLY12 = "1/2 birch ply"
 PAINT_PANEL = "1/2 paint-grade ply"   # painted white with the frames (Brian 2026-10-24); plywood, not MDF (Brian 2026-11-20)
 POPLAR = "poplar"           # drawer-front frames, painted white (Brian 2026-11-20: "poplar frame and plywood face")
 BB12 = "1/2 Baltic birch"
 
 # ================================================================ posts
-# Chamfer the four vertical edges first, then cut the grooves, so the groove walls are clean. The end-panel groove is
-# on the face toward the other post of the same end, SETBACK in from the outer face; the rear posts also take the
-# back's groove on their inner face, SETBACK in from the rear face. Grooves stop at GROOVE_STOP and run out the top.
+# Plain chamfered posts: the panels butt them and are pocket-screwed from inside, so no grooves.
 def make_post(x, y, front):
     """the low-X post; outer face at min X; front posts have their outer face at max Y, rear posts at min Y"""
     p = _box(x, y, 0, POST, POST, TOP_Z0)
-    p = chamfer(p.edges().filter_by(Axis.Z), CHAMFER)
-    gh = TOP_Z0 - GROOVE_STOP + 1
-    gy = y - 1 if front else y + POST - GROOVE_D
-    p -= _box(x + SETBACK, gy, GROOVE_STOP, T18, GROOVE_D + 1, gh)
-    if not front:
-        p -= _box(x + POST - GROOVE_D, y + SETBACK, GROOVE_STOP, GROOVE_D + 1, T12, gh)
-    return p
+    return chamfer(p.edges().filter_by(Axis.Z), CHAMFER)
 
 
 post_fl = make_post(X0, YF0, True)
@@ -219,74 +212,77 @@ post_rl = make_post(X0, YB0, False)
 post_fr = mirror(post_fl, Plane.YZ.offset(XC))
 post_rr = mirror(post_rl, Plane.YZ.offset(XC))
 _POST_NOTE = (f"{inch(POST)} square x {inch(TOP_Z0)} (glue up four 3/4 layers cut from the 1x6 boards, each 2-5/8 x 14-1/4, then joint and plane to size: 1/8 off each outer layer, the glue lines show on two opposite faces, turn them to the side faces, toward the side wall and toward the drawers, so the front and back show face grain); {inch(CHAMFER)} chamfer on all "
-              f"four vertical edges, full length, cut before the grooves; end-panel groove {inch(T18)} wide (measure) x "
-              f"{inch(GROOVE_D)} deep on the face toward the other post of that end, {inch(SETBACK)} in from the outer face, "
-              f"from {inch(GROOVE_STOP)} up out the top (the end stays as the bit leaves it, the panel's notched bottom "
-              "covers it); bare under Osmo; left/right mirrored")
+              f"four vertical edges, full length; no grooves: the end panel butts the face toward the other post of that end, "
+              f"{inch(SETBACK)} in from the outer face, and is pocket-screwed into it; bare under Osmo; left/right mirrored")
 add("post_front", post_fl, 2, SOFT_MAPLE,
     _POST_NOTE + f"; the Blum runner front screws into the inner face, holes {inch(UM_SCREW_Y[0] + RUNNER_SETBACK)} and "
     f"{inch(UM_SCREW_Y[1] + RUNNER_SETBACK)} behind the front face, #6 x 5/8",
     inst=[("post_fl", post_fl), ("post_fr", post_fr)])
 add("post_rear", post_rl, 2, SOFT_MAPLE,
-    _POST_NOTE + f"; plus the back's groove {inch(T12)} wide (measure) x {inch(GROOVE_D)} deep on the inner face, "
-    f"{inch(SETBACK)} in from the rear face, same stop; no notch, the post stands {inch(BB_CLEAR)} clear of the baseboard",
+    _POST_NOTE + f"; the back butts its inner face {inch(SETBACK)} in from the rear face, pocket-screwed into it; no "
+    f"notch, the post stands {inch(BB_CLEAR)} clear of the baseboard",
     inst=[("post_rl", post_rl), ("post_rr", post_rr)])
 
-# the post is the box minus four chamfer prisms minus its grooves: the chamfers never reach a groove
+# the post is the box minus four chamfer prisms; the panels land on the flat between the chamfers
 _post_box = POST ** 2 * TOP_Z0 - 4 * 0.5 * CHAMFER ** 2 * TOP_Z0
-_gh = TOP_Z0 - GROOVE_STOP
-assert abs(post_fl.volume - (_post_box - T18 * GROOVE_D * _gh)) < 1e-2, post_fl.volume
-assert abs(post_rl.volume - (_post_box - T18 * GROOVE_D * _gh - T12 * GROOVE_D * _gh)) < 1e-2, post_rl.volume
-assert CHAMFER < SETBACK, "the chamfer would break into a groove"
+assert abs(post_fl.volume - _post_box) < 1e-2 and abs(post_rl.volume - _post_box) < 1e-2, post_fl.volume
+assert CHAMFER < SETBACK, "a panel edge would land on the chamfer"
 
-# ================================================================ panels: ends (3/4) and back (1/2), housed in the posts
-# Bottom corners notched GROOVE_D x NOTCH_H so the housed tongue starts NOTCH_H up and the un-housed bottom butts the
-# post faces over the groove ends; a rabbet along the bottom inside edge takes the case bottom.
+# ================================================================ panels: ends and back (3/4), butted and pocket-screwed
+# Kreg pockets on the inside faces along both vertical edges, at heights clear of the bottom (which butts the lowest
+# 3/4 in), the top's own attachment pockets (end) and the Blum brackets and cleat (back): see the pocket checks.
+END_PH_Z = [PANEL_Z0 + 1.5 * IN, PANEL_Z0 + 5.5 * IN]
+BACK_PH_Z = [PANEL_Z0 + 3 * IN, PANEL_Z0 + 5.25 * IN]
 end_l = _box(END_X0, END_Y0, PANEL_Z0, T18, END_Y1 - END_Y0, TOP_Z0 - PANEL_Z0)
-for _y in (END_Y0 - 1, END_Y1 - GROOVE_D):
-    end_l -= _box(END_X0 - 1, _y, PANEL_Z0 - 1, T18 + 2, GROOVE_D + 1, NOTCH_H + 1)
-end_l -= _box(END_IN_L - RABBET_D, -1, PANEL_Z0 - 1, RABBET_D + 1, ALCOVE_D + 2, T18 + 1)
 end_r = mirror(end_l, Plane.YZ.offset(XC))
-_NOTCH_NOTE = (f"both bottom corners notched {inch(GROOVE_D)} (from each end) x {inch(NOTCH_H)} tall: the housed tongue "
-               f"starts {inch(GROOVE_CLR)} above the post groove's end and the panel's bottom {inch(NOTCH_H)} butts the post faces")
 add("end", end_l, 2, PLY18,
-    f"show face out, face grain vertical, painted white (bottom edge banded); housed {inch(GROOVE_D)} in each post, "
-    f"outer face {inch(SETBACK)} behind the post faces, top edge flush with the post tops; " + _NOTCH_NOTE +
-    f"; {inch(RABBET_D)} x {inch(T18)} (measure) rabbet along the bottom inside edge for the case bottom, through; "
-    "mirror pair", inst=[("end_l", end_l), ("end_r", end_r)])
+    f"plain rectangle; show face out, face grain vertical, painted white (bottom edge banded); butts the posts with its "
+    f"outer face {inch(SETBACK)} behind the post faces (clamp a {inch(SETBACK)} spacer to the post face), top edge flush "
+    f"with the post tops; glue and 2 Kreg pockets on the INSIDE face at each vertical edge, "
+    f"{inch(END_PH_Z[0] - PANEL_Z0)} and {inch(END_PH_Z[1] - PANEL_Z0)} up from the bottom edge, "
+    f"{inch(PH_SCREW)} fine-thread screws into the posts; mirror pair", inst=[("end_l", end_l), ("end_r", end_r)])
 
-back = _box(BACK_X0, BACK_Y0, PANEL_Z0, BACK_X1 - BACK_X0, T12, TOP_Z0 - PANEL_Z0)
-for _x in (BACK_X0 - 1, BACK_X1 - GROOVE_D):
-    back -= _box(_x, BACK_Y0 - 1, PANEL_Z0 - 1, GROOVE_D + 1, T12 + 2, NOTCH_H + 1)
-back -= _box(-1, BACK_Y1 - RABBET_D, PANEL_Z0 - 1, ALCOVE_W + 2, RABBET_D + 1, T18 + 1)
-add("back", back, 1, PLY12,
-    f"housed {inch(GROOVE_D)} in each rear post, outer face {inch(SETBACK)} behind their rear faces, top edge flush with "
-    "the post tops; " + _NOTCH_NOTE + f"; {inch(RABBET_D)} x {inch(T18)} (measure) rabbet along the bottom inside edge "
-    "for the case bottom, through; glued in (with no wall screws it is what keeps the case square); the Blum rear "
-    "brackets screw to its inside face with #6 x 1/2")
+back = _box(BACK_X0, BACK_Y0, PANEL_Z0, BACK_X1 - BACK_X0, T18, TOP_Z0 - PANEL_Z0)
+add("back", back, 1, PLY18,
+    f"plain rectangle, face grain vertical; butts the rear posts' inner faces with its outer face {inch(SETBACK)} behind "
+    f"their rear faces, top edge flush with the post tops; glue and 2 Kreg pockets on the INSIDE face at each end, "
+    f"{inch(BACK_PH_Z[0] - PANEL_Z0)} and {inch(BACK_PH_Z[1] - PANEL_Z0)} up from the bottom edge (above the Blum rear "
+    f"brackets, below the cleat), {inch(PH_SCREW)} fine-thread screws into the posts; with no wall screws it is what "
+    "keeps the case square; the Blum rear brackets screw to its inside face with #6 x 1/2")
 
 # ================================================================ case bottom, partition, cleat
-BOT_X0 = END_IN_L - RABBET_D
-BOT_X1 = END_IN_R + RABBET_D
-BOT_Y0 = BACK_Y1 - RABBET_D
+BOT_X0 = END_IN_L                         # butts the ends' inner faces ...
+BOT_X1 = END_IN_R
+BOT_Y0 = BACK_Y1                          # ... and the back's
 bottom = _box(BOT_X0, BOT_Y0, BOT_Z0, BOT_X1 - BOT_X0, CASE_D - BOT_Y0, T18)
 for _x0, _x1 in ((BOT_X0 - 1, POST_IN_L), (POST_IN_R, BOT_X1 + 1)):       # notched around the four posts
     bottom -= _box(_x0, YF0, BOT_Z0 - 1, _x1 - _x0, ALCOVE_D, T18 + 2)
     bottom -= _box(_x0, -1, BOT_Z0 - 1, _x1 - _x0, YB0 + POST + 1, T18 + 2)
-bottom -= _box(PART_X0, BACK_Y1, BOT_Z1 - DADO_D, T18, CASE_D - BACK_Y1 + 1, DADO_D + 1)
+# Kreg pockets on the underside (seen only from the floor): along both end edges into the ends, along the rear edge
+# into the back, kept clear of the corner notches and of the partition screws at the middle
+_side_y0, _side_y1 = YB0 + POST, YF0               # the end edge between the notches
+BOT_PH_Y = [_side_y0 + (_side_y1 - _side_y0) * f for f in (0.2, 0.5, 0.8)]
+_rx = [POST_IN_L + (POST_IN_R - POST_IN_L) * f for f in (0.08, 0.24, 0.40, 0.60, 0.76, 0.92)]
+BOT_PH_X = _rx
+PART_SCREW_Y = [BACK_Y1 + (CASE_D - BACK_Y1) * f for f in (0.15, 0.5, 0.85)]
 add("bottom", bottom, 1, PLY18,
-    f"face grain across the {inch(BOT_X1 - BOT_X0)}; sits {inch(RABBET_D)} into the rabbets of both ends and the back; "
-    f"all four corners notched {inch(POST_IN_L - BOT_X0)} across x {inch(CASE_D - YF0)} (front) and "
-    f"{inch(YB0 + POST - BOT_Y0)} (rear) around the posts; {inch(DADO_D)} deep x 3/4 ply (measure) dado for the "
-    "partition, centered, from the back to the front edge; front edge covered by the drawer fronts")
+    f"face grain along the {inch(BOT_X1 - BOT_X0)} (a 4 x 8 sheet can only give it that way); butts the ends' and the "
+    f"back's inner faces, underside flush with their bottom edges; all four corners notched {inch(POST_IN_L - BOT_X0)} "
+    f"across x {inch(CASE_D - YF0)} (front) and {inch(YB0 + POST - BOT_Y0)} (rear) around the posts; glue and Kreg "
+    f"pockets on the UNDERSIDE, {inch(PH_SCREW)} coarse-thread screws: {len(BOT_PH_Y)} along each end edge into the "
+    f"ends, {len(BOT_PH_X)} along the rear edge into the back; 3 countersunk #8 x 2 screws up into the partition on its "
+    "center line; front edge covered by the drawer fronts")
 
-PART_Z0 = BOT_Z1 - DADO_D
+PART_Z0 = BOT_Z1                           # stands on the bottom
+PART_PH_Z = [PART_Z0 + 2.5 * IN, PART_Z0 + 4.25 * IN]
 partition = _box(PART_X0, BACK_Y1, PART_Z0, T18, CASE_D - BACK_Y1, TOP_Z0 - PART_Z0)
 partition -= _box(PART_X0 - 1, CLEAT_Y0 - 1, CLEAT_Z0, T18 + 2, TS + 1, CLEAT_H + 1)
 add("partition", partition, 1, PLY18,
-    f"face grain vertical; sits in the bottom dado and against the back; front edge on the fronts' back faces (the "
-    f"partition-side runners mount to it the frameless way); notch the top rear corner {inch(TS)} deep x {inch(CLEAT_H)} "
-    "tall for the cleat")
+    f"face grain vertical; stands on the bottom (3 #8 x 2 screws up through the bottom into its edge) and butts the "
+    f"back; glue and 2 Kreg pockets on one face at the rear edge, {inch(PART_PH_Z[0] - PART_Z0)} and "
+    f"{inch(PART_PH_Z[1] - PART_Z0)} up (above the runners, below the cleat notch), {inch(PH_SCREW)} coarse-thread "
+    f"screws into the back; front edge on the fronts' back faces (the partition-side runners mount to it the frameless "
+    f"way); notch the top rear corner {inch(TS)} deep x {inch(CLEAT_H)} tall for the cleat")
 
 cleat = _box(POST_IN_L, CLEAT_Y0, CLEAT_Z0, POST_IN_R - POST_IN_L, TS, CLEAT_H)
 FIG8_XS = [POST_IN_L + (POST_IN_R - POST_IN_L) * f for f in (0.15, 0.37, 0.63, 0.85)]
@@ -474,29 +470,47 @@ for _env in (_box(-1, -1, -1, ALCOVE_W + 2, _bb_t + 1, BASEBOARD_H + 1),
         assert vol(_env & s) < 1e-3, f"{n} stands in the baseboard"
 assert abs(YB0 - (BASEBOARD_T + BB_CLEAR)) < 1e-9 and abs(X0 - TOP_X0 - END_OVERHANG) < 1e-9
 assert abs(post_rl.bounding_box().min.Y - YB0) < 1e-6 and abs(TOP_Y0 + REAR_OVERHANG - YB0) < 1e-9
-# the housed tongues: inside the panel, in a relieved post, and the un-housed bottoms on the post faces
 def housed(guest, host, probe):
     assert vol(probe & guest) > probe.volume * 0.999, "probe not inside guest"
     assert vol(probe & host) < 1e-6, "host not relieved for the guest"
 
 
-housed(part("end"), part("post_front"), _box(END_X0 + 0.3, END_Y1 - GROOVE_D + 0.3, (TONGUE_Z0 + TOP_Z0) / 2, T18 - 0.6, GROOVE_D - 0.6, 10))
-housed(part("end"), part("post_rear"), _box(END_X0 + 0.3, END_Y0 + 0.3, (TONGUE_Z0 + TOP_Z0) / 2, T18 - 0.6, GROOVE_D - 0.6, 10))
-housed(part("back"), part("post_rear"), _box(BACK_X0 + 0.3, BACK_Y0 + 0.3, (TONGUE_Z0 + TOP_Z0) / 2, GROOVE_D - 0.6, T12 - 0.6, 10))
-_butt = (end_l & _box(END_X0 - 1, -1, PANEL_Z0, T18 + 2, ALCOVE_D, NOTCH_H)).bounding_box()
-assert abs(_butt.min.Y - (YB0 + POST)) < 1e-6 and abs(_butt.max.Y - YF0) < 1e-6, "end's bottom not on the post faces"
-_butt = (back & _box(-1, BACK_Y0 - 1, PANEL_Z0, ALCOVE_W + 2, T12 + 2, NOTCH_H)).bounding_box()
-assert abs(_butt.min.X - POST_IN_L) < 1e-6 and abs(_butt.max.X - POST_IN_R) < 1e-6, "back's bottom not on the post faces"
-assert PANEL_Z0 <= GROOVE_STOP < TONGUE_Z0 and GROOVE_CLR >= T18 / 2 + 0.25 * IN
-# the post groove ends below the tongue and above the panel bottom: wood below GROOVE_STOP, air above
-_grv_air = _box(END_X0 + 0.3, END_Y1 - GROOVE_D + 0.3, GROOVE_STOP + 0.5, T18 - 0.6, GROOVE_D - 0.6, 2)
-assert vol(_grv_air & post_fl) < 1e-6, "front post groove does not reach GROOVE_STOP"
-_grv_wood = _box(END_X0 + 0.3, END_Y1 - GROOVE_D + 0.3, GROOVE_STOP - 2.5, T18 - 0.6, GROOVE_D - 0.6, 2)
-assert abs(vol(_grv_wood & post_fl) - _grv_wood.volume) < 1e-3, "front post groove runs below GROOVE_STOP"
-housed(part("bottom"), part("end"), _box(BOT_X0 + 0.5, (YB0 + POST + CASE_D) / 2, BOT_Z0 + 0.5, RABBET_D - 1, 10, T18 - 1))
-housed(part("bottom"), part("back"), _box(XC - 5, BOT_Y0 + 0.5, BOT_Z0 + 0.5, 10, RABBET_D - 1, T18 - 1))
-housed(part("partition"), part("bottom"), _box(PART_X0 + 0.5, CASE_D / 2, PART_Z0 + 0.5, T18 - 1, 10, DADO_D - 1))
+def butts(a, b, axis, at):
+    """a and b meet on the plane axis = at: each ends there, and they touch over a real area"""
+    ba, bb = a.bounding_box(), b.bounding_box()
+    lo = {"x": (ba.min.X, ba.max.X, bb.min.X, bb.max.X), "y": (ba.min.Y, ba.max.Y, bb.min.Y, bb.max.Y),
+          "z": (ba.min.Z, ba.max.Z, bb.min.Z, bb.max.Z)}[axis]
+    assert min(abs(lo[0] - at), abs(lo[1] - at)) < 1e-6 and min(abs(lo[2] - at), abs(lo[3] - at)) < 1e-6, (axis, at, lo)
+    grow = {"x": (1, 0, 0), "y": (0, 1, 0), "z": (0, 0, 1)}[axis]
+    probe = Pos(*[g * 0.5 for g in grow]) * a & b
+    probe2 = Pos(*[-g * 0.5 for g in grow]) * a & b
+    assert max(vol(probe), vol(probe2)) > 100, f"no contact on {axis} = {at}"
+
+
+# every case joint is a butt joint now: the panels on the posts, the bottom on the ends and the back, the partition
+# on the bottom and the back
+butts(end_l, post_fl, "y", YF0)
+butts(end_l, post_rl, "y", YB0 + POST)
+butts(back, post_rl, "x", POST_IN_L)
+butts(bottom, end_l, "x", END_IN_L)
+butts(bottom, back, "y", BACK_Y1)
+butts(partition, bottom, "z", BOT_Z1)
+butts(partition, back, "y", BACK_Y1)
+assert abs(bottom.bounding_box().min.Z - PANEL_Z0) < 1e-6, "bottom not flush with the panels' bottom edges"
 housed(part("cleat"), part("partition"), _box(PART_X0 + 0.5, CLEAT_Y0 + 0.5, CLEAT_Z0 + 0.5, T18 - 1, TS - 1, 10))
+# pocket holes: each recess (PH_REACH in from the edge, a bore radius around it) clear of what shares that face
+assert END_PH_Z[0] - PH_R >= BOT_Z1 + 0.25 * IN, "end pocket in the bottom's joint"
+assert END_PH_Z[1] + PH_R <= TOP_Z0 - PH_REACH - 0.25 * IN, "end pocket in the top's attachment pockets"
+assert BACK_PH_Z[0] - PH_R >= BOT_Z1 + UM_RUNNER_H, "back pocket behind the Blum rear bracket"
+assert BACK_PH_Z[1] + PH_R <= CLEAT_Z0, "back pocket under the cleat"
+assert PART_PH_Z[0] - PH_R >= PART_Z0 + UM_RUNNER_H, "partition pocket behind a runner"
+assert PART_PH_Z[1] + PH_R <= CLEAT_Z0, "partition pocket in the cleat notch"
+# the end's screws enter the front post well outboard of the Blum runner front screws (5/8 into the inner face)
+assert END_IN_L + 0.25 * IN <= POST_IN_L - 0.625 * IN, "end pocket screw meets a runner screw"
+for _y in BOT_PH_Y:
+    assert _side_y0 + PH_R + 0.25 * IN <= _y <= _side_y1 - PH_R - 0.25 * IN, "bottom pocket in a notch"
+for _x in BOT_PH_X:
+    assert POST_IN_L + PH_R <= _x <= POST_IN_R - PH_R and abs(_x - XC) >= T18 / 2 + 1 * IN, "bottom pocket at a notch or the partition"
 # the bottom's notches clear the posts and the bottom reaches the posts' inner faces
 for pn in ("post_fl", "post_rl"):
     assert vol(dict(INST)[pn] & bottom) < 1e-6
@@ -546,9 +560,8 @@ assert abs(_bb_b.min.Y - _bb_k.max.Y) < 1e-6, "bottom does not butt the back"
 assert abs(part("front_stile").volume - (STILE_W * FACE_T * FRONT_H - TONGUE_L * TONGUE_T * FRONT_H)) < 1e-3
 assert abs(part("front_panel").volume - (PW * PH * TONGUE_T + (PW - 2 * TONGUE_L) * (PH - 2 * TONGUE_L) * (PANEL_T - TONGUE_T))) < 1e-3
 assert abs(part("drawer_bottom").volume - (BOX_W - 2 * (T12 - RABBET_D) - PLAY) * (BOTTOM_D - PLAY / 2) * T12) < 1e-3
-_end_vol = (T18 * (END_Y1 - END_Y0) * (TOP_Z0 - PANEL_Z0) - 2 * GROOVE_D * T18 * NOTCH_H
-            - RABBET_D * T18 * (END_Y1 - END_Y0 - 2 * GROOVE_D))
-assert abs(part("end").volume - _end_vol) < 1e-3, part("end").volume
+assert abs(part("end").volume - T18 * (END_Y1 - END_Y0) * (TOP_Z0 - PANEL_Z0)) < 1e-3, part("end").volume
+assert abs(part("back").volume - T18 * (BACK_X1 - BACK_X0) * (TOP_Z0 - PANEL_Z0)) < 1e-3, part("back").volume
 
 assembly = Compound(children=[s for _, s in INST] + [s for _, s in HW])
 
@@ -580,10 +593,16 @@ if os.environ.get("EXPORT"):
         {"part": "Brass bar pull, 8 in", "qty": 2, "unit": "ea", "material": "hardware",
          "notes": "break-away machine screws long enough for 1/2 panel + 1/2 box front"},
         {"part": "Figure-8 tabletop fasteners", "qty": 4, "unit": "ea", "material": "hardware", "notes": "cleat to top"},
-        {"part": "Pocket screws #8 x 1-1/4 fine", "qty": 6, "unit": "ea", "material": "hardware",
-         "notes": "ends and partition to the top, near the front"},
-        {"part": "Wood screws #8 x 1", "qty": 6, "unit": "ea", "material": "hardware",
-         "notes": "cleat to the back from inside, countersunk; bottom to the partition from below"},
+        {"part": "Kreg pocket screws 1-1/4 fine thread", "qty": 6 + 2 * 2 * len(END_PH_Z) + 2 * len(BACK_PH_Z), "unit": "ea",
+         "material": "hardware", "notes": "into maple: ends and partition to the top near the front (6), ends to the posts "
+         f"({2 * 2 * len(END_PH_Z)}), back to the rear posts ({2 * len(BACK_PH_Z)})"},
+        {"part": "Kreg pocket screws 1-1/4 coarse thread", "qty": 2 * len(BOT_PH_Y) + len(BOT_PH_X) + len(PART_PH_Z),
+         "unit": "ea", "material": "hardware", "notes": "into ply: bottom to the ends "
+         f"({2 * len(BOT_PH_Y)}) and the back ({len(BOT_PH_X)}), partition to the back ({len(PART_PH_Z)})"},
+        {"part": "Wood screws #8 x 1", "qty": 4, "unit": "ea", "material": "hardware",
+         "notes": "cleat to the back from inside, countersunk"},
+        {"part": "Wood screws #8 x 2", "qty": len(PART_SCREW_Y), "unit": "ea", "material": "hardware",
+         "notes": "up through the bottom into the partition's edge, countersunk, pre-drilled"},
         {"part": "Iron-on maple edge banding, 13/16", "qty": 1, "unit": "roll", "material": "hardware",
          "notes": f"the ends' bottom edges (about {inch(2 * (END_Y1 - END_Y0))} in all), painted with them"},
         {"part": "Bench cushion", "qty": 1, "unit": "ea", "material": "soft goods",
