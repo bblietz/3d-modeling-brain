@@ -33,7 +33,8 @@ SETTLE = float(os.environ.get("SETTLE", "2.5"))
 STEPS = [
     ("step-01", "Posts",
      ("post_",),
-     f"Four {inch(POST)} square soft maple posts, {inch(TOP_Z0)} long. Chamfer the four vertical edges {inch(CHAMFER)} "
+     f"Four {inch(POST)} square soft maple posts, {inch(TOP_Z0)} long, each glued up from four 3/4 layers of 1x6 "
+     f"(2-5/8 x 14-1/4 blanks) and planed square, glue lines on the side faces (front and back show face grain). Chamfer the four vertical edges {inch(CHAMFER)} "
      f"first, full length, then cut the stopped grooves: the end-panel groove on the face toward the other post of that "
      f"end, {inch(SETBACK)} in from the outer face, {inch(GROOVE_D)} deep, from {inch(GROOVE_STOP)} up and out the top; "
      f"the rear posts also take the back's groove on the inner face, {inch(SETBACK)} in from the rear face, same stop. "
@@ -99,8 +100,8 @@ EXPLODE = {
 }
 
 COLORS = {
-    "hard maple": "#e2c48f", "soft maple": "#e2c48f", "3/4 maple ply": "#e9d9b0", "1/2 maple ply": "#ecdfbc",
-    "1/2 paint-grade panel": "#d9cbb0", "1/2 Baltic birch": "#efe2bd",
+    "soft maple": "#e2c48f", "poplar": "#e6dcc0", "3/4 birch ply": "#e9d9b0", "1/2 birch ply": "#ecdfbc",
+    "1/2 paint-grade ply": "#d9cbb0", "1/2 Baltic birch": "#efe2bd",
 }
 HW_COLORS = {"slide": "#8c8f94", "pull": "#b8903f", "cushion": "#c9bda8"}
 PAINTED = {"front_stile", "front_rail", "front_panel", "end", "back"}   # painted white; the ends are show faces

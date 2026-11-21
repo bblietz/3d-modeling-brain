@@ -28,11 +28,10 @@ from ocp_vscode import Camera, save_screenshot, set_port, show  # noqa: E402
 
 OUT = os.environ.get("HERO_OUT", f"{PROJ}/images/hero.png")
 COLORS = {
-    "hard maple": "#e2c48f",
-    "soft maple": "#e2c48f",
-    "3/4 maple ply": "#e9d9b0",
-    "1/2 maple ply": "#ecdfbc",
-    "1/2 paint-grade panel": "#d9cbb0",
+    "soft maple": "#e2c48f", "poplar": "#e6dcc0",
+    "3/4 birch ply": "#e9d9b0",
+    "1/2 birch ply": "#ecdfbc",
+    "1/2 paint-grade ply": "#d9cbb0",
     "1/2 Baltic birch": "#efe2bd",
 }
 HW_COLORS = {"slide": "#8c8f94", "pull": "#b8903f", "cushion": "#c9bda8"}

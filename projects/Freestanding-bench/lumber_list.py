@@ -2,13 +2,14 @@
 """Lumber to buy for the freestanding bench, packed from the PARTS registry (Brian 2026-11-20: "add a section on
 lumber I need to buy; assume 8 ft maple boards 1x6, full 4x8 sheets of plywood, no partial").
 
-Stock: 1x6 x 8 ft S4S maple (3/4 x 5-1/2 x 96 actual) for every 3/4 solid part, 4 x 8 sheets for the ply, and
-12/4 (or 8/4 plus 4/4) for the posts, which no 1x6 can make. Parts wider than a board (the top) become a glue-up
+Stock: 1x6 x 8 ft S4S soft maple (3/4 x 5-1/2 x 96 actual) for every solid part (Brian 2026-11-20: "no hard maple,
+all soft", and "i can't source 12/4 maple, so the legs will be made from 1x6") and 4 x 8 sheets for the ply. Parts
+thicker than a board (the posts) become face-glued layers, each a planing allowance wider and an inch longer than
+the part: four 3/4 layers make 3 in, planed to 2-1/2 square. Parts wider than a board (the top) become a glue-up
 of strips, each a jointing allowance wider than its share and an inch longer for squaring the ends. Pieces are
 shelf-packed onto each unit of stock, longest first, with a saw kerf between them: a shelf runs across the width
 of the board or sheet and is as long as its longest piece. Solid parts keep their length along the board (grain);
-sheet parts may turn. The 1/2 paint-grade panels come out of the 1/2 maple ply sheet with the back (the design
-allows paint-grade ply or MDF; buy a 1/2 MDF sheet instead for MDF panels). Shelf packing wastes a little against
+sheet parts may turn. The 1/2 paint-grade ply panels come out of the 1/2 birch ply sheet with the back. Shelf packing wastes a little against
 a careful layout, so a count here is safe, not minimal.
 
 Run:  .venv/bin/python projects/Freestanding-bench/lumber_list.py   (prints the list; make_cutlist_page imports it)
@@ -28,21 +29,18 @@ BOARD_T, BOARD_W, BOARD_L = 0.75 * IN, 5.5 * IN, 96 * IN   # 1x6 x 8 ft S4S
 SHEET_W, SHEET_L = 48 * IN, 96 * IN
 JOINT = 0.25 * IN                # lost per strip to jointing both edges in a glue-up
 TRIM = 1.0 * IN                  # extra length on glue-up strips, for squaring the panel's ends
-THICK_WASTE = 1.35               # board feet bought over net for the posts (rough 12/4 planes to 2-1/2 square)
+LAM_EXTRA = 0.125 * IN           # extra width on each post layer, planed off after the glue-up
 
-# material -> (kind, stock name, note); kind "board" packs onto 1x6 boards, "sheet" onto 4 x 8 sheets,
-# "thick" is bought by the board foot; a material may point at another's stock to share it
+# material -> (kind, stock name, note); kind "board" packs onto 1x6 boards, "sheet" onto 4 x 8 sheets;
+# a material may point at another's stock to share it
 STOCK = {
-    "hard maple": ("board", "Hard maple 1x6 x 8 ft (3/4 x 5-1/2 actual)", "the top glue-up, the front frames"),
-    "soft maple": ("board", "Soft maple 1x6 x 8 ft", "the cleat"),
-    "3/4 maple ply": ("sheet", "3/4 maple plywood, 4 x 8", "ends, bottom, partition"),
-    "1/2 maple ply": ("sheet", "1/2 maple plywood, 4 x 8", "the back and the two drawer-front panels (paint-grade ply is what the design allows; a 1/2 MDF sheet does the panels if you want MDF)"),
-    "1/2 paint-grade panel": "1/2 maple ply",
+    "soft maple": ("board", "Soft maple 1x6 x 8 ft (3/4 x 5-1/2 actual)", "the top glue-up, the cleat, and the posts as four glued layers each"),
+    "poplar": ("board", "Poplar 1x6 x 8 ft (3/4 x 5-1/2 actual)", "the drawer-front frames, painted white"),
+    "3/4 birch ply": ("sheet", "3/4 birch plywood, paint grade, 4 x 8", "ends, bottom, partition"),
+    "1/2 birch ply": ("sheet", "1/2 birch plywood, paint grade, 4 x 8", "the back and the two drawer-front panels"),
+    "1/2 paint-grade ply": "1/2 birch ply",
     "1/2 Baltic birch": ("sheet", "1/2 Baltic birch, 4 x 8", "the four drawer boxes (a 5 x 5 sheet holds them too)"),
 }
-THICK_NOTE = ("for the four posts: a piece at least 3 in wide, about {bf} board feet with the planing "
-              "and end waste (nets {net} bf at 2-1/2 square); or an 8/4 and a 4/4 piece the same size glued up, which "
-              "comes out at 2-1/2 with no allowance if both are S4S")
 
 
 def fi(mm):
@@ -55,15 +53,17 @@ def part_dims(solid):
 
 
 def pieces_for(parts):
-    """(material, name, w, l, turnable) per piece, qty expanded; wide solid parts become glue-up strips"""
-    out, thick = [], []
+    """(material, name, w, l, turnable) per piece, qty expanded; wide solid parts become glue-up strips, thick ones layers"""
+    out = []
     for p in parts:
         t, w, l = part_dims(p["solid"])
         stock = STOCK[p["material"]]
         mat = stock if isinstance(stock, str) else p["material"]
         kind = STOCK[mat][0]
         if kind == "board" and t > BOARD_T + 0.5:
-            thick.append((p["name"], p["qty"], t, w, l))
+            n = math.ceil(t / BOARD_T)
+            for i in range(p["qty"] * n):
+                out.append((mat, f"{p['name']} layer", w + LAM_EXTRA, l + TRIM, False))
             continue
         if kind == "board" and w > BOARD_W + 1e-6:
             n = math.ceil(w / (BOARD_W - JOINT))
@@ -72,7 +72,7 @@ def pieces_for(parts):
         else:
             for i in range(p["qty"]):
                 out.append((mat, p["name"], w, l, kind == "sheet"))
-    return out, thick
+    return out
 
 
 def pack(pieces, W, L):
@@ -116,7 +116,7 @@ def pack(pieces, W, L):
 
 def lumber_lines(parts):
     """[(qty, stock, note, [unit descriptions])] in buying order"""
-    pieces, thick = pieces_for(parts)
+    pieces = pieces_for(parts)
     lines = []
     for mat, spec in STOCK.items():
         if isinstance(spec, str):
@@ -137,10 +137,6 @@ def lumber_lines(parts):
                          f" ({u['yield']:.0%} of it)")
         lines.append((f"{len(units)} {'board' if len(units) == 1 else 'boards'}" if kind == "board"
                       else f"{len(units)} {'sheet' if len(units) == 1 else 'sheets'}", stock, what, descs))
-    if thick:
-        net = sum(q * t * w * l for _, q, t, w, l in thick) / IN ** 3 / 144
-        bf = math.ceil(net * THICK_WASTE)
-        lines.append((f"{bf} bd ft", "12/4 soft maple (posts)", THICK_NOTE.format(bf=bf, net=f"{net:.1f}"), []))
     return lines
 
 

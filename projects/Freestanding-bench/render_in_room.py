@@ -55,13 +55,13 @@ Materials and finish:
   recessed white panel. One brushed brass bar pull centered on each panel, exactly where the brass bar is in image 1. A
   thin shadow gap between the two fronts, and a thin dark line under them where the case's underside begins.
 - The case's end panels (the painted face at each end of the bench, between the posts) are the same satin white.
-- The top is solid hard maple, pale blond with fine grain, clear satin finish, gently eased edges; it overhangs the posts
+- The top is solid maple, pale blond with fine grain, clear satin finish, gently eased edges; it overhangs the posts
   a little, so its front edge and its two end edges show under the cushion as a thin pale wood band.
 - The four corner posts are solid maple like the top, square with lightly chamfered corners, straight, pale blond with
   fine vertical grain, clear satin finish, standing on the floor with a soft contact shadow; a thin shadow line where the
   white fronts and end panels step back behind the post faces.
 - The cushion is one long boxed cushion in oatmeal linen with piped edges, slightly soft, covering the whole top.
-- The three shelves are solid hard maple like the top, thick slabs floating on the back wall with no visible brackets.
+- The three shelves are solid maple like the top, thick slabs floating on the back wall with no visible brackets.
   Lightly styled: a few books, a small plant, a basket, a small framed picture, all standing on the shelves without
   hiding their front edges. No words, no signs, no dog.
 - The soffit across the top of the picture is painted drywall: its front face the same cream as the walls and pilasters,

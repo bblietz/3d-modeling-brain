@@ -74,13 +74,13 @@ GAP = 0.125 * IN            # reveals: fronts to posts, between the fronts, unde
 ROUND = 0.125 * IN          # eased arrises of the top: front and both ends
 
 # ---------------------------------------------------------------- stock (actual, MEASURE)
-T18 = 18.0                  # 3/4 maple ply: ends, bottom, partition
-T12 = 12.0                  # 1/2 Baltic birch (drawer boxes), 1/2 paint-grade panels, 1/2 maple ply back
+T18 = 18.0                  # 3/4 birch ply: ends, bottom, partition
+T12 = 12.0                  # 1/2 Baltic birch (drawer boxes), 1/2 paint-grade ply panels, 1/2 birch ply back
 TS = 0.75 * IN              # solid maple: top, cleat
 FACE_T = T18                # the fronts are milled to the ply thickness
 
 # ---------------------------------------------------------------- posts (the drawer bench's construction)
-POST = 2.5 * IN             # square; soft maple, 12/4 or an 8/4 plus 4/4 glue-up
+POST = 2.5 * IN             # square; soft maple, four 3/4 layers of 1x6 glued and planed (Brian 2026-11-20: no 12/4 to be had)
 CHAMFER = 0.375 * IN        # the four vertical edges, full length
 SETBACK = 0.5 * IN          # panel outer face behind the post face
 GROOVE_D = 0.375 * IN       # panels housed this deep in the posts
@@ -94,7 +94,7 @@ DADO_D = 0.25 * IN          # partition in the case bottom
 PLAY = 1.6                  # 1/16 in total play on housed panels (drawer bottoms)
 TONGUE_T = 0.25 * IN        # front frames: tongue-and-groove bit set
 TONGUE_L = 0.375 * IN
-PANEL_T = T12                # 1/2 panel (ply or MDF, measures 12 mm): back flush with the frame, face inset FACE_T - PANEL_T
+PANEL_T = T12                # 1/2 paint-grade ply panel (measures 12 mm): back flush with the frame, face inset FACE_T - PANEL_T
 STILE_W = 1.5 * IN          # maple frame width on the fronts
 CLEAT_H = 2.5 * IN          # rear top cleat on the back's inner face: the top's figure-8s
 
@@ -190,11 +190,12 @@ def add(name, solid, qty, material, notes="", inst=None):
         INST.append((n, s))
 
 
-MAPLE = "hard maple"
+MAPLE = "soft maple"           # Brian 2026-11-20: "no hard maple, all soft"; top and front frames too
 SOFT_MAPLE = "soft maple"
-PLY18 = "3/4 maple ply"
-PLY12 = "1/2 maple ply"
-PAINT_PANEL = "1/2 paint-grade panel"   # MDF or paint-grade ply, painted white with the frames (Brian 2026-10-24)
+PLY18 = "3/4 birch ply"     # paint grade: painted or hidden, so no maple face (Brian 2026-11-20)
+PLY12 = "1/2 birch ply"
+PAINT_PANEL = "1/2 paint-grade ply"   # painted white with the frames (Brian 2026-10-24); plywood, not MDF (Brian 2026-11-20)
+POPLAR = "poplar"           # drawer-front frames, painted white (Brian 2026-11-20: "poplar frame and plywood face")
 BB12 = "1/2 Baltic birch"
 
 # ================================================================ posts
@@ -217,7 +218,7 @@ post_fl = make_post(X0, YF0, True)
 post_rl = make_post(X0, YB0, False)
 post_fr = mirror(post_fl, Plane.YZ.offset(XC))
 post_rr = mirror(post_rl, Plane.YZ.offset(XC))
-_POST_NOTE = (f"{inch(POST)} square x {inch(TOP_Z0)} (12/4 stock or an 8/4 plus 4/4 glue-up); {inch(CHAMFER)} chamfer on all "
+_POST_NOTE = (f"{inch(POST)} square x {inch(TOP_Z0)} (glue up four 3/4 layers cut from the 1x6 boards, each 2-5/8 x 14-1/4, then joint and plane to size: 1/8 off each outer layer, the glue lines show on two opposite faces, turn them to the side faces, toward the side wall and toward the drawers, so the front and back show face grain); {inch(CHAMFER)} chamfer on all "
               f"four vertical edges, full length, cut before the grooves; end-panel groove {inch(T18)} wide (measure) x "
               f"{inch(GROOVE_D)} deep on the face toward the other post of that end, {inch(SETBACK)} in from the outer face, "
               f"from {inch(GROOVE_STOP)} up out the top (the end stays as the bit leaves it, the panel's notched bottom "
@@ -333,10 +334,10 @@ def front_parts(x0):
 
 _fl = front_parts(FRONT_X0[0])
 _fr = front_parts(FRONT_X0[1])
-add("front_stile", _fl[0], 4, MAPLE,
+add("front_stile", _fl[0], 4, POPLAR,
     f"{inch(TONGUE_T)} x {inch(TONGUE_L)} groove on the inner edge, through, front wall {inch(FACE_T - PANEL_T)} thick (set the fence from the panel ply); the rail tenons show on both ends (the top one is the visible one); painted white",
     inst=[("stile_ll", _fl[0]), ("stile_lr", _fl[1]), ("stile_rl", _fr[0]), ("stile_rr", _fr[1])])
-add("front_rail", _fl[2], 4, MAPLE,
+add("front_rail", _fl[2], 4, POPLAR,
     f"{inch(TONGUE_T)} x {inch(TONGUE_L)} groove on the inner edge, through; {inch(TONGUE_T)} x {inch(TONGUE_L)} "
     f"stub tenon on both ends (same bit); length includes both tenons; painted white",
     inst=[("rail_lb", _fl[2]), ("rail_lt", _fl[3]), ("rail_rb", _fr[2]), ("rail_rt", _fr[3])])

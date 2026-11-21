@@ -52,7 +52,7 @@ def dt(mm):
 
 
 P18, P12, P12M = "3/4 ply (measure)", "1/2 BB (measure)", "1/2 ply (measure)"
-PW12 = "1/2 MDF or paint-grade ply (measure)"
+PW12 = "1/2 paint-grade birch ply (measure)"
 UM_SCREW_Z = (25.0, 37.0)   # Blum 563H runner front screw holes above the opening bottom (the drawer bench's values from the Blum sheet); not in the model
 
 
@@ -442,7 +442,7 @@ def post_front():
     c.edge("bottom", "FRONT face")
     c.edge("right", "OUTER face")
 
-    sheet(name, head(name, f"soft maple {dt(POST)} x {dt(POST)} x {dt(H)} long (12/4, or 8/4 plus 4/4 glued up); left and right are mirror images"),
+    sheet(name, head(name, f"soft maple {dt(POST)} x {dt(POST)} x {dt(H)} long (four 3/4 layers of 1x6 glued up and planed); left and right are mirror images"),
           [a, b, c], "Drawn: the post at the right-hand end as you face the bench; the other front post is its mirror image (groove and holes "
                      "on the opposite faces). Chamfer first, then rout the stopped groove: its end hides behind the end panel's un-housed "
                      f"bottom, so it needs no squaring. Runner holes (Blum 563H sheet, drilled with the runner in hand): {dt(RUNNER_SETBACK + UM_SCREW_Y[0])} "
@@ -515,7 +515,7 @@ def post_rear():
     sheet(name, head(name, f"soft maple {dt(POST)} x {dt(POST)} x {dt(H)} long; same blank and chamfer as post_front; left and right are mirror images"),
           [a, b, c], "Drawn: the post at the right-hand end as you face the bench; the other rear post is its mirror image. Chamfer first, "
                      "then rout the two stopped grooves; their ends hide behind the panels' un-housed bottoms and stay as the bit leaves them. "
-                     "The back groove is sized to the 1/2 maple ply, the end groove to the 3/4. No notch: the post runs square to the "
+                     "The back groove is sized to the 1/2 birch ply, the end groove to the 3/4. No notch: the post runs square to the "
                      f"floor and stands {dt(YB0)} off the back wall, clear of the baseboard and shoe. Bare under Osmo.", stack=True)
     pr = _chamfer_probes(x, y, 0, H)
     pr += _groove_probes(ge, "-y", ("-x", "+x")) + _groove_probes(gb, "-x", ("-y", "+y"))
@@ -569,7 +569,7 @@ def end_panel():
     c.dim_v(GROOVE_STOP - PANEL_Z0, tz, 70 + 22, dt(GROOVE_CLR))
     c.edge("left", "REAR edge")
 
-    sheet(name, head(name, f"3/4 maple ply, {dt(H)} tall x {dt(L)} long, face grain vertical, show face OUT; mirror pair (the other end is the mirror image)"),
+    sheet(name, head(name, f"3/4 birch ply, {dt(H)} tall x {dt(L)} long, face grain vertical, show face OUT; mirror pair (the other end is the mirror image)"),
           [v, a, c], f"Housed {dt(GROOVE_D)} in each post with its outer face {dt(SETBACK)} behind the post faces and its top edge flush with the post "
                      f"tops; the post grooves end {dt(GROOVE_CLR)} below the notch tops (dashed in C), behind the un-housed bottom, so nothing is "
                      "squared. Datums: the rear edge and the bottom edge. Cut the rabbet on the INSIDE face; the two ends come out as a left and a "
@@ -633,7 +633,7 @@ def bottom_panel():
     a.dim_v(T18 - DADO_D, T18, S.w + 8, dt(DADO_D))
     a.edge("bottom", "bottom face")
 
-    sheet(name, head(name, f"3/4 maple ply, {dt(D)} deep x {dt(W)} long, face grain along the length"), [v, a],
+    sheet(name, head(name, f"3/4 birch ply, {dt(D)} deep x {dt(W)} long, face grain along the length"), [v, a],
           f"Both ends sit in the end panels' {dt(RABBET_D)} rabbets and the rear edge in the back's; the corner notches clear the posts "
           "(the rear ones also take in the strip in the back's rabbet). Datums: the FRONT edge and the left end. "
           "The dado is centered: mark it from the middle of the blank.")
@@ -666,7 +666,7 @@ def partition():
     v.edge("left", "REAR edge (against the back)")
     v.edge("right", "FRONT edge (on the fronts' back faces: the runners mount to it)")
     v.edge("bottom", "bottom edge (in the dado)")
-    sheet(name, head(name, f"3/4 maple ply, {dt(H)} tall x {dt(L)} deep, face grain vertical"), [v],
+    sheet(name, head(name, f"3/4 birch ply, {dt(H)} tall x {dt(L)} deep, face grain vertical"), [v],
           f"The bottom edge sits {dt(DADO_D)} deep in the bottom panel's dado; the rear edge stops against the back panel. The partition-side "
           "Blum runners mount to its faces the frameless way, fronts 3/32 behind its front edge. Datums: the REAR edge and the top edge.")
     pr = cut_probes(*nt, "+y")
@@ -789,7 +789,7 @@ def back_panel():
     c.dim_v(GROOVE_STOP - PANEL_Z0, NOTCH_H, 70 + 22, dt(GROOVE_CLR))
     c.edge("left", "end (in the rear post)")
 
-    sheet(name, head(name, f"1/2 maple ply, {dt(H)} tall x {dt(L)} long, face grain vertical"), [v, a, c],
+    sheet(name, head(name, f"1/2 birch ply, {dt(H)} tall x {dt(L)} long, face grain vertical"), [v, a, c],
           f"Housed {dt(GROOVE_D)} in each rear post, outer face {dt(SETBACK)} behind their rear faces, top edge flush with the post tops; "
           f"the post grooves end {dt(GROOVE_CLR)} below the notch tops (dashed in C). Glue it in all round: with no wall screws it is what "
           "keeps the case square. The cleat glues to this face along the top edge between the posts. The two rear brackets go on this face "
@@ -834,7 +834,7 @@ def top_slab():
     s.dim_v(0, TS, 40 + 8)
     s.callout(1, TS - 1, f"{dt(ROUND)} R, top and bottom", ha="left")
     s.edge("left", "FRONT")
-    sheet(name, head(name, f"hard maple {dt(TS)} thick, {dt(D)} deep x {dt(TOP_W)} long"), [v, s],
+    sheet(name, head(name, f"soft maple {dt(TS)} thick, {dt(D)} deep x {dt(TOP_W)} long"), [v, s],
           f"Glue up from 4 or 5 boards, grain along the {dt(TOP_W)} length. Overhangs the posts {dt(END_OVERHANG)} at each end, "
           f"{dt(OVERHANG)} at the front and {dt(REAR_OVERHANG)} at the back; {dt(SIDE_AIR)} of air to each side wall and "
           f"{dt(WALL_GAP)} to the back wall. Floats: pocket screws up "
@@ -886,8 +886,8 @@ def front_stile():
     s.dim_v(0, FACE_T, STILE_W + 8, P18)
     s.edge("bottom", "FRONT face")
 
-    sheet(name, head(name, f"hard maple, {dt(STILE_W)} x {dt(FRONT_H)}, thickness: {P18}"),
-          [f, e, s], "All four the same; mill to the 3/4 maple ply's thickness so the fronts sit flush with the case ends' edges. Set the groove from the 1/2 panel stock: the groove's front wall is the panel's inset, so test-cut on scrap and measure. The rail tenon shows on the top end; Brian is fine with that. Painted white.")
+    sheet(name, head(name, f"poplar, {dt(STILE_W)} x {dt(FRONT_H)}, thickness: {P18}"),
+          [f, e, s], "All four the same; mill to the 3/4 birch ply's thickness so the fronts sit flush with the case ends' edges. Set the groove from the 1/2 panel stock: the groove's front wall is the panel's inset, so test-cut on scrap and measure. The rail tenon shows on the top end; Brian is fine with that. Painted white.")
     pr = cut_probes(*g, "-x")
     pr += [wood(*g, "-y"), wood(*g, "+y"), runout(*g, "-z"), runout(*g, "+z")]
     return check(name, solid, pr)
@@ -944,7 +944,7 @@ def front_rail():
     c.dim_v(H - TONGUE_L, H, -8, dt(TONGUE_L))
     c.dim_v(0, H, 60 + 8)
 
-    sheet(name, head(name, f"hard maple, {dt(H)} x {dt(L)} including tenons, thickness: {P18}; all four the same"),
+    sheet(name, head(name, f"poplar, {dt(H)} x {dt(L)} including tenons, thickness: {P18}; all four the same"),
           [v, e, c], "Hatched: cut back to the tenon. The rail's tenon fills the stile groove; its own groove takes the panel tongue.")
     pr = cut_probes(*g, "-z")
     mid = (xr0 + TONGUE_L, GY0, g[2], RL - 2 * TONGUE_L, TONGUE_T, TONGUE_L)
@@ -986,7 +986,7 @@ def front_panel():
     s.dim_h(0, PANEL_T, 30 + 8, PW12)
     s.edge("left", "SHOW face")
 
-    sheet(name, head(name, f"1/2 MDF or paint-grade ply, {dt(PH)} x {dt(PW)} including tongues, painted white with the frame"), [v, s],
+    sheet(name, head(name, f"1/2 paint-grade birch ply, {dt(PH)} x {dt(PW)} including tongues, painted white with the frame"), [v, s],
           "Rabbet the back edges with a straight bit or the bit set's tongue cutter so the tongue stays flush with the show face. "
           "The back goes in flush with the back of the frame. Glue in all round (plywood does not move).")
     pr = []

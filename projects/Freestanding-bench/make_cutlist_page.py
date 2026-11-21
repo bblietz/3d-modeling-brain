@@ -29,17 +29,16 @@ from cutlist import inch_frac  # noqa: E402
 BUILT_IN_URL = "https://claude.ai/artifact/YQFcx4g5x64K83yhDHvGMf"   # the built-in design's shop page, kept
 OPTIONS_URL = "https://claude.ai/artifact/QLCHadrNJZDeDjqka9yond"   # the base options page; records Brian's pick A (posts, 2026-10-26)
 
-CASE_ORDER = ["soft maple", "hard maple", "3/4 maple ply", "1/2 maple ply"]
-DRAWER_ORDER = ["hard maple", "1/2 paint-grade panel", "1/2 Baltic birch"]
+CASE_ORDER = ["soft maple", "3/4 birch ply", "1/2 birch ply"]
+DRAWER_ORDER = ["poplar", "1/2 paint-grade ply", "1/2 Baltic birch"]
 CASE_LABEL = {
-    "soft maple": "Soft maple: posts and the rear cleat (posts bare, Osmo Natural)",
-    "hard maple": "Hard maple: top (bare, Osmo Natural)",
-    "3/4 maple ply": "3/4 in maple plywood (measure the sheet): ends (show faces, painted white, bottom edges banded), bottom, partition",
-    "1/2 maple ply": "1/2 in maple plywood (measure the sheet): back, housed in the rear posts",
+    "soft maple": "Soft maple: posts, the rear cleat and the top (posts and top bare, Osmo Natural)",
+    "3/4 birch ply": "3/4 in birch plywood, paint grade (measure the sheet): ends (show faces, painted white, bottom edges banded), bottom, partition",
+    "1/2 birch ply": "1/2 in birch plywood, paint grade (measure the sheet): back, housed in the rear posts",
 }
 DRAWER_LABEL = {
-    "hard maple": "Drawer front frames, hard maple, painted white: stiles and rails",
-    "1/2 paint-grade panel": "Drawer front panels, 1/2 in MDF or paint-grade plywood (measure the sheet), painted white with the frames",
+    "poplar": "Drawer front frames, poplar, painted white: stiles and rails",
+    "1/2 paint-grade ply": "Drawer front panels, 1/2 in paint-grade birch plywood (measure the sheet), painted white with the frames",
     "1/2 Baltic birch": "Drawer boxes: sides, fronts, backs and bottoms, 1/2 in 9-ply Baltic birch (measure the sheet)",
 }
 TEMPLATE_TAG = "not a plain rectangular blank"
@@ -384,7 +383,7 @@ PAGE = """<title>Freestanding Bench Cut List</title>
   <div class="big">
     <h2>Lumber to buy<small>1x6 x 8 ft maple boards and full 4 x 8 sheets</small></h2>
     <ul class="hw">{lumber}</ul>
-    <p class="foot">Packed from the cut list by the page builder (<span class="mono">lumber_list.py</span>): longest pieces first, a 1/8 in kerf between them, solid parts along the board's grain, the top as five strips a hair over 5 in wide and an inch over length for the glue-up. A shelf layout wastes a little against a careful one, so these counts are safe rather than minimal; the share of each board or sheet the parts take is in brackets.</p>
+    <p class="foot">Packed from the cut list by the page builder (<span class="mono">lumber_list.py</span>): longest pieces first, a 1/8 in kerf between them, solid parts along the board's grain, the top as five strips a hair over 5 in wide and an inch over length for the glue-up, each post as four layers 2-5/8 wide and 14-1/4 long that glue up to 3 in and plane to 2-1/2 square (no 12/4 stock needed). A shelf layout wastes a little against a careful one, so these counts are safe rather than minimal; the share of each board or sheet the parts take is in brackets.</p>
   </div>
 
   <div class="big">
