@@ -1,0 +1,66 @@
+{
+ "a.stl": {
+  "grams": 146.8,
+  "minutes": 122,
+  "time_text": "2h 2m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ },
+ "b.stl": {
+  "grams": 246.6,
+  "minutes": 193,
+  "time_text": "3h 13m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ },
+ "c.stl": {
+  "grams": 225.0,
+  "minutes": 178,
+  "time_text": "2h 58m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ },
+ "d_base.stl": {
+  "grams": 106.1,
+  "minutes": 101,
+  "time_text": "1h 41m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ },
+ "d_cradle.stl": {
+  "grams": 54.4,
+  "minutes": 56,
+  "time_text": "0h 56m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ },
+ "e.stl": {
+  "grams": 231.0,
+  "minutes": 186,
+  "time_text": "3h 6m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ },
+ "f_base.stl": {
+  "grams": 77.2,
+  "minutes": 78,
+  "time_text": "1h 18m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ },
+ "f_head.stl": {
+  "grams": 95.6,
+  "minutes": 96,
+  "time_text": "1h 36m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ }
+}

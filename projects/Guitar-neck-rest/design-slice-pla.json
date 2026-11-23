@@ -1,0 +1,10 @@
+{
+ "c1r.stl": {
+  "grams": 168.8,
+  "minutes": 147,
+  "time_text": "2h 27m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ }
+}

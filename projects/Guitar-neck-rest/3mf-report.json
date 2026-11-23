@@ -1,0 +1,61 @@
+{
+ "file": "guitar-neck-rest.3mf",
+ "machine": "Bambu Lab X2D 0.6 nozzle",
+ "process": "0.30mm Standard @BBL X2D 0.6 nozzle",
+ "filament": "Bambu PLA Basic @BBL X2D 0.6 nozzle",
+ "overrides": {
+  "curr_bed_type": "Textured PEI Plate",
+  "brim_type": "no_brim",
+  "skirt_loops": "2",
+  "skirt_distance": "3",
+  "skirt_height": "1",
+  "wall_loops": "2",
+  "sparse_infill_density": "15%",
+  "seam_position": "back",
+  "enable_support": "0",
+  "textured_plate_temp": "65",
+  "textured_plate_temp_initial_layer": "65"
+ },
+ "authored": {
+  "objects": 1,
+  "plates": 1,
+  "model_files": 2
+ },
+ "roundtrip": {
+  "objects": 1,
+  "plates": 1,
+  "model_files": 2
+ },
+ "slice": {
+  "time": "2 h 21 min",
+  "minutes": 142,
+  "seconds": 8519,
+  "grams": 167.5,
+  "layers": 267,
+  "top_z": 80.1,
+  "bed_C": 65,
+  "outer_walls_span_mm": [
+   147.9,
+   107.9
+  ],
+  "feature_mm": {
+   "Sparse infill": 23485.0,
+   "Outer wall": 13635.9,
+   "Inner wall": 13583.7,
+   "Internal solid infill": 2071.8,
+   "Bridge": 919.4,
+   "Top surface": 589.9,
+   "Bottom surface": 562.6,
+   "Floating vertical shell": 349.5,
+   "Skirt": 61.9,
+   "Gap infill": 0.6
+  },
+  "seams": {
+   "loops": 533,
+   "lowest_mm_up_the_rocker": 81.6,
+   "on_the_cradle_side": 266,
+   "inside_the_opening_top": 267
+  }
+ },
+ "note": "Open guitar-neck-rest.3mf once in Bambu Studio and look at the sliced preview: the GUI is the ground truth. Pick the filament colour there."
+}

@@ -1,0 +1,34 @@
+{
+ "c1.stl": {
+  "grams": 170.3,
+  "minutes": 147,
+  "time_text": "2h 27m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ },
+ "c2.stl": {
+  "grams": 244.5,
+  "minutes": 200,
+  "time_text": "3h 20m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ },
+ "c2_lid.stl": {
+  "grams": 10.6,
+  "minutes": 16,
+  "time_text": "0h 16m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ },
+ "c3.stl": {
+  "grams": 241.9,
+  "minutes": 194,
+  "time_text": "3h 14m",
+  "material": "pla",
+  "walls": 2,
+  "infill": 15
+ }
+}

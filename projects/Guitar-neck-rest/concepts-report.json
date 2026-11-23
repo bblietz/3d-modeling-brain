@@ -1,0 +1,362 @@
+{
+ "derived_mm": {
+  "CD": 13.2362,
+  "GW": 34.7736,
+  "XA": 95.0,
+  "YA": 76.7362,
+  "ZA": 108.486,
+  "BA": 76.7362,
+  "BB": 108.486,
+  "BC": 140.236,
+  "YC": 80.0,
+  "ZC": 108.486,
+  "C_CHORD": 150.0,
+  "XD": 124.0,
+  "YD": 116.0,
+  "D_ZU": 108.25,
+  "XE": 228.6,
+  "ZE": 44.9862,
+  "E_FOOT": 117.547,
+  "F_MIN": 64.0,
+  "F_MAX": 94.0,
+  "F_DISC_D": 130.0,
+  "XF": 100.0,
+  "YF": 77.5471,
+  "XC_TOP": 110.0,
+  "C_FR": 12.0,
+  "TR_W": 14.0,
+  "C2_VOL": 132.216,
+  "C3_LOW": 66.7638,
+  "C3_ZS": 62.0,
+  "R_END": 6.35,
+  "R_EDGE": 1.5875,
+  "C_LEAN": 13.2903,
+  "C1R_FLAT": 107.148,
+  "RIM_Y": 35.4623,
+  "TR_IN": 3.0,
+  "TR_D": 1.2
+ },
+ "heights_in": {
+  "low": 2.5,
+  "high": 3.75,
+  "tall": 5.0,
+  "flat": 1.25
+ },
+ "tilt_deg": {
+  "low": 2.19,
+  "high": 4.38,
+  "tall": 6.57
+ },
+ "pedestal_in": {
+  "min": 2.52,
+  "max": 3.7,
+  "drawn": 3.31
+ },
+ "cradle": {
+  "width_mm": 64.0,
+  "radius_mm": 45.3,
+  "depth_mm": 13.24,
+  "pad_mm": 2.0
+ },
+ "parts": {
+  "a": {
+   "size_mm": [
+    108.5,
+    76.7,
+    95.0
+   ],
+   "volume_cm3": 364.6
+  },
+  "b": {
+   "size_mm": [
+    140.2,
+    108.3,
+    76.7
+   ],
+   "volume_cm3": 907.5
+  },
+  "c": {
+   "size_mm": [
+    148.5,
+    108.5,
+    80.0
+   ],
+   "volume_cm3": 736.8
+  },
+  "d_base": {
+   "size_mm": [
+    124.0,
+    116.0,
+    108.2
+   ],
+   "volume_cm3": 226.3
+  },
+  "d_cradle": {
+   "size_mm": [
+    100.0,
+    112.0,
+    24.2
+   ],
+   "volume_cm3": 131.4
+  },
+  "e": {
+   "size_mm": [
+    228.6,
+    117.5,
+    45.0
+   ],
+   "volume_cm3": 748.9
+  },
+  "f_base": {
+   "size_mm": [
+    130.0,
+    130.0,
+    56.0
+   ],
+   "volume_cm3": 192.5
+  },
+  "f_head": {
+   "size_mm": [
+    100.0,
+    77.5,
+    67.2
+   ],
+   "volume_cm3": 249.3
+  },
+  "c1": {
+   "size_mm": [
+    148.5,
+    108.5,
+    80.0
+   ],
+   "volume_cm3": 415.6,
+   "cm_height_mm": 56.0
+  },
+  "c2": {
+   "size_mm": [
+    148.5,
+    108.5,
+    80.0
+   ],
+   "volume_cm3": 748.0,
+   "cm_height_mm": 53.9
+  },
+  "c2_lid": {
+   "size_mm": [
+    82.7,
+    38.7,
+    9.0
+   ],
+   "volume_cm3": 10.9
+  },
+  "c3": {
+   "size_mm": [
+    148.5,
+    108.5,
+    80.0
+   ],
+   "volume_cm3": 889.9,
+   "cm_height_mm": 50.2
+  },
+  "c1a": {
+   "size_mm": [
+    152.4,
+    108.5,
+    80.0
+   ],
+   "volume_cm3": 463.8,
+   "cm_height_mm": 59.8
+  },
+  "c1b": {
+   "size_mm": [
+    203.2,
+    108.5,
+    80.0
+   ],
+   "volume_cm3": 552.9,
+   "cm_height_mm": 64.0
+  },
+  "c1c": {
+   "size_mm": [
+    203.2,
+    108.5,
+    80.0
+   ],
+   "volume_cm3": 550.4,
+   "cm_height_mm": 65.3
+  },
+  "c1r": {
+   "size_mm": [
+    148.7,
+    108.5,
+    80.0
+   ],
+   "volume_cm3": 414.0,
+   "cm_height_mm": 55.9,
+   "roundover_check_mm": {
+    "floor": [
+     93.25,
+     93.25
+    ],
+    "arc": [
+     91.88,
+     91.88
+    ]
+   }
+  }
+ },
+ "use": {
+  "1.25": {
+   "tilt_deg": 0.0,
+   "under_headstock_in": 1.44
+  },
+  "2.5": {
+   "tilt_deg": 2.19,
+   "under_headstock_in": 3.16
+  },
+  "3.75": {
+   "tilt_deg": 4.38,
+   "under_headstock_in": 4.87
+  }
+ },
+ "rocker": {
+  "neck_line_below_centre_mm": 34.75,
+  "neck_load_kg": 1.6,
+  "radius_mm": 130.0,
+  "guitar_tail_to_nut_in": 31.5,
+  "instruments": {
+   "bass": {
+    "roll_deg": 4.38,
+    "bench_contact_moves_mm": 9.9,
+    "load_off_pad_middle_mm": 2.65,
+    "level_cradle_gap_mm": 8.4
+   },
+   "guitar": {
+    "roll_deg": 5.17,
+    "bench_contact_moves_mm": 11.7,
+    "load_off_pad_middle_mm": 3.13,
+    "level_cradle_gap_mm": 9.9
+   }
+  },
+  "fixed_side": {
+   "height_in": 2.628,
+   "slope_deg": 2.63,
+   "pitch_deg": {
+    "bass": 2.41,
+    "guitar": 2.85
+   },
+   "under_headstock_in": 3.33
+  },
+  "ballast": {
+   "pocket_cm3": 132,
+   "steel_bb_g": 635,
+   "sand_g": 212,
+   "centre_height_mm": 30.0
+  }
+ },
+ "long": {
+  "round2": {
+   "cradle_mm": 110.0,
+   "rocker_chord_mm": 150.0,
+   "cradle_start_from_nut_mm": 40.0,
+   "rest_centre_from_nut_mm": 95.0,
+   "roll_limit_deg": 35.2,
+   "instruments": {
+    "bass": {
+     "roll_deg": 4.38,
+     "bench_contact_moves_mm": 9.9,
+     "load_off_pad_middle_mm": 2.65,
+     "level_cradle_gap_mm": 8.4,
+     "last_fret_over_cradle": 3
+    },
+    "guitar": {
+     "roll_deg": 5.17,
+     "bench_contact_moves_mm": 11.7,
+     "load_off_pad_middle_mm": 3.13,
+     "level_cradle_gap_mm": 9.9,
+     "last_fret_over_cradle": 4
+    }
+   }
+  },
+  "variants": {
+   "c1a": {
+    "cradle_mm": 152.4,
+    "rocker_chord_mm": 150.0,
+    "cradle_start_from_nut_mm": 19.0,
+    "rest_centre_from_nut_mm": 95.2,
+    "roll_limit_deg": 35.2,
+    "instruments": {
+     "bass": {
+      "roll_deg": 4.38,
+      "bench_contact_moves_mm": 9.9,
+      "load_off_pad_middle_mm": 2.65,
+      "level_cradle_gap_mm": 11.7,
+      "last_fret_over_cradle": 3
+     },
+     "guitar": {
+      "roll_deg": 5.17,
+      "bench_contact_moves_mm": 11.7,
+      "load_off_pad_middle_mm": 3.13,
+      "level_cradle_gap_mm": 13.8,
+      "last_fret_over_cradle": 5
+     }
+    }
+   },
+   "c1b": {
+    "cradle_mm": 203.2,
+    "rocker_chord_mm": 150.0,
+    "cradle_start_from_nut_mm": 19.0,
+    "rest_centre_from_nut_mm": 120.6,
+    "roll_limit_deg": 35.2,
+    "instruments": {
+     "bass": {
+      "roll_deg": 4.52,
+      "bench_contact_moves_mm": 10.2,
+      "load_off_pad_middle_mm": 2.74,
+      "level_cradle_gap_mm": 16.0,
+      "last_fret_over_cradle": 5
+     },
+     "guitar": {
+      "roll_deg": 5.36,
+      "bench_contact_moves_mm": 12.2,
+      "load_off_pad_middle_mm": 3.25,
+      "level_cradle_gap_mm": 19.1,
+      "last_fret_over_cradle": 7
+     }
+    }
+   },
+   "c1c": {
+    "cradle_mm": 203.2,
+    "rocker_chord_mm": 101.6,
+    "cradle_start_from_nut_mm": 19.0,
+    "rest_centre_from_nut_mm": 120.6,
+    "roll_limit_deg": 23.0,
+    "instruments": {
+     "bass": {
+      "roll_deg": 4.52,
+      "bench_contact_moves_mm": 10.2,
+      "load_off_pad_middle_mm": 2.74,
+      "level_cradle_gap_mm": 16.0,
+      "last_fret_over_cradle": 5
+     },
+     "guitar": {
+      "roll_deg": 5.36,
+      "bench_contact_moves_mm": 12.2,
+      "load_off_pad_middle_mm": 3.25,
+      "level_cradle_gap_mm": 19.1,
+      "last_fret_over_cradle": 7
+     }
+    }
+   }
+  }
+ },
+ "roundover": {
+  "cradle_ends_mm": 6.35,
+  "other_edges_mm": 1.5875,
+  "end_face_lean_deg": 13.29,
+  "level_floor_mm": 107.1,
+  "pad_drawn_mm": 104.0,
+  "shoulder_flat_mm": 2.95,
+  "tread_lip_flat_mm": 1.41
+ }
+}

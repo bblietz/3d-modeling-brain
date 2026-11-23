@@ -1,0 +1,128 @@
+{
+ "solid": {
+  "size_mm": [
+   148.69,
+   108.49,
+   80.0
+  ],
+  "size_in": "5-7/8 x 3-1/8 x 4-1/4",
+  "volume_cm3": 415.5,
+  "facets": 172790
+ },
+ "cradle_mm_got_want": {
+  "floor_at_centre": [
+   93.65,
+   93.65
+  ],
+  "floor_at_roundover_start": [
+   93.65,
+   93.65
+  ],
+  "end_arc_middle": [
+   92.28,
+   92.28
+  ],
+  "other_end_arc_middle": [
+   92.28,
+   92.28
+  ],
+  "shoulder": [
+   108.486,
+   108.486
+  ],
+  "rim_roundover_middle": [
+   108.373,
+   108.365
+  ],
+  "level_floor_mm": 106.96
+ },
+ "channel": {
+  "in_channel_centre": [
+   0.5,
+   0.5
+  ],
+  "in_channel_near_wall": [
+   0.5,
+   0.5
+  ],
+  "on_lip": [
+   0.0,
+   0.0
+  ],
+  "on_other_lip": [
+   0.0,
+   0.0
+  ],
+  "width_mm": 51.6,
+  "depth_mm": 0.5,
+  "length_on_floor_mm": 142.9,
+  "tape_cut_in": "2 x 5-1/2",
+  "lip_each_side_mm": 14.2,
+  "end_clearance_mm": 1.6,
+  "side_clearance_mm": 0.4
+ },
+ "pad": {
+  "cut_in": "2-3/4 x 4-1/8",
+  "end_margin_mm": 1.09,
+  "side_margin_mm": 2.77,
+  "width_at_pad_surface_in": 2.45
+ },
+ "neck_clearance": {
+  "bass_nut": {
+   "min_gap_mm": 1.6,
+   "at_x_mm": -51.0,
+   "off_centre_mm": 0.0
+  },
+  "bass_fret12": {
+   "min_gap_mm": 1.6,
+   "at_x_mm": -51.0,
+   "off_centre_mm": -0.0
+  },
+  "guitar_nut": {
+   "min_gap_mm": 1.6,
+   "at_x_mm": -51.0,
+   "off_centre_mm": 0.0
+  },
+  "guitar_fret12": {
+   "min_gap_mm": 1.6,
+   "at_x_mm": -51.0,
+   "off_centre_mm": 0.0
+  }
+ },
+ "overhangs": {
+  "limit_deg": 47.0,
+  "plate_side_roundover_mm2": 953.2,
+  "channel_down_facing_wall_mm2": 71.7,
+  "channel_wall_ledge_mm": 0.5,
+  "elsewhere_mm2": 0.0,
+  "cradle_upper_rim_deg": 45.6
+ },
+ "derived_mm": {
+  "CD": 13.2362,
+  "ZC": 108.486,
+  "GR": 46.9,
+  "FLOOR": 93.65,
+  "C_LEAN": 13.2903,
+  "FLAT": 106.959,
+  "RIM_Y": 34.9088,
+  "RIM_YG": 33.7659,
+  "CH_W": 51.6,
+  "CH_A": 31.6122,
+  "R_END": 6.35,
+  "R_EDGE": 1.5875,
+  "PAD_T": 1.6,
+  "HIGH": 95.25,
+  "CR": 45.3,
+  "YC": 80.0,
+  "RR": 130.0,
+  "TAPE_D": 0.5,
+  "TAPE_W": 50.8,
+  "TAPE_L": 139.7,
+  "PAD_W": 69.85,
+  "PAD_L": 104.775,
+  "C_FR": 12.0,
+  "XC_TOP": 110.0,
+  "C_HALF": 75.0,
+  "C_SAG": 23.8162
+ }
+}
