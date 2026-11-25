@@ -278,7 +278,7 @@ def shots():
     go("step-06", {}, cam_r, 1.6, keys=BOX)
     keys = BOX + FRONT + ("pull_l",)
     t7 = (tb[0], (BOX_Y1 + FACE_Y1) / 2 + 100, tb[2])
-    go("step-07", {**{n: (0, 260, 0) for n in FRONT}, "pull_l": (0, 420, 0)},
+    go("step-07", {**{n: (0, 260, 0) for n in FRONT}, "pull_l": (0, 260, 0)},
        ((t7[0] - 900, t7[1] + 1700, t7[2] + 800), t7), 1.2, keys=keys)
     go("step-08", {}, ((tb[0] - 900, tb[1] + 1700, tb[2] + 800), (tb[0], tb[1] + 100, tb[2])), 1.35, keys=keys)
 
