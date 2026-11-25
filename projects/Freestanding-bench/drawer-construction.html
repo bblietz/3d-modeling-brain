@@ -1,0 +1,154 @@
+<title>Freestanding Bench Drawers</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* layout: one reading column; each step is a picture with its instructions beside it, stacking on phones */
+:root {
+  --bg: #f6f1e9; --paper: #fffdf8; --fg: #2b2520; --muted: #6b6259; --rule: #ddd3c4; --accent: #b03a2e; --dim: #7a4a1c;
+  --flag-bg: #fbeee0; --flag-edge: #d08a3c;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1f1b17; --paper: #2a251f; --fg: #eee6da; --muted: #b3a797; --rule: #453c32; --accent: #e5806f; --dim: #e0b07a;
+  --flag-bg: #3a2c1d; --flag-edge: #c98b45; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #1f1b17; --paper: #2a251f; --fg: #eee6da; --muted: #b3a797; --rule: #453c32; --accent: #e5806f; --dim: #e0b07a;
+  --flag-bg: #3a2c1d; --flag-edge: #c98b45; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+.wrap { max-width: 1100px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.4rem; margin-top: 8px; padding-top: 18px; border-top: 2px solid var(--fg); }
+h3 { font-size: 1.1rem; }
+p { margin: 0; max-width: 68ch; }
+.lede { color: var(--muted); margin-top: 6px; }
+section { display: grid; gap: 18px; margin-top: 36px; }
+figure { margin: 0; background: #fffdf8; border: 1px solid var(--rule); border-radius: 6px; padding: 10px; overflow-x: auto; }
+figure img { display: block; width: 100%; height: auto; }
+figcaption { color: #6b6259; font-size: .9rem; margin-top: 6px; }
+.answer { background: var(--paper); border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 6px; padding: 16px 18px; display: grid; gap: 8px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: .9rem; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 14px; border-radius: 3px; border: 1px solid #0003; display: inline-block; }
+.steps { display: grid; gap: 22px; }
+.step { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.step .txt { display: grid; gap: 8px; min-width: 0; }
+.num { font-family: var(--mono); color: var(--accent); font-size: .85rem; letter-spacing: .06em; text-transform: uppercase; }
+ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.flag { background: var(--flag-bg); border: 1px solid var(--flag-edge); border-radius: 6px; padding: 14px 16px; display: grid; gap: 6px; }
+.mono { font-family: var(--mono); font-size: .92em; font-variant-numeric: tabular-nums; }
+@media (max-width: 720px) { .step { grid-template-columns: minmax(0, 1fr); } h1 { font-size: 1.6rem; } }
+</style>
+
+<div class="wrap">
+  <h1>Freestanding bench: drawer construction</h1>
+  <p class="lede">Two drawers, each a painted front (a poplar frame around a plywood panel) screwed to a 1/2 in Baltic birch box on Blum 563H runners. Every picture here is cut from the bench model, so the sizes match the cut list. Inches throughout.</p>
+
+  <section>
+    <div class="answer">
+      <h3>What goes in the top rabbet</h3>
+      <p>The drawer front is a frame with a panel in the middle, like a small Shaker door. The panel's rabbets are what let it fit the frame. The top rail has a groove along its lower (inner) edge, and the panel's top tongue fits into that groove, the same way its bottom tongue fits into the bottom rail. So the top rabbet makes the tongue that the top rail's groove holds (drawing 2B).</p>
+    </div>
+    <div class="legend" aria-label="Part colors">
+      <span><i style="background:#5b8ec9"></i>top rail</span>
+      <span><i style="background:#6fb36a"></i>bottom rail</span>
+      <span><i style="background:#e8a44a"></i>stiles</span>
+      <span><i style="background:#d9776f"></i>panel</span>
+      <span><i style="background:#9b86c4"></i>box front</span>
+      <span><i style="background:#78b0ad"></i>box back</span>
+      <span><i style="background:#cdb88f"></i>box sides</span>
+      <span><i style="background:#e3cf7a"></i>box bottom</span>
+      <span><i style="background:#b8903f"></i>pull</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>How the front is made</h2>
+    <figure><img src="images/drawer/elevation.png" alt="Drawer front seen from the room: top rail, bottom rail, two stiles and the panel, with the hidden tongues dashed and section line A-A">
+      <figcaption>1. The front from the room. The dashed lines are the panel's top and bottom tongues, hidden inside the rails' grooves.</figcaption></figure>
+    <figure><img src="images/drawer/section.png" alt="Section A-A through the drawer front and box front, and an enlarged view of the top rail with the panel's top tongue in its groove">
+      <figcaption>2. Cut top to bottom. B shows the top joint: the top rail's groove holds the panel's top tongue. The rabbet on the panel's back makes that tongue.</figcaption></figure>
+  </section>
+
+  <section>
+    <h2>Making the front</h2>
+    <div class="steps">
+      <div class="step">
+        <figure><img src="images/drawer/machining.png" alt="Three profiles: the groove in a rail, the stub tenon on a rail end, and the back rabbet on the panel edge"></figure>
+        <div class="txt">
+          <div class="num">Steps 1 to 4: cut the joints</div>
+          <ul>
+            <li><b>Mill the parts</b> (per drawer): 2 stiles <span class="mono">23/32 x 1-1/2 x 8-1/8</span>, 2 rails <span class="mono">23/32 x 1-1/2 x 26-5/16</span>, poplar. Panel <span class="mono">5-7/8 x 26-5/16</span>, 1/2 plywood, grain horizontal.</li>
+            <li><b>a. Groove</b> the inner edge of all 4 rails and 4 stiles, full length: <span class="mono">1/4</span> wide, <span class="mono">3/8</span> deep, <span class="mono">1/4</span> back from the show face. Test-cut on scrap with the panel's tongue first.</li>
+            <li><b>b. Stub tenons</b> on both ends of every rail: <span class="mono">1/4</span> thick, <span class="mono">3/8</span> long, same bit set.</li>
+            <li><b>c. Rabbet the panel's back</b> on all four edges, <span class="mono">7/32</span> deep x <span class="mono">3/8</span> wide, leaving a <span class="mono">1/4</span> tongue flush with the painted face. The top and bottom tongues go into the rails, the end tongues into the stiles.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="step">
+        <figure><img src="images/drawer/step-01.png" alt="Five front parts laid out apart: top rail, panel, bottom rail and two stiles"></figure>
+        <div class="txt"><div class="num">Step 5: dry fit</div>
+          <p>The five parts per front. Both rails are the same part; the one on top is turned groove-down. Dry fit everything before glue.</p></div>
+      </div>
+      <div class="step">
+        <figure><img src="images/drawer/step-02.png" alt="Bottom rail joined to both stiles in a U, panel and top rail above"></figure>
+        <div class="txt"><div class="num">Step 6: bottom rail into the stiles</div>
+          <p>Glue the bottom rail's tenons into the stiles' grooves, making a U. Everything else drops in from the top.</p></div>
+      </div>
+      <div class="step">
+        <figure><img src="images/drawer/step-03.png" alt="Panel seated in the U, top rail above it"></figure>
+        <div class="txt"><div class="num">Step 7: panel down, top rail on</div>
+          <p>Glue the panel's grooves and slide it down the stile grooves until its bottom tongue sits in the bottom rail. Then press the top rail down: its groove takes the panel's top tongue and its tenons go into the stiles. The plywood does not move, so glue it all round.</p></div>
+      </div>
+      <div class="step">
+        <figure><img src="images/drawer/step-04.png" alt="Finished drawer front"></figure>
+        <div class="txt"><div class="num">Step 8: clamp, square, paint</div>
+          <p>Clamp across the rails, check the diagonals match, let it cure. Overall <span class="mono">28-9/16 x 8-1/8</span>. Prime and paint white.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Making the box</h2>
+    <div class="steps">
+      <div class="step">
+        <figure><img src="images/drawer/step-05.png" alt="Drawer box parts apart: two sides, front, back and bottom"></figure>
+        <div class="txt"><div class="num">Step 9: cut the box parts</div>
+          <ul>
+            <li><b>Sides</b> (2): <span class="mono">6-1/2 x 18</span>. Rabbet both ends on the inside, 1/4 deep x the plywood's thickness. Groove for the bottom, 1/4 deep, its underside 1/2 up from the bottom edge, through.</li>
+            <li><b>Front</b>: <span class="mono">6-1/2 x 27-1/4</span>, the same bottom groove; 4 oversize 3/16 holes for the front's screws.</li>
+            <li><b>Back</b>: <span class="mono">6-1/2 x 27-1/4</span>, no groove. Blum notches at both bottom corners, the two hook holes, and 4 screw holes for the bottom.</li>
+            <li><b>Bottom</b>: <span class="mono">17-9/32 x 27-3/16</span>, plain rectangle.</li>
+          </ul></div>
+      </div>
+      <div class="step">
+        <figure><img src="images/drawer/step-06.png" alt="Glued drawer box seen from behind, showing the back with its notches"></figure>
+        <div class="txt"><div class="num">Step 10: glue up the box</div>
+          <p>Glue the front and back into the sides' rabbets with the bottom in the side and front grooves. The bottom butts the back's inside face; pre-drill 3/32 pilots into its edge through the back's 4 holes and drive <span class="mono">#6 x 1</span> screws. Check square. Clip the Blum locking devices under the bottom at the front corners.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Front onto the box</h2>
+    <div class="steps">
+      <div class="step">
+        <figure><img src="images/drawer/step-07.png" alt="Drawer box with the finished front just in front of it, pull beside"></figure>
+        <div class="txt"><div class="num">Step 11: hang the box, fit the front</div>
+          <p>Set the box on its runners. Hold the front in place with 1/8 spacers for the reveals, its bottom flush with the case underside. Clamp it to the box front and drive 4 <span class="mono">#8 x 7/8</span> pre-drilled screws from inside the box through the oversize holes. The holes let you nudge the front square before the last turn.</p></div>
+      </div>
+      <div class="step">
+        <figure><img src="images/drawer/step-08.png" alt="Finished drawer with the front and pull attached"></figure>
+        <div class="txt"><div class="num">Step 12: pull</div>
+          <p>Drill for the 8 in brass pull through the panel and the box front together, so the holes line up, and bolt it on. Section A-A shows the screw path.</p></div>
+      </div>
+    </div>
+    <div class="flag">
+      <h3>To decide: where the front's screws bite</h3>
+      <p>As drawn, all four <span class="mono">#8 x 7/8</span> screws go into the panel, 3-1/4 and 5-3/4 in up from the bottom of the front. That is about 11/32 into 1/2 plywood, about 1/8 short of the painted face. The cut list's "best bite into the top rail" is wrong: the holes miss the rails. A stronger option is to move the holes 1 in in from each end of the box front, so the screws go into the solid poplar stiles.</p>
+    </div>
+  </section>
+</div>
